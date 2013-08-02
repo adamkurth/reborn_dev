@@ -47,6 +47,7 @@ class h5v1Plan(object):
         self.dataField = ""
         self.wavelengthField = ""
         self.detOffsetField = ""
+        self.panel = None
         self.read = h5v1Read
     
     def __str__(self):
@@ -70,10 +71,10 @@ class h5v1Plan(object):
             return False
         return True
 
-
-def h5v1Read(filePath,panelArray):
+def h5v1Read(panelArray,filePath):
 
     f = h5py.File(filePath,"r")
+    
     for p in range(len(panelArray)):
         # Load wavelength from hdf5 file
         if panelArray.panels[p].dataPlan.wavelengthField != "":
