@@ -8,11 +8,11 @@ class panel(object):
 
     """ Individual detector panel, assumed to be a flat 2D array of square pixels. """
 
-    def __init__(self):
+    def __init__(self,name=""):
         
         """ There are no default initialization parameters. """
         
-        self.name = ""
+        self.name = name
         self.pixSize = 0
         self.F = np.zeros(3)
         self.S = np.zeros(3)
@@ -22,13 +22,14 @@ class panel(object):
         self.beam = None
         self.I = None
         self.V = None
+        self.K = None
         
         self.panelArray = None
         
     def __str__(self):
         
         s = ""
-        s += " name = %s\n" % self.name
+        s += " name = \"%s\"\n" % self.name
         s += " pixSize = %g\n" % self.pixSize
         s += " F = [%g, %g, %g]\n" % (self.F[0],self.F[1],self.F[2])
         s += " S = [%g, %g, %g]\n" % (self.S[0],self.S[1],self.S[2])
@@ -58,72 +59,70 @@ class panel(object):
         return True
         
 
-    def computeGeometry(self):
+    def computeRealSpaceGeometry(self):
         
-        
-        pass
+        if self.nF == 0 or self.nS == 0:
+            return False
+        X = np.arange(0,self.nF)
+        Y = np.arange(0,self.nS)
+        [X,Y] = np.meshgrid(X,Y)
+        return [X,Y]
 
 
-class panelArray(object):
+class panelArray(list):
 
     def __init__(self):
 
         """ Just make an empty panel array """
 
-        self.panels = []
         self.beam = None
-
-    def __len__(self):
-        
-        """ Use the built-in python len() function to get the number of panels """
-        
-        return len(self.panels)
     
     def __str__(self):
         
-        """ Print useful information on request """
-        
         s = ""
-        for p in range(len(self)):
-            s += "\n\n"
-            s += self.panels[p].__str__()
+        for p in self: s += "\n\n" + p.__str__()
         return(s)
 
-    def addPanel(self,p):
+    def __getitem__(self,key):
+        
+        if isinstance(key,str):
+            key = self.getPanelIndexByName(key)
+            if key == None:
+                raise IndexError("There is no panel named %s" % key)
+                return None
+        return super(panelArray,self).__getitem__(key)
+
+    def __setitem__(self,key,value):
+        
+        if not isinstance(value,panel):
+            raise TypeError("You may only append panel type to a panelArray object")
+        if value.name == "":
+            value.name = "%d" % key
+        super(panelArray,self).__setitem__(key,value)
+
+    def append(self,p=None,name=""):
+        
         if p == None:
             p = panel()
+        if not isinstance(p,panel):
+            raise TypeError("You may only append panel type to a panelArray object")
         p.panelArray = self
-        self.panels.append(p)
+        if name != "":
+            p.name = name
+        else:
+            p.name = "%d" % len(self)
+        super(panelArray,self).append(p)
 
-    def findPanelIndexByName(self,name):
+    def getPanelIndexByName(self,name):
         
         """ Find the integer index of a panel by it's unique name """
-        
-        for i in range(len(self)):
-            if self.panels[i].name == name:
+        i = 0
+        for p in self:
+            if p.name == name:
                 return i
+            i += 1
         return None
 
     def read(self,fileName):
         
-        self.panels[0].dataPlan.read(self,fileName)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        self[0].dataPlan.read(self,fileName)

@@ -60,69 +60,71 @@ def crystfelToPanelArray(fileName):
             continue
 
         # Get index of this panel
-        p = pa.findPanelIndexByName(name)
+        i = pa.getPanelIndexByName(name)
         
         # If it is a new panel:
-        if p == None:
-            pa.addPanel(None)
-            p = len(pa) - 1
-            pa.panels[p].name = name
-            pa.panels[p].dataPlan = data.h5v1Plan()
-            pa.panels[p].dataPlan.panel = pa.panels[p]
+        if i == None:
+            pa.append()
+            p = pa[len(pa) - 1]
+            p.name = name
+            p.dataPlan = data.h5v1Plan()
+            p.dataPlan.panel = p
+        else:
+            p = pa[i]
 
         # Parse the simple keys
         if key == "corner_x":
-            pa.panels[p].T[0] = float(value)
+            p.T[0] = float(value)
         if key == "corner_y":
-            pa.panels[p].T[1] = float(value)
+            p.T[1] = float(value)
         if key == "min_fs":
-            pa.panels[p].dataPlan.fRange[0] = int(value)
+            p.dataPlan.fRange[0] = int(value)
         if key == "max_fs":
-            pa.panels[p].dataPlan.fRange[1] = int(value)
+            p.dataPlan.fRange[1] = int(value)
         if key == "min_ss":
-            pa.panels[p].dataPlan.sRange[0] = int(value)
+            p.dataPlan.sRange[0] = int(value)
         if key == "max_ss":
-            pa.panels[p].dataPlan.sRange[1] = int(value)
+            p.dataPlan.sRange[1] = int(value)
         if key == "coffset":            
-            pa.panels[p].T[2] = float(value)
+            p.T[2] = float(value)
         if key == "res":
-            pa.panels[p].pixSize = 1 / float(value)
+            p.pixSize = 1 / float(value)
 
         # Parse the more complicated keys
         if key == "fs":
             value = value.split("y")[0].split("x")
-            pa.panels[p].F[0] = float(value[0].replace(" ", ""))
-            pa.panels[p].F[1] = float(value[1].replace(" ", ""))
+            p.F[0] = float(value[0].replace(" ", ""))
+            p.F[1] = float(value[1].replace(" ", ""))
         if key == "ss":
             value = value.split("y")[0].split("x")
-            pa.panels[p].S[0] = float(value[0].replace(" ", ""))
-            pa.panels[p].S[1] = float(value[1].replace(" ", ""))
+            p.S[0] = float(value[0].replace(" ", ""))
+            p.S[1] = float(value[1].replace(" ", ""))
 
     fh.close()
 
 
-    for p in range(len(pa)):
+    for p in pa:
     
         # Link array beam to panel beam
-        pa.panels[p].beam = pa.beam
+        p.beam = pa.beam
 
         # These are defaults
-        pa.panels[p].dataPlan.dataField = "/data/rawdata0"
-        pa.panels[p].dataPlan.wavelengthField = "/LCLS/photon_wavelength_A"
-        pa.panels[p].B = np.array([0, 0, 1])
+        p.dataPlan.dataField = "/data/rawdata0"
+        p.dataPlan.wavelengthField = "/LCLS/photon_wavelength_A"
+        p.B = np.array([0, 0, 1])
 
         # Unit conversions
-        pa.panels[p].T = pa.panels[p].T * pa.panels[p].pixSize
+        p.T = p.T * p.pixSize
 
         # Check for extra global configurations
         if globalAduPerEv != None:
-            pa.panels[p].aduPerEv = globalAduPerEv
+            p.aduPerEv = globalAduPerEv
         if globalCLen != None:
-            pa.panels[p].T[2] += globalCLen
+            p.T[2] += globalCLen
         if globalCLenField != None:
-            pa.panels[p].dataPlan.detOffsetField = globalCLenField
+            p.dataPlan.detOffsetField = globalCLenField
         if globalCOffset != None:
-            pa.panels[p].T[2] += globalCOffset
+            p.T[2] += globalCOffset
             
     return pa
 
