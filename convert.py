@@ -24,7 +24,7 @@ def crystfelToPanelArray(fileName):
     globalCLen = None
     globalAduPerEv = None
 
-    pa = detector.panelArray()
+    pa = detector.panelList()
     pa.beam = source.beam()
 
     for line in fh:
@@ -131,7 +131,7 @@ def crystfelToPanelArray(fileName):
 
 def pypadTxtToPanelArray(self,fileName):
 
-    pa = detector.panelArray()
+    pa = detector.panelList()
 
     fh = open(fileName,"r")
     pn = -1        

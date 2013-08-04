@@ -8,7 +8,7 @@ pa.read("examples/example1.h5")
 
 print(pa)
 
-p = pa.panels[0]
+p = pa[0]
 
 print(p.I)
 

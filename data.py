@@ -71,23 +71,23 @@ class h5v1Plan(object):
             return False
         return True
 
-def h5v1Read(panelArray,filePath):
+def h5v1Read(panelList,filePath):
 
     f = h5py.File(filePath,"r")
     
-    for p in range(len(panelArray)):
+    for p in panelList:
         # Load wavelength from hdf5 file
-        if panelArray.panels[p].dataPlan.wavelengthField != "":
-            panelArray.panels[p].beam.wavelength = f[panelArray.panels[p].dataPlan.wavelengthField].value[0]*1e-10
+        if p.dataPlan.wavelengthField != "":
+            p.beam.wavelength = f[p.dataPlan.wavelengthField].value[0]*1e-10
         # Load camera length
-        if panelArray.panels[p].dataPlan.detOffsetField != "":
-            panelArray.panels[p].T[2] += f[panelArray.panels[p].dataPlan.detOffsetField].value[0]*1e-3
-        if panelArray.panels[p].dataPlan.dataField != "":
-            dset = f[panelArray.panels[p].dataPlan.dataField]
-            fmin = panelArray.panels[p].dataPlan.fRange[0]
-            fmax = panelArray.panels[p].dataPlan.fRange[1]+1
-            smin = panelArray.panels[p].dataPlan.sRange[0]
-            smax = panelArray.panels[p].dataPlan.sRange[1]+1
-            panelArray.panels[p].I = np.array(dset[smin:smax,fmin:fmax],dtype=np.double)
+        if p.dataPlan.detOffsetField != "":
+            p.T[2] += f[p.dataPlan.detOffsetField].value[0]*1e-3
+        if p.dataPlan.dataField != "":
+            dset = f[p.dataPlan.dataField]
+            fmin = p.dataPlan.fRange[0]
+            fmax = p.dataPlan.fRange[1]+1
+            smin = p.dataPlan.sRange[0]
+            smax = p.dataPlan.sRange[1]+1
+            p.I = np.array(dset[smin:smax,fmin:fmax],dtype=np.double)
 
     f.close()

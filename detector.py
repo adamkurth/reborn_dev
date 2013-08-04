@@ -24,7 +24,7 @@ class panel(object):
         self.V = None
         self.K = None
         
-        self.panelArray = None
+        self.panelList = None
         
     def __str__(self):
         
@@ -69,7 +69,7 @@ class panel(object):
         return [X,Y]
 
 
-class panelArray(list):
+class panelList(list):
 
     def __init__(self):
 
@@ -90,28 +90,28 @@ class panelArray(list):
             if key == None:
                 raise IndexError("There is no panel named %s" % key)
                 return None
-        return super(panelArray,self).__getitem__(key)
+        return super(panelList,self).__getitem__(key)
 
     def __setitem__(self,key,value):
         
         if not isinstance(value,panel):
-            raise TypeError("You may only append panel type to a panelArray object")
+            raise TypeError("You may only append panel type to a panelList object")
         if value.name == "":
             value.name = "%d" % key
-        super(panelArray,self).__setitem__(key,value)
+        super(panelList,self).__setitem__(key,value)
 
     def append(self,p=None,name=""):
         
         if p == None:
             p = panel()
         if not isinstance(p,panel):
-            raise TypeError("You may only append panel type to a panelArray object")
-        p.panelArray = self
+            raise TypeError("You may only append panel type to a panelList object")
+        p.panelList = self
         if name != "":
             p.name = name
         else:
             p.name = "%d" % len(self)
-        super(panelArray,self).append(p)
+        super(panelList,self).append(p)
 
     def getPanelIndexByName(self,name):
         
