@@ -4,11 +4,12 @@ Created on Aug 1, 2013
 @author: kirian
 '''
 
-import pad
+import detector
 import source
 import data
 import utils
 import numpy as np
+
 
 def crystfelToPanelArray(fileName):
 
@@ -23,7 +24,8 @@ def crystfelToPanelArray(fileName):
     globalCLen = None
     globalAduPerEv = None
 
-    pa = pad.panelArray()
+    pa = detector.panelArray()
+    pa.beam = source.beam()
 
     for line in fh:
         
@@ -98,14 +100,11 @@ def crystfelToPanelArray(fileName):
 
     fh.close()
 
-    
-    # Set the global configurations
-    pa.source = source.source()
 
     for p in range(len(pa)):
     
         # Link array beam to panel beam
-        pa.panels[p].source = pa.source
+        pa.panels[p].beam = pa.beam
 
         # These are defaults
         pa.panels[p].dataPlan.dataField = "/data/rawdata0"
@@ -124,20 +123,13 @@ def crystfelToPanelArray(fileName):
             pa.panels[p].dataPlan.detOffsetField = globalCLenField
         if globalCOffset != None:
             pa.panels[p].T[2] += globalCOffset
-        
-        fmin = pa.panels[p].dataPlan.fRange[0]
-        fmax = pa.panels[p].dataPlan.fRange[1]
-        smin = pa.panels[p].dataPlan.sRange[0]
-        smax = pa.panels[p].dataPlan.sRange[1]
-        pa.panels[p].nF = fmax - fmin + 1
-        pa.panels[p].nS = smax - smin + 1
             
     return pa
 
 
 def pypadTxtToPanelArray(self,fileName):
 
-    pa = pad.panelArray()
+    pa = detector.panelArray()
 
     fh = open(fileName,"r")
     pn = -1        

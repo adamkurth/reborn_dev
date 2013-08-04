@@ -78,7 +78,7 @@ def h5v1Read(panelArray,filePath):
     for p in range(len(panelArray)):
         # Load wavelength from hdf5 file
         if panelArray.panels[p].dataPlan.wavelengthField != "":
-            panelArray.panels[p].source.wavelength = f[panelArray.panels[p].dataPlan.wavelengthField].value[0]*1e-10
+            panelArray.panels[p].beam.wavelength = f[panelArray.panels[p].dataPlan.wavelengthField].value[0]*1e-10
         # Load camera length
         if panelArray.panels[p].dataPlan.detOffsetField != "":
             panelArray.panels[p].T[2] += f[panelArray.panels[p].dataPlan.detOffsetField].value[0]*1e-3

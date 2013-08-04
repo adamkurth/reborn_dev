@@ -6,7 +6,7 @@ Created on Jul 27, 2013
 
 import numpy as np
 
-class source(object):
+class beam(object):
     
     def __init__(self):
         

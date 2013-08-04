@@ -1,25 +1,25 @@
 
 import numpy as np
 from utils import warn
-import data
-import source
 
 """ Classes for analyzing diffraction data contained in pixel array detectors (PAD) """
 
 class panel(object):
 
+    """ Individual detector panel, assumed to be a flat 2D array of square pixels. """
+
     def __init__(self):
+        
+        """ There are no default initialization parameters. """
         
         self.name = ""
         self.pixSize = 0
         self.F = np.zeros(3)
         self.S = np.zeros(3)
-        self.nF = 0
-        self.nS = 0
         self.T = np.zeros(3)
         self.aduPerEv = 0
-        self.dataPlan = data.genericDataPlan()
-        self.source = source.source()
+        self.dataPlan = None
+        self.beam = None
         self.I = None
         self.V = None
         
@@ -35,9 +35,20 @@ class panel(object):
         s += " nF = %d\n" % self.nF
         s += " nS = %d\n" % self.nS
         s += " T = [%g, %g, %g]\n" % (self.T[0],self.T[1],self.T[2])
-        s += " B = [%g, %g, %g]\n" % (self.B[0],self.B[1],self.B[2])
         s += " aduPerEv = %g" % self.aduPerEv
         return s
+
+    @property
+    def nF(self):
+        if self.I != None:
+            return self.I.shape[1]
+        return 0
+    
+    @property
+    def nS(self):
+        if self.I != None:
+            return self.I.shape[0]
+        return 0
 
     def check(self):
 
@@ -60,7 +71,7 @@ class panelArray(object):
         """ Just make an empty panel array """
 
         self.panels = []
-        self.source = source.source()
+        self.beam = None
 
     def __len__(self):
         
@@ -77,11 +88,6 @@ class panelArray(object):
             s += "\n\n"
             s += self.panels[p].__str__()
         return(s)
-
-    def print_(self):
-        for p in range(len(self)):
-            print("")
-            self.panels[p].print_()
 
     def addPanel(self,p):
         if p == None:

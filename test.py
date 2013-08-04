@@ -2,12 +2,14 @@
 
 import convert
 
-p = convert.crystfelToPanelArray("examples/example1.geom")
+pa = convert.crystfelToPanelArray("examples/example1.geom")
 
-p.read("examples/example1.h5")
+pa.read("examples/example1.h5")
 
-print(p.panels[1].I)
+print(pa)
 
-#print(p)
+p = pa.panels[0]
 
+print(p.I)
 
+p.check()
