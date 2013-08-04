@@ -1,31 +1,10 @@
 #!/usr/bin/env python
 
-#import pad
 import convert
-import copy
-#import data
-#import imview
-#from PyQt4 import QtGui
-#import sys
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
-#import numpy as np
 
-
-
-
-# arr = np.ones((100, 100), dtype=float)
-# arr[45:55, 45:55] = 0
-# arr[25, :] = 5
-# arr[:, 25] = 5
-# arr[75, :] = 5
-# arr[:, 75] = 5
-# arr[50, :] = 10
-# arr[:, 50] = 10
-# arr += np.sin(np.linspace(0, 20, 100)).reshape(1, 100)
-# arr += np.random.normal(size=(100,100))
-
-p = convert.crystfelToPanelArray("examples/example1.geom")
+p = convert.crystfel_to_panel_list("examples/example1.geom")
 p.read("examples/example1.h5")
 
 ## create GUI

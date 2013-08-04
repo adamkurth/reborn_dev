@@ -7,30 +7,33 @@ Created on Aug 1, 2013
 import detector
 import source
 import data
-import utils
 import numpy as np
 
 
-def crystfelToPanelArray(fileName):
+def crystfel_to_panel_list(filename):
 
-    # All panel-specific keys that are recognized 
-    allKeys = set(["fs", "ss", "corner_x", "corner_y", "min_fs", "max_fs", "min_ss", "max_ss", "clen", "coffset", "res", "adu_per_eV"])
+    """ Convert a crystfel "geom" file into a panel list """
 
-    fh = open(fileName, "r")
-        
+    # All panel-specific keys that are recognized
+    all_keys = set(["fs", "ss", "corner_x", "corner_y",
+                    "min_fs", "max_fs", "min_ss", "max_ss",
+                    "clen", "coffset", "res", "adu_per_eV"])
+
+    h = open(filename, "r")
+
     # Global settings affecting all panels
-    globalCOffset = None
-    globalCLenField = None
-    globalCLen = None
-    globalAduPerEv = None
+    global_coffset = None
+    global_clen_field = None
+    global_clen = None
+    global_adu_per_ev = None
 
     pa = detector.panelList()
     pa.beam = source.beam()
 
-    for line in fh:
-        
+    for line in h:
+
         line = line.split("=")
-        
+
         if len(line) != 2:
             continue
 
@@ -39,14 +42,14 @@ def crystfelToPanelArray(fileName):
 
         # Check for global keys first
         if key == "coffset":
-            globalCOffset = float(value)
+            global_coffset = float(value)
         if key == "clen":
             try:
-                globalCLen = float(value)
+                global_clen = float(value)
             except:
-                globalCLenField = value
+                global_clen_field = value
         if key == "adu_per_eV":
-            globalAduPerEv = float(value)
+            global_adu_per_ev = float(value)
 
         # If not a global key, check for panel-specific keys
         key = key.split("/")
@@ -56,14 +59,14 @@ def crystfelToPanelArray(fileName):
         name = key[0].strip()
         key = key[1].strip()
 
-        if not key in allKeys:
+        if not key in all_keys:
             continue
 
         # Get index of this panel
         i = pa.getPanelIndexByName(name)
-        
+
         # If it is a new panel:
-        if i == None:
+        if i is None:
             pa.append()
             p = pa[len(pa) - 1]
             p.name = name
@@ -85,7 +88,7 @@ def crystfelToPanelArray(fileName):
             p.dataPlan.sRange[0] = int(value)
         if key == "max_ss":
             p.dataPlan.sRange[1] = int(value)
-        if key == "coffset":            
+        if key == "coffset":
             p.T[2] = float(value)
         if key == "res":
             p.pixSize = 1 / float(value)
@@ -100,11 +103,10 @@ def crystfelToPanelArray(fileName):
             p.S[0] = float(value[0].replace(" ", ""))
             p.S[1] = float(value[1].replace(" ", ""))
 
-    fh.close()
-
+    h.close()
 
     for p in pa:
-    
+
         # Link array beam to panel beam
         p.beam = pa.beam
 
@@ -117,24 +119,26 @@ def crystfelToPanelArray(fileName):
         p.T = p.T * p.pixSize
 
         # Check for extra global configurations
-        if globalAduPerEv != None:
-            p.aduPerEv = globalAduPerEv
-        if globalCLen != None:
-            p.T[2] += globalCLen
-        if globalCLenField != None:
-            p.dataPlan.detOffsetField = globalCLenField
-        if globalCOffset != None:
-            p.T[2] += globalCOffset
-            
+        if global_adu_per_ev is not None:
+            p.aduPerEv = global_adu_per_ev
+        if global_clen is not None:
+            p.T[2] += global_clen
+        if global_clen_field is not None:
+            p.dataPlan.detOffsetField = global_clen_field
+        if global_coffset is not None:
+            p.T[2] += global_coffset
+
     return pa
 
 
-def pypadTxtToPanelArray(self,fileName):
+def pypad_txt_to_panel_list(self, filename):
+
+    """ Convert a pypad txt file to a panel list """
 
     pa = detector.panelList()
 
-    fh = open(fileName,"r")
-    pn = -1        
+    fh = open(filename, "r")
+    pn = -1
 
     for line in fh:
         line = line.split()
@@ -143,24 +147,19 @@ def pypadTxtToPanelArray(self,fileName):
                 int(line[0])
             except:
                 continue
-        
+
             pn += 1
-            pa.addPanel(None)    
+            pa.append()
+            p = pa[pn]
 
-            B = np.array([0, 0, 1])
-            F = np.array([ float(line[7]), float(line[8]), float(line[9]) ])            
-            S = np.array([ float(line[4]), float(line[5]), float(line[6]) ])
-            T = np.array([ float(line[1]), float(line[2]), float(line[3]) ])    
+            p.B = np.array([0, 0, 1])
+            p.F = np.array([float(line[7]), float(line[8]), float(line[9])])
+            p.S = np.array([float(line[4]), float(line[5]), float(line[6])])
+            p.T = np.array([float(line[1]), float(line[2]), float(line[3])])
 
-            pa.panels[pn].B = B
-            pa.panels[pn].F = F
-            pa.panels[pn].S = S
-            pa.panels[pn].T = T
+            p.pixSize = np.linalg.norm(p.F)
+            p.T *= 1e-3
 
-            pa.panels[pn].pixSize = utils.norm2(F)
-            pa.panels[pn].T *= 1e-3
-            
     fh.close()
-    
-    return pa
 
+    return pa
