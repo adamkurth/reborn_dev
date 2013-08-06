@@ -9,4 +9,12 @@ pa.read("examples/example1.h5")
 
 print(pa[0].I)
 
+worked = pa.computeRealSpaceGeometry()
+
+print(worked)
+
+
+
+
+
 # pa.check()

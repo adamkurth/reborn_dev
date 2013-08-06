@@ -60,6 +60,12 @@ class panel(object):
             return self.I.shape[0]
         return 0
 
+    @property
+    def nPix(self):
+        if self.I is not None:
+            return self.I.size
+        return 0
+
     def check(self):
 
         if self.pixSize <= 0:
@@ -71,10 +77,17 @@ class panel(object):
 
         if self.nF == 0 or self.nS == 0:
             return False
-        X = np.arange(0, self.nF)
-        Y = np.arange(0, self.nS)
-        [X, Y] = np.meshgrid(X, Y)
-        return [X, Y]
+
+        i = np.arange(self.nF)
+        j = np.arange(self.nS)
+        [i, j] = np.meshgrid(i, j)
+        i.flatten()
+        j.flatten()
+        F = np.outer(i, self.F)
+        S = np.outer(j, self.S)
+        self.V = np.tile(self.T, [self.nPix, 1]) + F + S
+
+        return True
 
 
 class panelList(list):
@@ -131,6 +144,15 @@ class panelList(list):
                 return i
             i += 1
         return None
+
+    def computeRealSpaceGeometry(self):
+
+        out = []
+        for p in self:
+            out.append(p.computeRealSpaceGeometry())
+
+        return out
+
 
 #     def check(self):
 #
