@@ -21,11 +21,11 @@ class genericDataPlan(object):
     def __str__(self):
 
         s = ""
-        s += " type : %s\n" % self.type
-        s += " origin : %d\n" % self.origin
-        s += " stride : %d\n" % self.stride
-        s += " nf : %d\n" % self.nf
-        s += " ns : %d\n" % self.ns
+        s += "type : %s\n" % self.type
+        s += "origin : %d\n" % self.origin
+        s += "stride : %d\n" % self.stride
+        s += "nf : %d\n" % self.nf
+        s += "ns : %d\n" % self.ns
         return s
 
     def check(self):
@@ -53,12 +53,12 @@ class h5v1Plan(object):
     def __str__(self):
 
         s = ""
-        s += " type : %s\n" % self.type
-        s += " fRange : [%d, %d]\n" % (self.fRange[0], self.fRange[1])
-        s += " sRange : [%d, %d]\n" % (self.sRange[0], self.sRange[1])
-        s += " dataField : %s\n" % self.dataField
-        s += " wavelengthField : %s\n" % self.wavelengthField
-        s += " detOffsetField : %s" % self.detOffsetField
+        s += "type : %s\n" % self.type
+        s += "fRange : [%d, %d]\n" % (self.fRange[0], self.fRange[1])
+        s += "sRange : [%d, %d]\n" % (self.sRange[0], self.sRange[1])
+        s += "dataField : %s\n" % self.dataField
+        s += "wavelengthField : %s\n" % self.wavelengthField
+        s += "detOffsetField : %s" % self.detOffsetField
         return s
 
     def check(self):
@@ -89,6 +89,6 @@ def h5v1Read(panelList, filePath):
             fmax = p.dataPlan.fRange[1] + 1
             smin = p.dataPlan.sRange[0]
             smax = p.dataPlan.sRange[1] + 1
-            p.I = np.array(dset[smin:smax, fmin:fmax], dtype=np.double)
+            p.data = np.array(dset[smin:smax, fmin:fmax], dtype=np.double)
 
     f.close()

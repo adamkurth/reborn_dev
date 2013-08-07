@@ -2,6 +2,7 @@
 import numpy as np
 from utils import warn
 import source
+# import operator
 
 """
 Classes for analyzing diffraction data contained in pixel array detectors (PAD)
@@ -29,41 +30,60 @@ class panel(object):
         self.aduPerEv = 0
         self.dataPlan = None
         self.beam = source.beam()
-        self.I = np.zeros([0, 0])
+        self.data = np.zeros([0, 0])
         self.V = np.zeros([0, 0, 3])
         self.K = np.zeros([0, 0, 3])
 
         self.panelList = None
 
+    def copy(self):
+
+        p = panel()
+        p.name = self.name
+        p.pixSize = self.pixSize
+        p.F = self.F.copy()
+        p.T = self.T.copy()
+        p.aduPerEv = self.aduPerEv
+        p.dataPlan = self.dataPlan
+        p.beam = self.beam.copy()
+        p.data = self.data.copy()
+        p.V = self.V.copy()
+        p.K = self.K.copy()
+
+        p.panelList = None
+
+        return p
+
     def __str__(self):
 
         s = ""
-        s += " name = \"%s\"\n" % self.name
-        s += " pixSize = %g\n" % self.pixSize
-        s += " F = [%g, %g, %g]\n" % (self.F[0], self.F[1], self.F[2])
-        s += " S = [%g, %g, %g]\n" % (self.S[0], self.S[1], self.S[2])
-        s += " nF = %d\n" % self.nF
-        s += " nS = %d\n" % self.nS
-        s += " T = [%g, %g, %g]\n" % (self.T[0], self.T[1], self.T[2])
-        s += " aduPerEv = %g" % self.aduPerEv
+        s += "name = \"%s\"\n" % self.name
+        s += "pixSize = %g\n" % self.pixSize
+        s += "F = [%g, %g, %g]\n" % (self.F[0], self.F[1], self.F[2])
+        s += "S = [%g, %g, %g]\n" % (self.S[0], self.S[1], self.S[2])
+        s += "nF = %d\n" % self.nF
+        s += "nS = %d\n" % self.nS
+        s += "T = [%g, %g, %g]\n" % (self.T[0], self.T[1], self.T[2])
+        s += "aduPerEv = %g\n" % self.aduPerEv
+        s += self.data.__str__()
         return s
 
     @property
     def nF(self):
-        if self.I is not None:
-            return self.I.shape[1]
+        if self.data is not None:
+            return self.data.shape[1]
         return 0
 
     @property
     def nS(self):
-        if self.I is not None:
-            return self.I.shape[0]
+        if self.data is not None:
+            return self.data.shape[0]
         return 0
 
     @property
     def nPix(self):
-        if self.I is not None:
-            return self.I.size
+        if self.data is not None:
+            return self.data.size
         return 0
 
     def check(self):
@@ -96,7 +116,15 @@ class panelList(list):
 
         """ Just make an empty panel array """
 
+        self.isConsolidated = False
+        self.data = np.zeros(0)
         self.beam = None
+
+    def copy(self):
+
+        pa = panelList()
+        for p in self:
+            pa.append(p.copy())
 
     def __str__(self):
 
@@ -121,6 +149,7 @@ class panelList(list):
         if value.name == "":
             value.name = "%d" % key
         super(panelList, self).__setitem__(key, value)
+        self.isConsolidated = False
 
     def append(self, p=None, name=""):
 
@@ -134,6 +163,7 @@ class panelList(list):
         else:
             p.name = "%d" % len(self)
         super(panelList, self).append(p)
+        self.isConsolidated = False
 
     def getPanelIndexByName(self, name):
 
@@ -151,8 +181,33 @@ class panelList(list):
         for p in self:
             out.append(p.computeRealSpaceGeometry())
 
-        return out
+        return all(out)
 
+    def consolidateData(self):
+
+        ntot = 0
+        for p in self:
+            ntot += p.nPix
+
+        self.data = np.empty(ntot)
+
+        n = 0
+        for p in self:
+            nPix = p.nPix
+            nF = p.nF
+            nS = p.nS
+            self.data[n:(n + nPix)] = p.data.flatten()
+            p.data = self.data[n:(n + nPix)]
+            p.data = p.data.reshape((nS, nF))
+            n += nPix
+
+        self.isConsolidated = True
+
+#     def operate(self, func, **kwargs):
+#
+#         for p in self:
+#             p.data = func(p.data, **kwargs)
+#         return self
 
 #     def check(self):
 #

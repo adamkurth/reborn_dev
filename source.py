@@ -5,6 +5,7 @@ Created on Jul 27, 2013
 '''
 
 import numpy as np
+import utils
 
 
 class beam(object):
@@ -14,13 +15,23 @@ class beam(object):
         self.wavelength = 0
         self.B = np.array([0, 0, 1])
 
-    def print_(self):
+    def copy(self):
 
-        print("wavelength : %g" % self.wavelength)
-        print("B : [%g, %g, %g]" % (self.B[0], self.B[1], self.B[2]))
+        b = beam()
+        b.wavelength = self.wavelength
+        b.B = self.B.copy()
+        return b
 
-    def sanityCheck(self):
+    def __str__(self):
 
-        if self.wavelength == 0:
+        s = ""
+        s += "wavelength : %g\n" % self.wavelength
+        s += "B : [%g, %g, %g]\n" % (self.B[0], self.B[1], self.B[2])
+        return s
+
+    def check(self):
+
+        if self.wavelength <= 0:
+            utils.warn("Bad wavelength: %f" % self.wavelength)
             return False
         return True
