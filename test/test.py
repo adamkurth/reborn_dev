@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import convert
+from pydiffract import convert
 
 print("")
 
@@ -11,11 +11,21 @@ pa.read("examples/example1.h5")
 
 print(pa[0].data)
 
-worked = pa.computeRealSpaceGeometry()
+# pa.computeRealSpaceGeometry()
 
-print(worked)
 
-pa.consolidateData()
+V = pa.V
 
+dat = pa.data
+
+dat += 1
+
+pa.data = dat
+
+print(pa[0].data.dtype)
+
+pa2 = pa.copy()
+
+print(pa[0].F[0])
 
 # pa.check()

@@ -12,7 +12,7 @@ Classes for analyzing diffraction data contained in pixel array detectors (PAD)
 class panel(object):
 
     """
-    Individual detector panel, assumed to be a flat 2D array of square pixels.
+    Individual detector panel, assumed to be a 2D lattice of pixels.
     """
 
     def __init__(self, name=""):
@@ -22,17 +22,18 @@ class panel(object):
         "uninitialized"
         """
 
+        self.dtype = np.float64
         self.name = name
         self.pixSize = 0
-        self.F = np.zeros(3)
-        self.S = np.zeros(3)
-        self.T = np.zeros(3)
+        self._F = np.array([1, 0, 0], dtype=self.dtype)
+        self._S = np.array([0, 1, 0], dtype=self.dtype)
+        self._T = np.array([0, 0, 0], dtype=self.dtype)
         self.aduPerEv = 0
         self.dataPlan = None
         self.beam = source.beam()
-        self.data = np.zeros([0, 0])
-        self.V = np.zeros([0, 0, 3])
-        self.K = np.zeros([0, 0, 3])
+        self.data = np.zeros([0, 0], dtype=self.dtype)
+        self._V = None
+        self._K = None
 
         self.panelList = None
 
@@ -41,14 +42,17 @@ class panel(object):
         p = panel()
         p.name = self.name
         p.pixSize = self.pixSize
-        p.F = self.F.copy()
-        p.T = self.T.copy()
+        p._F = self._F.copy()
+        p._S = self._S.copy()
+        p._T = self._T.copy()
         p.aduPerEv = self.aduPerEv
         p.dataPlan = self.dataPlan
         p.beam = self.beam.copy()
         p.data = self.data.copy()
-        p.V = self.V.copy()
-        p.K = self.K.copy()
+        if self._V is not None:
+            p._V = self._V.copy()
+        if self._K is not None:
+            p._K = self._K.copy()
 
         p.panelList = None
 
@@ -86,6 +90,51 @@ class panel(object):
             return self.data.size
         return 0
 
+    @property
+    def F(self):
+        return self._F
+
+    @F.setter
+    def F(self, val):
+        if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
+            self._F = self.dtype(val)
+            self._V = None
+            self._K = None
+        else:
+            raise ValueError("Must be a numpy array of length 3")
+
+    @property
+    def S(self):
+        return self._S
+
+    @S.setter
+    def S(self, val):
+        if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
+            self._S = self.dtype(val)
+            self._V = None
+            self._K = None
+        else:
+            raise ValueError("Must be a numpy array of length 3")
+
+    @property
+    def T(self):
+        return self._T
+
+    @T.setter
+    def T(self, val):
+        if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
+            self._T = self.dtype(val)
+            self._V = None
+            self._K = None
+        else:
+            raise ValueError("Must be a numpy array of length 3")
+
+    @property
+    def V(self):
+        if self._V is None:
+            self.computeRealSpaceGeometry()
+        return self._V
+
     def check(self):
 
         if self.pixSize <= 0:
@@ -96,18 +145,26 @@ class panel(object):
     def computeRealSpaceGeometry(self):
 
         if self.nF == 0 or self.nS == 0:
-            return False
+            raise ValueError("Data array has zero size (%d x %d)" % (self.nF, self.nS))
 
+        if self.pixSize <= 0:
+            raise ValueError("Pixel size must be >= 0")
+
+        p = self.pixSize
         i = np.arange(self.nF)
         j = np.arange(self.nS)
         [i, j] = np.meshgrid(i, j)
-        i.flatten()
-        j.flatten()
-        F = np.outer(i, self.F)
-        S = np.outer(j, self.S)
-        self.V = np.tile(self.T, [self.nPix, 1]) + F + S
+        i.ravel()
+        j.ravel()
+        F = np.outer(i, self._F)
+        S = np.outer(j, self._S)
+        self._V = self.T + F * p + S * p
 
-        return True
+#     def getRealSpaceBoundingBox(self):
+#
+#         vmin = np.ones(3) * np.finfo(np.float64).max
+#         vmax = np.ones(3) * np.finfo(np.float64).min
+
 
 
 class panelList(list):
@@ -117,7 +174,6 @@ class panelList(list):
         """ Just make an empty panel array """
 
         self.isConsolidated = False
-        self.data = np.zeros(0)
         self.beam = None
 
     def copy(self):
@@ -145,11 +201,22 @@ class panelList(list):
     def __setitem__(self, key, value):
 
         if not isinstance(value, panel):
-            raise TypeError("You may only append panels to a panelList object")
+            raise TypeError("You may only add panels to a panelList object")
         if value.name == "":
             value.name = "%d" % key
         super(panelList, self).__setitem__(key, value)
         self.isConsolidated = False
+
+    @property
+    def nPix(self):
+        ntot = 0
+        for p in self:
+            ntot += p.nPix
+        return ntot
+
+    @property
+    def nPanels(self):
+        return len(self)
 
     def append(self, p=None, name=""):
 
@@ -177,42 +244,61 @@ class panelList(list):
 
     def computeRealSpaceGeometry(self):
 
-        out = []
         for p in self:
-            out.append(p.computeRealSpaceGeometry())
+            p.computeRealSpaceGeometry()
 
-        return all(out)
+    @property
+    def V(self):
 
-    def consolidateData(self):
-
-        ntot = 0
-        for p in self:
-            ntot += p.nPix
-
-        self.data = np.empty(ntot)
+        V = np.empty((self.nPix, 3))
 
         n = 0
         for p in self:
             nPix = p.nPix
             nF = p.nF
             nS = p.nS
-            self.data[n:(n + nPix)] = p.data.flatten()
-            p.data = self.data[n:(n + nPix)]
+            V[n:(n + nPix), :] = p.V.reshape((nPix, 3))
+            p._V = V[n:(n + nPix)]
+            p._V = p._V.reshape((nS, nF, 3))
+            n += nPix
+
+        return V
+
+    @property
+    def data(self):
+
+        data = np.empty(self.nPix)
+
+        n = 0
+        for p in self:
+            nPix = p.nPix
+            nF = p.nF
+            nS = p.nS
+            data[n:(n + nPix)] = p.data.ravel()
+            p.data = data[n:(n + nPix)]
             p.data = p.data.reshape((nS, nF))
             n += nPix
 
-        self.isConsolidated = True
+        return data
 
-#     def operate(self, func, **kwargs):
-#
-#         for p in self:
-#             p.data = func(p.data, **kwargs)
-#         return self
+    @data.setter
+    def data(self, data):
 
-#     def check(self):
-#
-#         checks = [c for c in ]
+        if not isinstance(data, np.ndarray) and data.ndim == 1 and data.size == self.nPix:
+            raise ValueError("Must be flattened ndarray of size %d" % self.nPix)
+        n = 0
+        for p in self:
+            nPix = p.nPix
+            nF = p.nF
+            nS = p.nS
+            p.data = data[n:(n + nPix)]
+            p.data = p.data.reshape((nS, nF))
+            n += nPix
 
     def read(self, fileName):
 
         self[0].dataPlan.read(self, fileName)
+
+
+class GeometryError(Exception):
+    pass
