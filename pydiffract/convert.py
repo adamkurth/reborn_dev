@@ -4,9 +4,7 @@ Created on Aug 1, 2013
 @author: kirian
 '''
 
-import detector
-import source
-import data
+from pydiffract import detector, source, data
 import numpy as np
 
 
@@ -70,6 +68,9 @@ def crystfel_to_panel_list(filename):
             pa.append()
             p = pa[len(pa) - 1]
             p.name = name
+            p.T = np.zeros(3)
+            p.F = np.zeros(3)
+            p.S = np.zeros(3)
             p.dataPlan = data.h5v1Plan()
             p.dataPlan.panel = p
         else:
@@ -118,6 +119,10 @@ def crystfel_to_panel_list(filename):
         # Unit conversions
         p.T = p.T * p.pixSize
 
+        # Data array size
+        p.nF = p.dataPlan.fRange[1] - p.dataPlan.fRange[0] + 1
+        p.nS = p.dataPlan.sRange[1] - p.dataPlan.sRange[0] + 1
+
         # Check for extra global configurations
         if global_adu_per_ev is not None:
             p.aduPerEv = global_adu_per_ev
@@ -131,7 +136,7 @@ def crystfel_to_panel_list(filename):
     return pa
 
 
-def pypad_txt_to_panel_list(self, filename):
+def pypad_txt_to_panel_list(filename):
 
     """ Convert a pypad txt file to a panel list """
 

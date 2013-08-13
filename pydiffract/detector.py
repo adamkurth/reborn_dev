@@ -1,7 +1,7 @@
 
 import numpy as np
-from utils import warn
-import source
+from pydiffract.utils import warn
+from pydiffract import source
 # import operator
 
 """
@@ -25,13 +25,15 @@ class panel(object):
         self.dtype = np.float64
         self.name = name
         self.pixSize = 0
-        self._F = np.array([1, 0, 0], dtype=self.dtype)
-        self._S = np.array([0, 1, 0], dtype=self.dtype)
-        self._T = np.array([0, 0, 0], dtype=self.dtype)
+        self._F = None
+        self._S = None
+        self._T = None
+        self._nF = 0
+        self._nS = 0
         self.aduPerEv = 0
         self.dataPlan = None
         self.beam = source.beam()
-        self.data = np.zeros([0, 0], dtype=self.dtype)
+        self.data = None
         self._V = None
         self._K = None
 
@@ -42,9 +44,9 @@ class panel(object):
         p = panel()
         p.name = self.name
         p.pixSize = self.pixSize
-        p._F = self._F.copy()
-        p._S = self._S.copy()
-        p._T = self._T.copy()
+        p.F = self._F.copy()
+        p.S = self._S.copy()
+        p.T = self._T.copy()
         p.aduPerEv = self.aduPerEv
         p.dataPlan = self.dataPlan
         p.beam = self.beam.copy()
@@ -69,20 +71,25 @@ class panel(object):
         s += "nS = %d\n" % self.nS
         s += "T = [%g, %g, %g]\n" % (self.T[0], self.T[1], self.T[2])
         s += "aduPerEv = %g\n" % self.aduPerEv
-        s += self.data.__str__()
         return s
 
     @property
     def nF(self):
-        if self.data is not None:
-            return self.data.shape[1]
-        return 0
+        return self._nF
+
+    @nF.setter
+    def nF(self, val):
+        self.deleteGeometryData()
+        self._nF = val
 
     @property
     def nS(self):
-        if self.data is not None:
-            return self.data.shape[0]
-        return 0
+        return self._nS
+
+    @nS.setter
+    def nS(self, val):
+        self.deleteGeometryData()
+        self._nS = val
 
     @property
     def nPix(self):
@@ -98,10 +105,9 @@ class panel(object):
     def F(self, val):
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._F = self.dtype(val)
-            self._V = None
-            self._K = None
+            self.deleteGeometryData()
         else:
-            raise ValueError("Must be a numpy array of length 3")
+            raise ValueError("Must be a numpy ndarray of length 3")
 
     @property
     def S(self):
@@ -111,8 +117,7 @@ class panel(object):
     def S(self, val):
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._S = self.dtype(val)
-            self._V = None
-            self._K = None
+            self.deleteGeometryData()
         else:
             raise ValueError("Must be a numpy array of length 3")
 
@@ -124,8 +129,7 @@ class panel(object):
     def T(self, val):
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._T = self.dtype(val)
-            self._V = None
-            self._K = None
+            self.deleteGeometryData()
         else:
             raise ValueError("Must be a numpy array of length 3")
 
@@ -134,6 +138,12 @@ class panel(object):
         if self._V is None:
             self.computeRealSpaceGeometry()
         return self._V
+
+    @property
+    def K(self):
+        if self._K is None:
+            self.computeReciprocalSpaceGeometry()
+        return self._K
 
     def check(self):
 
@@ -159,6 +169,15 @@ class panel(object):
         F = np.outer(i, self._F)
         S = np.outer(j, self._S)
         self._V = self.T + F * p + S * p
+        self._V = self._V.reshape((self._nS, self._nF, 3))
+
+    def computeReciprocalSpaceGeometry(self):
+
+        self._K = self.V.copy()
+
+    def deleteGeometryData(self):
+        self._V = None
+        self._K = None
 
 #     def getRealSpaceBoundingBox(self):
 #
@@ -173,6 +192,7 @@ class panelList(list):
 
         """ Just make an empty panel array """
 
+        self._V = None
         self.isConsolidated = False
         self.beam = None
 
@@ -250,19 +270,37 @@ class panelList(list):
     @property
     def V(self):
 
-        V = np.empty((self.nPix, 3))
+        if self._V is None or self._V.shape[1] != self.nPix:
+            self._V = np.empty((self.nPix, 3))
+
+        n = 0
+        for p in self:
+            if p.V.base is self._V:
+                continue
+            nPix = p.nPix
+            nF = p.nF
+            nS = p.nS
+            self._V[n:(n + nPix), :] = p._V.reshape((nPix, 3))
+            p._V = self._V[n:(n + nPix)].reshape((nS, nF, 3))
+            n += nPix
+
+        return self._V
+
+    @property
+    def K(self):
+
+        K = np.empty((self.nPix, 3))
 
         n = 0
         for p in self:
             nPix = p.nPix
             nF = p.nF
             nS = p.nS
-            V[n:(n + nPix), :] = p.V.reshape((nPix, 3))
-            p._V = V[n:(n + nPix)]
-            p._V = p._V.reshape((nS, nF, 3))
+            K[n:(n + nPix), :] = p.K.reshape((nPix, 3))
+            p._K = K[n:(n + nPix)].reshape((nS, nF, 3))
             n += nPix
 
-        return V
+        return K
 
     @property
     def data(self):
@@ -275,8 +313,7 @@ class panelList(list):
             nF = p.nF
             nS = p.nS
             data[n:(n + nPix)] = p.data.ravel()
-            p.data = data[n:(n + nPix)]
-            p.data = p.data.reshape((nS, nF))
+            p.data = data[n:(n + nPix)].reshape((nS, nF))
             n += nPix
 
         return data
