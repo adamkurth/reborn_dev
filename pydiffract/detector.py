@@ -31,7 +31,6 @@ class panel(object):
         self._nF = 0
         self._nS = 0
         self.aduPerEv = 0
-        self.dataPlan = None
         self.beam = source.beam()
         self.data = None
         self._V = None
@@ -48,7 +47,6 @@ class panel(object):
         p.S = self._S.copy()
         p.T = self._T.copy()
         p.aduPerEv = self.aduPerEv
-        p.dataPlan = self.dataPlan
         p.beam = self.beam.copy()
         p.data = self.data.copy()
         if self._V is not None:
@@ -79,7 +77,10 @@ class panel(object):
 
     @nF.setter
     def nF(self, val):
-        self.deleteGeometryData()
+        if not isinstance(val, int):
+            raise ValueError("nS must be an integer")
+        if val != self._nS:
+            self.deleteGeometryData()
         self._nF = val
 
     @property
@@ -88,7 +89,10 @@ class panel(object):
 
     @nS.setter
     def nS(self, val):
-        self.deleteGeometryData()
+        if not isinstance(val, int):
+            raise ValueError("nS must be an integer")
+        if val != self._nS:
+            self.deleteGeometryData()
         self._nS = val
 
     @property
@@ -331,10 +335,6 @@ class panelList(list):
             p.data = data[n:(n + nPix)]
             p.data = p.data.reshape((nS, nF))
             n += nPix
-
-    def read(self, fileName):
-
-        self[0].dataPlan.read(self, fileName)
 
 
 class GeometryError(Exception):

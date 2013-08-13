@@ -6,12 +6,12 @@ from pydiffract import convert
 
 print("")
 
-pa = convert.crystfel_to_panel_list("examples/example1.geom")
+[pa, reader] = convert.crystfelToPanelList("examples/example1.geom")
 print(pa[0])
 
-pa.read("examples/example1.h5")
+reader.getShot(pa, "examples/example1.h5")
 
-# print(pa[0].data)
+print(pa[0].data)
 
 # pa.computeRealSpaceGeometry()
 

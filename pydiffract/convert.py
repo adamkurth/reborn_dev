@@ -8,7 +8,7 @@ from pydiffract import detector, source, data
 import numpy as np
 
 
-def crystfel_to_panel_list(filename):
+def crystfelToPanelList(filename):
 
     """ Convert a crystfel "geom" file into a panel list """
 
@@ -26,6 +26,7 @@ def crystfel_to_panel_list(filename):
     global_adu_per_ev = None
 
     pa = detector.panelList()
+    ra = []
     pa.beam = source.beam()
 
     for line in h:
@@ -67,14 +68,15 @@ def crystfel_to_panel_list(filename):
         if i is None:
             pa.append()
             p = pa[len(pa) - 1]
+            ra.append(data.h5v1Plan())
+            r = ra[len(pa) - 1]
             p.name = name
             p.T = np.zeros(3)
             p.F = np.zeros(3)
             p.S = np.zeros(3)
-            p.dataPlan = data.h5v1Plan()
-            p.dataPlan.panel = p
         else:
             p = pa[i]
+            r = ra[i]
 
         # Parse the simple keys
         if key == "corner_x":
@@ -82,13 +84,13 @@ def crystfel_to_panel_list(filename):
         if key == "corner_y":
             p.T[1] = float(value)
         if key == "min_fs":
-            p.dataPlan.fRange[0] = int(value)
+            r.fRange[0] = int(value)
         if key == "max_fs":
-            p.dataPlan.fRange[1] = int(value)
+            r.fRange[1] = int(value)
         if key == "min_ss":
-            p.dataPlan.sRange[0] = int(value)
+            r.sRange[0] = int(value)
         if key == "max_ss":
-            p.dataPlan.sRange[1] = int(value)
+            r.sRange[1] = int(value)
         if key == "coffset":
             p.T[2] = float(value)
         if key == "res":
@@ -106,22 +108,27 @@ def crystfel_to_panel_list(filename):
 
     h.close()
 
-    for p in pa:
+
+
+    for i in range(len(pa)):
+
+        p = pa[i]
+        r = ra[i]
 
         # Link array beam to panel beam
         p.beam = pa.beam
 
         # These are defaults
-        p.dataPlan.dataField = "/data/rawdata0"
-        p.dataPlan.wavelengthField = "/LCLS/photon_wavelength_A"
+        r.dataField = "/data/rawdata0"
+        r.wavelengthField = "/LCLS/photon_wavelength_A"
         p.B = np.array([0, 0, 1])
 
         # Unit conversions
         p.T = p.T * p.pixSize
 
         # Data array size
-        p.nF = p.dataPlan.fRange[1] - p.dataPlan.fRange[0] + 1
-        p.nS = p.dataPlan.sRange[1] - p.dataPlan.sRange[0] + 1
+        p.nF = r.fRange[1] - r.fRange[0] + 1
+        p.nS = r.sRange[1] - r.sRange[0] + 1
 
         # Check for extra global configurations
         if global_adu_per_ev is not None:
@@ -129,11 +136,14 @@ def crystfel_to_panel_list(filename):
         if global_clen is not None:
             p.T[2] += global_clen
         if global_clen_field is not None:
-            p.dataPlan.detOffsetField = global_clen_field
+            r.detOffsetField = global_clen_field
         if global_coffset is not None:
             p.T[2] += global_coffset
 
-    return pa
+    reader = data.h5v1Reader()
+    reader.setPlan(ra)
+
+    return [pa, reader]
 
 
 def pypad_txt_to_panel_list(filename):
