@@ -27,6 +27,7 @@ def crystfelToPanelList(filename):
 
     pa = detector.panelList()
     ra = []
+    pixSize = np.ones(10000)
     pa.beam = source.beam()
 
     for line in h:
@@ -94,7 +95,7 @@ def crystfelToPanelList(filename):
         if key == "coffset":
             p.T[2] = float(value)
         if key == "res":
-            p.pixSize = 1 / float(value)
+            pixSize[i] = 1.0 / float(value)
 
         # Parse the more complicated keys
         if key == "fs":
@@ -124,7 +125,9 @@ def crystfelToPanelList(filename):
         p.B = np.array([0, 0, 1])
 
         # Unit conversions
-        p.T = p.T * p.pixSize
+        p.T = p.T * pixSize[i]
+        p.F = p.F * pixSize[i]
+        p.S = p.S * pixSize[i]
 
         # Data array size
         p.nF = r.fRange[1] - r.fRange[0] + 1
@@ -146,35 +149,35 @@ def crystfelToPanelList(filename):
     return [pa, reader]
 
 
-def pypad_txt_to_panel_list(filename):
-
-    """ Convert a pypad txt file to a panel list """
-
-    pa = detector.panelList()
-
-    fh = open(filename, "r")
-    pn = -1
-
-    for line in fh:
-        line = line.split()
-        if len(line) == 10:
-            try:
-                int(line[0])
-            except:
-                continue
-
-            pn += 1
-            pa.append()
-            p = pa[pn]
-
-            p.B = np.array([0, 0, 1])
-            p.F = np.array([float(line[7]), float(line[8]), float(line[9])])
-            p.S = np.array([float(line[4]), float(line[5]), float(line[6])])
-            p.T = np.array([float(line[1]), float(line[2]), float(line[3])])
-
-            p.pixSize = np.linalg.norm(p.F)
-            p.T *= 1e-3
-
-    fh.close()
-
-    return pa
+# def pypad_txt_to_panel_list(filename):
+#
+#     """ Convert a pypad txt file to a panel list """
+#
+#     pa = detector.panelList()
+#
+#     fh = open(filename, "r")
+#     pn = -1
+#
+#     for line in fh:
+#         line = line.split()
+#         if len(line) == 10:
+#             try:
+#                 int(line[0])
+#             except:
+#                 continue
+#
+#             pn += 1
+#             pa.append()
+#             p = pa[pn]
+#
+#             p.B = np.array([0, 0, 1])
+#             p.F = np.array([float(line[7]), float(line[8]), float(line[9])])
+#             p.S = np.array([float(line[4]), float(line[5]), float(line[6])])
+#             p.T = np.array([float(line[1]), float(line[2]), float(line[3])])
+#
+#             p.pixSize = np.linalg.norm(p.F)
+#             p.T *= 1e-3
+#
+#     fh.close()
+#
+#     return pa

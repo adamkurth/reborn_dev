@@ -7,6 +7,7 @@ from pydiffract import convert
 print("")
 
 [pa, reader] = convert.crystfelToPanelList("examples/example1.geom")
+
 print(pa[0])
 
 reader.getShot(pa, "examples/example1.h5")

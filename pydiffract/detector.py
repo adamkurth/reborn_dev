@@ -1,5 +1,6 @@
 
 import numpy as np
+from numpy.linalg import norm
 from pydiffract.utils import warn
 from pydiffract import source
 # import operator
@@ -24,7 +25,6 @@ class panel(object):
 
         self.dtype = np.float64
         self.name = name
-        self.pixSize = 0
         self._F = None
         self._S = None
         self._T = None
@@ -42,7 +42,6 @@ class panel(object):
 
         p = panel()
         p.name = self.name
-        p.pixSize = self.pixSize
         p.F = self._F.copy()
         p.S = self._S.copy()
         p.T = self._T.copy()
@@ -62,12 +61,12 @@ class panel(object):
 
         s = ""
         s += "name = \"%s\"\n" % self.name
-        s += "pixSize = %g\n" % self.pixSize
-        s += "F = [%g, %g, %g]\n" % (self.F[0], self.F[1], self.F[2])
-        s += "S = [%g, %g, %g]\n" % (self.S[0], self.S[1], self.S[2])
+        s += "pixSize = %s\n" % self.pixSize.__str__()
+        s += "F = %s\n" % self.F.__str__()
+        s += "S = %s\n" % self.S.__str__()
         s += "nF = %d\n" % self.nF
         s += "nS = %d\n" % self.nS
-        s += "T = [%g, %g, %g]\n" % (self.T[0], self.T[1], self.T[2])
+        s += "T = %s\n" % self.T.__str__()
         s += "aduPerEv = %g\n" % self.aduPerEv
         return s
 
@@ -94,6 +93,11 @@ class panel(object):
         if val != self._nS:
             self.deleteGeometryData()
         self._nS = val
+
+    @property
+    def pixSize(self):
+        if self._F is not None:
+            return np.array([norm(self.F), norm(self.S)])
 
     @property
     def nPix(self):
@@ -161,10 +165,6 @@ class panel(object):
         if self.nF == 0 or self.nS == 0:
             raise ValueError("Data array has zero size (%d x %d)" % (self.nF, self.nS))
 
-        if self.pixSize <= 0:
-            raise ValueError("Pixel size must be >= 0")
-
-        p = self.pixSize
         i = np.arange(self.nF)
         j = np.arange(self.nS)
         [i, j] = np.meshgrid(i, j)
@@ -172,7 +172,7 @@ class panel(object):
         j.ravel()
         F = np.outer(i, self._F)
         S = np.outer(j, self._S)
-        self._V = self.T + F * p + S * p
+        self._V = self.T + F + S
         self._V = self._V.reshape((self._nS, self._nF, 3))
 
     def computeReciprocalSpaceGeometry(self):
