@@ -44,7 +44,7 @@ def crystfel_to_panel_list(filename):
         if key == "clen":
             try:
                 global_clen = float(value)
-            except:
+            except ValueError:
                 global_clen_field = value
         if key == "adu_per_eV":
             global_adu_per_ev = float(value)

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 from pydiffract import convert
-import h5py
-
+# import h5py
 
 
 print("")
