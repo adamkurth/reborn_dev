@@ -122,7 +122,7 @@ def crystfelToPanelList(filename):
         # These are defaults
         r.dataField = "/data/rawdata0"
         r.wavelengthField = "/LCLS/photon_wavelength_A"
-        p.B = np.array([0, 0, 1])
+        p.beam.B = np.array([0, 0, 1])
 
         # Unit conversions
         p.T = p.T * pixSize[i]
