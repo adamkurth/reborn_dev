@@ -38,18 +38,29 @@ def test_copy(pa):
     pa2 = pa.copy()
 
 
-#     print(pa[0].getRealSpaceBoundingBox())
+def test_bounding_box(pa):
+
+    r = pa.getRealSpaceBoundingBox()
+    print(r)
+
+def test_assemble(pa):
+
+    adat = pa.assembledData
 
 
-r = pa.getRealSpaceBoundingBox()
-print(r / pa[0].pixSize)
 
 
-# func = 'test_copy(pa)'
-# N = 1
-#
-# for i in range(N):
-#
-#     cProfile.run(func, filename='test.cprof')
-#     stats = pstats.Stats("test.cprof")
-#     stats.strip_dirs().sort_stats('time').print_stats()
+N = pa[0].N
+print(N)
+
+
+
+
+
+func = 'test_assemble(pa)'
+N = 1
+for i in range(N):
+
+    cProfile.run(func, filename='test.cprof')
+    stats = pstats.Stats("test.cprof")
+    stats.strip_dirs().sort_stats('time').print_stats()

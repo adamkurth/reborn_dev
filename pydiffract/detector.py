@@ -3,7 +3,7 @@ import numpy as np
 from numpy.linalg import norm
 from pydiffract.utils import warn
 from pydiffract import source
-import numexpr
+import numexpr as ne
 # import operator
 
 """
@@ -32,9 +32,10 @@ class panel(object):
         self._nF = 0
         self._nS = 0
         self.aduPerEv = 0
-        self.beam = source.beam()
+        self.beam = None
         self.data = None
         self._V = None
+        self._solidAngle = None
         self._K = None
 
         self.panelList = None
@@ -97,8 +98,17 @@ class panel(object):
 
     @property
     def pixSize(self):
-        if self._F is not None:
-            return np.mean([norm(self.F), norm(self.S)])
+
+        if self._F is None or self._S is None:
+            raise ValueError("F or S is not defined")
+
+        p1 = norm(self.F)
+        p2 = norm(self.S)
+        if abs(p1 - p2) / float(p2) > 1e-6 or abs(p1 - p2) / float(p1) > 1e-6:
+            raise ValueError("Pixel size is not consistent between F and S vectors (%10f, %10f)" % (p1, p2))
+
+        return np.mean([p1, p2])
+
 
     @property
     def nPix(self):
@@ -160,15 +170,20 @@ class panel(object):
             self.computeReciprocalSpaceGeometry()
         return self._K
 
+    @property
+    def N(self):
+        N = np.cross(self.F, self.S)
+        return N / norm(N)
+
     def check(self):
 
-        if self.pixSize <= 0:
-            warn("Bad pixel size in panel %s" % self.name)
-            return False
+        self.checkGeometry()
         return True
 
     def checkGeometry(self):
 
+        if self.pixSize <= 0:
+            raise ValueError("Bad pixel size in panel %s" % self.name)
         if self._T is None:
             raise ValueError("Panel translation vector T is not defined")
         if self._F is None:
@@ -192,13 +207,17 @@ class panel(object):
         self._V = self.T + F + S
         self._V = self._V.reshape((self._nS, self._nF, 3))
 
+
     def computeReciprocalSpaceGeometry(self):
 
         self._K = self.V - self.B
 
     def deleteGeometryData(self):
         self._V = None
+        self._solidAngle = None
         self._K = None
+        if self.panelList is not None:
+            self.panelList.deleteGeometryData()
 
     def getRealSpaceBoundingBox(self):
 
@@ -227,6 +246,7 @@ class panelList(list):
         self._K = None
         self.isConsolidated = False
         self.beam = None
+        self._realSpaceBoundingBox = None
 
     def copy(self):
 
@@ -370,10 +390,26 @@ class panelList(list):
     @property
     def assembledData(self):
 
-        pass
+        pixSize = self[0].pixSize
+        r = self.realSpaceBoundingBox
+        rpix = r / pixSize
+        rpix[:, 0] = np.floor(rpix[:, 0])
+        rpix[:, 1] = np.ceil(rpix[:, 1])
 
-    def getRealSpaceBoundingBox(self):
+        adat = np.zeros([rpix[1, 1] - rpix[1, 0] + 1, rpix[0, 1] - rpix[0, 0] + 1])
+        adat_c = adat.copy()
 
+        Vr = np.round(self.V / pixSize)
+        d = self.data
+        nPix = self.nPix
+
+        return adat
+
+    @property
+    def realSpaceBoundingBox(self):
+
+        if self._realSpaceBoundingBox is not None:
+            return self._realSpaceBoundingBox
 
         r = np.zeros([3, 2])
         r[:, 0] = np.ones(3) * np.finfo(np.float64).max
@@ -389,7 +425,12 @@ class panelList(list):
             r[1, 1] = max([r[1, 1], rp[1, 1]])
             r[2, 1] = max([r[2, 1], rp[2, 1]])
 
-        return r
+        self._realSpaceBoundingBox = r
+        return r.copy()
+
+    def deleteGeometryData(self):
+
+        self._realSpaceBoundingBox = None
 
 class GeometryError(Exception):
     pass
