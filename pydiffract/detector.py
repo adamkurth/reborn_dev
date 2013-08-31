@@ -1,7 +1,7 @@
 
 import numpy as np
 from numpy.linalg import norm
-from pydiffract.utils import warn
+from pydiffract.utils import warn, vecNorm
 from pydiffract import source
 import numexpr as ne
 # import operator
@@ -25,6 +25,7 @@ class panel(object):
         """
 
         self.dtype = np.float64
+        # configured parameters
         self.name = name
         self._F = None
         self._S = None
@@ -34,10 +35,11 @@ class panel(object):
         self.aduPerEv = 0
         self.beam = None
         self.data = None
+        # derived parameters
         self._V = None
         self._solidAngle = None
         self._K = None
-
+        # if this panel is a part of a list
         self.panelList = None
 
     def copy(self):
@@ -47,6 +49,8 @@ class panel(object):
         p.F = self._F.copy()
         p.S = self._S.copy()
         p.T = self._T.copy()
+        p.nF = self.nF
+        p.nS = self.nS
         p.aduPerEv = self.aduPerEv
         p.beam = self.beam.copy()
         p.data = self.data.copy()
@@ -54,6 +58,8 @@ class panel(object):
             p._V = self._V.copy()
         if self._K is not None:
             p._K = self._K.copy()
+        if self._solidAngle is not None:
+            p._solidAngle = self._solidAngle.copy()
 
         p.panelList = None
 
@@ -175,6 +181,15 @@ class panel(object):
         N = np.cross(self.F, self.S)
         return N / norm(N)
 
+    @property
+    def solidAngle(self):
+        v = vecNorm(self.V)
+        n = self.N
+        V2 = np.sum(self.V ** 2, axis=-1)
+        A = norm(np.cross(self.F, self.S))
+        self._solidAngle = A / V2 * np.dot(v, n)
+        return self._solidAngle
+
     def check(self):
 
         self.checkGeometry()
@@ -205,8 +220,7 @@ class panel(object):
         F = np.outer(i, self._F)
         S = np.outer(j, self._S)
         self._V = self.T + F + S
-        self._V = self._V.reshape((self._nS, self._nF, 3))
-
+        # self._V = self._V.reshape((self._nS, self._nF, 3))
 
     def computeReciprocalSpaceGeometry(self):
 
@@ -333,7 +347,7 @@ class panelList(list):
             nF = p.nF
             nS = p.nS
             self._V[n:(n + nPix), :] = p._V.reshape((nPix, 3))
-            p._V = self._V[n:(n + nPix)].reshape((nS, nF, 3))
+            # p._V = self._V[n:(n + nPix)].reshape((nS, nF, 3))
             n += nPix
 
         return self._V
@@ -352,7 +366,7 @@ class panelList(list):
             nF = p.nF
             nS = p.nS
             self._K[n:(n + nPix), :] = p._K.reshape((nPix, 3))
-            p._K = self._K[n:(n + nPix)].reshape((nS, nF, 3))
+            # p._K = self._K[n:(n + nPix)].reshape((nS, nF, 3))
             n += nPix
 
         return self._K
@@ -431,6 +445,8 @@ class panelList(list):
     def deleteGeometryData(self):
 
         self._realSpaceBoundingBox = None
+        self._K = None
+        self._V = None
 
 class GeometryError(Exception):
     pass

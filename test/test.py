@@ -47,8 +47,11 @@ def test_assemble(pa):
 
     adat = pa.assembledData
 
+def test_solid_angle(pa):
 
-
+    sa = pa[0].solidAngle
+    print(sa.min())
+    print(sa.max())
 
 N = pa[0].N
 print(N)
@@ -57,7 +60,7 @@ print(N)
 
 
 
-func = 'test_assemble(pa)'
+func = 'test_solid_angle(pa)'
 N = 1
 for i in range(N):
 
