@@ -5,6 +5,7 @@ import numpy as np
 from timeit import timeit
 import cProfile
 import pstats
+from pylab import *
 
 # print("")
 
@@ -45,7 +46,10 @@ def test_bounding_box(pa):
 
 def test_assemble(pa):
 
-    adat = pa.assembledData
+#     print(pa.realSpaceBoundingBox / pa[0].pixSize)
+    adat = pa.simpleRealSpaceProjection
+    imshow(log(adat + 100), interpolation='nearest', cmap='gray')
+    show()
 
 def test_solid_angle(pa):
 
@@ -53,14 +57,14 @@ def test_solid_angle(pa):
     print(sa.min())
     print(sa.max())
 
-N = pa[0].N
-print(N)
+# N = pa[0].N
+# print(N)
 
 
+adat = pa.simpleRealSpaceProjection
 
 
-
-func = 'test_solid_angle(pa)'
+func = 'test_assemble(pa)'
 N = 1
 for i in range(N):
 

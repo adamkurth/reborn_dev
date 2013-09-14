@@ -14,14 +14,13 @@ Classes for analyzing diffraction data contained in pixel array detectors (PAD)
 class panel(object):
 
     """
-    Individual detector panel, assumed to be a 2D lattice of pixels.
+    Individual detector panel, assumed to be a 2D lattice of pixels with orthogoanl axes
     """
 
     def __init__(self, name=""):
 
         """
-        There are no default initialization parameters.  Zeros generally mean
-        "uninitialized"
+        Try not to make any assumptions during initialization
         """
 
         self.dtype = np.float64
@@ -43,6 +42,10 @@ class panel(object):
         self.panelList = None
 
     def copy(self):
+
+        """
+        Ensure that there are no links between data
+        """
 
         p = panel()
         p.name = self.name
@@ -67,6 +70,10 @@ class panel(object):
 
     def __str__(self):
 
+        """
+        Print something useful when in interactive mode
+        """
+
         s = ""
         s += "name = \"%s\"\n" % self.name
         s += "pixSize = %s\n" % self.pixSize.__str__()
@@ -80,10 +87,12 @@ class panel(object):
 
     @property
     def nF(self):
+        """ Number of fast-scan pixels"""
         return self._nF
 
     @nF.setter
     def nF(self, val):
+        """ Changing fast-scan pixel count destroys all geometry arrays"""
         if not isinstance(val, int):
             raise ValueError("nS must be an integer")
         if val != self._nS:
@@ -92,10 +101,12 @@ class panel(object):
 
     @property
     def nS(self):
+        """ Number of slow-scan pixels"""
         return self._nS
 
     @nS.setter
     def nS(self, val):
+        """ Changing slow-scan pixel count destroys all geometry arrays"""
         if not isinstance(val, int):
             raise ValueError("nS must be an integer")
         if val != self._nS:
@@ -104,30 +115,31 @@ class panel(object):
 
     @property
     def pixSize(self):
-
+        """ Return the pixel size, if both fast-scan and slow-scan bases are the same length"""
         if self._F is None or self._S is None:
             raise ValueError("F or S is not defined")
-
         p1 = norm(self.F)
         p2 = norm(self.S)
         if abs(p1 - p2) / float(p2) > 1e-6 or abs(p1 - p2) / float(p1) > 1e-6:
             raise ValueError("Pixel size is not consistent between F and S vectors (%10f, %10f)" % (p1, p2))
-
         return np.mean([p1, p2])
 
 
     @property
     def nPix(self):
+        """ Total number of pixels"""
         if self.data is not None:
             return self.data.size
         return 0
 
     @property
     def F(self):
+        """ The fast-scan basis vector (length equal to pixel size)"""
         return self._F
 
     @F.setter
     def F(self, val):
+        """ Must be a numpy ndarray of length 3"""
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._F = self.dtype(val)
             self.deleteGeometryData()
@@ -136,6 +148,7 @@ class panel(object):
 
     @property
     def S(self):
+
         return self._S
 
     @S.setter
@@ -240,7 +253,7 @@ class panel(object):
         r = np.zeros([3, 2])
         r[:, 0] = np.ones(3) * np.finfo(self.dtype).max
         r[:, 1] = np.ones(3) * np.finfo(self.dtype).min
-        v = V[[0, 0, -1, -1], [0, -1, -1, 0], :]
+        v = V.reshape(self.nS, self.nF, 3)[[0, 0, -1, -1], [0, -1, -1, 0], :]
         r[0, 0] = min(v[:, 0])
         r[1, 0] = min(v[:, 1])
         r[2, 0] = min(v[:, 2])
@@ -402,7 +415,7 @@ class panelList(list):
             n += nPix
 
     @property
-    def assembledData(self):
+    def simpleRealSpaceProjection(self):
 
         pixSize = self[0].pixSize
         r = self.realSpaceBoundingBox
@@ -411,11 +424,40 @@ class panelList(list):
         rpix[:, 1] = np.ceil(rpix[:, 1])
 
         adat = np.zeros([rpix[1, 1] - rpix[1, 0] + 1, rpix[0, 1] - rpix[0, 0] + 1])
-        adat_c = adat.copy()
+        cdat = adat.copy()
 
-        Vr = np.round(self.V / pixSize)
+        V = self.V[:, 0:2] / pixSize - rpix[0:2, 0]
+        Vll = np.round(V).astype(np.int32)
+#         Vll = np.floor(V).astype(np.int32)
+#         Vuu = Vll + 1
+#         Vlu = Vll.copy()
+#         Vlu[:, 0] = Vll[:, 0]
+#         Vlu[:, 1] = Vuu[:, 1]
+#         Vul = Vll.copy()
+#         Vul[:, 0] = Vuu[:, 0]
+#         Vul[:, 1] = Vll[:, 1]
+
+#         Wuu = 1 / np.sqrt(np.sum((V - Vuu) ** 2, axis=-1))
+#         Wll = 1 / np.sqrt(np.sum((V - Vll) ** 2, axis=-1))
+#         Wul = 1 / np.sqrt(np.sum((V - Vul) ** 2, axis=-1))
+#         Wlu = 1 / np.sqrt(np.sum((V - Vlu) ** 2, axis=-1))
+
         d = self.data
         nPix = self.nPix
+
+        adat[Vll[:, 1], Vll[:, 0]] += d  # * Wll
+#         adat[Vuu[:, 1], Vuu[:, 0]] += d * Wuu
+#         adat[Vul[:, 1], Vul[:, 0]] += d * Wul
+#         adat[Vlu[:, 1], Vlu[:, 0]] += d * Wlu
+
+#         cdat[Vll[:, 1], Vll[:, 0]] += Wll
+#         cdat[Vuu[:, 1], Vuu[:, 0]] += Wuu
+#         cdat[Vul[:, 1], Vul[:, 0]] += Wul
+#         cdat[Vlu[:, 1], Vlu[:, 0]] += Wlu
+#
+#         adat /= cdat
+
+        # adat /= Wsum.reshape(adat.shape)
 
         return adat
 
