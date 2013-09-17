@@ -1,51 +1,45 @@
 
 import numpy as np
 from numpy.linalg import norm
-from pydiffract.utils import warn, vecNorm
+from pydiffract.utils import vecNorm
 from pydiffract import source
-import numexpr as ne
-# import operator
 
 """
-Classes for analyzing diffraction data contained in pixel array detectors (PAD)
+Classes for analyzing diffraction data contained in pixel array detectors (PAD).
 """
 
 
 class panel(object):
-
-    """
-    Individual detector panel, assumed to be a 2D lattice of pixels with orthogoanl axes
-    """
+    """ Individual detector panel: a 2D lattice of square pixels."""
 
     def __init__(self, name=""):
+        """ Make no assumptions during initialization."""
 
-        """
-        Try not to make any assumptions during initialization
-        """
-
-        self.dtype = np.float64
-        # configured parameters
-        self.name = name
-        self._F = None
-        self._S = None
-        self._T = None
-        self._nF = 0
-        self._nS = 0
-        self.aduPerEv = 0
-        self.beam = None
-        self.data = None
-        # derived parameters
-        self._V = None
-        self._solidAngle = None
-        self._K = None
-        # if this panel is a part of a list
-        self.panelList = None
+        self.dtype = np.float64  # Choose the data type (this may go away)
+        # Configured parameters
+        self.name = name  # Panel name for convenience
+        self._F = None  # Fast-scan vector
+        self._S = None  # Slow-scan vector
+        self._T = None  # Translation of this panel (from interaction region to center of first pixel)
+        self._nF = 0  # Number of pixels along the fast-scan direction
+        self._nS = 0  # Number of pixels along the slow-scan direction
+        self.aduPerEv = 0  # Number of arbitrary data units per eV of photon energy
+        self.beam = None  # Container for x-ray beam information
+        self.data = None  # Diffraction intensity data
+        # Derived parameters
+        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_rsbb']
+        self._pixSize = None  # Pixel size derived from F/S vectors
+        self._V = None  # 3D vectors pointing from interaction region to pixel centers
+        self._sa = None  # Solid angles corresponding to each pixel
+        self._K = None  # Reciprocal space vectors multiplied by wavelength
+        self._rsbb = None  # Real-space bounding box information
+        # Sanity checks
+        self._validGeometry = False
+        # If this panel is a part of a list
+        self.panelList = None  # This is the link to the panel list
 
     def copy(self):
-
-        """
-        Ensure that there are no links between data
-        """
+        """ Deep copy of everything.  Parent panel list is stripped away."""
 
         p = panel()
         p.name = self.name
@@ -61,18 +55,14 @@ class panel(object):
             p._V = self._V.copy()
         if self._K is not None:
             p._K = self._K.copy()
-        if self._solidAngle is not None:
-            p._solidAngle = self._solidAngle.copy()
-
+        if self._sa is not None:
+            p._sa = self._sa.copy()
         p.panelList = None
 
         return p
 
     def __str__(self):
-
-        """
-        Print something useful when in interactive mode
-        """
+        """ Print something useful when in interactive mode."""
 
         s = ""
         s += "name = \"%s\"\n" % self.name
@@ -87,173 +77,203 @@ class panel(object):
 
     @property
     def nF(self):
-        """ Number of fast-scan pixels"""
+        """ Number of fast-scan pixels."""
         return self._nF
 
     @nF.setter
     def nF(self, val):
-        """ Changing fast-scan pixel count destroys all geometry arrays"""
-        if not isinstance(val, int):
-            raise ValueError("nS must be an integer")
-        if val != self._nS:
-            self.deleteGeometryData()
-        self._nF = val
+        """ Changing the fast-scan pixel count destroys all derived geometry 
+        data as well as intensity data."""
+        self._nF = np.int32(val)
+        self.deleteGeometryData()
+        self.data = None
 
     @property
     def nS(self):
-        """ Number of slow-scan pixels"""
+        """ Number of slow-scan pixels."""
         return self._nS
 
     @nS.setter
     def nS(self, val):
-        """ Changing slow-scan pixel count destroys all geometry arrays"""
-        if not isinstance(val, int):
-            raise ValueError("nS must be an integer")
-        if val != self._nS:
-            self.deleteGeometryData()
-        self._nS = val
+        """ Changing the slow-scan pixel count destroys all derived geometry 
+        data as well as intensity data."""
+        self._nS = np.int32(val)
+        self.deleteGeometryData()
+        self.data = None
 
     @property
     def pixSize(self):
-        """ Return the pixel size, if both fast-scan and slow-scan bases are the same length"""
-        if self._F is None or self._S is None:
-            raise ValueError("F or S is not defined")
-        p1 = norm(self.F)
-        p2 = norm(self.S)
-        if abs(p1 - p2) / float(p2) > 1e-6 or abs(p1 - p2) / float(p1) > 1e-6:
-            raise ValueError("Pixel size is not consistent between F and S vectors (%10f, %10f)" % (p1, p2))
-        return np.mean([p1, p2])
-
+        """ Return the pixel size only if both fast/slow-scan vectors are the same length."""
+        if self._pixSize is None:
+            if self._validGeometry == False:
+                self.checkGeometry()
+            p1 = norm(self.F)
+            p2 = norm(self.S)
+            if abs(p1 - p2) / float(p2) > 1e-6 or abs(p1 - p2) / float(p1) > 1e-6:
+                raise ValueError("Pixel size is not consistent between F and S vectors (%10f, %10f)." % (p1, p2))
+            self._pixSize = np.mean([p1, p2])
+        return self._pixSize.copy()
 
     @property
     def nPix(self):
-        """ Total number of pixels"""
-        if self.data is not None:
-            return self.data.size
-        return 0
+        """ Total number of pixels."""
+        return self._nF * self._nS
 
     @property
     def F(self):
-        """ The fast-scan basis vector (length equal to pixel size)"""
+        """ Fast-scan vector (length equal to pixel size)."""
         return self._F
 
     @F.setter
     def F(self, val):
-        """ Must be a numpy ndarray of length 3"""
+        """ Must be a numpy ndarray of length 3."""
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._F = self.dtype(val)
             self.deleteGeometryData()
         else:
-            raise ValueError("F must be a numpy ndarray of length 3")
+            raise ValueError("F must be a numpy ndarray of length 3.")
 
     @property
     def S(self):
-
+        """ Slow-scan vector (length equal to pixel size)."""
         return self._S
 
     @S.setter
     def S(self, val):
+        """ Must be a numpy ndarray of length 3."""
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._S = self.dtype(val)
             self.deleteGeometryData()
         else:
-            raise ValueError("S must be a numpy array of length 3")
+            raise ValueError("S must be a numpy array of length 3.")
 
     @property
     def T(self):
+        """ Translation vector pointing from interaction region to center of first pixel."""
         return self._T
 
     @T.setter
     def T(self, val):
+        """ Must be an ndarray of length 3."""
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._T = self.dtype(val)
             self.deleteGeometryData()
         else:
-            raise ValueError("Must be a numpy array of length 3")
+            raise ValueError("Must be a numpy array of length 3.")
 
     @property
     def B(self):
+        """ Beam direction vector."""
         if self.beam is None:
-            raise ValueError("Panel has no beam information")
+            raise ValueError("Panel has no beam information.")
         return self.beam.B
 
     @property
     def V(self):
+        """ Vectors pointing from interaction region to pixel centers."""
         if self._V is None:
             self.computeRealSpaceGeometry()
         return self._V
 
     @property
     def K(self):
+        """ Scattering vectors multiplied by wavelength."""
         if self._K is None:
             self.computeReciprocalSpaceGeometry()
         return self._K
 
     @property
     def N(self):
+        """ Normal vector to panel surface."""
         N = np.cross(self.F, self.S)
         return N / norm(N)
 
     @property
     def solidAngle(self):
-        v = vecNorm(self.V)
-        n = self.N
-        V2 = np.sum(self.V ** 2, axis=-1)
-        A = norm(np.cross(self.F, self.S))
-        self._solidAngle = A / V2 * np.dot(v, n)
-        return self._solidAngle
+        """ Solid angles of pixels."""
+        if self._sa is None:
+            v = vecNorm(self.V)
+            n = self.N
+            V2 = np.sum(self.V ** 2, axis=-1)
+            A = norm(np.cross(self.F, self.S))
+            self._sa = A / V2 * np.dot(v, n)
+        return self._sa
 
     def check(self):
+        """ Check for any known issues with this panel."""
 
         self.checkGeometry()
         return True
 
     def checkGeometry(self):
+        """ Check for valid geometry configuration."""
 
-        if self.pixSize <= 0:
-            raise ValueError("Bad pixel size in panel %s" % self.name)
         if self._T is None:
-            raise ValueError("Panel translation vector T is not defined")
+            raise ValueError("Panel translation vector T is not defined.")
         if self._F is None:
-            raise ValueError("Panel basis vector F is not defined")
+            raise ValueError("Panel basis vector F is not defined.")
         if self._S is None:
-            raise ValueError("Panel basis vector S is not defined")
+            raise ValueError("Panel basis vector S is not defined.")
         if self.nF == 0 or self.nS == 0:
-            raise ValueError("Data array has zero size (%d x %d)" % (self.nF, self.nS))
+            raise ValueError("Data array has zero size (%d x %d)." % (self.nF, self.nS))
+
+        self._geometryChecked = True
 
     def computeRealSpaceGeometry(self):
 
-        self.checkGeometry()
+        if self._validGeometry == False:
+            self.checkGeometry()
 
         i = np.arange(self.nF)
         j = np.arange(self.nS)
         [i, j] = np.meshgrid(i, j)
         i.ravel()
         j.ravel()
-        F = np.outer(i, self._F)
-        S = np.outer(j, self._S)
-        self._V = self.T + F + S
+        self._V = self.pixelsToVectors(i, j)
         # self._V = self._V.reshape((self._nS, self._nF, 3))
+
+    def pixelsToVectors(self, i, j):
+        """ Convert pixel indices to translation vectors (i=fast scan, j=slow scan)."""
+
+        F = np.outer(i, self.F)
+        S = np.outer(j, self.S)
+        V = self.T + F + S
+        return V
 
     def computeReciprocalSpaceGeometry(self):
 
         self._K = self.V - self.B
 
     def deleteGeometryData(self):
+
+        """ Clear out all generated geometry data."""
+
         self._V = None
-        self._solidAngle = None
+        self._sa = None
         self._K = None
+        self._rsbb = None
         if self.panelList is not None:
             self.panelList.deleteGeometryData()
+        self._validGeometry = False
+
+    def getVertices(self, corners=False):
+        """ Get panel getVertices; positions of corner pixels."""
+
+        nF = self.nF - 1
+        nS = self.nS - 1
+        v = self.pixelsToVectors([0, 0, nF, nF], [0, nS, nS, 0])
+        return v
 
     def getRealSpaceBoundingBox(self):
+        """ Return the minimum and maximum values of the four corners."""
 
-        V = self.V
+        if self._rsbb is not None:
+            return self._rsbb
 
         r = np.zeros([3, 2])
         r[:, 0] = np.ones(3) * np.finfo(self.dtype).max
         r[:, 1] = np.ones(3) * np.finfo(self.dtype).min
-        v = V.reshape(self.nS, self.nF, 3)[[0, 0, -1, -1], [0, -1, -1, 0], :]
+        v = self.getVertices()
         r[0, 0] = min(v[:, 0])
         r[1, 0] = min(v[:, 1])
         r[2, 0] = min(v[:, 2])
@@ -261,27 +281,37 @@ class panel(object):
         r[1, 1] = max(v[:, 1])
         r[2, 1] = max(v[:, 2])
 
+        self._rsbb = r
+
         return r
 
 class panelList(list):
 
     def __init__(self):
 
-        """ Just make an empty panel array """
+        """ Create an empty panel array."""
 
+        self._data = None
+        self._sa = None
         self._V = None
         self._K = None
         self.isConsolidated = False
         self.beam = None
-        self._realSpaceBoundingBox = None
+        self._rsbb = None
 
     def copy(self):
+
+        """ Create a deep copy."""
 
         pa = panelList()
         for p in self:
             pa.append(p.copy())
 
+        return pa
+
     def __str__(self):
+
+        """ Print something useful when in interactive mode."""
 
         s = ""
         for p in self:
@@ -289,6 +319,8 @@ class panelList(list):
         return(s)
 
     def __getitem__(self, key):
+
+        """ Get a panel. Panels may be referenced by name or index."""
 
         if isinstance(key, str):
             key = self.getPanelIndexByName(key)
@@ -349,7 +381,7 @@ class panelList(list):
     @property
     def V(self):
 
-        if self._V is None or self._V.shape[0] != self.nPix:
+        if self._V is None:
             self._V = np.empty((self.nPix, 3))
 
         n = 0
@@ -414,18 +446,18 @@ class panelList(list):
     @property
     def solidAngle(self):
 
-        data = np.empty(self.nPix)
-
-        n = 0
-        for p in self:
-            nPix = p.nPix
-            nF = p.nF
-            nS = p.nS
-            data[n:(n + nPix)] = p.solidAngle.ravel()
-            # p.data = data[n:(n + nPix)].reshape((nS, nF))
-            n += nPix
-
-        return data
+        if self._sa == None:
+            sa = np.empty(self.nPix)
+            n = 0
+            for p in self:
+                nPix = p.nPix
+                nF = p.nF
+                nS = p.nS
+                sa[n:(n + nPix)] = p.solidAngle.ravel()
+                # p.data = data[n:(n + nPix)].reshape((nS, nF))
+                n += nPix
+            self._sa = sa
+        return self._sa
 
     @property
     def simpleRealSpaceProjection(self):
@@ -477,8 +509,8 @@ class panelList(list):
     @property
     def realSpaceBoundingBox(self):
 
-        if self._realSpaceBoundingBox is not None:
-            return self._realSpaceBoundingBox
+        if self._rsbb is not None:
+            return self._rsbb
 
         r = np.zeros([3, 2])
         r[:, 0] = np.ones(3) * np.finfo(np.float64).max
@@ -494,14 +526,16 @@ class panelList(list):
             r[1, 1] = max([r[1, 1], rp[1, 1]])
             r[2, 1] = max([r[2, 1], rp[2, 1]])
 
-        self._realSpaceBoundingBox = r
+        self._rsbb = r
         return r.copy()
 
     def deleteGeometryData(self):
 
-        self._realSpaceBoundingBox = None
+        self._sa = None
+        self._rsbb = None
         self._K = None
         self._V = None
+
 
 class GeometryError(Exception):
     pass

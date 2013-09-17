@@ -23,6 +23,8 @@ w.setWindowTitle('gwiz')
 w.setCameraPosition(distance=0.5 * pa[0].T[2] / pa[0].pixSize)
 w.orbit(45, -120)
 
+# print(w.cameraPosition())
+
 # p = pa[0]
 # p.T[0] = p.pixSize * 1
 # p.T[1] = p.pixSize * 2
@@ -76,16 +78,16 @@ for p in pa:
 
     T = (p.T) / p.pixSize
 
-    T[0] += 0.2 * T[0]
+#     T[0] += 0.2 * T[0]
 
     phi *= 180 / np.pi
 
-    print(p.F)
-    print(p.S)
-    print(T)
-    print(R)
-    print(V)
-    print(phi)
+#     print(p.F)
+#     print(p.S)
+#     print(T)
+#     print(R)
+#     print(V)
+#     print(phi)
 
     im.translate(-0.5, -0.5, 0)
     im.rotate(phi, V[0], V[1], V[2])
