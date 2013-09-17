@@ -376,10 +376,7 @@ class panelList(list):
             if p.K.base is self._K:
                 continue
             nPix = p.nPix
-            nF = p.nF
-            nS = p.nS
             self._K[n:(n + nPix), :] = p._K.reshape((nPix, 3))
-            # p._K = self._K[n:(n + nPix)].reshape((nS, nF, 3))
             n += nPix
 
         return self._K
@@ -413,6 +410,22 @@ class panelList(list):
             p.data = data[n:(n + nPix)]
             p.data = p.data.reshape((nS, nF))
             n += nPix
+
+    @property
+    def solidAngle(self):
+
+        data = np.empty(self.nPix)
+
+        n = 0
+        for p in self:
+            nPix = p.nPix
+            nF = p.nF
+            nS = p.nS
+            data[n:(n + nPix)] = p.solidAngle.ravel()
+            # p.data = data[n:(n + nPix)].reshape((nS, nF))
+            n += nPix
+
+        return data
 
     @property
     def simpleRealSpaceProjection(self):
