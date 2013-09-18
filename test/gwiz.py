@@ -25,6 +25,8 @@ class gui(QtGui.QMainWindow):
         self.w = gl.GLViewWidget()
         self.setCentralWidget(self.w)
         self.setWindowTitle('gwiz')
+        self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        self.activateWindow()
         self.show()
 
     def initUI(self):
@@ -107,7 +109,6 @@ def main():
     for p in pa:
 
         d = p.data
-    #     d = p.solidAngle.copy().reshape(p.nS, p.nF)
 
         d[0, :] = maxd * 0.5
         d[0:10, 0] = maxd * 0.5
@@ -124,19 +125,8 @@ def main():
         im = ims[i]
 
         phi, V, R = getPanelRotation(p)
-
-        T = (p.T) / p.pixSize
-
-    #     T[0] += 0.2 * T[0]
-
+        T = p.T / p.pixSize
         phi *= 180 / np.pi
-
-    #     print(p.F)
-    #     print(p.S)
-    #     print(T)
-    #     print(R)
-    #     print(V)
-    #     print(phi)
 
         im.translate(-0.5, -0.5, 0)
         im.rotate(phi, V[0], V[1], V[2])
@@ -146,18 +136,42 @@ def main():
 
         w.addItem(im)
 
+    # Scatter plot items
+
     npeak = 2
     pos = np.empty((npeak, 3))
     size = np.empty((npeak))
     color = np.empty((npeak, 4))
-    pos[0] = (100, 0, 0); size[0] = 10;   color[0] = (0.0, 1.0, 0.0, 0.5)
-    pos[1] = (0, 100, 0); size[1] = 10;   color[1] = (0.0, 1.0, 0.0, 0.5)
-
-    pos = pa[0].pixelsToVectors(pos[:, 0], pos[:, 1])
+    pos[0] = (100, 0, 0); size[0] = 10;   color[0] = (0.0, 1.0, 0.0, 0.4)
+    pos[1] = (0, 100, 0); size[1] = 10;   color[1] = (0.0, 1.0, 0.0, 0.4)
 
     sp1 = gl.GLScatterPlotItem(pos=pos, size=size, color=color, pxMode=False)
-    sp1.translate(5, 5, 0)
+    sp1.rotate(phi, V[0], V[1], V[2])
+    sp1.translate(T[0], T[1], T[2])
     w.addItem(sp1)
+
+    # Line plot items
+
+    for p in pa:
+
+        T = p.T / p.pixSize
+        phi, V, R = getPanelRotation(p)
+        phi *= 180 / np.pi
+
+        fs = np.array([[0, 0, 0], p.F]) / p.pixSize * p.nF * 0.3
+
+        plt = gl.GLLinePlotItem(pos=fs, color=pg.glColor((0, 1 * 1.3)))
+#         plt.translate(-0.5, -0.5, 0)
+        plt.rotate(phi, V[0], V[1], V[2])
+        plt.translate(T[0], T[1], T[2])
+        w.addItem(plt)
+
+        b = (p.getVertices(loop=True) + p.T) / p.pixSize
+
+        plt2 = gl.GLLinePlotItem(pos=b, color=pg.glColor((10, 30 * 1.3)))
+        w.addItem(plt2)
+
+
 
     sys.exit(app.exec_())
 

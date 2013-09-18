@@ -7,11 +7,6 @@ import cProfile
 import pstats
 from pylab import *
 
-
-[pa, reader] = convert.crystfelToPanelList("examples/example1.geom")
-reader.getShot(pa, "examples/example1.h5")
-
-
 def test_all(pa):
 
     test_V(pa)
@@ -20,7 +15,7 @@ def test_all(pa):
     pa.deleteGeometryData()
     test_dat(pa)
     test_copy(pa)
-    test_bounding_box(pa)
+    test_bounding_box(pa, verbose=True)
     test_solid_angle(pa)
     test_assemble(pa, verbose=True)
 
@@ -46,9 +41,16 @@ def test_copy(pa):
     pa2 = pa.copy()
     print("Pass")
 
-def test_bounding_box(pa):
+def test_bounding_box(pa, verbose=False):
     print("Checking real-space bounding box calculation...")
-    r = pa.realSpaceBoundingBox
+    r = pa[0].getRealSpaceBoundingBox()
+    if verbose == True:
+        print('r')
+        print(r / pa[0].pixSize)
+    ra = pa.realSpaceBoundingBox
+    if verbose == True:
+        print('ra')
+        print(ra / pa[0].pixSize)
     print("Pass")
 
 def test_solid_angle(pa, verbose=False):
@@ -62,11 +64,17 @@ def test_solid_angle(pa, verbose=False):
 def test_assemble(pa, verbose=False):
     print("Checking simple 2d assembly...")
     adat = pa.simpleRealSpaceProjection
-    adat[adat < 0] = 0
     if verbose == True:
+        adat[adat < 0] = 0
         imshow(log(adat + 100), interpolation='nearest', cmap='gray')
         show()
     print("Pass")
+
+
+
+
+[pa, reader] = convert.crystfelToPanelList("examples/example1.geom")
+reader.getShot(pa, "examples/example1.h5")
 
 test_all(pa)
 
