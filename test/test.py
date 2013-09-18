@@ -22,7 +22,7 @@ def test_all(pa):
     test_copy(pa)
     test_bounding_box(pa)
     test_solid_angle(pa)
-    test_assemble(pa, showIm=True)
+    test_assemble(pa, verbose=True)
 
 def test_V(pa):
     print("Checking real-space vector calculation...")
@@ -51,18 +51,19 @@ def test_bounding_box(pa):
     r = pa.realSpaceBoundingBox
     print("Pass")
 
-def test_solid_angle(pa):
+def test_solid_angle(pa, verbose=False):
     print("Checking solid angle calculation...")
     sa = pa[0].solidAngle
-    print(sa.min())
-    print(sa.max())
+    if verbose == True:
+        print(sa.min())
+        print(sa.max())
     print("Pass")
 
-def test_assemble(pa, showIm=True):
+def test_assemble(pa, verbose=False):
     print("Checking simple 2d assembly...")
     adat = pa.simpleRealSpaceProjection
     adat[adat < 0] = 0
-    if show == True:
+    if verbose == True:
         imshow(log(adat + 100), interpolation='nearest', cmap='gray')
         show()
     print("Pass")

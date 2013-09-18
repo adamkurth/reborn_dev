@@ -31,6 +31,8 @@ def error(message):
 
 def kabschRotation(Vi1, Vi2):
 
+    """ Find the best rotation to bring two vector lists into coincidence."""
+
     V1 = Vi1.copy()
     V2 = Vi2.copy()
 
@@ -58,6 +60,8 @@ def kabschRotation(Vi1, Vi2):
 
 def randomRotationMatrix():
 
+    """ Create a random rotation matrix."""
+
     q = Quaternion(np.random.rand(4))
     q = q.normalized()
     R = q.asRotation()
@@ -65,6 +69,8 @@ def randomRotationMatrix():
 
 
 def axisAndAngle(R):
+
+    """ Rotation angle and axis from rotation matrix."""
 
     sR = R.copy()
     T = Tensor(sR)

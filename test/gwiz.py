@@ -150,8 +150,10 @@ def main():
     pos = np.empty((npeak, 3))
     size = np.empty((npeak))
     color = np.empty((npeak, 4))
-    pos[0] = (100, 0, 0); size[0] = 0.5;   color[0] = (0.0, 1.0, 0.0, 0.5)
-    pos[1] = (0, 100, 0); size[1] = 0.2;   color[1] = (0.0, 1.0, 0.0, 0.5)
+    pos[0] = (100, 0, 0); size[0] = 10;   color[0] = (0.0, 1.0, 0.0, 0.5)
+    pos[1] = (0, 100, 0); size[1] = 10;   color[1] = (0.0, 1.0, 0.0, 0.5)
+
+    pos = pa[0].pixelsToVectors(pos[:, 0], pos[:, 1])
 
     sp1 = gl.GLScatterPlotItem(pos=pos, size=size, color=color, pxMode=False)
     sp1.translate(5, 5, 0)

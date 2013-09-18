@@ -10,9 +10,11 @@ Classes for analyzing diffraction data contained in pixel array detectors (PAD).
 
 
 class panel(object):
+
     """ Individual detector panel: a 2D lattice of square pixels."""
 
     def __init__(self, name=""):
+
         """ Make no assumptions during initialization."""
 
         self.dtype = np.float64  # Choose the data type (this may go away)
@@ -27,18 +29,19 @@ class panel(object):
         self.beam = None  # Container for x-ray beam information
         self.data = None  # Diffraction intensity data
         # Derived parameters
-        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_rsbb']
         self._pixSize = None  # Pixel size derived from F/S vectors
         self._V = None  # 3D vectors pointing from interaction region to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
         self._K = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
+        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_rsbb']  # Default values of these are 'None'
         # Sanity checks
         self._validGeometry = False
         # If this panel is a part of a list
         self.panelList = None  # This is the link to the panel list
 
     def copy(self):
+
         """ Deep copy of everything.  Parent panel list is stripped away."""
 
         p = panel()
@@ -62,6 +65,7 @@ class panel(object):
         return p
 
     def __str__(self):
+
         """ Print something useful when in interactive mode."""
 
         s = ""
@@ -77,33 +81,43 @@ class panel(object):
 
     @property
     def nF(self):
+
         """ Number of fast-scan pixels."""
+
         return self._nF
 
     @nF.setter
     def nF(self, val):
+
         """ Changing the fast-scan pixel count destroys all derived geometry 
         data as well as intensity data."""
+
         self._nF = np.int32(val)
         self.deleteGeometryData()
         self.data = None
 
     @property
     def nS(self):
+
         """ Number of slow-scan pixels."""
+
         return self._nS
 
     @nS.setter
     def nS(self, val):
+
         """ Changing the slow-scan pixel count destroys all derived geometry 
         data as well as intensity data."""
+
         self._nS = np.int32(val)
         self.deleteGeometryData()
         self.data = None
 
     @property
     def pixSize(self):
+
         """ Return the pixel size only if both fast/slow-scan vectors are the same length."""
+
         if self._pixSize is None:
             if self._validGeometry == False:
                 self.checkGeometry()
@@ -116,17 +130,23 @@ class panel(object):
 
     @property
     def nPix(self):
+
         """ Total number of pixels."""
+
         return self._nF * self._nS
 
     @property
     def F(self):
+
         """ Fast-scan vector (length equal to pixel size)."""
+
         return self._F
 
     @F.setter
     def F(self, val):
+
         """ Must be a numpy ndarray of length 3."""
+
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._F = self.dtype(val)
             self.deleteGeometryData()
@@ -135,12 +155,16 @@ class panel(object):
 
     @property
     def S(self):
+
         """ Slow-scan vector (length equal to pixel size)."""
+
         return self._S
 
     @S.setter
     def S(self, val):
+
         """ Must be a numpy ndarray of length 3."""
+
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._S = self.dtype(val)
             self.deleteGeometryData()
@@ -149,12 +173,16 @@ class panel(object):
 
     @property
     def T(self):
+
         """ Translation vector pointing from interaction region to center of first pixel."""
+
         return self._T
 
     @T.setter
     def T(self, val):
+
         """ Must be an ndarray of length 3."""
+
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._T = self.dtype(val)
             self.deleteGeometryData()
@@ -163,34 +191,44 @@ class panel(object):
 
     @property
     def B(self):
+
         """ Beam direction vector."""
+
         if self.beam is None:
             raise ValueError("Panel has no beam information.")
         return self.beam.B
 
     @property
     def V(self):
+
         """ Vectors pointing from interaction region to pixel centers."""
+
         if self._V is None:
             self.computeRealSpaceGeometry()
         return self._V
 
     @property
-    def K(self):
+    def K(self)
+    
         """ Scattering vectors multiplied by wavelength."""
+        
         if self._K is None:
             self.computeReciprocalSpaceGeometry()
         return self._K
 
     @property
     def N(self):
+        
         """ Normal vector to panel surface."""
+        
         N = np.cross(self.F, self.S)
         return N / norm(N)
 
     @property
     def solidAngle(self):
+        
         """ Solid angles of pixels."""
+        
         if self._sa is None:
             v = vecNorm(self.V)
             n = self.N
@@ -200,12 +238,14 @@ class panel(object):
         return self._sa
 
     def check(self):
+        
         """ Check for any known issues with this panel."""
 
         self.checkGeometry()
         return True
 
     def checkGeometry(self):
+        
         """ Check for valid geometry configuration."""
 
         if self._T is None:
@@ -221,6 +261,8 @@ class panel(object):
 
     def computeRealSpaceGeometry(self):
 
+        """ Compute arrays relevant to real-space geometry."""
+
         if self._validGeometry == False:
             self.checkGeometry()
 
@@ -229,10 +271,11 @@ class panel(object):
         [i, j] = np.meshgrid(i, j)
         i.ravel()
         j.ravel()
-        self._V = self.pixelsToVectors(i, j)
+        self._V = self.pixelsToVectors(j, i)
         # self._V = self._V.reshape((self._nS, self._nF, 3))
 
-    def pixelsToVectors(self, i, j):
+    def pixelsToVectors(self, j, i):
+
         """ Convert pixel indices to translation vectors (i=fast scan, j=slow scan)."""
 
         F = np.outer(i, self.F)
@@ -242,29 +285,31 @@ class panel(object):
 
     def computeReciprocalSpaceGeometry(self):
 
+        """ Compute the reciprocal-space scattering vectors, multiplied by wavelength."""
+
         self._K = self.V - self.B
 
     def deleteGeometryData(self):
 
-        """ Clear out all generated geometry data."""
+        """ Clear out all derived geometry data."""
 
-        self._V = None
-        self._sa = None
-        self._K = None
-        self._rsbb = None
+        for i in self._derivedGeometry:
+            setattr(self, i, None)
         if self.panelList is not None:
             self.panelList.deleteGeometryData()
         self._validGeometry = False
 
     def getVertices(self, corners=False):
+
         """ Get panel getVertices; positions of corner pixels."""
 
         nF = self.nF - 1
         nS = self.nS - 1
-        v = self.pixelsToVectors([0, 0, nF, nF], [0, nS, nS, 0])
+        v = self.pixelsToVectors([0, nF, nF, 0], [0, 0, nS, nS])
         return v
 
     def getRealSpaceBoundingBox(self):
+
         """ Return the minimum and maximum values of the four corners."""
 
         if self._rsbb is not None:
@@ -287,17 +332,19 @@ class panel(object):
 
 class panelList(list):
 
+    """ List container for detector panels, with extra functionality."""
+
     def __init__(self):
 
         """ Create an empty panel array."""
 
-        self._data = None
-        self._sa = None
-        self._V = None
-        self._K = None
-        self.isConsolidated = False
-        self.beam = None
-        self._rsbb = None
+        # Derived data (concatenated from individual panels)
+        self._data = None  # Concatenated intensity data
+        self._sa = None  # Concatenated solid angles
+        self._V = None  # Concatenated pixel positions
+        self._K = None  # Concatenated reciprocal-space vectors
+        self.beam = None  # X-ray beam information, common to all panels
+        self._rsbb = None  # Real-space bounding box of entire panel list
 
     def copy(self):
 
@@ -331,15 +378,19 @@ class panelList(list):
 
     def __setitem__(self, key, value):
 
+        """ Set a panel, check that it is the appropriate type."""
+
         if not isinstance(value, panel):
             raise TypeError("You may only add panels to a panelList object")
         if value.name == "":
             value.name = "%d" % key
         super(panelList, self).__setitem__(key, value)
-        self.isConsolidated = False
 
     @property
     def nPix(self):
+
+        """ Total number of pixels in all panels."""
+
         ntot = 0
         for p in self:
             ntot += p.nPix
@@ -347,9 +398,14 @@ class panelList(list):
 
     @property
     def nPanels(self):
+
+        """ Number of panels."""
+
         return len(self)
 
     def append(self, p=None, name=""):
+
+        """ Append a panel, check that it is of the correct type."""
 
         if p is None:
             p = panel()
@@ -361,11 +417,11 @@ class panelList(list):
         else:
             p.name = "%d" % len(self)
         super(panelList, self).append(p)
-        self.isConsolidated = False
 
     def getPanelIndexByName(self, name):
 
         """ Find the integer index of a panel by it's unique name """
+
         i = 0
         for p in self:
             if p.name == name:
@@ -375,11 +431,15 @@ class panelList(list):
 
     def computeRealSpaceGeometry(self):
 
+        """ Compute real-space geometry of all panels."""
+
         for p in self:
             p.computeRealSpaceGeometry()
 
     @property
     def V(self):
+
+        """ Concatenated pixel position."""
 
         if self._V is None:
             self._V = np.empty((self.nPix, 3))
@@ -400,6 +460,8 @@ class panelList(list):
     @property
     def K(self):
 
+        """ Concatenated reciprocal-space vectors."""
+
         if self._K is None or self._K.shape[0] != self.nPix:
             self._K = np.empty((self.nPix, 3))
 
@@ -415,6 +477,8 @@ class panelList(list):
 
     @property
     def data(self):
+
+        """ Concatenated intensity data."""
 
         data = np.empty(self.nPix)
 
@@ -432,6 +496,8 @@ class panelList(list):
     @data.setter
     def data(self, data):
 
+        """ Check that intensity data is of the correct type."""
+
         if not isinstance(data, np.ndarray) and data.ndim == 1 and data.size == self.nPix:
             raise ValueError("Must be flattened ndarray of size %d" % self.nPix)
         n = 0
@@ -445,6 +511,8 @@ class panelList(list):
 
     @property
     def solidAngle(self):
+
+        """ Concatenated solid angles."""
 
         if self._sa == None:
             sa = np.empty(self.nPix)
@@ -461,6 +529,8 @@ class panelList(list):
 
     @property
     def simpleRealSpaceProjection(self):
+
+        """ Project all intensity data along the beam direction.  Nearest neighbor interpolation."""
 
         pixSize = self[0].pixSize
         r = self.realSpaceBoundingBox
