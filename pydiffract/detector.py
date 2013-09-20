@@ -42,7 +42,7 @@ class panel(object):
         # If this panel is a part of a list
         self.panelList = None  # This is the link to the panel list
 
-    def copy(self):
+    def copy(self, derived=True):
 
         """ Deep copy of everything.  Parent panel list is stripped away."""
 
@@ -56,12 +56,13 @@ class panel(object):
         p.aduPerEv = self.aduPerEv
         p.beam = self.beam.copy()
         p.data = self.data.copy()
-        if self._V is not None:
-            p._V = self._V.copy()
-        if self._K is not None:
-            p._K = self._K.copy()
-        if self._sa is not None:
-            p._sa = self._sa.copy()
+        if derived == True:
+            if self._V is not None:
+                p._V = self._V.copy()
+            if self._K is not None:
+                p._K = self._K.copy()
+            if self._sa is not None:
+                p._sa = self._sa.copy()
         p.panelList = None
 
         return p
@@ -274,7 +275,7 @@ class panel(object):
         i.ravel()
         j.ravel()
         self._V = self.pixelsToVectors(j, i)
-        self._V = self._V.reshape((self._nS, self._nF, 3))
+#         self._V = self._V.reshape((self._nS, self._nF, 3))
 
     def pixelsToVectors(self, j, i):
 
@@ -301,21 +302,33 @@ class panel(object):
             self.panelList.deleteGeometryData()
         self._validGeometry = False
 
-    def getVertices(self, corners=False, loop=False):
+    def getVertices(self, edge=False, loop=False):
 
         """ Get panel getVertices; positions of corner pixels."""
 
         nF = self.nF - 1
         nS = self.nS - 1
         z = 0
+
+        if edge == True:
+            z -= 0.5
+            nF += 0.5
+            nS += 0.5
+
         j = [z, nF, nF, z]
         i = [z, z, nS, nS]
+
         if loop == True:
             i.append(i[0])
             j.append(j[0])
 
-        v = self.pixelsToVectors(j, i)
-        return v
+        return self.pixelsToVectors(j, i)
+
+    def getCenter(self):
+
+        """ Vector to center of panel."""
+
+        return np.mean(self.getVertices(), axis=0)
 
     def getRealSpaceBoundingBox(self):
 
@@ -349,13 +362,13 @@ class panelList(list):
         self._rsbb = None  # Real-space bounding box of entire panel list
         self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_rsbb']  # Default values of these are 'None'
 
-    def copy(self):
+    def copy(self, derived=True):
 
         """ Create a deep copy."""
 
         pa = panelList()
         for p in self:
-            pa.append(p.copy())
+            pa.append(p.copy(derived=derived))
 
         return pa
 
@@ -591,6 +604,20 @@ class panelList(list):
             raise ValueError("Pixel sizes in panel list are not all the same.")
 
         return self._pixSize.copy()
+
+    def getCenter(self):
+
+        """ Mean center of panel list."""
+
+        c = np.zeros((self.nPanels, 3))
+        i = 0
+        for p in self:
+            c[i, :] = p.getCenter()
+            i += 1
+
+        print(c)
+
+        return np.mean(c, axis=0)
 
     def deleteGeometryData(self):
 

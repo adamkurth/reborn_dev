@@ -33,29 +33,57 @@ def kabschRotation(Vi1, Vi2):
 
     """ Find the best rotation to bring two vector lists into coincidence."""
 
-    V1 = Vi1.copy()
-    V2 = Vi2.copy()
+    assert Vi1.shape[0] == Vi2.shape[0]
+    assert Vi1.shape[0] > 0
 
-    assert V1.shape[0] == V2.shape[0]
-    L = V1.shape[0]
-    assert L > 0
-
-    COM1 = np.sum(V1, axis=0) / float(L)
-    COM2 = np.sum(V2, axis=0) / float(L)
-    V1 -= COM1
-    V2 -= COM2
+    V1 = Vi1 - np.mean(Vi1, axis=0)
+    V2 = Vi2 - np.mean(Vi2, axis=0)
 
     V, S, Wt = np.linalg.svd(np.dot(np.transpose(V2), V1))
 
-    reflect = float(str(float(np.linalg.det(V) * np.linalg.det(Wt))))
+    d = np.round(np.linalg.det(Wt.dot(V.T)))
 
-    if reflect == -1.0:
-        S[-1] = -S[-1]
-        V[:, -1] = -V[:, -1]
+    print(d)
 
-    U = np.dot(V, Wt)
+    if d < 1:
+        V[:, -1] *= -1
+
+    U = (V.dot(Wt)).T
 
     return U
+
+# def kabschRotation(Ai, Bi):
+#
+#     A = np.matrix(Ai)
+#     B = np.matrix(Bi)
+#
+#     assert len(A) == len(B)
+#
+#     N = A.shape[0];  # total points
+#
+#     centroid_A = np.mean(A, axis=0)
+#     centroid_B = np.mean(B, axis=0)
+#
+#     # centre the points
+#     AA = A - np.tile(centroid_A, (N, 1))
+#     BB = B - np.tile(centroid_B, (N, 1))
+#
+#     # dot is matrix multiplication for array
+#     H = np.transpose(AA) * BB
+#
+#     U, S, Vt = np.linalg.svd(H)
+#
+#     R = Vt.T * U.T
+#
+#     # special reflection case
+#     if np.linalg.det(R) < 0:
+#         print "Reflection detected"
+#         Vt[2, :] *= -1
+#         R = Vt.T * U.T
+#
+#     t = -R * centroid_A.T + centroid_B.T
+#
+#     return np.transpose(R)
 
 
 def randomRotationMatrix():
