@@ -12,8 +12,11 @@ from Scientific.Geometry.Transformation import Rotation
 
 def vecNorm(V):
 
-    n = np.sqrt(np.sum(V * V, axis=-1))
-    return V / np.tile(n, (1, 3)).reshape(3, len(n)).T
+    v = V
+    if v.ndim != 2:
+            raise ValueError("V must have one or two dimensions.")
+    n = np.sqrt(np.sum(V * V, axis=1))
+    return (V.T / n).T
 
 def warn(message):
 
@@ -107,4 +110,66 @@ def axisAndAngle(R):
     VV = np.array([[V.x(), V.y(), V.z()]])
     return VV, phi
 
+def axisAndAngleToMatrix(axis, angle):
 
+    """Generate the rotation matrix from the axis-angle notation.
+
+    Conversion equations
+    ====================
+
+    From Wikipedia (http://en.wikipedia.org/wiki/Rotation_matrix), the conversion is given by::
+
+        c = cos(angle); s = sin(angle); C = 1-c
+        xs = x*s;   ys = y*s;   zs = z*s
+        xC = x*C;   yC = y*C;   zC = z*C
+        xyC = x*yC; yzC = y*zC; zxC = z*xC
+        [ x*xC+c   xyC-zs   zxC+ys ]
+        [ xyC+zs   y*yC+c   yzC-xs ]
+        [ zxC-ys   yzC+xs   z*zC+c ]
+
+
+    @param matrix:  The 3x3 rotation matrix to update.
+    @type matrix:   3x3 numpy array
+    @param axis:    The 3D rotation axis.
+    @type axis:     numpy array, len 3
+    @param angle:   The rotation angle.
+    @type angle:    float
+    """
+
+    # Trig factors.
+    ca = np.cos(angle)
+    sa = np.sin(angle)
+    C = 1 - ca
+
+    # Depack the axis.
+    a = axis.ravel()
+    x = a[0]
+    y = a[1]
+    z = a[2]
+#     x, y, z = axis
+
+    # Multiplications (to remove duplicate calculations).
+    xs = x * sa
+    ys = y * sa
+    zs = z * sa
+    xC = x * C
+    yC = y * C
+    zC = z * C
+    xyC = x * yC
+    yzC = y * zC
+    zxC = z * xC
+
+    matrix = np.zeros([3, 3])
+
+    # Update the rotation matrix.
+    matrix[0, 0] = x * xC + ca
+    matrix[0, 1] = xyC - zs
+    matrix[0, 2] = zxC + ys
+    matrix[1, 0] = xyC + zs
+    matrix[1, 1] = y * yC + ca
+    matrix[1, 2] = yzC - xs
+    matrix[2, 0] = zxC - ys
+    matrix[2, 1] = yzC + xs
+    matrix[2, 2] = z * zC + ca
+
+    return matrix

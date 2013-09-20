@@ -108,11 +108,6 @@ class panelListGui(QtGui.QMainWindow):
         mn = rang[0]
         mx = rang[1]
 
-        hi = mx * 0.5
-        d[0:10, :] = hi
-        d[0:20, 0:20] = hi
-        d[-5:-1, :] = hi
-        d[:, -5:-1] = hi
         d[d < mn] = mn
         d[d > mx] = mx
         d -= mn
@@ -121,12 +116,13 @@ class panelListGui(QtGui.QMainWindow):
 
         # Geometry data
         phi, V, R = getPanelRotation(p)
+#         junk = getPanelRotation2(p)
         T = p.T
         phi = np.degrees(phi)
         pix = p.pixSize
 
         # Add intensity data to view
-        im = gl.GLImageItem(pg.makeRGBA(d)[0])
+        im = gl.GLImageItem(pg.makeRGBA(d.T)[0])
         im.scale(pix, pix, pix)
         im.translate(-pix / 2, -pix / 2, 0)
         im.rotate(phi, V[0], V[1], V[2])
@@ -136,82 +132,16 @@ class panelListGui(QtGui.QMainWindow):
 
 def getPanelRotation(p):
 
-    """ Return the rotation angle, axis, and matrix for orienting panel in gl view."""
+    R = np.zeros([3, 3])
 
-    V1 = np.zeros((2, 3))
-    V1[0, :] = p.F
-    V1[1, :] = p.S
-    V1 = utils.vecNorm(V1)
-    V2 = np.zeros((2, 3))
-    V2[0, 0] = 1
-    V2[1, 1] = 1
-    R = utils.kabschRotation(V1, V2)
-#     print(V1)
-#     print(V2)
-#     print(R)
-    err = np.max(V1 - (R.dot(V2.T)).T)
-    print(np.max(V1 - (R.dot(V2.T)).T))
+    R[:, 0] = utils.vecNorm(p.F[np.newaxis])
+    R[:, 1] = utils.vecNorm(p.S[np.newaxis])
+    R[:, 2] = utils.vecNorm((np.cross(R[:, 0], R[:, 1]))[np.newaxis])
+
     V, phi = utils.axisAndAngle(R)
     V = V.T
 
     return phi, V, R
-
-
-def R_axis_angle(matrix, axis, angle):
-    """Generate the rotation matrix from the axis-angle notation.
-
-    Conversion equations
-    ====================
-
-    From Wikipedia (http://en.wikipedia.org/wiki/Rotation_matrix), the conversion is given by::
-
-        c = cos(angle); s = sin(angle); C = 1-c
-        xs = x*s;   ys = y*s;   zs = z*s
-        xC = x*C;   yC = y*C;   zC = z*C
-        xyC = x*yC; yzC = y*zC; zxC = z*xC
-        [ x*xC+c   xyC-zs   zxC+ys ]
-        [ xyC+zs   y*yC+c   yzC-xs ]
-        [ zxC-ys   yzC+xs   z*zC+c ]
-
-
-    @param matrix:  The 3x3 rotation matrix to update.
-    @type matrix:   3x3 numpy array
-    @param axis:    The 3D rotation axis.
-    @type axis:     numpy array, len 3
-    @param angle:   The rotation angle.
-    @type angle:    float
-    """
-
-    # Trig factors.
-    ca = cos(angle)
-    sa = sin(angle)
-    C = 1 - ca
-
-    # Depack the axis.
-    x, y, z = axis
-
-    # Multiplications (to remove duplicate calculations).
-    xs = x * sa
-    ys = y * sa
-    zs = z * sa
-    xC = x * C
-    yC = y * C
-    zC = z * C
-    xyC = x * yC
-    yzC = y * zC
-    zxC = z * xC
-
-    # Update the rotation matrix.
-    matrix[0, 0] = x * xC + ca
-    matrix[0, 1] = xyC - zs
-    matrix[0, 2] = zxC + ys
-    matrix[1, 0] = xyC + zs
-    matrix[1, 1] = y * yC + ca
-    matrix[1, 2] = yzC - xs
-    matrix[2, 0] = zxC - ys
-    matrix[2, 1] = yzC + xs
-    matrix[2, 2] = z * zC + ca
-
 
 def main():
 
@@ -272,39 +202,13 @@ def main():
     sp = gl.GLScatterPlotItem(pos=pos, size=siz, color=col, pxMode=False)
     w.addItem(sp)
 
-    # Indicate fast-scan direction
-    pos = np.zeros((2, 3))
-    pos[0] = (0, 0, 0)
-    pos[1] = (1, 0, 0) * 10  # p.pixSize * 1000
-    col = (1, 0, 0, 1.0)
-    fs = gl.GLLinePlotItem(pos=pos, color=col)
-    w.addItem(fs)
-
-
-    # Line plot items
-
-#     for p in pa:
-#
-#
-#
-#         T = p.T / p.pixSize
-#         phi, V, R = getPanelRotation(p)
-#         phi *= 180 / np.pi
-#
-#         fs = np.array([[0, 0, 0], p.F]) / p.pixSize * p.nF * 0.3
-#
-#         plt = gl.GLLinePlotItem(pos=fs, color=pg.glColor((0, 1 * 1.3)))
-# #         plt.translate(-0.5, -0.5, 0)
-#         plt.rotate(phi, V[0], V[1], V[2])
-#         plt.translate(T[0], T[1], T[2])
-#         w.addItem(plt)
-#
-#         b = (p.getVertices(loop=True) + p.T) / p.pixSize
-#
-#         plt2 = gl.GLLinePlotItem(pos=b, color=pg.glColor((10, 30 * 1.3)))
-#         w.addItem(plt2)
-
-
+#     # Indicate fast-scan direction
+#     pos = np.zeros((2, 3))
+#     pos[0] = (0, 0, 0)
+#     pos[1] = (1, 0, 0) * 10  # p.pixSize * 1000
+#     col = (1, 0, 0, 1.0)
+#     fs = gl.GLLinePlotItem(pos=pos, color=col)
+#     w.addItem(fs)
 
     sys.exit(app.exec_())
 
