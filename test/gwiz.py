@@ -36,20 +36,38 @@ class panelListGui(QtGui.QMainWindow):
         self.statusBar()
 #         self.center()
 
+        menubar = self.menuBar()
+
+        fileMenu = menubar.addMenu('&File')
+
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(QtGui.qApp.quit)
+        fileMenu.addAction(exitAction)
 
         openFile = QtGui.QAction(QtGui.QIcon('open.png'), '&Open', self)
         openFile.setShortcut('Ctrl+O')
         openFile.setStatusTip('Open image file')
         openFile.triggered.connect(self.showOpenFileDialog)
-
-        menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&File')
-        fileMenu.addAction(exitAction)
         fileMenu.addAction(openFile)
+
+        viewMenu = menubar.addMenu('View')
+
+        showScan = QtGui.QAction(QtGui.QIcon('open.png'), 'Fast scan', self)
+        showScan.setStatusTip('Show fast-scan directions')
+        showScan.triggered.connect(self.showFastScans)
+        viewMenu.addAction(showScan)
+
+        framePanels = QtGui.QAction(QtGui.QIcon('open.png'), 'Panel frames', self)
+        framePanels.setStatusTip('Draw frames around panels')
+        framePanels.triggered.connect(self.framePanels)
+        viewMenu.addAction(framePanels)
+
+        showAxes = QtGui.QAction(QtGui.QIcon('open.png'), 'Axes', self)
+        showAxes.setStatusTip('Draw axes (red,green,blue = x,y,z)')
+        showAxes.triggered.connect(self.showAxes)
+        viewMenu.addAction(showAxes)
 
     def center(self):
 
@@ -73,7 +91,9 @@ class panelListGui(QtGui.QMainWindow):
 
             self.showPanel(p)
 
-    def framePanels(self, col=(0, 0, 1, 0.5)):
+    def framePanels(self):
+
+        col = (0, 0, 1, 0.5)
 
         for p in self.panelList:
             pos = np.zeros((5, 3))
@@ -90,6 +110,49 @@ class panelListGui(QtGui.QMainWindow):
             col = (1, 0, 0, 1.0)
             fs = gl.GLLinePlotItem(pos=pos, color=col)
             self.w.addItem(fs)
+
+    def showAxes(self):
+
+        axislen = self.panelList.pixSize * 100
+        pos = np.zeros((2, 3))
+        pos[0] = np.array([0, 0, 0])
+        pos[1] = np.array([axislen, 0, 0])
+        col = (1, 0, 0, 1.0)
+        beamd = gl.GLLinePlotItem(pos=pos, color=col)
+        self.w.addItem(beamd)
+
+        pos = np.zeros((2, 3))
+        pos[0] = np.array([0, 0, 0])
+        pos[1] = np.array([0, axislen, 0])
+        col = (0, 1, 0, 1.0)
+        beamd = gl.GLLinePlotItem(pos=pos, color=col)
+        self.w.addItem(beamd)
+
+        pos = np.zeros((2, 3))
+        pos[0] = np.array([0, 0, 0])
+        pos[1] = np.array([0, 0, axislen])
+        col = (0, 0, 1, 1.0)
+        beamd = gl.GLLinePlotItem(pos=pos, color=col)
+        self.w.addItem(beamd)
+
+    def showBeamDirection(self):
+
+        pos = np.zeros((2, 3))
+        pos[0] = np.array([0, 0, 0])
+        pos[1] = np.array([0, 0, self.panelList.pixSize * 500])
+        col = (0, 0, 1, 1.0)
+        beamd = gl.GLLinePlotItem(pos=pos, color=col)
+        self.w.addItem(beamd)
+
+    def showInteractionPoint(self):
+
+        # Add point at origin
+        pos = np.empty((1, 3))
+        pos[0] = (0, 0, 0)
+        col = (0, 1, 0, 0.4)
+        siz = p.pixSize * 10
+        sp = gl.GLScatterPlotItem(pos=pos, size=siz, color=col, pxMode=False)
+        w.addItem(sp)
 
     def showPanel(self, p, rang=None):
 
@@ -155,7 +218,8 @@ def main():
     g.panelList = pa
 
     c = pa.getCenter()
-    w.setCameraPosition(distance=c[2] * 3)
+    w.pan(c[0], c[1], c[2])
+    w.setCameraPosition(distance=c[2])
     w.orbit(45, 60)
 
     ims = []
@@ -186,21 +250,19 @@ def main():
         sp = gl.GLScatterPlotItem(pos=pos, size=siz, color=col, pxMode=False)
         w.addItem(sp)
 
+
+    w.renderText(pos[0, 0], pos[0, 1], pos[0, 2], 'test')
+
     g.showPanels()
-    g.framePanels()
-    g.showFastScans()
+
+#     g.showBeamDirection()
+    g.showAxes()
+#     g.framePanels()
+#     g.showFastScans()
 
 #     im = gl.GLImageItem(pg.makeRGBA(d)[0])
 #     im.scale(pix, pix, pix)
 #     w.addItem(im)
-
-    # Add point at origin
-    pos = np.empty((1, 3))
-    pos[0] = (0, 0, 0)
-    col = (0, 1, 0, 0.4)
-    siz = p.pixSize * 10
-    sp = gl.GLScatterPlotItem(pos=pos, size=siz, color=col, pxMode=False)
-    w.addItem(sp)
 
 #     # Indicate fast-scan direction
 #     pos = np.zeros((2, 3))
