@@ -93,7 +93,7 @@ class panel(object):
     def nF(self, val):
 
         """ Changing the fast-scan pixel count destroys all derived geometry 
-        data as well as intensity data."""
+        and intensity data."""
 
         self._nF = np.int32(val)
         self.deleteGeometryData()
@@ -130,6 +130,14 @@ class panel(object):
                 raise ValueError("Pixel size is not consistent between F and S vectors (%10f, %10f)." % (p1, p2))
             self._pixSize = np.mean([p1, p2])
         return self._pixSize.copy()
+
+    @pixSize.setter
+    def pixSize(self, val):
+
+        pf = norm(self.F)
+        ps = norm(self.S)
+        self.F *= val / pf
+        self.S *= val / ps
 
     @property
     def nPix(self):
@@ -596,12 +604,8 @@ class panelList(list):
             mnpix = np.mean(pix)
             if all(np.absolute((pix - mnpix) / mnpix) < 1e-6):
                 self._pixSize = mnpix
-
-            return self._pixSize.copy()
-
-        else:
-
-            raise ValueError("Pixel sizes in panel list are not all the same.")
+            else:
+                raise ValueError("Pixel sizes in panel list are not all the same.")
 
         return self._pixSize.copy()
 

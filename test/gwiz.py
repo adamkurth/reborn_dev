@@ -113,7 +113,7 @@ class panelListGui(QtGui.QMainWindow):
 
     def showAxes(self):
 
-        axislen = self.panelList.pixSize * 100
+        axislen = self.panelList.pixSize.copy() * 100
         pos = np.zeros((2, 3))
         pos[0] = np.array([0, 0, 0])
         pos[1] = np.array([axislen, 0, 0])
@@ -230,11 +230,8 @@ def main():
     padata = pa.data
     padata[padata < mn] = mn
     pa.data = padata
-    # padata = pa.solidAngle
     maxd = np.max(padata)
     mind = np.min(padata)
-
-    # maxd = 1e-5
 
     for p in pa:
 
@@ -246,19 +243,13 @@ def main():
         pos = np.empty((1, 3))
         pos[0] = p.getCenter()
         col = (0, 1, 0, 0.4)
-        siz = p.pixSize * 10
+        siz = p.pixSize.copy() * 10
         sp = gl.GLScatterPlotItem(pos=pos, size=siz, color=col, pxMode=False)
         w.addItem(sp)
 
-
-    w.renderText(pos[0, 0], pos[0, 1], pos[0, 2], 'test')
+    w.renderText(0, 0, 0, 'test')
 
     g.showPanels()
-
-#     g.showBeamDirection()
-    g.showAxes()
-#     g.framePanels()
-#     g.showFastScans()
 
 #     im = gl.GLImageItem(pg.makeRGBA(d)[0])
 #     im.scale(pix, pix, pix)

@@ -7,6 +7,7 @@ import cProfile
 import pstats
 from pylab import *
 
+
 def test_all(pa):
 
     test_V(pa)
@@ -15,7 +16,7 @@ def test_all(pa):
     pa.deleteGeometryData()
     test_dat(pa)
     test_copy(pa)
-    test_bounding_box(pa, verbose=True)
+    test_bounding_box(pa, verbose=False)
     test_solid_angle(pa)
     test_assemble(pa, verbose=True)
 
@@ -69,8 +70,6 @@ def test_assemble(pa, verbose=False):
         imshow(log(adat + 100), interpolation='nearest', cmap='gray')
         show()
     print("Pass")
-
-
 
 
 [pa, reader] = convert.crystfelToPanelList("examples/example1.geom")

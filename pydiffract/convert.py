@@ -8,7 +8,7 @@ from pydiffract import detector, source, data
 import numpy as np
 
 
-def crystfelToPanelList(filename):
+def crystfelToPanelList(geomFilePath=None):
 
     """ Convert a crystfel "geom" file into a panel list """
 
@@ -17,7 +17,10 @@ def crystfelToPanelList(filename):
                     "min_fs", "max_fs", "min_ss", "max_ss",
                     "clen", "coffset", "res", "adu_per_eV"])
 
-    h = open(filename, "r")
+    if geomFilePath is None:
+        raise ValueError("No geometry file specified")
+
+    h = open(geomFilePath, "r")
 
     # Global settings affecting all panels
     global_coffset = None
@@ -126,8 +129,9 @@ def crystfelToPanelList(filename):
 
         # Unit conversions
         p.T = p.T * pixSize[i]
-        p.F = p.F * pixSize[i]
-        p.S = p.S * pixSize[i]
+        p.pixSize = pixSize[i]  # (this modifies F and S vectors)
+#         p.F = p.F * pixSize[i]
+#         p.S = p.S * pixSize[i]
 
         # Data array size
         p.nF = r.fRange[1] - r.fRange[0] + 1
