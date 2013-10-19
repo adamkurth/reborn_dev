@@ -351,6 +351,31 @@ class panel(object):
 
         return self._rsbb.copy()
 
+    def simpleSetup(self, nF=None, nS=None, pixSize=None, distance=None, T=None):
+
+        """ Simple way to create a panel with centered beam."""
+
+        if nF is None:
+            raise ValueError("Number of fast scan pixels is unspecified.")
+        if nS is None:
+            raise ValueError("Number of slow scan pixels is unspecified.")
+        if pixSize is None:
+            raise ValueError("Pixel size is unspecified.")
+
+        self.nF = nF
+        self.nS = nS
+        self.F = np.array([1, 0, 0]) * pixSize
+        self.S = np.array([0, 1, 0]) * pixSize
+
+        if T is None:
+            if distance is None:
+                raise ValueError("Distance is unspecified")
+            self.T = np.array([0, 0, distance]) - self.F * self.nF / 2.0 - self.S * self.nS / 2.0
+        else:
+            self.T = T
+
+
+
 class panelList(list):
 
     """ List container for detector panels, with extra functionality."""
@@ -534,6 +559,20 @@ class panelList(list):
             n += nPix
 
     @property
+    def wavelength(self):
+
+        return self.beam.wavelength
+
+    @wavelength.setter
+    def wavelength(self, val):
+
+        if self.beam is None:
+            self.beam = source.beam()
+        self.beam.wavelength = val
+        for p in self:
+            p.beam = self.beam
+
+    @property
     def solidAngle(self):
 
         """ Concatenated solid angles."""
@@ -630,3 +669,10 @@ class panelList(list):
         for i in self._derivedGeometry:
             setattr(self, i, None)
 
+    def simpleSetup(self, nF=None, nS=None, pixSize=None, distance=None, T=None):
+
+        """ Append a panel using the simple setup method."""
+
+        p = panel()
+        p.simpleSetup(nF, nS, pixSize, distance, T)
+        self.append(p)

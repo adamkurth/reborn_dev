@@ -4,11 +4,11 @@ Created on Aug 1, 2013
 @author: kirian
 '''
 
-from pydiffract import detector, source, data
+from pydiffract import detector, source, dataio
 import numpy as np
 
 
-def crystfelToPanelList(geomFilePath=None):
+def crystfelToPanelList(geomFilePath=None, beamFilePath=None):
 
     """ Convert a crystfel "geom" file into a panel list """
 
@@ -72,7 +72,7 @@ def crystfelToPanelList(geomFilePath=None):
         if i is None:
             pa.append()
             p = pa[len(pa) - 1]
-            ra.append(data.h5v1Plan())
+            ra.append(dataio.h5v1Plan())
             r = ra[len(pa) - 1]
             p.name = name
             p.T = np.zeros(3)
@@ -147,7 +147,9 @@ def crystfelToPanelList(geomFilePath=None):
         if global_coffset is not None:
             p.T[2] += global_coffset
 
-    reader = data.h5v1Reader()
+
+
+    reader = dataio.h5v1Reader()
     reader.setPlan(ra)
 
     return [pa, reader]
