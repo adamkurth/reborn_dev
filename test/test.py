@@ -64,7 +64,7 @@ def test_solid_angle(pa, verbose=False):
 
 def test_assemble(pa, verbose=False):
     print("Checking simple 2d assembly...")
-    adat = pa.simpleRealSpaceProjection
+    adat = pa.assembledData()
     if verbose == True:
         adat[adat < 0] = 0
         imshow(log(adat + 100), interpolation='nearest', cmap='gray')
@@ -77,7 +77,7 @@ reader.getShot(pa, "examples/example1.h5")
 
 test_all(pa)
 
-# adat = pa.simpleRealSpaceProjection
+# adat = pa.assembledData()
 #
 #
 # func = 'test_assemble(pa)'

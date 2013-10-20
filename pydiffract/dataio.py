@@ -163,6 +163,7 @@ class diproiReader(object):
         if len(panelList) != len(self.plan):
             raise ValueError("Length of panel list does not match data reading plan.")
 
+
         f = h5py.File(filePath, "r")
 
         for i in range(len(panelList)):
@@ -196,23 +197,29 @@ class frameGetter(object):
         if self.fileList is None:
             raise ValueError('No file list specified')
 
-        if len(self.fileList) < num + 1:
+        if num > len(self.fileList) - 1:
             return False
-
 
         filePath = self.fileList[num]
         self.reader.getFrame(pl, filePath)
 
-        return True
+        return num
 
     def nextFrame(self, pl):
 
-        return self.getFrame(pl)
+        self.frameNumber += 1
+        if self.frameNumber > len(self.fileList) - 1:
+            self.frameNumber = 0
+        return self.getFrame(pl, self.frameNumber)
 
     def previousFrame(self, pl):
 
-        if self.frameNumber < 1:
-            return False
+        self.frameNumber -= 1
+        if self.frameNumber < 0:
+            self.frameNumber = len(self.fileList) - 1
+        return self.getFrame(pl, self.frameNumber)
+
+
 
 
 

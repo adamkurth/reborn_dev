@@ -98,6 +98,7 @@ class panelListGui(QtGui.QMainWindow):
         for p in self.panelList:
             pos = np.zeros((5, 3))
             pos[:] = p.getVertices(edge=True, loop=True)
+
             fr = gl.GLLinePlotItem(pos=pos, color=col)
             self.w.addItem(fr)
 
@@ -218,9 +219,11 @@ def main():
     g.panelList = pa
 
     c = pa.getCenter()
+
     w.pan(c[0], c[1], c[2])
-    w.setCameraPosition(distance=c[2])
-    w.orbit(45, 60)
+    w.setCameraPosition(distance=c[2] * 2)
+#     w.orbit(45, 60)
+    w.orbit(45, -120)
 
     ims = []
     cs = []
@@ -240,12 +243,12 @@ def main():
         g.showPanel(p, rang=[mind, maxd])
 
         # Add points at centers of panels
-        pos = np.empty((1, 3))
-        pos[0] = p.getCenter()
-        col = (0, 1, 0, 0.4)
-        siz = p.pixSize.copy() * 10
-        sp = gl.GLScatterPlotItem(pos=pos, size=siz, color=col, pxMode=False)
-        w.addItem(sp)
+#         pos = np.empty((1, 3))
+#         pos[0] = p.getCenter()
+#         col = (0, 1, 0, 0.4)
+#         siz = p.pixSize.copy() * 10
+#         sp = gl.GLScatterPlotItem(pos=pos, size=siz, color=col, pxMode=False)
+#         w.addItem(sp)
 
     w.renderText(0, 0, 0, 'test')
 
@@ -263,7 +266,8 @@ def main():
 #     fs = gl.GLLinePlotItem(pos=pos, color=col)
 #     w.addItem(fs)
 
-    sys.exit(app.exec_())
+    app.exec_()
+#     sys.exit(app.exec_())
 
 if __name__ == '__main__':
     main()
