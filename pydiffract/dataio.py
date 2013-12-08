@@ -73,6 +73,8 @@ class h5v1Plan(object):
 
 class h5v1Reader(object):
 
+    """ Read an hdf5 file with "cheetah" format """
+
     def __init__(self):
 
         self.plan = None
@@ -82,6 +84,8 @@ class h5v1Reader(object):
         self.plan = plan
 
     def getShot(self, panelList, filePath):
+
+        """ Populate a panel list with image data. """
 
         if self.plan is None:
             raise ValueError("You don't have a data reading plan!")

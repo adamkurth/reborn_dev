@@ -593,6 +593,7 @@ class panelList(list):
             p._sa = p._sa.reshape((p.nS, p.nF))
         return self._sa
 
+    @property
     def assembledData(self):
 
         """ Project all intensity data along the beam direction.  Nearest neighbor interpolation."""
