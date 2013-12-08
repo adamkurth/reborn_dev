@@ -85,6 +85,11 @@ class h5v1Reader(object):
 
     def getShot(self, panelList, filePath):
 
+        self.getFrame(self, panelList, filePath)
+
+
+    def getFrame(self, panelList, filePath):
+
         """ Populate a panel list with image data. """
 
         if self.plan is None:
