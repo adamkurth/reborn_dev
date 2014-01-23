@@ -11,6 +11,11 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   introduction
+   tutorial
+   cookbook
+   modules
+
 
 
 Indices and tables
@@ -19,4 +24,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
 

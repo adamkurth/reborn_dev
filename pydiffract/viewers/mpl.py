@@ -22,29 +22,49 @@ def stretch(two, scale):
     return [cent - ran * scale / 2.0, cent + ran * scale / 2.0]
 
 
-def zoom_factory(fig, base_scale=1.5):
+def connectAxisZoomFunction(fig, base_scale=1.5, x_scale=None, y_scale=None):
+
+    """ Connect a zoom function to an axis (zoom when mouse wheel is scrolled)"""
 
     def zoom_fun(event):
 
         ax = event.inaxes
+        print(ax)
 
         zoomx = True
         zoomy = True
 
+        xs = base_scale
+        ys = base_scale
+
+        if any((x_scale, y_scale)):
+
+            zoomx = False
+            zoomy = False
+
+            if x_scale is not None:
+                xs = x_scale
+                zoomx = True
+
+            if y_scale is not None:
+                ys = y_scale
+                zoomy = True
+
         if ax is not None:
 
             if event.button == 'up':
-                scale = 1 / base_scale
+                xs = 1.0 / xs
+                ys = 1.0 / ys
             elif event.button == 'down':
-                scale = base_scale
+                pass
             else:
-                scale = 1
+                return
 
             if zoomx is True:
-                ax.set_xlim(stretch(ax.get_xlim(), scale))
+                ax.set_xlim(stretch(ax.get_xlim(), xs))
 
             if zoomy is True:
-                ax.set_ylim(stretch(ax.get_ylim(), scale))
+                ax.set_ylim(stretch(ax.get_ylim(), ys))
 
             plt.draw()
 
@@ -52,7 +72,7 @@ def zoom_factory(fig, base_scale=1.5):
 
 
 
-def axes_color(ax, col):
+def setAxesColor(ax, col):
     for child in ax.get_children():
         if isinstance(child, matplotlib.spines.Spine):
             child.set_color(col)
@@ -63,12 +83,16 @@ def axes_color(ax, col):
 
 
 
+class mplColorBar(object):
+
+    pass
+
 class mplPanelView(object):
 
     def __init__(self, im=None):
 
         # create the figure
-        self.fig = plt.figure(1)
+        self.fig = plt.figure()
         self.fig.clf()
         self.fig.patch.set_facecolor([0, 0, 0])
 
@@ -92,7 +116,7 @@ class mplPanelView(object):
 
         # setup zooming feature
         self.zoomScale = 1.3
-        zoom_factory(self.fig, base_scale=self.zoomScale)
+        connectAxisZoomFunction(self.fig, base_scale=self.zoomScale)
 
     def set_gamma(self, gamma=None):
 
@@ -127,14 +151,14 @@ class mplPanelView(object):
     def setup_cbar(self):
 
         # view range for colorbar/histogram
-        hs_ran = stretch(self.imageRange, 1.05)
+        histRange = stretch(self.imageRange, 1.05)
 
         # histogram axes
         self.hs_ax = self.fig.add_axes([0.92, 0.05, 0.06, 0.9])
         self.hs_ax.patch.set_facecolor([0, 0, 0])
         self.hs_ax.patch.set_alpha(0)
-        axes_color(self.hs_ax, [.5, .5, .5])
-        self.hs_ax.set_ylim(hs_ran)
+        setAxesColor(self.hs_ax, [.5, .5, .5])
+        self.hs_ax.set_ylim(histRange)
 
         # plot histogram
         self.hs_ax_hs = self.hs_ax.hist(self.image.ravel(), bins=200, log=True, \
@@ -154,13 +178,13 @@ class mplPanelView(object):
         self.cb_ax = self.fig.add_axes([0.98, 0.05, 0.01, 0.9], sharey=self.hs_ax)
         self.cb_ax.patch.set_facecolor([0, 0, 0])
         self.hs_ax.set_xlim([0, 1])
-        axes_color(self.cb_ax, [.5, .5, .5])
+        setAxesColor(self.cb_ax, [.5, .5, .5])
         self.cb_ax.set_xticks([])
         plt.setp(self.cb_ax.get_yticklabels(), visible=False)
 
         # colorbar image
         self.cb_ax_img = self.cb_ax.imshow(cdat, \
-         extent=(-1000, 1000, hs_ran[0], hs_ran[1]), \
+         extent=(-1000, 1000, histRange[0], histRange[1]), \
          origin='lower', interpolation='nearest')
         self.cb_ax_img.set_clim(self.img.get_clim())
 

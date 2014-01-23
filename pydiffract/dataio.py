@@ -7,7 +7,6 @@ Created on Jul 27, 2013
 import h5py
 import numpy as np
 
-
 class genericDataPlan(object):
 
     def __init__(self):
@@ -85,7 +84,7 @@ class h5v1Reader(object):
 
     def getShot(self, panelList, filePath):
 
-        self.getFrame(self, panelList, filePath)
+        self.getFrame(panelList, filePath)
 
 
     def getFrame(self, panelList, filePath):
@@ -100,7 +99,15 @@ class h5v1Reader(object):
 
         f = h5py.File(filePath, "r")
 
+        # each panel could come from a different data set within the hdf5
+        # we don't want to load the data set each time, since that's slow...
+        # so the code gets ugly here...
+        prevDataField = self.plan[0].dataField
+        dset = f[prevDataField]
+        dat = np.array(dset, dtype=panelList[0].dtype)
+
         for i in range(len(panelList)):
+
             p = panelList[i]
             h = self.plan[i]
             # Load wavelength from hdf5 file
@@ -110,12 +117,17 @@ class h5v1Reader(object):
             if h.detOffsetField is not None:
                 p.T[2] += f[h.detOffsetField].value[0] * 1e-3
             if h.dataField is not None:
-                dset = f[h.dataField]
+                thisDataField = h.dataField
+                if thisDataField != prevDataField:
+                    dset = f[thisDataField]
+                    dat = np.array(dset, dtype=p.dtype)
+                prevDataField = thisDataField
                 fmin = h.fRange[0]
                 fmax = h.fRange[1] + 1
                 smin = h.sRange[0]
                 smax = h.sRange[1] + 1
-                p.data = np.array(dset[smin:smax, fmin:fmax], dtype=p.dtype)
+                p.data = dat[smin:smax, fmin:fmax]
+
 
         f.close()
 
@@ -191,22 +203,90 @@ class diproiReader(object):
 
 class frameGetter(object):
 
-    def __init__(self):
+    """ Methods for getting data from a list of files. """
 
-        self.fileList = None
-        self.reader = None
-        self.frameNumber = -1
+    def __init__(self, reader=None, fileList=None):
 
-    def getFrame(self, pl, num=None):
+        self._fileList = None
+        self._reader = None
+        self._frameNumber = -1
+        self._nFrames = None
+
+        if reader is not None:
+            self.reader = reader
+
+        if fileList is not None:
+            self.fileList = fileList
+
+    @property
+    def reader(self):
+
+        """ The reader class to be used when loading frame data. """
+
+        return self._reader
+
+    @reader.setter
+    def reader(self, value):
+
+        self._reader = value
+
+    @property
+    def fileList(self):
+
+        """ The file list from which to grab frames. (List object containing strings). """
+
+        return self._fileList
+
+    @fileList.setter
+    def fileList(self, value):
+
+        self._fileList = value
+        self._nFrames = len(value)
+
+    @property
+    def frameNumber(self):
+
+        """ The current frame number. """
+
+        return self._frameNumber
+
+    @frameNumber.setter
+    def frameNumber(self, value):
+
+        self._frameNumber = value
+
+    @property
+    def nFrames(self):
+
+        """ Number of frames available. """
+
+        if self.fileList is None:
+
+            return 0
+
+        return len(self.fileList)
+
+    def loadFileList(self, fileList):
+
+        """ Load a file list.  Should be a text file, one full file path per line. """
+
+        self.fileList = [i.strip() for i in open(fileList).readlines()]
+
+    def getFrame(self, panelList, frameNumber=None):
+
+        """ Get the frame data, given index number. """
+
+        pl = panelList
+        num = frameNumber
 
         if num is None:
-            self.frameNumber += 1
+            self.frameNumber = 0
             num = self.frameNumber
 
         if self.fileList is None:
             raise ValueError('No file list specified')
 
-        if num > len(self.fileList) - 1:
+        if num > self.nFrames - 1:
             return False
 
         filePath = self.fileList[num]
@@ -214,14 +294,22 @@ class frameGetter(object):
 
         return num
 
-    def nextFrame(self, pl):
+    def nextFrame(self, panelList):
+
+        """ Get the data from the next frame. """
+
+        pl = panelList
 
         self.frameNumber += 1
         if self.frameNumber > len(self.fileList) - 1:
             self.frameNumber = 0
         return self.getFrame(pl, self.frameNumber)
 
-    def previousFrame(self, pl):
+    def previousFrame(self, panelList):
+
+        """ Get the data from the previous frame. """
+
+        pl = panelList
 
         self.frameNumber -= 1
         if self.frameNumber < 0:

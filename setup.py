@@ -11,5 +11,5 @@ setup(name='pydiffract',
       author="Richard A. Kirian",
       author_email="rkirian@gmail.com",
       description='Diffraction analysis tools',
-      packages=["pydiffract"],
+      packages=["pydiffract","pydiffract.viewers"],
       package_dir={"pydiffract": "pydiffract"})

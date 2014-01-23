@@ -19,6 +19,7 @@ def test_all(pa):
     test_bounding_box(pa, verbose=False)
     test_solid_angle(pa)
     test_assemble(pa, verbose=True)
+    test_print(pa)
 
 def test_V(pa):
     print("Checking real-space vector calculation...")
@@ -64,13 +65,16 @@ def test_solid_angle(pa, verbose=False):
 
 def test_assemble(pa, verbose=False):
     print("Checking simple 2d assembly...")
-    adat = pa.assembledData()
+    adat = pa.assembledData
     if verbose == True:
         adat[adat < 0] = 0
         imshow(log(adat + 100), interpolation='nearest', cmap='gray')
         show()
     print("Pass")
 
+def test_print(pa, verbose=True):
+
+    print(pa)
 
 [pa, reader] = convert.crystfelToPanelList("examples/example1.geom")
 reader.getShot(pa, "examples/example1.h5")
