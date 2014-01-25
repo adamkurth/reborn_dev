@@ -24,7 +24,7 @@ class panel(object):
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
         self.aduPerEv = 0  # Number of arbitrary data units per eV of photon energy
-        self.beam = None  # Container for x-ray beam information
+        self.beam = source.beam()  # Container for x-ray beam information
         self.data = None  # Diffraction intensity data
 
         # Derived parameters
@@ -311,7 +311,7 @@ class panel(object):
 
         """ Compute the reciprocal-space scattering vectors, multiplied by wavelength."""
 
-        self._K = self.V - self.B
+        self._K = vecNorm(self.V) - self.B
 
     def deleteGeometryData(self):
 
@@ -364,7 +364,7 @@ class panel(object):
 
         return self._rsbb.copy()
 
-    def simpleSetup(self, nF=None, nS=None, pixSize=None, distance=None, T=None):
+    def simpleSetup(self, nF=None, nS=None, pixSize=None, distance=None, T=None, wavelength=None):
 
         """ Simple way to create a panel with centered beam."""
 
@@ -387,6 +387,8 @@ class panel(object):
         else:
             self.T = T
 
+        if wavelength is not None:
+            self.beam.wavelength = wavelength
 
 
 class panelList(list):

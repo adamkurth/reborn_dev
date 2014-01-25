@@ -18,7 +18,7 @@ def test_all(pa):
     test_copy(pa)
     test_bounding_box(pa, verbose=False)
     test_solid_angle(pa)
-    test_assemble(pa, verbose=True)
+    test_assemble(pa, verbose=False)
     test_print(pa)
 
 def test_V(pa):
