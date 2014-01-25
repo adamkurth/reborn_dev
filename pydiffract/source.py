@@ -14,6 +14,8 @@ class beam(object):
 
         self._wavelength = 0
         self._B = np.array([0, 0, 1])
+        self._P = np.array([1, 0, 0])
+        self.polarizationRatio = 1
 
     def copy(self):
 
@@ -41,6 +43,17 @@ class beam(object):
     def B(self, value):
 
         self._B = value
+
+    @property
+    def P(self):
+
+        return self._P
+
+    @P.setter
+    def P(self, value):
+
+        self._P = value
+
 
     def __str__(self):
 

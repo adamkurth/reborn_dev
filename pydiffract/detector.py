@@ -32,9 +32,8 @@ class panel(object):
         self._V = None  # 3D vectors pointing from interaction region to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
         self._K = None  # Reciprocal space vectors multiplied by wavelength
-        self._Q = None  # Reciprocal space vectors (with wavelength and 2*pi factor)
         self._rsbb = None  # Real-space bounding box information
-        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_Q', '_rsbb']  # Default values of these are 'None'
+        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb']  # Default values of these are 'None'
 
         # Other internal data
         self._validGeometry = False  # True when geometry configuration is valid
@@ -259,7 +258,23 @@ class panel(object):
             V2 = np.sum(self.V ** 2, axis=-1)
             A = norm(np.cross(self.F, self.S))
             self._sa = A / V2 * np.dot(v, n)
+
         return self._sa
+
+    @property
+    def polarizationFactor(self):
+
+        """ The scattering polarization factor. """
+
+        if self.beam.polarizationRatio != 1:
+            raise ValueError("Only linear polarization handled at this time.")
+
+        if self._pf is None:
+            p = self.beam.P
+            u = vecNorm(self.V)
+            self._pf = 1 - np.abs(u.dot(p)) ** 2
+
+        return self._pf
 
     def check(self):
 
@@ -410,7 +425,7 @@ class panelList(list):
         self._rsbb = None  # Real-space bounding box of entire panel list
         self._vll = None  # Look-up table for simple projection
         self._rpix = None  # junk
-        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_rsbb', '_vll', '_rpix']  # Default values of these are 'None'
+        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix']  # Default values of these are 'None'
 
 
     def copy(self, derived=True):
@@ -543,6 +558,13 @@ class panelList(list):
         return self._K
 
     @property
+    def Q(self):
+
+        """ Concatenated reciprocal-space vectors."""
+
+        return 2 * np.pi * self.K / self.beam.wavelength
+
+    @property
     def data(self):
 
         """ Concatenated intensity data."""
@@ -607,6 +629,24 @@ class panelList(list):
             self._sa = sa
             p._sa = p._sa.reshape((p.nS, p.nF))
         return self._sa
+
+    @property
+    def polarizationFactor(self):
+
+        """ Concatenated polarization factors."""
+
+        if self._pf == None:
+            pf = np.empty(self.nPix)
+            n = 0
+            for p in self:
+                nPix = p.nPix
+                nF = p.nF
+                nS = p.nS
+                pf[n:(n + nPix)] = p.polarizationFactor.ravel()
+                n += nPix
+            self._pf = pf
+            p._pf = p._pf.reshape((p.nS, p.nF))
+        return self._pf
 
     @property
     def assembledData(self):
@@ -694,10 +734,10 @@ class panelList(list):
         for i in self._derivedGeometry:
             setattr(self, i, None)
 
-    def simpleSetup(self, nF=None, nS=None, pixSize=None, distance=None, T=None):
+    def simpleSetup(self, nF=None, nS=None, pixSize=None, distance=None, T=None, wavelength=None):
 
         """ Append a panel using the simple setup method."""
 
         p = panel()
-        p.simpleSetup(nF, nS, pixSize, distance, T)
+        p.simpleSetup(nF, nS, pixSize, distance, T, wavelength)
         self.append(p)

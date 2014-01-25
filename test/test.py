@@ -19,7 +19,8 @@ def test_all(pa):
     test_bounding_box(pa, verbose=False)
     test_solid_angle(pa)
     test_assemble(pa, verbose=False)
-    test_print(pa)
+    test_polarization_factor(pa, verbose=True)
+    test_print(pa, verbose=False)
 
 def test_V(pa):
     print("Checking real-space vector calculation...")
@@ -71,6 +72,12 @@ def test_assemble(pa, verbose=False):
         imshow(log(adat + 100), interpolation='nearest', cmap='gray')
         show()
     print("Pass")
+
+def test_polarization_factor(pa, verbose=False):
+    print("Checking polarization factor... fixme")
+    pf = pa.polarizationFactor
+    if verbose == True:
+        print(pf)
 
 def test_print(pa, verbose=True):
 
