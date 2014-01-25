@@ -12,15 +12,35 @@ class beam(object):
 
     def __init__(self):
 
-        self.wavelength = 0
-        self.B = np.array([0, 0, 1])
+        self._wavelength = 0
+        self._B = np.array([0, 0, 1])
 
     def copy(self):
 
         b = beam()
-        b.wavelength = self.wavelength
+        b._wavelength = self._wavelength
         b.B = self.B.copy()
         return b
+
+    @property
+    def wavelength(self):
+
+        return self._wavelength
+
+    @wavelength.setter
+    def wavelength(self, value):
+
+        self._wavelength = value
+
+    @property
+    def B(self):
+
+        return self._B
+
+    @B.setter
+    def B(self, value):
+
+        self._B = value
 
     def __str__(self):
 

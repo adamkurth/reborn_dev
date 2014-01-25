@@ -32,8 +32,9 @@ class panel(object):
         self._V = None  # 3D vectors pointing from interaction region to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
         self._K = None  # Reciprocal space vectors multiplied by wavelength
+        self._Q = None  # Reciprocal space vectors (with wavelength and 2*pi factor)
         self._rsbb = None  # Real-space bounding box information
-        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_rsbb']  # Default values of these are 'None'
+        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_Q', '_rsbb']  # Default values of these are 'None'
 
         # Other internal data
         self._validGeometry = False  # True when geometry configuration is valid
@@ -203,7 +204,7 @@ class panel(object):
     @property
     def B(self):
 
-        """ Beam direction vector."""
+        """ Nominal beam direction vector (normalized)."""
 
         if self.beam is None:
             raise ValueError("Panel has no beam information.")
@@ -221,16 +222,28 @@ class panel(object):
     @property
     def K(self):
 
-        """ Scattering vectors multiplied by wavelength."""
+        """ Normalized scattering vectors.   Similar to the conventional scattering 
+            vectors, but multiplied by wavelength.  This does not have the 2*pi factor
+            included."""
 
         if self._K is None:
             self.computeReciprocalSpaceGeometry()
         return self._K
 
     @property
+    def Q(self):
+
+        """ Scattering vectors, with 2*pi factor and wavelength included."""
+
+        if self.beam.wavelength is None:
+            raise ValueError("No wavelength is defined.  Cannot compute Q vectors.")
+
+        return 2 * np.pi * self.K / self.beam.wavelength
+
+    @property
     def N(self):
 
-        """ Normal vector to panel surface."""
+        """ Normal vector to panel surface (F X S)."""
 
         N = np.cross(self.F, self.S)
         return N / norm(N)
