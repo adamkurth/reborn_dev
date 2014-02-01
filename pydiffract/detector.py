@@ -366,6 +366,11 @@ class panel(object):
 
         return np.mean(self.getVertices(), axis=0)
 
+    @property
+    def realSpaceBoundingBox(self):
+
+        return self.getRealSpaceBoundingBox()
+
     def getRealSpaceBoundingBox(self):
 
         """ Return the minimum and maximum values of the four corners."""

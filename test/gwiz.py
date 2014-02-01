@@ -16,6 +16,50 @@ import numpy as np
 import pydiffract.convert as convert
 import pydiffract.utils as utils
 
+
+
+
+
+class myGLViewWidget(gl.GLViewWidget):
+
+    def __init__(self):
+
+        super(gl.GLViewWidget, self).__init__()
+        self.opts = []
+
+    def pan(self, dx, dy, dz, relative=False):
+        """
+        Moves the center (look-at) position while holding the camera in place. 
+        
+        If relative=True, then the coordinates are interpreted such that x
+        if in the global xy plane and points to the right side of the view, y is
+        in the global xy plane and orthogonal to x, and z points in the global z
+        direction. Distances are scaled roughly such that a value of 1.0 moves
+        by one pixel on screen.
+        
+        """
+        if not relative:
+            self.opts['center'] += QtGui.QVector3D(dx, dy, dz)
+        else:
+            cPos = self.cameraPosition()
+            cVec = self.opts['center'] - cPos
+            dist = cVec.length()  # # distance from camera to center
+            xDist = dist * 2. * np.tan(0.5 * self.opts['fov'] * np.pi / 180.)  # # approx. width of view at distance of center point
+            xScale = xDist / self.width()
+            zVec = QtGui.QVector3D(0, 0, 1)
+            xVec = QtGui.QVector3D.crossProduct(zVec, cVec).normalized()
+            # xVec = QtGui.QVector3D(0,1,0)
+            # yVec = QtGui.QVector3D.crossProduct(xVec, zVec).normalized()
+            yVec = QtGui.QVector3D(0, 0, 1)
+            self.opts['center'] = self.opts['center'] + xVec * xScale * dx + yVec * xScale * dy + zVec * xScale * dz
+        self.update()
+
+
+
+
+
+
+
 class panelListGui(QtGui.QMainWindow):
 
     def __init__(self):
