@@ -16,6 +16,13 @@ class beam(object):
         self._B = np.array([0, 0, 1])
         self._P = np.array([1, 0, 0])
         self.polarizationRatio = 1
+        self.spectralWidth = 0
+        self.photonEnergy = 0
+        self.beamDivergence = 0
+        self.pulseEnergy = 0
+        self.nPhotons = 0
+        self.profile = "tophat"
+        self.meanFluence = 0
 
     def copy(self):
 

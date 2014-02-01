@@ -10,6 +10,31 @@ from Scientific.Geometry.Quaternion import Quaternion
 from Scientific.Geometry import Tensor
 from Scientific.Geometry.Transformation import Rotation
 
+
+c = 299792458  # Speed of light
+h = 6.62606957e-34  # Planck constant
+hc = h * c
+
+
+def eV2Joules(eV):
+
+    """ Convert electron volts into Joules. """
+
+    return eV * 1.60217657e-19
+
+def photonEnergy2Wavelength(energy):
+
+    """ Convert photon energy to photon wavelength. SI units, as always. """
+
+    return hc / energy
+
+def photonWavelength2Energy(wavelength):
+
+    """ Convert photon wavelength to energy. SI units, as always. """
+
+    return hc / wavelength
+
+
 def vecNorm(V):
 
     v = V

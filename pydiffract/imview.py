@@ -54,7 +54,7 @@ class simple2DView(QtGui.QMainWindow):
     def showDialog(self):
 
         fname = QtGui.QFileDialog.getOpenFileName(self, 'Open data file', '$HOME')
-
+        print(fname)
 
 
 
@@ -104,7 +104,7 @@ class simple3DView(QtGui.QMainWindow):
     def showDialog(self):
 
         fname = QtGui.QFileDialog.getOpenFileName(self, 'Open data file', '$HOME')
-
+        print(fname)
 
 
 # class simple3DView(QtGui.QMainWindow):

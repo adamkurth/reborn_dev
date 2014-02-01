@@ -536,8 +536,6 @@ class panelList(list):
             if p.V.base is self._V:
                 continue
             nPix = p.nPix
-            nF = p.nF
-            nS = p.nS
             self._V[n:(n + nPix), :] = p._V.reshape((nPix, 3))
             # p._V = self._V[n:(n + nPix)].reshape((nS, nF, 3))
             n += nPix
@@ -597,8 +595,6 @@ class panelList(list):
         n = 0
         for p in self:
             nPix = p.nPix
-            nF = p.nF
-            nS = p.nS
             p.data = data[n:(n + nPix)]
             p.data = p.data.reshape((p.nS, p.nF))
             n += nPix
@@ -627,8 +623,6 @@ class panelList(list):
             n = 0
             for p in self:
                 nPix = p.nPix
-                nF = p.nF
-                nS = p.nS
                 sa[n:(n + nPix)] = p.solidAngle.ravel()
                 n += nPix
             self._sa = sa
@@ -645,8 +639,6 @@ class panelList(list):
             n = 0
             for p in self:
                 nPix = p.nPix
-                nF = p.nF
-                nS = p.nS
                 pf[n:(n + nPix)] = p.polarizationFactor.ravel()
                 n += nPix
             self._pf = pf
