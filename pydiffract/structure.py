@@ -14,6 +14,7 @@ class molecule(object):
         self.Z = None  # List of atomic numbers
         self.f = None  # List of scattering factors
         self.R = None  # Rotation of this molecule
+        self.T = None  # Translation of this molecule
 
     def nAtoms(self):
 
@@ -28,20 +29,6 @@ class molecule(object):
         return (r, u)
 
 
-class ensemble(object):
-
-    """ A collection of scatterers. """
-
-    def __init__(self):
-
-        self.molecules = []
-
-
-    def nMolecules(self):
-
-        return len(self.molecules)
-
-
 class crystal(object):
 
     """ Information pertaining to a single ideal crystal of finite size. """
@@ -50,6 +37,26 @@ class crystal(object):
 
         self.cellParameters = None
         self._O = None
+        self.r = None
+        self.elem = None
+        self.molecules = None
+
+    @property
+    def nMolecules(self):
+
+        if self.molecules is None:
+            n = 0
+        else:
+            n = len(self.molecules)
+        return n
+
+    def addMolecule(self, mol):
+
+        if self.molecules is None:
+            self.molecules = []
+
+        self.molecules.append(mol)
+
 
     @property
     def O(self):
@@ -80,15 +87,22 @@ class crystal(object):
 
 def loadPdbFile(filePath):
 
+    cryst = crystal()
+
+    # get atomic coordinates of unit cell
     p = PDB.PDBParser()
     struc = p.get_structure('dummy', filePath)
     model = struc[0]
     r = np.array([x.coord for x in model.get_atoms()]) * 1e-10
     e = np.array([x.element for x in model.get_atoms()])
+    mol = molecule()
+    mol.r = r
+    mol.elem = e
+    cryst.addMolecule(mol)
 
     # get unit cell
     p = re.compile(r'^CRYST1*')
-    cryst1 = ""
+    cryst1 = None
     f = open(filePath, 'r')
     for line in f:
         if p.match(line):
@@ -96,26 +110,23 @@ def loadPdbFile(filePath):
             break
     f.close()
 
-    a = float(cryst1[6:14])
-    b = float(cryst1[15:23])
-    c = float(cryst1[24:32])
-    alpha = float(cryst1[33:39])
-    beta = float(cryst1[40:46])
-    gamma = float(cryst1[47:53])
+    if cryst1 is not None:
+        a = float(cryst1[6:14])
+        b = float(cryst1[15:23])
+        c = float(cryst1[24:32])
+        alpha = float(cryst1[33:39])
+        beta = float(cryst1[40:46])
+        gamma = float(cryst1[47:53])
+        cell = dict()
+        cell['a'] = a
+        cell['b'] = b
+        cell['c'] = c
+        cell['alpha'] = alpha
+        cell['beta'] = beta
+        cell['gamma'] = gamma
+        cryst.cellParameters = cell
 
-    cell = dict()
-    cell['a'] = a
-    cell['b'] = b
-    cell['c'] = c
-    cell['alpha'] = alpha
-    cell['beta'] = beta
-    cell['gamma'] = gamma
-
-    mol = molecule()
-    mol.r = r
-    mol.elem = e
-
-    return mol
+    return cryst
 
 
 
