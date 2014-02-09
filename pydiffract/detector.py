@@ -33,7 +33,8 @@ class panel(object):
         self._sa = None  # Solid angles corresponding to each pixel
         self._K = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
-        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb']  # Default values of these are 'None'
+        self._geometryHash = None  # Hash of the configured geometry parameters
+        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_geometryHash']  # Default values of these are 'None'
 
         # Other internal data
         self._validGeometry = False  # True when geometry configuration is valid
@@ -298,6 +299,31 @@ class panel(object):
 
         self._validGeometry = True
 
+    @property
+    def geometryHash(self):
+
+        """ Hash all of the configured geometry values. """
+
+        if self._geometryHash is None:
+
+            F = self._F
+            S = self._S
+            T = self._T
+
+            if F is None:
+                self._geometryHash = None
+                return self._geometryHash
+            elif S is None:
+                self._geometryHash = None
+                return self._geometryHash
+            elif T is None:
+                self._geometryHash = None
+                return self._geometryHash
+
+            self._geometryHash = hash((F[0], F[1], F[2], S[0], S[1], S[2], T[0], T[1], T[2], self._nF, self._nS))
+
+        return self._geometryHash
+
     def computeRealSpaceGeometry(self):
 
         """ Compute arrays relevant to real-space geometry."""
@@ -430,7 +456,8 @@ class panelList(list):
         self._rsbb = None  # Real-space bounding box of entire panel list
         self._vll = None  # Look-up table for simple projection
         self._rpix = None  # junk
-        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix']  # Default values of these are 'None'
+        self._geometryHash = None  # Hash of geometries
+        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix', '_geometryHash']  # Default values of these are 'None'
 
 
     def copy(self, derived=True):
@@ -730,6 +757,23 @@ class panelList(list):
 
         for i in self._derivedGeometry:
             setattr(self, i, None)
+
+    @property
+    def geometryHash(self):
+
+        """ Hash all of the configured geometry values. """
+
+        if self._geometryHash is None:
+
+            a = tuple([p.geometryHash for p in self])
+
+            if None in a:
+                self._geometryHash = None
+                return self._geometryHash
+
+            self._geometryHash = hash(a)
+
+        return self._geometryHash
 
     def simpleSetup(self, nF=None, nS=None, pixSize=None, distance=None, T=None, wavelength=None):
 
