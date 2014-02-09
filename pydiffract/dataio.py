@@ -6,6 +6,7 @@ Created on Jul 27, 2013
 
 import h5py
 import numpy as np
+from pydiffract import detector
 
 class genericDataPlan(object):
 
@@ -199,6 +200,65 @@ class diproiReader(object):
 
 
         f.close()
+
+
+class saclaReader(object):
+
+    def __init__(self, filePath=None):
+
+        self.filePath = None  # List of file paths
+        self.nFrames = None  # Total number of frames
+        self.runKey = None  # ID of run
+        self.fileID = None  # hdf5 file ID
+        self.detectorKeys = None  # Detector panel keys
+        self.shotKeys = None  # One key for each shot (!)
+
+        if filePath is not None:
+
+            self.setupFile(filePath)
+
+    def setupFile(self, filePath):
+
+        """ Do this when a new file is introduced. """
+
+        self.filePath = filePath
+        self.fileID = h5py.File(self.filePath, 'r')
+        self.runKey = self.fileID.keys()[1]
+        # FIXME: search for actual detector keys (no assumptions)
+        self.detectorKeys = ['detector_2d_%d' % n for n in np.arange(1, 8 + 1)]
+        self.shotKeys = self.fileID[self.runKey][self.detectorKeys[0]].keys()[1:]
+
+    def getFrame(self, panelList, frameNumber):
+
+        # FIXME: fill in this function
+        pass
+
+    def setupGeometry(self, pa):
+
+        n = 0
+
+        for detectorKey in self.detectorKeys:
+
+            pixSize = np.double(self.fileID[self.runKey][detectorKey]['detector_info']['pixel_size_in_micro_meter'])[0] * 1e-6
+            T = np.double(self.fileID[self.runKey][detectorKey]['detector_info']['detector_coordinate_in_micro_meter']) * 1e-6
+            T[1] *= -1
+            rot = -np.double(self.fileID[self.runKey][detectorKey]['detector_info']['detector_rotation_angle_in_degree']) * np.pi / 180.0
+            data = np.double(self.fileID[self.runKey][detectorKey][self.shotKeys[0]]['detector_data'])
+            if pa.nPanels == 0:
+                p = detector.panel()
+            elif pa.nPanels == len(self.detectorKeys):
+                p = pa[n]
+            else:
+                raise ValueError("Panel list length doesn't match the hdf5 file.")
+            p.T = T
+            R = np.array([[np.cos(rot), -np.sin(rot), 0], [np.sin(rot), np.cos(rot), 0], [0, 0, 1.0]])
+            p.S = R.dot(np.array([0, 1, 0])) * pixSize
+            p.F = R.dot(np.array([1, 0, 0])) * pixSize
+            p.nF = data.shape[1]
+            p.nS = data.shape[0]
+            if pa.nPanels == 0:
+                pa.append(p)
+            n += 1
 
 
 class frameGetter(object):
