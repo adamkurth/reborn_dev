@@ -8,35 +8,6 @@ import h5py
 import numpy as np
 from pydiffract import detector
 
-class genericDataPlan(object):
-
-    def __init__(self):
-
-        self.type = "genericv1"
-        self.origin = 0
-        self.stride = 0
-        self.nf = 0
-        self.ns = 0
-
-    def __str__(self):
-
-        s = ""
-        s += "type : %s\n" % self.type
-        s += "origin : %d\n" % self.origin
-        s += "stride : %d\n" % self.stride
-        s += "nf : %d\n" % self.nf
-        s += "ns : %d\n" % self.ns
-        return s
-
-    def check(self):
-
-        if self.nf == 0:
-            return False
-        if self.ns == 0:
-            return False
-        return True
-
-
 class h5v1Plan(object):
 
     def __init__(self):
@@ -78,6 +49,7 @@ class h5v1Reader(object):
     def __init__(self):
 
         self.plan = None
+        self.nFrames = 1
 
     def setPlan(self, plan):
 
@@ -169,6 +141,8 @@ class diproiReader(object):
     def __init__(self):
 
         self.plan = None
+        self.nFrames = 1
+        self.filePath = None
 
     def setPlan(self, plan):
 
@@ -212,6 +186,7 @@ class saclaReader(object):
         self.fileID = None  # hdf5 file ID
         self.detectorKeys = None  # Detector panel keys
         self.shotKeys = None  # One key for each shot (!)
+        self.dummyPanelList = detector.panelList()  # Dummy panel list for geometry values
 
         if filePath is not None:
 
@@ -219,7 +194,7 @@ class saclaReader(object):
 
     def setupFile(self, filePath):
 
-        """ Do this when a new file is introduced. """
+        """ Do this when a new file is introduced. Check contents of hdf5 file. """
 
         self.filePath = filePath
         self.fileID = h5py.File(self.filePath, 'r')
@@ -227,15 +202,31 @@ class saclaReader(object):
         # FIXME: search for actual detector keys (no assumptions)
         self.detectorKeys = ['detector_2d_%d' % n for n in np.arange(1, 8 + 1)]
         self.shotKeys = self.fileID[self.runKey][self.detectorKeys[0]].keys()[1:]
+        self.nFrames = len(self.shotKeys)
+        self.setupGeometry(self.dummyPanelList)
 
     def getFrame(self, panelList, frameNumber):
 
-        # FIXME: fill in this function
-        pass
+        """ Populate the panelList data with intensities from given frame number. """
 
-    def setupGeometry(self, pa):
+        pa = panelList
+        if pa.geometryHash != self.dummyPanelList.geometryHash:
+            self.setupGeometry(pa)
 
         n = 0
+        for detectorKey in self.detectorKeys:
+            data = np.double(self.fileID[self.runKey][detectorKey][self.shotKeys[0]]['detector_data'])
+            pa[n].data = data
+            n += 1
+
+    def setupGeometry(self, panelList):
+
+        """ Geometry configuration for a particular hdf5 file. """
+
+        n = 0
+        pa = panelList
+        if pa is None:
+            pa = detector.panelList()
 
         for detectorKey in self.detectorKeys:
 
@@ -244,7 +235,7 @@ class saclaReader(object):
             T[1] *= -1
             rot = -np.double(self.fileID[self.runKey][detectorKey]['detector_info']['detector_rotation_angle_in_degree']) * np.pi / 180.0
             data = np.double(self.fileID[self.runKey][detectorKey][self.shotKeys[0]]['detector_data'])
-            if pa.nPanels == 0:
+            if pa.nPanels == n:
                 p = detector.panel()
             elif pa.nPanels == len(self.detectorKeys):
                 p = pa[n]
@@ -256,7 +247,7 @@ class saclaReader(object):
             p.F = R.dot(np.array([1, 0, 0])) * pixSize
             p.nF = data.shape[1]
             p.nS = data.shape[0]
-            if pa.nPanels == 0:
+            if pa.nPanels == n:
                 pa.append(p)
             n += 1
 

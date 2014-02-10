@@ -17,6 +17,7 @@ Contents:
    modules
 
 
+.. automodule:: pydiffract
 
 Indices and tables
 ==================
