@@ -119,7 +119,8 @@ class panel(object):
     @property
     def pixSize(self):
 
-        """ Return the pixel size only if both fast/slow-scan vectors are the same length."""
+        """ Return the pixel size only if both fast/slow-scan vectors are the same length.
+            Setting this value will modify the fast- and slow-scan vectors F and S. """
 
         if self._pixSize is None:
             if self._validGeometry == False:
@@ -138,6 +139,7 @@ class panel(object):
         ps = norm(self.S)
         self.F *= val / pf
         self.S *= val / ps
+        self.deleteGeometryData()
 
     @property
     def nPix(self):
@@ -445,7 +447,7 @@ class panelList(list):
         """ Create an empty panel array."""
 
         # Configured data
-        self.beam = None  # X-ray beam information, common to all panels
+        self._beam = None  # X-ray beam information, common to all panels
         # Derived data (concatenated from individual panels)
         self._data = None  # Concatenated intensity data
         self._pixSize = None  # Common pixel size (if not common amongst panels, this will be 'None')
@@ -498,6 +500,12 @@ class panelList(list):
         if value.name == "":
             value.name = "%d" % key
         super(panelList, self).__setitem__(key, value)
+
+    @property
+    def beam(self):
+
+        self._beam = self[0].beam
+        return self._beam
 
     @property
     def nPix(self):

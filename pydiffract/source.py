@@ -5,7 +5,7 @@ class beam(object):
 
     def __init__(self):
 
-        self._wavelength = 0
+        self._wavelength = None
         self._B = np.array([0, 0, 1])
         self._P = np.array([1, 0, 0])
         self.polarizationRatio = 1
