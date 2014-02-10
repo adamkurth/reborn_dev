@@ -1,9 +1,3 @@
-'''
-Created on Aug 9, 2013
-
-@author: kirian
-'''
-
 from distutils.core import setup
 
 setup(name='pydiffract',
@@ -11,5 +5,5 @@ setup(name='pydiffract',
       author="Richard A. Kirian",
       author_email="rkirian@gmail.com",
       description='Diffraction analysis tools',
-      packages=["pydiffract","pydiffract.viewers"],
+      packages=["pydiffract", "pydiffract.viewers"],
       package_dir={"pydiffract": "pydiffract"})

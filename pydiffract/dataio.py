@@ -1,9 +1,3 @@
-'''
-Created on Jul 27, 2013
-
-@author: kirian
-'''
-
 import h5py
 import numpy as np
 from pydiffract import detector

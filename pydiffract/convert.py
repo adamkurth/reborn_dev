@@ -1,9 +1,3 @@
-'''
-Created on Aug 1, 2013
-
-@author: kirian
-'''
-
 from pydiffract import detector, source, dataio
 import numpy as np
 

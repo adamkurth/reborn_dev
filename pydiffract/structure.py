@@ -127,8 +127,3 @@ def loadPdbFile(filePath):
         cryst.cellParameters = cell
 
     return cryst
-
-
-
-
-

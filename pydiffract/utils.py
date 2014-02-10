@@ -10,11 +10,9 @@ from Scientific.Geometry.Quaternion import Quaternion
 from Scientific.Geometry import Tensor
 from Scientific.Geometry.Transformation import Rotation
 
-
 c = 299792458  # Speed of light
 h = 6.62606957e-34  # Planck constant
 hc = h * c
-
 
 def eV2Joules(eV):
 

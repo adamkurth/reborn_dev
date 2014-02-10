@@ -1,12 +1,5 @@
-'''
-Created on Jul 27, 2013
-
-@author: kirian
-'''
-
 import numpy as np
 import utils
-
 
 class beam(object):
 

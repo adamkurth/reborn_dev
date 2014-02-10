@@ -1,9 +1,3 @@
-'''
-Created on Dec 8, 2013
-
-@author: kirian
-'''
-
 import numpy as np
 
 from mpl_toolkits.mplot3d.axes3d import Axes3D

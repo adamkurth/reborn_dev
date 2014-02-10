@@ -1,9 +1,3 @@
-'''
-Created on Jul 27, 2013
-
-@author: kirian
-'''
-
 from PyQt4 import QtGui
 import pyqtgraph as pg
 import numpy as np

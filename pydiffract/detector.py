@@ -1,4 +1,3 @@
-
 import numpy as np
 from numpy.linalg import norm
 from pydiffract.utils import vecNorm
