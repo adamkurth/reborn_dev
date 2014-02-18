@@ -2,3 +2,5 @@
 *.cprof
 build/*
 build
+*.h5
+*.hdf5
