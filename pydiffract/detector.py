@@ -125,34 +125,44 @@ class panel(object):
 
         """ Number of fast-scan pixels."""
 
+        if self._nF is 0:
+            if self.data is not None:
+                self.nF = self.data.shape[1]
         return self._nF
 
     @nF.setter
     def nF(self, val):
 
-        """ Changing the fast-scan pixel count destroys all derived geometry 
-        and intensity data."""
+        """ Changing the fast-scan pixel count destroys all derived geometry data, and 
+        any unmatched intensity data."""
 
         self._nF = np.int32(val)
         self.deleteGeometryData()
-        self.data = None
+        if self.data is not None:
+            if self.data.shape[1] != self._nF:
+                self._data = None
 
     @property
     def nS(self):
 
         """ Number of slow-scan pixels."""
 
+        if self._nS is 0:
+            if self.data is not None:
+                self._nS = self.data.shape[0]
         return self._nS
 
     @nS.setter
     def nS(self, val):
 
-        """ Changing the slow-scan pixel count destroys all derived geometry 
-        data as well as intensity data."""
+        """ Changing the fast-scan pixel count destroys all derived geometry data, and 
+        any unmatched intensity data."""
 
         self._nS = np.int32(val)
         self.deleteGeometryData()
-        self.data = None
+        if self.data is not None:
+            if self.data.shape[0] != self._nS:
+                self._data = None
 
     @property
     def pixSize(self):

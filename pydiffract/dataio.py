@@ -102,74 +102,34 @@ class h5v1Reader(object):
         f.close()
 
 
-class diproiPlan(object):
+class diproiReader(detector.panelList):
 
     def __init__(self):
 
-        self.dataField = None
-        self.wavelengthField = None
+        super(diproiReader, self).__init__()
 
-    def __str__(self):
-
-        s = ""
-        s += "fRange : [%d, %d]\n" % (self.fRange[0], self.fRange[1])
-        s += "sRange : [%d, %d]\n" % (self.sRange[0], self.sRange[1])
-        if self.dataField is not None:
-            s += "dataField : %s\n" % self.dataField
-        if self.wavelengthField is not None:
-            s += "wavelengthField : %s\n" % self.wavelengthField
-        if self.detOffsetField is not None:
-            s += "detOffsetField : %s" % self.detOffsetField
-        return s
-
-    def check(self):
-
-        if self.fRange[1] == 0:
-            return False
-        if self.sRange[1] == 0:
-            return False
-        if self.dataField == "":
-            return False
-        return True
-
-
-class diproiReader(object):
-
-    def __init__(self):
-
-        self.plan = None
-        self.nFrames = 1
         self.filePath = None
+        self.fileList = None
+        self.dataField = None
+        self.append()
 
-    def setPlan(self, plan):
+    @property
+    def nFrames(self):
 
-        if not isinstance(plan, list):
-            self.plan = [plan]
-        else:
-            self.plan = plan
+        if self.fileList is None:
+            return 0
 
-    def getFrame(self, panelList, filePath):
+        return len(self.fileList)
 
-        if self.plan is None:
-            raise ValueError("No data reading plan specified.")
+    def loadFileList(self, fileList):
 
-        if len(panelList) != len(self.plan):
-            raise ValueError("Length of panel list does not match data reading plan.")
+        self.fileList = loadFileList(fileList)
 
+    def getFrame(self, frameNumber=0):
 
-        f = h5py.File(filePath, "r")
-
-        for i in range(len(panelList)):
-            p = panelList[i]
-            h = self.plan[i]
-            # Load wavelength from hdf5 file
-#             if h.wavelengthField is not None:
-#                 p.beam.wavelength = f[h.wavelengthField].value[0] * 1e-10
-            if h.dataField is not None:
-                p.data = np.array(f[h.dataField], dtype=p.dtype)
-
-
-
+        self.filePath = self.fileList[frameNumber]
+        f = h5py.File(self.filePath, "r")
+        self[0].data = np.array(f[self.dataField], dtype=self[0].dtype)
         f.close()
 
 
@@ -367,7 +327,11 @@ class frameGetter(object):
 
 
 
+def loadFileList(fileList):
 
+    """ Create a list of file paths from a file with one path per line. """
+
+    return [i.strip() for i in open(fileList).readlines()]
 
 
 

@@ -44,6 +44,15 @@ class detectorTests(unittest.TestCase):
         # Check that there is never an assumed wavelength
         self.failUnless(pa.wavelength is None)
 
+        # Check that pixels can be discovered from data
+        p = detector.panel()
+        p.data = np.random.random([100, 200])
+        self.failUnless(p.nF == 200)
+        self.failUnless(p.nS == 100)
+        # Check that geometry hash is None if not all values provided
+        self.failUnless(p.geometryHash is None)
+
+
 class sourceTests(unittest.TestCase):
 
     """ All tests relevant to source classes. """
