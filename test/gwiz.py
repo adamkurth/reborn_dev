@@ -8,12 +8,12 @@ Created on Sep 17, 2013
 Simple viewer
 """
 
-import sys
+# import sys
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 import numpy as np
-import pydiffract.convert as convert
+from pydiffract import convert, dataio, detector
 import pydiffract.utils as utils
 
 
@@ -257,8 +257,16 @@ def main():
     g = panelListGui()
     w = g.w
 
-    [pa, reader] = convert.crystfelToPanelList("examples/example1.geom")
-    reader.getShot(pa, "examples/example1.h5")
+#     [pa, reader] = convert.crystfelToPanelList("examples/example1.geom")
+#     reader.getShot(pa, "examples/example1.h5")
+
+    filePath = 'examples/sacla/02-2014/run178730.hdf5'
+
+    reader = dataio.saclaReader(filePath)
+    pa = detector.panelList()
+    reader.getFrame(pa, 0)
+    for p in pa:
+        p.T = p.T + np.array([0, 0, 0.05])
 
     g.panelList = pa
 
@@ -294,7 +302,7 @@ def main():
 #         sp = gl.GLScatterPlotItem(pos=pos, size=siz, color=col, pxMode=False)
 #         w.addItem(sp)
 
-    w.renderText(0, 0, 0, 'test')
+    w.renderText(0, 0, -0.05, 'test')
 
     g.showPanels()
 

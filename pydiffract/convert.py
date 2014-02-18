@@ -25,7 +25,6 @@ def crystfelToPanelList(geomFilePath=None, beamFilePath=None):
     pa = detector.panelList()
     ra = []
     pixSize = np.ones(10000)
-    pa.beam = source.beam()
 
     for line in h:
 
@@ -140,8 +139,6 @@ def crystfelToPanelList(geomFilePath=None, beamFilePath=None):
             r.detOffsetField = global_clen_field
         if global_coffset is not None:
             p.T[2] += global_coffset
-
-
 
     reader = dataio.h5v1Reader()
     reader.setPlan(ra)

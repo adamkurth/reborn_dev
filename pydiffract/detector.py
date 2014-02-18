@@ -4,7 +4,7 @@ from pydiffract.utils import vecNorm
 from pydiffract import source
 
 """
-Classes for analyzing diffraction data contained in pixel array detectors (PAD).
+Classes for analyzing diffraction data contained in pixel array detectors (PADs).
 """
 
 class panel(object):
@@ -23,8 +23,8 @@ class panel(object):
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
         self.aduPerEv = 0  # Number of arbitrary data units per eV of photon energy
-        self.beam = source.beam()  # Container for x-ray beam information
-        self.data = None  # Diffraction intensity data
+        self._beam = source.beam()  # Container for x-ray beam information
+        self._data = None  # Diffraction intensity data
 
         # Derived parameters
         self._pixSize = None  # Pixel size derived from F/S vectors
@@ -63,6 +63,10 @@ class panel(object):
                 p._K = self._K.copy()
             if self._sa is not None:
                 p._sa = self._sa.copy()
+            if self._pf is not None:
+                p._pf = self._pf.copy()
+            if self._rsbb is not None:
+                p._rsbb = self._rsbb.copy()
         p.panelList = None
 
         return p
@@ -81,6 +85,40 @@ class panel(object):
         s += "T = %s\n" % self.T.__str__()
         s += "aduPerEv = %g\n" % self.aduPerEv
         return s
+
+    @property
+    def data(self):
+
+        """ Intensity data. """
+
+        return self._data
+
+    @data.setter
+    def data(self, val):
+
+        self._data = val
+
+    @property
+    def beam(self):
+
+        """ X-ray beam data. If it doesn't exist, return the beam data from parent panel list."""
+
+        beam = self._beam
+
+        if beam is None:
+            if self.panelList.beam is not None:
+                beam = self.panelList.beam
+            else:
+                beam = None
+
+        return beam
+
+    @beam.setter
+    def beam(self, val):
+
+        if not isinstance(val, source.beam):
+            raise TypeError("Beam info must be a source.beam class")
+        self._beam = val
 
     @property
     def nF(self):
@@ -504,8 +542,18 @@ class panelList(list):
     @property
     def beam(self):
 
-        self._beam = self[0].beam
+        """ X-ray beam data.  If it doesn't exist, try to get it from the first panel. """
+
+        if self._beam is None:
+            self.beam = source.beam()
         return self._beam
+
+    @beam.setter
+    def beam(self, value):
+
+        if not isinstance(value, source.beam):
+            raise TypeError("Beam info must be a source.beam class")
+        self._beam = value
 
     @property
     def nPix(self):
@@ -644,8 +692,6 @@ class panelList(list):
         if self.beam is None:
             self.beam = source.beam()
         self.beam.wavelength = val
-        for p in self:
-            p.beam = self.beam
 
     @property
     def solidAngle(self):

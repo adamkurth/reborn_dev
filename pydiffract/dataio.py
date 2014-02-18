@@ -4,6 +4,9 @@ from pydiffract import detector
 
 class h5v1Plan(object):
 
+    """ A container for the various information needed to pull 
+    out the data corresponding to a detector panel."""
+
     def __init__(self):
 
         self.fRange = [0, 0]
@@ -188,7 +191,8 @@ class saclaReader(object):
 
     def setupFile(self, filePath):
 
-        """ Do this when a new file is introduced. Check contents of hdf5 file. """
+        """ Do this when a new file is introduced. Check contents of hdf5 file, 
+        get geometry information. """
 
         self.filePath = filePath
         self.fileID = h5py.File(self.filePath, 'r')
@@ -209,8 +213,7 @@ class saclaReader(object):
 
         n = 0
         for detectorKey in self.detectorKeys:
-            data = np.double(self.fileID[self.runKey][detectorKey][self.shotKeys[0]]['detector_data'])
-            pa[n].data = data
+            pa[n].data = np.double(self.fileID[self.runKey][detectorKey][self.shotKeys[frameNumber]]['detector_data'])
             n += 1
 
     def setupGeometry(self, panelList):

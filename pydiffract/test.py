@@ -24,6 +24,9 @@ def generateSimplePanelList():
 
     return pa
 
+def generateSimpleHdf5File(filePath):
+
+    pass
 
 class detectorTests(unittest.TestCase):
 
@@ -38,6 +41,8 @@ class detectorTests(unittest.TestCase):
         # Check for he right number of panels and total pixels
         self.failUnless(pa.nPanels == 2)
         self.failUnless(pa.nPix == 40000)
+        # Check that there is never an assumed wavelength
+        self.failUnless(pa.wavelength is None)
 
 class sourceTests(unittest.TestCase):
 
