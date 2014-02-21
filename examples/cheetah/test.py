@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
 from pydiffract import convert
-import numpy as np
-from timeit import timeit
-import cProfile
-import pstats
+# import numpy as np
+# from timeit import timeit
+# import cProfile
+# import pstats
 from pylab import *
-
 
 def test_all(pa):
 
@@ -18,7 +17,7 @@ def test_all(pa):
     test_copy(pa)
     test_bounding_box(pa, verbose=False)
     test_solid_angle(pa)
-    test_assemble(pa, verbose=False)
+    test_assemble(pa, verbose=True)
     test_polarization_factor(pa, verbose=True)
     test_print(pa, verbose=False)
 
@@ -83,8 +82,8 @@ def test_print(pa, verbose=True):
 
     print(pa)
 
-[pa, reader] = convert.crystfelToPanelList("examples/example1.geom")
-reader.getShot(pa, "examples/example1.h5")
+[pa, reader] = convert.crystfelToPanelList("example1.geom")
+reader.getShot(pa, "example1.h5")
 
 test_all(pa)
 

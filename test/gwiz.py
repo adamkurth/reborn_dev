@@ -260,7 +260,7 @@ def main():
 #     [pa, reader] = convert.crystfelToPanelList("examples/example1.geom")
 #     reader.getShot(pa, "examples/example1.h5")
 
-    filePath = 'examples/sacla/02-2014/run178730.hdf5'
+    filePath = '../examples/sacla/02-2014/run178730.hdf5'
 
     reader = dataio.saclaReader(filePath)
     pa = detector.panelList()

@@ -37,7 +37,7 @@ class panel(object):
 
         # Other internal data
         self._validGeometry = False  # True when geometry configuration is valid
-        self.dtype = np.float64  # Choose the data type (this may go away)
+        self.dtype = np.double  # Choose the data type (this may go away)
 
         # If this panel is a part of a list
         self.panelList = None  # This is the link to the panel list
@@ -96,7 +96,9 @@ class panel(object):
     @data.setter
     def data(self, val):
 
+
         self._data = val
+        self.data
 
     @property
     def beam(self):
@@ -347,6 +349,8 @@ class panel(object):
             raise ValueError("Data array has zero size (%d x %d)." % (self.nF, self.nS))
 
         self._validGeometry = True
+
+        return True
 
     @property
     def geometryHash(self):
@@ -813,6 +817,22 @@ class panelList(list):
             i += 1
 
         return np.mean(c, axis=0)
+
+    def check(self):
+
+        for p in self:
+
+            if not p.checkGeometry():
+
+                return False
+
+    def checkGeometry(self):
+
+        for p in self:
+
+            if not p.checkGeometry():
+
+                return False
 
     def deleteGeometryData(self):
 
