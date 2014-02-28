@@ -1,6 +1,8 @@
 import h5py
 import numpy as np
+import copy
 from pydiffract import detector
+
 
 class h5v1Plan(object):
 
@@ -112,6 +114,12 @@ class diproiReader(detector.panelList):
         self.fileList = None
         self.dataField = None
         self.append()
+
+    def deepcopy(self):
+
+        pa = copy.deepcopy(self)
+
+        return pa
 
     @property
     def nFrames(self):

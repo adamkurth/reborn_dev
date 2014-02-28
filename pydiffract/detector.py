@@ -36,7 +36,6 @@ class panel(object):
         self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_geometryHash']  # Default values of these are 'None'
 
         # Other internal data
-        self._validGeometry = False  # True when geometry configuration is valid
         self.dtype = np.double  # Choose the data type (this may go away)
 
         # If this panel is a part of a list
@@ -95,7 +94,6 @@ class panel(object):
 
     @data.setter
     def data(self, val):
-
 
         self._data = val
         self.data
@@ -173,8 +171,6 @@ class panel(object):
             Setting this value will modify the fast- and slow-scan vectors F and S. """
 
         if self._pixSize is None:
-            if self._validGeometry == False:
-                self.checkGeometry()
             p1 = norm(self.F)
             p2 = norm(self.S)
             if abs(p1 - p2) / float(p2) > 1e-6 or abs(p1 - p2) / float(p1) > 1e-6:
@@ -348,8 +344,6 @@ class panel(object):
         if self.nF == 0 or self.nS == 0:
             raise ValueError("Data array has zero size (%d x %d)." % (self.nF, self.nS))
 
-        self._validGeometry = True
-
         return True
 
     @property
@@ -380,9 +374,6 @@ class panel(object):
     def computeRealSpaceGeometry(self):
 
         """ Compute arrays relevant to real-space geometry."""
-
-        if self._validGeometry == False:
-            self.checkGeometry()
 
         i = np.arange(self.nF)
         j = np.arange(self.nS)
@@ -415,7 +406,6 @@ class panel(object):
             setattr(self, i, None)
         if self.panelList is not None:
             self.panelList.deleteGeometryData()
-        self._validGeometry = False
 
     def getVertices(self, edge=False, loop=False):
 
@@ -668,18 +658,22 @@ class panelList(list):
 
         """ Concatenated intensity data."""
 
-        data = np.empty(self.nPix)
+        if self._data is None:
 
-        n = 0
-        for p in self:
-            nPix = p.nPix
-            nF = p.nF
-            nS = p.nS
-            data[n:(n + nPix)] = p.data.ravel()
-            p.data = data[n:(n + nPix)].reshape((nS, nF))
-            n += nPix
+            data = np.empty(self.nPix)
 
-        return data
+            n = 0
+            for p in self:
+                nPix = p.nPix
+                nF = p.nF
+                nS = p.nS
+                data[n:(n + nPix)] = p.data.ravel()
+                p.data = data[n:(n + nPix)].reshape((nS, nF))
+                n += nPix
+
+            self._data = data
+
+        return self._data
 
     @data.setter
     def data(self, data):
@@ -688,6 +682,8 @@ class panelList(list):
 
         if not isinstance(data, np.ndarray) and data.ndim == 1 and data.size == self.nPix:
             raise ValueError("Must be flattened ndarray of size %d" % self.nPix)
+
+        self._data = data
         n = 0
         for p in self:
             nPix = p.nPix

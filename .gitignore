@@ -4,3 +4,5 @@ build/*
 build
 *.h5
 *.hdf5
+temp
+*.c

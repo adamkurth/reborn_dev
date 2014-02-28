@@ -18,8 +18,10 @@ pa[0].S = np.array([0, 1, 0]) * 50e-6  # Slow-scan direction (and pixel size)
 # Check geometry
 print(pa.checkGeometry())
 print(pa)
+
 # Assemble the data for viewing
 im = pa.assembledData
 # View the data
 plt.imshow(im, interpolation='none', cmap='gray')
 plt.show()
+

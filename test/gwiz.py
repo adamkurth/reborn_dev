@@ -72,7 +72,8 @@ class panelListGui(QtGui.QMainWindow):
         self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         self.activateWindow()
         self.show()
-        self.panelList = None
+        self._panelList = None
+        self.panelItems = None
 
     def initUI(self):
 
@@ -113,6 +114,23 @@ class panelListGui(QtGui.QMainWindow):
         showAxes.triggered.connect(self.showAxes)
         viewMenu.addAction(showAxes)
 
+    @property
+    def panelList(self):
+
+        return self._panelList
+
+    @panelList.setter
+    def panelList(self, val):
+
+        if self.panelItems is None:
+            self.panelItems = [None] * len(val)
+
+        if len(self.panelItems) != len(val):
+            self.panelItems = [None] * len(val)
+
+        self._panelList = val
+
+
     def center(self):
 
         qr = self.frameGeometry()
@@ -131,9 +149,13 @@ class panelListGui(QtGui.QMainWindow):
 
     def showPanels(self):
 
+        if self.panelItems is None:
+            self.panelItems = [None for i in range(len(self.panelList))]
+
         for p in self.panelList:
 
             self.showPanel(p)
+
 
     def framePanels(self):
 
@@ -274,7 +296,6 @@ def main():
 
     w.pan(c[0], c[1], c[2])
     w.setCameraPosition(distance=c[2] * 2)
-#     w.orbit(45, 60)
     w.orbit(45, -120)
 
     ims = []
@@ -288,11 +309,11 @@ def main():
     maxd = np.max(padata)
     mind = np.min(padata)
 
-    for p in pa:
-
-        i += 1
-
-        g.showPanel(p, rang=[mind, maxd])
+#     for p in pa:
+#
+#         i += 1
+#
+#         g.showPanel(p, rang=[mind, maxd])
 
         # Add points at centers of panels
 #         pos = np.empty((1, 3))
@@ -302,9 +323,16 @@ def main():
 #         sp = gl.GLScatterPlotItem(pos=pos, size=siz, color=col, pxMode=False)
 #         w.addItem(sp)
 
-    w.renderText(0, 0, -0.05, 'test')
+
 
     g.showPanels()
+
+
+#     dist = pa.realSpaceBoundingBox[0, 2]
+#     st = QtGui.QFont()
+#     st.setPixelSize(100)
+#     st.OpenGLCompatible = True
+#     w.renderText(0, 0, 1, 'test')
 
 #     im = gl.GLImageItem(pg.makeRGBA(d)[0])
 #     im.scale(pix, pix, pix)
