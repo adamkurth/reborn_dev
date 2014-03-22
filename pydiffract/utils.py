@@ -12,7 +12,10 @@ from Scientific.Geometry.Transformation import Rotation
 
 c = 299792458  # Speed of light
 h = 6.62606957e-34  # Planck constant
-hc = h * c
+hc = h * c  # Planck's constant * light speed
+re = 2.818e-15  # classical electron radius
+re2 = re ** 2
+joulesPerEv = 1.60217657e-19
 
 def eV2Joules(eV):
 

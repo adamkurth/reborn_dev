@@ -1,22 +1,70 @@
 import numpy as np
-from numpy import cos, sin, array, zeros
+from numpy import cos, sin, array, zeros, complex
 from Bio import PDB
 import re
+import xraylib
+from pydiffract import utils
 
 class molecule(object):
 
-    """ A collection of atomic positions, with specified elements. """
+    """ A collection of atomic positions, with specified elements, 
+    and transformation operations. """
 
     def __init__(self):
 
         self.r = None  # List of atomic coordinates (Nx3 array)
-        self.elem = None  # List of element names
-        self.Z = None  # List of atomic numbers
-        self.f = None  # List of scattering factors
+        self._elem = None  # List of element names
+        self._Z = None  # List of atomic numbers
+        self._f = None  # List of scattering factors
         self.R = None  # Rotation of this molecule
         self.T = None  # Translation of this molecule
+        self._photonEnergy = None  # Photon energy corresponding to scattering factors
+
+    @property
+    def elem(self):
+
+        return self._elem
+
+    @elem.setter
+    def elem(self, elem):
+
+        if self.r is not None:
+            if len(elem) != len(self.r):
+                raise ValueError("Number of elements does not match number of atomic positions.")
+
+        self._elem = [e.capitalize() for e in elem]
+
+    @property
+    def Z(self):
+
+        """ Atomic numbers generated from element strings. """
+
+        if self._Z is None:
+            if self.elem is None:
+                raise ValueError("Elements are not defined.")
+            self._Z = array([xraylib.SymbolToAtomicNumber(elem) for elem in self.elem])
+
+        return self._Z
+
+    def f(self, photonEnergy):
+
+        """ Atomic scattering factors for a particular photon energy. """
+
+        if photonEnergy != self._photonEnergy:
+            self._photonEnergy = photonEnergy
+            self._f = None
+
+        if self._f is None:
+            if self.Z is not None:
+                ev = photonEnergy / utils.joulesPerEv
+                print(ev)
+                self._f = array([complex(Z + xraylib.Fi(Z, ev), xraylib.Fii(Z, ev)) for Z in self._Z])
+
+        return self._f
 
     def nAtoms(self):
+
+        """ Number of atoms """
 
         return len(self.r)
 
@@ -24,9 +72,39 @@ class molecule(object):
 
         """ Return coordinates for each element """
 
-        u = np.unique(self.elem)
-        r = [self.r[self.elem == uu] for uu in u]
-        return (r, u)
+        e = np.unique(self.elem)
+        r = [self.r[self.elem == ee] for ee in e]
+        return (r, e)
+
+    def r_t(self):
+
+        """ Transformed coordinates """
+
+        r = self.r.copy()
+
+        if self.R is not None:
+
+            r = self.R * r
+
+        if self.T is not None:
+
+            r = r + self.T
+
+        return r
+
+    def fromPdb(self, pdbFile):
+
+        """ Load atoms from PDB file (not sure if it loads everything, e.g. HETATM) """
+
+        p = PDB.PDBParser()
+        s = p.get_structure('dummy', pdbFile)
+        m = s[0]
+
+        self.r = np.array([x.coord for x in m.get_atoms()])
+        self.elem = np.array([x.element for x in m.get_atoms()])
+
+
+
 
 
 class crystal(object):

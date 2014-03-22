@@ -333,14 +333,11 @@ class frameGetter(object):
         return self.getFrame(pl, self.frameNumber)
 
 
-
-
 def loadFileList(fileList):
 
     """ Create a list of file paths from a file with one path per line. """
 
     return [i.strip() for i in open(fileList).readlines()]
-
 
 
 
