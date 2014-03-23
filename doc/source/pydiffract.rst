@@ -9,14 +9,6 @@ pydiffract Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`convert` Module
----------------------
-
-.. automodule:: pydiffract.convert
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`dataio` Module
 --------------------
 

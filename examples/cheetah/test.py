@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pydiffract import convert
+from pydiffract import dataio
 # import numpy as np
 # from timeit import timeit
 # import cProfile
@@ -82,7 +82,7 @@ def test_print(pa, verbose=True):
 
     print(pa)
 
-[pa, reader] = convert.crystfelToPanelList("example1.geom")
+[pa, reader] = dataio.crystfelToPanelList("example1.geom")
 reader.getShot(pa, "example1.h5")
 
 test_all(pa)

@@ -8,20 +8,35 @@ from pydiffract import utils
 class molecule(object):
 
     """ A collection of atomic positions, with specified elements, 
-    and transformation operations. """
+    and transformation operations. Atomic scattering factors on request."""
 
     def __init__(self):
 
-        self.r = None  # List of atomic coordinates (Nx3 array)
+        self._r = None  # List of atomic coordinates (Nx3 array)
         self._elem = None  # List of element names
         self._Z = None  # List of atomic numbers
         self._f = None  # List of scattering factors
         self.R = None  # Rotation of this molecule
         self.T = None  # Translation of this molecule
         self._photonEnergy = None  # Photon energy corresponding to scattering factors
+        self.dtype = np.double
+
+    @property
+    def r(self):
+
+        """ Atomic coordinates (immutable) """
+
+        return self._r
+
+    @r.setter
+    def r(self, r):
+
+        self._r = self.dtype(r)
 
     @property
     def elem(self):
+
+        """ Atomic element (strings, immutable). """
 
         return self._elem
 
@@ -57,7 +72,6 @@ class molecule(object):
         if self._f is None:
             if self.Z is not None:
                 ev = photonEnergy / utils.joulesPerEv
-                print(ev)
                 self._f = array([complex(Z + xraylib.Fi(Z, ev), xraylib.Fii(Z, ev)) for Z in self._Z])
 
         return self._f
@@ -83,11 +97,9 @@ class molecule(object):
         r = self.r.copy()
 
         if self.R is not None:
-
             r = self.R * r
 
         if self.T is not None:
-
             r = r + self.T
 
         return r
@@ -100,8 +112,8 @@ class molecule(object):
         s = p.get_structure('dummy', pdbFile)
         m = s[0]
 
-        self.r = np.array([x.coord for x in m.get_atoms()])
-        self.elem = np.array([x.element for x in m.get_atoms()])
+        self.r = array([x.coord for x in m.get_atoms()]) * 1e-10
+        self.elem = array([x.element for x in m.get_atoms()])
 
 
 
@@ -171,8 +183,8 @@ def loadPdbFile(filePath):
     p = PDB.PDBParser()
     struc = p.get_structure('dummy', filePath)
     model = struc[0]
-    r = np.array([x.coord for x in model.get_atoms()]) * 1e-10
-    e = np.array([x.element for x in model.get_atoms()])
+    r = array([x.coord for x in model.get_atoms()]) * 1e-10
+    e = array([x.element for x in model.get_atoms()])
     mol = molecule()
     mol.r = r
     mol.elem = e

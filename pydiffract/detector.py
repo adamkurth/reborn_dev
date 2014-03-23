@@ -95,8 +95,7 @@ class panel(object):
     @data.setter
     def data(self, val):
 
-        self._data = val
-        self.data
+        self._data = self.dtype(val)
 
     @property
     def beam(self):
@@ -136,7 +135,7 @@ class panel(object):
         """ Changing the fast-scan pixel count destroys all derived geometry data, and 
         any unmatched intensity data."""
 
-        self._nF = np.int32(val)
+        self._nF = np.uint32(val)
         self.deleteGeometryData()
         if self.data is not None:
             if self.data.shape[1] != self._nF:
@@ -158,7 +157,7 @@ class panel(object):
         """ Changing the fast-scan pixel count destroys all derived geometry data, and 
         any unmatched intensity data."""
 
-        self._nS = np.int32(val)
+        self._nS = np.uint32(val)
         self.deleteGeometryData()
         if self.data is not None:
             if self.data.shape[0] != self._nS:
@@ -175,12 +174,13 @@ class panel(object):
             p2 = norm(self.S)
             if abs(p1 - p2) / float(p2) > 1e-6 or abs(p1 - p2) / float(p1) > 1e-6:
                 raise ValueError("Pixel size is not consistent between F and S vectors (%10f, %10f)." % (p1, p2))
-            self._pixSize = np.mean([p1, p2])
+            self._pixSize = self.dtype(np.mean([p1, p2]))
         return self._pixSize.copy()
 
     @pixSize.setter
     def pixSize(self, val):
 
+        val = self.dtype(val)
         pf = norm(self.F)
         ps = norm(self.S)
         self.F *= val / pf
@@ -285,7 +285,7 @@ class panel(object):
         if self.beam.wavelength is None:
             raise ValueError("No wavelength is defined.  Cannot compute Q vectors.")
 
-        return 2 * np.pi * self.K / self.beam.wavelength
+        return self.dtype(2.0 * np.pi * self.K / self.beam.wavelength)
 
     @property
     def N(self):
@@ -320,7 +320,7 @@ class panel(object):
         if self._pf is None:
             p = self.beam.P
             u = vecNorm(self.V)
-            self._pf = 1 - np.abs(u.dot(p)) ** 2
+            self._pf = self.dtype(1.0 - np.abs(u.dot(p)) ** 2)
 
         return self._pf
 
@@ -390,13 +390,13 @@ class panel(object):
         F = np.outer(i, self.F)
         S = np.outer(j, self.S)
         V = self.T + F + S
-        return V
+        return self.dtype(V)
 
     def computeReciprocalSpaceGeometry(self):
 
         """ Compute the reciprocal-space scattering vectors, multiplied by wavelength."""
 
-        self._K = vecNorm(self.V) - self.B
+        self._K = self.dtype(vecNorm(self.V) - self.B)
 
     def deleteGeometryData(self):
 
@@ -549,7 +549,10 @@ class panelList(list):
         """ X-ray beam data.  If it doesn't exist, try to get it from the first panel. """
 
         if self._beam is None:
-            self.beam = source.beam()
+            if len(self) == 0:
+                self.beam = source.beam()
+            else:
+                self.beam = self[0].beam
         return self._beam
 
     @beam.setter
