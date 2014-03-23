@@ -19,7 +19,7 @@ class molecule(object):
         self.R = None  # Rotation of this molecule
         self.T = None  # Translation of this molecule
         self._photonEnergy = None  # Photon energy corresponding to scattering factors
-        self.dtype = np.double
+        self.dtype = np.float64
 
     @property
     def r(self):

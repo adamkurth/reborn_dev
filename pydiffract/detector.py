@@ -36,7 +36,7 @@ class panel(object):
         self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_geometryHash']  # Default values of these are 'None'
 
         # Other internal data
-        self.dtype = np.double  # Choose the data type (this may go away)
+        self.dtype = np.float64  # Choose the data type (this may go away)
 
         # If this panel is a part of a list
         self.panelList = None  # This is the link to the panel list
