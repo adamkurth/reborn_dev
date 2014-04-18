@@ -2,9 +2,11 @@ from Bio import PDB
 from pydiffract import structure, utils, detector
 import numpy as np
 import matplotlib.pyplot as plt
-from pydiffract.simulate import core
+from pydiffract.simulate import cycore, clcore
 from pydiffract import utils
 import time
+
+
 
 pdbFile = "4H92.pdb"
 
@@ -22,14 +24,24 @@ r = mol.r
 f = mol.f(8000 * utils.joulesPerEv)
 
 t = time.time()
-ph = core.molecularFormFactor(q, r, f)
+ph = cycore.phaseFactor(q, r)
+elapsed = time.time() - t
+print(elapsed)
+
+t = time.time()
+ph = clcore.phaseFactor(q, r)
 elapsed = time.time() - t
 print(elapsed)
 
 I = np.abs(ph) ** 2
 I = I.reshape(nS, nF)
-plt.imshow(np.log(I), interpolation='nearest')
+dispim = I
+dispim = np.log(dispim)
+plt.imshow(dispim, interpolation='nearest')
 plt.show()
+
+
+
 
 
 # plt.scatter(mol.r[:, 0], mol.r[:, 1])

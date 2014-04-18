@@ -1,8 +1,16 @@
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
 import numpy
+import os
 
-extensions = Extension("pydiffract.simulate.core", ["pydiffract/simulate/core.pyx"], include_dirs=[numpy.get_include()])
+os.environ["CC"] = "gcc"
+os.environ["CXX"] = "g++"
+
+extensions = Extension("pydiffract.simulate.cycore",
+                       ["pydiffract/simulate/cycore.pyx"],
+                       include_dirs=[numpy.get_include()],
+                       extra_compile_args=['-fopenmp'],
+                       extra_link_args=['-fopenmp'])
 
 setup(name='pydiffract',
       version='0.0.1',
