@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.linalg import norm
+from numpy.random import random, randn
 from pydiffract.utils import vecNorm, vecMag
 from pydiffract import source
 
@@ -283,6 +284,25 @@ class panel(object):
             raise ValueError("No wavelength is defined.  Cannot compute Q vectors.")
 
         return 2.0 * np.pi * self.K / self.beam.wavelength
+
+    @property
+    def mcQ(self):
+
+        """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident 
+            beam direction for each pixel independently. """
+
+        i = np.arange(self.nF)
+        j = np.arange(self.nS)
+        [i, j] = np.meshgrid(i, j)
+        i = i.ravel() + random(self.nPix) - 0.5
+        j = j.ravel() + random(self.nPix) - 0.5
+        F = np.outer(i, self.F)
+        S = np.outer(j, self.S)
+        V = self.T + F + S
+        B = np.outer(np.ones(self.nPix), self.B) + randn(self.nPix, 3) * self.beam.divergence
+        K = vecNorm(V) - vecNorm(B)
+        lam = self.beam.wavelength * (1 + randn(self.nPix) * self.beam.spectralWidth)
+        return 2 * np.pi * K / np.outer(lam, np.ones(3))
 
     @property
     def stol(self):
@@ -662,6 +682,22 @@ class panelList(list):
         """ Concatenated reciprocal-space vectors."""
 
         return 2 * np.pi * self.K / self.beam.wavelength
+
+    @property
+    def mcQ(self):
+
+        """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident 
+            beam direction for each pixel independently. """
+
+        q = np.empty((self.nPix, 3))
+
+        n = 0
+        for p in self:
+            nPix = p.nPix
+            q[n:(n + nPix), :] = p.mcQ.reshape((nPix, 3))
+            n += nPix
+
+        return q
 
     @property
     def stol(self):
