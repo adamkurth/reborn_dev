@@ -19,7 +19,8 @@ class molecule(object):
         self.R = None  # Rotation of this molecule
         self.T = None  # Translation of this molecule
         self._photonEnergy = None  # Photon energy corresponding to scattering factors
-        self.dtype = np.float64
+        self.float = np.float64
+        self.int = np.int64
 
     @property
     def r(self):
@@ -31,7 +32,7 @@ class molecule(object):
     @r.setter
     def r(self, r):
 
-        self._r = self.dtype(r)
+        self._r = self.float(r)
 
     @property
     def elem(self):
@@ -57,38 +58,38 @@ class molecule(object):
         if self._Z is None:
             if self.elem is None:
                 raise ValueError("Elements are not defined.")
-            self._Z = array([xraylib.SymbolToAtomicNumber(elem) for elem in self.elem])
+            self._Z = self.int(array([xraylib.SymbolToAtomicNumber(elem) for elem in self.elem]))
 
         return self._Z
 
-    def f(self, photonEnergy):
-
-        """ Atomic scattering factors for a particular photon energy. """
-
-        if photonEnergy != self._photonEnergy:
-            self._photonEnergy = photonEnergy
-            self._f = None
-
-        if self._f is None:
-            if self.Z is not None:
-                ev = photonEnergy / utils.joulesPerEv
-                self._f = array([complex(Z + xraylib.Fi(Z, ev), xraylib.Fii(Z, ev)) for Z in self._Z])
-
-        return self._f
+#     def f(self, photonEnergy):
+#
+#         """ Atomic scattering factors for a particular photon energy. """
+#
+#         if photonEnergy != self._photonEnergy:
+#             self._photonEnergy = photonEnergy
+#             self._f = None
+#
+#         if self._f is None:
+#             if self.Z is not None:
+#                 ev = photonEnergy / utils.joulesPerEv
+#                 self._f = array([self.float(complex(Z + xraylib.Fi(Z, ev)), self.float(xraylib.Fii(Z, ev))) for Z in self._Z])
+#
+#         return self._f
 
     def nAtoms(self):
 
         """ Number of atoms """
 
-        return len(self.r)
+        return self.int(len(self.r))
 
     def groupedElements(self):
 
         """ Return coordinates for each element """
 
-        e = np.unique(self.elem)
-        r = [self.r[self.elem == ee] for ee in e]
-        return (r, e)
+        uZ = np.unique(self.Z)
+        r = [self.r[self.Z == Z, :] for Z in uZ]
+        return (r, uZ)
 
     def r_t(self):
 
@@ -102,7 +103,7 @@ class molecule(object):
         if self.T is not None:
             r = r + self.T
 
-        return r
+        return self.float(r)
 
     def fromPdb(self, pdbFile):
 

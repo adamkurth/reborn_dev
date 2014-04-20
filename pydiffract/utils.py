@@ -40,9 +40,15 @@ def vecNorm(V):
 
     v = V
     if v.ndim != 2:
-            raise ValueError("V must have one or two dimensions.")
+        raise ValueError("V must have one or two dimensions.")
     n = np.sqrt(np.sum(V * V, axis=1))
     return (V.T / n).T
+
+def vecMag(V):
+
+    if V.ndim != 2:
+        raise ValueError("V must have one or two dimensions.")
+    return np.sqrt(np.sum(V * V, axis=1))
 
 def warn(message):
 
