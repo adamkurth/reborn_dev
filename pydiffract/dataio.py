@@ -76,7 +76,7 @@ class h5v1Reader(object):
         # so the code gets ugly here...
         prevDataField = self.plan[0].dataField
         dset = f[prevDataField]
-        dat = np.array(dset, dtype=panelList[0].dtype)
+        dat = np.array(dset)
 
         for i in range(len(panelList)):
 
@@ -92,7 +92,7 @@ class h5v1Reader(object):
                 thisDataField = h.dataField
                 if thisDataField != prevDataField:
                     dset = f[thisDataField]
-                    dat = np.array(dset, dtype=p.dtype)
+                    dat = np.array(dset)
                 prevDataField = thisDataField
                 fmin = h.fRange[0]
                 fmax = h.fRange[1] + 1
@@ -137,7 +137,7 @@ class diproiReader(detector.panelList):
 
         self.filePath = self.fileList[frameNumber]
         f = h5py.File(self.filePath, "r")
-        self[0].data = np.array(f[self.dataField], dtype=self[0].dtype)
+        self[0].data = np.array(f[self.dataField])
         f.close()
 
 
