@@ -35,11 +35,6 @@ class panel(object):
         self._geometryHash = None  # Hash of the configured geometry parameters
         self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_geometryHash']  # Default values of these are 'None'
 
-        # Other internal data
-        self.dtype = np.float64  # Choose the data type (this may go away)
-        self.float = np.float64
-        self.int = np.int64
-
         # If this panel is a part of a list
         self.panelList = None  # This is the link to the panel list
 
@@ -97,7 +92,7 @@ class panel(object):
     @data.setter
     def data(self, val):
 
-        self._data = self.dtype(val)
+        self._data = val
 
     @property
     def beam(self):
@@ -128,7 +123,7 @@ class panel(object):
 
         if self._nF is 0:
             if self.data is not None:
-                self.nF = self.int(self.data.shape[1])
+                self.nF = self.data.shape[1]
         return self._nF
 
     @nF.setter
@@ -137,7 +132,7 @@ class panel(object):
         """ Changing the fast-scan pixel count destroys all derived geometry data, and 
         any unmatched intensity data."""
 
-        self._nF = self.int(val)
+        self._nF = np.int(val)
         self.deleteGeometryData()
         if self.data is not None:
             if self.data.shape[1] != self._nF:
@@ -150,7 +145,7 @@ class panel(object):
 
         if self._nS is 0:
             if self.data is not None:
-                self._nS = self.int(self.data.shape[0])
+                self._nS = self.data.shape[0]
         return self._nS
 
     @nS.setter
@@ -159,7 +154,7 @@ class panel(object):
         """ Changing the fast-scan pixel count destroys all derived geometry data, and 
         any unmatched intensity data."""
 
-        self._nS = self.int(val)
+        self._nS = np.int(val)
         self.deleteGeometryData()
         if self.data is not None:
             if self.data.shape[0] != self._nS:
@@ -174,15 +169,15 @@ class panel(object):
         if self._pixSize is None:
             p1 = norm(self.F)
             p2 = norm(self.S)
-            if abs(p1 - p2) / float(p2) > 1e-6 or abs(p1 - p2) / float(p1) > 1e-6:
+            if abs(p1 - p2) / np.float(p2) > 1e-6 or abs(p1 - p2) / np.float(p1) > 1e-6:
                 raise ValueError("Pixel size is not consistent between F and S vectors (%10f, %10f)." % (p1, p2))
-            self._pixSize = self.float(np.mean([p1, p2]))
+            self._pixSize = np.mean([p1, p2])
         return self._pixSize.copy()
 
     @pixSize.setter
     def pixSize(self, val):
 
-        val = self.float(val)
+        val = val
         pf = norm(self.F)
         ps = norm(self.S)
         self.F *= val / pf
@@ -209,7 +204,7 @@ class panel(object):
         """ Must be a numpy ndarray of length 3."""
 
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
-            self._F = self.float(val)
+            self._F = val
             self.deleteGeometryData()
         else:
             raise ValueError("F must be a numpy ndarray of length 3.")
@@ -227,7 +222,7 @@ class panel(object):
         """ Must be a numpy ndarray of length 3."""
 
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
-            self._S = self.float(val)
+            self._S = val
             self.deleteGeometryData()
         else:
             raise ValueError("S must be a numpy array of length 3.")
@@ -245,7 +240,7 @@ class panel(object):
         """ Must be an ndarray of length 3."""
 
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
-            self._T = self.float(val)
+            self._T = val
             self.deleteGeometryData()
         else:
             raise ValueError("Must be a numpy array of length 3.")
@@ -287,7 +282,7 @@ class panel(object):
         if self.beam.wavelength is None:
             raise ValueError("No wavelength is defined.  Cannot compute Q vectors.")
 
-        return self.float(2.0 * np.pi * self.K / self.beam.wavelength)
+        return 2.0 * np.pi * self.K / self.beam.wavelength
 
     @property
     def stol(self):
@@ -297,7 +292,7 @@ class panel(object):
         if self.beam.wavelength is None:
             raise ValueError("No wavelength is defined.  Cannot compute stol.")
 
-        return self.float(0.5 * vecMag(self.K) / self.beam.wavelength)
+        return 0.5 * vecMag(self.K) / self.beam.wavelength
 
 
     @property
@@ -306,7 +301,7 @@ class panel(object):
         """ Normal vector to panel surface (F X S)."""
 
         N = np.cross(self.F, self.S)
-        return self.float(N / norm(N))
+        return N / norm(N)
 
     @property
     def solidAngle(self):
@@ -318,7 +313,7 @@ class panel(object):
             n = self.N
             V2 = np.sum(self.V ** 2, axis=-1)
             A = norm(np.cross(self.F, self.S))
-            self._sa = self.float(A / V2 * np.dot(v, n))
+            self._sa = A / V2 * np.dot(v, n)
 
         return self._sa
 
@@ -333,7 +328,7 @@ class panel(object):
         if self._pf is None:
             p = self.beam.P
             u = vecNorm(self.V)
-            self._pf = self.float(1.0 - np.abs(u.dot(p)) ** 2)
+            self._pf = 1.0 - np.abs(u.dot(p)) ** 2
 
         return self._pf
 
@@ -393,7 +388,7 @@ class panel(object):
         [i, j] = np.meshgrid(i, j)
         i.ravel()
         j.ravel()
-        self._V = self.float(self.pixelsToVectors(j, i))
+        self._V = self.pixelsToVectors(j, i)
 
     def pixelsToVectors(self, j, i):
 
@@ -402,13 +397,13 @@ class panel(object):
         F = np.outer(i, self.F)
         S = np.outer(j, self.S)
         V = self.T + F + S
-        return self.float(V)
+        return V
 
     def computeReciprocalSpaceGeometry(self):
 
         """ Compute the reciprocal-space scattering vectors, multiplied by wavelength."""
 
-        self._K = self.float(vecNorm(self.V) - self.B)
+        self._K = vecNorm(self.V) - self.B
 
     def deleteGeometryData(self):
 
@@ -439,13 +434,13 @@ class panel(object):
             i.append(i[0])
             j.append(j[0])
 
-        return self.float(self.pixelsToVectors(i, j))
+        return self.pixelsToVectors(i, j)
 
     def getCenter(self):
 
         """ Vector to center of panel."""
 
-        return self.float(np.mean(self.getVertices(), axis=0))
+        return np.mean(self.getVertices(), axis=0)
 
     @property
     def realSpaceBoundingBox(self):
@@ -461,7 +456,7 @@ class panel(object):
             r = np.zeros((2, 3))
             r[0, :] = np.min(v, axis=0)
             r[1, :] = np.max(v, axis=0)
-            self._rsbb = self.float(r)
+            self._rsbb = r
 
         return self._rsbb.copy()
 
