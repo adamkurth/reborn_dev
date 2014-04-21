@@ -98,24 +98,27 @@ class panel(object):
     @property
     def beam(self):
 
-        """ X-ray beam data. If it doesn't exist, return the beam data from parent panel list."""
+        """ X-ray beam data, taken from parent panel list if one exists."""
 
-        beam = self._beam
-
-        if beam is None:
-            if self.panelList.beam is not None:
-                beam = self.panelList.beam
-            else:
-                beam = None
+        if self.panelList is not None:
+            beam = self.panelList._beam
+            self._beam = None
+        else:
+            beam = self._beam
 
         return beam
 
     @beam.setter
-    def beam(self, val):
+    def beam(self, beam):
 
-        if not isinstance(val, source.beam):
+        if not isinstance(beam, source.beam):
             raise TypeError("Beam info must be a source.beam class")
-        self._beam = val
+
+        if self.panelList is not None:
+            self.panelList._beam = beam
+            self._beam = None
+        else:
+            self._beam = beam
 
     @property
     def nF(self):
@@ -573,31 +576,27 @@ class panelList(list):
     @property
     def beam(self):
 
-        """ X-ray beam data.  If it doesn't exist, try to get it from the first panel. """
+        """ X-ray beam data. """
 
         if self._beam is None:
-            if len(self) == 0:
-                self.beam = source.beam()
-            else:
-                self.beam = self[0].beam
+            self._beam = source.beam()
+
         return self._beam
 
     @beam.setter
-    def beam(self, value):
+    def beam(self, beam):
 
-        if not isinstance(value, source.beam):
+        if not isinstance(beam, source.beam):
             raise TypeError("Beam info must be a source.beam class")
-        self._beam = value
+
+        self._beam = beam
 
     @property
     def nPix(self):
 
         """ Total number of pixels in all panels."""
 
-        ntot = 0
-        for p in self:
-            ntot += p.nPix
-        return ntot
+        return np.sum([p.nPix for p in self])
 
     @property
     def nPanels(self):
@@ -615,10 +614,19 @@ class panelList(list):
         if not isinstance(p, panel):
             raise TypeError("You may only append panels to a panelList object")
         p.panelList = self
+
+        # Create name if one doesn't exist
         if name != "":
             p.name = name
         else:
             p.name = "%d" % len(self)
+
+        # Inherit first beam from append
+        if self._beam is None:
+            self._beam = p.beam
+
+        p._beam = None
+
         super(panelList, self).append(p)
 
     def getPanelIndexByName(self, name):
@@ -645,16 +653,8 @@ class panelList(list):
         """ Concatenated pixel position."""
 
         if self._V is None:
-            self._V = np.empty((self.nPix, 3))
 
-        n = 0
-        for p in self:
-            if p.V.base is self._V:
-                continue
-            nPix = p.nPix
-            self._V[n:(n + nPix), :] = p._V.reshape((nPix, 3))
-            # p._V = self._V[n:(n + nPix)].reshape((nS, nF, 3))
-            n += nPix
+            self._V = np.concatenate([p.V.reshape(np.product(p.V.shape) / 3, 3) for p in self])
 
         return self._V
 
@@ -664,15 +664,8 @@ class panelList(list):
         """ Concatenated reciprocal-space vectors."""
 
         if self._K is None or self._K.shape[0] != self.nPix:
-            self._K = np.empty((self.nPix, 3))
 
-        n = 0
-        for p in self:
-            if p.K.base is self._K:
-                continue
-            nPix = p.nPix
-            self._K[n:(n + nPix), :] = p._K.reshape((nPix, 3))
-            n += nPix
+            self._K = np.concatenate([p.K.reshape(np.product(p.K.shape) / 3, 3) for p in self])
 
         return self._K
 
@@ -689,15 +682,7 @@ class panelList(list):
         """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident 
             beam direction for each pixel independently. """
 
-        q = np.empty((self.nPix, 3))
-
-        n = 0
-        for p in self:
-            nPix = p.nPix
-            q[n:(n + nPix), :] = p.mcQ.reshape((nPix, 3))
-            n += nPix
-
-        return q
+        return np.concatenate([p.mcQ.reshape(np.product(p.mcQ.shape) / 3, 3) for p in self])
 
     @property
     def stol(self):
@@ -705,9 +690,10 @@ class panelList(list):
         """ sin(theta)/lambda, where theta is the half angle """
 
         if self.beam.wavelength is None:
+
             raise ValueError("No wavelength is defined.  Cannot compute stol.")
 
-        return 0.5 * vecMag(self.K) / self.beam.wavelength
+        return 0.5 * vecMag(self.K) / self.wavelength
 
     @property
     def data(self):
@@ -716,18 +702,7 @@ class panelList(list):
 
         if self._data is None:
 
-            data = np.empty(self.nPix)
-
-            n = 0
-            for p in self:
-                nPix = p.nPix
-                nF = p.nF
-                nS = p.nS
-                data[n:(n + nPix)] = p.data.ravel()
-                p.data = data[n:(n + nPix)].reshape((nS, nF))
-                n += nPix
-
-            self._data = data
+            self._data = np.concatenate([p.data.reshape(np.product(p.data.shape)) for p in self])
 
         return self._data
 
@@ -765,14 +740,9 @@ class panelList(list):
         """ Concatenated solid angles."""
 
         if self._sa == None:
-            sa = np.empty(self.nPix)
-            n = 0
-            for p in self:
-                nPix = p.nPix
-                sa[n:(n + nPix)] = p.solidAngle.ravel()
-                n += nPix
-            self._sa = sa
-            p._sa = p._sa.reshape((p.nS, p.nF))
+
+            self._sa = np.concatenate([p.solidAngle.reshape(np.product(p.solidAngle.shape)) for p in self])
+
         return self._sa
 
     @property
@@ -781,14 +751,9 @@ class panelList(list):
         """ Concatenated polarization factors."""
 
         if self._pf == None:
-            pf = np.empty(self.nPix)
-            n = 0
-            for p in self:
-                nPix = p.nPix
-                pf[n:(n + nPix)] = p.polarizationFactor.ravel()
-                n += nPix
-            self._pf = pf
-            p._pf = p._pf.reshape((p.nS, p.nF))
+
+            self._pf = np.concatenate([p.polarizationFactor.reshape(np.product(p.polarizationFactor.shape)) for p in self])
+
         return self._pf
 
     @property

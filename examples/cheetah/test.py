@@ -83,7 +83,7 @@ def test_print(pa, verbose=True):
     print(pa)
 
 pl = dataio.h5Reader()
-pl = dataio.crystfelToPanelList("example1.geom", panelList=pl)
+pl.loadCrystfel(geomFile="example1.geom")
 pl.fileList = ["example1.h5"]
 pl.getFrame(0)
 
