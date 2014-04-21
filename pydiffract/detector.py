@@ -26,6 +26,7 @@ class panel(object):
         self.aduPerEv = 0  # Number of arbitrary data units per eV of photon energy
         self._beam = source.beam()  # Container for x-ray beam information
         self._data = None  # Diffraction intensity data
+        self._mask = None
 
         # Derived parameters
         self._pixSize = None  # Pixel size derived from F/S vectors
@@ -94,6 +95,18 @@ class panel(object):
     def data(self, val):
 
         self._data = val
+
+    @property
+    def mask(self):
+
+        """ Bad pixel mask. """
+
+        return self._mask
+
+    @mask.setter
+    def mask(self, mask):
+
+        self._mask = mask
 
     @property
     def beam(self):
@@ -723,6 +736,33 @@ class panelList(list):
             n += nPix
 
     @property
+    def mask(self):
+
+        """ Concatenated mask."""
+
+        if self._mask is None:
+
+            self._mask = np.concatenate([p.mask.reshape(np.product(p.mask.shape)) for p in self])
+
+        return self._mask
+
+    @mask.setter
+    def mask(self, mask):
+
+        """ Check that mask is of the correct type."""
+
+        if not isinstance(mask, np.ndarray) and mask.ndim == 1 and mask.size == self.nPix:
+            raise ValueError("Must be flattened ndarray of size %d" % self.nPix)
+
+        self._mask = mask
+        n = 0
+        for p in self:
+            nPix = p.nPix
+            p.mask = mask[n:(n + nPix)]
+            p.mask = p.mask.reshape((p.nS, p.nF))
+            n += nPix
+
+    @property
     def wavelength(self):
 
         return self.beam.wavelength
@@ -882,3 +922,21 @@ class panelList(list):
         p = panel()
         p.simpleSetup(nF, nS, pixSize, distance, T, wavelength)
         self.append(p)
+
+    def radialProfile(self):
+
+        q = self.Q / 2 / np.pi
+        qmag = vecMag(q)
+        maxq = np.max(qmag)
+
+        qbin = maxq / 99
+        bins = np.int64(np.floor(qmag / qbin))
+
+        c = np.bincount(bins)
+        c = c.astype(np.double)
+        c[c == 0] = 1e100
+        c[np.isnan(c)] = 1e100
+        pr = np.bincount(bins, self.data)
+        pr /= c
+
+        return pr

@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-from pydiffract import dataio
-# import numpy as np
+from pydiffract import dataio, utils
+import numpy as np
 # from timeit import timeit
 # import cProfile
 # import pstats
 from pylab import *
+
 
 def test_all(pa):
 
@@ -87,6 +88,9 @@ pl.loadCrystfel(geomFile="example1.geom")
 pl.fileList = ["example1.h5"]
 pl.getFrame(0)
 
+p = pl.radialProfile()
+plot(p)
+show()
 test_all(pl)
 
 
