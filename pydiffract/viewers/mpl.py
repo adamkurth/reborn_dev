@@ -133,7 +133,7 @@ class mplPanelView(object):
 
         if self.img is None:
             self.img = self.im_ax.imshow(self.image)
-            self.img.set_interpolation('none')
+            self.img.set_interpolation('nearest')
 #            self.img.set_cmap(self.cmap)
             self.fig.show()
         else:

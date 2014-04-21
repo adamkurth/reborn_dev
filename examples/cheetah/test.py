@@ -82,10 +82,15 @@ def test_print(pa, verbose=True):
 
     print(pa)
 
-[pa, reader] = dataio.crystfelToPanelList("example1.geom")
-reader.getShot(pa, "example1.h5")
+pl = dataio.h5Reader()
+pl = dataio.crystfelToPanelList("example1.geom", panelList=pl)
+pl.fileList = ["example1.h5"]
+pl.getFrame(0)
 
-test_all(pa)
+test_all(pl)
+
+
+
 
 # adat = pa.assembledData()
 #

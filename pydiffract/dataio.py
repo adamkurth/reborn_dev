@@ -4,104 +4,77 @@ import copy
 from pydiffract import detector
 
 
-class h5v1Plan(object):
 
-    """ A container for the various information needed to pull 
-    out the data corresponding to a detector panel."""
-
-    def __init__(self):
-
-        self.fRange = [0, 0]
-        self.sRange = [0, 0]
-        self.dataField = None
-        self.wavelengthField = None
-        self.detOffsetField = None
-
-    def __str__(self):
-
-        s = ""
-        s += "fRange : [%d, %d]\n" % (self.fRange[0], self.fRange[1])
-        s += "sRange : [%d, %d]\n" % (self.sRange[0], self.sRange[1])
-        if self.dataField is not None:
-            s += "dataField : %s\n" % self.dataField
-        if self.wavelengthField is not None:
-            s += "wavelengthField : %s\n" % self.wavelengthField
-        if self.detOffsetField is not None:
-            s += "detOffsetField : %s" % self.detOffsetField
-        return s
-
-    def check(self):
-
-        if self.fRange[1] == 0:
-            return False
-        if self.sRange[1] == 0:
-            return False
-        if self.dataField == "":
-            return False
-        return True
-
-
-class h5v1Reader(object):
+class h5Reader(detector.panelList):
 
     """ Read an hdf5 file with "cheetah" format """
 
     def __init__(self):
 
-        self.plan = None
-        self.nFrames = 1
+        super(h5Reader, self).__init__()
 
-    def setPlan(self, plan):
+        self.filePath = None
+        self.fileList = None
 
-        self.plan = plan
+    def deepcopy(self):
 
-    def getShot(self, panelList, filePath):
+        pa = copy.deepcopy(self)
 
-        self.getFrame(panelList, filePath)
+        return pa
 
+    @property
+    def nFrames(self):
 
-    def getFrame(self, panelList, filePath):
+        if self.fileList is None:
+            return 0
+
+        return len(self.fileList)
+
+    def loadFileList(self, fileList):
+
+        self.fileList = loadFileList(fileList)
+
+    def loadCrystfel(self, geomFile=None, beamFile=None):
+
+        crystfelToPanelList(geomFile=geomFile, beamFile=beamFile, panelList=self)
+
+    def getFrame(self, frameNumber=0):
 
         """ Populate a panel list with image data. """
 
-        if self.plan is None:
-            raise ValueError("You don't have a data reading plan!")
-
-        if len(panelList) != len(self.plan):
-            raise ValueError("Length of panel list does not match data reading plan!")
+        filePath = self.fileList[frameNumber]
 
         f = h5py.File(filePath, "r")
 
         # each panel could come from a different data set within the hdf5
         # we don't want to load the data set each time, since that's slow...
         # so the code gets ugly here...
-        prevDataField = self.plan[0].dataField
+        prevDataField = self[0].dataField
         dset = f[prevDataField]
         dat = np.array(dset)
 
-        for i in range(len(panelList)):
+        for p in self:
 
-            p = panelList[i]
-            h = self.plan[i]
             # Load wavelength from hdf5 file
-            if h.wavelengthField is not None:
-                p.beam.wavelength = f[h.wavelengthField].value[0] * 1e-10
+            if p.wavelengthField is not None:
+                p.beam.wavelength = f[p.wavelengthField].value[0] * 1e-10
             # Load camera length
-            if h.detOffsetField is not None:
-                p.T[2] += f[h.detOffsetField].value[0] * 1e-3
-            if h.dataField is not None:
-                thisDataField = h.dataField
+            if p.detOffsetField is not None:
+                p.T[2] += f[p.detOffsetField].value[0] * 1e-3
+            if p.dataField is not None:
+                thisDataField = p.dataField
                 if thisDataField != prevDataField:
                     dset = f[thisDataField]
                     dat = np.array(dset)
                 prevDataField = thisDataField
-                fmin = h.fRange[0]
-                fmax = h.fRange[1] + 1
-                smin = h.sRange[0]
-                smax = h.sRange[1] + 1
+                fmin = p.fRange[0]
+                fmax = p.fRange[1] + 1
+                smin = p.sRange[0]
+                smax = p.sRange[1] + 1
                 p.data = dat[smin:smax, fmin:fmax]
 
-
         f.close()
+
 
 
 class diproiReader(detector.panelList):
@@ -340,7 +313,10 @@ def loadFileList(fileList):
     return [i.strip() for i in open(fileList).readlines()]
 
 
-def crystfelToPanelList(geomFilePath=None, beamFilePath=None):
+
+
+
+def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
 
     """ Convert a crystfel "geom" file into a panel list """
 
@@ -349,10 +325,11 @@ def crystfelToPanelList(geomFilePath=None, beamFilePath=None):
                     "min_fs", "max_fs", "min_ss", "max_ss",
                     "clen", "coffset", "res", "adu_per_eV"])
 
-    if geomFilePath is None:
+    # Geometry file is required
+    if geomFile is None:
         raise ValueError("No geometry file specified")
 
-    h = open(geomFilePath, "r")
+    h = open(geomFile, "r")
 
     # Global settings affecting all panels
     global_coffset = None
@@ -360,17 +337,22 @@ def crystfelToPanelList(geomFilePath=None, beamFilePath=None):
     global_clen = None
     global_adu_per_ev = None
 
-    pa = detector.panelList()
-    ra = []
-    pixSize = np.ones(10000)
+    if panelList is None:
+        pa = h5Reader()
+    else:
+        pa = panelList
+
+    # Place holder for pixel sizes
+    pixSize = np.zeros(10000)
 
     for line in h:
 
+        # Search for appropriate lines
         line = line.split("=")
-
         if len(line) != 2:
             continue
 
+        # Split key/values
         value = line[1].strip()
         key = line[0].strip()
 
@@ -390,28 +372,32 @@ def crystfelToPanelList(geomFilePath=None, beamFilePath=None):
         if len(key) != 2:
             continue
 
+        # Split name from key/value pairs
         name = key[0].strip()
         key = key[1].strip()
 
+        # Skip unknown panel-specific key
         if not key in all_keys:
             continue
 
         # Get index of this panel
         i = pa.getPanelIndexByName(name)
-
         # If it is a new panel:
         if i is None:
             pa.append()
             p = pa[len(pa) - 1]
-            ra.append(h5v1Plan())
-            r = ra[len(pa) - 1]
             p.name = name
-            p.T = np.zeros(3)
             p.F = np.zeros(3)
             p.S = np.zeros(3)
+            p.T = np.zeros(3)
+            # add some extra attributes to the panel object
+            p.fRange = [0, 0]
+            p.sRange = [0, 0]
+            p.dataField = None
+            p.wavelengthField = None
+            p.detOffsetField = None
         else:
             p = pa[i]
-            r = ra[i]
 
         # Parse the simple keys
         if key == "corner_x":
@@ -419,13 +405,13 @@ def crystfelToPanelList(geomFilePath=None, beamFilePath=None):
         if key == "corner_y":
             p.T[1] = float(value)
         if key == "min_fs":
-            r.fRange[0] = int(value)
+            p.fRange[0] = int(value)
         if key == "max_fs":
-            r.fRange[1] = int(value)
+            p.fRange[1] = int(value)
         if key == "min_ss":
-            r.sRange[0] = int(value)
+            p.sRange[0] = int(value)
         if key == "max_ss":
-            r.sRange[1] = int(value)
+            p.sRange[1] = int(value)
         if key == "coffset":
             p.T[2] = float(value)
         if key == "res":
@@ -443,30 +429,21 @@ def crystfelToPanelList(geomFilePath=None, beamFilePath=None):
 
     h.close()
 
+    pa.beam.B = np.array([0, 0, 1])
 
-
-    for i in range(len(pa)):
-
-        p = pa[i]
-        r = ra[i]
-
-        # Link array beam to panel beam
-        p.beam = pa.beam
+    for p in pa:
 
         # These are defaults
-        r.dataField = "/data/rawdata0"
-        r.wavelengthField = "/LCLS/photon_wavelength_A"
-        p.beam.B = np.array([0, 0, 1])
+        p.dataField = "/data/rawdata0"
+        p.wavelengthField = "/LCLS/photon_wavelength_A"
 
         # Unit conversions
         p.T = p.T * pixSize[i]
-        p.pixSize = pixSize[i]  # (this modifies F and S vectors)
-#         p.F = p.F * pixSize[i]
-#         p.S = p.S * pixSize[i]
+        p.pixSize = pixSize[i]
 
         # Data array size
-        p.nF = r.fRange[1] - r.fRange[0] + 1
-        p.nS = r.sRange[1] - r.sRange[0] + 1
+        p.nF = p.fRange[1] - p.fRange[0] + 1
+        p.nS = p.sRange[1] - p.sRange[0] + 1
 
         # Check for extra global configurations
         if global_adu_per_ev is not None:
@@ -474,14 +451,11 @@ def crystfelToPanelList(geomFilePath=None, beamFilePath=None):
         if global_clen is not None:
             p.T[2] += global_clen
         if global_clen_field is not None:
-            r.detOffsetField = global_clen_field
+            p.detOffsetField = global_clen_field
         if global_coffset is not None:
             p.T[2] += global_coffset
 
-    reader = h5v1Reader()
-    reader.setPlan(ra)
-
-    return [pa, reader]
+    return pa
 
 
 
