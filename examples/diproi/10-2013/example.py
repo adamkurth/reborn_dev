@@ -22,6 +22,6 @@ print(pa)
 # Assemble the data for viewing
 im = pa.assembledData
 # View the data
-plt.imshow(im, interpolation='none', cmap='gray')
+plt.imshow(im, interpolation='nearest', cmap='gray')
 plt.show()
 

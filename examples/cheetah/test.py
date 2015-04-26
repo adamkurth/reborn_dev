@@ -5,7 +5,8 @@ import numpy as np
 # from timeit import timeit
 # import cProfile
 # import pstats
-from pylab import *
+import matplotlib.pyplot as plt
+#from pylab import *
 
 
 def test_all(pa):
@@ -69,8 +70,8 @@ def test_assemble(pa, verbose=False):
     adat = pa.assembledData
     if verbose == True:
         adat[adat < 0] = 0
-        imshow(log(adat + 100), interpolation='nearest', cmap='gray')
-        show()
+        plt.imshow(np.log(adat + 100), interpolation='nearest', cmap='gray')
+        plt.show()
     print("Pass")
 
 def test_polarization_factor(pa, verbose=False):
@@ -89,8 +90,8 @@ pl.fileList = ["example1.h5"]
 pl.getFrame(0)
 
 p = pl.radialProfile()
-plot(p)
-show()
+plt.plot(p)
+plt.show()
 test_all(pl)
 
 

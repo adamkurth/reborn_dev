@@ -6,9 +6,9 @@ Some useful utility functions for pydiffract
 
 import sys
 import numpy as np
-from Scientific.Geometry.Quaternion import Quaternion
-from Scientific.Geometry import Tensor
-from Scientific.Geometry.Transformation import Rotation
+#from Scientific.Geometry.Quaternion import Quaternion
+#from Scientific.Geometry import Tensor
+#from Scientific.Geometry.Transformation import Rotation
 
 c = 299792458  # Speed of light
 h = 6.62606957e-34  # Planck constant
@@ -141,26 +141,26 @@ def kabschRotation(Vi1, Vi2):
 #     return np.transpose(R)
 
 
-def randomRotationMatrix():
+#def randomRotationMatrix():
+#
+#    """ Create a random rotation matrix."""
+#
+#    q = Quaternion(np.random.rand(4))
+#    q = q.normalized()
+#    R = q.asRotation()
+#    return R.tensor.array
 
-    """ Create a random rotation matrix."""
 
-    q = Quaternion(np.random.rand(4))
-    q = q.normalized()
-    R = q.asRotation()
-    return R.tensor.array
-
-
-def axisAndAngle(R):
-
-    """ Rotation angle and axis from rotation matrix."""
-
-    sR = R.copy()
-    T = Tensor(sR)
-    sR = Rotation(T)
-    V, phi = sR.axisAndAngle()
-    VV = np.array([[V.x(), V.y(), V.z()]])
-    return VV, phi
+#def axisAndAngle(R):
+#
+#    """ Rotation angle and axis from rotation matrix."""
+#
+#    sR = R.copy()
+#    T = Tensor(sR)
+#    sR = Rotation(T)
+#    V, phi = sR.axisAndAngle()
+#    VV = np.array([[V.x(), V.y(), V.z()]])
+#    return VV, phi
 
 def axisAndAngleToMatrix(axis, angle):
 

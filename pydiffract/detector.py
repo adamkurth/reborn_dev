@@ -599,6 +599,8 @@ class panelList(list):
     @beam.setter
     def beam(self, beam):
 
+        """ X-ray beam data setter. """
+
         if not isinstance(beam, source.beam):
             raise TypeError("Beam info must be a source.beam class")
 
