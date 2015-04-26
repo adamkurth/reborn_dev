@@ -76,6 +76,42 @@ class h5Reader(detector.panelList):
         f.close()
 
 
+def loadCheetahH5(pl, filePath):
+
+    f = h5py.File(filePath, "r")
+
+    # each panel could come from a different data set within the hdf5
+    # we don't want to load the data set each time, since that's slow...
+    # so the code gets ugly here...
+    prevDataField = pl[0].dataField
+    dset = f[prevDataField]
+    dat = np.array(dset)
+
+    for p in pl:
+
+        # Load wavelength from hdf5 file
+        if p.wavelengthField is not None:
+            p.beam.wavelength = f[p.wavelengthField].value[0] * 1e-10
+
+        # Load camera length
+        if p.detOffsetField is not None:
+            p.T[2] += f[p.detOffsetField].value[0] * 1e-3
+
+        if p.dataField is not None:
+            thisDataField = p.dataField
+            if thisDataField != prevDataField:
+                dset = f[thisDataField]
+                dat = np.array(dset)
+            prevDataField = thisDataField
+            fmin = p.fRange[0]
+            fmax = p.fRange[1] + 1
+            smin = p.sRange[0]
+            smax = p.sRange[1] + 1
+            p.data = dat[smin:smax, fmin:fmax]
+
+    f.close()
+
+
 
 class diproiReader(detector.panelList):
 
@@ -320,6 +356,25 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
 
     """ Convert a crystfel "geom" file into a panel list """
 
+
+
+    # For parsing the very loose fast/slow scan vector specification
+    def splitxysum(s):
+
+        s = s.strip()
+        coords = list("".join(i for i in s if i in "xyz"))
+        vals = {}
+        for coord in coords:
+            s = s.split(coord)
+            vals[coord] = float(s[0].replace(" ", ""))
+            s = s[1]
+
+        vec = [vals['x'], vals['y'], 0]
+        if len(vals) > 2:
+            vec[2] = vals['z']
+
+        return vec
+
     # All panel-specific keys that are recognized
     all_keys = set(["fs", "ss", "corner_x", "corner_y",
                     "min_fs", "max_fs", "min_ss", "max_ss",
@@ -336,6 +391,7 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
     global_clen_field = None
     global_clen = None
     global_adu_per_ev = None
+    global_res = None
 
     if panelList is None:
         pa = h5Reader()
@@ -366,6 +422,8 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
                 global_clen_field = value
         if key == "adu_per_eV":
             global_adu_per_ev = float(value)
+        if key == 'res':
+            global_res = float(value)
 
         # If not a global key, check for panel-specific keys
         key = key.split("/")
@@ -419,13 +477,11 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
 
         # Parse the more complicated keys
         if key == "fs":
-            value = value.split("y")[0].split("x")
-            p.F[0] = float(value[0].replace(" ", ""))
-            p.F[1] = float(value[1].replace(" ", ""))
+            vec = splitxysum(value)
+            p.F = np.array(vec)
         if key == "ss":
-            value = value.split("y")[0].split("x")
-            p.S[0] = float(value[0].replace(" ", ""))
-            p.S[1] = float(value[1].replace(" ", ""))
+            vec = splitxysum(value)
+            p.S = np.array(vec)
 
     h.close()
 
@@ -439,6 +495,8 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
 
         # Unit conversions
         p.T = p.T * pixSize[i]
+        if pixSize[i] == 0:
+            pixSize[i] = 1 / global_res
         p.pixSize = pixSize[i]
 
         # Data array size

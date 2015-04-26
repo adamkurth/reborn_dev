@@ -197,8 +197,8 @@ class panel(object):
         val = val
         pf = norm(self.F)
         ps = norm(self.S)
-        self.F *= val / pf
-        self.S *= val / ps
+        self._F *= val / pf
+        self._S *= val / ps
         self.deleteGeometryData()
 
     @property
