@@ -4,8 +4,8 @@ import pyopencl as cl
 
 def phaseFactor(q, r):
 
-    r = np.float32(r)
-    q = np.float32(q)
+    r = np.array(r, dtype=np.float32, order='C')
+    q = np.array(q, dtype=np.float32, order='C')
 
     ctx = cl.create_some_context()
     queue = cl.CommandQueue(ctx)

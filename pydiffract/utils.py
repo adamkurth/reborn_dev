@@ -63,6 +63,26 @@ def error(message):
 
     sys.stderr.write("ERROR: %s\n" % message)
 
+def rot1(angle):
+
+    """ Rotate about axis 1. """
+
+    return np.array([[0, np.cos(angle), -np.sin(angle)], [1, 0, 0], [0, np.sin(angle), np.cos(angle)]])
+
+
+def rot2(angle):
+
+    """ Rotate about axis 2. """
+
+    return np.array([[np.cos(angle), 0, -np.sin(angle)], [0, 1, 0], [np.sin(angle), 0, np.cos(angle)]])
+
+
+def rot3(angle):
+
+    """ Rotate about axis 2. """
+
+    return np.array([[np.cos(angle), -np.sin(angle), 0], [0, 0, 1], [np.sin(angle), np.cos(angle), 0]])
+
 
 def kabschRotation(Vi1, Vi2):
 
