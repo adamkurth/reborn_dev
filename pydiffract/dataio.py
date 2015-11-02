@@ -230,12 +230,13 @@ class frameGetter(object):
 
     """ Methods for getting data from a list of files. """
 
-    def __init__(self, reader=None, fileList=None):
+    def __init__(self, readers=[]):
 
         self._fileList = None
-        self._reader = None
+        self._readers = []
         self._frameNumber = -1
         self._nFrames = None
+        self._nReaders = nReaders
 
         if reader is not None:
             self.reader = reader
@@ -244,16 +245,24 @@ class frameGetter(object):
             self.fileList = fileList
 
     @property
-    def reader(self):
+    def nReaders(self):
+
+        """ How many readers are available. """
+
+        return len(self._nReaders)
+
+    @property
+    def readers(self):
 
         """ The reader class to be used when loading frame data. """
 
-        return self._reader
+        return self._readers
 
-    @reader.setter
-    def reader(self, value):
+    @readers.setter
+    def readers(self, value):
 
-        self._reader = value
+        self._readers = value
+
 
     @property
     def fileList(self):
@@ -267,6 +276,13 @@ class frameGetter(object):
 
         self._fileList = value
         self._nFrames = len(value)
+
+    def appendFileList(self, value):
+
+        """ Append to the existing file list. """
+
+        self._fileList += value
+        self.nFrames = len(value)
 
     @property
     def frameNumber(self):
@@ -295,6 +311,10 @@ class frameGetter(object):
 
         """ Load a file list.  Should be a text file, one full file path per line. """
 
+        if self.nFrames > 0:
+            self.appendFileList([i.strip() for i in open(fileList).readlines()])
+            return
+
         self.fileList = [i.strip() for i in open(fileList).readlines()]
 
     def getFrame(self, panelList, frameNumber=None):
@@ -315,7 +335,7 @@ class frameGetter(object):
             return False
 
         filePath = self.fileList[num]
-        self.reader.getFrame(pl, filePath)
+        self.readers[1].getFrame(pl, filePath)
 
         return num
 
