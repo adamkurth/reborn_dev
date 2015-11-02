@@ -532,6 +532,7 @@ class panelList(list):
         """ Create an empty panel array."""
 
         # Configured data
+        self._name = None  # The name of this list (useful for rigid groups)
         self._beam = None  # X-ray beam information, common to all panels
         # Derived data (concatenated from individual panels)
         self._data = None  # Concatenated intensity data
@@ -543,6 +544,7 @@ class panelList(list):
         self._vll = None  # Look-up table for simple projection
         self._rpix = None  # junk
         self._geometryHash = None  # Hash of geometries
+        self._rigidGroups = None  # Groups of panels that might be manipulated together
         self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix', '_geometryHash']  # Default values of these are 'None'
 
 
@@ -633,7 +635,7 @@ class panelList(list):
         # Create name if one doesn't exist
         if name != "":
             p.name = name
-        else:
+        elif p.name == "":
             p.name = "%d" % len(self)
 
         # Inherit first beam from append
@@ -768,6 +770,62 @@ class panelList(list):
     def wavelength(self):
 
         return self.beam.wavelength
+
+    @property
+    def name(self):
+
+        """ The name of this panel list """
+
+        return self._name
+
+    @name.setter
+    def name(self, name):
+
+        self._name = name
+
+    @property
+    def rigidGroups(self):
+
+        """ Groups of panels that one might like to manipulate together. """
+
+        return self._rigidGroups
+
+    def addRigidGroup(self, name, vals):
+
+        """ Append to the list of rigid groups. A rigid group is techically just
+         a truncated panel list pointing to members of the parent panel list.  """
+
+        if self._rigidGroups is None:
+            self._rigidGroups = []
+
+        pl = panelList()
+        pl.beam = self.beam
+        pl.name = name
+        for val in vals:
+            pl.append(self[val])
+            pl[-1].panelList = self
+        self._rigidGroups.append(pl)
+
+    def appendToRigidGroup(self, name, vals):
+
+        """ Append more panels to an existing rigid group. """
+
+        g = self.rigidGroup(name)
+        for val in vals:
+            g.append(val)
+
+    def rigidGroup(self, name):
+
+        """ Get a rigid group by name. """
+
+        thisGroup = None
+        for g in self.rigidGroups:
+            if g.name == name:
+                thisGroup = g
+                break
+
+        return thisGroup
+
 
     @wavelength.setter
     def wavelength(self, val):

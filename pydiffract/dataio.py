@@ -2,7 +2,7 @@ import h5py
 import numpy as np
 import copy
 from pydiffract import detector
-
+import re
 
 
 class h5Reader(detector.panelList):
@@ -358,8 +358,6 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
 
     """ Convert a crystfel "geom" file into a panel list """
 
-
-
     # For parsing the very loose fast/slow scan vector specification
     def splitxysum(s):
 
@@ -403,6 +401,11 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
     # Place holder for pixel sizes
     pixSize = np.zeros(10000)
 
+    rigidGroupNames = []
+    rigidGroups = []
+    rigidGroupCollectionNames = []
+    rigidGroupCollections = []
+
     for line in h:
 
         # Search for appropriate lines
@@ -427,6 +430,18 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
         if key == 'res':
             global_res = float(value)
 
+        if re.search("^rigid_group_collection", key):
+            keymod = key.split("_")
+            rigidGroupCollectionNames.append(keymod[-1])
+            rigidGroupCollections.append([k.strip() for k in value.split(',')])
+            continue
+
+        if re.search("^rigid_group", key):
+            keymod = key.split("_")
+            rigidGroupNames.append(keymod[-1])
+            rigidGroups.append([k.strip() for k in value.split(',')])
+            continue
+
         # If not a global key, check for panel-specific keys
         key = key.split("/")
         if len(key) != 2:
@@ -435,6 +450,9 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
         # Split name from key/value pairs
         name = key[0].strip()
         key = key[1].strip()
+
+        # Skip commented lines
+
 
         # Skip unknown panel-specific key
         if not key in all_keys:
@@ -517,6 +535,19 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
             p.T[2] += global_coffset
 
         i += 1
-        print(p.T)
+
+    for i in range(len(rigidGroups)):
+        pa.addRigidGroup(rigidGroupNames[i], rigidGroups[i])
+
+    for i in range(len(rigidGroupCollections)):
+        cn = rigidGroupCollectionNames[i]
+        rgc = rigidGroupCollections[i]
+        rgn = []
+        for j in rgc:
+            rg = pa.rigidGroup(j)
+            for k in rg:
+                rgn.append(k.name)
+        pa.addRigidGroup(cn, rgn)
+
 
     return pa
