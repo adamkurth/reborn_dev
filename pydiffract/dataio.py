@@ -352,6 +352,8 @@ def loadFileList(fileList):
 
 
 
+
+
 def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
 
     """ Convert a crystfel "geom" file into a panel list """
@@ -487,6 +489,7 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
 
     pa.beam.B = np.array([0, 0, 1])
 
+    i = 0
     for p in pa:
 
         # These are defaults
@@ -494,10 +497,10 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
         p.wavelengthField = "/LCLS/photon_wavelength_A"
 
         # Unit conversions
-        p.T = p.T * pixSize[i]
         if pixSize[i] == 0:
             pixSize[i] = 1 / global_res
         p.pixSize = pixSize[i]
+        p.T *= pixSize[i]
 
         # Data array size
         p.nF = p.fRange[1] - p.fRange[0] + 1
@@ -513,15 +516,7 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
         if global_coffset is not None:
             p.T[2] += global_coffset
 
+        i += 1
+        print(p.T)
+
     return pa
-
-
-
-
-
-
-
-
-
-
-

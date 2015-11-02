@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from pydiffract import convert
+from pydiffract import dataio
 
 
 

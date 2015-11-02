@@ -8,10 +8,9 @@ from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 import numpy as np
-import pydiffract.convert as convert
-import pydiffract.utils as utils
+from pydiffract import dataio, utils
 
-[pa, reader] = convert.crystfelToPanelList("examples/example1.geom")
+[pa, reader] = dataio.crystfelToPanelList("examples/example1.geom")
 reader.getShot(pa, "examples/example1.h5")
 
 # # Create a GL View widget to display data
