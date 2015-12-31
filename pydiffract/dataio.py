@@ -5,6 +5,11 @@ from pydiffract import detector
 import re
 
 
+# A "reader" should be initialized with file paths, and instructuions on how to access a
+# sequence of frames.  Readers are not feature rich -- just the bare minimum methods to laod
+# data for the sequence of frames.
+# The "frameGetter" class makes access to a sequence of files opaque; shouldn't matter what type of files.
+
 class cheetahH5Reader(object):
 
     """ Read an hdf5 file with "cheetah" format """
@@ -15,7 +20,15 @@ class cheetahH5Reader(object):
             self.panelList = detector.panelList()
         else:
             self.panelList = panelList
-        self.fileList = []
+        self._fileList = []
+
+    @property
+    def fileList(self):
+        return self._fileList
+
+    @fileList.setter
+    def fileList(self, value):
+        self._fileList = value
 
     def getFrame(self, frameNumber=0):
 
@@ -181,15 +194,12 @@ class frameGetter(object):
 
     """ Methods for getting data from a list of files. """
 
-    def __init__(self, reader=None, fileList=[]):
+    def __init__(self):
 
         self._fileList = []
         self._reader = None
         self._frameNumber = 0
         self._loop = False
-
-        self.reader = reader
-        self.fileList = fileList
 
     @property
     def reader(self):
@@ -331,11 +341,6 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
 
         return vec
 
-    # All panel-specific keys that are recognized
-    all_keys = set(["fs", "ss", "corner_x", "corner_y",
-                    "min_fs", "max_fs", "min_ss", "max_ss",
-                    "clen", "coffset", "res", "adu_per_eV"])
-
     # Geometry file is required
     if geomFile is None:
         raise ValueError("No geometry file specified")
@@ -348,6 +353,9 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
     global_clen = None
     global_adu_per_ev = None
     global_res = None
+    global_photon_energy = None
+    global_photon_energy_field = None
+    global_data = None
 
     if panelList is None:
         pa = detector.panelList()
@@ -364,7 +372,22 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
 
     for line in h:
 
-        # Search for appropriate lines
+        line = line.strip()
+
+        # Skip empty lines
+        if len(line) == 0:
+            continue
+
+        # Skip commented lines
+        if line[0] == ';':
+            continue
+
+        # Remove comments
+        line = line.split(';')
+        line = line[0]
+        line = line.strip()
+
+        # Search for appropriate lines, which must have an "=" character
         line = line.split("=")
         if len(line) != 2:
             continue
@@ -375,30 +398,45 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
 
         # Check for global keys first
         if key == "coffset":
+            # This will be summed with clen
             global_coffset = float(value)
         if key == "clen":
             try:
+                # If a value is given
                 global_clen = float(value)
             except ValueError:
+                # If a path to value in hdf5 file is given
                 global_clen_field = value
+                global_clen = None
         if key == "adu_per_eV":
             global_adu_per_ev = float(value)
         if key == 'res':
             global_res = float(value)
+        if key == "data":
+            # This is the hdf5 path to the data array
+            global_data = value
+        if key == "photon_energy":
+            try:
+                # If a value is given
+                global_photon_energy = float(value)
+            except ValueError:
+                # If a path to value in hdf5 file is given
+                global_photon_energy_field = value
+                global_photon_energy = None
 
+        # For dealing with rigid groups
         if re.search("^rigid_group_collection", key):
             keymod = key.split("_")
             rigidGroupCollectionNames.append(keymod[-1])
             rigidGroupCollections.append([k.strip() for k in value.split(',')])
             continue
-
         if re.search("^rigid_group", key):
             keymod = key.split("_")
             rigidGroupNames.append(keymod[-1])
             rigidGroups.append([k.strip() for k in value.split(',')])
             continue
 
-        # If not a global key, check for panel-specific keys
+        # If not a global key, check for panel-specific keys, which always have a "/" character
         key = key.split("/")
         if len(key) != 2:
             continue
@@ -407,17 +445,11 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
         name = key[0].strip()
         key = key[1].strip()
 
-        # Skip commented lines
-
-
-        # Skip unknown panel-specific key
-        if not key in all_keys:
-            continue
-
         # Get index of this panel
         i = pa.getPanelIndexByName(name)
         # If it is a new panel:
         if i is None:
+            # Initialize panel
             pa.append()
             p = pa[len(pa) - 1]
             p.name = name
@@ -429,11 +461,12 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
             p.sRange = [0, 0]
             p.dataField = None
             p.wavelengthField = None
+            p.photonEnergyField = None
             p.detOffsetField = None
         else:
             p = pa[i]
 
-        # Parse the simple keys
+        # Parse panel-specific keys
         if key == "corner_x":
             p.T[0] = float(value)
         if key == "corner_y":
@@ -450,8 +483,6 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
             p.T[2] = float(value)
         if key == "res":
             pixSize[i] = 1.0 / float(value)
-
-        # Parse the more complicated keys
         if key == "fs":
             vec = splitxysum(value)
             p.F = np.array(vec)
@@ -459,16 +490,15 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
             vec = splitxysum(value)
             p.S = np.array(vec)
 
+    # We are now done reading the geometry file
     h.close()
 
+    # Initialize beam information for this panel array
     pa.beam.B = np.array([0, 0, 1])
 
+    # Now adjust panel list according to global parameters, convert units, etc.
     i = 0
     for p in pa:
-
-        # These are defaults
-        p.dataField = "/data/rawdata0"
-        p.wavelengthField = "/LCLS/photon_wavelength_A"
 
         # Unit conversions
         if pixSize[i] == 0:
@@ -481,14 +511,18 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
         p.nS = p.sRange[1] - p.sRange[0] + 1
 
         # Check for extra global configurations
-        if global_adu_per_ev is not None:
-            p.aduPerEv = global_adu_per_ev
+        p.aduPerEv = global_adu_per_ev
+        p.dataField = global_data
+        p.detOffsetField = global_clen_field
         if global_clen is not None:
             p.T[2] += global_clen
-        if global_clen_field is not None:
-            p.detOffsetField = global_clen_field
+            p.detOffsetField = None  # Cannot have clen value *and* path
         if global_coffset is not None:
             p.T[2] += global_coffset
+            p.detOffsetField = None  # Cannot have offset value *and* field
+        if global_photon_energy is not None:
+            p.beam.wavelength = 1.2398e-6 / global_photon_energy  # CrystFEL uses eV units
+            p.photonEnergyField = None  # Cannot have both energy value *and* field
 
         i += 1
 
@@ -504,6 +538,5 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
             for k in rg:
                 rgn.append(k.name)
         pa.addRigidGroup(cn, rgn)
-
 
     return pa
