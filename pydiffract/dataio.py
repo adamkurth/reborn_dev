@@ -5,89 +5,40 @@ from pydiffract import detector
 import re
 
 
-class h5Reader(detector.panelList):
+class cheetahH5Reader(object):
 
     """ Read an hdf5 file with "cheetah" format """
 
-    def __init__(self):
+    def __init__(self, panelList=None):
 
-        super(h5Reader, self).__init__()
-
-        self.filePath = None
-        self.fileList = None
-
-    def deepcopy(self):
-
-        pa = copy.deepcopy(self)
-
-        return pa
-
-    @property
-    def nFrames(self):
-
-        if self.fileList is None:
-            return 0
-
-        return len(self.fileList)
-
-    def loadFileList(self, fileList):
-
-        self.fileList = loadFileList(fileList)
-
-    def loadCrystfel(self, geomFile=None, beamFile=None):
-
-        crystfelToPanelList(geomFile=geomFile, beamFile=beamFile, panelList=self)
+        if panelList is None:
+            self.panelList = detector.panelList()
+        else:
+            self.panelList = panelList
+        self.fileList = []
 
     def getFrame(self, frameNumber=0):
 
-        """ Populate a panel list with image data. """
+        """ Get a frame. """
 
         filePath = self.fileList[frameNumber]
+        loadCheetahH5V1(self.panelList, filePath)
 
-        f = h5py.File(filePath, "r")
-
-        # each panel could come from a different data set within the hdf5
-        # we don't want to load the data set each time, since that's slow...
-        # so the code gets ugly here...
-        prevDataField = self[0].dataField
-        dset = f[prevDataField]
-        dat = np.array(dset)
-
-        for p in self:
-
-            # Load wavelength from hdf5 file
-            if p.wavelengthField is not None:
-                p.beam.wavelength = f[p.wavelengthField].value[0] * 1e-10
-            # Load camera length
-            if p.detOffsetField is not None:
-                p.T[2] += f[p.detOffsetField].value[0] * 1e-3
-            if p.dataField is not None:
-                thisDataField = p.dataField
-                if thisDataField != prevDataField:
-                    dset = f[thisDataField]
-                    dat = np.array(dset)
-                prevDataField = thisDataField
-                fmin = p.fRange[0]
-                fmax = p.fRange[1] + 1
-                smin = p.sRange[0]
-                smax = p.sRange[1] + 1
-                p.data = dat[smin:smax, fmin:fmax]
-
-        f.close()
+        return self.panelList
 
 
-def loadCheetahH5(pl, filePath):
+def loadCheetahH5V1(panelList, filePath):
 
     f = h5py.File(filePath, "r")
 
     # each panel could come from a different data set within the hdf5
     # we don't want to load the data set each time, since that's slow...
     # so the code gets ugly here...
-    prevDataField = pl[0].dataField
+    prevDataField = panelList[0].dataField
     dset = f[prevDataField]
     dat = np.array(dset)
 
-    for p in pl:
+    for p in panelList:
 
         # Load wavelength from hdf5 file
         if p.wavelengthField is not None:
@@ -230,39 +181,28 @@ class frameGetter(object):
 
     """ Methods for getting data from a list of files. """
 
-    def __init__(self, readers=[]):
+    def __init__(self, reader=None, fileList=[]):
 
-        self._fileList = None
-        self._readers = []
-        self._frameNumber = -1
-        self._nFrames = None
-        self._nReaders = nReaders
+        self._fileList = []
+        self._reader = None
+        self._frameNumber = 0
+        self._loop = False
 
-        if reader is not None:
-            self.reader = reader
-
-        if fileList is not None:
-            self.fileList = fileList
+        self.reader = reader
+        self.fileList = fileList
 
     @property
-    def nReaders(self):
-
-        """ How many readers are available. """
-
-        return len(self._nReaders)
-
-    @property
-    def readers(self):
+    def reader(self):
 
         """ The reader class to be used when loading frame data. """
 
-        return self._readers
+        return self._reader
 
-    @readers.setter
-    def readers(self, value):
+    @reader.setter
+    def reader(self, value):
 
-        self._readers = value
-
+        # TODO: check type
+        self._reader = value
 
     @property
     def fileList(self):
@@ -275,14 +215,7 @@ class frameGetter(object):
     def fileList(self, value):
 
         self._fileList = value
-        self._nFrames = len(value)
-
-    def appendFileList(self, value):
-
-        """ Append to the existing file list. """
-
-        self._fileList += value
-        self.nFrames = len(value)
+        self.reader.fileList = value
 
     @property
     def frameNumber(self):
@@ -294,16 +227,18 @@ class frameGetter(object):
     @frameNumber.setter
     def frameNumber(self, value):
 
+        if value >= self.nFrames:
+            raise ValueError('Frame number out of bounds (too large).')
+
+        if value < 0:
+            raise ValueError('Frame number out of bounds (negative).')
+
         self._frameNumber = value
 
     @property
     def nFrames(self):
 
         """ Number of frames available. """
-
-        if self.fileList is None:
-
-            return 0
 
         return len(self.fileList)
 
@@ -312,54 +247,55 @@ class frameGetter(object):
         """ Load a file list.  Should be a text file, one full file path per line. """
 
         if self.nFrames > 0:
-            self.appendFileList([i.strip() for i in open(fileList).readlines()])
+            self.fileList += [i.strip() for i in open(fileList).readlines()]
             return
 
         self.fileList = [i.strip() for i in open(fileList).readlines()]
 
-    def getFrame(self, panelList, frameNumber=None):
+    def loadCrystfelGeometry(self, geomFile=None, beamFile=None):
+
+        crystfelToPanelList(geomFile=geomFile, beamFile=beamFile, panelList=self.reader.panelList)
+
+    def getFrame(self, frameNumber=0):
 
         """ Get the frame data, given index number. """
 
-        pl = panelList
-        num = frameNumber
+        if self.nFrames == 0:
+            raise ValueError('No file list specified.')
 
-        if num is None:
-            self.frameNumber = 0
-            num = self.frameNumber
+        self.reader.getFrame(frameNumber)
 
-        if self.fileList is None:
-            raise ValueError('No file list specified')
+        return self.reader.panelList
 
-        if num > self.nFrames - 1:
-            return False
-
-        filePath = self.fileList[num]
-        self.readers[1].getFrame(pl, filePath)
-
-        return num
-
-    def nextFrame(self, panelList):
+    def nextFrame(self):
 
         """ Get the data from the next frame. """
 
-        pl = panelList
-
         self.frameNumber += 1
-        if self.frameNumber > len(self.fileList) - 1:
-            self.frameNumber = 0
-        return self.getFrame(pl, self.frameNumber)
 
-    def previousFrame(self, panelList):
+        if self.frameNumber >= self.nFrames:
+            if self._loop == True:
+                self.frameNumber = 0
+            else:
+                return None
+
+        return self.getFrame(self.frameNumber)
+
+    def previousFrame(self):
 
         """ Get the data from the previous frame. """
 
-        pl = panelList
+        fn = self._frameNumber
 
-        self.frameNumber -= 1
-        if self.frameNumber < 0:
-            self.frameNumber = len(self.fileList) - 1
-        return self.getFrame(pl, self.frameNumber)
+        if fn <= 0:
+            if self._loop == True:
+                self.frameNumber = self.nFrames - 1
+            else:
+                self.frameNumber -= 1
+        else:
+            self.frameNumber -= 1
+
+        return self.getFrame(fn)
 
 
 def loadFileList(fileList):
@@ -414,7 +350,7 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
     global_res = None
 
     if panelList is None:
-        pa = h5Reader()
+        pa = detector.panelList()
     else:
         pa = panelList
 
