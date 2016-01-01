@@ -75,6 +75,8 @@ def loadCheetahH5V1(panelList, filePath):
 
     f.close()
 
+    return panelList
+
 
 
 class diproiReader(detector.panelList):
@@ -274,7 +276,7 @@ class frameGetter(object):
             raise ValueError('No file list specified.')
 
         self.reader.getFrame(frameNumber)
-
+        # print('getting frame %d' % (frameNumber))
         return self.reader.panelList
 
     def nextFrame(self):

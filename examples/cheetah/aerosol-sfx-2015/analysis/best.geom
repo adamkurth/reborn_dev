@@ -2,11 +2,11 @@
 ; geoptimized using intor - O.Y.
 ; Manually optimized with hdfsee (only quadrants) - O.Y.
 ; Automatically generated from calibration data
-clen = -500 ; /LCLS/detector0-EncoderValue
+clen = .128 ; /LCLS/detector0-EncoderValue
 photon_energy = 8010 ; /LCLS/photon_energy_eV
 res = 9090.91
 adu_per_eV = 0.00338
-coffset = 0.567855
+coffset = 0 ; 0.567855
 
 data = /data/rawdata
 ; data = /entry_1/data_1/data

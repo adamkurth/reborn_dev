@@ -95,6 +95,8 @@ class panel(object):
     def data(self, val):
 
         self._data = val
+        # Must clear out any derived data that depends on this input
+        self.deleteDerivedData()
 
     @property
     def mask(self):
@@ -449,6 +451,11 @@ class panel(object):
             setattr(self, i, None)
         if self.panelList is not None:
             self.panelList.deleteGeometryData()
+
+    def deleteDerivedData(self):
+
+        if self.panelList is not None:
+            self.panelList.data = None
 
     def getVertices(self, edge=False, loop=False):
 
