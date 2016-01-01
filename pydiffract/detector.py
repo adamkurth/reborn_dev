@@ -455,7 +455,7 @@ class panel(object):
     def deleteDerivedData(self):
 
         if self.panelList is not None:
-            self.panelList.data = None
+            self.panelList._data = None
 
     def getVertices(self, edge=False, loop=False):
 
