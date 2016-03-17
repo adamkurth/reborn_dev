@@ -7,8 +7,11 @@ import re
 
 # A "reader" should be initialized with file paths, and instructuions on how to access a
 # sequence of frames.  Readers are not feature rich -- just the bare minimum methods to laod
-# data for the sequence of frames.
+# raw data for the sequence of frames.
 # The "frameGetter" class makes access to a sequence of files opaque; shouldn't matter what type of files.
+
+# Minimally, a reader should have the method getFrame(frameNumber=0), which should return a panelList object
+
 
 class cheetahH5Reader(object):
 
@@ -76,6 +79,54 @@ def loadCheetahH5V1(panelList, filePath):
     f.close()
 
     return panelList
+
+class cxidbReader(object):
+
+    """ Read an hdf5 file with "CXIDB" format """
+
+    def __init__(self, panelList=None, fileList=[]):
+
+        self.panelList = panelList
+        self.fileList = []
+        self.hdf5Files = []
+
+        self.dataPaths = None
+        self.panelNames = None
+        self.nFs = None
+        self.nSs = None
+
+        if self.fileList is not None:
+            self.loadHdf5Files()
+
+        if self.panelList is None:
+            self.panelList = detector.panelList()
+
+    def loadHdf5Files(self):
+
+        for thisFile in self.fileList:
+            self.hdf5Files.append(h5py.File(thisFile, "r"))
+
+    def initializePanelList(self):
+        
+        pl = self.panelList
+        for dp in range(len(self.dataPaths)):
+            for pi in range(len(self.panelNames)):
+                p = detector.panel()
+                p.name = self.panelNames[dp,pi]
+                p.nF = self.nFs[dp,pi]
+                p.nS = self.nSs[dp,pi]
+                pl.append(p)
+                
+        
+
+
+    def getFrame(self, frameNumber=0):
+        
+        
+
+
+
+
 
 
 

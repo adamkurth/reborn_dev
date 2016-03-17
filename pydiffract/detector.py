@@ -17,7 +17,7 @@ class panel(object):
         """ Make no assumptions during initialization."""
 
         # Configured parameters
-        self.name = name  # Panel name for convenience
+        self._name = name  # Panel name for convenience
         self._F = None  # Fast-scan vector
         self._S = None  # Slow-scan vector
         self._T = None  # Translation of this panel (from interaction region to center of first pixel)
@@ -83,6 +83,18 @@ class panel(object):
         s += "T = %s\n" % self.T.__str__()
         s += "aduPerEv = %g\n" % self.aduPerEv
         return s
+
+    @property
+    def name(self):
+
+        """ Name of this panel. """
+
+        return self._name
+
+    @name.setter
+    def name(self, val):
+
+        self._name = val
 
     @property
     def data(self):
