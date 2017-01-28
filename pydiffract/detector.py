@@ -24,11 +24,11 @@ class panel(object):
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
         self.aduPerEv = 0  # Number of arbitrary data units per eV of photon energy
-        self._beam = None  # Container for x-ray beam information
+        self._beam = source.beam()  # Container for x-ray beam information
         self._data = None  # Diffraction intensity data
         self._mask = None
 
-        # Derived parameters
+        # Cached parameters
         self._pixelSize = None  # Pixel size derived from F/S vectors
         self._V = None  # 3D vectors pointing from interaction region to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
@@ -534,7 +534,7 @@ class panel(object):
 
         return self._rsbb.copy()
 
-    def simpleSetup(self, nF=None, nS=None, pixelSize=None, distance=None, T=None, wavelength=None):
+    def simpleSetup(self, nF=None, nS=None, pixelSize=None, distance=None, wavelength=None, T=None):
 
         """ Simple way to create a panel with centered beam."""
 
@@ -558,6 +558,8 @@ class panel(object):
             self.T = T
 
         if wavelength is not None:
+            if self.beam is None:
+                self.beam = source.beam()
             self.beam.wavelength = wavelength
 
 
@@ -571,7 +573,7 @@ class panelList(object):
 
         # Configured data
         self._name = None  # The name of this list (useful for rigid groups)
-        self._beam = None  # X-ray beam information, common to all panels
+        self._beam = source.beam()  # X-ray beam information, common to all panels
         self._panelList = []  # List of individual panels
         
         # Derived data (concatenated from individual panels)
@@ -660,6 +662,9 @@ class panelList(object):
             raise TypeError("Beam info must be a source.beam class")
 
         self._beam = beam
+        for p in self:
+            p.beam = beam
+        
 
     @property
     def nPix(self):
@@ -693,7 +698,7 @@ class panelList(object):
 
         # Inherit first beam from append
         if self._beam is None:
-            self._beam = p.beam
+            self._beam = p.beam.copy()
 
         p._beam = None
 
@@ -1037,12 +1042,25 @@ class panelList(object):
 
         return self._geometryHash
 
-    def simpleSetup(self, nF=None, nS=None, pixelSize=None, distance=None, T=None, wavelength=None):
+    def simpleSetup(self, nF=None, nS=None, pixelSize=None, distance=None, wavelength=None, T=None):
 
-        """ Append a panel using the simple setup method."""
+        """ 
+
+        Append a panel using the simple setup method.
+        
+        Arguments:
+        nF         : Number of fast-scan pixels
+        nS         : Number of slow-scan pixels
+        pixelSize  : Pixel size in meters
+        distance   : Distance in meters
+        wavelength : Wavelength in meters
+        T          : Translation from sample to center of first pixel in meters
+        
+        """
 
         p = panel()
-        p.simpleSetup(nF, nS, pixelSize, distance, T, wavelength)
+        p.simpleSetup(nF, nS, pixelSize, distance, wavelength, T)
+        self.beam = p.beam
         self.append(p)
 
     def radialProfile(self):
