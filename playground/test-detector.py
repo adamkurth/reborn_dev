@@ -17,9 +17,12 @@ r = np.zeros([3,3])
 r[1,0] = 10e-10
 r[1,1] = 1e-10
 
-r = np.random.normal(0,10e-10,[10000,3])
+N = 5000
+r = np.random.normal(0,10e-10,[N,3])
 
-A = clcore.phaseFactor(Q,r)
+f = np.random.random([N])
+
+A = clcore.phaseFactor(Q,r,f)
 
 I = np.abs(A)**2
 I = I.reshape((pl[0].nS, pl[0].nF))
@@ -27,5 +30,5 @@ I = I.reshape((pl[0].nS, pl[0].nF))
 #I[0,0:10] = I.max()*10
 
 
-plt.imshow(np.log(I+1),interpolation='none',cmap='gray',origin='lower')
+plt.imshow(np.log(I+1),interpolation='nearest',cmap='gray',origin='lower')
 plt.show()
