@@ -6,3 +6,6 @@ Some notes on setting things up:
 - I am using Anaconda Python 2.7
 - conda install -c ufechner pyqtgraph=0.9.10
 - conda install -c timrudge pyopencl=2014.1
+- conda install -c conda-forge xraylib=3.2.0
+
+In the beginning, we will probably rely heavily on external modules, but the hope is to largely remove those dependencies.
