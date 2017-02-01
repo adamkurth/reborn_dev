@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from pydiffract import dataio
+from bornagain import dataio
 
 
 

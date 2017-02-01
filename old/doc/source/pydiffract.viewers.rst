@@ -4,7 +4,7 @@ viewers Package
 :mod:`mpl` Module
 -----------------
 
-.. automodule:: pydiffract.viewers.mpl
+.. automodule:: bornagain.viewers.mpl
     :members:
     :undoc-members:
     :show-inheritance:

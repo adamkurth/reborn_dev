@@ -1,6 +1,6 @@
 import numpy              as np
-from pydiffract       import detector
-from pydiffract.utils import vecNorm, vecMag
+from bornagain       import detector
+from bornagain.utils import vecNorm, vecMag
 
 class radialProfile(object):
 

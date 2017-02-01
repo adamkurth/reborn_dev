@@ -1,7 +1,7 @@
 Introduction
 ************
 
-pydiffract is meant to be a flexible, intuitive and easy-to-use library of analysis tools for x-ray diffraction data.  It is meant for quickly hashing out ideas for projects that do not fit within existing analysis pipelines. 
+bornagain is meant to be a flexible, intuitive and easy-to-use library of analysis tools for x-ray diffraction data.  It is meant for quickly hashing out ideas for projects that do not fit within existing analysis pipelines. 
 
 Firstly, let's get the simple things out of the way:
 
@@ -35,9 +35,9 @@ The primary data class is a detector panel - 2D array of pixels that measure dif
 
     blockdiag {
         
-        pydiffract -> detector;
-        pydiffract -> source;
-        pydiffract -> dataio;
+        bornagain -> detector;
+        bornagain -> source;
+        bornagain -> dataio;
         
         detector -> panel;
         detector -> panelList;

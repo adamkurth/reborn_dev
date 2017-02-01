@@ -3,7 +3,7 @@ from numpy import cos, sin, array, zeros, complex
 from Bio import PDB
 import re
 import xraylib
-from pydiffract import utils
+from bornagain import utils
 
 class molecule(object):
 

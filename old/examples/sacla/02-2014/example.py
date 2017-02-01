@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pydiffract import detector, dataio
+from bornagain import detector, dataio
 
 filePath = 'run178730.hdf5'
 

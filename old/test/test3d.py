@@ -8,7 +8,7 @@ from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 import numpy as np
-from pydiffract import dataio, utils
+from bornagain import dataio, utils
 
 [pa, reader] = dataio.crystfelToPanelList("examples/example1.geom")
 reader.getShot(pa, "examples/example1.h5")
