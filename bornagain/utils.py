@@ -1,6 +1,6 @@
 """
 
-Some useful utility functions for pydiffract
+Some useful utility functions for bornagain
 
 """
 

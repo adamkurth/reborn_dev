@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pydiffract import dataio, utils
+from bornagain import dataio, utils
 import numpy as np
 # from timeit import timeit
 # import cProfile

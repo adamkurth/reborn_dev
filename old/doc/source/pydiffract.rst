@@ -1,10 +1,10 @@
-pydiffract Package
+bornagain Package
 ==================
 
-:mod:`pydiffract` Package
+:mod:`bornagain` Package
 -------------------------
 
-.. automodule:: pydiffract.__init__
+.. automodule:: bornagain.__init__
     :members:
     :undoc-members:
     :show-inheritance:
@@ -12,7 +12,7 @@ pydiffract Package
 :mod:`dataio` Module
 --------------------
 
-.. automodule:: pydiffract.dataio
+.. automodule:: bornagain.dataio
     :members:
     :undoc-members:
     :show-inheritance:
@@ -20,7 +20,7 @@ pydiffract Package
 :mod:`detector` Module
 ----------------------
 
-.. automodule:: pydiffract.detector
+.. automodule:: bornagain.detector
     :members:
     :undoc-members:
     :show-inheritance:
@@ -28,7 +28,7 @@ pydiffract Package
 :mod:`imview` Module
 --------------------
 
-.. automodule:: pydiffract.imview
+.. automodule:: bornagain.imview
     :members:
     :undoc-members:
     :show-inheritance:
@@ -36,7 +36,7 @@ pydiffract Package
 :mod:`source` Module
 --------------------
 
-.. automodule:: pydiffract.source
+.. automodule:: bornagain.source
     :members:
     :undoc-members:
     :show-inheritance:
@@ -44,7 +44,7 @@ pydiffract Package
 :mod:`utils` Module
 -------------------
 
-.. automodule:: pydiffract.utils
+.. automodule:: bornagain.utils
     :members:
     :undoc-members:
     :show-inheritance:
@@ -52,7 +52,7 @@ pydiffract Package
 :mod:`structure` Module
 -------------------
 
-.. automodule:: pydiffract.structure
+.. automodule:: bornagain.structure
     :members:
     :undoc-members:
     :show-inheritance:
@@ -65,5 +65,5 @@ Subpackages
 
 .. toctree::
 
-    pydiffract.viewers
+    bornagain.viewers
 

@@ -1,5 +1,5 @@
 import unittest
-from pydiffract import detector, source
+from bornagain import detector, source
 import numpy as np
 
 def generateSimplePanelList():

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import pydiffract.convert as convert
+import bornagain.convert as convert
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 

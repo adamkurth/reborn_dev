@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# pydiffract documentation build configuration file, created by
+# bornagain documentation build configuration file, created by
 # sphinx-quickstart on Fri Sep 13 10:38:13 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -18,8 +18,8 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('../..'))
 #sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../../pydiffract'))
-#sys.path.insert(0, os.path.abspath('../pydiffract'))
+sys.path.insert(0, os.path.abspath('../../bornagain'))
+#sys.path.insert(0, os.path.abspath('../bornagain'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -43,7 +43,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pydiffract'
+project = u'bornagain'
 copyright = u'2013, Richard A. Kirian'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -167,7 +167,7 @@ html_last_updated_fmt = '%b %d, %Y'
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pydiffractdoc'
+htmlhelp_basename = 'bornagaindoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -186,7 +186,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'pydiffract.tex', u'pydiffract Documentation',
+  ('index', 'bornagain.tex', u'bornagain Documentation',
    u'Richard A. Kirian', 'manual'),
 ]
 
@@ -216,7 +216,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pydiffract', u'pydiffract Documentation',
+    ('index', 'bornagain', u'bornagain Documentation',
      [u'Richard A. Kirian'], 1)
 ]
 
@@ -230,8 +230,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'pydiffract', u'pydiffract Documentation',
-   u'Richard A. Kirian', 'pydiffract', 'One line description of project.',
+  ('index', 'bornagain', u'bornagain Documentation',
+   u'Richard A. Kirian', 'bornagain', 'One line description of project.',
    'Miscellaneous'),
 ]
 

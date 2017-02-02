@@ -4,8 +4,8 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-import pydiffract as dif
-import pydiffract.simulate.clcore as clcore
+import bornagain as dif
+import bornagain.simulate.clcore as clcore
 
 
 pl = dif.detector.panelList()

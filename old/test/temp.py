@@ -4,7 +4,7 @@ Created on Feb 1, 2014
 @author: kirian
 '''
 
-from pydiffract import structure
+from bornagain import structure
 
 from Bio import PDB
 

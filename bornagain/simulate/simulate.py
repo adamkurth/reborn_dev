@@ -1,6 +1,6 @@
-from pydiffract.utils import joulesPerEv, hc
-# from pydiffract.simulate import cycore, clcore
-import pydiffract.simulate.clcore as core
+from bornagain.utils import joulesPerEv, hc
+# from bornagain.simulate import cycore, clcore
+import bornagain.simulate.clcore as core
 import numpy as np
 import time
 import xraylib

@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 import copy
-from pydiffract import detector
+from bornagain import detector
 import re
 
 

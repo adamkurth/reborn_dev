@@ -4,7 +4,7 @@ Created on Apr 26, 2015
 @author: rkirian
 '''
 
-from pydiffract import detector
+from bornagain import detector
 import numpy as np
 
 

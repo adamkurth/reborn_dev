@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.linalg import norm
 from numpy.random import random, randn
-from pydiffract.utils import vecNorm, vecMag
-from pydiffract import source
+from bornagain.utils import vecNorm, vecMag
+from bornagain import source
 
 """
 Classes for analyzing diffraction data contained in pixel array detectors (PADs).

@@ -1,7 +1,7 @@
-pydiffract
+bornagain
 ==========
 
 .. toctree::
    :maxdepth: 4
 
-   pydiffract
+   bornagain

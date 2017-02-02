@@ -13,8 +13,8 @@ from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 import numpy as np
-from pydiffract import dataio, detector
-import pydiffract.utils as utils
+from bornagain import dataio, detector
+import bornagain.utils as utils
 
 
 

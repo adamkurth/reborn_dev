@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pydiffract import dataio, detector
+from bornagain import dataio, detector
 
 # The data reader - a super class of panelList with helpers for loading data from files
 pa = dataio.diproiReader()

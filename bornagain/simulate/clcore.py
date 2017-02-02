@@ -94,6 +94,7 @@ def phaseFactorQRFcomplex(q, r, f):
 def phaseFactorPAD(r, f, T, F, S, nF, nS, w):
 
     '''
+    This should simulate detector panels without explicitly calculating q vectors first.
     This assumes that the scattering factors are complex.
     '''
 
@@ -169,6 +170,7 @@ def phaseFactorPAD(r, f, T, F, S, nF, nS, w):
 
     ph = re + 1j * im
     return ph
+
 
 
 def phaseFactorQRFreal(q, r, f):

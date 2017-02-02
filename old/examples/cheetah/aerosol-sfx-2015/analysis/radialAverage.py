@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pydiffract import dataio, utils
+from bornagain import dataio, utils
 import numpy as np
 from glob import glob
 import matplotlib.pyplot as plt
