@@ -1,8 +1,8 @@
 # bornagain?
 
-The name derives from the fact that this module is all about handling diffraction under the Born approximation, and of course this is not the first attempt of this sort (so Born... again...).  The previous module was named "pydiffract" (pydiffract has been born again).  
+This module is all about handling diffraction under the Born approximation.  This is not the module of this sort, so it is called Born... again.  It is also a re-make of my previous "pydiffract" module (which is now born again).
 
-The aim here is to allow for flexible simulations and analysis of diffraction data.  Emphasis is placed on useability of the code for scripting tasks.  Some effort will also be dedicated to the creation of a decent diffraction viewer.  Development will be on an "as-needed" basis, but we will try to develop with some foresight of what might come next.
+The aim here is to allow for flexible simulations and analysis of diffraction data.  Emphasis is placed on useability of the code for scripting tasks.  Some effort will also be dedicated to the creation of a decent diffraction viewer.  Development will be on an "as-needed" basis, but with foresight of what might come next.
 
 # Conventions
 
