@@ -21,7 +21,7 @@ joulesPerEv = 1.60217657e-19
 def vecCheck(vec,hardcheck=False):
 
 	''' 
-Check that a vector meets our assumption of a 3xN numpy array.  This is helpful, for
+Check that a vector meets our assumption of an Nx3 numpy array.  This is helpful, for
 example, when we want to ensure that dot products and broadcasting will work as expected.
 We could of course add an argument for vectors of dimension other than 3, but for now 
 3-vectors are all that we work with.
@@ -38,11 +38,11 @@ vec:        The original input if it satisfies our conditions.  Otherwise return
 		
 	if hardcheck:  # In this case we just raise an error if the input isn't perfect
 		if type(vec) is not np.ndarray:
-			raise ValueError('Vectors must be 3xN numpy ndarrays')
+			raise ValueError('Vectors must be Nx3 numpy ndarrays')
 		if len(vec.shape) != 2:
-			raise ValueError('Vectors must be 3xN numpy ndarrays')
-		if vec.shape[0] != 3:
-			raise ValueError('Vectors must be 3xN numpy ndarrays')
+			raise ValueError('Vectors must be Nx3 numpy ndarrays')
+		if vec.shape[1] != 3:
+			raise ValueError('Vectors must be Nx3 numpy ndarrays')
 		return vec
 	
 	if type(vec) is not np.ndarray:
@@ -50,12 +50,14 @@ vec:        The original input if it satisfies our conditions.  Otherwise return
 	if len(vec.shape) == 1:
 		vec = vec[np.newaxis]
 	if len(vec.shape) != 2:
-		raise ValueError('Vectors must be 3xN numpy ndarrays')
-	if vec.shape[0] != 3:
-		if vec.shape[1] != 3:
-			raise ValueError('Vectors must be 3xN numpy ndarrays')
+		raise ValueError('Vectors must be Nx3 numpy ndarrays')
+	if vec.shape[1] != 3:
+		if vec.shape[0] != 3:
+			raise ValueError('Vectors must be Nx3 numpy ndarrays')
 		else:
 			vec = vec.T
+	if ~vec.flags['C_CONTIGUOUS']:
+		vec = vec.copy()
 	
 	return vec
 
