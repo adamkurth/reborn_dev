@@ -7,7 +7,7 @@ The aim here is to allow for flexible simulations and analysis of diffraction da
 # Conventions
 
 * All units are SI, and angles are radians.
-* All vectors should have a numpy shape of Nx3.
+* All vectors should have a numpy shape of Nx3, in order to keep vector components close in memory.
 
 # Dependencies:
 
