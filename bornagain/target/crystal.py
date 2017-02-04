@@ -6,8 +6,8 @@ import spglib                as sg
 import xraylib               as xr
 import numpy                 as np
 import matplotlib.pyplot     as plt
-import pyqtgraph             as pg
-import pyqtgraph.opengl      as gl
+# import pyqtgraph             as pg
+# import pyqtgraph.opengl      as gl
 from   bornagain         import units, utils
 from   numpy             import sin,cos,sqrt
 
@@ -174,57 +174,57 @@ def parsePDB(pdbFilePath,crystalStruct=None):
 	return cryst
 
 
-def viewClusterAtoms(cryst,occupancies=None):
+#def viewClusterAtoms(cryst,occupancies=None):
+#
+#	''' Simple 3D viewer to see atomic coordinates and unit cell.  Not very featureful,
+#	    but works as a basic sanity check for transformations.'''
+#
+#	if occupancies is None:
+#		occupancies = [[np.zeros([3])] for i in range(0,cryst.nMolecules)]
 
-	''' Simple 3D viewer to see atomic coordinates and unit cell.  Not very featureful,
-	    but works as a basic sanity check for transformations.'''
-
-	if occupancies is None:
-		occupancies = [[np.zeros([3])] for i in range(0,cryst.nMolecules)]
-
-	app=pg.QtGui.QApplication([])
-	w = gl.GLViewWidget()
-	scl = 1e10
-	siz = 1
+#	app=pg.QtGui.QApplication([])
+#	w = gl.GLViewWidget()
+#	scl = 1e10
+#	siz = 1
 
 	# Plot each symmetry partner in different colors
-	for i in range(0,cryst.nMolecules):
-		print(i)
-		R = cryst.symRs[i]
-		T = cryst.symTs[i]
-		for Tp in occupancies[i]:
-			Tp = utils.vecCheck(Tp)
-			ff = cryst.O.dot(R.dot(cryst.x)+T+Tp)
-			plt = gl.GLScatterPlotItem(pos=ff.T*scl,color=utils.glColors[i+2], size=siz)
-			w.addItem(plt)
+#	for i in range(0,cryst.nMolecules):
+#		print(i)
+#		R = cryst.symRs[i]
+#		T = cryst.symTs[i]
+#		for Tp in occupancies[i]:
+#			Tp = utils.vecCheck(Tp)
+#			ff = cryst.O.dot(R.dot(cryst.x)+T+Tp)
+#			plt = gl.GLScatterPlotItem(pos=ff.T*scl,color=utils.glColors[i+2], size=siz)
+#			w.addItem(plt)
 
 	# Plot points at the origin and lattice vector tips
-	o = np.array([0,0,0])
-	tips = [cryst.O.dot(np.array([1,0,0])),
-			cryst.O.dot(np.array([0,1,0])),
-			cryst.O.dot(np.array([0,0,1]))]
+#	o = np.array([0,0,0])
+#	tips = [cryst.O.dot(np.array([1,0,0])),
+#			cryst.O.dot(np.array([0,1,0])),
+#			cryst.O.dot(np.array([0,0,1]))]
 
 	# Draw the unit cell in white
-	wid=1
-	C=pg.glColor([255,255,255])
-	for i in range(0,3):
-		plt = gl.GLLinePlotItem(pos=np.array([o,tips[i]])*scl,mode='lines',width=wid,color=C)
-		w.addItem(plt)
-		plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+1)%3])*scl,mode='lines',width=wid,color=C)
-		w.addItem(plt)
-		plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+2)%3])*scl,mode='lines',width=wid,color=C)
-		w.addItem(plt)
-		plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+1)%3]+tips[(i+2)%3])*scl,mode='lines',width=wid,color=C)
-		w.addItem(plt)
+#	wid=1
+#	C=pg.glColor([255,255,255])
+#	for i in range(0,3):
+#		plt = gl.GLLinePlotItem(pos=np.array([o,tips[i]])*scl,mode='lines',width=wid,color=C)
+#		w.addItem(plt)
+#		plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+1)%3])*scl,mode='lines',width=wid,color=C)
+#		w.addItem(plt)
+#		plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+2)%3])*scl,mode='lines',width=wid,color=C)
+#		w.addItem(plt)
+#		plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+1)%3]+tips[(i+2)%3])*scl,mode='lines',width=wid,color=C)
+#		w.addItem(plt)
 
 	# Draw the basis vectors in color
-	for i in range(0,3):
-		plt = gl.GLLinePlotItem(pos=np.array([o,tips[i]])*scl,mode='lines',width=5,color=utils.glColors[i+2])
-		w.addItem(plt)
+#	for i in range(0,3):
+#		plt = gl.GLLinePlotItem(pos=np.array([o,tips[i]])*scl,mode='lines',width=5,color=utils.glColors[i+2])
+#		w.addItem(plt)
 
-	w.setCameraPosition(distance=1000)
-	w.show()
-	pg.QtGui.QApplication.exec_()
+#	w.setCameraPosition(distance=1000)
+#	w.show()
+#	pg.QtGui.QApplication.exec_()
 
 
 
