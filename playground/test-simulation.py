@@ -32,7 +32,9 @@ cryst = crystal.structure('../examples/data/pdb/2LYZ.pdb')
 #r = np.random.normal(0,10e-10,[N,3])
 #r[:,2] = 0
 
-r = cryst.r.T.copy()
+r = cryst.r
+print(r.shape)
+print(r.flags)
 
 f = ba.simulate.utils.atomicScatteringFactors(cryst.Z, pl.beam.wavelength)
 
