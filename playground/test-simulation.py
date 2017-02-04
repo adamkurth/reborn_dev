@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
-#import bornagain.structure.crystal as crystal
+import bornagain.target.crystal as crystal
 
 
 # Create a detector
@@ -17,7 +17,7 @@ pl.simpleSetup(1000,1000,100e-6,0.05,1.5e-10)
 Q = pl.Q
 
 # Load a crystal structure
-cryst = ba.target.crystal.structure('../examples/data/pdb/2LYZ.pdb')
+cryst = crystal.structure('../examples/data/pdb/2LYZ.pdb')
 
 # r = np.zeros([3,3])
 # 
