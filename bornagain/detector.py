@@ -32,6 +32,7 @@ class panel(object):
         self._pixelSize = None  # Pixel size derived from F/S vectors
         self._V = None  # 3D vectors pointing from interaction region to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
+        self._pf = None # Polarization factor
         self._K = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
         self._geometryHash = None  # Hash of the configured geometry parameters
@@ -586,6 +587,7 @@ class panelList(object):
         self._rsbb = None  # Real-space bounding box of entire panel list
         self._vll = None  # Look-up table for simple projection
         self._rpix = None  # junk
+        self._pf = None # Polarization facto
         self._geometryHash = None  # Hash of geometries
         self._rigidGroups = None  # Groups of panels that might be manipulated together
         self._derivedGeometry = ['_pixelSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix', '_geometryHash']  # Default values of these are 'None'
@@ -920,6 +922,34 @@ class panelList(object):
             self._pf = np.concatenate([p.polarizationFactor.reshape(np.product(p.polarizationFactor.shape)) for p in self])
 
         return self._pf
+
+
+    def assembleData(self, data=None):
+
+        """ Project all intensity data along the beam direction.  Nearest neighbor interpolation.  This is a crude way to display data... """
+
+        if self._vll is None:
+            pixelSize = self.pixelSize
+            r = self.realSpaceBoundingBox
+            rpix = r / pixelSize
+            rpix[0, :] = np.floor(rpix[0, :])
+            rpix[1, :] = np.ceil(rpix[1, :])
+            V = self.V[:, 0:2] / pixelSize - rpix[0, 0:2]
+            Vll = np.round(V).astype(np.int32)
+            self._vll = Vll.astype(np.int)
+            self._rpix = rpix.astype(np.int)
+            
+        Vll = self._vll
+        rpix = self._rpix
+
+        adat = np.zeros([rpix[1, 1] - rpix[0, 1] + 1, rpix[1, 0] - rpix[0, 0] + 1])
+
+        if data is None:
+            data = self.data
+
+        adat[Vll[:, 1], Vll[:, 0]] = data
+
+        return adat
 
     @property
     def assembledData(self):
