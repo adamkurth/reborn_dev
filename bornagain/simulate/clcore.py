@@ -167,7 +167,7 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w):
             vx = vx/vmag;
             vy = vy/vmag;
             vz = vz/vmag;
-            float tp = 6.283185;
+            float tp = 6.283185f;
             float qx = (vx-Bx)*tp/w;
             float qy = (vy-By)*tp/w;
             float qz = (vz-Bz)*tp/w;
