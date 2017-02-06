@@ -100,6 +100,7 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w):
 
     ctx = cl.create_some_context()
     queue = cl.CommandQueue(ctx)
+    maxGroupSize = 64 #queue.device.max_work_group_size
     mf = cl.mem_flags
     
     def buf_float(x):
@@ -130,10 +131,12 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w):
     # run each q vector in parallel
     prg = cl.Program(ctx, """
         #define PI2 6.28318530718f
+        #define GROUP_SIZE %d
         __kernel void clsim(
         __global const float *r,  /* A float3 array does not seem to work in pyopencl.. */
         __global const float2 *f,
         __global float2 *a, 
+        int nPixels,
         int nAtoms,
         int nF,
         int nS,
@@ -143,50 +146,66 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w):
         float4 S,
         float4 B)
         {
-            // These are image indices:
-            int i = get_global_id(0);
-            int j = get_global_id(1);
-            int ni = get_global_size(0);
-            //int k = get_local_size(0);
+            const int gi = get_global_id(0); /* Global index */
+            const int i = gi %% nF;          /* Pixel coordinate i */
+            const int j = gi/nF;             /* Pixel coordinate j */
+            const int li = get_local_id(0);  /* Local group index */
             
-            float4 r4;
-            //float4 r4;
-            float ph;
-            float fr_n;
-            float fi_n;
-            float sinph;
-            float cosph;
-            float rep = 0;
-            float imp = 0;
+            float ph, sinph, cosph;
+            float re = 0;
+            float im = 0;
+            
+            // Each global index corresponds to a particular q-vector
             float4 V = T + i*F + j*S;
             V /= length(V);
             float4 q = (V-B)*PI2/w;
-            //barrier(CLK_LOCAL_MEM_FENCE);
+                        
+            __local float4 rg[GROUP_SIZE];
+            __local float2 fg[GROUP_SIZE];
             
-            //local float4 rs[GROUP_SIZE];
-            
-            //for (int m=0; 
-            for (int n=0; n < nAtoms; n++){
-            	fr_n = f[n].x;
-            	fi_n = f[n].y;
-            	r4 = (float4)(r[n*3],r[n*3+1],r[n*3+2],0.0f);   //vload3(n,r);
-            	//barrier(CLK_LOCAL_MEM_FENCE);
-                ph = dot(q,r4); 
-                sinph = native_sin(ph);
-                cosph = native_cos(ph);
-                rep += fr_n*cosph + fi_n*sinph;
-                imp += fr_n*sinph + fi_n*cosph;
+        	for (int g=0; g<nAtoms; g+=GROUP_SIZE){
+        	
+        		// Here we will move a chunk of atoms to local memory.  Each worker in a 
+        		// group moves one atom.
+        		int ai = g+li;
+        		rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
+        		fg[li] = (float2)(0.0f,0.0f);
+        		if (ai < nAtoms){
+        			rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
+        			fg[li] = f[ai];
+        		}
+        		// Don't proceed until **all** members of the group have finished moving 
+        		// atom information into local memory.
+        		barrier(CLK_LOCAL_MEM_FENCE);
+        		
+        		// We use a local real and imaginary part to avoid floatint point overflow
+        		float lre=0;
+        		float lim=0;
+        		
+        		// Now sum up the amplitudes from this subset of atoms
+				for (int n=0; n < GROUP_SIZE; n++){
+					ph = -dot(q,rg[n]); 
+					sinph = native_sin(ph);
+					cosph = native_cos(ph);
+					lre += fg[n].x*cosph - fg[n].y*sinph;
+					lim += fg[n].x*sinph + fg[n].y*cosph;
+				}
+				re += lre;
+				im += lim;
+				
+				// Don't proceed until this subset of atoms are completed.
+				barrier(CLK_LOCAL_MEM_FENCE);
             }
             
-            a[i+ni*j].x = rep;
-            a[i+ni*j].y = imp;
+            a[gi].x = re;
+            a[gi].y = im;
         }
-        """).build()
+        """ % maxGroupSize).build()
 
     clsim = prg.clsim
-    clsim.set_scalar_arg_dtypes([None,None,None,int,int,int,np.float32,None,None,None,None])
+    clsim.set_scalar_arg_dtypes([None,None,None,int,int,int,int,np.float32,None,None,None,None])
 
-    clsim(queue, (nF,nS), None, r_buf,f_buf,a_buf,nAtoms,nF,nS,w,T,F,S,B)
+    clsim(queue, (nPixels,), (maxGroupSize,), r_buf,f_buf,a_buf,nPixels,nAtoms,nF,nS,w,T,F,S,B)
     a = np.zeros(nPixels, dtype=np.complex64)
 
     cl.enqueue_copy(queue, a, a_buf)
