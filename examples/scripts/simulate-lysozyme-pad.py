@@ -12,23 +12,21 @@ import bornagain.target.crystal as crystal
 pl = ba.detector.panelList()
 pl.simpleSetup(1000,1000,100e-6,0.05,1.5e-10)
 
-# Scattering vectors
-Q = pl.Q
-
 # Load a crystal structure from pdb file
 cryst = crystal.structure('../../examples/data/pdb/2LYZ.pdb')
 
-# These are atomic coordinates
+# These are atomic coordinates (Nx3 array)
 r = cryst.r
 
-# Look up atomic scattering factors
+# Look up atomic scattering factors (they are complex numbers)
 f = ba.simulate.utils.atomicScatteringFactors(cryst.Z, pl.beam.wavelength)
 
 # Run the simulation
 p = pl[0]
-t = time.time()
-A = clcore.phaseFactorPAD(r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength)
-print('Ran simulation in %f seconds' % (time.time() - t))
+for i in range(0,10):
+	t = time.time()
+	A = clcore.phaseFactorPAD(r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength)
+	print('Ran simulation in %f seconds' % (time.time() - t))
 
 # Display pattern
 I = np.abs(A)**2

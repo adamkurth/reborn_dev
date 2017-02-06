@@ -1,5 +1,6 @@
 import numpy as np
 import pyopencl as cl
+import time 
 
 def phaseFactor(q, r, f=None):
 
@@ -104,55 +105,52 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w):
     def buf_float(x):
         x = np.array(x, dtype=np.float32, order='C')
         return cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=x)
-    	
+    
+    def buf_complex(x):
+        x = np.array(x, dtype=np.complex64, order='C')
+        return cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=x)
+    
+    def vec4(x):
+    	# Evdidently pyopencl does not deal with 3-vectors very well, so we use 4-vectors
+    	# and pad with a zero at the end.
+    	return np.array([x[0],x[1],x[2],0.0]).astype(np.float32)
+    
+    # Setup buffers.  This is very fast.  However, we are assuming that we can just load
+    # all atoms into memory, which might not be possible...
     r_buf = buf_float(r)
-    fr_buf = buf_float(f.real)
-    fi_buf = buf_float(f.imag)
+    f_buf = buf_complex(f)
     nPixels = nF*nS
     nAtoms = r.shape[0]
-    Tx = T[0]
-    Ty = T[1]
-    Tz = T[2]
-    Fx = F[0]
-    Fy = F[1]
-    Fz = F[2]
-    Sx = S[0]
-    Sy = S[1]
-    Sz = S[2]
-    Bx = B[0]
-    By = B[1]
-    Bz = B[2]    
-    re_buf = cl.Buffer(ctx, mf.WRITE_ONLY, nPixels*4)
-    im_buf = cl.Buffer(ctx, mf.WRITE_ONLY, nPixels*4)
+    T = vec4(T) 
+    F = vec4(F) 
+    S = vec4(S) 
+    B = vec4(B) 
+    a_buf = cl.Buffer(ctx, mf.WRITE_ONLY, nPixels*4*2)
 
     # run each q vector in parallel
     prg = cl.Program(ctx, """
+        #define PI2 6.28318530718f
         __kernel void clsim(
-        __global const float *r,
-        __global const float *fr,
-        __global const float *fi,
-        __global float *re, 
-        __global float *im,
+        __global const float *r,  /* A float3 array does not seem to work in pyopencl.. */
+        __global const float2 *f,
+        __global float2 *a, 
         int nAtoms,
         int nF,
         int nS,
-        float Tx,
-        float Ty,
-        float Tz,
-        float Fx,
-        float Fy,
-        float Fz,
-        float Sx,
-        float Sy,
-        float Sz,
-        float Bx,
-        float By,
-        float Bz,
-        float w)
+        float w,
+        float4 T,
+        float4 F,
+        float4 S,
+        float4 B)
         {
+            // These are image indices:
             int i = get_global_id(0);
             int j = get_global_id(1);
+            int ni = get_global_size(0);
+            //int k = get_local_size(0);
             
+            float4 r4;
+            //float4 r4;
             float ph;
             float fr_n;
             float fi_n;
@@ -160,45 +158,40 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w):
             float cosph;
             float rep = 0;
             float imp = 0;
-            float vx = Tx + i*Fx + j*Sx;
-            float vy = Ty + i*Fy + j*Sy;
-            float vz = Tz + i*Fz + j*Sz;
-            float vmag = sqrt(vx*vx + vy*vy + vz*vz);
-            vx = vx/vmag;
-            vy = vy/vmag;
-            vz = vz/vmag;
-            float tp = 6.283185f;
-            float qx = (vx-Bx)*tp/w;
-            float qy = (vy-By)*tp/w;
-            float qz = (vz-Bz)*tp/w;
+            float4 V = T + i*F + j*S;
+            V /= length(V);
+            float4 q = (V-B)*PI2/w;
+            //barrier(CLK_LOCAL_MEM_FENCE);
             
-            int n;
-            for (n=0; n < nAtoms; n++){
-            	fr_n = fr[n];
-            	fi_n = fi[n];
-                ph = qx*r[n*3] + qy*r[n*3+1] + qz*r[n*3+2];
-                sinph = sin(ph);
-                cosph = cos(ph);
+            //local float4 rs[GROUP_SIZE];
+            
+            //for (int m=0; 
+            for (int n=0; n < nAtoms; n++){
+            	fr_n = f[n].x;
+            	fi_n = f[n].y;
+            	r4 = (float4)(r[n*3],r[n*3+1],r[n*3+2],0.0f);   //vload3(n,r);
+            	//barrier(CLK_LOCAL_MEM_FENCE);
+                ph = dot(q,r4); 
+                sinph = native_sin(ph);
+                cosph = native_cos(ph);
                 rep += fr_n*cosph + fi_n*sinph;
                 imp += fr_n*sinph + fi_n*cosph;
             }
-            re[i+nF*j] = rep;
-            im[i+nF*j] = imp;
+            
+            a[i+ni*j].x = rep;
+            a[i+ni*j].y = imp;
         }
         """).build()
 
     clsim = prg.clsim
-    clsim.set_scalar_arg_dtypes([None,None,None,None,None,int, int,int,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32])
+    clsim.set_scalar_arg_dtypes([None,None,None,int,int,int,np.float32,None,None,None,None])
 
-    clsim(queue, (nF,nS), None, r_buf,fr_buf,fi_buf,re_buf,im_buf,nAtoms,nF,nS,Tx,Ty,Tz,Fx,Fy,Fz,Sx,Sy,Sz,Bx,By,Bz,w)
-    re = np.zeros(nPixels, dtype=np.float32)
-    im = np.zeros(nPixels, dtype=np.float32)
+    clsim(queue, (nF,nS), None, r_buf,f_buf,a_buf,nAtoms,nF,nS,w,T,F,S,B)
+    a = np.zeros(nPixels, dtype=np.complex64)
 
-    cl.enqueue_copy(queue, re, re_buf)
-    cl.enqueue_copy(queue, im, im_buf)
+    cl.enqueue_copy(queue, a, a_buf)
 
-    A = re + 1j * im
-    return A
+    return a
 
 
 
