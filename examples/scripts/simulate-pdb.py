@@ -12,11 +12,10 @@ import bornagain.target.crystal as crystal
 pl = ba.detector.panelList()
 pl.simpleSetup(1000,1000,100e-6,0.05,1.5e-10)
 
-# Scattering vectors
-q = pl.Q
-
 # Load a crystal structure from pdb file
-cryst = crystal.structure('../../examples/data/pdb/2LYZ.pdb')
+pdbFile = '../../examples/data/pdb/2LYZ.pdb'  # Lysozyme
+pdbFile = '../../examples/data/pdb/1jb0.pdb'  # Photosystem I
+cryst = crystal.structure(pdbFile)
 
 # These are atomic coordinates (Nx3 array)
 r = cryst.r
@@ -24,13 +23,20 @@ r = cryst.r
 # Look up atomic scattering factors (they are complex numbers)
 f = ba.simulate.utils.atomicScatteringFactors(cryst.Z, pl.beam.wavelength)
 
-# Run the simulation
-p = pl[0]
+# This method computes the q vectors on the fly.  Slight speed increase.
+
+p = pl[0]  # p is the first panel in the panelList (there is only one)
+
 for i in range(0,10):
 	t = time.time()
 	A = clcore.phaseFactorPAD(r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength)
 	tf = time.time() - t
 	print('phaseFactorPAD: %f seconds' % (tf))
+
+# This method uses any q vectors that you supply.  Here we grab the q vectors from the 
+# detector panelList class instance.
+
+q = pl.Q
 
 for i in range(0,10):
 	t = time.time()
