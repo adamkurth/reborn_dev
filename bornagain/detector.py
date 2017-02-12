@@ -1,16 +1,17 @@
 import numpy as np
 from numpy.linalg import norm
 from numpy.random import random, randn
-from bornagain.utils import vecNorm, vecMag
-from bornagain import source
+
+from utils import vecNorm, vecMag
+import source
 
 """
 Classes for analyzing diffraction data contained in pixel array detectors (PADs).
 """
 
-class panel(object):
+class Panel(object):
 
-    """ Individual detector panel: a 2D lattice of square pixels."""
+    """ Individual detector Panel: a 2D lattice of square pixels."""
 
     def __init__(self, name=""):
 
@@ -20,7 +21,7 @@ class panel(object):
         self._name = name  # Panel name for convenience
         self._F = None  # Fast-scan vector
         self._S = None  # Slow-scan vector
-        self._T = None  # Translation of this panel (from interaction region to center of first pixel)
+        self._T = None  # Translation of this Panel (from interaction region to center of first pixel)
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
         self.aduPerEv = 0  # Number of arbitrary data units per eV of photon energy
@@ -37,14 +38,14 @@ class panel(object):
         self._rsbb = None  # Real-space bounding box information
         self._geometryHash = None  # Hash of the configured geometry parameters
 
-        # If this panel is a part of a list
-        self.PanelList = None  # This is the link to the panel list
+        # If this Panel is a part of a list
+        self.PanelList = None  # This is the link to the Panel list
 
     def copy(self, derived=True):
 
-        """ Deep copy of everything.  Parent panel list is stripped away."""
+        """ Deep copy of everything.  Parent Panel list is stripped away."""
 
-        p = panel()
+        p = Panel()
         p.name = self.name
         p.F = self._F.copy()
         p.S = self._S.copy()
@@ -87,7 +88,7 @@ class panel(object):
     @property
     def name(self):
 
-        """ Name of this panel. """
+        """ Name of this Panel. """
 
         return self._name
 
@@ -95,7 +96,7 @@ class panel(object):
     def name(self, val):
 
 #        if self._name != "":
-#            raise ValueError('Cannot rename a detector panel')
+#            raise ValueError('Cannot rename a detector Panel')
 
         self._name = val
 
@@ -133,7 +134,7 @@ class panel(object):
     @property
     def beam(self):
 
-        """ X-ray beam data, taken from parent panel list if one exists."""
+        """ X-ray beam data, taken from parent Panel list if one exists."""
 
         if self.PanelList is not None:
             beam = self.PanelList._beam
@@ -363,7 +364,7 @@ class panel(object):
     @property
     def N(self):
 
-        """ Normal vector to panel surface (F X S)."""
+        """ Normal vector to Panel surface (F X S)."""
 
         N = np.cross(self.F, self.S)
         return N / norm(N)
@@ -399,7 +400,7 @@ class panel(object):
 
     def check(self):
 
-        """ Check for any known issues with this panel."""
+        """ Check for any known issues with this Panel."""
 
         self.checkGeometry()
         return True
@@ -491,7 +492,7 @@ class panel(object):
 
     def getVertices(self, edge=False, loop=False):
 
-        """ Get panel getVertices; positions of corner pixels."""
+        """ Get Panel getVertices; positions of corner pixels."""
 
         nF = self.nF - 1
         nS = self.nS - 1
@@ -513,7 +514,7 @@ class panel(object):
 
     def getCenter(self):
 
-        """ Vector to center of panel."""
+        """ Vector to center of Panel."""
 
         return np.mean(self.getVertices(), axis=0)
 
@@ -537,7 +538,7 @@ class panel(object):
 
     def simpleSetup(self, nF=None, nS=None, pixelSize=None, distance=None, wavelength=None, T=None):
 
-        """ Simple way to create a panel with centered beam."""
+        """ Simple way to create a Panel with centered beam."""
 
         if nF is None:
             raise ValueError("Number of fast scan pixels is unspecified.")
@@ -570,7 +571,7 @@ class PanelList(object):
 
     def __init__(self):
 
-        """ Create an empty panel array."""
+        """ Create an empty Panel array."""
 
         # Configured data
         self._name = None  # The name of this list (useful for rigid groups)
@@ -584,7 +585,7 @@ class PanelList(object):
         self._sa = None  # Concatenated solid angles
         self._V = None  # Concatenated pixel positions
         self._K = None  # Concatenated reciprocal-space vectors
-        self._rsbb = None  # Real-space bounding box of entire panel list
+        self._rsbb = None  # Real-space bounding box of entire Panel list
         self._vll = None  # Look-up table for simple projection
         self._rpix = None  # junk
         self._pf = None # Polarization facto
@@ -614,23 +615,23 @@ class PanelList(object):
 
     def __getitem__(self, key):
 
-        """ Get a panel. Panels may be referenced by name or index."""
+        """ Get a Panel. Panels may be referenced by name or index."""
 
         if isinstance(key, str):
             key = self.getPanelIndexByName(key)
             if key is None:
-                raise IndexError("There is no panel named %s" % key)
+                raise IndexError("There is no Panel named %s" % key)
                 return None
         return self._PanelList[key]
 
     def __setitem__(self, key, value):
 
-        """ Set a panel, check that it is the appropriate type."""
+        """ Set a Panel, check that it is the appropriate type."""
 
-        if not isinstance(value, panel):
+        if not isinstance(value, Panel):
             raise TypeError("You may only add panels to a PanelList object")
         if value.name == "":
-            value.name = "%d" % key  # Give the  panel a name if it wasn't provided
+            value.name = "%d" % key  # Give the  Panel a name if it wasn't provided
         self._PanelList[key] = value
 
     def __iter__(self):
@@ -641,7 +642,7 @@ class PanelList(object):
 
     def __len__(self):
 
-        """ Return length of panel list."""
+        """ Return length of Panel list."""
 
         return len(self._PanelList)
 
@@ -684,11 +685,11 @@ class PanelList(object):
 
     def append(self, p=None, name=""):
 
-        """ Append a panel, check that it is of the correct type."""
+        """ Append a Panel, check that it is of the correct type."""
 
         if p is None:
-            p = panel()
-        if not isinstance(p, panel):
+            p = Panel()
+        if not isinstance(p, Panel):
             raise TypeError("You may only append panels to a PanelList object")
         p.PanelList = self
 
@@ -708,7 +709,7 @@ class PanelList(object):
 
     def getPanelIndexByName(self, name):
 
-        """ Find the integer index of a panel by it's unique name """
+        """ Find the integer index of a Panel by it's unique name """
 
         i = 0
         for p in self:
@@ -841,7 +842,7 @@ class PanelList(object):
     @property
     def name(self):
 
-        """ The name of this panel list """
+        """ The name of this Panel list """
 
         return self._name
 
@@ -860,7 +861,7 @@ class PanelList(object):
     def addRigidGroup(self, name, vals):
 
         """ Append to the list of rigid groups. A rigid group is techically just
-         a truncated panel list pointing to members of the parent panel list.  """
+         a truncated Panel list pointing to members of the parent Panel list.  """
 
         if self._rigidGroups is None:
             self._rigidGroups = []
@@ -1016,13 +1017,13 @@ class PanelList(object):
             if all(np.absolute((pix - mnpix) / mnpix) < 1e-6):
                 self._pixelSize = mnpix
             else:
-                raise ValueError("Pixel sizes in panel list are not all the same.")
+                raise ValueError("Pixel sizes in Panel list are not all the same.")
 
         return self._pixelSize.copy()
 
     def getCenter(self):
 
-        """ Mean center of panel list. """
+        """ Mean center of Panel list. """
 
         c = np.zeros((self.nPanels, 3))
         i = 0
@@ -1076,7 +1077,7 @@ class PanelList(object):
 
         """
 
-        Append a panel using the simple setup method.
+        Append a Panel using the simple setup method.
 
         Arguments:
         nF         : Number of fast-scan pixels
@@ -1088,7 +1089,7 @@ class PanelList(object):
 
         """
 
-        p = panel()
+        p = Panel()
         p.simpleSetup(nF, nS, pixelSize, distance, wavelength, T)
         self.beam = p.beam
         self.append(p)

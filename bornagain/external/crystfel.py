@@ -83,10 +83,10 @@ def geomToDict(geomFile=None,rawStrings=False):
 					mydict[key] = False
 			continue
 
-	# These are the panel keys allowed by crystfel
+	# These are the Panel keys allowed by crystfel
 	panelKeys = ['name','data','dim0','dim1','dim2','min_fs','min_ss','max_fs','max_ss','adu_per_eV','badrow_direction','res','clen','coffset','fs','ss','corner_x','corner_y','max_adu','no_index','mask','mask_file','saturation_map','saturation_map_file','mask_good','mask_bad','photon_energy','photon_energy_scale']
 
-	# Here is our template panel dictionary.  Also for the global panel dictionary,
+	# Here is our template Panel dictionary.  Also for the global Panel dictionary,
 	# which fills in the undefined properties of panels.
 	panelDictTemplate = {}
 	# Initialized with None for all keys
@@ -94,7 +94,7 @@ def geomToDict(geomFile=None,rawStrings=False):
 		panelDictTemplate[key] = None
 	
 	# These are the bad region keys allowed by crystfel
-	badRegionKeys = ['name','min_x','max_x','min_y','max_y','panel']
+	badRegionKeys = ['name','min_x','max_x','min_y','max_y','Panel']
 
 	# Initialize a template dictionary for bad regions.
 	badRegionDictTemplate = {}
@@ -188,7 +188,7 @@ def geomToDict(geomFile=None,rawStrings=False):
 			thisDict[key] = value
 			continue
 
-		# If not any of the above types, check if it is a panel-specific specification
+		# If not any of the above types, check if it is a Panel-specific specification
 		key = key.split("/")
 		if len(key) != 2:
 			print('Cannot interpret string %s' % originalline)
@@ -211,17 +211,17 @@ def geomToDict(geomFile=None,rawStrings=False):
 
 	# Convert strings to numeric types as appropriate
 	if rawStrings is not True:
-		for panel in panels:
-			convertTypes(panel)
+		for Panel in panels:
+			convertTypes(Panel)
 		convertTypes(globals)
 		for badRegion in badRegions:
 			convertTypes(badRegion)
 
-	# Populate the missing values in each panel with global values
-	for panel in panels:
+	# Populate the missing values in each Panel with global values
+	for Panel in panels:
 		for key in panelKeys:
-			if panel[key] is None:
-				panel[key] = globals[key]
+			if Panel[key] is None:
+				Panel[key] = globals[key]
 
 	# Now package up the results and return
 	geomDict = {'globals' : globals, 'panels' : panels, 'rigidGroups' : rigidGroups, 'rigidGroupCollections' : rigidGroupCollections, 'badRegions' : badRegions}
@@ -237,20 +237,20 @@ def geomDictToPanelList(geomDict):
 	
 	for p in geomDict['panels']:
 
-		panel = detector.panel()
+		Panel = detector.Panel()
 
-		panel.name = p['name']
-		panel.F = np.array(p['fs']) # Unit vectors
-		panel.S = np.array(p['ss'])
-		panel.nF = p['max_fs'] - p['min_fs'] + 1
-		panel.nS = p['max_ss'] - p['min_ss'] + 1
+		Panel.name = p['name']
+		Panel.F = np.array(p['fs']) # Unit vectors
+		Panel.S = np.array(p['ss'])
+		Panel.nF = p['max_fs'] - p['min_fs'] + 1
+		Panel.nS = p['max_ss'] - p['min_ss'] + 1
 		z = 0.0
 		if type(p['coffset']) is not str:
 			z += p['coffset']
-		panel.T = np.array([p['corner_x']/p['res'],p['corner_y']/p['res'],z])
-		panel.pixelSize = 1.0 / p['res']
-		panel.aduPerEv = p['adu_per_eV']
-		PanelList.append(panel)
+		Panel.T = np.array([p['corner_x']/p['res'],p['corner_y']/p['res'],z])
+		Panel.pixelSize = 1.0 / p['res']
+		Panel.aduPerEv = p['adu_per_eV']
+		PanelList.append(Panel)
 
 	return PanelList
 
@@ -259,7 +259,7 @@ def geomDictToPanelList(geomDict):
 #        if key == "clen":
 #            p.T[2] += float(value)
 #		
-#    # Now adjust panel list according to global parameters, convert units, etc.
+#    # Now adjust Panel list according to global parameters, convert units, etc.
 #    i = 0
 #    for p in pa:
 #
@@ -308,7 +308,7 @@ def geomDictToPanelList(geomDict):
 
 def loadCheetahMask(maskArray,PanelList,geomDict):
 
-	""" Populate panel masks with cheetah mask array. """
+	""" Populate Panel masks with cheetah mask array. """
 
 	fail = False
 
@@ -320,7 +320,7 @@ def loadCheetahMask(maskArray,PanelList,geomDict):
 
 def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
 
-    """ Convert a crystfel "geom" file into a panel list """
+    """ Convert a crystfel "geom" file into a Panel list """
 
     # For parsing the very loose fast/slow scan vector specification
     def splitxysum(s):
@@ -446,7 +446,7 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
         if re.search("^bad_", key):
             continue
 
-        # If not a global key, check for panel-specific keys, which always have a "/" character
+        # If not a global key, check for Panel-specific keys, which always have a "/" character
         key = key.split("/")
         if len(key) != 2:
             continue
@@ -455,18 +455,18 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
         name = key[0].strip()
         key = key[1].strip()
 
-        # Get index of this panel
+        # Get index of this Panel
         i = pa.getPanelIndexByName(name)
-        # If it is a new panel:
+        # If it is a new Panel:
         if i is None:
-            # Initialize panel
+            # Initialize Panel
             pa.append()
             p = pa[len(pa) - 1]
             p.name = name
             p.F = np.zeros(3)
             p.S = np.zeros(3)
             p.T = np.zeros(3)
-            # add some extra attributes to the panel object
+            # add some extra attributes to the Panel object
             p.fRange = [0, 0]
             p.sRange = [0, 0]
             p.dataField = None
@@ -476,7 +476,7 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
         else:
             p = pa[i]
 
-        # Parse panel-specific keys
+        # Parse Panel-specific keys
         if key == "corner_x":
             p.T[0] = float(value)
         if key == "corner_y":
@@ -505,10 +505,10 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
     # We are now done reading the geometry file
     h.close()
 
-    # Initialize beam information for this panel array
+    # Initialize beam information for this Panel array
     pa.beam.B = np.array([0, 0, 1])
 
-    # Now adjust panel list according to global parameters, convert units, etc.
+    # Now adjust Panel list according to global parameters, convert units, etc.
     i = 0
     for p in pa:
 
