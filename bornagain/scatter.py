@@ -14,11 +14,11 @@ class radialProfile(object):
 		self.counts = None
 		self.qRange = None
 
-	def makePlan(self,panelList,mask=None,nBins=100,qRange=None):
+	def makePlan(self,PanelList,mask=None,nBins=100,qRange=None):
 
-		''' Use panelList as template to cache information for radial binning. '''
+		''' Use PanelList as template to cache information for radial binning. '''
 
-		self.Qmag = panelList.Qmag.copy()
+		self.Qmag = PanelList.Qmag.copy()
 		if qRange is None:
 			self.minQ = np.min(self.Qmag)
 			self.maxQ = np.max(self.Qmag)
@@ -39,11 +39,11 @@ class radialProfile(object):
 		self.counts = np.bincount(self.binIndices, self.mask, self.nBins)
 		self.countsNonZero = self.counts > 0
 
-	def getProfile(self, panelList, average=True):
+	def getProfile(self, PanelList, average=True):
 
 		fail = False
 
-		profile = np.bincount(self.binIndices, panelList.data*self.mask, self.nBins)
+		profile = np.bincount(self.binIndices, PanelList.data*self.mask, self.nBins)
 		if average:
 			profile.flat[self.countsNonZero] /= self.counts.flat[self.countsNonZero]
 	

@@ -11,7 +11,7 @@ getter.loadCrystfelGeometry(geomFile="./best.geom")
 getter.fileList = glob('../hdf5/r0009-test2/data*/LCLS*.h5') #["../hdf5/r0048-gv2/data1/LCLS_2015_Jun26_r0048_143302_11f13.h5"]
 getter.getFrame(0)
 
-y = getter.reader.panelList.radialProfile()
+y = getter.reader.PanelList.radialProfile()
 # plt.plot(y)
 # plt.show()
 

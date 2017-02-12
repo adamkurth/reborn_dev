@@ -41,7 +41,7 @@ def test_dat(pa):
     print("Pass")
 
 def test_copy(pa):
-    print("Checking panelList copy function...")
+    print("Checking PanelList copy function...")
     pa2 = pa.copy()
     print("Pass")
 

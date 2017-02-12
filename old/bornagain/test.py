@@ -8,7 +8,7 @@ def generateSimplePanelList():
     two panels that are just beside one another.  No beam information will be set
     here."""
 
-    pa = detector.panelList()
+    pa = detector.PanelList()
     p = detector.panel()
     p.nF = 200
     p.nS = 100

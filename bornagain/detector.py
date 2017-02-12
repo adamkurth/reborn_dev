@@ -38,7 +38,7 @@ class panel(object):
         self._geometryHash = None  # Hash of the configured geometry parameters
 
         # If this panel is a part of a list
-        self.panelList = None  # This is the link to the panel list
+        self.PanelList = None  # This is the link to the panel list
 
     def copy(self, derived=True):
 
@@ -65,7 +65,7 @@ class panel(object):
                 p._pf = self._pf.copy()
             if self._rsbb is not None:
                 p._rsbb = self._rsbb.copy()
-        p.panelList = None
+        p.PanelList = None
 
         return p
 
@@ -135,8 +135,8 @@ class panel(object):
 
         """ X-ray beam data, taken from parent panel list if one exists."""
 
-        if self.panelList is not None:
-            beam = self.panelList._beam
+        if self.PanelList is not None:
+            beam = self.PanelList._beam
             self._beam = None
         else:
             beam = self._beam
@@ -149,8 +149,8 @@ class panel(object):
         if not isinstance(beam, source.beam):
             raise TypeError("Beam info must be a source.beam class")
 
-        if self.panelList is not None:
-            self.panelList._beam = beam
+        if self.PanelList is not None:
+            self.PanelList._beam = beam
             self._beam = None
         else:
             self._beam = beam
@@ -481,13 +481,13 @@ class panel(object):
         self._rsbb = None  # Real-space bounding box information
         self._geometryHash = None  # Hash of the configured geometry parameters
 
-        if self.panelList is not None:
-            self.panelList.clearGeometryCache()
+        if self.PanelList is not None:
+            self.PanelList.clearGeometryCache()
 
     def deleteDerivedData(self):
 
-        if self.panelList is not None:
-            self.panelList._data = None
+        if self.PanelList is not None:
+            self.PanelList._data = None
 
     def getVertices(self, edge=False, loop=False):
 
@@ -564,7 +564,7 @@ class panel(object):
             self.beam.wavelength = wavelength
 
 
-class panelList(object):
+class PanelList(object):
 
     """ List container for detector panels, with extra functionality."""
 
@@ -575,7 +575,7 @@ class panelList(object):
         # Configured data
         self._name = None  # The name of this list (useful for rigid groups)
         self._beam = source.beam()  # X-ray beam information, common to all panels
-        self._panelList = []  # List of individual panels
+        self._PanelList = []  # List of individual panels
 
         # Derived data (concatenated from individual panels)
         self._data = None  # Concatenated intensity data
@@ -597,7 +597,7 @@ class panelList(object):
 
         """ Create a deep copy."""
 
-        pa = panelList()
+        pa = PanelList()
         for p in self:
             pa.append(p.copy(derived=derived))
 
@@ -621,29 +621,29 @@ class panelList(object):
             if key is None:
                 raise IndexError("There is no panel named %s" % key)
                 return None
-        return self._panelList[key]
+        return self._PanelList[key]
 
     def __setitem__(self, key, value):
 
         """ Set a panel, check that it is the appropriate type."""
 
         if not isinstance(value, panel):
-            raise TypeError("You may only add panels to a panelList object")
+            raise TypeError("You may only add panels to a PanelList object")
         if value.name == "":
             value.name = "%d" % key  # Give the  panel a name if it wasn't provided
-        self._panelList[key] = value
+        self._PanelList[key] = value
 
     def __iter__(self):
 
         """ Iterate through panels. """
 
-        return iter(self._panelList)
+        return iter(self._PanelList)
 
     def __len__(self):
 
         """ Return length of panel list."""
 
-        return len(self._panelList)
+        return len(self._PanelList)
 
     @property
     def beam(self):
@@ -680,7 +680,7 @@ class panelList(object):
 
         """ Number of panels."""
 
-        return len(self._panelList)
+        return len(self._PanelList)
 
     def append(self, p=None, name=""):
 
@@ -689,8 +689,8 @@ class panelList(object):
         if p is None:
             p = panel()
         if not isinstance(p, panel):
-            raise TypeError("You may only append panels to a panelList object")
-        p.panelList = self
+            raise TypeError("You may only append panels to a PanelList object")
+        p.PanelList = self
 
         # Create name if one doesn't exist
         if name != "":
@@ -704,7 +704,7 @@ class panelList(object):
 
         p._beam = None
 
-        self._panelList.append(p)
+        self._PanelList.append(p)
 
     def getPanelIndexByName(self, name):
 
@@ -865,12 +865,12 @@ class panelList(object):
         if self._rigidGroups is None:
             self._rigidGroups = []
 
-        pl = panelList()
+        pl = PanelList()
         pl.beam = self.beam
         pl.name = name
         for val in vals:
             pl.append(self[val])
-            pl[-1].panelList = self
+            pl[-1].PanelList = self
         self._rigidGroups.append(pl)
 
     def appendToRigidGroup(self, name, vals):

@@ -28,7 +28,7 @@ Here are the expectations we have for an x-ray diffraction experiment, which def
     
     }
 
-The primary data class is a detector panel - 2D array of pixels that measure diffracted intensity.  Since many detectors now contain multiple panels, the panelList class is used to abstract away from the specific details of each panel.
+The primary data class is a detector panel - 2D array of pixels that measure diffracted intensity.  Since many detectors now contain multiple panels, the PanelList class is used to abstract away from the specific details of each panel.
 
 .. blockdiag:: 
     :desctable:
@@ -40,7 +40,7 @@ The primary data class is a detector panel - 2D array of pixels that measure dif
         bornagain -> dataio;
         
         detector -> panel;
-        detector -> panelList;
+        detector -> PanelList;
         
         source -> beam;
         

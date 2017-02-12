@@ -9,7 +9,7 @@ import bornagain as ba
 import bornagain.simulate.clcore as clcore
 
 # Create a detector
-pl = ba.detector.panelList()
+pl = ba.detector.PanelList()
 nPix = 1000;
 pl.simpleSetup(nPix,nPix,100e-6,0.1,1.5e-10)
 

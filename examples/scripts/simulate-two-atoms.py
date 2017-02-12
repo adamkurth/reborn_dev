@@ -8,7 +8,7 @@ import bornagain as ba
 import bornagain.simulate.clcore as clcore
 
 # Create a detector
-pl = ba.detector.panelList()
+pl = ba.detector.PanelList()
 pl.simpleSetup(1000,1000,100e-6,0.1,1.5e-10)
 
 # Scattering vectors

@@ -13,13 +13,13 @@ def cspadReshapePsanaToCheetah(im):
 	return np.concatenate(imlist,axis=1)
 
 
-def cspadToPanelList(dataIn,panelList,geomDict):
+def cspadToPanelList(dataIn,PanelList,geomDict):
 
-	""" Dump the psana cspad numpy array (32,185,388) into a panelList object.  This function assumes that a CrystFEL geometry file has been transformed into a CrystFEL geomDict dictionary. """
+	""" Dump the psana cspad numpy array (32,185,388) into a PanelList object.  This function assumes that a CrystFEL geometry file has been transformed into a CrystFEL geomDict dictionary. """
 
 	im = cspadReshapePsanaToCheetah(dataIn)
 	for p in geomDict['panels']:
-		panelList[p['name']].data = im[p['min_ss']:(p['max_ss']+1),p['min_fs']:(p['max_fs']+1)]
+		PanelList[p['name']].data = im[p['min_ss']:(p['max_ss']+1),p['min_fs']:(p['max_fs']+1)]
 
-	return panelList
+	return PanelList
 

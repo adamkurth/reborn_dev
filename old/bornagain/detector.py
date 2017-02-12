@@ -38,7 +38,7 @@ class panel(object):
         self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_geometryHash']  # Default values of these are 'None'
 
         # If this panel is a part of a list
-        self.panelList = None  # This is the link to the panel list
+        self.PanelList = None  # This is the link to the panel list
 
     def copy(self, derived=True):
 
@@ -65,7 +65,7 @@ class panel(object):
                 p._pf = self._pf.copy()
             if self._rsbb is not None:
                 p._rsbb = self._rsbb.copy()
-        p.panelList = None
+        p.PanelList = None
 
         return p
 
@@ -127,8 +127,8 @@ class panel(object):
 
         """ X-ray beam data, taken from parent panel list if one exists."""
 
-        if self.panelList is not None:
-            beam = self.panelList._beam
+        if self.PanelList is not None:
+            beam = self.PanelList._beam
             self._beam = None
         else:
             beam = self._beam
@@ -141,8 +141,8 @@ class panel(object):
         if not isinstance(beam, source.beam):
             raise TypeError("Beam info must be a source.beam class")
 
-        if self.panelList is not None:
-            self.panelList._beam = beam
+        if self.PanelList is not None:
+            self.PanelList._beam = beam
             self._beam = None
         else:
             self._beam = beam
@@ -461,13 +461,13 @@ class panel(object):
 
         for i in self._derivedGeometry:
             setattr(self, i, None)
-        if self.panelList is not None:
-            self.panelList.deleteGeometryData()
+        if self.PanelList is not None:
+            self.PanelList.deleteGeometryData()
 
     def deleteDerivedData(self):
 
-        if self.panelList is not None:
-            self.panelList._data = None
+        if self.PanelList is not None:
+            self.PanelList._data = None
 
     def getVertices(self, edge=False, loop=False):
 
@@ -542,7 +542,7 @@ class panel(object):
             self.beam.wavelength = wavelength
 
 
-class panelList(list):
+class PanelList(list):
 
     """ List container for detector panels, with extra functionality."""
 
@@ -571,7 +571,7 @@ class panelList(list):
 
         """ Create a deep copy."""
 
-        pa = panelList()
+        pa = PanelList()
         for p in self:
             pa.append(p.copy(derived=derived))
 
@@ -595,17 +595,17 @@ class panelList(list):
             if key is None:
                 raise IndexError("There is no panel named %s" % key)
                 return None
-        return super(panelList, self).__getitem__(key)
+        return super(PanelList, self).__getitem__(key)
 
     def __setitem__(self, key, value):
 
         """ Set a panel, check that it is the appropriate type."""
 
         if not isinstance(value, panel):
-            raise TypeError("You may only add panels to a panelList object")
+            raise TypeError("You may only add panels to a PanelList object")
         if value.name == "":
             value.name = "%d" % key
-        super(panelList, self).__setitem__(key, value)
+        super(PanelList, self).__setitem__(key, value)
 
     @property
     def beam(self):
@@ -648,8 +648,8 @@ class panelList(list):
         if p is None:
             p = panel()
         if not isinstance(p, panel):
-            raise TypeError("You may only append panels to a panelList object")
-        p.panelList = self
+            raise TypeError("You may only append panels to a PanelList object")
+        p.PanelList = self
 
         # Create name if one doesn't exist
         if name != "":
@@ -663,7 +663,7 @@ class panelList(list):
 
         p._beam = None
 
-        super(panelList, self).append(p)
+        super(PanelList, self).append(p)
 
     def getPanelIndexByName(self, name):
 
@@ -817,12 +817,12 @@ class panelList(list):
         if self._rigidGroups is None:
             self._rigidGroups = []
 
-        pl = panelList()
+        pl = PanelList()
         pl.beam = self.beam
         pl.name = name
         for val in vals:
             pl.append(self[val])
-            pl[-1].panelList = self
+            pl[-1].PanelList = self
         self._rigidGroups.append(pl)
 
     def appendToRigidGroup(self, name, vals):

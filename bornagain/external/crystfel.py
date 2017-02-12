@@ -230,10 +230,10 @@ def geomToDict(geomFile=None,rawStrings=False):
 
 def geomDictToPanelList(geomDict):
 
-	""" Convert a CrystFEL geometry dictionary to a panelList object. """
+	""" Convert a CrystFEL geometry dictionary to a PanelList object. """
 
-	panelList = detector.panelList()
-	panelList.beam.B = np.array([0, 0, 1])
+	PanelList = detector.PanelList()
+	PanelList.beam.B = np.array([0, 0, 1])
 	
 	for p in geomDict['panels']:
 
@@ -250,9 +250,9 @@ def geomDictToPanelList(geomDict):
 		panel.T = np.array([p['corner_x']/p['res'],p['corner_y']/p['res'],z])
 		panel.pixelSize = 1.0 / p['res']
 		panel.aduPerEv = p['adu_per_eV']
-		panelList.append(panel)
+		PanelList.append(panel)
 
-	return panelList
+	return PanelList
 
 #        if key == "coffset":
 #            p.T[2] += float(value)
@@ -306,19 +306,19 @@ def geomDictToPanelList(geomDict):
 #    return pa
 
 
-def loadCheetahMask(maskArray,panelList,geomDict):
+def loadCheetahMask(maskArray,PanelList,geomDict):
 
 	""" Populate panel masks with cheetah mask array. """
 
 	fail = False
 
 	for p in geomDict['panels']:
-		panelList[p['name']].mask = maskArray[p['min_ss']:(p['max_ss']+1),p['min_fs']:(p['max_fs']+1)]
+		PanelList[p['name']].mask = maskArray[p['min_ss']:(p['max_ss']+1),p['min_fs']:(p['max_fs']+1)]
 
 	return fail
 
 
-def geomToPanelList(geomFile=None, beamFile=None, panelList=None):
+def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
 
     """ Convert a crystfel "geom" file into a panel list """
 
@@ -363,10 +363,10 @@ def geomToPanelList(geomFile=None, beamFile=None, panelList=None):
     global_photon_energy_field = None
     global_data = None
 
-    if panelList is None:
-        pa = detector.panelList()
+    if PanelList is None:
+        pa = detector.PanelList()
     else:
-        pa = panelList
+        pa = PanelList
 
     # Place holder for pixel sizes
     pixelSize = np.zeros(10000)

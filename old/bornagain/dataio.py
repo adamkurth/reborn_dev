@@ -10,19 +10,19 @@ import re
 # raw data for the sequence of frames.
 # The "frameGetter" class makes access to a sequence of files opaque; shouldn't matter what type of files.
 
-# Minimally, a reader should have the method getFrame(frameNumber=0), which should return a panelList object
+# Minimally, a reader should have the method getFrame(frameNumber=0), which should return a PanelList object
 
 
 class cheetahH5Reader(object):
 
     """ Read an hdf5 file with "cheetah" format """
 
-    def __init__(self, panelList=None):
+    def __init__(self, PanelList=None):
 
-        if panelList is None:
-            self.panelList = detector.panelList()
+        if PanelList is None:
+            self.PanelList = detector.PanelList()
         else:
-            self.panelList = panelList
+            self.PanelList = PanelList
         self._fileList = []
 
     @property
@@ -38,23 +38,23 @@ class cheetahH5Reader(object):
         """ Get a frame. """
 
         filePath = self.fileList[frameNumber]
-        loadCheetahH5V1(self.panelList, filePath)
+        loadCheetahH5V1(self.PanelList, filePath)
 
-        return self.panelList
+        return self.PanelList
 
 
-def loadCheetahH5V1(panelList, filePath):
+def loadCheetahH5V1(PanelList, filePath):
 
     f = h5py.File(filePath, "r")
 
     # each panel could come from a different data set within the hdf5
     # we don't want to load the data set each time, since that's slow...
     # so the code gets ugly here...
-    prevDataField = panelList[0].dataField
+    prevDataField = PanelList[0].dataField
     dset = f[prevDataField]
     dat = np.array(dset)
 
-    for p in panelList:
+    for p in PanelList:
 
         # Load wavelength from hdf5 file
         if p.wavelengthField is not None:
@@ -78,15 +78,15 @@ def loadCheetahH5V1(panelList, filePath):
 
     f.close()
 
-    return panelList
+    return PanelList
 
 class cxidbReader(object):
 
     """ Read an hdf5 file with "CXIDB" format """
 
-    def __init__(self, panelList=None, fileList=[]):
+    def __init__(self, PanelList=None, fileList=[]):
 
-        self.panelList = panelList
+        self.PanelList = PanelList
         self.fileList = []
         self.hdf5Files = []
 
@@ -98,8 +98,8 @@ class cxidbReader(object):
         if self.fileList is not None:
             self.loadHdf5Files()
 
-        if self.panelList is None:
-            self.panelList = detector.panelList()
+        if self.PanelList is None:
+            self.PanelList = detector.PanelList()
 
     def loadHdf5Files(self):
 
@@ -108,7 +108,7 @@ class cxidbReader(object):
 
     def initializePanelList(self):
 
-        pl = self.panelList
+        pl = self.PanelList
         for dp in range(len(self.dataPaths)):
             for pi in range(len(self.panelNames)):
                 p = detector.panel()
@@ -130,7 +130,7 @@ class cxidbReader(object):
 
 
 
-class diproiReader(detector.panelList):
+class diproiReader(detector.PanelList):
 
     def __init__(self):
 
@@ -177,7 +177,7 @@ class saclaReader(object):
         self.fileID = None  # hdf5 file ID
         self.detectorKeys = None  # Detector panel keys
         self.shotKeys = None  # One key for each shot (!)
-        self.dummyPanelList = detector.panelList()  # Dummy panel list for geometry values
+        self.dummyPanelList = detector.PanelList()  # Dummy panel list for geometry values
 
         if filePath is not None:
 
@@ -197,11 +197,11 @@ class saclaReader(object):
         self.nFrames = len(self.shotKeys)
         self.setupGeometry(self.dummyPanelList)
 
-    def getFrame(self, panelList, frameNumber):
+    def getFrame(self, PanelList, frameNumber):
 
-        """ Populate the panelList data with intensities from given frame number. """
+        """ Populate the PanelList data with intensities from given frame number. """
 
-        pa = panelList
+        pa = PanelList
         if pa.geometryHash != self.dummyPanelList.geometryHash:
             self.setupGeometry(pa)
 
@@ -210,14 +210,14 @@ class saclaReader(object):
             pa[n].data = np.double(self.fileID[self.runKey][detectorKey][self.shotKeys[frameNumber]]['detector_data'])
             n += 1
 
-    def setupGeometry(self, panelList):
+    def setupGeometry(self, PanelList):
 
         """ Geometry configuration for a particular hdf5 file. """
 
         n = 0
-        pa = panelList
+        pa = PanelList
         if pa is None:
-            pa = detector.panelList()
+            pa = detector.PanelList()
 
         for detectorKey in self.detectorKeys:
 
@@ -317,7 +317,7 @@ class frameGetter(object):
 
     def loadCrystfelGeometry(self, geomFile=None, beamFile=None):
 
-        crystfelToPanelList(geomFile=geomFile, beamFile=beamFile, panelList=self.reader.panelList)
+        crystfelToPanelList(geomFile=geomFile, beamFile=beamFile, PanelList=self.reader.PanelList)
 
     def getFrame(self, frameNumber=0):
 
@@ -328,7 +328,7 @@ class frameGetter(object):
 
         self.reader.getFrame(frameNumber)
         # print('getting frame %d' % (frameNumber))
-        return self.reader.panelList
+        return self.reader.PanelList
 
     def nextFrame(self):
 
@@ -373,7 +373,7 @@ def loadFileList(fileList):
 
 
 
-def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
+def crystfelToPanelList(geomFile=None, beamFile=None, PanelList=None):
 
     """ Convert a crystfel "geom" file into a panel list """
 
@@ -410,10 +410,10 @@ def crystfelToPanelList(geomFile=None, beamFile=None, panelList=None):
     global_photon_energy_field = None
     global_data = None
 
-    if panelList is None:
-        pa = detector.panelList()
+    if PanelList is None:
+        pa = detector.PanelList()
     else:
-        pa = panelList
+        pa = PanelList
 
     # Place holder for pixel sizes
     pixSize = np.zeros(10000)

@@ -20,7 +20,7 @@ Load a SACLA hdf5 file::
 	filePath = 'run178730.hdf5'
 	
 	reader = dataio.saclaReader(filePath)
-	pa = detector.panelList()
+	pa = detector.PanelList()
 	reader.getFrame(pa,0)
 	
 	im = pa.assembledData

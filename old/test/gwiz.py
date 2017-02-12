@@ -60,11 +60,11 @@ class myGLViewWidget(gl.GLViewWidget):
 
 
 
-class panelListGui(QtGui.QMainWindow):
+class PanelListGui(QtGui.QMainWindow):
 
     def __init__(self):
 
-        super(panelListGui, self).__init__()
+        super(PanelListGui, self).__init__()
         self.initUI()
         self.w = gl.GLViewWidget()
         self.setCentralWidget(self.w)
@@ -72,7 +72,7 @@ class panelListGui(QtGui.QMainWindow):
         self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         self.activateWindow()
         self.show()
-        self._panelList = None
+        self._PanelList = None
         self.panelItems = None
 
     def initUI(self):
@@ -115,12 +115,12 @@ class panelListGui(QtGui.QMainWindow):
         viewMenu.addAction(showAxes)
 
     @property
-    def panelList(self):
+    def PanelList(self):
 
-        return self._panelList
+        return self._PanelList
 
-    @panelList.setter
-    def panelList(self, val):
+    @PanelList.setter
+    def PanelList(self, val):
 
         if self.panelItems is None:
             self.panelItems = [None] * len(val)
@@ -128,7 +128,7 @@ class panelListGui(QtGui.QMainWindow):
         if len(self.panelItems) != len(val):
             self.panelItems = [None] * len(val)
 
-        self._panelList = val
+        self._PanelList = val
 
 
     def center(self):
@@ -150,9 +150,9 @@ class panelListGui(QtGui.QMainWindow):
     def showPanels(self):
 
         if self.panelItems is None:
-            self.panelItems = [None for i in range(len(self.panelList))]
+            self.panelItems = [None for i in range(len(self.PanelList))]
 
-        for p in self.panelList:
+        for p in self.PanelList:
 
             self.showPanel(p)
 
@@ -161,7 +161,7 @@ class panelListGui(QtGui.QMainWindow):
 
         col = (0, 0, 1, 0.5)
 
-        for p in self.panelList:
+        for p in self.PanelList:
             pos = np.zeros((5, 3))
             pos[:] = p.getVertices(edge=True, loop=True)
 
@@ -170,7 +170,7 @@ class panelListGui(QtGui.QMainWindow):
 
     def showFastScans(self):
 
-        for p in self.panelList:
+        for p in self.PanelList:
             pos = np.zeros((2, 3))
             pos[0] = p.T
             pos[1] = p.T + p.F * p.nF * 0.5
@@ -180,7 +180,7 @@ class panelListGui(QtGui.QMainWindow):
 
     def showAxes(self):
 
-        axislen = self.panelList.pixSize.copy() * 100
+        axislen = self.PanelList.pixSize.copy() * 100
         pos = np.zeros((2, 3))
         pos[0] = np.array([0, 0, 0])
         pos[1] = np.array([axislen, 0, 0])
@@ -206,7 +206,7 @@ class panelListGui(QtGui.QMainWindow):
 
         pos = np.zeros((2, 3))
         pos[0] = np.array([0, 0, 0])
-        pos[1] = np.array([0, 0, self.panelList.pixSize * 500])
+        pos[1] = np.array([0, 0, self.PanelList.pixSize * 500])
         col = (0, 0, 1, 1.0)
         beamd = gl.GLLinePlotItem(pos=pos, color=col)
         self.w.addItem(beamd)
@@ -276,7 +276,7 @@ def getPanelRotation(p):
 def main():
 
     app = QtGui.QApplication([])
-    g = panelListGui()
+    g = PanelListGui()
     w = g.w
 
 #     [pa, reader] = dataio.crystfelToPanelList("examples/example1.geom")
@@ -285,12 +285,12 @@ def main():
     filePath = '../examples/sacla/02-2014/run178730.hdf5'
 
     reader = dataio.saclaReader(filePath)
-    pa = detector.panelList()
+    pa = detector.PanelList()
     reader.getFrame(pa, 0)
     for p in pa:
         p.T = p.T + np.array([0, 0, 0.05])
 
-    g.panelList = pa
+    g.PanelList = pa
 
     c = pa.getCenter()
 

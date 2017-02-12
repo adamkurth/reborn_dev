@@ -5,7 +5,7 @@ from bornagain import detector, dataio
 filePath = 'run178730.hdf5'
 
 reader = dataio.saclaReader(filePath)
-pa = detector.panelList()
+pa = detector.PanelList()
 
 frameNumber = 3
 reader.getFrame(pa, frameNumber)
