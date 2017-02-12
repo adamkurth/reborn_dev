@@ -1,8 +1,6 @@
-import numpy              as np
-from bornagain       import detector
-from bornagain.utils import vecNorm, vecMag
+import numpy as np
 
-class radialProfile(object):
+class RadialProfile(object):
 
 	def __init__(self):
 		
@@ -14,7 +12,7 @@ class radialProfile(object):
 		self.counts = None
 		self.qRange = None
 
-	def makePlan(self,PanelList,mask=None,nBins=100,qRange=None):
+	def make_plan(self,PanelList,mask=None,nBins=100,qRange=None):
 
 		''' Use PanelList as template to cache information for radial binning. '''
 
@@ -39,7 +37,7 @@ class radialProfile(object):
 		self.counts = np.bincount(self.binIndices, self.mask, self.nBins)
 		self.countsNonZero = self.counts > 0
 
-	def getProfile(self, PanelList, average=True):
+	def get_profile(self, PanelList, average=True):
 
 		fail = False
 
