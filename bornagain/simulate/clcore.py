@@ -11,13 +11,13 @@ def padVec(x,n):
     m = x.shape[0]
     return np.concatenate([x,np.zeros([n-m,3])])
 
-def buffer_float32(x,ctx):
+def buffer_float32(x,context):
     x = np.array(x, dtype=np.float32, order='C')
-    return cl.Buffer(ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
+    return cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
 
-def buffer_complex64(x,ctx):
+def buffer_complex64(x,context):
     x = np.array(x, dtype=np.complex64, order='C')
-    return cl.Buffer(ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
+    return cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
 
 def vec4(x,dtype=np.float32):
     # Evdidently pyopencl does not deal with 3-vectors very well, so we use 4-vectors
@@ -25,7 +25,7 @@ def vec4(x,dtype=np.float32):
     return np.array([x[0],x[1],x[2],0.0],dtype=dtype)
 
 
-def phaseFactorQRF(q, r, f):
+def phaseFactorQRF(q, r, f, context=None):
     
     '''
     Calculate the amplitude sum for given set of Nx3 scattering q vectors, Mx3 position r
@@ -35,8 +35,8 @@ def phaseFactorQRF(q, r, f):
     nPixels = q.shape[0]
     nAtoms = r.shape[0]
     
-    ctx = cl.create_some_context()
-    queue = cl.CommandQueue(ctx)
+    if context is None: context = cl.create_some_context()
+    queue = cl.CommandQueue(context)
     groupSize = 64 #queue.device.max_work_group_size
     globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
     mf = cl.mem_flags
@@ -44,13 +44,13 @@ def phaseFactorQRF(q, r, f):
     # Atom list is padded with zeros to be an integer multiple of the group size
     padAtoms = np.ceil(nAtoms/float(groupSize))*groupSize
     
-    q_buf = buffer_float32(q,ctx)    
-    r_buf = buffer_float32(r.flatten(),ctx)
-    f_buf = buffer_complex64(f,ctx)
-    a_buf = cl.Buffer(ctx, mf.WRITE_ONLY, nPixels*4*2)
+    q_buf = buffer_float32(q,context)    
+    r_buf = buffer_float32(r.flatten(),context)
+    f_buf = buffer_complex64(f,context)
+    a_buf = cl.Buffer(context, mf.WRITE_ONLY, nPixels*4*2)
     
     # run each q vector in parallel
-    prg = cl.Program(ctx, """
+    prg = cl.Program(context, """
         #define GROUP_SIZE %d
         __kernel void phaseFactorQRF_cl(
         __global const float *q,  
@@ -131,7 +131,7 @@ def phaseFactorQRF(q, r, f):
     return a
 
 
-def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w):
+def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w, context=None):
     
     '''
     This should simulate detector panels.  More details to follow...
@@ -140,19 +140,19 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w):
     nPixels = nF*nS
     nAtoms = r.shape[0]
     
-    ctx = cl.create_some_context()
-    queue = cl.CommandQueue(ctx)
+    if context is None: context = cl.create_some_context()
+    queue = cl.CommandQueue(context)
     groupSize = 64 #queue.device.max_work_group_size
     globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
     mf = cl.mem_flags
     
     def buf_float(x):
         x = np.array(x, dtype=np.float32, order='C')
-        return cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=x)
+        return cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=x)
     
     def buf_complex(x):
         x = np.array(x, dtype=np.complex64, order='C')
-        return cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=x)
+        return cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=x)
     
     def vec4(x):
         # Evdidently pyopencl does not deal with 3-vectors very well, so we use 4-vectors
@@ -167,10 +167,10 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w):
     F = vec4(F) 
     S = vec4(S) 
     B = vec4(B)
-    a_buf = cl.Buffer(ctx, mf.WRITE_ONLY, nPixels*4*2)
+    a_buf = cl.Buffer(context, mf.WRITE_ONLY, nPixels*4*2)
 
     # run each q vector in parallel
-    prg = cl.Program(ctx, """
+    prg = cl.Program(context, """
         #define PI2 6.28318530718f
         #define GROUP_SIZE %d
         __kernel void phaseFactorPAD_cl(
@@ -261,8 +261,7 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w):
 
     return a
 
-
-def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None):
+def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None, context=None):
     
     '''
     This should simulate a regular 3D mesh of q-space samples.
@@ -283,23 +282,23 @@ def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None):
     nAtoms = r.shape[0]
     nPixels = N[0]*N[1]*N[2]
     
-    ctx = cl.create_some_context()
-    queue = cl.CommandQueue(ctx)
+    if context is None: context = cl.create_some_context()
+    queue = cl.CommandQueue(context)
     groupSize = 64 #queue.device.max_work_group_size
     globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
     mf = cl.mem_flags
     
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    r_buf = buffer_float32(r,ctx)
-    f_buf = buffer_complex64(f,ctx)
+    r_buf = buffer_float32(r,context)
+    f_buf = buffer_complex64(f,context)
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     Qmin = vec4(Qmin,dtype=np.float32) 
-    a_buf = cl.Buffer(ctx, mf.WRITE_ONLY, nPixels*4*2)
+    a_buf = cl.Buffer(context, mf.WRITE_ONLY, nPixels*4*2)
     
     # run each q vector in parallel
-    prg = cl.Program(ctx, """
+    prg = cl.Program(context, """
         #define GROUP_SIZE """ + ('%d' % groupSize) + """
         __kernel void phaseFactor3DM_cl(
         __global const float *r,  /* A float3 array does not seem to work in pyopencl.. */
