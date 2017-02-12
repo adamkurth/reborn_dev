@@ -21,10 +21,10 @@ def phaseFactor(q, r):
     # run each q vector in parallel
     prg = cl.Program(ctx, """
         __kernel void phase_factor(
-        __global const float *q, 
-        __global const float *r, 
+        __global const float *q,
+        __global const float *r,
         int nr,
-        __global float *re, 
+        __global float *re,
         __global float *im)
         {
             int gid = get_global_id(0);
@@ -35,7 +35,7 @@ def phaseFactor(q, r):
             float qy = q[gid*3+1];
             float qz = q[gid*3+2];
             int i;
-    
+
             for (i=0; i < nr; i++){
                 ph = qx*r[i*3] + qy*r[i*3+1] + qz*r[i*3+2];
                 re[gid] += cos(ph);

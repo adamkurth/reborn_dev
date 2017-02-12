@@ -160,7 +160,7 @@ class panel(object):
     @nF.setter
     def nF(self, val):
 
-        """ Changing the fast-scan pixel count destroys all derived geometry data, and 
+        """ Changing the fast-scan pixel count destroys all derived geometry data, and
         any unmatched intensity data."""
 
         self._nF = np.int(val)
@@ -182,7 +182,7 @@ class panel(object):
     @nS.setter
     def nS(self, val):
 
-        """ Changing the fast-scan pixel count destroys all derived geometry data, and 
+        """ Changing the fast-scan pixel count destroys all derived geometry data, and
         any unmatched intensity data."""
 
         self._nS = np.int(val)
@@ -297,7 +297,7 @@ class panel(object):
     @property
     def K(self):
 
-        """ Normalized scattering vectors.   Similar to the conventional scattering 
+        """ Normalized scattering vectors.   Similar to the conventional scattering
             vectors, but multiplied by wavelength.  This does not have the 2*pi factor
             included."""
 
@@ -318,7 +318,7 @@ class panel(object):
     @property
     def mcQ(self):
 
-        """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident 
+        """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident
             beam direction for each pixel independently. """
 
         i = np.arange(self.nF)
@@ -715,7 +715,7 @@ class panelList(list):
     @property
     def mcQ(self):
 
-        """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident 
+        """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident
             beam direction for each pixel independently. """
 
         return np.concatenate([p.mcQ.reshape(np.product(p.mcQ.shape) / 3, 3) for p in self])

@@ -1,4 +1,4 @@
-''' Basic utilities for reading in atom coordinates from PDB files, viewing coordinates, 
+''' Basic utilities for reading in atom coordinates from PDB files, viewing coordinates,
     gathering symmetry operations for space groups, etc. '''
 
 
@@ -14,7 +14,7 @@ from   numpy             import sin,cos,sqrt
 
 class structure(object):
 
-	''' Stuff needed to deal with an atomistic crystal structure. 
+	''' Stuff needed to deal with an atomistic crystal structure.
 	
 	    A note on coordinate transformations and the orthogonalization matrix O:
 	      Convert from fractional coordinates x to real-space coordinates r:
@@ -112,7 +112,7 @@ def parsePDB(pdbFilePath,crystalStruct=None):
 		
 		for line in pdbfile:
 		
-			# This is the inverse of the "orthogonalization matrix"  along with 
+			# This is the inverse of the "orthogonalization matrix"  along with
 			# translation vector.  See Rupp for an explanation.
 			
 			if line[:5] == 'SCALE':
@@ -126,12 +126,12 @@ def parsePDB(pdbFilePath,crystalStruct=None):
 		
 			if line[:6] == 'CRYST1':
 				cryst1 = line
-				# As always, everything in our programs are in SI units.  
+				# As always, everything in our programs are in SI units.
 				# PDB files use angstrom units.
 				a = float(cryst1[6:15])*1e-10
 				b = float(cryst1[15:24])*1e-10
 				c = float(cryst1[24:33])*1e-10
-				# And of course degrees are converted to radians (though we loose the perfection 
+				# And of course degrees are converted to radians (though we loose the perfection
 				# of rational quotients like 360/4=90...)
 				al = float(cryst1[33:40])*np.pi/180.0
 				be = float(cryst1[40:47])*np.pi/180.0

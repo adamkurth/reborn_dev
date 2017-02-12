@@ -8,7 +8,7 @@ import xraylib
 
 def atomicFormFactor(Z, stol):
 
-    """ Atomic form factor, a function of atomic number and 
+    """ Atomic form factor, a function of atomic number and
         sin(theta/2)/lambda . """
 
     return np.array([xraylib.FF_Rayl(Z, s) for s in stol * 1e-10])

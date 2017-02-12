@@ -1,5 +1,5 @@
 import numpy as np
- 
+
 def cspadReshapePsanaToCheetah(im):
 
 	""" Transform psana cspad numpy array (32,185,388) array to Cheetah 2D array (1480, 1552).  This only works on standard CSPAD.  I'm not aware of a way to do this generically for any CSPAD such as the 2x2 without hard-coding.  Wish I knew how. """

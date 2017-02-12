@@ -11,7 +11,7 @@ def atomicScatteringFactors(elements,energy):
 		sample = elements
 	else:
 		sample = elements[0]
-	if type(sample) is str: 
+	if type(sample) is str:
 		Z = np.array([xr.SymbolToAtomicNumber(e.strip().capitalize()) for e in elements])
 	else:
 		Z = elements

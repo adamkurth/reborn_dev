@@ -7,7 +7,7 @@ from bornagain import utils
 
 class molecule(object):
 
-    """ A collection of atomic positions, with specified elements, 
+    """ A collection of atomic positions, with specified elements,
     and transformation operations. Atomic scattering factors on request."""
 
     def __init__(self):

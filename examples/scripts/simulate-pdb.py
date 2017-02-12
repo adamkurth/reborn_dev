@@ -43,7 +43,7 @@ if 1:
 	imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
 	imdisp = np.log(imdisp+0.1)
 
-# This method uses any q vectors that you supply.  Here we grab the q vectors from the 
+# This method uses any q vectors that you supply.  Here we grab the q vectors from the
 # detector.panelList class.
 if 1:
 	q = pl.Q # These are the scattering vectors, Nx3 array.

@@ -107,7 +107,7 @@ class cxidbReader(object):
             self.hdf5Files.append(h5py.File(thisFile, "r"))
 
     def initializePanelList(self):
-        
+
         pl = self.panelList
         for dp in range(len(self.dataPaths)):
             for pi in range(len(self.panelNames)):
@@ -116,13 +116,13 @@ class cxidbReader(object):
                 p.nF = self.nFs[dp,pi]
                 p.nS = self.nSs[dp,pi]
                 pl.append(p)
-                
-        
+
+
 
 
     def getFrame(self, frameNumber=0):
-        
-        
+
+
 
 
 
@@ -185,7 +185,7 @@ class saclaReader(object):
 
     def setupFile(self, filePath):
 
-        """ Do this when a new file is introduced. Check contents of hdf5 file, 
+        """ Do this when a new file is introduced. Check contents of hdf5 file,
         get geometry information. """
 
         self.filePath = filePath

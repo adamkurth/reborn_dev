@@ -29,14 +29,14 @@ class myGLViewWidget(gl.GLViewWidget):
 
     def pan(self, dx, dy, dz, relative=False):
         """
-        Moves the center (look-at) position while holding the camera in place. 
-        
+        Moves the center (look-at) position while holding the camera in place.
+
         If relative=True, then the coordinates are interpreted such that x
         if in the global xy plane and points to the right side of the view, y is
         in the global xy plane and orthogonal to x, and z points in the global z
         direction. Distances are scaled roughly such that a value of 1.0 moves
         by one pixel on screen.
-        
+
         """
         if not relative:
             self.opts['center'] += QtGui.QVector3D(dx, dy, dz)

@@ -258,7 +258,7 @@ def geomDictToPanelList(geomDict):
 #            p.T[2] += float(value)
 #        if key == "clen":
 #            p.T[2] += float(value)
-#		 
+#		
 #    # Now adjust panel list according to global parameters, convert units, etc.
 #    i = 0
 #    for p in pa:

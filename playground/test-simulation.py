@@ -20,11 +20,11 @@ Q = pl.Q
 cryst = crystal.structure('../examples/data/pdb/2LYZ.pdb')
 
 # r = np.zeros([3,3])
-# 
+#
 # r[1,0] = 0e-10
 # r[1,1] = -3e-10
 # r[1,2] = 0e-10
-# 
+#
 # r[2,0] = 6e-10
 # r[2,1] = 3e-10
 

@@ -108,10 +108,10 @@ class panel(object):
 
     @data.setter
     def data(self, val):
-       
+
         if val.shape[0] != self.nS or val.shape[1] != self.nF:
             raise ValueError('Panel data should have shape (%d,%d), not (%d,%d)' % (self.nS,self.nF,val.shape[0],val.shape[1]))
-                     
+
         self._data = val
         # Must clear out any derived data that depends on this input
         self.deleteDerivedData()
@@ -168,7 +168,7 @@ class panel(object):
     @nF.setter
     def nF(self, val):
 
-        """ Changing the fast-scan pixel count destroys all derived geometry data, and 
+        """ Changing the fast-scan pixel count destroys all derived geometry data, and
         any unmatched intensity data."""
 
         self._nF = np.int(val)
@@ -190,7 +190,7 @@ class panel(object):
     @nS.setter
     def nS(self, val):
 
-        """ Changing the fast-scan pixel count destroys all derived geometry data, and 
+        """ Changing the fast-scan pixel count destroys all derived geometry data, and
         any unmatched intensity data."""
 
         self._nS = np.int(val)
@@ -305,7 +305,7 @@ class panel(object):
     @property
     def K(self):
 
-        """ Normalized scattering vectors.   Similar to the conventional scattering 
+        """ Normalized scattering vectors.   Similar to the conventional scattering
             vectors, but multiplied by wavelength.  This does not have the 2*pi factor
             included."""
 
@@ -333,7 +333,7 @@ class panel(object):
     @property
     def mcQ(self):
 
-        """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident 
+        """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident
             beam direction for each pixel independently. """
 
         i = np.arange(self.nF)
@@ -479,8 +479,8 @@ class panel(object):
         self._sa = None  # Solid angles corresponding to each pixel
         self._K = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
-        self._geometryHash = None  # Hash of the configured geometry parameters           
-            
+        self._geometryHash = None  # Hash of the configured geometry parameters
+
         if self.panelList is not None:
             self.panelList.clearGeometryCache()
 
@@ -576,7 +576,7 @@ class panelList(object):
         self._name = None  # The name of this list (useful for rigid groups)
         self._beam = source.beam()  # X-ray beam information, common to all panels
         self._panelList = []  # List of individual panels
-        
+
         # Derived data (concatenated from individual panels)
         self._data = None  # Concatenated intensity data
         self._mask = None  # Identify bad pixels [1 means good, 0 means bad]
@@ -634,15 +634,15 @@ class panelList(object):
         self._panelList[key] = value
 
     def __iter__(self):
-        
+
         """ Iterate through panels. """
-        
+
         return iter(self._panelList)
 
     def __len__(self):
-        
+
         """ Return length of panel list."""
-        
+
         return len(self._panelList)
 
     @property
@@ -666,7 +666,7 @@ class panelList(object):
         self._beam = beam
         for p in self:
             p.beam = beam
-        
+
 
     @property
     def nPix(self):
@@ -763,7 +763,7 @@ class panelList(object):
     @property
     def mcQ(self):
 
-        """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident 
+        """ Monte Carlo q vectors; add jitter to wavelength, pixel position, incident
             beam direction for each pixel independently. """
 
         return np.concatenate([p.mcQ.reshape(np.product(p.mcQ.shape) / 3, 3) for p in self])
@@ -938,7 +938,7 @@ class panelList(object):
             Vll = np.round(V).astype(np.int32)
             self._vll = Vll.astype(np.int)
             self._rpix = rpix.astype(np.int)
-            
+
         Vll = self._vll
         rpix = self._rpix
 
@@ -1041,7 +1041,7 @@ class panelList(object):
             if not p.checkGeometry():
 
                 return False
-        
+
         return True
 
     def clearGeometryCache(self):
@@ -1074,10 +1074,10 @@ class panelList(object):
 
     def simpleSetup(self, nF=None, nS=None, pixelSize=None, distance=None, wavelength=None, T=None):
 
-        """ 
+        """
 
         Append a panel using the simple setup method.
-        
+
         Arguments:
         nF         : Number of fast-scan pixels
         nS         : Number of slow-scan pixels
@@ -1085,7 +1085,7 @@ class panelList(object):
         distance   : Distance in meters
         wavelength : Wavelength in meters
         T          : Translation from sample to center of first pixel in meters
-        
+
         """
 
         p = panel()

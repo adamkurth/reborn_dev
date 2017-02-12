@@ -20,18 +20,18 @@ joulesPerEv = 1.60217657e-19
 
 def vecCheck(vec,hardcheck=False):
 
-	''' 
+	'''
 Check that a vector meets our assumption of an Nx3 numpy array.  This is helpful, for
 example, when we want to ensure that dot products and broadcasting will work as expected.
-We could of course add an argument for vectors of dimension other than 3, but for now 
+We could of course add an argument for vectors of dimension other than 3, but for now
 3-vectors are all that we work with.
 
-==== Input: 
+==== Input:
 vec:        The object that we are trying to make conform to our assumption about vectors.
-hardcheck:  If True, then this function will raise a ValueError if the check fails.  If 
+hardcheck:  If True, then this function will raise a ValueError if the check fails.  If
 	    False, then this function attempts to fix the problem with the input.
 
-==== Output:     
+==== Output:
 vec:        The original input if it satisfies our conditions.  Otherwise return a
 	    modified numpy ndarray with the correct shape.
 '''

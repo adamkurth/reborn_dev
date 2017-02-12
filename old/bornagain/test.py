@@ -5,7 +5,7 @@ import numpy as np
 def generateSimplePanelList():
 
     """ Generate a simple panel list consisting of a 200x200 array, but split into
-    two panels that are just beside one another.  No beam information will be set 
+    two panels that are just beside one another.  No beam information will be set
     here."""
 
     pa = detector.panelList()
