@@ -76,7 +76,7 @@ def test_assemble(pa, verbose=False):
 
 def test_polarization_factor(pa, verbose=False):
     print("Checking polarization factor... fixme")
-    pf = pa.polarizationFactor
+    pf = pa.polarization_factor
     if verbose == True:
         print(pf)
 

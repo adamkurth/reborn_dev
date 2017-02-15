@@ -11,7 +11,7 @@ import bornagain.external.crystfel as crystfel
 
 # Create a detector
 #pl = ba.detector.PanelList()
-#pl.simpleSetup(1000,1000,100e-6,0.05,1.5e-10)
+#pl.simple_setup(1000,1000,100e-6,0.05,1.5e-10)
 pl = crystfel.geomToPanelList(geomFile='../data/crystfel/geom/cxin5016-oy-v1.geom')
 pl.wavelength = 1.5e-10
 

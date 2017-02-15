@@ -10,7 +10,7 @@ import bornagain.target.crystal as crystal
 
 # Create a detector
 pl = ba.detector.PanelList()
-pl.simpleSetup(1000,1000,100e-6,0.05,1.5e-10)
+pl.simple_setup(1000,1000,100e-6,0.05,1.5e-10)
 
 # Scattering vectors
 Q = pl.Q

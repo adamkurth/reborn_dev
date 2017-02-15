@@ -202,7 +202,7 @@ class saclaReader(object):
         """ Populate the PanelList data with intensities from given frame number. """
 
         pa = PanelList
-        if pa.geometryHash != self.dummyPanelList.geometryHash:
+        if pa.geometry_hash != self.dummyPanelList.geometry_hash:
             self.setupGeometry(pa)
 
         n = 0
@@ -564,7 +564,7 @@ def crystfelToPanelList(geomFile=None, beamFile=None, PanelList=None):
         p.nS = p.sRange[1] - p.sRange[0] + 1
 
         # Check for extra global configurations
-        p.aduPerEv = global_adu_per_ev
+        p.adu_per_ev = global_adu_per_ev
         p.dataField = global_data
         p.detOffsetField = global_clen_field
         if global_clen is not None:

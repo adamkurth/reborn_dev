@@ -24,19 +24,19 @@ class Panel(object):
         self._T = None  # Translation of this Panel (from interaction region to center of first pixel)
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
-        self.aduPerEv = 0  # Number of arbitrary data units per eV of photon energy
+        self.adu_per_ev = 0  # Number of arbitrary data units per eV of photon energy
         self._beam = source.beam()  # Container for x-ray beam information
         self._data = None  # Diffraction intensity data
         self._mask = None
 
         # Cached parameters
-        self._pixelSize = None  # Pixel size derived from F/S vectors
+        self._pixel_size = None  # Pixel size derived from F/S vectors
         self._V = None  # 3D vectors pointing from interaction region to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
         self._pf = None # Polarization factor
         self._K = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
-        self._geometryHash = None  # Hash of the configured geometry parameters
+        self._geometry_hash = None  # Hash of the configured geometry parameters
 
         # If this Panel is a part of a list
         self.PanelList = None  # This is the link to the Panel list
@@ -52,7 +52,7 @@ class Panel(object):
         p.T = self._T.copy()
         p.nF = self.nF
         p.nS = self.nS
-        p.aduPerEv = self.aduPerEv
+        p.adu_per_ev = self.adu_per_ev
         p.beam = self.beam.copy()
         p.data = self.data.copy()
         if derived == True:
@@ -76,13 +76,13 @@ class Panel(object):
 
         s = ""
         s += "name = \"%s\"\n" % self.name
-        s += "pixelSize = %s\n" % self.pixelSize.__str__()
+        s += "pixel_size = %s\n" % self.pixel_size.__str__()
         s += "F = %s\n" % self.F.__str__()
         s += "S = %s\n" % self.S.__str__()
         s += "nF = %d\n" % self.nF
         s += "nS = %d\n" % self.nS
         s += "T = %s\n" % self.T.__str__()
-        s += "aduPerEv = %g\n" % self.aduPerEv
+        s += "adu_per_ev = %g\n" % self.adu_per_ev
         return s
 
     @property
@@ -173,7 +173,7 @@ class Panel(object):
         any unmatched intensity data."""
 
         self._nF = np.int(val)
-        self.clearGeometryCache()
+        self.clear_geometry_cache()
         if self.data is not None:
             if self.data.shape[1] != self._nF:
                 self._data = None
@@ -195,37 +195,37 @@ class Panel(object):
         any unmatched intensity data."""
 
         self._nS = np.int(val)
-        self.clearGeometryCache()
+        self.clear_geometry_cache()
         if self.data is not None:
             if self.data.shape[0] != self._nS:
                 self._data = None
 
     @property
-    def pixelSize(self):
+    def pixel_size(self):
 
         """ Return the pixel size only if both fast/slow-scan vectors are the same length.
             Setting this value will modify the fast- and slow-scan vectors F and S. """
 
-        if self._pixelSize is None:
+        if self._pixel_size is None:
             p1 = norm(self.F)
             p2 = norm(self.S)
             if abs(p1 - p2) / np.float(p2) > 1e-6 or abs(p1 - p2) / np.float(p1) > 1e-6:
                 raise ValueError("Pixel size is not consistent between F and S vectors (%10f, %10f)." % (p1, p2))
-            self._pixelSize = np.mean([p1, p2])
-        return self._pixelSize.copy()
+            self._pixel_size = np.mean([p1, p2])
+        return self._pixel_size.copy()
 
-    @pixelSize.setter
-    def pixelSize(self, val):
+    @pixel_size.setter
+    def pixel_size(self, val):
 
         val = val
         pf = norm(self.F)
         ps = norm(self.S)
         self._F *= val / pf
         self._S *= val / ps
-        self.clearGeometryCache()
+        self.clear_geometry_cache()
 
     @property
-    def nPix(self):
+    def n_pixels(self):
 
         """ Total number of pixels."""
 
@@ -245,7 +245,7 @@ class Panel(object):
 
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._F = val
-            self.clearGeometryCache()
+            self.clear_geometry_cache()
         else:
             raise ValueError("F must be a numpy ndarray of length 3.")
 
@@ -263,7 +263,7 @@ class Panel(object):
 
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._S = val
-            self.clearGeometryCache()
+            self.clear_geometry_cache()
         else:
             raise ValueError("S must be a numpy array of length 3.")
 
@@ -281,7 +281,7 @@ class Panel(object):
 
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._T = val
-            self.clearGeometryCache()
+            self.clear_geometry_cache()
         else:
             raise ValueError("Must be a numpy array of length 3.")
 
@@ -340,14 +340,14 @@ class Panel(object):
         i = np.arange(self.nF)
         j = np.arange(self.nS)
         [i, j] = np.meshgrid(i, j)
-        i = i.ravel() + random(self.nPix) - 0.5
-        j = j.ravel() + random(self.nPix) - 0.5
+        i = i.ravel() + random(self.n_pixels) - 0.5
+        j = j.ravel() + random(self.n_pixels) - 0.5
         F = np.outer(i, self.F)
         S = np.outer(j, self.S)
         V = self.T + F + S
-        B = np.outer(np.ones(self.nPix), self.B) + randn(self.nPix, 3) * self.beam.divergence
+        B = np.outer(np.ones(self.n_pixels), self.B) + randn(self.n_pixels, 3) * self.beam.divergence
         K = vecNorm(V) - vecNorm(B)
-        lam = self.beam.wavelength * (1 + randn(self.nPix) * self.beam.spectralWidth)
+        lam = self.beam.wavelength * (1 + randn(self.n_pixels) * self.beam.spectralWidth)
         return 2 * np.pi * K / np.outer(lam, np.ones(3))
 
     @property
@@ -384,7 +384,7 @@ class Panel(object):
         return self._sa
 
     @property
-    def polarizationFactor(self):
+    def polarization_factor(self):
 
         """ The scattering polarization factor. """
 
@@ -402,10 +402,10 @@ class Panel(object):
 
         """ Check for any known issues with this Panel."""
 
-        self.checkGeometry()
+        self.check_geometry()
         return True
 
-    def checkGeometry(self):
+    def check_geometry(self):
 
         """ Check for valid geometry configuration."""
 
@@ -421,29 +421,29 @@ class Panel(object):
         return True
 
     @property
-    def geometryHash(self):
+    def geometry_hash(self):
 
         """ Hash all of the configured geometry values. """
 
-        if self._geometryHash is None:
+        if self._geometry_hash is None:
 
             F = self._F
             S = self._S
             T = self._T
 
             if F is None:
-                self._geometryHash = None
-                return self._geometryHash
+                self._geometry_hash = None
+                return self._geometry_hash
             elif S is None:
-                self._geometryHash = None
-                return self._geometryHash
+                self._geometry_hash = None
+                return self._geometry_hash
             elif T is None:
-                self._geometryHash = None
-                return self._geometryHash
+                self._geometry_hash = None
+                return self._geometry_hash
 
-            self._geometryHash = hash((F[0], F[1], F[2], S[0], S[1], S[2], T[0], T[1], T[2], self._nF, self._nS))
+            self._geometry_hash = hash((F[0], F[1], F[2], S[0], S[1], S[2], T[0], T[1], T[2], self._nF, self._nS))
 
-        return self._geometryHash
+        return self._geometry_hash
 
     def computeRealSpaceGeometry(self):
 
@@ -471,28 +471,28 @@ class Panel(object):
 
         self._K = vecNorm(self.V) - self.B
 
-    def clearGeometryCache(self):
+    def clear_geometry_cache(self):
 
         """ Clear out all derived geometry data."""
 
-        self._pixelSize = None  # Pixel size derived from F/S vectors
+        self._pixel_size = None  # Pixel size derived from F/S vectors
         self._V = None  # 3D vectors pointing from interaction region to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
         self._K = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
-        self._geometryHash = None  # Hash of the configured geometry parameters
+        self._geometry_hash = None  # Hash of the configured geometry parameters
 
         if self.PanelList is not None:
-            self.PanelList.clearGeometryCache()
+            self.PanelList.clear_geometry_cache()
 
     def deleteDerivedData(self):
 
         if self.PanelList is not None:
             self.PanelList._data = None
 
-    def getVertices(self, edge=False, loop=False):
+    def get_vertices(self, edge=False, loop=False):
 
-        """ Get Panel getVertices; positions of corner pixels."""
+        """ Get Panel get_vertices; positions of corner pixels."""
 
         nF = self.nF - 1
         nS = self.nS - 1
@@ -512,11 +512,11 @@ class Panel(object):
 
         return self.pixelsToVectors(i, j)
 
-    def getCenter(self):
+    def get_center(self):
 
         """ Vector to center of Panel."""
 
-        return np.mean(self.getVertices(), axis=0)
+        return np.mean(self.get_vertices(), axis=0)
 
     @property
     def realSpaceBoundingBox(self):
@@ -528,7 +528,7 @@ class Panel(object):
         """ Return the minimum and maximum values of the four corners."""
 
         if self._rsbb is None:
-            v = self.getVertices()
+            v = self.get_vertices()
             r = np.zeros((2, 3))
             r[0, :] = np.min(v, axis=0)
             r[1, :] = np.max(v, axis=0)
@@ -536,7 +536,7 @@ class Panel(object):
 
         return self._rsbb.copy()
 
-    def simpleSetup(self, nF=None, nS=None, pixelSize=None, distance=None, wavelength=None, T=None):
+    def simple_setup(self, nF=None, nS=None, pixelSize=None, distance=None, wavelength=None, T=None):
 
         """ Simple way to create a Panel with centered beam."""
 
@@ -581,7 +581,7 @@ class PanelList(object):
         # Derived data (concatenated from individual panels)
         self._data = None  # Concatenated intensity data
         self._mask = None  # Identify bad pixels [1 means good, 0 means bad]
-        self._pixelSize = None  # Common pixel size (if not common amongst panels, this will be 'None')
+        self._pixel_size = None  # Common pixel size (if not common amongst panels, this will be 'None')
         self._sa = None  # Concatenated solid angles
         self._V = None  # Concatenated pixel positions
         self._K = None  # Concatenated reciprocal-space vectors
@@ -589,9 +589,9 @@ class PanelList(object):
         self._vll = None  # Look-up table for simple projection
         self._rpix = None  # junk
         self._pf = None # Polarization facto
-        self._geometryHash = None  # Hash of geometries
+        self._geometry_hash = None  # Hash of geometries
         self._rigidGroups = None  # Groups of panels that might be manipulated together
-        self._derivedGeometry = ['_pixelSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix', '_geometryHash']  # Default values of these are 'None'
+        self._derivedGeometry = ['_pixel_size', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix', '_geometry_hash']  # Default values of these are 'None'
 
 
     def copy(self, derived=True):
@@ -670,11 +670,11 @@ class PanelList(object):
 
 
     @property
-    def nPix(self):
+    def n_pixels(self):
 
         """ Total number of pixels in all panels."""
 
-        return np.sum([p.nPix for p in self])
+        return np.sum([p.n_pixels for p in self])
 
     @property
     def nPanels(self):
@@ -741,7 +741,7 @@ class PanelList(object):
 
         """ Concatenated reciprocal-space vectors."""
 
-        if self._K is None or self._K.shape[0] != self.nPix:
+        if self._K is None or self._K.shape[0] != self.n_pixels:
 
             self._K = np.concatenate([p.K.reshape(np.product(p.K.shape) / 3, 3) for p in self])
 
@@ -796,13 +796,13 @@ class PanelList(object):
 
         """ Check that intensity data is of the correct type."""
 
-        if not isinstance(data, np.ndarray) and data.ndim == 1 and data.size == self.nPix:
-            raise ValueError("Must be flattened ndarray of size %d" % self.nPix)
+        if not isinstance(data, np.ndarray) and data.ndim == 1 and data.size == self.n_pixels:
+            raise ValueError("Must be flattened ndarray of size %d" % self.n_pixels)
 
         self._data = data
         n = 0
         for p in self:
-            nPix = p.nPix
+            nPix = p.n_pixels
             p.data = data[n:(n + nPix)]
             p.data = p.data.reshape((p.nS, p.nF))
             n += nPix
@@ -823,13 +823,13 @@ class PanelList(object):
 
         """ Check that mask is of the correct type."""
 
-        if not isinstance(mask, np.ndarray) and mask.ndim == 1 and mask.size == self.nPix:
-            raise ValueError("Must be flattened ndarray of size %d" % self.nPix)
+        if not isinstance(mask, np.ndarray) and mask.ndim == 1 and mask.size == self.n_pixels:
+            raise ValueError("Must be flattened ndarray of size %d" % self.n_pixels)
 
         self._mask = mask
         n = 0
         for p in self:
-            nPix = p.nPix
+            nPix = p.n_pixels
             p.mask = mask[n:(n + nPix)]
             p.mask = p.mask.reshape((p.nS, p.nF))
             n += nPix
@@ -914,13 +914,13 @@ class PanelList(object):
         return self._sa
 
     @property
-    def polarizationFactor(self):
+    def polarization_factor(self):
 
         """ Concatenated polarization factors."""
 
         if self._pf == None:
 
-            self._pf = np.concatenate([p.polarizationFactor.reshape(np.product(p.polarizationFactor.shape)) for p in self])
+            self._pf = np.concatenate([p.polarization_factor.reshape(np.product(p.polarization_factor.shape)) for p in self])
 
         return self._pf
 
@@ -930,7 +930,7 @@ class PanelList(object):
         """ Project all intensity data along the beam direction.  Nearest neighbor interpolation.  This is a crude way to display data... """
 
         if self._vll is None:
-            pixelSize = self.pixelSize
+            pixelSize = self.pixel_size
             r = self.realSpaceBoundingBox
             rpix = r / pixelSize
             rpix[0, :] = np.floor(rpix[0, :])
@@ -961,7 +961,7 @@ class PanelList(object):
             return self[0].data
 
         if self._vll is None:
-            pixelSize = self.pixelSize
+            pixelSize = self.pixel_size
             r = self.realSpaceBoundingBox
             rpix = r / pixelSize
             rpix[0, :] = np.floor(rpix[0, :])
@@ -1002,78 +1002,78 @@ class PanelList(object):
         return self._rsbb.copy()
 
     @property
-    def pixelSize(self):
+    def pixel_size(self):
 
         """ Return the average pixel size, if all pixels are identical."""
 
-        if self._pixelSize is None:
+        if self._pixel_size is None:
 
             pix = np.zeros(self.nPanels)
             i = 0
             for p in self:
-                pix[i] = p.pixelSize
+                pix[i] = p.pixel_size
                 i += 1
             mnpix = np.mean(pix)
             if all(np.absolute((pix - mnpix) / mnpix) < 1e-6):
-                self._pixelSize = mnpix
+                self._pixel_size = mnpix
             else:
                 raise ValueError("Pixel sizes in Panel list are not all the same.")
 
-        return self._pixelSize.copy()
+        return self._pixel_size.copy()
 
-    def getCenter(self):
+    def get_center(self):
 
         """ Mean center of Panel list. """
 
         c = np.zeros((self.nPanels, 3))
         i = 0
         for p in self:
-            c[i, :] = p.getCenter()
+            c[i, :] = p.get_center()
             i += 1
 
         return np.mean(c, axis=0)
 
-    def checkGeometry(self):
+    def check_geometry(self):
 
         """ Check that geometry is sane. """
 
         for p in self:
 
-            if not p.checkGeometry():
+            if not p.check_geometry():
 
                 return False
 
         return True
 
-    def clearGeometryCache(self):
+    def clear_geometry_cache(self):
 
         """ Delete derived data relevant to geometry.  Normally used internally. """
 
-        self._pixelSize = None  # Pixel size derived from F/S vectors
+        self._pixel_size = None  # Pixel size derived from F/S vectors
         self._V = None  # 3D vectors pointing from interaction region to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
         self._K = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
-        self._geometryHash = None  # Hash of the configured geometry parameters
+        self._geometry_hash = None  # Hash of the configured geometry parameters
 
     @property
-    def geometryHash(self):
+    def geometry_hash(self):
 
         """ Hash all of the configured geometry values. """
 
-        if self._geometryHash is None:
+        if self._geometry_hash is None:
 
-            a = tuple([p.geometryHash for p in self])
+            a = tuple([p.geometry_hash for p in self])
 
             if None in a:
-                self._geometryHash = None
-                return self._geometryHash
+                self._geometry_hash = None
+                return self._geometry_hash
 
-            self._geometryHash = hash(a)
+            self._geometry_hash = hash(a)
 
-        return self._geometryHash
+        return self._geometry_hash
 
-    def simpleSetup(self, nF=None, nS=None, pixelSize=None, distance=None, wavelength=None, T=None):
+    def simple_setup(self, nF=None, nS=None, pixelSize=None, distance=None, wavelength=None, T=None):
 
         """
 
@@ -1082,7 +1082,7 @@ class PanelList(object):
         Arguments:
         nF         : Number of fast-scan pixels
         nS         : Number of slow-scan pixels
-        pixelSize  : Pixel size in meters
+        pixel_size  : Pixel size in meters
         distance   : Distance in meters
         wavelength : Wavelength in meters
         T          : Translation from sample to center of first pixel in meters
@@ -1090,11 +1090,11 @@ class PanelList(object):
         """
 
         p = Panel()
-        p.simpleSetup(nF, nS, pixelSize, distance, wavelength, T)
+        p.simple_setup(nF, nS, pixelSize, distance, wavelength, T)
         self.beam = p.beam
         self.append(p)
 
-    def radialProfile(self):
+    def RadialProfile(self):
 
         q = self.Q / 2 / np.pi
         qmag = vecMag(q)

@@ -23,7 +23,7 @@ class panel(object):
         self._T = None  # Translation of this panel (from interaction region to center of first pixel)
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
-        self.aduPerEv = 0  # Number of arbitrary data units per eV of photon energy
+        self.adu_per_ev = 0  # Number of arbitrary data units per eV of photon energy
         self._beam = source.beam()  # Container for x-ray beam information
         self._data = None  # Diffraction intensity data
         self._mask = None
@@ -34,8 +34,8 @@ class panel(object):
         self._sa = None  # Solid angles corresponding to each pixel
         self._K = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
-        self._geometryHash = None  # Hash of the configured geometry parameters
-        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_geometryHash']  # Default values of these are 'None'
+        self._geometry_hash = None  # Hash of the configured geometry parameters
+        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_geometry_hash']  # Default values of these are 'None'
 
         # If this panel is a part of a list
         self.PanelList = None  # This is the link to the panel list
@@ -51,7 +51,7 @@ class panel(object):
         p.T = self._T.copy()
         p.nF = self.nF
         p.nS = self.nS
-        p.aduPerEv = self.aduPerEv
+        p.adu_per_ev = self.adu_per_ev
         p.beam = self.beam.copy()
         p.data = self.data.copy()
         if derived == True:
@@ -81,7 +81,7 @@ class panel(object):
         s += "nF = %d\n" % self.nF
         s += "nS = %d\n" % self.nS
         s += "T = %s\n" % self.T.__str__()
-        s += "aduPerEv = %g\n" % self.aduPerEv
+        s += "adu_per_ev = %g\n" % self.adu_per_ev
         return s
 
     @property
@@ -368,7 +368,7 @@ class panel(object):
         return self._sa
 
     @property
-    def polarizationFactor(self):
+    def polarization_factor(self):
 
         """ The scattering polarization factor. """
 
@@ -386,10 +386,10 @@ class panel(object):
 
         """ Check for any known issues with this panel."""
 
-        self.checkGeometry()
+        self.check_geometry()
         return True
 
-    def checkGeometry(self):
+    def check_geometry(self):
 
         """ Check for valid geometry configuration."""
 
@@ -405,29 +405,29 @@ class panel(object):
         return True
 
     @property
-    def geometryHash(self):
+    def geometry_hash(self):
 
         """ Hash all of the configured geometry values. """
 
-        if self._geometryHash is None:
+        if self._geometry_hash is None:
 
             F = self._F
             S = self._S
             T = self._T
 
             if F is None:
-                self._geometryHash = None
-                return self._geometryHash
+                self._geometry_hash = None
+                return self._geometry_hash
             elif S is None:
-                self._geometryHash = None
-                return self._geometryHash
+                self._geometry_hash = None
+                return self._geometry_hash
             elif T is None:
-                self._geometryHash = None
-                return self._geometryHash
+                self._geometry_hash = None
+                return self._geometry_hash
 
-            self._geometryHash = hash((F[0], F[1], F[2], S[0], S[1], S[2], T[0], T[1], T[2], self._nF, self._nS))
+            self._geometry_hash = hash((F[0], F[1], F[2], S[0], S[1], S[2], T[0], T[1], T[2], self._nF, self._nS))
 
-        return self._geometryHash
+        return self._geometry_hash
 
     def computeRealSpaceGeometry(self):
 
@@ -469,9 +469,9 @@ class panel(object):
         if self.PanelList is not None:
             self.PanelList._data = None
 
-    def getVertices(self, edge=False, loop=False):
+    def get_vertices(self, edge=False, loop=False):
 
-        """ Get panel getVertices; positions of corner pixels."""
+        """ Get panel get_vertices; positions of corner pixels."""
 
         nF = self.nF - 1
         nS = self.nS - 1
@@ -491,11 +491,11 @@ class panel(object):
 
         return self.pixelsToVectors(i, j)
 
-    def getCenter(self):
+    def get_center(self):
 
         """ Vector to center of panel."""
 
-        return np.mean(self.getVertices(), axis=0)
+        return np.mean(self.get_vertices(), axis=0)
 
     @property
     def realSpaceBoundingBox(self):
@@ -507,7 +507,7 @@ class panel(object):
         """ Return the minimum and maximum values of the four corners."""
 
         if self._rsbb is None:
-            v = self.getVertices()
+            v = self.get_vertices()
             r = np.zeros((2, 3))
             r[0, :] = np.min(v, axis=0)
             r[1, :] = np.max(v, axis=0)
@@ -515,7 +515,7 @@ class panel(object):
 
         return self._rsbb.copy()
 
-    def simpleSetup(self, nF=None, nS=None, pixSize=None, distance=None, T=None, wavelength=None):
+    def simple_setup(self, nF=None, nS=None, pixSize=None, distance=None, T=None, wavelength=None):
 
         """ Simple way to create a panel with centered beam."""
 
@@ -562,9 +562,9 @@ class PanelList(list):
         self._rsbb = None  # Real-space bounding box of entire panel list
         self._vll = None  # Look-up table for simple projection
         self._rpix = None  # junk
-        self._geometryHash = None  # Hash of geometries
+        self._geometry_hash = None  # Hash of geometries
         self._rigidGroups = None  # Groups of panels that might be manipulated together
-        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix', '_geometryHash']  # Default values of these are 'None'
+        self._derivedGeometry = ['_pixSize', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix', '_geometry_hash']  # Default values of these are 'None'
 
 
     def copy(self, derived=True):
@@ -865,13 +865,13 @@ class PanelList(list):
         return self._sa
 
     @property
-    def polarizationFactor(self):
+    def polarization_factor(self):
 
         """ Concatenated polarization factors."""
 
         if self._pf == None:
 
-            self._pf = np.concatenate([p.polarizationFactor.reshape(np.product(p.polarizationFactor.shape)) for p in self])
+            self._pf = np.concatenate([p.polarization_factor.reshape(np.product(p.polarization_factor.shape)) for p in self])
 
         return self._pf
 
@@ -942,14 +942,14 @@ class PanelList(list):
 
         return self._pixSize.copy()
 
-    def getCenter(self):
+    def get_center(self):
 
         """ Mean center of panel list."""
 
         c = np.zeros((self.nPanels, 3))
         i = 0
         for p in self:
-            c[i, :] = p.getCenter()
+            c[i, :] = p.get_center()
             i += 1
 
         return np.mean(c, axis=0)
@@ -958,15 +958,15 @@ class PanelList(list):
 
         for p in self:
 
-            if not p.checkGeometry():
+            if not p.check_geometry():
 
                 return False
 
-    def checkGeometry(self):
+    def check_geometry(self):
 
         for p in self:
 
-            if not p.checkGeometry():
+            if not p.check_geometry():
 
                 return False
 
@@ -978,28 +978,28 @@ class PanelList(list):
             setattr(self, i, None)
 
     @property
-    def geometryHash(self):
+    def geometry_hash(self):
 
         """ Hash all of the configured geometry values. """
 
-        if self._geometryHash is None:
+        if self._geometry_hash is None:
 
-            a = tuple([p.geometryHash for p in self])
+            a = tuple([p.geometry_hash for p in self])
 
             if None in a:
-                self._geometryHash = None
-                return self._geometryHash
+                self._geometry_hash = None
+                return self._geometry_hash
 
-            self._geometryHash = hash(a)
+            self._geometry_hash = hash(a)
 
-        return self._geometryHash
+        return self._geometry_hash
 
-    def simpleSetup(self, nF=None, nS=None, pixSize=None, distance=None, T=None, wavelength=None):
+    def simple_setup(self, nF=None, nS=None, pixSize=None, distance=None, T=None, wavelength=None):
 
         """ Append a panel using the simple setup method."""
 
         p = panel()
-        p.simpleSetup(nF, nS, pixSize, distance, T, wavelength)
+        p.simple_setup(nF, nS, pixSize, distance, T, wavelength)
         self.append(p)
 
     def radialProfile(self):

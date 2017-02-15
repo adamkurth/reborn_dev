@@ -11,7 +11,7 @@ import bornagain.simulate.clcore as clcore
 # Create a detector
 pl = ba.detector.PanelList()
 nPix = 1000;
-pl.simpleSetup(nPix,nPix,100e-6,0.1,1.5e-10)
+pl.simple_setup(nPix,nPix,100e-6,0.1,1.5e-10)
 
 # Scattering vectors
 q = pl.Q
@@ -38,7 +38,7 @@ print(time.time() - t)
 # Display diffraction intensities
 I = np.abs(A)**2
 # Multiply by polarization factor
-#I *= pl.polarizationFactor
+#I *= pl.polarization_factor
 
 dispim = np.reshape(I,[nPix,nPix])
 dispim = np.log10(dispim+0.1)

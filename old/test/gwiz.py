@@ -163,7 +163,7 @@ class PanelListGui(QtGui.QMainWindow):
 
         for p in self.PanelList:
             pos = np.zeros((5, 3))
-            pos[:] = p.getVertices(edge=True, loop=True)
+            pos[:] = p.get_vertices(edge=True, loop=True)
 
             fr = gl.GLLinePlotItem(pos=pos, color=col)
             self.w.addItem(fr)
@@ -292,7 +292,7 @@ def main():
 
     g.PanelList = pa
 
-    c = pa.getCenter()
+    c = pa.get_center()
 
     w.pan(c[0], c[1], c[2])
     w.setCameraPosition(distance=c[2] * 2)
@@ -317,7 +317,7 @@ def main():
 
         # Add points at centers of panels
 #         pos = np.empty((1, 3))
-#         pos[0] = p.getCenter()
+#         pos[0] = p.get_center()
 #         col = (0, 1, 0, 0.4)
 #         siz = p.pixSize.copy() * 10
 #         sp = gl.GLScatterPlotItem(pos=pos, size=siz, color=col, pxMode=False)

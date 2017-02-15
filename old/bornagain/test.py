@@ -50,7 +50,7 @@ class detectorTests(unittest.TestCase):
         self.failUnless(p.nF == 200)
         self.failUnless(p.nS == 100)
         # Check that geometry hash is None if not all values provided
-        self.failUnless(p.geometryHash is None)
+        self.failUnless(p.geometry_hash is None)
 
 
 class sourceTests(unittest.TestCase):

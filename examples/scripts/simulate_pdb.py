@@ -1,10 +1,11 @@
 import sys
-sys.path.append("../..")
 import time
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pyopencl as cl
 
+sys.path.append("../..")
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
 import bornagain.target.crystal as crystal
@@ -15,7 +16,7 @@ nPixels = 1001
 pixelSize = 100e-6
 detectorDistance = 0.05
 wavelength = 1.5e-10
-pl.simpleSetup(nPixels, nPixels, pixelSize, detectorDistance, wavelength)
+pl.simple_setup(nPixels, nPixels, pixelSize, detectorDistance, wavelength)
 
 # Load a crystal structure from pdb file
 pdbFile = '../../examples/data/pdb/2LYZ.pdb'  # Lysozyme

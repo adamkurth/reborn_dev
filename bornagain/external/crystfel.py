@@ -248,8 +248,8 @@ def geomDictToPanelList(geomDict):
 		if type(p['coffset']) is not str:
 			z += p['coffset']
 		Panel.T = np.array([p['corner_x']/p['res'],p['corner_y']/p['res'],z])
-		Panel.pixelSize = 1.0 / p['res']
-		Panel.aduPerEv = p['adu_per_eV']
+		Panel.pixel_size = 1.0 / p['res']
+		Panel.adu_per_ev = p['adu_per_eV']
 		PanelList.append(Panel)
 
 	return PanelList
@@ -264,18 +264,18 @@ def geomDictToPanelList(geomDict):
 #    for p in pa:
 #
 #        # Unit conversions
-#        if pixelSize[i] == 0:
+#        if pixel_size[i] == 0:
 #            if global_res is not None:
-#                pixelSize[i] = 1 / global_res
-#        p.pixelSize = pixelSize[i]
-#        p.T[0:2] *= pixelSize[i]
+#                pixel_size[i] = 1 / global_res
+#        p.pixel_size = pixel_size[i]
+#        p.T[0:2] *= pixel_size[i]
 #
 #        # Data array size
 #        p.nF = p.fRange[1] - p.fRange[0] + 1
 #        p.nS = p.sRange[1] - p.sRange[0] + 1
 #
 #        # Check for extra global configurations
-#        p.aduPerEv = global_adu_per_ev
+#        p.adu_per_ev = global_adu_per_ev
 #        p.dataField = global_data
 #        p.detOffsetField = global_clen_field
 #        if global_clen is not None:
@@ -369,7 +369,7 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
         pa = PanelList
 
     # Place holder for pixel sizes
-    pixelSize = np.zeros(10000)
+    pixel_size = np.zeros(10000)
 
     rigidGroupNames = []
     rigidGroups = []
@@ -494,7 +494,7 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
         if key == "clen":
             p.T[2] += float(value)
         if key == "res":
-            pixelSize[i] = 1.0 / float(value)
+            pixel_size[i] = 1.0 / float(value)
         if key == "fs":
             vec = splitxysum(value)
             p.F = np.array(vec)
@@ -513,18 +513,18 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
     for p in pa:
 
         # Unit conversions
-        if pixelSize[i] == 0:
+        if pixel_size[i] == 0:
             if global_res is not None:
-                pixelSize[i] = 1 / global_res
-        p.pixelSize = pixelSize[i]
-        p.T[0:2] *= pixelSize[i]
+                pixel_size[i] = 1 / global_res
+        p.pixel_size = pixel_size[i]
+        p.T[0:2] *= pixel_size[i]
 
         # Data array size
         p.nF = p.fRange[1] - p.fRange[0] + 1
         p.nS = p.sRange[1] - p.sRange[0] + 1
 
         # Check for extra global configurations
-        p.aduPerEv = global_adu_per_ev
+        p.adu_per_ev = global_adu_per_ev
         p.dataField = global_data
         p.detOffsetField = global_clen_field
         if global_clen is not None:

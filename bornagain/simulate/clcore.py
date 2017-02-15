@@ -1,6 +1,5 @@
 import numpy as np
 import pyopencl as cl
-import time
 
 def pad1d(x,n):
     m = len(x)
@@ -11,11 +10,11 @@ def padVec(x,n):
     m = x.shape[0]
     return np.concatenate([x,np.zeros([n-m,3])])
 
-def buffer_float32(x,context):
+def buffer_read_float32(x,context):
     x = np.array(x, dtype=np.float32, order='C')
     return cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
 
-def buffer_complex64(x,context):
+def buffer_read_complex64(x,context):
     x = np.array(x, dtype=np.complex64, order='C')
     return cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
 
@@ -28,8 +27,16 @@ def vec4(x,dtype=np.float32):
 def phaseFactorQRF(q, r, f, context=None):
 
     '''
-    Calculate the amplitude sum for given set of Nx3 scattering q vectors, Mx3 position r
-       vectors, and M complex scattering factors f.
+    Calculate the diffraction amplitude sum over f*exp(-iq.r) 
+    
+    Input Arguments:
+    q:       Numpy array [N,3] of scattering vectors (2.pi/lambda)
+    r:       Numpy array [M,3] of atomic coordinates
+    f:       Numpy array [M] of complex scattering factors
+    context: Optional pyopencl context cl.create_some_context()
+    
+    Return:
+    A:       Numpy array [N] of complex amplitudes
     '''
 
     nPixels = q.shape[0]
@@ -41,17 +48,14 @@ def phaseFactorQRF(q, r, f, context=None):
     globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
     mf = cl.mem_flags
 
-    # Atom list is padded with zeros to be an integer multiple of the group size
-    padAtoms = np.ceil(nAtoms/float(groupSize))*groupSize
-
-    q_buf = buffer_float32(q,context)
-    r_buf = buffer_float32(r.flatten(),context)
-    f_buf = buffer_complex64(f,context)
+    q_buf = buffer_read_float32(q,context)
+    r_buf = buffer_read_float32(r.flatten(),context)
+    f_buf = buffer_read_complex64(f,context)
     a_buf = cl.Buffer(context, mf.WRITE_ONLY, nPixels*4*2)
 
     # run each q vector in parallel
     prg = cl.Program(context, """
-        #define GROUP_SIZE %d
+        #define GROUP_SIZE """ + ("%d" % groupSize) + """
         __kernel void phaseFactorQRF_cl(
         __global const float *q,
         __global const float *r,
@@ -119,7 +123,7 @@ def phaseFactorQRF(q, r, f, context=None):
                 a[gi].x = re;
                 a[gi].y = im;
             }
-        }""" % groupSize).build()
+        }""").build()
 
     phaseFactorQRF_cl = prg.phaseFactorQRF_cl
     phaseFactorQRF_cl.set_scalar_arg_dtypes(     [ None,  None,  None,  None,  int,    int ]  )
@@ -290,8 +294,8 @@ def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None, context=None):
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    r_buf = buffer_float32(r,context)
-    f_buf = buffer_complex64(f,context)
+    r_buf = buffer_read_float32(r,context)
+    f_buf = buffer_read_complex64(f,context)
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     Qmin = vec4(Qmin,dtype=np.float32)
@@ -382,3 +386,12 @@ def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None, context=None):
     cl.enqueue_copy(queue, a, a_buf)
 
     return a
+
+
+class PatternGenerator(object):
+
+    def __init__(self, A, N, Qmin=None, Qmax=None, context=None):
+        
+        
+        
+         

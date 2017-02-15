@@ -16,7 +16,7 @@ pa[0].T = np.array([-1024, -1024, 0.05])  # Translation to first pixel
 pa[0].F = np.array([1, 0, 0]) * 50e-6  # Fast-scan direction (and pixel size)
 pa[0].S = np.array([0, 1, 0]) * 50e-6  # Slow-scan direction (and pixel size)
 # Check geometry
-print(pa.checkGeometry())
+print(pa.check_geometry())
 print(pa)
 
 # Assemble the data for viewing
