@@ -27,9 +27,9 @@ def vec4(x,dtype=np.float32):
 def phaseFactorQRF(q, r, f, context=None):
 
     '''
-    Calculate the diffraction amplitude sum over f*exp(-iq.r) 
+    Calculate the diffraction amplitude sum over n: f_n*exp(-iq.r_n)
     
-    Input Arguments:
+    Input:
     q:       Numpy array [N,3] of scattering vectors (2.pi/lambda)
     r:       Numpy array [M,3] of atomic coordinates
     f:       Numpy array [M] of complex scattering factors
@@ -128,8 +128,8 @@ def phaseFactorQRF(q, r, f, context=None):
     phaseFactorQRF_cl = prg.phaseFactorQRF_cl
     phaseFactorQRF_cl.set_scalar_arg_dtypes(     [ None,  None,  None,  None,  int,    int ]  )
     phaseFactorQRF_cl(queue, (globalSize,), (groupSize,),q_buf, r_buf, f_buf, a_buf, nAtoms, nPixels)
+    
     a = np.zeros(nPixels, dtype=np.complex64)
-
     cl.enqueue_copy(queue, a, a_buf)
 
     return a
@@ -265,7 +265,7 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w, context=None):
 
     return a
 
-def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None, context=None):
+def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None, context=None, copy_buffer=True):
 
     '''
     This should simulate a regular 3D mesh of q-space samples.
@@ -381,17 +381,30 @@ def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None, context=None):
     phaseFactor3DM_cl.set_scalar_arg_dtypes([None,None,None,int,int,None,None,None])
 
     phaseFactor3DM_cl(queue, (globalSize,), (groupSize,), r_buf,f_buf,a_buf,nPixels,nAtoms,N,deltaQ,Qmin)
-    a = np.zeros(nPixels, dtype=np.complex64)
+    
+    if copy_buffer == True:
+        a = np.zeros(nPixels, dtype=np.complex64)
+        cl.enqueue_copy(queue, a, a_buf)
+        return a
+    else:
+        return a_buf
 
-    cl.enqueue_copy(queue, a, a_buf)
 
-    return a
+class PatternGeneratorLUT(object):
 
-
-class PatternGenerator(object):
-
-    def __init__(self, A, N, Qmin=None, Qmax=None, context=None):
+    def __init__(self, a_buf, n_voxels, q_min=None, q_max=None, context=None):
+        
+        self.a_buf = a_buf
+        self.n_voxels = n_voxels
+        self.q_min = q_min
+        self.q_max = q_max
+        self.context = context
         
         
         
-         
+        
+        
+        
+        
+        
+        
