@@ -16,7 +16,7 @@ atomic_symbols = np.array([x.strip() for x in atomic_symbols])
 henke_data_path = pkg_resources.resource_filename('bornagain.simulate','data/henke_data')
 
 
-def get_atomic_numbers(symbols):
+def atomic_symbols_to_numbers(symbols):
 
     symbols = np.array(symbols)
     symbols = symbols
@@ -28,7 +28,7 @@ def get_atomic_numbers(symbols):
 
     return Z
 
-def get_atomic_symbols(numbers):
+def atomic_numbers_to_symbols(numbers):
     
     numbers = np.array(numbers)
     return atomic_symbols[numbers-1]

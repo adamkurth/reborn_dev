@@ -24,7 +24,7 @@ def vec4(x,dtype=np.float32):
     return np.array([x[0],x[1],x[2],0.0],dtype=dtype)
 
 
-def phaseFactorQRF(q, r, f, context=None):
+def phase_factor_qrf(q, r, f, context=None):
 
     '''
     Calculate the diffraction amplitude sum over n: f_n*exp(-iq.r_n)
@@ -56,7 +56,7 @@ def phaseFactorQRF(q, r, f, context=None):
     # run each q vector in parallel
     prg = cl.Program(context, """
         #define GROUP_SIZE """ + ("%d" % groupSize) + """
-        __kernel void phaseFactorQRF_cl(
+        __kernel void phase_factor_qrf_cl(
         __global const float *q,
         __global const float *r,
         __global const float2 *f,
@@ -125,9 +125,9 @@ def phaseFactorQRF(q, r, f, context=None):
             }
         }""").build()
 
-    phaseFactorQRF_cl = prg.phaseFactorQRF_cl
-    phaseFactorQRF_cl.set_scalar_arg_dtypes(     [ None,  None,  None,  None,  int,    int ]  )
-    phaseFactorQRF_cl(queue, (globalSize,), (groupSize,),q_buf, r_buf, f_buf, a_buf, nAtoms, nPixels)
+    phase_factor_qrf_cl = prg.phase_factor_qrf_cl
+    phase_factor_qrf_cl.set_scalar_arg_dtypes(     [ None,  None,  None,  None,  int,    int ]  )
+    phase_factor_qrf_cl(queue, (globalSize,), (groupSize,),q_buf, r_buf, f_buf, a_buf, nAtoms, nPixels)
     
     a = np.zeros(nPixels, dtype=np.complex64)
     cl.enqueue_copy(queue, a, a_buf)
