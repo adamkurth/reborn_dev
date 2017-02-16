@@ -1,6 +1,6 @@
-from bornagain import simulate as sim
 import numpy as np
-
+from bornagain import simulate as sim
+from time import time
 
 def test_element_numbers_and_symbols():
         
@@ -12,4 +12,13 @@ def test_element_numbers_and_symbols():
     
     assert(all(Z1 == Z2))
     
+def test_load_henke_data(atomic_number):
     
+    for i in range(1,10):
+        t = time()
+        data = sim.atoms.get_henke_data(atomic_number)
+        print(time()-t)
+    
+    return data
+
+print(test_load_henke_data(1).keys())

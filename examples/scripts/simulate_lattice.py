@@ -32,7 +32,7 @@ f = np.ones([N**3], dtype=np.complex64)
 
 # Compute diffraction amplitudes
 t = time.time()
-A = clcore.phaseFactorQRF(q,r,f)
+A = clcore.phase_factor_qrf(q,r,f)
 print(time.time() - t)
 
 # Display diffraction intensities

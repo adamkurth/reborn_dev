@@ -52,9 +52,9 @@ if 1:
     q = pl.Q  # These are the scattering vectors, Nx3 array.
     for i in range(0, 10):
         t = time.time()
-        A = clcore.phaseFactorQRF(q, r, f, context=context)
+        A = clcore.phase_factor_qrf(q, r, f, context=context)
         tf = time.time() - t
-        print('phaseFactorQRF: %0.3g seconds/atom/pixel' %
+        print('phase_factor_qrf: %0.3g seconds/atom/pixel' %
               (tf / q.shape[0] / r.shape[0]))
     imdisp = np.abs(A)**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
