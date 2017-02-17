@@ -38,7 +38,7 @@ r = cryst.r
 
 
 
-f = ba.simulate.utils.atomicScatteringFactors(cryst.Z, pl.beam.wavelength)
+f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelength)
 
 
 #f = np.random.random([N]) + 1j*np.random.random([N])

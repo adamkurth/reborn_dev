@@ -7,3 +7,4 @@ build
 *.hdf5
 temp
 *.c
+.cache

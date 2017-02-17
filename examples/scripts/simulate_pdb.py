@@ -27,7 +27,8 @@ cryst = crystal.structure(pdbFile)
 r = cryst.r
 
 # Look up atomic scattering factors (they are complex numbers)
-f = ba.simulate.utils.atomicScatteringFactors(cryst.Z, pl.beam.wavelength)
+#f = ba.simulate.utils.atomicScatteringFactors(cryst.Z, pl.beam.wavelength)
+f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelength)
 
 # Create an opencl context
 context = cl.create_some_context()
