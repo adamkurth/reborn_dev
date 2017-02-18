@@ -1,9 +1,10 @@
 import sys
-sys.path.append("../..")
 import time
+
 import numpy as np
 import matplotlib.pyplot as plt
 
+sys.path.append("../../..")
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
 import bornagain.target.crystal as crystal
@@ -12,14 +13,14 @@ import bornagain.external.crystfel as crystfel
 # Create a detector
 #pl = ba.detector.PanelList()
 #pl.simple_setup(1000,1000,100e-6,0.05,1.5e-10)
-pl = crystfel.geomToPanelList(geomFile='../data/crystfel/geom/cxin5016-oy-v1.geom')
+pl = crystfel.geomToPanelList(geomFile='../../data/crystfel/geom/cxin5016-oy-v1.geom')
 pl.wavelength = 1.5e-10
 
 # Scattering vectors
 Q = pl.Q
 
 # Load a crystal structure
-cryst = crystal.structure('../data/pdb/2LYZ.pdb')
+cryst = crystal.structure('../../data/pdb/2LYZ.pdb')
 r = cryst.r
 
 
@@ -45,7 +46,7 @@ f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelen
 #f = None
 
 t = time.time()
-A = clcore.phaseFactor(Q,r,f)
+A = clcore.phase_factor_qrf(Q,r,f)
 print(time.time() - t)
 
 I = np.abs(A)**2

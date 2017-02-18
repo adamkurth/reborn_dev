@@ -1,15 +1,6 @@
 import numpy as np
 import pyopencl as cl
 
-def pad1d(x,n):
-    m = len(x)
-    return np.concatenate([x,np.zeros([n-m])])
-
-def padVec(x,n):
-    assert x.shape[1] == 3
-    m = x.shape[0]
-    return np.concatenate([x,np.zeros([n-m,3])])
-
 def buffer_read_float32(x,context):
     x = np.array(x, dtype=np.float32, order='C')
     return cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)

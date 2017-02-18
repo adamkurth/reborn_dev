@@ -1,9 +1,10 @@
 import sys
-sys.path.append("../..")
 import time
+
 import numpy as np
 import matplotlib.pyplot as plt
 
+sys.path.append("../../..")
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
 
@@ -12,7 +13,7 @@ pl = ba.detector.PanelList()
 pl.simple_setup(1000,1000,100e-6,0.1,1.5e-10)
 
 # Scattering vectors
-Q = pl.Q
+q = pl.Q
 
 # Atomic coordinates
 N = 2
@@ -24,7 +25,7 @@ f = np.ones([N])
 
 # Compute diffraction amplitudes
 t = time.time()
-A = clcore.phaseFactor(Q,r,f)
+A = clcore.phase_factor_qrf(q,r,f)
 print(time.time() - t)
 
 # Display diffraction intensities
@@ -33,8 +34,6 @@ I = np.abs(A)**2
 I *= pl.polarization_factor
 
 I = np.reshape(I,[1000,1000])
-
-
 
 plt.imshow(I,interpolation='nearest',cmap='gray',origin='lower')
 plt.title('y: up, x: right, z: beam (towards you)')

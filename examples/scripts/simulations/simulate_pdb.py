@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pyopencl as cl
 
-sys.path.append("../..")
+sys.path.append("../../..")
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
 import bornagain.target.crystal as crystal
@@ -19,7 +19,7 @@ wavelength = 1.5e-10
 pl.simple_setup(nPixels, nPixels, pixelSize, detectorDistance, wavelength)
 
 # Load a crystal structure from pdb file
-pdbFile = '../../examples/data/pdb/2LYZ.pdb'  # Lysozyme
+pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
 # pdbFile = '../../examples/data/pdb/1jb0.pdb'  # Photosystem I
 cryst = crystal.structure(pdbFile)
 
@@ -36,7 +36,7 @@ context = cl.create_some_context()
 # This method computes the q vectors on the fly.  Slight speed increase.
 if 1:
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
-    for i in range(0, 10):
+    for i in range(0, 3):
         t = time.time()
         A = clcore.phaseFactorPAD(
             r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, context=context)
@@ -51,7 +51,7 @@ if 1:
 # detector.PanelList class.
 if 1:
     q = pl.Q  # These are the scattering vectors, Nx3 array.
-    for i in range(0, 10):
+    for i in range(0, 3):
         t = time.time()
         A = clcore.phase_factor_qrf(q, r, f, context=context)
         tf = time.time() - t
@@ -68,7 +68,7 @@ if 1:
     qmax = 2 * np.pi / (res)
     qmin = -qmax
     N = 201  # Number of samples
-    for i in range(0, 10):
+    for i in range(0, 3):
         t = time.time()
         A = clcore.phaseFactor3DM(r, f, N, qmin, qmax, context=context)
         tf = time.time() - t
