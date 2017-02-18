@@ -28,11 +28,6 @@ conda install -c ufechner pyqtgraph=0.9.10
 conda install -c timrudge pyopencl=2014.1
 ```
 
-`xraylib` for simulations:
-```bash
-conda install -c conda-forge xraylib=3.2.0
-```
-
 `pyopengl` for plotting 3d graphics:
 ```bash
 conda install pyopengl
