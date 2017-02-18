@@ -8,3 +8,4 @@ build
 temp
 *.c
 .cache
+.metadata
