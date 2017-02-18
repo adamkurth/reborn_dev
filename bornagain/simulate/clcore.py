@@ -15,7 +15,7 @@ def vec4(x,dtype=np.float32):
     return np.array([x[0],x[1],x[2],0.0],dtype=dtype)
 
 
-def phase_factor_qrf(q, r, f, context=None):
+def phase_factor_qrf(q, r, f, context=None, group_size=64):
 
     '''
     Calculate the diffraction amplitude sum over n: f_n*exp(-iq.r_n)
@@ -25,6 +25,7 @@ def phase_factor_qrf(q, r, f, context=None):
     r:       Numpy array [M,3] of atomic coordinates
     f:       Numpy array [M] of complex scattering factors
     context: Optional pyopencl context cl.create_some_context()
+    group_size: Optional specification of pyopencl group size
     
     Return:
     A:       Numpy array [N] of complex amplitudes
@@ -35,7 +36,9 @@ def phase_factor_qrf(q, r, f, context=None):
 
     if context is None: context = cl.create_some_context()
     queue = cl.CommandQueue(context)
-    groupSize = 64 #queue.device.max_work_group_size
+    groupSize = group_size
+    if groupSize > queue.device.max_work_group_size:
+        groupSize = queue.device.max_work_group_size
     globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
     mf = cl.mem_flags
 
@@ -126,10 +129,30 @@ def phase_factor_qrf(q, r, f, context=None):
     return a
 
 
-def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w, context=None):
+def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, group_size=64):
 
     '''
-    This should simulate detector panels.  More details to follow...
+    This should simulate detector panels.  
+    
+    Input:
+    r:       An Nx3 numpy array with atomic coordinates (meters)
+    f:       A numpy array with complex scattering factors
+    T:       A 1x3 numpy array with vector components pointing from sample to the center 
+             of the first pixel in memory
+    F:       A 1x3 numpy array containing the basis vector components pointing in the
+             direction corresponding to contiguous pixels in memory ("fast scan").
+    S:       A 1x3 numpy array containing the basis vector components pointing in the
+             direction corresponding to non-contiguous pixels in memory ("slow scan").
+    B:       A 1x3 numpy array with unit-vector components corresponding to the incident
+             x-ray beam direction
+    nF:      Number of fast-scan pixels (corresponding to F vector) in the detector panel
+    nS:      Number of slow-scan pixels (corresponding to S vector) in the detector panel
+    w:       The photon wavelength in meters
+    context: The opencl context may be specified, optionally
+    group_size: Optional specification of pyopencl group size
+    
+    Output:
+    A:        A numpy array of length nF*nS containing complex scattering amplitudes 
     '''
 
     nPixels = nF*nS
@@ -137,7 +160,9 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w, context=None):
 
     if context is None: context = cl.create_some_context()
     queue = cl.CommandQueue(context)
-    groupSize = 64 #queue.device.max_work_group_size
+    groupSize = group_size
+    if groupSize > queue.device.max_work_group_size:
+        groupSize = queue.device.max_work_group_size
     globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
     mf = cl.mem_flags
 
@@ -168,7 +193,7 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w, context=None):
     prg = cl.Program(context, """
         #define PI2 6.28318530718f
         #define GROUP_SIZE %d
-        __kernel void phaseFactorPAD_cl(
+        __kernel void phase_factor_pad_cl(
         __global const float *r,  /* A float3 array does not seem to work in pyopencl.. */
         __global const float2 *f,
         __global float2 *a,
@@ -246,20 +271,37 @@ def phaseFactorPAD(r, f, T, F, S, B, nF, nS, w, context=None):
 
         }""" % groupSize).build()
 
-    phaseFactorPAD_cl = prg.phaseFactorPAD_cl
-    phaseFactorPAD_cl.set_scalar_arg_dtypes([None,None,None,int,int,int,int,np.float32,None,None,None,None])
+    phase_factor_pad_cl = prg.phase_factor_pad_cl
+    phase_factor_pad_cl.set_scalar_arg_dtypes([None,None,None,int,int,int,int,np.float32,None,None,None,None])
 
-    phaseFactorPAD_cl(queue, (globalSize,), (groupSize,), r_buf,f_buf,a_buf,nPixels,nAtoms,nF,nS,w,T,F,S,B)
+    phase_factor_pad_cl(queue, (globalSize,), (groupSize,), r_buf,f_buf,a_buf,nPixels,nAtoms,nF,nS,w,T,F,S,B)
     a = np.zeros(nPixels, dtype=np.complex64)
 
     cl.enqueue_copy(queue, a, a_buf)
 
     return a
 
-def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None, context=None, copy_buffer=True):
+def phase_factor_mesh(r, f, N, Qmin=None, Qmax=None, context=None, copy_buffer=True, group_size=64):
 
     '''
     This should simulate a regular 3D mesh of q-space samples.
+    
+    Input:
+    r:            An Nx3 numpy array of atomic coordinates (meters)
+    f:            A numpy array of complex atomic scattering factors
+    N:            A scalar or length-3 array specifying the number of q-space samples in 
+                  each of the three dimensions
+    q_min:        A scalar or length-3 array specifying the minimum q-space magnitudes in
+                  the 3d mesh.  These values specify the center of the voxel.
+    q_max:        A scalar or length-3 array specifying the maximum q-space magnitudes in
+                  the 3d mesh.  These values specify the center of the voxel.
+    context:      Optionally specify the opencl context
+    copy_buffer:  Set to False if you wish to keep the output array in GPU memory
+    group_size:   Optional specification of pyopencl group size
+    
+    Output:
+    An array of complex scattering amplitudes.  By default this is a normal numpy array.  
+    Optionally, this may be an opencl buffer.  
     '''
 
     assert Qmax is not None
@@ -279,7 +321,9 @@ def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None, context=None, copy_buffer=True)
 
     if context is None: context = cl.create_some_context()
     queue = cl.CommandQueue(context)
-    groupSize = 64 #queue.device.max_work_group_size
+    groupSize = group_size
+    if groupSize > queue.device.max_work_group_size:
+        groupSize = queue.device.max_work_group_size
     globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
     mf = cl.mem_flags
 
@@ -295,7 +339,7 @@ def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None, context=None, copy_buffer=True)
     # run each q vector in parallel
     prg = cl.Program(context, """
         #define GROUP_SIZE """ + ('%d' % groupSize) + """
-        __kernel void phaseFactor3DM_cl(
+        __kernel void phase_factor_mesh_cl(
         __global const float *r,  /* A float3 array does not seem to work in pyopencl.. */
         __global const float2 *f,
         __global float2 *a,
@@ -366,12 +410,10 @@ def phaseFactor3DM(r, f, N,Qmin=None, Qmax=None, context=None, copy_buffer=True)
             }
         }""").build()
 
-    #print(globalSize,groupSize)
+    phase_factor_mesh_cl = prg.phase_factor_mesh_cl
+    phase_factor_mesh_cl.set_scalar_arg_dtypes([None,None,None,int,int,None,None,None])
 
-    phaseFactor3DM_cl = prg.phaseFactor3DM_cl
-    phaseFactor3DM_cl.set_scalar_arg_dtypes([None,None,None,int,int,None,None,None])
-
-    phaseFactor3DM_cl(queue, (globalSize,), (groupSize,), r_buf,f_buf,a_buf,nPixels,nAtoms,N,deltaQ,Qmin)
+    phase_factor_mesh_cl(queue, (globalSize,), (groupSize,), r_buf,f_buf,a_buf,nPixels,nAtoms,N,deltaQ,Qmin)
     
     if copy_buffer == True:
         a = np.zeros(nPixels, dtype=np.complex64)
@@ -390,12 +432,4 @@ class PatternGeneratorLUT(object):
         self.q_min = q_min
         self.q_max = q_max
         self.context = context
-        
-        
-        
-        
-        
-        
-        
-        
         

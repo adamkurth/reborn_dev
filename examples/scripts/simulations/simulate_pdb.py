@@ -38,10 +38,10 @@ if 1:
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
     for i in range(0, 3):
         t = time.time()
-        A = clcore.phaseFactorPAD(
+        A = clcore.phase_factor_pad(
             r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, context=context)
         tf = time.time() - t
-        print('phaseFactorPAD: %0.3g seconds/atom/pixel' %
+        print('phase_factor_pad: %0.3g seconds/atom/pixel' %
               (tf / p.nF / p.nS / r.shape[0]))
     imdisp = np.abs(A)**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
@@ -70,9 +70,9 @@ if 1:
     N = 201  # Number of samples
     for i in range(0, 3):
         t = time.time()
-        A = clcore.phaseFactor3DM(r, f, N, qmin, qmax, context=context)
+        A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, context=context)
         tf = time.time() - t
-        print('phaseFactor3DM: %0.3g seconds/atom/pixel' %
+        print('phase_factor_mesh: %0.3g seconds/atom/pixel' %
               (tf / N**3 / r.shape[0]))
     A = A.reshape([N, N, N])
     imdisp = A[(N - 1) / 2, :, :].reshape([N, N])

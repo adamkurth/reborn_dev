@@ -27,7 +27,7 @@ f = ba.simulate.utils.atomicScatteringFactors(cryst.Z, pl.beam.wavelength)
 # Run the simulation
 p = pl[0]
 t = time.time()
-A = clcore.phaseFactorPAD(r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength)
+A = clcore.phase_factor_pad(r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength)
 print('Ran simulation in %f seconds' % (time.time() - t))
 
 # Display pattern
