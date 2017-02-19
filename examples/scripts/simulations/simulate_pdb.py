@@ -135,28 +135,6 @@ if 0:
     print("")
 
 
-# This method uses any q vectors that you supply.  Here we grab the q vectors from the
-# detector.PanelList class.
-if 0:
-    q_gpu = cl.array.to_device(queue, pl[0].Q.astype(np.float32))
-    r_gpu = cl.array.to_device(queue, cryst.r.astype(np.float32))
-    f_gpu = cl.array.to_device(queue, f.astype(np.complex64))
-    for i in range(0, n_trials):
-        t = time.time()
-        A = clcore.phase_factor_qrf_array(q_gpu, r_gpu, f_gpu, context=context, queue=queue)
-        tf = time.time() - t
-        print('phase_factor_qrf: %0.3g seconds/atom/pixel' %
-              (tf / q.shape[0] / r.shape[0]))
-    imdisp = np.abs(A)**2
-    imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
-    imdisp = np.log(imdisp + 0.1)
-    if show_all:
-        plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
-        plt.title('y: up, x: right, z: beam (towards you)')
-        plt.show()
-    print("")
-
-
 # Display pattern
 if ~show_all:
     plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
