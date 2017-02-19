@@ -16,7 +16,7 @@ nPixels = 1001
 pixelSize = 100e-6
 detectorDistance = 0.05
 wavelength = 1.5e-10
-pl.simple_setup(nPixels, nPixels, pixelSize, detectorDistance, wavelength)
+pl.simple_setup(nPixels, nPixels+1, pixelSize, detectorDistance, wavelength)
 
 # Load a crystal structure from pdb file
 pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
@@ -46,6 +46,7 @@ if 1:
     imdisp = np.abs(A)**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
     imdisp = np.log(imdisp + 0.1)
+    print("")
 
 # This method uses any q vectors that you supply.  Here we grab the q vectors from the
 # detector.PanelList class.
@@ -60,6 +61,7 @@ if 1:
     imdisp = np.abs(A)**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
     imdisp = np.log(imdisp + 0.1)
+    print("")
 
 # This method involves first making a 3D map of reciprocal-space amplitudes.  We will
 # interpolate individual patterns from this map.
@@ -67,17 +69,29 @@ if 1:
     res = 1e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
-    N = 201  # Number of samples
-    for i in range(0, 3):
+    N = 200  # Number of samples
+    for i in range(0, 1):
         t = time.time()
         A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, context=context)
         tf = time.time() - t
         print('phase_factor_mesh: %0.3g seconds/atom/pixel' %
               (tf / N**3 / r.shape[0]))
-    A = A.reshape([N, N, N])
-    imdisp = A[(N - 1) / 2, :, :].reshape([N, N])
+    imdisp = A.reshape([N, N, N])
+    imdisp = imdisp[(N - 1) / 2, :, :].reshape([N, N])
     imdisp = np.abs(imdisp)**2
     imdisp = np.log(imdisp + 0.1)
+    print("")
+    
+    if 1:
+        t = time.time()
+        A = clcore.buffer_mesh_lookup(A, N, qmin, qmax, pl.Q)
+        tf = time.time() - t
+        print('buffer_mesh_lookup: %0.3g seconds/atom/pixel' %
+                  (tf / N**3 / r.shape[0]))
+        imdisp = A.reshape(pl[0].nS,pl[0].nF) 
+        imdisp = np.abs(imdisp)**2
+        imdisp = np.log(imdisp + 0.1)
+        print("")
 
 
 # Display pattern

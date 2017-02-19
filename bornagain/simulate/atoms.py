@@ -14,7 +14,7 @@ def memoize(function):
     
     """ 
     This is a function decorator for caching results from a function, to avoid
-    excessive computation of reading from disk.  Search the web for more details of how
+    excessive computation or reading from disk.  Search the web for more details of how
     this works.  It is a standard practice in Python 2.
     """ 
     
