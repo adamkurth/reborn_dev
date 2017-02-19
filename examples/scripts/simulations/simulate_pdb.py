@@ -18,6 +18,7 @@ pixelSize = 100e-6
 detectorDistance = 0.05
 wavelength = 1.5e-10
 pl.simple_setup(nPixels, nPixels+1, pixelSize, detectorDistance, wavelength)
+q = pl[0].Q
 
 # Load a crystal structure from pdb file
 pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
@@ -36,12 +37,13 @@ context = cl.create_some_context()
 queue = cl.CommandQueue(context)
 
 
-n_trials = 10
+n_trials = 3
+show = False
 show_all = True
 #plt.ion()
 
 # This method computes the q vectors on the fly.  Slight speed increase.
-if 0:
+if 1:
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
     for i in range(0, n_trials):
         t = time.time()
@@ -54,7 +56,7 @@ if 0:
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
     imdisp = np.log(imdisp + 0.1)
     # Display pattern
-    if show_all:
+    if show_all and show:
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
         plt.show()
@@ -74,16 +76,45 @@ if 1:
     imdisp = np.abs(A)**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
     imdisp = np.log(imdisp + 0.1)
-    if show_all:
+    if show_all and show:
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
         plt.show()
     print("")
 
+# This method uses any q vectors that you supply.  Here we grab the q vectors from the
+# detector.PanelList class. This time we make device memory explicitly.
+if 1:
+    t = time.time()
+    q_dev = cl.array.to_device(queue, q.astype(np.float32))
+    r_dev = cl.array.to_device(queue, r.astype(np.float32))
+    f_dev = cl.array.to_device(queue, f.astype(np.complex64))
+    a_dev = cl.array.to_device(queue, np.zeros([q_dev.shape[0]],dtype=np.complex64))
+    tf = time.time() - t
+    print('move to device memory: %0.3g seconds' % (tf))
+    for i in range(0, n_trials):
+        t = time.time()
+        a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, a_dev)
+        tf = time.time() - t
+        print('phase_factor_qrf: %0.3g seconds (%0.3g/atom/pixel)' %
+              (tf, tf / q.shape[0] / r.shape[0]))
+    imdisp = np.abs(a.get())**2
+    imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
+    imdisp = np.log(imdisp + 0.1)
+    if show_all and show:
+        plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
+        plt.title('y: up, x: right, z: beam (towards you)')
+        plt.show()
+    print("")
+    del q_dev
+    del r_dev
+    del f_dev
+    del a_dev
+
 
 # This method involves first making a 3D map of reciprocal-space amplitudes.  We will
 # interpolate individual patterns from this map.
-if 0:
+if 1:
     res = 1e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
@@ -98,7 +129,7 @@ if 0:
     imdisp = imdisp[(N - 1) / 2, :, :].reshape([N, N])
     imdisp = np.abs(imdisp)**2
     imdisp = np.log(imdisp + 0.1)
-    if show_all:
+    if show_all and show:
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
         plt.show()
@@ -106,7 +137,7 @@ if 0:
     
 # This method involves first making a 3D map of reciprocal-space amplitudes.  We will
 # interpolate individual patterns from this map.
-if 0:
+if 1:
     res = 1e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
@@ -128,7 +159,7 @@ if 0:
     imdisp = AA.reshape(pl[0].nS,pl[0].nF) 
     imdisp = np.abs(imdisp)**2
     imdisp = np.log(imdisp + 0.1)
-    if show_all:
+    if show_all and show:
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
         plt.show()
@@ -136,7 +167,7 @@ if 0:
 
 
 # Display pattern
-if ~show_all:
+if ~show_all and show:
     plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
     plt.title('y: up, x: right, z: beam (towards you)')
     plt.show()

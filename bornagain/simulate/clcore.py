@@ -14,39 +14,92 @@ def vec4(x,dtype=np.float32):
     # and pad with a zero at the end.
     return np.array([x[0],x[1],x[2],0.0],dtype=dtype)
 
+def to_device(queue, x):
+    
+    """
+    Create a cl array from numpy array.  Return input if already a cl array.  Float or complex allowed.
+    """
+    
+    if type(x) is cl.array.Array:
+        return x
+    
+    if np.iscomplexobj(x):
+        dt = np.complex64
+    else:
+        dt = np.float32
+    
+    return cl.array.to_device(queue, x.astype(dt))
+    
 
-def phase_factor_qrf(q, r, f, context=None, queue=None, group_size=64):
+def get_context_and_queue(var):
+    
+    """Attempt to determine cl context and queue from input buffers.  Check for consistency."""
+    
+    context = None
+    queue = None
+    
+    for v in var:
+        if v is None: continue
+        if type(v) is cl.array.Array:
+            q = v.queue
+            c = v.context
+            if context is None: context = c
+            if queue is None: queue = q
+            if c != context:
+                raise(ValueError('Mismatched cl context'))
+            if q != queue:
+                raise(ValueError('Mismatched cl queue'))
+    
+    if queue is None: 
+        if context is None: 
+            context = cl.create_some_context()
+        queue = cl.CommandQueue(context)
+        
+    return context, queue
+
+def cap_group_size(group_size, queue):
+    
+    """Check that group size does not exceed device limit"""
+    
+    if group_size > queue.device.max_work_group_size:
+        group_size = queue.device.max_work_group_size
+        
+    return group_size
+        
+        
+
+def phase_factor_qrf(q, r, f, a=None, context=None, queue=None, group_size=64):
 
     '''
-    Calculate the diffraction amplitude sum over n: f_n*exp(-iq.r_n)
+    Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
     
     Input:
-    q:       Numpy array [N,3] of scattering vectors (2.pi/lambda)
-    r:       Numpy array [M,3] of atomic coordinates
-    f:       Numpy array [M] of complex scattering factors
-    context: Optional pyopencl context cl.create_some_context()
-    group_size: Optional specification of pyopencl group size
+    q:       Numpy or cl array [N,3] of scattering vectors (2.pi/lambda)
+    r:       Numpy or cl array [M,3] of atomic coordinates
+    f:       Numpy or cl array [M] of complex scattering factors
+    a:       Optional cl array [N] of complex scattering amplitudes
+    context: Optional pyopencl context [cl.create_some_context()]
+    queue:   Optional pyopencl queue [cl.CommandQueue(context)]
+    group_size: Optional specification of pyopencl group size (default 64 or maximum)
     
     Return:
-    A:       Numpy array [N] of complex amplitudes
+    Numpy array [N] of complex amplitudes OR cl array if there are input cl arrays
     '''
 
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
 
-    if queue is None: 
-        if context is None: 
-            context = cl.create_some_context()
-        queue = cl.CommandQueue(context)
-    group_size = group_size
-    if group_size > queue.device.max_work_group_size:
-        group_size = queue.device.max_work_group_size
+    context, queue = get_context_and_queue([q,r,f,a])
+    group_size = cap_group_size(group_size, queue)
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
     
-    q_dev = cl.array.to_device(queue, q.astype(np.float32))
-    r_dev = cl.array.to_device(queue, r.astype(np.float32))
-    f_dev = cl.array.to_device(queue, f.astype(np.complex64))
-    a_dev = cl.array.to_device(queue, np.zeros([n_pixels],dtype=np.complex64))
+    q_dev = to_device(queue, q)
+    r_dev = to_device(queue, r)
+    f_dev = to_device(queue, f)
+    if a is None: 
+        a_dev = to_device(queue, np.zeros([n_pixels],dtype=np.complex64))
+    else:
+        a_dev = a
 
     # run each q vector in parallel
     prg = cl.Program(context, """
@@ -124,7 +177,10 @@ def phase_factor_qrf(q, r, f, context=None, queue=None, group_size=64):
     phase_factor_qrf_cl.set_scalar_arg_dtypes(     [ None,  None,  None,  None,  int,    int ]  )
     phase_factor_qrf_cl(queue, (global_size,), (group_size,),q_dev.data, r_dev.data, f_dev.data, a_dev.data, n_atoms, n_pixels)
 
-    a = a_dev.get()
+    if a is None:
+        a = a_dev.get()
+    else:
+        a = a_dev
 
     return a
 
@@ -148,8 +204,9 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, grou
     nF:      Number of fast-scan pixels (corresponding to F vector) in the detector panel
     nS:      Number of slow-scan pixels (corresponding to S vector) in the detector panel
     w:       The photon wavelength in meters
-    context: The opencl context may be specified, optionally
-    group_size: Optional specification of pyopencl group size
+    context: Optional pyopencl context [cl.create_some_context()]
+    queue:   Optional pyopencl queue [cl.CommandQueue(context)]
+    group_size: Optional specification of pyopencl group size (default 64 or maximum)
     
     Output:
     A:        A numpy array of length nF*nS containing complex scattering amplitudes 
@@ -167,8 +224,8 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, grou
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    r_dev = clbuffer_float(r, context)
-    f_dev = clbuffer_complex(f, context)
+    r_dev = cl.array.to_device(queue, r.astype(np.float32))
+    f_dev = cl.array.to_device(queue, f.astype(np.complex64))
     T = vec4(T)
     F = vec4(F)
     S = vec4(S)
@@ -260,30 +317,30 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, grou
     phase_factor_pad_cl = prg.phase_factor_pad_cl
     phase_factor_pad_cl.set_scalar_arg_dtypes([None,None,None,int,int,int,int,np.float32,None,None,None,None])
 
-    phase_factor_pad_cl(queue, (global_size,), (group_size,), r_dev,f_dev,a_dev,n_pixels,n_atoms,nF,nS,w,T,F,S,B)
+    phase_factor_pad_cl(queue, (global_size,), (group_size,), r_dev.data,f_dev.data,a_dev,n_pixels,n_atoms,nF,nS,w,T,F,S,B)
     a = np.zeros(n_pixels, dtype=np.complex64)
 
     cl.enqueue_copy(queue, a, a_dev)
 
     return a
 
-def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, copy_buffer=True, group_size=64):
+def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, group_size=64, copy_buffer=True):
 
     '''
     This should simulate a regular 3D mesh of q-space samples.
     
     Input:
-    r:            An Nx3 numpy array of atomic coordinates (meters)
-    f:            A numpy array of complex atomic scattering factors
-    N:            A scalar or length-3 array specifying the number of q-space samples in 
-                  each of the three dimensions
-    q_min:        A scalar or length-3 array specifying the minimum q-space magnitudes in
-                  the 3d mesh.  These values specify the center of the voxel.
-    q_max:        A scalar or length-3 array specifying the maximum q-space magnitudes in
-                  the 3d mesh.  These values specify the center of the voxel.
-    context:      Optionally specify the opencl context
-    copy_buffer:  Set to False if you wish to keep the output array in GPU memory
-    group_size:   Optional specification of pyopencl group size
+    r:       An Nx3 numpy array of atomic coordinates (meters)
+    f:       A numpy array of complex atomic scattering factors
+    N:       A scalar or length-3 array specifying the number of q-space samples in 
+               each of the three dimensions
+    q_min:   A scalar or length-3 array specifying the minimum q-space magnitudes in
+               the 3d mesh.  These values specify the center of the voxel.
+    q_max:   A scalar or length-3 array specifying the maximum q-space magnitudes in
+               the 3d mesh.  These values specify the center of the voxel.
+    context: Optional pyopencl context [cl.create_some_context()]
+    queue:   Optional pyopencl queue [cl.CommandQueue(context)]
+    group_size: Optional specification of pyopencl group size (default 64 or maximum)
     
     Output:
     An array of complex scattering amplitudes.  By default this is a normal numpy array.  
@@ -312,8 +369,8 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, copy_buff
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    r_dev = clbuffer_float(r,context)
-    f_dev = clbuffer_complex(f,context)
+    r_dev = cl.array.to_device(queue, r.astype(np.float32))
+    f_dev = cl.array.to_device(queue, f.astype(np.complex64))
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     q_min = vec4(q_min,dtype=np.float32)
@@ -397,7 +454,7 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, copy_buff
     phase_factor_mesh_cl = prg.phase_factor_mesh_cl
     phase_factor_mesh_cl.set_scalar_arg_dtypes([None,None,None,int,int,None,None,None])
 
-    phase_factor_mesh_cl(queue, (global_size,), (group_size,), r_dev,f_dev,a_dev,n_pixels,n_atoms,N,deltaQ,q_min)
+    phase_factor_mesh_cl(queue, (global_size,), (group_size,), r_dev.data,f_dev.data,a_dev,n_pixels,n_atoms,N,deltaQ,q_min)
     
     if copy_buffer == True:
         a = np.zeros(n_pixels, dtype=np.complex64)
@@ -407,7 +464,7 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, copy_buff
         return a_dev
 
 
-def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, copy_buffer=True, group_size=64):
+def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, group_size=64, copy_buffer=True):
 
     """
     This is supposed to lookup intensities from a 3d mesh of amplitudes.
@@ -420,9 +477,9 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, copy_buf
     q_max:   As defined in phase_factor_mesh()
     q:       An Nx3 numpy array of q-space coordinates at which we want to interpolate 
                the complex amplitudes in a_dev
-    context:
-    copy_buffer:
-    group_size:
+    context: Optional pyopencl context [cl.create_some_context()]
+    queue:   Optional pyopencl queue [cl.CommandQueue(context)]
+    group_size: Optional specification of pyopencl group size (default 64 or maximum)
                
     Output:
     A numpy array of complex amplitudes.
@@ -452,7 +509,7 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, copy_buf
         a_dev = clbuffer_complex(a,context)
     elif type(a) is cl.Buffer:
         a_dev = a #cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=a)
-    q_dev = clbuffer_float(q,context)
+    q_dev = cl.array.to_device(queue, q.astype(np.float32))
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     q_min = vec4(q_min,dtype=np.float32)
@@ -495,7 +552,7 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, copy_buf
     buffer_mesh_lookup_cl = prg.buffer_mesh_lookup_cl
     buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None,None,None,int,None,None,None])
 
-    buffer_mesh_lookup_cl(queue, (global_size,), (group_size,), a_dev,q_dev,out_dev,n_pixels,N,deltaQ,q_min)
+    buffer_mesh_lookup_cl(queue, (global_size,), (group_size,), a_dev,q_dev.data,out_dev,n_pixels,N,deltaQ,q_min)
     
     if copy_buffer == True:
         out = np.zeros(n_pixels, dtype=np.complex64)
