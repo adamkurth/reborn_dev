@@ -38,7 +38,7 @@ queue = cl.CommandQueue(context)
 
 
 n_trials = 3
-show = False
+show = True
 show_all = True
 #plt.ion()
 
@@ -86,10 +86,10 @@ if 1:
 # detector.PanelList class. This time we make device memory explicitly.
 if 1:
     t = time.time()
-    q_dev = cl.array.to_device(queue, q.astype(np.float32))
-    r_dev = cl.array.to_device(queue, r.astype(np.float32))
-    f_dev = cl.array.to_device(queue, f.astype(np.complex64))
-    a_dev = cl.array.to_device(queue, np.zeros([q_dev.shape[0]],dtype=np.complex64))
+    q_dev = clcore.to_device(queue, q)
+    r_dev = clcore.to_device(queue, r)
+    f_dev = clcore.to_device(queue, f)
+    a_dev = clcore.to_device(queue, np.zeros([q_dev.shape[0]],dtype=np.complex64))
     tf = time.time() - t
     print('move to device memory: %0.3g seconds' % (tf))
     for i in range(0, n_trials):
@@ -138,14 +138,14 @@ if 1:
 # This method involves first making a 3D map of reciprocal-space amplitudes.  We will
 # interpolate individual patterns from this map.
 if 1:
-    res = 1e-10  # Resolution
+    res = 2e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
-    N = 100  # Number of samples
+    N = 200  # Number of samples
     for i in range(0,n_trials):
         t = time.time()
         A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, 
-                                        context=context, queue=queue, copy_buffer=False)
+                                        context=context, queue=queue, get=False)
         tf = time.time() - t
         print('phase_factor_mesh: %0.3g seconds/atom/pixel' %
                   (tf / N**3 / r.shape[0]))

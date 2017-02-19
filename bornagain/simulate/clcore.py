@@ -1,13 +1,13 @@
 import numpy as np
 import pyopencl as cl
 
-def clbuffer_float(x,context):
-    x = np.array(x, dtype=np.float32, order='C')
-    return cl.Buffer(context, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
-
-def clbuffer_complex(x,context):
-    x = np.array(x, dtype=np.complex64, order='C')
-    return cl.Buffer(context, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
+# def clbuffer_float(x,context):
+#     x = np.array(x, dtype=np.float32, order='C')
+#     return cl.Buffer(context, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
+# 
+# def clbuffer_complex(x,context):
+#     x = np.array(x, dtype=np.complex64, order='C')
+#     return cl.Buffer(context, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
 
 def vec4(x,dtype=np.float32):
     # Evdidently pyopencl does not deal with 3-vectors very well, so we use 4-vectors
@@ -96,7 +96,7 @@ def phase_factor_qrf(q, r, f, a=None, context=None, queue=None, group_size=64):
     q_dev = to_device(queue, q)
     r_dev = to_device(queue, r)
     f_dev = to_device(queue, f)
-    if a is None: 
+    if a is None:
         a_dev = to_device(queue, np.zeros([n_pixels],dtype=np.complex64))
     else:
         a_dev = a
@@ -215,11 +215,8 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, grou
     n_pixels = nF*nS
     n_atoms = r.shape[0]
 
-    if context is None: context = cl.create_some_context()
-    if queue is None: queue = cl.CommandQueue(context)
-    group_size = group_size
-    if group_size > queue.device.max_work_group_size:
-        group_size = queue.device.max_work_group_size
+    context, queue = get_context_and_queue([r,f])
+    group_size = cap_group_size(group_size, queue)
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
@@ -230,7 +227,7 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, grou
     F = vec4(F)
     S = vec4(S)
     B = vec4(B)
-    a_dev = clbuffer_complex(np.zeros([n_pixels],dtype=np.complex64), context)
+    a_dev = to_device(queue,np.zeros([n_pixels],dtype=np.complex64))
 
     # run each q vector in parallel
     prg = cl.Program(context, """
@@ -317,14 +314,12 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, grou
     phase_factor_pad_cl = prg.phase_factor_pad_cl
     phase_factor_pad_cl.set_scalar_arg_dtypes([None,None,None,int,int,int,int,np.float32,None,None,None,None])
 
-    phase_factor_pad_cl(queue, (global_size,), (group_size,), r_dev.data,f_dev.data,a_dev,n_pixels,n_atoms,nF,nS,w,T,F,S,B)
-    a = np.zeros(n_pixels, dtype=np.complex64)
-
-    cl.enqueue_copy(queue, a, a_dev)
+    phase_factor_pad_cl(queue, (global_size,), (group_size,), r_dev.data,f_dev.data,a_dev.data,n_pixels,n_atoms,nF,nS,w,T,F,S,B)
+    a = a_dev.get()
 
     return a
 
-def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, group_size=64, copy_buffer=True):
+def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, group_size=64, get=True):
 
     '''
     This should simulate a regular 3D mesh of q-space samples.
@@ -360,22 +355,18 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, group_siz
     n_atoms = r.shape[0]
     n_pixels = N[0]*N[1]*N[2]
 
-    if context is None: context = cl.create_some_context()
-    if queue is None: queue = cl.CommandQueue(context)
-    group_size = group_size
-    if group_size > queue.device.max_work_group_size:
-        group_size = queue.device.max_work_group_size
+    context, queue = get_context_and_queue([r,f])
+    group_size = cap_group_size(group_size, queue)
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    r_dev = cl.array.to_device(queue, r.astype(np.float32))
-    f_dev = cl.array.to_device(queue, f.astype(np.complex64))
+    r_dev = to_device(queue, r)
+    f_dev = to_device(queue, f)
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     q_min = vec4(q_min,dtype=np.float32)
-    #a_dev = cl.Buffer(context, mf.READ_WRITE, n_pixels*4*2)
-    a_dev = clbuffer_complex(np.zeros([n_pixels],dtype=np.complex64), context)
+    a_dev = to_device(queue,np.zeros([n_pixels],dtype=np.complex64))
 
     # run each q vector in parallel
     prg = cl.Program(context, """
@@ -454,17 +445,15 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, group_siz
     phase_factor_mesh_cl = prg.phase_factor_mesh_cl
     phase_factor_mesh_cl.set_scalar_arg_dtypes([None,None,None,int,int,None,None,None])
 
-    phase_factor_mesh_cl(queue, (global_size,), (group_size,), r_dev.data,f_dev.data,a_dev,n_pixels,n_atoms,N,deltaQ,q_min)
+    phase_factor_mesh_cl(queue, (global_size,), (group_size,), r_dev.data,f_dev.data,a_dev.data,n_pixels,n_atoms,N,deltaQ,q_min)
     
-    if copy_buffer == True:
-        a = np.zeros(n_pixels, dtype=np.complex64)
-        cl.enqueue_copy(queue, a, a_dev)
-        return a
+    if get == True:
+        return a_dev.get()
     else:
         return a_dev
 
 
-def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, group_size=64, copy_buffer=True):
+def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, group_size=64, get=True):
 
     """
     This is supposed to lookup intensities from a 3d mesh of amplitudes.
@@ -497,23 +486,18 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, group_si
 
     n_pixels = q.shape[0]
 
-    if context is None: context = cl.create_some_context()
-    if queue is None: queue = cl.CommandQueue(context)
-    if group_size > queue.device.max_work_group_size:
-        group_size = queue.device.max_work_group_size
+    context, queue = get_context_and_queue([a,q])
+    group_size = cap_group_size(group_size, queue)
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    if type(a) is np.ndarray:
-        a_dev = clbuffer_complex(a,context)
-    elif type(a) is cl.Buffer:
-        a_dev = a #cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=a)
-    q_dev = cl.array.to_device(queue, q.astype(np.float32))
+    a_dev = to_device(queue, a)
+    q_dev = to_device(queue, q)
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     q_min = vec4(q_min,dtype=np.float32)
-    out_dev = clbuffer_complex(np.zeros([n_pixels],dtype=np.complex64), context)
+    out_dev = to_device(queue, np.zeros([n_pixels],dtype=np.complex64))
     
     # run each q vector in parallel
     prg = cl.Program(context, """//CL//
@@ -552,12 +536,10 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, group_si
     buffer_mesh_lookup_cl = prg.buffer_mesh_lookup_cl
     buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None,None,None,int,None,None,None])
 
-    buffer_mesh_lookup_cl(queue, (global_size,), (group_size,), a_dev,q_dev.data,out_dev,n_pixels,N,deltaQ,q_min)
+    buffer_mesh_lookup_cl(queue, (global_size,), (group_size,), a_dev.data,q_dev.data,out_dev.data,n_pixels,N,deltaQ,q_min)
     
-    if copy_buffer == True:
-        out = np.zeros(n_pixels, dtype=np.complex64)
-        cl.enqueue_copy(queue, out, out_dev)
-        return out
+    if get == True:
+        return out_dev.get()
     else:
         return None
     
