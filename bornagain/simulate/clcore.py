@@ -42,11 +42,11 @@ def phase_factor_qrf(q, r, f, context=None, queue=None, group_size=64):
     if group_size > queue.device.max_work_group_size:
         group_size = queue.device.max_work_group_size
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
-
-    q_dev = clbuffer_float(q,context)
-    r_dev = clbuffer_float(r.flatten(),context)
-    f_dev = clbuffer_complex(f,context)
-    a_dev = clbuffer_complex(np.zeros([n_pixels],dtype=np.complex64), context)
+    
+    q_dev = cl.array.to_device(queue, q.astype(np.float32))
+    r_dev = cl.array.to_device(queue, r.astype(np.float32))
+    f_dev = cl.array.to_device(queue, f.astype(np.complex64))
+    a_dev = cl.array.to_device(queue, np.zeros([n_pixels],dtype=np.complex64))
 
     # run each q vector in parallel
     prg = cl.Program(context, """
@@ -122,10 +122,9 @@ def phase_factor_qrf(q, r, f, context=None, queue=None, group_size=64):
 
     phase_factor_qrf_cl = prg.phase_factor_qrf_cl
     phase_factor_qrf_cl.set_scalar_arg_dtypes(     [ None,  None,  None,  None,  int,    int ]  )
-    phase_factor_qrf_cl(queue, (global_size,), (group_size,),q_dev, r_dev, f_dev, a_dev, n_atoms, n_pixels)
-    
-    a = np.zeros(n_pixels, dtype=np.complex64)
-    cl.enqueue_copy(queue, a, a_dev)
+    phase_factor_qrf_cl(queue, (global_size,), (group_size,),q_dev.data, r_dev.data, f_dev.data, a_dev.data, n_atoms, n_pixels)
+
+    a = a_dev.get()
 
     return a
 
