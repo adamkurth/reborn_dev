@@ -1,13 +1,13 @@
 import numpy as np
 import pyopencl as cl
 
-def clbuffer_readonly_float32(x,context):
+def clbuffer_float(x,context):
     x = np.array(x, dtype=np.float32, order='C')
-    return cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
+    return cl.Buffer(context, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
 
-def clbuffer_readonly_complex64(x,context):
+def clbuffer_complex(x,context):
     x = np.array(x, dtype=np.complex64, order='C')
-    return cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
+    return cl.Buffer(context, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
 
 def vec4(x,dtype=np.float32):
     # Evdidently pyopencl does not deal with 3-vectors very well, so we use 4-vectors
@@ -15,7 +15,7 @@ def vec4(x,dtype=np.float32):
     return np.array([x[0],x[1],x[2],0.0],dtype=dtype)
 
 
-def phase_factor_qrf(q, r, f, context=None, group_size=64):
+def phase_factor_qrf(q, r, f, context=None, queue=None, group_size=64):
 
     '''
     Calculate the diffraction amplitude sum over n: f_n*exp(-iq.r_n)
@@ -31,32 +31,33 @@ def phase_factor_qrf(q, r, f, context=None, group_size=64):
     A:       Numpy array [N] of complex amplitudes
     '''
 
-    nPixels = q.shape[0]
-    nAtoms = r.shape[0]
+    n_pixels = q.shape[0]
+    n_atoms = r.shape[0]
 
-    if context is None: context = cl.create_some_context()
-    queue = cl.CommandQueue(context)
-    groupSize = group_size
-    if groupSize > queue.device.max_work_group_size:
-        groupSize = queue.device.max_work_group_size
-    globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
-    mf = cl.mem_flags
+    if queue is None: 
+        if context is None: 
+            context = cl.create_some_context()
+        queue = cl.CommandQueue(context)
+    group_size = group_size
+    if group_size > queue.device.max_work_group_size:
+        group_size = queue.device.max_work_group_size
+    global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
-    q_buf = clbuffer_readonly_float32(q,context)
-    r_buf = clbuffer_readonly_float32(r.flatten(),context)
-    f_buf = clbuffer_readonly_complex64(f,context)
-    a_buf = cl.Buffer(context, mf.WRITE_ONLY, nPixels*4*2)
+    q_dev = clbuffer_float(q,context)
+    r_dev = clbuffer_float(r.flatten(),context)
+    f_dev = clbuffer_complex(f,context)
+    a_dev = clbuffer_complex(np.zeros([n_pixels],dtype=np.complex64), context)
 
     # run each q vector in parallel
     prg = cl.Program(context, """
-        #define GROUP_SIZE """ + ("%d" % groupSize) + """
+        #define GROUP_SIZE """ + ("%d" % group_size) + """
         __kernel void phase_factor_qrf_cl(
         __global const float *q,
         __global const float *r,
         __global const float2 *f,
         __global float2 *a,
-        int nAtoms,
-        int nPixels)
+        int n_atoms,
+        int n_pixels)
         {
             const int gi = get_global_id(0); /* Global index */
             const int li = get_local_id(0);  /* Local group index */
@@ -69,7 +70,7 @@ def phase_factor_qrf(q, r, f, context=None, group_size=64):
             // global index could be larger than the number of pixels because it must be a
             // multiple of the group size.
             float4 q4;
-            if (gi < nPixels){
+            if (gi < n_pixels){
                 q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
             } else {
                 q4 = (float4)(0.0f,0.0f,0.0f,0.0f);
@@ -77,13 +78,13 @@ def phase_factor_qrf(q, r, f, context=None, group_size=64):
             __local float4 rg[GROUP_SIZE];
             __local float2 fg[GROUP_SIZE];
 
-            for (int g=0; g<nAtoms; g+=GROUP_SIZE){
+            for (int g=0; g<n_atoms; g+=GROUP_SIZE){
 
                 // Here we will move a chunk of atoms to local memory.  Each worker in a
                 // group moves one atom.
                 int ai = g+li;
 
-                if (ai < nAtoms ){
+                if (ai < n_atoms ){
                     rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
                     fg[li] = f[ai];
                 } else {
@@ -113,7 +114,7 @@ def phase_factor_qrf(q, r, f, context=None, group_size=64):
                 // Don't proceed until this subset of atoms are completed.
                 barrier(CLK_LOCAL_MEM_FENCE);
             }
-            if (gi < nPixels){
+            if (gi < n_pixels){
                 a[gi].x = re;
                 a[gi].y = im;
             }
@@ -121,15 +122,129 @@ def phase_factor_qrf(q, r, f, context=None, group_size=64):
 
     phase_factor_qrf_cl = prg.phase_factor_qrf_cl
     phase_factor_qrf_cl.set_scalar_arg_dtypes(     [ None,  None,  None,  None,  int,    int ]  )
-    phase_factor_qrf_cl(queue, (globalSize,), (groupSize,),q_buf, r_buf, f_buf, a_buf, nAtoms, nPixels)
+    phase_factor_qrf_cl(queue, (global_size,), (group_size,),q_dev, r_dev, f_dev, a_dev, n_atoms, n_pixels)
     
-    a = np.zeros(nPixels, dtype=np.complex64)
-    cl.enqueue_copy(queue, a, a_buf)
+    a = np.zeros(n_pixels, dtype=np.complex64)
+    cl.enqueue_copy(queue, a, a_dev)
 
     return a
 
 
-def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, group_size=64):
+def phase_factor_qrf_array(q, r, f, context=None, queue=None, group_size=64):
+
+    '''
+    Calculate the diffraction amplitude sum over n: f_n*exp(-iq.r_n)
+    
+    Input:
+    q:       Numpy array [N,3] of scattering vectors (2.pi/lambda)
+    r:       Numpy array [M,3] of atomic coordinates
+    f:       Numpy array [M] of complex scattering factors
+    context: Optional pyopencl context cl.create_some_context()
+    group_size: Optional specification of pyopencl group size
+    
+    Return:
+    A:       Numpy array [N] of complex amplitudes
+    '''
+
+    n_pixels = q.shape[0]
+    n_atoms = r.shape[0]
+
+    if queue is None: 
+        if context is None: 
+            context = cl.create_some_context()
+        queue = cl.CommandQueue(context)
+    if group_size > queue.device.max_work_group_size:
+        group_size = queue.device.max_work_group_size
+    global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
+
+#     q_dev = clbuffer_float(q,context)
+#     r_dev = clbuffer_float(r.flatten(),context)
+#     f_dev = clbuffer_complex(f,context)
+    a_dev = clbuffer_complex(np.zeros([n_pixels],dtype=np.complex64), context)
+
+    # run each q vector in parallel
+    prg = cl.Program(context, """
+        #define GROUP_SIZE """ + ("%d" % group_size) + """
+        __kernel void phase_factor_qrf_arrays_cl(
+        __global const float *q,
+        __global const float *r,
+        __global const float2 *f,
+        __global float2 *a,
+        int n_atoms,
+        int n_pixels)
+        {
+            const int gi = get_global_id(0); /* Global index */
+            const int li = get_local_id(0);  /* Local group index */
+
+            float ph, sinph, cosph;
+            float re = 0;
+            float im = 0;
+
+            // Each global index corresponds to a particular q-vector.  Note that the
+            // global index could be larger than the number of pixels because it must be a
+            // multiple of the group size.
+            float4 q4;
+            if (gi < n_pixels){
+                q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+            } else {
+                q4 = (float4)(0.0f,0.0f,0.0f,0.0f);
+            }
+            __local float4 rg[GROUP_SIZE];
+            __local float2 fg[GROUP_SIZE];
+
+            for (int g=0; g<n_atoms; g+=GROUP_SIZE){
+
+                // Here we will move a chunk of atoms to local memory.  Each worker in a
+                // group moves one atom.
+                int ai = g+li;
+
+                if (ai < n_atoms ){
+                    rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
+                    fg[li] = f[ai];
+                } else {
+                    rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
+                    fg[li] = (float2)(0.0f,0.0f);
+                }
+
+                // Don't proceed until **all** members of the group have finished moving
+                // atom information into local memory.
+                barrier(CLK_LOCAL_MEM_FENCE);
+
+                // We use a local real and imaginary part to avoid floatint point overflow
+                float lre=0;
+                float lim=0;
+
+                // Now sum up the amplitudes from this subset of atoms
+                for (int n=0; n < GROUP_SIZE; n++){
+                    ph = -dot(q4,rg[n]);
+                    sinph = native_sin(ph);
+                    cosph = native_cos(ph);
+                    lre += fg[n].x*cosph - fg[n].y*sinph;
+                    lim += fg[n].x*sinph + fg[n].y*cosph;
+                }
+                re += lre;
+                im += lim;
+
+                // Don't proceed until this subset of atoms are completed.
+                barrier(CLK_LOCAL_MEM_FENCE);
+            }
+            if (gi < n_pixels){
+                a[gi].x = re;
+                a[gi].y = im;
+            }
+        }""").build()
+
+    phase_factor_qrf_arrays_cl = prg.phase_factor_qrf_arrays_cl
+    phase_factor_qrf_arrays_cl.set_scalar_arg_dtypes(     [ None,  None,  None,  None,  int,    int ]  )
+    phase_factor_qrf_arrays_cl(queue, (global_size,), (group_size,),q.data, r.data, f.data, a_dev, n_atoms, n_pixels)
+    
+    a = np.zeros(n_pixels, dtype=np.complex64)
+    cl.enqueue_copy(queue, a, a_dev)
+
+    return a
+
+
+def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, group_size=64):
 
     '''
     This should simulate detector panels.  
@@ -155,39 +270,25 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, group_size=64):
     A:        A numpy array of length nF*nS containing complex scattering amplitudes 
     '''
 
-    nPixels = nF*nS
-    nAtoms = r.shape[0]
+    n_pixels = nF*nS
+    n_atoms = r.shape[0]
 
     if context is None: context = cl.create_some_context()
-    queue = cl.CommandQueue(context)
-    groupSize = group_size
-    if groupSize > queue.device.max_work_group_size:
-        groupSize = queue.device.max_work_group_size
-    globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
-    mf = cl.mem_flags
-
-    def buf_float(x):
-        x = np.array(x, dtype=np.float32, order='C')
-        return cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=x)
-
-    def buf_complex(x):
-        x = np.array(x, dtype=np.complex64, order='C')
-        return cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=x)
-
-    def vec4(x):
-        # Evdidently pyopencl does not deal with 3-vectors very well, so we use 4-vectors
-        # and pad with a zero at the end.
-        return np.array([x[0],x[1],x[2],0.0]).astype(np.float32)
+    if queue is None: queue = cl.CommandQueue(context)
+    group_size = group_size
+    if group_size > queue.device.max_work_group_size:
+        group_size = queue.device.max_work_group_size
+    global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    r_buf = buf_float(r)
-    f_buf = buf_complex(f)
+    r_dev = clbuffer_float(r, context)
+    f_dev = clbuffer_complex(f, context)
     T = vec4(T)
     F = vec4(F)
     S = vec4(S)
     B = vec4(B)
-    a_buf = cl.Buffer(context, mf.WRITE_ONLY, nPixels*4*2)
+    a_dev = clbuffer_complex(np.zeros([n_pixels],dtype=np.complex64), context)
 
     # run each q vector in parallel
     prg = cl.Program(context, """
@@ -197,8 +298,8 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, group_size=64):
         __global const float *r,  /* A float3 array does not seem to work in pyopencl.. */
         __global const float2 *f,
         __global float2 *a,
-        int nPixels,
-        int nAtoms,
+        int n_pixels,
+        int n_atoms,
         int nF,
         int nS,
         float w,
@@ -228,13 +329,13 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, group_size=64):
             __local float4 rg[GROUP_SIZE];
             __local float2 fg[GROUP_SIZE];
 
-            for (int g=0; g<nAtoms; g+=GROUP_SIZE){
+            for (int g=0; g<n_atoms; g+=GROUP_SIZE){
 
                 // Here we will move a chunk of atoms to local memory.  Each worker in a
                 // group moves one atom.
                 int ai = g+li;
 
-                if (ai < nAtoms){
+                if (ai < n_atoms){
                     rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
                     fg[li] = f[ai];
                 } else {
@@ -264,24 +365,24 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, group_size=64):
                 barrier(CLK_LOCAL_MEM_FENCE);
             }
 
-            if (gi < nPixels ){
+            if (gi < n_pixels ){
                 a[gi].x = re;
                 a[gi].y = im;
             }
 
-        }""" % groupSize).build()
+        }""" % group_size).build()
 
     phase_factor_pad_cl = prg.phase_factor_pad_cl
     phase_factor_pad_cl.set_scalar_arg_dtypes([None,None,None,int,int,int,int,np.float32,None,None,None,None])
 
-    phase_factor_pad_cl(queue, (globalSize,), (groupSize,), r_buf,f_buf,a_buf,nPixels,nAtoms,nF,nS,w,T,F,S,B)
-    a = np.zeros(nPixels, dtype=np.complex64)
+    phase_factor_pad_cl(queue, (global_size,), (group_size,), r_dev,f_dev,a_dev,n_pixels,n_atoms,nF,nS,w,T,F,S,B)
+    a = np.zeros(n_pixels, dtype=np.complex64)
 
-    cl.enqueue_copy(queue, a, a_buf)
+    cl.enqueue_copy(queue, a, a_dev)
 
     return a
 
-def phase_factor_mesh(r, f, N, q_min, q_max, context=None, copy_buffer=True, group_size=64):
+def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, copy_buffer=True, group_size=64):
 
     '''
     This should simulate a regular 3D mesh of q-space samples.
@@ -314,35 +415,35 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, copy_buffer=True, gro
 
     deltaQ = np.array((q_max-q_min)/(N-1.0),dtype=np.float32)
 
-    nAtoms = r.shape[0]
-    nPixels = N[0]*N[1]*N[2]
+    n_atoms = r.shape[0]
+    n_pixels = N[0]*N[1]*N[2]
 
     if context is None: context = cl.create_some_context()
-    queue = cl.CommandQueue(context)
-    groupSize = group_size
-    if groupSize > queue.device.max_work_group_size:
-        groupSize = queue.device.max_work_group_size
-    globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
-    mf = cl.mem_flags
+    if queue is None: queue = cl.CommandQueue(context)
+    group_size = group_size
+    if group_size > queue.device.max_work_group_size:
+        group_size = queue.device.max_work_group_size
+    global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    r_buf = clbuffer_readonly_float32(r,context)
-    f_buf = clbuffer_readonly_complex64(f,context)
+    r_dev = clbuffer_float(r,context)
+    f_dev = clbuffer_complex(f,context)
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     q_min = vec4(q_min,dtype=np.float32)
-    a_buf = cl.Buffer(context, mf.WRITE_ONLY, nPixels*4*2)
+    #a_dev = cl.Buffer(context, mf.READ_WRITE, n_pixels*4*2)
+    a_dev = clbuffer_complex(np.zeros([n_pixels],dtype=np.complex64), context)
 
     # run each q vector in parallel
     prg = cl.Program(context, """
-        #define GROUP_SIZE """ + ('%d' % groupSize) + """
+        #define GROUP_SIZE """ + ('%d' % group_size) + """
         __kernel void phase_factor_mesh_cl(
         __global const float *r,  /* A float3 array does not seem to work in pyopencl.. */
         __global const float2 *f,
         __global float2 *a,
-        int nPixels,
-        int nAtoms,
+        int n_pixels,
+        int n_atoms,
         int4 N,
         float4 deltaQ,
         float4 q_min)
@@ -367,12 +468,12 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, copy_buffer=True, gro
             __local float4 rg[GROUP_SIZE];
             __local float2 fg[GROUP_SIZE];
 
-            for (int g=0; g<nAtoms; g+=GROUP_SIZE){
+            for (int g=0; g<n_atoms; g+=GROUP_SIZE){
 
                 // Here we will move a chunk of atoms to local memory.  Each worker in a
                 // group moves one atom.
                 ai = g+li;
-                if (ai < nAtoms){
+                if (ai < n_atoms){
                     rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
                     fg[li] = f[ai];
                 } else {
@@ -402,7 +503,7 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, copy_buffer=True, gro
                 barrier(CLK_LOCAL_MEM_FENCE);
             }
 
-            if (gi < nPixels){
+            if (gi < n_pixels){
                 a[gi].x = re;
                 a[gi].y = im;
             }
@@ -411,17 +512,17 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, copy_buffer=True, gro
     phase_factor_mesh_cl = prg.phase_factor_mesh_cl
     phase_factor_mesh_cl.set_scalar_arg_dtypes([None,None,None,int,int,None,None,None])
 
-    phase_factor_mesh_cl(queue, (globalSize,), (groupSize,), r_buf,f_buf,a_buf,nPixels,nAtoms,N,deltaQ,q_min)
+    phase_factor_mesh_cl(queue, (global_size,), (group_size,), r_dev,f_dev,a_dev,n_pixels,n_atoms,N,deltaQ,q_min)
     
     if copy_buffer == True:
-        a = np.zeros(nPixels, dtype=np.complex64)
-        cl.enqueue_copy(queue, a, a_buf)
+        a = np.zeros(n_pixels, dtype=np.complex64)
+        cl.enqueue_copy(queue, a, a_dev)
         return a
     else:
-        return a_buf
+        return a_dev
 
 
-def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, copy_buffer=True, group_size=64):
+def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, copy_buffer=True, group_size=64):
 
     """
     This is supposed to lookup intensities from a 3d mesh of amplitudes.
@@ -433,7 +534,7 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, copy_buffer=True, gr
     q_min:   As defined in phase_factor_mesh()
     q_max:   As defined in phase_factor_mesh()
     q:       An Nx3 numpy array of q-space coordinates at which we want to interpolate 
-               the complex amplitudes in a_buf
+               the complex amplitudes in a_dev
     context:
     copy_buffer:
     group_size:
@@ -452,33 +553,34 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, copy_buffer=True, gr
 
     deltaQ = np.array((q_max-q_min)/(N-1.0),dtype=np.float32)
 
-    nPixels = q.shape[0]
+    n_pixels = q.shape[0]
 
     if context is None: context = cl.create_some_context()
-    queue = cl.CommandQueue(context)
-    groupSize = group_size
-    if groupSize > queue.device.max_work_group_size:
-        groupSize = queue.device.max_work_group_size
-    globalSize = np.int(np.ceil(nPixels/np.float(groupSize))*groupSize)
-    mf = cl.mem_flags
+    if queue is None: queue = cl.CommandQueue(context)
+    if group_size > queue.device.max_work_group_size:
+        group_size = queue.device.max_work_group_size
+    global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    a_buf = clbuffer_readonly_complex64(a,context)
-    q_buf = clbuffer_readonly_float32(q,context)
+    if type(a) is np.ndarray:
+        a_dev = clbuffer_complex(a,context)
+    elif type(a) is cl.Buffer:
+        a_dev = a #cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=a)
+    q_dev = clbuffer_float(q,context)
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     q_min = vec4(q_min,dtype=np.float32)
-    out_buf = cl.Buffer(context, mf.WRITE_ONLY, nPixels*4*2)
+    out_dev = clbuffer_complex(np.zeros([n_pixels],dtype=np.complex64), context)
     
     # run each q vector in parallel
-    prg = cl.Program(context, """
-        #define GROUP_SIZE """ + ('%d' % groupSize) + """
+    prg = cl.Program(context, """//CL//
+        #define GROUP_SIZE """ + ('%d' % group_size) + """
         __kernel void buffer_mesh_lookup_cl(
         __global float2 *a,
         __global float *q,
-        __global float2 *out_buf,
-        int nPixels,
+        __global float2 *out_dev,
+        int n_pixels,
         int4 N,
         float4 deltaQ,
         float4 q_min)
@@ -496,11 +598,11 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, copy_buffer=True, gr
             
             if (i >= 0 && i < N.x && j >= 0 && j < N.y && k >= 0 && k < N.z){
                 const int idx = k*N.x*N.y + j*N.x + i;
-                out_buf[gi].x = a[idx].x;
-                out_buf[gi].y = a[idx].y;
+                out_dev[gi].x = a[idx].x;
+                out_dev[gi].y = a[idx].y;
             } else {
-                out_buf[gi].x = 0.0f;
-                out_buf[gi].y = 0.0f;
+                out_dev[gi].x = 0.0f;
+                out_dev[gi].y = 0.0f;
             }
 
         }""").build()
@@ -508,11 +610,11 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, copy_buffer=True, gr
     buffer_mesh_lookup_cl = prg.buffer_mesh_lookup_cl
     buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None,None,None,int,None,None,None])
 
-    buffer_mesh_lookup_cl(queue, (globalSize,), (groupSize,), a_buf,q_buf,out_buf,nPixels,N,deltaQ,q_min)
+    buffer_mesh_lookup_cl(queue, (global_size,), (group_size,), a_dev,q_dev,out_dev,n_pixels,N,deltaQ,q_min)
     
     if copy_buffer == True:
-        out = np.zeros(nPixels, dtype=np.complex64)
-        cl.enqueue_copy(queue, out, out_buf)
+        out = np.zeros(n_pixels, dtype=np.complex64)
+        cl.enqueue_copy(queue, out, out_dev)
         return out
     else:
         return None
