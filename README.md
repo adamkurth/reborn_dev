@@ -19,7 +19,7 @@ source activate bornagain
 ```
 In order to run fast simulations on a GPU we need `pyopencl`:
 ```bash
-conda install -c timrudge pyopencl=2014.1
+pip install pyopencl
 ```
 Unfortunately, we need `spglib` for dealing with crystal symmetries (it will be removed later):
 `spglib` for space group symmetry:
