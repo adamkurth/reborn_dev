@@ -22,7 +22,6 @@ In order to run fast simulations on a GPU we need `pyopencl`:
 pip install pyopencl
 ```
 Unfortunately, we need `spglib` for dealing with crystal symmetries (it will be removed later):
-`spglib` for space group symmetry:
 ```bash
 pip install spglib
 ```
