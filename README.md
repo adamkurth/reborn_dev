@@ -9,25 +9,28 @@ The aim here is to allow for flexible simulations and analysis of diffraction da
 * All units are SI, and angles are radians.
 * All vectors should have a numpy shape of Nx3, in order to keep vector components close in memory.
 
-# Dependencies:
+# Installation:
 
-In addition to the standard modules included with Anaconda Python 2.7:
-
+I recommed using Anaconda Python 2.7, and a conda environment.  On a mac computer, I first installed Anaconda, and on that clean installation I created an environment:
+``` bash
+conda update conda
+conda create -n bornagain
+source activate bornagain
+```
+In order to run fast simulations on a GPU we need `pyopencl`:
+```bash
+conda install -c timrudge pyopencl=2014.1
+```
+Unfortunately, we need `spglib` for dealing with crystal symmetries (it will be removed later):
 `spglib` for space group symmetry:
 ```bash
 pip install spglib
 ```
-
+So far these are not strictly needed, but will probably become dependencies:
 `pyqtgraph` for viewing:
 ```bash
 conda install -c ufechner pyqtgraph=0.9.10
 ```
-
-`pyopencl` for GPU simulations:
-```bash
-conda install -c timrudge pyopencl=2014.1
-```
-
 `pyopengl` for plotting 3d graphics:
 ```bash
 conda install pyopengl
