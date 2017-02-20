@@ -1,39 +1,39 @@
 import numpy as np
 import pyopencl as cl
 
-# def clbuffer_float(x,context):
-#     x = np.array(x, dtype=np.float32, order='C')
-#     return cl.Buffer(context, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
-# 
-# def clbuffer_complex(x,context):
-#     x = np.array(x, dtype=np.complex64, order='C')
-#     return cl.Buffer(context, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
 
 def vec4(x,dtype=np.float32):
     # Evdidently pyopencl does not deal with 3-vectors very well, so we use 4-vectors
     # and pad with a zero at the end.
     return np.array([x[0],x[1],x[2],0.0],dtype=dtype)
 
-def to_device(queue, x):
+def to_device(queue, x=None, shape=None, dtype=None):
     
     """
-    Create a cl array from numpy array.  Return input if already a cl array.  Float or complex allowed.
+    For convenience: create a cl array from numpy array or size, return input if already a cl array.
     """
     
     if type(x) is cl.array.Array:
         return x
     
-    if np.iscomplexobj(x):
-        dt = np.complex64
-    else:
-        dt = np.float32
+    if x is None:
+        x = np.zeros(shape,dtype=dtype)
     
-    return cl.array.to_device(queue, x.astype(dt))
+    if dtype is None:
+        if np.iscomplexobj(x):
+            dtype = np.complex64
+        else:
+            dtype = np.float32
+    
+    return cl.array.to_device(queue, x.astype(dtype))
     
 
 def get_context_and_queue(var):
     
-    """Attempt to determine cl context and queue from input buffers.  Check for consistency."""
+    """
+    Attempt to determine cl context and queue from input buffers.  Check for consistency and raise 
+    ValueError if there are problems.
+    """
     
     context = None
     queue = None
@@ -59,7 +59,9 @@ def get_context_and_queue(var):
 
 def cap_group_size(group_size, queue):
     
-    """Check that group size does not exceed device limit"""
+    """
+    Check that the cl group size does not exceed device limit.  Cap the group if need be.
+    """
     
     if group_size > queue.device.max_work_group_size:
         group_size = queue.device.max_work_group_size
@@ -93,14 +95,11 @@ def phase_factor_qrf(q, r, f, a=None, context=None, queue=None, group_size=64):
     group_size = cap_group_size(group_size, queue)
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
     
-    q_dev = to_device(queue, q)
-    r_dev = to_device(queue, r)
-    f_dev = to_device(queue, f)
-    if a is None:
-        a_dev = to_device(queue, np.zeros([n_pixels],dtype=np.complex64))
-    else:
-        a_dev = a
-
+    q_dev = to_device(queue, q, dtype=np.float32)
+    r_dev = to_device(queue, r, dtype=np.float32)
+    f_dev = to_device(queue, f, dtype=np.complex64)
+    a_dev = to_device(queue, a, dtype=np.complex64, shape=(n_pixels))
+    
     # run each q vector in parallel
     prg = cl.Program(context, """
         #define GROUP_SIZE """ + ("%d" % group_size) + """
@@ -185,7 +184,7 @@ def phase_factor_qrf(q, r, f, a=None, context=None, queue=None, group_size=64):
     return a
 
 
-def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, group_size=64):
+def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=None, queue=None, group_size=64):
 
     '''
     This should simulate detector panels.  
@@ -204,6 +203,7 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, grou
     nF:      Number of fast-scan pixels (corresponding to F vector) in the detector panel
     nS:      Number of slow-scan pixels (corresponding to S vector) in the detector panel
     w:       The photon wavelength in meters
+    a:       Optional output complex scattering amplitude cl array 
     context: Optional pyopencl context [cl.create_some_context()]
     queue:   Optional pyopencl queue [cl.CommandQueue(context)]
     group_size: Optional specification of pyopencl group size (default 64 or maximum)
@@ -221,13 +221,14 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, grou
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    r_dev = cl.array.to_device(queue, r.astype(np.float32))
-    f_dev = cl.array.to_device(queue, f.astype(np.complex64))
+    r_dev = to_device(queue, r, dtype=np.float32)
+    f_dev = to_device(queue, f, dtype=np.complex64)
     T = vec4(T)
     F = vec4(F)
     S = vec4(S)
     B = vec4(B)
-    a_dev = to_device(queue,np.zeros([n_pixels],dtype=np.complex64))
+    a_dev = to_device(queue, a, dtype=np.complex64, shape=(n_pixels))
+
 
     # run each q vector in parallel
     prg = cl.Program(context, """
@@ -319,7 +320,7 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, context=None, queue=None, grou
 
     return a
 
-def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, group_size=64, get=True):
+def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=None, queue=None, group_size=64, get=True):
 
     '''
     This should simulate a regular 3D mesh of q-space samples.
@@ -361,12 +362,12 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, group_siz
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    r_dev = to_device(queue, r)
-    f_dev = to_device(queue, f)
+    r_dev = to_device(queue, r, dtype=np.float32)
+    f_dev = to_device(queue, f, dtype=np.complex64)
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     q_min = vec4(q_min,dtype=np.float32)
-    a_dev = to_device(queue,np.zeros([n_pixels],dtype=np.complex64))
+    a_dev = to_device(queue,a,dtype=np.complex64,shape=(n_pixels))
 
     # run each q vector in parallel
     prg = cl.Program(context, """
@@ -453,7 +454,7 @@ def phase_factor_mesh(r, f, N, q_min, q_max, context=None, queue=None, group_siz
         return a_dev
 
 
-def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, group_size=64, get=True):
+def buffer_mesh_lookup(a, N, q_min, q_max, q, out=None, context=None, queue=None, group_size=64, get=True):
 
     """
     This is supposed to lookup intensities from a 3d mesh of amplitudes.
@@ -492,12 +493,12 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, group_si
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    a_dev = to_device(queue, a)
-    q_dev = to_device(queue, q)
+    a_dev = to_device(queue, a, dtype=np.complex64)
+    q_dev = to_device(queue, q, dtype=np.float32)
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     q_min = vec4(q_min,dtype=np.float32)
-    out_dev = to_device(queue, np.zeros([n_pixels],dtype=np.complex64))
+    out_dev = to_device(queue,out,dtype=np.complex64,shape=(n_pixels))
     
     # run each q vector in parallel
     prg = cl.Program(context, """//CL//
@@ -544,3 +545,10 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, context=None, queue=None, group_si
         return None
     
 
+# def clbuffer_float(x,context):
+#     x = np.array(x, dtype=np.float32, order='C')
+#     return cl.Buffer(context, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
+# 
+# def clbuffer_complex(x,context):
+#     x = np.array(x, dtype=np.complex64, order='C')
+#     return cl.Buffer(context, cl.mem_flags.READ_WRITE | cl.mem_flags.COPY_HOST_PTR, hostbuf=x)
