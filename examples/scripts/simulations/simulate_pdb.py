@@ -21,8 +21,8 @@ pl.simple_setup(nPixels, nPixels+1, pixelSize, detectorDistance, wavelength)
 q = pl[0].Q
 
 # Load a crystal structure from pdb file
-pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
-#pdbFile = '../../data/pdb/1jb0.pdb'  # Photosystem I
+#pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
+pdbFile = '../../data/pdb/1jb0.pdb'  # Photosystem I
 cryst = crystal.structure(pdbFile)
 
 # These are atomic coordinates (Nx3 array)
@@ -35,13 +35,13 @@ f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelen
 context = cl.create_some_context()
 queue = cl.CommandQueue(context)
 
-n_trials = 3
-show = True
-show_all = True
+n_trials = 10
+show = 1
+show_all = show
 #plt.ion()
 
 # This method computes the q vectors on the fly.  Slight speed increase.
-if 1:
+if 0:
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
     for i in range(0, n_trials):
         t = time.time()
@@ -63,7 +63,7 @@ if 1:
 
 # This method uses any q vectors that you supply.  Here we grab the q vectors from the
 # detector.PanelList class.
-if 1:
+if 0:
     q = pl.Q  # These are the scattering vectors, Nx3 array.
     for i in range(0, n_trials):
         t = time.time()
@@ -94,8 +94,8 @@ if 1:
         t = time.time()
         a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, a_dev)
         tf = time.time() - t
-        print('phase_factor_qrf: %0.3g seconds (%0.3g/atom/pixel)' %
-              (tf, tf / q.shape[0] / r.shape[0]))
+        print('phase_factor_qrf: %0.3g seconds (%0.3g/atom/pixel; %d atoms; %d pixels)' %
+              (tf, tf / q.shape[0] / r.shape[0], r.shape[0], q.shape[0]))
     imdisp = np.abs(a.get())**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
     imdisp = np.log(imdisp + 0.1)
@@ -112,11 +112,11 @@ if 1:
 
 # This method involves first making a 3D map of reciprocal-space amplitudes.  We will
 # interpolate individual patterns from this map.
-if 1:
+if 0:
     res = 1e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
-    N = 200  # Number of samples
+    N = 128  # Number of samples
     for i in range(0, n_trials):
         t = time.time()
         A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, context=context, queue=queue)
@@ -135,7 +135,7 @@ if 1:
     
 # This method involves first making a 3D map of reciprocal-space amplitudes.  We will
 # interpolate individual patterns from this map.
-if 1:
+if 0:
     res = 2e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
@@ -165,7 +165,7 @@ if 1:
 
 
 # Display pattern
-if ~show_all and show:
+if (~show_all) and show:
     plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
     plt.title('y: up, x: right, z: beam (towards you)')
     plt.show()
