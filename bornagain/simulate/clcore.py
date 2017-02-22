@@ -213,8 +213,10 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=None, queue=No
     A:        A numpy array of length nF*nS containing complex scattering amplitudes 
     '''
 
-    n_pixels = nF*nS
-    n_atoms = r.shape[0]
+    nF = np.int32(nF)
+    nS = np.int32(nS)
+    n_pixels = np.int32(nF*nS)
+    n_atoms = np.int32(r.shape[0])
 
     context, queue = get_context_and_queue([r,f])
     group_size = cap_group_size(group_size, queue)
@@ -314,7 +316,7 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=None, queue=No
         }""" % group_size).build()
 
     phase_factor_pad_cl = prg.phase_factor_pad_cl
-    phase_factor_pad_cl.set_scalar_arg_dtypes([None,None,None,int,int,int,int,np.float32,None,None,None,None])
+    phase_factor_pad_cl.set_scalar_arg_dtypes([None,None,None,np.int32,np.int32,np.int32,np.int32,np.float32,None,None,None,None])
 
     phase_factor_pad_cl(queue, (global_size,), (group_size,), r_dev.data,f_dev.data,a_dev.data,n_pixels,n_atoms,nF,nS,w,T,F,S,B)
     a = a_dev.get()
@@ -354,8 +356,8 @@ def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=None, queue=None, g
 
     deltaQ = np.array((q_max-q_min)/(N-1.0),dtype=np.float32)
 
-    n_atoms = r.shape[0]
-    n_pixels = N[0]*N[1]*N[2]
+    n_atoms = np.int32(r.shape[0])
+    n_pixels = np.int32(N[0]*N[1]*N[2])
 
     context, queue = get_context_and_queue([r,f])
     group_size = cap_group_size(group_size, queue)
@@ -445,7 +447,7 @@ def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=None, queue=None, g
         }""").build()
 
     phase_factor_mesh_cl = prg.phase_factor_mesh_cl
-    phase_factor_mesh_cl.set_scalar_arg_dtypes([None,None,None,int,int,None,None,None])
+    phase_factor_mesh_cl.set_scalar_arg_dtypes([None,None,None,np.int32,np.int32,None,None,None])
 
     phase_factor_mesh_cl(queue, (global_size,), (group_size,), r_dev.data,f_dev.data,a_dev.data,n_pixels,n_atoms,N,deltaQ,q_min)
     
@@ -486,7 +488,7 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, out=None, context=None, queue=None
 
     deltaQ = np.array((q_max-q_min)/(N-1.0),dtype=np.float32)
 
-    n_pixels = q.shape[0]
+    n_pixels = np.int32(q.shape[0])
 
     context, queue = get_context_and_queue([a,q])
     group_size = cap_group_size(group_size, queue)
@@ -536,7 +538,7 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, out=None, context=None, queue=None
         }""").build()
 
     buffer_mesh_lookup_cl = prg.buffer_mesh_lookup_cl
-    buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None,None,None,int,None,None,None])
+    buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None,None,None,np.int32,None,None,None])
 
     buffer_mesh_lookup_cl(queue, (global_size,), (group_size,), a_dev.data,q_dev.data,out_dev.data,n_pixels,N,deltaQ,q_min)
     
