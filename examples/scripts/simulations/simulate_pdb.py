@@ -21,9 +21,10 @@ pl.simple_setup(nPixels, nPixels+1, pixelSize, detectorDistance, wavelength)
 q = pl[0].Q
 
 # Load a crystal structure from pdb file
-#pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
-pdbFile = '../../data/pdb/1jb0.pdb'  # Photosystem I
+pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
+#pdbFile = '../../data/pdb/1jb0.pdb'  # Photosystem I
 cryst = crystal.structure(pdbFile)
+print('pdb file: %s' % pdbFile)
 
 # These are atomic coordinates (Nx3 array)
 r = cryst.r
@@ -34,6 +35,7 @@ f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelen
 # Create an opencl context and queue
 context = cl.create_some_context()
 queue = cl.CommandQueue(context)
+group_size = 64
 
 n_trials = 10
 show = 1
@@ -46,7 +48,7 @@ if 0:
     for i in range(0, n_trials):
         t = time.time()
         A = clcore.phase_factor_pad(
-            r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, context=context, queue=queue)
+            r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, context=context, queue=queue,group_size=group_size)
         tf = time.time() - t
         print('phase_factor_pad: %0.3g seconds/atom/pixel' %
               (tf / p.nF / p.nS / r.shape[0]))
@@ -67,7 +69,7 @@ if 0:
     q = pl.Q  # These are the scattering vectors, Nx3 array.
     for i in range(0, n_trials):
         t = time.time()
-        A = clcore.phase_factor_qrf(q, r, f, context=context, queue=queue)
+        A = clcore.phase_factor_qrf(q, r, f, context=context, queue=queue,group_size=group_size)
         tf = time.time() - t
         print('phase_factor_qrf: %0.3g seconds/atom/pixel' %
               (tf / q.shape[0] / r.shape[0]))
@@ -92,7 +94,7 @@ if 1:
     print('move to device memory: %0.3g seconds' % (tf))
     for i in range(0, n_trials):
         t = time.time()
-        a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, a_dev)
+        a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, a_dev,group_size=group_size)
         tf = time.time() - t
         print('phase_factor_qrf: %0.3g seconds (%0.3g/atom/pixel; %d atoms; %d pixels)' %
               (tf, tf / q.shape[0] / r.shape[0], r.shape[0], q.shape[0]))
@@ -119,7 +121,7 @@ if 0:
     N = 128  # Number of samples
     for i in range(0, n_trials):
         t = time.time()
-        A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, context=context, queue=queue)
+        A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, context=context, queue=queue,group_size=group_size)
         tf = time.time() - t
         print('phase_factor_mesh: %0.3g seconds/atom/pixel' %
               (tf / N**3 / r.shape[0]))
@@ -143,14 +145,14 @@ if 0:
     for i in range(0,n_trials):
         t = time.time()
         A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, 
-                                        context=context, queue=queue, get=False)
+                                        context=context, queue=queue, get=False,group_size=group_size)
         tf = time.time() - t
         print('phase_factor_mesh: %0.3g seconds/atom/pixel' %
                   (tf / N**3 / r.shape[0]))
     for i in range(0,n_trials):
         t = time.time()
         AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, pl.Q, 
-                                           context=context, queue=queue)
+                                           context=context, queue=queue,group_size=group_size)
         tf = time.time() - t
         print('buffer_mesh_lookup: %0.3g seconds/atom/pixel' %
                   (tf / pl.Q.shape[0] / r.shape[0]))
@@ -165,7 +167,8 @@ if 0:
 
 
 # Display pattern
-if (~show_all) and show:
-    plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
-    plt.title('y: up, x: right, z: beam (towards you)')
-    plt.show()
+if not show_all:
+    if show:
+        plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
+        plt.title('y: up, x: right, z: beam (towards you)')
+        plt.show()
