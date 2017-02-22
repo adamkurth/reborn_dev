@@ -11,9 +11,14 @@ The aim here is to allow for flexible simulations and analysis of diffraction da
 
 # Installation:
 
-I recommed using Anaconda Python 2.7, and a conda environment.  On a mac computer, I first installed Anaconda, and on that clean installation I created an environment:
+I recommend using Anaconda Python 2.7, and a conda environment.  On a Mac or Linux computer, I first installed Anaconda by doing something like this:
 ``` bash
+wget https://repo.continuum.io/archive/Anaconda2-4.3.0-Linux-x86_64.sh
+bash Anaconda2-4.3.0-Linux-x86_64.sh
 conda update conda
+```
+On that clean installation I created a conda environment:
+``` bash
 conda create -n bornagain
 source activate bornagain
 ```
