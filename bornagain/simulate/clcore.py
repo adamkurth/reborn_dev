@@ -70,7 +70,7 @@ def cap_group_size(group_size, queue):
         
         
 
-def phase_factor_qrf(q, r, f, a=None, context=None, queue=None, group_size=64):
+def phase_factor_qrf(q, r, f, a=None, context=None, queue=None, group_size=32):
 
     '''
     Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
@@ -184,7 +184,7 @@ def phase_factor_qrf(q, r, f, a=None, context=None, queue=None, group_size=64):
     return a
 
 
-def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=None, queue=None, group_size=64):
+def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=None, queue=None, group_size=32):
 
     '''
     This should simulate detector panels.  
@@ -320,7 +320,7 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=None, queue=No
 
     return a
 
-def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=None, queue=None, group_size=64, get=True):
+def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=None, queue=None, group_size=32, get=True):
 
     '''
     This should simulate a regular 3D mesh of q-space samples.
@@ -454,7 +454,7 @@ def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=None, queue=None, g
         return a_dev
 
 
-def buffer_mesh_lookup(a, N, q_min, q_max, q, out=None, context=None, queue=None, group_size=64, get=True):
+def buffer_mesh_lookup(a, N, q_min, q_max, q, out=None, context=None, queue=None, group_size=32, get=True):
 
     """
     This is supposed to lookup intensities from a 3d mesh of amplitudes.

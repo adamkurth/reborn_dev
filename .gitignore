@@ -9,3 +9,4 @@ temp
 *.c
 .cache
 .metadata
+.*.csv

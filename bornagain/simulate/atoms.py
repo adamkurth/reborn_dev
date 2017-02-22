@@ -2,7 +2,7 @@ from functools import wraps
 import pkg_resources
 import numpy as np
 from bornagain import units
-from astropy.units import photon
+#from astropy.units import photon
 
 atomic_symbols_file = pkg_resources.resource_filename('bornagain.simulate','data/atomic_symbols.csv')
 atomic_symbols = np.loadtxt(atomic_symbols_file,usecols=(1,),dtype=np.str_,delimiter=',')
