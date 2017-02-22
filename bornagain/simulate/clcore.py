@@ -88,8 +88,8 @@ def phase_factor_qrf(q, r, f, a=None, context=None, queue=None, group_size=32):
     Numpy array [N] of complex amplitudes OR cl array if there are input cl arrays
     '''
 
-    n_pixels = q.shape[0]
-    n_atoms = r.shape[0]
+    n_pixels = np.int32(q.shape[0])
+    n_atoms = np.int32(r.shape[0])
 
     context, queue = get_context_and_queue([q,r,f,a])
     group_size = cap_group_size(group_size, queue)
@@ -173,8 +173,9 @@ def phase_factor_qrf(q, r, f, a=None, context=None, queue=None, group_size=32):
         }""").build()
 
     phase_factor_qrf_cl = prg.phase_factor_qrf_cl
-    phase_factor_qrf_cl.set_scalar_arg_dtypes(     [ None,  None,  None,  None,  int,    int ]  )
+    phase_factor_qrf_cl.set_scalar_arg_dtypes(     [ None,  None,  None,  None,  np.int32,    np.int32 ]  )
     phase_factor_qrf_cl(queue, (global_size,), (group_size,),q_dev.data, r_dev.data, f_dev.data, a_dev.data, n_atoms, n_pixels)
+#    phase_factor_qrf_cl(queue, (global_size,), None,q_dev.data, r_dev.data, f_dev.data, a_dev.data, n_atoms, n_pixels)
 
     if a is None:
         a = a_dev.get()
