@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pyopencl as cl
 import pyopencl.array
 
-sys.path.append("../../..")
+sys.path.append("../..")
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
 import bornagain.target.crystal as crystal
@@ -21,8 +21,8 @@ pl.simple_setup(nPixels, nPixels+1, pixelSize, detectorDistance, wavelength)
 q = pl[0].Q
 
 # Load a crystal structure from pdb file
-pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
-#pdbFile = '../../data/pdb/1jb0.pdb'  # Photosystem I
+pdbFile = '../data/pdb/2LYZ.pdb'  # Lysozyme
+#pdbFile = '../data/pdb/1jb0.pdb'  # Photosystem I
 cryst = crystal.structure(pdbFile)
 print('')
 print('Loading pdb file: %s' % pdbFile)

@@ -4,7 +4,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.append("../../..")
+sys.path.append("../..")
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
 

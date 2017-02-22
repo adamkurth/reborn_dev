@@ -5,7 +5,7 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
-sys.path.append("../../..")
+sys.path.append("../..")
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
 
