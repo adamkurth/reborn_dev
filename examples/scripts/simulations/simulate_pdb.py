@@ -24,7 +24,8 @@ q = pl[0].Q
 #pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
 pdbFile = '../../data/pdb/1jb0.pdb'  # Photosystem I
 cryst = crystal.structure(pdbFile)
-print('pdb file: %s' % pdbFile)
+print('')
+print('Loading pdb file: %s' % pdbFile)
 print('')
 
 # These are atomic coordinates (Nx3 array)
@@ -93,12 +94,12 @@ if 1:
     t = time.time()
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
-    q_dev = clcore.to_device(queue, q)
-    r_dev = clcore.to_device(queue, r)
-    f_dev = clcore.to_device(queue, f)
+    q_dev = clcore.to_device(queue, q, dtype=np.float32)
+    r_dev = clcore.to_device(queue, r, dtype=np.float32)
+    f_dev = clcore.to_device(queue, f, dtype=np.complex64)
     a_dev = clcore.to_device(queue, np.zeros([q_dev.shape[0]],dtype=np.complex64))
     tf = time.time() - t
-    print('move to device memory: %7.03f ms' % (tf*1e3))
+    print('Move to device memory: %7.03f ms' % (tf*1e3))
     for i in range(0, n_trials):
         t = time.time()
         a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, a_dev,group_size=group_size)
@@ -156,7 +157,8 @@ if 1:
     for i in range(0,n_trials):
         t = time.time()
         A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, 
-                                        context=context, queue=queue, get=False,group_size=group_size)
+                                        context=context, queue=queue,
+                                        get=False,group_size=group_size)
         tf = time.time() - t
         print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -168,11 +170,30 @@ if 1:
     for i in range(0,n_trials):
         t = time.time()
         AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, pl.Q, 
-                                           context=context, queue=queue,group_size=group_size)
+                                           context=context,queue=queue,
+                                           group_size=group_size)
         tf = time.time() - t
         print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
-    imdisp = AA.reshape(pl[0].nS,pl[0].nF) 
+    print('')
+    
+#     t = time.time()
+#     q_dev = clcore.to_device(queue, q, dtype=np.float32)
+#     A_dev = clcore.to_device(queue, A, dtype=np.complex64)
+#     tf = time.time() - t
+#     print('Move to device memory: %7.03f ms' % (tf*1e3))
+#     n_atoms = 0
+#     n_pixels = q.shape[0]
+#     for i in range(0,n_trials):
+#         t = time.time()
+#         AA = clcore.buffer_mesh_lookup(A_dev, N, qmin, qmax, q_dev, 
+#                                            context=context,queue=queue,
+#                                            group_size=group_size)
+#         tf = time.time() - t
+#         print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
+#               (tf*1e3,n_atoms,n_pixels))
+    
+    imdisp = AA.reshape(pl[0].nS,pl[0].nF)
     imdisp = np.abs(imdisp)**2
     imdisp = np.log(imdisp + 0.1)
     if show_all and show:
