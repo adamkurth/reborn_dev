@@ -21,10 +21,11 @@ pl.simple_setup(nPixels, nPixels+1, pixelSize, detectorDistance, wavelength)
 q = pl[0].Q
 
 # Load a crystal structure from pdb file
-pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
-#pdbFile = '../../data/pdb/1jb0.pdb'  # Photosystem I
+#pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
+pdbFile = '../../data/pdb/1jb0.pdb'  # Photosystem I
 cryst = crystal.structure(pdbFile)
 print('pdb file: %s' % pdbFile)
+print('')
 
 # These are atomic coordinates (Nx3 array)
 r = cryst.r
@@ -38,20 +39,22 @@ queue = cl.CommandQueue(context)
 group_size = 64
 
 n_trials = 10
-show = 1
+show = 0
 show_all = show
 #plt.ion()
 
 # This method computes the q vectors on the fly.  Slight speed increase.
 if 1:
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
+    n_pixels = p.nF*p.nS
+    n_atoms = r.shape[0]
     for i in range(0, n_trials):
         t = time.time()
         A = clcore.phase_factor_pad(
             r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, context=context, queue=queue,group_size=group_size)
         tf = time.time() - t
-        print('phase_factor_pad: %0.3g seconds/atom/pixel' %
-              (tf / p.nF / p.nS / r.shape[0]))
+        print('phase_factor_pad: %7.03f ms (%d atoms; %d pixels)' %
+              (tf*1e3,n_atoms,n_pixels))
     imdisp = np.abs(A)**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
     imdisp = np.log(imdisp + 0.1)
@@ -67,12 +70,14 @@ if 1:
 # detector.PanelList class.
 if 1:
     q = pl.Q  # These are the scattering vectors, Nx3 array.
+    n_pixels = q.shape[0]
+    n_atoms = r.shape[0]
     for i in range(0, n_trials):
         t = time.time()
         A = clcore.phase_factor_qrf(q, r, f, context=context, queue=queue,group_size=group_size)
         tf = time.time() - t
-        print('phase_factor_qrf: %0.3g seconds/atom/pixel' %
-              (tf / q.shape[0] / r.shape[0]))
+        print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
+              (tf*1e3,n_atoms,n_pixels))
     imdisp = np.abs(A)**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
     imdisp = np.log(imdisp + 0.1)
@@ -86,18 +91,20 @@ if 1:
 # detector.PanelList class. This time we make device memory explicitly.
 if 1:
     t = time.time()
+    n_pixels = q.shape[0]
+    n_atoms = r.shape[0]
     q_dev = clcore.to_device(queue, q)
     r_dev = clcore.to_device(queue, r)
     f_dev = clcore.to_device(queue, f)
     a_dev = clcore.to_device(queue, np.zeros([q_dev.shape[0]],dtype=np.complex64))
     tf = time.time() - t
-    print('move to device memory: %0.3g seconds' % (tf))
+    print('move to device memory: %7.03f ms' % (tf*1e3))
     for i in range(0, n_trials):
         t = time.time()
         a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, a_dev,group_size=group_size)
         tf = time.time() - t
-        print('phase_factor_qrf: %0.3g seconds (%0.3g/atom/pixel; %d atoms; %d pixels)' %
-              (tf, tf / q.shape[0] / r.shape[0], r.shape[0], q.shape[0]))
+        print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
+              (tf*1e3,n_atoms,n_pixels))
     imdisp = np.abs(a.get())**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
     imdisp = np.log(imdisp + 0.1)
@@ -119,12 +126,14 @@ if 1:
     qmax = 2 * np.pi / (res)
     qmin = -qmax
     N = 128  # Number of samples
+    n_atoms = r.shape[0]
+    n_pixels = N**3
     for i in range(0, n_trials):
         t = time.time()
         A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, context=context, queue=queue,group_size=group_size)
         tf = time.time() - t
-        print('phase_factor_mesh: %0.3g seconds/atom/pixel' %
-              (tf / N**3 / r.shape[0]))
+        print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' %
+              (tf*1e3,n_atoms,n_pixels))
     imdisp = A.reshape([N, N, N])
     imdisp = imdisp[(N - 1) / 2, :, :].reshape([N, N])
     imdisp = np.abs(imdisp)**2
@@ -142,20 +151,27 @@ if 1:
     qmax = 2 * np.pi / (res)
     qmin = -qmax
     N = 200  # Number of samples
+    n_atoms = r.shape[0]
+    n_pixels = N**3
     for i in range(0,n_trials):
         t = time.time()
         A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, 
                                         context=context, queue=queue, get=False,group_size=group_size)
         tf = time.time() - t
-        print('phase_factor_mesh: %0.3g seconds/atom/pixel' %
-                  (tf / N**3 / r.shape[0]))
+        print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' %
+              (tf*1e3,n_atoms,n_pixels))
+    print('')
+    
+    q = pl.Q
+    n_atoms = 0
+    n_pixels = q.shape[0]
     for i in range(0,n_trials):
         t = time.time()
         AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, pl.Q, 
                                            context=context, queue=queue,group_size=group_size)
         tf = time.time() - t
-        print('buffer_mesh_lookup: %0.3g seconds/atom/pixel' %
-                  (tf / pl.Q.shape[0] / r.shape[0]))
+        print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
+              (tf*1e3,n_atoms,n_pixels))
     imdisp = AA.reshape(pl[0].nS,pl[0].nF) 
     imdisp = np.abs(imdisp)**2
     imdisp = np.log(imdisp + 0.1)
@@ -165,10 +181,3 @@ if 1:
         plt.show()
     print("")
 
-
-# Display pattern
-if not show_all:
-    if show:
-        plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
-        plt.title('y: up, x: right, z: beam (towards you)')
-        plt.show()
