@@ -43,7 +43,7 @@ show_all = show
 #plt.ion()
 
 # This method computes the q vectors on the fly.  Slight speed increase.
-if 0:
+if 1:
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
     for i in range(0, n_trials):
         t = time.time()
@@ -65,7 +65,7 @@ if 0:
 
 # This method uses any q vectors that you supply.  Here we grab the q vectors from the
 # detector.PanelList class.
-if 0:
+if 1:
     q = pl.Q  # These are the scattering vectors, Nx3 array.
     for i in range(0, n_trials):
         t = time.time()
@@ -114,7 +114,7 @@ if 1:
 
 # This method involves first making a 3D map of reciprocal-space amplitudes.  We will
 # interpolate individual patterns from this map.
-if 0:
+if 1:
     res = 1e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
@@ -137,7 +137,7 @@ if 0:
     
 # This method involves first making a 3D map of reciprocal-space amplitudes.  We will
 # interpolate individual patterns from this map.
-if 0:
+if 1:
     res = 2e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
