@@ -43,11 +43,10 @@ conda install pyopengl
 # Notes on installation on Scientific Linux 6
 This is very incomplete... but in part the following was needed to deal with the very old version of gcc on SL6 (don't use SL6 ever again...)
 ```bash
-python -m pip install mako
+pip install mako
 [cd pyopencl-2016.2.1; downloaded source...]
 sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
 sudo yum install devtoolset-2
 scl enable devtoolset-2 bash
 rm ./siteconf.py ; ./configure.py --cl-inc-dir=/usr/local/cuda/include --cl-lib-dir=/usr/local/cuda/lib64; make install
-scl enable devtoolset-2 bash
 ```
