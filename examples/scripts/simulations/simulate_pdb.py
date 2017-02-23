@@ -21,8 +21,8 @@ pl.simple_setup(nPixels, nPixels+1, pixelSize, detectorDistance, wavelength)
 q = pl[0].Q
 
 # Load a crystal structure from pdb file
-#pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
-pdbFile = '../../data/pdb/1jb0.pdb'  # Photosystem I
+pdbFile = '../../data/pdb/2LYZ.pdb'  # Lysozyme
+#pdbFile = '../../data/pdb/1jb0.pdb'  # Photosystem I
 cryst = crystal.structure(pdbFile)
 print('')
 print('Loading pdb file: %s' % pdbFile)
@@ -37,14 +37,14 @@ f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelen
 # Create an opencl context and queue
 context = cl.create_some_context()
 queue = cl.CommandQueue(context)
-group_size = 64
+group_size = 32
 
 n_trials = 10
 show = 0
 show_all = show
 #plt.ion()
 
-# This method computes the q vectors on the fly.  Slight speed increase.
+print("Compute q vectors on the fly.  Faster than accessing q's from memory?")
 if 1:
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
     n_pixels = p.nF*p.nS
@@ -67,8 +67,7 @@ if 1:
     print("")
 
 
-# This method uses any q vectors that you supply.  Here we grab the q vectors from the
-# detector.PanelList class.
+print("Access q vectors from memory (i.e. compute them on cpu first)")
 if 1:
     q = pl.Q  # These are the scattering vectors, Nx3 array.
     n_pixels = q.shape[0]
@@ -88,8 +87,7 @@ if 1:
         plt.show()
     print("")
 
-# This method uses any q vectors that you supply.  Here we grab the q vectors from the
-# detector.PanelList class. This time we make device memory explicitly.
+print("Compute q vectors on cpu, but load into GPU memory only once (at the beginning)")
 if 1:
     t = time.time()
     n_pixels = q.shape[0]
@@ -120,8 +118,7 @@ if 1:
     del a_dev
 
 
-# This method involves first making a 3D map of reciprocal-space amplitudes.  We will
-# interpolate individual patterns from this map.
+print("Make a full 3D diffraction amplitude map...")
 if 1:
     res = 1e-10  # Resolution
     qmax = 2 * np.pi / (res)
@@ -145,8 +142,7 @@ if 1:
         plt.show()
     print("")
     
-# This method involves first making a 3D map of reciprocal-space amplitudes.  We will
-# interpolate individual patterns from this map.
+print("First compute a 3D diffraction amplitude map...")
 if 1:
     res = 2e-10  # Resolution
     qmax = 2 * np.pi / (res)
@@ -167,6 +163,7 @@ if 1:
     q = pl.Q
     n_atoms = 0
     n_pixels = q.shape[0]
+    print("...and now look up amplitudes for a set of q vectors")
     for i in range(0,n_trials):
         t = time.time()
         AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, pl.Q, 
