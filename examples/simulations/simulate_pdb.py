@@ -38,6 +38,8 @@ f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelen
 context = cl.create_some_context()
 queue = cl.CommandQueue(context)
 group_size = 32
+print(context)
+print(queue)
 
 n_trials = 10
 show = 1
@@ -185,7 +187,7 @@ if 1:
     
     t = time.time()
     q_dev = clcore.to_device(queue, q, dtype=np.float32)
-    a_map_dev = clcore.to_device(queue, AA, dtype=np.complex64)
+    a_map_dev = clcore.to_device(queue, A, dtype=np.complex64)
     a_out_dev = clcore.to_device(queue, dtype=np.complex64, shape=(n_pixels))
     tf = time.time() - t
     print('As above, but first move arrays to device memory (%7.03f ms)' % (tf*1e3))
@@ -199,8 +201,6 @@ if 1:
         tf = time.time() - t
         print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
-#     print(cl.array.max(a_out_dev.real))
-#     print(cl.array.max(a_out_dev.imag))
     if show_all and show:
         imdisp = a_out_dev.get().reshape(pl[0].nS,pl[0].nF)
         imdisp = np.abs(imdisp)**2

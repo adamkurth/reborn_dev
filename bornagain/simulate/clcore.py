@@ -29,27 +29,28 @@ def to_device(queue, x=None, shape=None, dtype=None):
     return cl.array.to_device(queue, x.astype(dtype))
     
 
-def get_context_and_queue(var):
+def get_context_and_queue(var=None, context=None, queue=None):
     
     """
     Attempt to determine cl context and queue from input buffers.  Check for consistency 
     and raise ValueError if there are problems.
     """
     
-    context = None
-    queue = None
+#     context = None
+#     queue = None
     
-    for v in var:
-        if v is None: continue
-        if type(v) is cl.array.Array:
-            q = v.queue
-            c = v.context
-            if context is None: context = c
-            if queue is None: queue = q
-            if c != context:
-                raise(ValueError('Mismatched cl context'))
-            if q != queue:
-                raise(ValueError('Mismatched cl queue'))
+    if var is not None:
+        for v in var:
+            if v is None: continue
+            if type(v) is cl.array.Array:
+                q = v.queue
+                c = v.context
+                if context is None: context = c
+                if queue is None: queue = q
+                if c != context:
+                    raise(ValueError('Mismatched cl context'))
+                if q != queue:
+                    raise(ValueError('Mismatched cl queue'))
     
     if queue is None: 
         if context is None: 
@@ -92,7 +93,7 @@ def phase_factor_qrf(q, r, f, a=None, context=None, queue=None, group_size=32):
     n_pixels = np.int32(q.shape[0])
     n_atoms = np.int32(r.shape[0])
 
-    context, queue = get_context_and_queue([q,r,f,a])
+    context, queue = get_context_and_queue([q,r,f,a],context,queue)
     group_size = cap_group_size(group_size, queue)
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
     
@@ -219,7 +220,7 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=None, queue=No
     n_pixels = np.int32(nF*nS)
     n_atoms = np.int32(r.shape[0])
 
-    context, queue = get_context_and_queue([r,f])
+    context, queue = get_context_and_queue([r,f],context,queue)
     group_size = cap_group_size(group_size, queue)
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
@@ -360,7 +361,7 @@ def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=None, queue=None, g
     n_atoms = np.int32(r.shape[0])
     n_pixels = np.int32(N[0]*N[1]*N[2])
 
-    context, queue = get_context_and_queue([r,f])
+    context, queue = get_context_and_queue([r,f],context,queue)
     group_size = cap_group_size(group_size, queue)
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
@@ -491,7 +492,7 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, 
 
     n_pixels = np.int32(q.shape[0])
 
-    context, queue = get_context_and_queue([a_map,q,a_out_dev])
+    context, queue = get_context_and_queue([a_map,q,a_out_dev],context,queue)
     group_size = cap_group_size(group_size, queue)
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
@@ -546,7 +547,6 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, 
                            None,
                            None,
                            None])
-
     buffer_mesh_lookup_cl(queue, (global_size,), (group_size,), 
                            a_map_dev.data,
                            q_dev.data,
@@ -555,9 +555,6 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, 
                            N,
                            deltaQ,
                            q_min)
-    print(a_out_dev)
-    print(a_out_dev.context)
-    print(cl.array.max(a_out_dev.real))
     if get == True:
         return a_out_dev.get()
     else:
