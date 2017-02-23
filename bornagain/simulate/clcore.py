@@ -10,7 +10,8 @@ def vec4(x,dtype=np.float32):
 def to_device(queue, x=None, shape=None, dtype=None):
     
     """
-    For convenience: create a cl array from numpy array or size, return input if already a cl array.
+    For convenience: create a cl array from numpy array or size, return input if already a 
+    cl array.
     """
     
     if type(x) is cl.array.Array:
@@ -31,8 +32,8 @@ def to_device(queue, x=None, shape=None, dtype=None):
 def get_context_and_queue(var):
     
     """
-    Attempt to determine cl context and queue from input buffers.  Check for consistency and raise 
-    ValueError if there are problems.
+    Attempt to determine cl context and queue from input buffers.  Check for consistency 
+    and raise ValueError if there are problems.
     """
     
     context = None
@@ -457,7 +458,7 @@ def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=None, queue=None, g
         return a_dev
 
 
-def buffer_mesh_lookup(a, N, q_min, q_max, q, out=None, context=None, queue=None, group_size=32, get=True):
+def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, queue=None, group_size=32, get=True):
 
     """
     This is supposed to lookup intensities from a 3d mesh of amplitudes.
@@ -490,26 +491,25 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, out=None, context=None, queue=None
 
     n_pixels = np.int32(q.shape[0])
 
-    context, queue = get_context_and_queue([a,q])
+    context, queue = get_context_and_queue([a_map,q,a_out_dev])
     group_size = cap_group_size(group_size, queue)
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can just load
     # all atoms into memory, which might not be possible...
-    a_dev = to_device(queue, a, dtype=np.complex64)
+    a_map_dev = to_device(queue, a_map, dtype=np.complex64)
     q_dev = to_device(queue, q, dtype=np.float32)
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     q_min = vec4(q_min,dtype=np.float32)
-    out_dev = to_device(queue,out,dtype=np.complex64,shape=(n_pixels))
-    
+    a_out_dev = to_device(queue,a_out_dev,dtype=np.complex64,shape=(n_pixels))
     # run each q vector in parallel
     prg = cl.Program(context, """//CL//
         #define GROUP_SIZE """ + ('%d' % group_size) + """
         __kernel void buffer_mesh_lookup_cl(
-        __global float2 *a,
+        __global float2 *a_map,
         __global float *q,
-        __global float2 *out_dev,
+        __global float2 *a_out,
         int n_pixels,
         int4 N,
         float4 deltaQ,
@@ -528,22 +528,38 @@ def buffer_mesh_lookup(a, N, q_min, q_max, q, out=None, context=None, queue=None
             
             if (i >= 0 && i < N.x && j >= 0 && j < N.y && k >= 0 && k < N.z){
                 const int idx = k*N.x*N.y + j*N.x + i;
-                out_dev[gi].x = a[idx].x;
-                out_dev[gi].y = a[idx].y;
+                a_out[gi].x = a_map[idx].x;
+                a_out[gi].y = a_map[idx].y;
             } else {
-                out_dev[gi].x = 0.0f;
-                out_dev[gi].y = 0.0f;
+                a_out[gi].x = 0.0f;
+                a_out[gi].y = 0.0f;
             }
 
         }""").build()
 
     buffer_mesh_lookup_cl = prg.buffer_mesh_lookup_cl
-    buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None,None,None,np.int32,None,None,None])
+    buffer_mesh_lookup_cl.set_scalar_arg_dtypes(
+                          [None,
+                           None,
+                           None,
+                           np.int32,
+                           None,
+                           None,
+                           None])
 
-    buffer_mesh_lookup_cl(queue, (global_size,), (group_size,), a_dev.data,q_dev.data,out_dev.data,n_pixels,N,deltaQ,q_min)
-    
+    buffer_mesh_lookup_cl(queue, (global_size,), (group_size,), 
+                           a_map_dev.data,
+                           q_dev.data,
+                           a_out_dev.data,
+                           n_pixels,
+                           N,
+                           deltaQ,
+                           q_min)
+    print(a_out_dev)
+    print(a_out_dev.context)
+    print(cl.array.max(a_out_dev.real))
     if get == True:
-        return out_dev.get()
+        return a_out_dev.get()
     else:
         return None
     

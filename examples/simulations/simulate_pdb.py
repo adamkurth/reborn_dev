@@ -40,12 +40,13 @@ queue = cl.CommandQueue(context)
 group_size = 32
 
 n_trials = 10
-show = 0
+show = 1
 show_all = show
 #plt.ion()
 
-print("Compute q vectors on the fly.  Faster than accessing q's from memory?")
-if 1:
+
+if 0:
+    print("Compute q vectors on the fly.  Faster than accessing q's from memory?")
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
     n_pixels = p.nF*p.nS
     n_atoms = r.shape[0]
@@ -67,8 +68,9 @@ if 1:
     print("")
 
 
-print("Access q vectors from memory (i.e. compute them on cpu first)")
-if 1:
+
+if 0:
+    print("Access q vectors from memory (i.e. compute them on cpu first)")
     q = pl.Q  # These are the scattering vectors, Nx3 array.
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
@@ -87,8 +89,9 @@ if 1:
         plt.show()
     print("")
 
-print("Compute q vectors on cpu, but load into GPU memory only once (at the beginning)")
-if 1:
+
+if 0:
+    print("Compute q vectors on cpu, but load into GPU memory only once (at the beginning)")
     t = time.time()
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
@@ -117,9 +120,8 @@ if 1:
     del f_dev
     del a_dev
 
-
-print("Make a full 3D diffraction amplitude map...")
-if 1:
+if 0:
+    print("Make a full 3D diffraction amplitude map...")
     res = 1e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
@@ -142,7 +144,6 @@ if 1:
         plt.show()
     print("")
     
-print("First compute a 3D diffraction amplitude map...")
 if 1:
     res = 2e-10  # Resolution
     qmax = 2 * np.pi / (res)
@@ -150,6 +151,7 @@ if 1:
     N = 200  # Number of samples
     n_atoms = r.shape[0]
     n_pixels = N**3
+    print("First compute a 3D diffraction amplitude map...")
     for i in range(0,n_trials):
         t = time.time()
         A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, 
@@ -163,37 +165,46 @@ if 1:
     q = pl.Q
     n_atoms = 0
     n_pixels = q.shape[0]
-    print("...and now look up amplitudes for a set of q vectors")
+    print("Now look up amplitudes for a set of q vectors, using the 3D map")
     for i in range(0,n_trials):
         t = time.time()
-        AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, pl.Q, 
+        AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, q, 
                                            context=context,queue=queue,
                                            group_size=group_size)
         tf = time.time() - t
         print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
-    print('')
-    
-#     t = time.time()
-#     q_dev = clcore.to_device(queue, q, dtype=np.float32)
-#     A_dev = clcore.to_device(queue, A, dtype=np.complex64)
-#     tf = time.time() - t
-#     print('Move to device memory: %7.03f ms' % (tf*1e3))
-#     n_atoms = 0
-#     n_pixels = q.shape[0]
-#     for i in range(0,n_trials):
-#         t = time.time()
-#         AA = clcore.buffer_mesh_lookup(A_dev, N, qmin, qmax, q_dev, 
-#                                            context=context,queue=queue,
-#                                            group_size=group_size)
-#         tf = time.time() - t
-#         print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
-#               (tf*1e3,n_atoms,n_pixels))
-    
-    imdisp = AA.reshape(pl[0].nS,pl[0].nF)
-    imdisp = np.abs(imdisp)**2
-    imdisp = np.log(imdisp + 0.1)
     if show_all and show:
+        imdisp = AA.reshape(pl[0].nS,pl[0].nF)
+        imdisp = np.abs(imdisp)**2
+        imdisp = np.log(imdisp + 0.1)
+        plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
+        plt.title('y: up, x: right, z: beam (towards you)')
+        plt.show()
+    print("")
+    
+    t = time.time()
+    q_dev = clcore.to_device(queue, q, dtype=np.float32)
+    a_map_dev = clcore.to_device(queue, AA, dtype=np.complex64)
+    a_out_dev = clcore.to_device(queue, dtype=np.complex64, shape=(n_pixels))
+    tf = time.time() - t
+    print('As above, but first move arrays to device memory (%7.03f ms)' % (tf*1e3))
+    n_atoms = 0
+    n_pixels = q.shape[0]
+    for i in range(0,n_trials):
+        t = time.time()
+        clcore.buffer_mesh_lookup(a_map_dev, N, qmin, qmax, q_dev, a_out_dev,
+                                           context=context,queue=queue,
+                                           group_size=group_size, get=False)
+        tf = time.time() - t
+        print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
+              (tf*1e3,n_atoms,n_pixels))
+#     print(cl.array.max(a_out_dev.real))
+#     print(cl.array.max(a_out_dev.imag))
+    if show_all and show:
+        imdisp = a_out_dev.get().reshape(pl[0].nS,pl[0].nF)
+        imdisp = np.abs(imdisp)**2
+        imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
         plt.show()
