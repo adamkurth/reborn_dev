@@ -1,5 +1,6 @@
 import numpy as np
 import pyopencl as cl
+import pyopencl.array
 
 
 def vec4(x,dtype=np.float32):
@@ -529,6 +530,14 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, 
             
             if (i >= 0 && i < N.x && j >= 0 && j < N.y && k >= 0 && k < N.z){
                 const int idx = k*N.x*N.y + j*N.x + i;
+                float x1 = 1.0f - i_f;
+                float y1 = 1.0f - j_f;
+                float z1 = 1.0f - k_f;
+                //float2 Vxyz = a_map[k*N.x*N.y + j*N.x + i     ]*x1*y1*z1 +
+                //              a_map[k*N.x*N.y + j*N.x + (i+1) ]*i_f*y1*z1 +
+                //              a_map[k*N.x*N.y + (j+1)*N.x + i ]*x1*j_f*z1 +
+                //              a_map[(k+1)k*N.x*N.y + j*N.x + i]*x1*y1*k_f +
+                //              a_map[(k+1)k*N.x*N.y + j*N.x + (i+1)]*x1*y1*k_f ;
                 a_out[gi].x = a_map[idx].x;
                 a_out[gi].y = a_map[idx].y;
             } else {

@@ -92,7 +92,7 @@ if 0:
     print("")
 
 
-if 0:
+if 1:
     print("Compute q vectors on cpu, but load into GPU memory only once (at the beginning)")
     t = time.time()
     n_pixels = q.shape[0]
@@ -146,7 +146,7 @@ if 0:
         plt.show()
     print("")
     
-if 1:
+if 0:
     res = 2e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
