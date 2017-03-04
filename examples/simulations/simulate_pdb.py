@@ -41,13 +41,13 @@ group_size = 32
 print(context)
 print(queue)
 
-n_trials = 10
+n_trials = 3
 show = 1
 show_all = show
 #plt.ion()
 
 
-if 0:
+if 1:
     print("Compute q vectors on the fly.  Faster than accessing q's from memory?")
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
     n_pixels = p.nF*p.nS
@@ -71,7 +71,7 @@ if 0:
 
 
 
-if 0:
+if 1:
     print("Access q vectors from memory (i.e. compute them on cpu first)")
     q = pl.Q  # These are the scattering vectors, Nx3 array.
     n_pixels = q.shape[0]
@@ -123,6 +123,7 @@ if 1:
     del a_dev
 
 if 0:
+    
     print("Make a full 3D diffraction amplitude map...")
     res = 1e-10  # Resolution
     qmax = 2 * np.pi / (res)
@@ -146,7 +147,8 @@ if 0:
         plt.show()
     print("")
     
-if 0:
+if 1:
+    
     res = 2e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
@@ -164,7 +166,13 @@ if 0:
               (tf*1e3,n_atoms,n_pixels))
     print('')
     
-    q = pl.Q
+    pl = ba.detector.PanelList()
+    nPixels = 1000
+    pixelSize = 100e-6
+    detectorDistance = 0.05
+    wavelength = 1.5e-10
+    pl.simple_setup(nPixels, nPixels+1, pixelSize, detectorDistance, wavelength)
+    q = pl[0].Q
     n_atoms = 0
     n_pixels = q.shape[0]
     print("Now look up amplitudes for a set of q vectors, using the 3D map")

@@ -1,10 +1,13 @@
 import numpy as np
+import pytest
+
 try:
     import clcore
     havecl = True
 except ImportError:
     havecl = False
 
+@pytest.mark.skipif(havecl is False, reason="requires pyopencl module")
 def test_two_atoms():
 
     # Check if pyopencl is available

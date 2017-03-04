@@ -520,26 +520,49 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, 
             const int gi = get_global_id(0); /* Global index is q-vector index */
             const float4 q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
             
-            const float i_f = (q4.x - q_min.x)/deltaQ.x; /* Voxel coordinate i (x) */
-            const float j_f = (q4.y - q_min.y)/deltaQ.y; /* Voxel coordinate j (y) */
-            const float k_f = (q4.z - q_min.z)/deltaQ.z; /* Voxel corrdinate k (z) */
+            // Floating point coordinates
+            const float i_f = (q4.x - q_min.x)/deltaQ.x; 
+            const float j_f = (q4.y - q_min.y)/deltaQ.y; 
+            const float k_f = (q4.z - q_min.z)/deltaQ.z;
 
-            const int i = (int)(round(i_f));
-            const int j = (int)(round(j_f));
-            const int k = (int)(round(k_f));
+            // Nearest integer coordinates
+            const int i = (int)(floor(i_f));
+            const int j = (int)(floor(j_f));
+            const int k = (int)(floor(k_f));
+            const int kk0 = k*N.x*N.y;
+            const int jj0 = j*N.x;
+            const int ii0 = i;
+            const int kk1 = (k+1)*N.x*N.y;
+            const int jj1 = (j+1)*N.x;
+            const int ii1 = i+1;
+            
+            // Coordinates specified in paulbourke.net/miscellaneous/interpolation
+            const float x = i_f - floor(i_f);
+            const float y = j_f - floor(j_f);
+            const float z = k_f - floor(k_f);
+            const float x1 = 1.0f - x;
+            const float y1 = 1.0f - y;
+            const float z1 = 1.0f - z;
             
             if (i >= 0 && i < N.x && j >= 0 && j < N.y && k >= 0 && k < N.z){
-                const int idx = k*N.x*N.y + j*N.x + i;
-                float x1 = 1.0f - i_f;
-                float y1 = 1.0f - j_f;
-                float z1 = 1.0f - k_f;
-                //float2 Vxyz = a_map[k*N.x*N.y + j*N.x + i     ]*x1*y1*z1 +
-                //              a_map[k*N.x*N.y + j*N.x + (i+1) ]*i_f*y1*z1 +
-                //              a_map[k*N.x*N.y + (j+1)*N.x + i ]*x1*j_f*z1 +
-                //              a_map[(k+1)k*N.x*N.y + j*N.x + i]*x1*y1*k_f +
-                //              a_map[(k+1)k*N.x*N.y + j*N.x + (i+1)]*x1*y1*k_f ;
-                a_out[gi].x = a_map[idx].x;
-                a_out[gi].y = a_map[idx].y;
+                
+                a_out[gi] = a_map[ii0 + jj0 + kk0] * x1 * y1 * z1 +
+                            
+                            a_map[ii1 + jj0 + kk0] * x  * y1 * z1 +
+                            a_map[ii0 + jj1 + kk0] * x1 * y  * z1 +
+                            a_map[ii0 + jj0 + kk1] * x1 * y1 * z  +
+                            
+                            a_map[ii0 + jj1 + kk1] * x1 * y  * z  +
+                            a_map[ii1 + jj0 + kk1] * x  * y1 * z  +
+                            a_map[ii1 + jj1 + kk0] * x  * y  * z1 +
+                            
+                            a_map[ii1 + jj1 + kk1] * x  * y  * z    ;
+                
+                // Nearest neighbor
+                //const int idx = k*N.x*N.y + j*N.x + i;
+                //a_out[gi].x = a_map[idx].x;
+                //a_out[gi].y = a_map[idx].y;
+                
             } else {
                 a_out[gi].x = 0.0f;
                 a_out[gi].y = 0.0f;

@@ -20,7 +20,7 @@ joulesPerEv = 1.60217657e-19
 
 def vecCheck(vec,hardcheck=False):
 
-	'''
+    '''
 Check that a vector meets our assumption of an Nx3 numpy array.  This is helpful, for
 example, when we want to ensure that dot products and broadcasting will work as expected.
 We could of course add an argument for vectors of dimension other than 3, but for now
@@ -29,37 +29,37 @@ We could of course add an argument for vectors of dimension other than 3, but fo
 ==== Input:
 vec:        The object that we are trying to make conform to our assumption about vectors.
 hardcheck:  If True, then this function will raise a ValueError if the check fails.  If
-	    False, then this function attempts to fix the problem with the input.
+        False, then this function attempts to fix the problem with the input.
 
 ==== Output:
 vec:        The original input if it satisfies our conditions.  Otherwise return a
-	    modified numpy ndarray with the correct shape.
+        modified numpy ndarray with the correct shape.
 '''
-		
-	if hardcheck:  # In this case we just raise an error if the input isn't perfect
-		if type(vec) is not np.ndarray:
-			raise ValueError('Vectors must be Nx3 numpy ndarrays')
-		if len(vec.shape) != 2:
-			raise ValueError('Vectors must be Nx3 numpy ndarrays')
-		if vec.shape[1] != 3:
-			raise ValueError('Vectors must be Nx3 numpy ndarrays')
-		return vec
-	
-	if type(vec) is not np.ndarray:
-		vec = np.array(vec)
-	if len(vec.shape) == 1:
-		vec = vec[np.newaxis]
-	if len(vec.shape) != 2:
-		raise ValueError('Vectors must be Nx3 numpy ndarrays')
-	if vec.shape[1] != 3:
-		if vec.shape[0] != 3:
-			raise ValueError('Vectors must be Nx3 numpy ndarrays')
-		else:
-			vec = vec.T
-	if ~vec.flags['C_CONTIGUOUS']:
-		vec = vec.copy()
-	
-	return vec
+
+    if hardcheck:  # In this case we just raise an error if the input isn't perfect
+        if type(vec) is not np.ndarray:
+            raise ValueError('Vectors must be Nx3 numpy ndarrays')
+        if len(vec.shape) != 2:
+            raise ValueError('Vectors must be Nx3 numpy ndarrays')
+        if vec.shape[1] != 3:
+            raise ValueError('Vectors must be Nx3 numpy ndarrays')
+        return vec
+    
+    if type(vec) is not np.ndarray:
+        vec = np.array(vec)
+    if len(vec.shape) == 1:
+        vec = vec[np.newaxis]
+    if len(vec.shape) != 2:
+        raise ValueError('Vectors must be Nx3 numpy ndarrays')
+    if vec.shape[1] != 3:
+        if vec.shape[0] != 3:
+            raise ValueError('Vectors must be Nx3 numpy ndarrays')
+        else:
+            vec = vec.T
+    if ~vec.flags['C_CONTIGUOUS']:
+        vec = vec.copy()
+    
+    return vec
 
 
 def eV2Joules(eV):
@@ -303,37 +303,77 @@ def axisAndAngleToMatrix(axis, angle):
 
 class scalarMonitor(object):
 
-	""" Class for monitoring a scalar for which we expect many observations.
-	    Array will grow as needed, and basic calculations can be done."""
+    """ Class for monitoring a scalar for which we expect many observations.
+        Array will grow as needed, and basic calculations can be done."""
 
-	def __init__(self,size=1000):
-		
-		self.idx = 0         # Current index of observation
-		self.size = size     # Size of array
-		self.data = np.zeros([size]) # Data array
-		self.maxSize = 10e6  # Don't grow array larger than this
+    def __init__(self,size=1000):
+        
+        self.idx = 0         # Current index of observation
+        self.size = size     # Size of array
+        self.data = np.zeros([size]) # Data array
+        self.maxSize = 10e6  # Don't grow array larger than this
 
-	def append(self,value):
-		
-		if (self.idx + 1) > self.size:
-			if (self.size*2) > self.maxSize:
-				print("Cannot grow array larger than %d" % self.size*2)
-				return None
-			self.data = np.concatenate([self.data,np.zeros([self.size])])
-			self.size = self.data.shape[0]
-		self.data[self.idx] = value
-		self.idx += 1
+    def append(self,value):
+        
+        if (self.idx + 1) > self.size:
+            if (self.size*2) > self.maxSize:
+                print("Cannot grow array larger than %d" % self.size*2)
+                return None
+            self.data = np.concatenate([self.data,np.zeros([self.size])])
+            self.size = self.data.shape[0]
+        self.data[self.idx] = value
+        self.idx += 1
 
-	def getData(self):
-		
-		return self.data[0:self.idx]
+    def getData(self):
+        
+        return self.data[0:self.idx]
 
-	def getMean(self):
+    def getMean(self):
 
-		return np.mean(self.getData())
+        return np.mean(self.getData())
 
-	def getStd(self):
-	
-		return np.std(self.getData())
+    def getStd(self):
+    
+        return np.std(self.getData())
 
-
+def random_rotation_matrix(deflection=1.0, randnums=None):
+    """
+    Creates a random rotation matrix.
+    
+    deflection: the magnitude of the rotation. For 0, no rotation; for 1, competely random
+    rotation. Small deflection => small perturbation.
+    randnums: 3 random numbers in the range [0, 1]. If `None`, they will be auto-generated.
+    """
+    # from http://www.realtimerendering.com/resources/GraphicsGems/gemsiii/rand_rotation.c
+    
+    if randnums is None:
+        randnums = np.random.uniform(size=(3,))
+        
+    theta, phi, z = randnums
+    
+    theta = theta * 2.0*deflection*np.pi  # Rotation about the pole (Z).
+    phi = phi * 2.0*np.pi  # For direction of pole deflection.
+    z = z * 2.0*deflection  # For magnitude of pole deflection.
+    
+    # Compute a vector V used for distributing points over the sphere
+    # via the reflection I - V Transpose(V).  This formulation of V
+    # will guarantee that if x[1] and x[2] are uniformly distributed,
+    # the reflected points will be uniform on the sphere.  Note that V
+    # has length sqrt(2) to eliminate the 2 in the Householder matrix.
+    
+    r = np.sqrt(z)
+    V = (
+        np.sin(phi) * r,
+        np.cos(phi) * r,
+        np.sqrt(2.0 - z)
+        )
+    
+    st = np.sin(theta)
+    ct = np.cos(theta)
+    
+    R = np.array(((ct, st, 0), (-st, ct, 0), (0, 0, 1)))
+    
+    # Construct the rotation matrix  ( V Transpose(V) - I ) R.
+    
+    M = (np.outer(V, V) - np.eye(3)).dot(R)
+    return M
