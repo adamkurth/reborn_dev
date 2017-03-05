@@ -50,3 +50,9 @@ sudo yum install devtoolset-2
 scl enable devtoolset-2 bash
 rm ./siteconf.py ; ./configure.py --cl-inc-dir=/usr/local/cuda/include --cl-lib-dir=/usr/local/cuda/lib64; make install
 ```
+
+# Notes for developers
+* This project follows the [PEP 8](https://www.python.org/dev/peps/pep-0008) style guide for python code.
+
+
+
