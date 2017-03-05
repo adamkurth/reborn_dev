@@ -45,7 +45,7 @@ rm ./siteconf.py ; ./configure.py --cl-inc-dir=/usr/local/cuda/include --cl-lib-
 # Notes for developers
 * This project follows the [PEP 8](https://www.python.org/dev/peps/pep-0008) style guide for python code.
 * The main documentation is generated using [Sphinx](http://www.sphinx-doc.org/en/stable/index.html).
-
+* Versioning is done according to Semantic Versioning 2.0.0 ([SemVer](http://semver.org/))
 
 
 
