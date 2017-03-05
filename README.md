@@ -40,8 +40,8 @@ conda install -c ufechner pyqtgraph=0.9.10
 conda install pyopengl
 ```
 
-# Notes on installation on Scientific Linux 6
-This is very incomplete... but in part the following was needed to deal with the very old version of gcc on SL6 (don't use SL6 ever again...)
+# Installation notes
+Scientific Linux 6 sucks.  It has very old versions of many libraries such as gcc.  I had to do something like the following to install on SL6:
 ```bash
 pip install mako
 [cd pyopencl-2016.2.1; downloaded source...]
@@ -53,6 +53,8 @@ rm ./siteconf.py ; ./configure.py --cl-inc-dir=/usr/local/cuda/include --cl-lib-
 
 # Notes for developers
 * This project follows the [PEP 8](https://www.python.org/dev/peps/pep-0008) style guide for python code.
+* The main documentation is generated using [Sphinx](http://www.sphinx-doc.org/en/stable/index.html).
+
 
 
 
