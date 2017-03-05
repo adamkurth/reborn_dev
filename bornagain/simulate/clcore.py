@@ -1,12 +1,3 @@
-import os
-import pkg_resources
-
-import numpy as np
-import pyopencl as cl
-import pyopencl.array
-
-clcore_file = pkg_resources.resource_filename('bornagain.simulate','clcore.cl')
-
 """
 This module contains some core functions that are useful for simulating diffraction on GPU devices.  It is not
 finished yet...
@@ -14,6 +5,27 @@ finished yet...
 Some environment variables that affect this module:
   'BORNAGAIN_CL_GROUPSIZE' : This sets the default groupsize.  It will otherwise be 32, which may fail on CPUs.
 """
+
+import os
+import pkg_resources
+
+import numpy as np
+import pyopencl as cl
+import pyopencl.array
+
+
+clcore_file = pkg_resources.resource_filename('bornagain.simulate','clcore.cl')
+
+context = cl.create_some_context()
+queue = cl.CommandQueue(context)
+
+group_size = os.environ.get('BORNAGAIN_CL_GROUPSIZE')
+if group_size is None: 
+    group_size = 32
+if group_size > queue.device.max_work_group_size:
+    group_size = queue.device.max_work_group_size
+
+programs = cl.Program(context,open(clcore_file).read()).build()
 
 def vec4(x,dtype=np.float32):
     
@@ -82,16 +94,6 @@ def cap_group_size(group_size, queue):
         group_size = queue.device.max_work_group_size
         
     return group_size
-     
-context = cl.create_some_context()
-queue = cl.CommandQueue(context)
-
-group_size = os.environ.get('BORNAGAIN_CL_GROUPSIZE')
-if group_size is None: 
-    group_size = 32
-group_size = cap_group_size(group_size,queue)
-
-programs = cl.Program(context,open(clcore_file).read()).build()
 
 phase_factor_qrf_cl = programs.phase_factor_qrf
 phase_factor_qrf_cl.set_scalar_arg_dtypes([None,None,None,None,np.int32,np.int32])
