@@ -30,15 +30,6 @@ Unfortunately, we need `spglib` for dealing with crystal symmetries (it will be 
 ```bash
 pip install spglib
 ```
-So far these are not strictly needed, but will probably become dependencies:
-`pyqtgraph` for viewing:
-```bash
-conda install -c ufechner pyqtgraph=0.9.10
-```
-`pyopengl` for plotting 3d graphics:
-```bash
-conda install pyopengl
-```
 
 # Installation notes
 Scientific Linux 6 sucks.  It has very old versions of many libraries such as gcc.  I had to do something like the following to install on SL6:
