@@ -35,43 +35,22 @@ r = cryst.r
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelength)
 
 # Create an opencl context and queue
-context = cl.create_some_context()
-queue = cl.CommandQueue(context)
-group_size = 32
-print(context)
-print(queue)
+context = clcore.context
+queue = clcore.queue
+group_size = clcore.group_size
 
 n_trials = 3
-show = 1
+if len(sys.argv) > 1:
+    show = 1
+else:
+    show = 0
 show_all = show
 #plt.ion()
 
 
-if 1:
-    print("Compute q vectors on the fly.  Faster than accessing q's from memory?")
-    p = pl[0]  # p is the first panel in the PanelList (there is only one)
-    n_pixels = p.nF*p.nS
-    n_atoms = r.shape[0]
-    for i in range(0, n_trials):
-        t = time.time()
-        A = clcore.phase_factor_pad(
-            r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, context=context, queue=queue,group_size=group_size)
-        tf = time.time() - t
-        print('phase_factor_pad: %7.03f ms (%d atoms; %d pixels)' %
-              (tf*1e3,n_atoms,n_pixels))
-    imdisp = np.abs(A)**2
-    imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
-    imdisp = np.log(imdisp + 0.1)
-    # Display pattern
-    if show_all and show:
-        plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
-        plt.title('y: up, x: right, z: beam (towards you)')
-        plt.show()
-    print("")
-
-
 
 if 1:
+    
     print("Access q vectors from memory (i.e. compute them on cpu first)")
     q = pl.Q  # These are the scattering vectors, Nx3 array.
     n_pixels = q.shape[0]
@@ -93,6 +72,7 @@ if 1:
 
 
 if 1:
+    
     print("Compute q vectors on cpu, but load into GPU memory only once (at the beginning)")
     t = time.time()
     n_pixels = q.shape[0]
@@ -122,7 +102,32 @@ if 1:
     del f_dev
     del a_dev
 
-if 0:
+
+if 1:
+    
+    print("Compute q vectors on the fly.  Faster than accessing q's from memory?")
+    p = pl[0]  # p is the first panel in the PanelList (there is only one)
+    n_pixels = p.nF*p.nS
+    n_atoms = r.shape[0]
+    for i in range(0, n_trials):
+        t = time.time()
+        A = clcore.phase_factor_pad(
+            r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, context=context, queue=queue,group_size=group_size)
+        tf = time.time() - t
+        print('phase_factor_pad: %7.03f ms (%d atoms; %d pixels)' %
+              (tf*1e3,n_atoms,n_pixels))
+    imdisp = np.abs(A)**2
+    imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
+    imdisp = np.log(imdisp + 0.1)
+    # Display pattern
+    if show_all and show:
+        plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
+        plt.title('y: up, x: right, z: beam (towards you)')
+        plt.show()
+    print("")
+
+
+if 1:
     
     print("Make a full 3D diffraction amplitude map...")
     res = 1e-10  # Resolution
@@ -146,7 +151,8 @@ if 0:
         plt.title('y: up, x: right, z: beam (towards you)')
         plt.show()
     print("")
-    
+
+
 if 1:
     
     res = 2e-10  # Resolution
@@ -217,4 +223,3 @@ if 1:
         plt.title('y: up, x: right, z: beam (towards you)')
         plt.show()
     print("")
-
