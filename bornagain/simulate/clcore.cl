@@ -13,8 +13,7 @@ kernel void phase_factor_qrf(
     const int li = get_local_id(0);  /* Local group index */
 
     float ph, sinph, cosph;
-    float re = 0;
-    float im = 0;
+    float2 a_sum = (float2)(0.0f,0.0f);
 
     // Each global index corresponds to a particular q-vector.  Note that the
     // global index could be larger than the number of pixels because it must be a
@@ -47,26 +46,23 @@ kernel void phase_factor_qrf(
         barrier(CLK_LOCAL_MEM_FENCE);
 
         // We use a local real and imaginary part to avoid floatint point overflow
-        float lre=0;
-        float lim=0;
+        float2 a_temp = (float2)(0.0f,0.0f);
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
             ph = -dot(q4,rg[n]);
             sinph = native_sin(ph);
             cosph = native_cos(ph);
-            lre += fg[n].x*cosph - fg[n].y*sinph;
-            lim += fg[n].x*sinph + fg[n].y*cosph;
+            a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
+            a_temp.y += fg[n].x*sinph + fg[n].y*cosph;
         }
-        re += lre;
-        im += lim;
+        a_sum += a_temp;
 
         // Don't proceed until this subset of atoms are completed.
         barrier(CLK_LOCAL_MEM_FENCE);
     }
     if (gi < n_pixels){
-        a[gi].x = re;
-        a[gi].y = im;
+        a[gi] = a_sum;
     }
 }
 
@@ -229,57 +225,59 @@ kernel void buffer_mesh_lookup(
     int n_pixels,
     int4 N,
     float4 deltaQ,
-    float4 q_min)
+    float4 q_min,
+    float16 R)
 {
-    const int gi = get_global_id(0); /* Global index is q-vector index */
+    const int gi = get_global_id(0);
+
     const float4 q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+    const float4 q4r = (float4)(0.0f,0.0f,0.0f,0.0f);
+
+    q4r.x = R.s0*q4.x + R.s3*q4.y + R.s6*q4.z;
+    q4r.y = R.s1*q4.x + R.s4*q4.y + R.s7*q4.z;
+    q4r.z = R.s2*q4.x + R.s5*q4.y + R.s8*q4.z;
 
     // Floating point coordinates
-    const float i_f = (q4.x - q_min.x)/deltaQ.x;
-    const float j_f = (q4.y - q_min.y)/deltaQ.y;
-    const float k_f = (q4.z - q_min.z)/deltaQ.z;
+    const float i_f = (q4r.x - q_min.x)/deltaQ.x;
+    const float j_f = (q4r.y - q_min.y)/deltaQ.y;
+    const float k_f = (q4r.z - q_min.z)/deltaQ.z;
 
-    // Nearest integer coordinates
+    // Integer coordinates
     const int i = (int)(floor(i_f));
     const int j = (int)(floor(j_f));
     const int k = (int)(floor(k_f));
-    const int kk0 = k*N.x*N.y;
-    const int jj0 = j*N.x;
-    const int ii0 = i;
-    const int kk1 = (k+1)*N.x*N.y;
-    const int jj1 = (j+1)*N.x;
-    const int ii1 = i+1;
 
-    // Coordinates specified in paulbourke.net/miscellaneous/interpolation
-    const float x = i_f - floor(i_f);
-    const float y = j_f - floor(j_f);
-    const float z = k_f - floor(k_f);
-    const float x1 = 1.0f - x;
-    const float y1 = 1.0f - y;
-    const float z1 = 1.0f - z;
+    // Trilinear interpolation formula specified in
+    //     paulbourke.net/miscellaneous/interpolation
+    const int k0 = k*N.x*N.y;
+    const int j0 = j*N.x;
+    const int i0 = i;
+    const int k1 = (k+1)*N.x*N.y;
+    const int j1 = (j+1)*N.x;
+    const int i1 = i+1;
+    const float x0 = i_f - floor(i_f);
+    const float y0 = j_f - floor(j_f);
+    const float z0 = k_f - floor(k_f);
+    const float x1 = 1.0f - x0;
+    const float y1 = 1.0f - y0;
+    const float z1 = 1.0f - z0;
 
     if (i >= 0 && i < N.x && j >= 0 && j < N.y && k >= 0 && k < N.z){
 
-        a_out[gi] = a_map[ii0 + jj0 + kk0] * x1 * y1 * z1 +
+        a_out[gi] = a_map[i0 + j0 + k0] * x1 * y1 * z1 +
 
-                a_map[ii1 + jj0 + kk0] * x  * y1 * z1 +
-                a_map[ii0 + jj1 + kk0] * x1 * y  * z1 +
-                a_map[ii0 + jj0 + kk1] * x1 * y1 * z  +
+                    a_map[i1 + j0 + k0] * x0 * y1 * z1 +
+                    a_map[i0 + j1 + k0] * x1 * y0 * z1 +
+                    a_map[i0 + j0 + k1] * x1 * y1 * z0 +
 
-                a_map[ii0 + jj1 + kk1] * x1 * y  * z  +
-                a_map[ii1 + jj0 + kk1] * x  * y1 * z  +
-                a_map[ii1 + jj1 + kk0] * x  * y  * z1 +
+                    a_map[i0 + j1 + k1] * x1 * y0 * z0 +
+                    a_map[i1 + j0 + k1] * x0 * y1 * z0 +
+                    a_map[i1 + j1 + k0] * x0 * y0 * z1 +
 
-                a_map[ii1 + jj1 + kk1] * x  * y  * z    ;
-
-        // Nearest neighbor
-        //const int idx = k*N.x*N.y + j*N.x + i;
-        //a_out[gi].x = a_map[idx].x;
-        //a_out[gi].y = a_map[idx].y;
+                    a_map[i1 + j1 + k1] * x0 * y0 * z0   ;
 
     } else {
-        a_out[gi].x = 0.0f;
-        a_out[gi].y = 0.0f;
+        a_out[gi] = (float2)(0.0f,0.0f);
     }
 
 }

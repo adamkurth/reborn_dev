@@ -49,7 +49,7 @@ show_all = show
 
 
 
-if 1:
+if 0:
     
     print("Access q vectors from memory (i.e. compute them on cpu first)")
     q = pl.Q  # These are the scattering vectors, Nx3 array.
@@ -71,7 +71,7 @@ if 1:
     print("")
 
 
-if 1:
+if 0:
     
     print("Compute q vectors on cpu, but load into GPU memory only once (at the beginning)")
     t = time.time()
@@ -103,7 +103,7 @@ if 1:
     del a_dev
 
 
-if 1:
+if 0:
     
     print("Compute q vectors on the fly.  Faster than accessing q's from memory?")
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
@@ -127,7 +127,7 @@ if 1:
     print("")
 
 
-if 1:
+if 0:
     
     print("Make a full 3D diffraction amplitude map...")
     res = 1e-10  # Resolution
@@ -155,7 +155,7 @@ if 1:
 
 if 1:
     
-    res = 2e-10  # Resolution
+    res = 1e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
     N = 200  # Number of samples
@@ -171,6 +171,7 @@ if 1:
         print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
     print('')
+    print(A)
     
     pl = ba.detector.PanelList()
     nPixels = 1000
@@ -184,7 +185,7 @@ if 1:
     print("Now look up amplitudes for a set of q vectors, using the 3D map")
     for i in range(0,n_trials):
         t = time.time()
-        AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, q, 
+        AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, q, None, 
                                            context=context,queue=queue,
                                            group_size=group_size)
         tf = time.time() - t
@@ -207,9 +208,10 @@ if 1:
     print('As above, but first move arrays to device memory (%7.03f ms)' % (tf*1e3))
     n_atoms = 0
     n_pixels = q.shape[0]
+    R = ba.utils.random_rotation_matrix()
     for i in range(0,n_trials):
         t = time.time()
-        clcore.buffer_mesh_lookup(a_map_dev, N, qmin, qmax, q_dev, a_out_dev,
+        clcore.buffer_mesh_lookup(a_map_dev, N, qmin, qmax, q_dev, R, a_out_dev,
                                            context=context,queue=queue,
                                            group_size=group_size, get=False)
         tf = time.time() - t

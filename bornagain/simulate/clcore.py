@@ -244,9 +244,9 @@ def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=context, queue=queu
  
  
 buffer_mesh_lookup_cl = programs.buffer_mesh_lookup
-buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None,None,None,np.int32,None,None,None])
+buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None,None,None,np.int32,None,None,None,None])
  
-def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, queue=None, group_size=32, get=True):
+def buffer_mesh_lookup(a_map, N, q_min, q_max, q, R=None, a_out_dev=None, context=context, queue=queue, group_size=group_size, get=True):
  
     """
     This is supposed to lookup intensities from a 3d mesh of amplitudes.
@@ -259,6 +259,7 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, 
     q_max:   As defined in phase_factor_mesh()
     q:       An Nx3 numpy array of q-space coordinates at which we want to interpolate 
                the complex amplitudes in a_dev
+    R:       A 3x3 rotation matrix which will act on the q vectors
     context: Optional pyopencl context [cl.create_some_context()]
     queue:   Optional pyopencl queue [cl.CommandQueue(context)]
     group_size: Optional specification of pyopencl group size (default 64 or maximum)
@@ -266,7 +267,13 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, 
     Output:
     A numpy array of complex amplitudes.
     """
-     
+ 
+    if R is None:
+        R = np.eye(3,dtype=np.float32)
+
+    R16 = np.zeros([16],dtype=np.float32)
+    R16[0:9] = R.flatten().astype(np.float32)
+
     N = np.array(N,dtype=np.int32)
     q_max = np.array(q_max,dtype=np.float32)
     q_min = np.array(q_min,dtype=np.float32)
@@ -281,6 +288,7 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, 
  
     a_map_dev = to_device(queue, a_map, dtype=np.complex64)
     q_dev = to_device(queue, q, dtype=np.float32)
+    R_dev = to_device(queue, R, dtype=np.float32)
     N = vec4(N,dtype=np.int32)
     deltaQ = vec4(deltaQ,dtype=np.float32)
     q_min = vec4(q_min,dtype=np.float32)
@@ -288,7 +296,7 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, a_out_dev=None, context=None, 
  
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
      
-    buffer_mesh_lookup_cl(queue, (global_size,), (group_size,),a_map_dev.data,q_dev.data,a_out_dev.data,n_pixels,N,deltaQ,q_min)
+    buffer_mesh_lookup_cl(queue, (global_size,), (group_size,),a_map_dev.data,q_dev.data,a_out_dev.data,n_pixels,N,deltaQ,q_min,R16)
     
     if get == True:
         return a_out_dev.get()
