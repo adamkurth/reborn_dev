@@ -1,8 +1,11 @@
+import sys
+
 import numpy as np
 import pytest
 
+sys.path.append('..')
 try:
-    import clcore
+    from bornagain.simulate import clcore
     havecl = True
 except ImportError:
     havecl = False

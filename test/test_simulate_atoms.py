@@ -1,4 +1,8 @@
+import sys
+
 import numpy as np
+
+sys.path.append('..')
 from bornagain import simulate as sim
 from bornagain import units
 
