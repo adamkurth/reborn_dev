@@ -1,4 +1,4 @@
-Welcome to bornagain's documentation!
+bornagain's documentation
 =====================================
 
 The bornagain python module is meant to be used for the analysis and simulation of 
@@ -13,8 +13,7 @@ Contents
    
    api
    api_detector
-   ...
-
+   coding
 
 Indices and tables
 ==================
@@ -22,3 +21,8 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+Testing
+=======
+
+.. automodule:: detector
