@@ -1,3 +1,7 @@
+"""
+Seems to be a duplicate of the "maps" module.  Neither are tested, and will evolve when the need arises.
+"""
+
 import numpy as np
 
 class map3d(object):

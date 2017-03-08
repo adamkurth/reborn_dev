@@ -1,5 +1,6 @@
-''' Basic utilities for reading in atom coordinates from PDB files, viewing coordinates,
-    gathering symmetry operations for space groups, etc. '''
+''' 
+Basic utilities for dealing with crystalline objects.   
+'''
 
 
 import spglib                as sg

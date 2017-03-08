@@ -1,13 +1,13 @@
+"""
+Classes for analyzing/simulating diffraction data contained in pixel array detectors (PADs).
+"""
+
 import numpy as np
 from numpy.linalg import norm
 from numpy.random import random, randn
 
 from utils import vecNorm, vecMag
 import source
-
-"""
-Classes for analyzing diffraction data contained in pixel array detectors (PADs).
-"""
 
 class Panel(object):
 

@@ -1,7 +1,6 @@
 """
-
-Some useful utility functions for bornagain
-
+Some useful utility functions for bornagain.  Utilities pertaining to unit conversions will be removed.  There
+are some old functions here that will likely also be removed.
 """
 
 import sys
@@ -20,7 +19,7 @@ joulesPerEv = 1.60217657e-19
 
 def vecCheck(vec,hardcheck=False):
 
-    '''
+'''
 Check that a vector meets our assumption of an Nx3 numpy array.  This is helpful, for
 example, when we want to ensure that dot products and broadcasting will work as expected.
 We could of course add an argument for vectors of dimension other than 3, but for now

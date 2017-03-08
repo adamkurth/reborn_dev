@@ -12,11 +12,14 @@ try:
 except ImportError:
     havecl = False
 
-@pytest.mark.skipif(havecl is False, reason="requires pyopencl module")
+clskip = pytest.mark.skipif(havecl is False, reason="Requires pyopencl module")
+
+@clskip
 def test_two_atoms(main=False):
 
-    # Check if pyopencl is available
-    assert(havecl == True)
+    """
+    Test if the simulated diffraction between two points is sensible.
+    """
 
     r = np.zeros([2,3])
     r[1,0] = 1e-10
@@ -33,10 +36,12 @@ def test_two_atoms(main=False):
     
     assert(np.max(I) == 4.0)
     
-    return True
-    
-@pytest.mark.skipif(havecl is False, reason="requires pyopencl module")
+@clskip
 def test_equivalence_pad_qrf(main=False):
+    
+    """
+    Test if we get the same results using phase_factor_qrf and phase_factor_pad
+    """
     
     nF = np.int(50)
     nS = np.int(101)

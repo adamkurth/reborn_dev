@@ -1,3 +1,7 @@
+"""
+Classes related to density or intensity maps.  "Map" means a 3D grid of samples.
+"""
+
 import numpy               as np
 from scipy.interpolate import RegularGridInterpolator
 from bornagain         import utils

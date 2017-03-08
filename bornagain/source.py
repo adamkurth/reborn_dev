@@ -1,3 +1,7 @@
+"""
+Classes related to x-ray sources.  
+"""
+
 import numpy as np
 import utils
 
