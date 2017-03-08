@@ -5,7 +5,7 @@ Classes related to density or intensity maps.  "Map" means a 3D grid of samples.
 import numpy               as np
 from scipy.interpolate import RegularGridInterpolator
 from bornagain         import utils
-import pyqtgraph           as pg
+#import pyqtgraph           as pg
 from scipy.stats       import binned_statistic_dd
 
 class meshTool(object):
@@ -74,10 +74,10 @@ class meshTool(object):
 	def lind(self):
 		return np.arange(0,self.m**3)
 		
-	def pos2ind(self,pos,round=False,wrap=False):
+	def pos2ind(self,pos,_round=False,wrap=False):
 		''' Convert 3xN array of positions to 3xN array of indices.'''
 		ind = pos*self.s + self.n
-		if round:
+		if _round:
 			ind = np.round(ind).astype(np.int)
 		if wrap:
 			ind = ind % self.m
@@ -106,10 +106,10 @@ class meshTool(object):
 		''' Convert Nx1 array of linear indices to 3xN array of positions.'''
 		return  self.ind2pos(self.lind2ind(lind))
 		
-	def collect(self,pos,val,round=False,wrap=False,average=False):
+	def collect(self,pos,val,_round=False,wrap=False,average=False):
 		''' Sum Nx1 array of values into given voxels specified by 3xN position vector
 		    list. '''
-		ind = np.round(self.pos2ind(pos,round=False,wrap=False)).astype(np.int)
+		ind = np.round(self.pos2ind(pos,_round=False,wrap=False)).astype(np.int)
 		dat = self.zeros()
 		if average:
 			count = self.zeros()

@@ -5,7 +5,7 @@ are some old functions here that will likely also be removed.
 
 import sys
 import numpy as np
-import math
+#import math
 # from Scientific.Geometry.Quaternion import Quaternion
 # from Scientific.Geometry import Tensor
 # from Scientific.Geometry.Transformation import Rotation
@@ -19,21 +19,21 @@ joulesPerEv = 1.60217657e-19
 
 def vecCheck(vec,hardcheck=False):
 
-'''
-Check that a vector meets our assumption of an Nx3 numpy array.  This is helpful, for
-example, when we want to ensure that dot products and broadcasting will work as expected.
-We could of course add an argument for vectors of dimension other than 3, but for now
-3-vectors are all that we work with.
-
-==== Input:
-vec:        The object that we are trying to make conform to our assumption about vectors.
-hardcheck:  If True, then this function will raise a ValueError if the check fails.  If
-        False, then this function attempts to fix the problem with the input.
-
-==== Output:
-vec:        The original input if it satisfies our conditions.  Otherwise return a
-        modified numpy ndarray with the correct shape.
-'''
+    """
+    Check that a vector meets our assumption of an Nx3 numpy array.  This is helpful, for
+    example, when we want to ensure that dot products and broadcasting will work as expected.
+    We could of course add an argument for vectors of dimension other than 3, but for now
+    3-vectors are all that we work with.
+    
+    ==== Input:
+    vec:        The object that we are trying to make conform to our assumption about vectors.
+    hardcheck:  If True, then this function will raise a ValueError if the check fails.  If
+            False, then this function attempts to fix the problem with the input.
+    
+    ==== Output:
+    vec:        The original input if it satisfies our conditions.  Otherwise return a
+            modified numpy ndarray with the correct shape.
+    """
 
     if hardcheck:  # In this case we just raise an error if the input isn't perfect
         if type(vec) is not np.ndarray:
@@ -128,28 +128,28 @@ def rot3(angle):
     return np.array([[np.cos(angle), -np.sin(angle), 0], [0, 0, 1], [np.sin(angle), np.cos(angle), 0]])
 
 
-def kabschRotation(Vi1, Vi2):
-
-    """ Find the best rotation to bring two vector lists into coincidence."""
-
-    assert Vi1.shape[0] == Vi2.shape[0]
-    assert Vi1.shape[0] > 0
-
-    V1 = Vi1 - np.mean(Vi1, axis=0)
-    V2 = Vi2 - np.mean(Vi2, axis=0)
-
-    V, S, Wt = np.linalg.svd(np.dot(np.transpose(V2), V1))
-
-    d = np.round(np.linalg.det(Wt.dot(V.T)))
-
-    print(d)
-
-    if d < 1:
-        V[:, -1] *= -1
-
-    U = (V.dot(Wt)).T
-
-    return U
+# def kabschRotation(Vi1, Vi2):
+# 
+#     """ Find the best rotation to bring two vector lists into coincidence."""
+# 
+#     assert Vi1.shape[0] == Vi2.shape[0]
+#     assert Vi1.shape[0] > 0
+# 
+#     V1 = Vi1 - np.mean(Vi1, axis=0)
+#     V2 = Vi2 - np.mean(Vi2, axis=0)
+# 
+#     V, S, Wt = np.linalg.svd(np.dot(np.transpose(V2), V1))
+# 
+#     d = np.round(np.linalg.det(Wt.dot(V.T)))
+# 
+#     print(d)
+# 
+#     if d < 1:
+#         V[:, -1] *= -1
+# 
+#     U = (V.dot(Wt)).T
+# 
+#     return U
 
 # def kabschRotation(Ai, Bi):
 #
@@ -207,33 +207,33 @@ def kabschRotation(Vi1, Vi2):
 #    return VV, phi
 
 
-def axisAndAngle(matrix):
-
-    R = np.array(matrix, dtype=np.float64, copy=False)
-    R33 = R[:3, :3]
-    # direction: unit eigenvector of R33 corresponding to eigenvalue of 1
-    w, W = np.linalg.eig(R33.T)
-    i = np.where(abs(np.real(w) - 1.0) < 1e-8)[0]
-    if not len(i):
-        raise ValueError("no unit eigenvector corresponding to eigenvalue 1")
-    direction = np.real(W[:, i[-1]]).squeeze()
-    # point: unit eigenvector of R33 corresponding to eigenvalue of 1
-    w, Q = np.linalg.eig(R)
-    i = np.where(abs(np.real(w) - 1.0) < 1e-8)[0]
-    if not len(i):
-        raise ValueError("no unit eigenvector corresponding to eigenvalue 1")
-#     point = np.real(Q[:, i[-1]]).squeeze()
-#     point /= point[3]
-    # rotation angle depending on direction
-    cosa = (np.trace(R33) - 1.0) / 2.0
-    if abs(direction[2]) > 1e-8:
-        sina = (R[1, 0] + (cosa - 1.0) * direction[0] * direction[1]) / direction[2]
-    elif abs(direction[1]) > 1e-8:
-        sina = (R[0, 2] + (cosa - 1.0) * direction[0] * direction[2]) / direction[1]
-    else:
-        sina = (R[2, 1] + (cosa - 1.0) * direction[1] * direction[2]) / direction[0]
-    angle = math.atan2(sina, cosa)
-    return direction, angle
+# def axisAndAngle(matrix):
+# 
+#     R = np.array(matrix, dtype=np.float64, copy=False)
+#     R33 = R[:3, :3]
+#     # direction: unit eigenvector of R33 corresponding to eigenvalue of 1
+#     w, W = np.linalg.eig(R33.T)
+#     i = np.where(abs(np.real(w) - 1.0) < 1e-8)[0]
+#     if not len(i):
+#         raise ValueError("no unit eigenvector corresponding to eigenvalue 1")
+#     direction = np.real(W[:, i[-1]]).squeeze()
+#     # point: unit eigenvector of R33 corresponding to eigenvalue of 1
+#     w, Q = np.linalg.eig(R)
+#     i = np.where(abs(np.real(w) - 1.0) < 1e-8)[0]
+#     if not len(i):
+#         raise ValueError("no unit eigenvector corresponding to eigenvalue 1")
+# #     point = np.real(Q[:, i[-1]]).squeeze()
+# #     point /= point[3]
+#     # rotation angle depending on direction
+#     cosa = (np.trace(R33) - 1.0) / 2.0
+#     if abs(direction[2]) > 1e-8:
+#         sina = (R[1, 0] + (cosa - 1.0) * direction[0] * direction[1]) / direction[2]
+#     elif abs(direction[1]) > 1e-8:
+#         sina = (R[0, 2] + (cosa - 1.0) * direction[0] * direction[2]) / direction[1]
+#     else:
+#         sina = (R[2, 1] + (cosa - 1.0) * direction[1] * direction[2]) / direction[0]
+#     angle = math.atan2(sina, cosa)
+#     return direction, angle
 
 
 def axisAndAngleToMatrix(axis, angle):
