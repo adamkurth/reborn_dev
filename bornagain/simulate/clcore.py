@@ -96,9 +96,9 @@ def cap_group_size(group_size, queue):
     return group_size
 
 phase_factor_qrf_cl = programs.phase_factor_qrf
-phase_factor_qrf_cl.set_scalar_arg_dtypes([None,None,None,None,np.int32,np.int32])
+phase_factor_qrf_cl.set_scalar_arg_dtypes([None,None,None,None,None,np.int32,np.int32])
 
-def phase_factor_qrf(q, r, f, a=None, context=context, queue=queue, group_size=group_size):
+def phase_factor_qrf(q, r, f, R=None, a=None, context=context, queue=queue, group_size=group_size):
 
     '''
     Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
@@ -107,6 +107,7 @@ def phase_factor_qrf(q, r, f, a=None, context=context, queue=queue, group_size=g
     q:       Numpy or cl array [N,3] of scattering vectors (2.pi/lambda)
     r:       Numpy or cl array [M,3] of atomic coordinates
     f:       Numpy or cl array [M] of complex scattering factors
+    R:       Optional numpy array [3x3] specifying rotation of q vectors
     a:       Optional cl array [N] of complex scattering amplitudes
     context: Optional pyopencl context [cl.create_some_context()]
     queue:   Optional pyopencl queue [cl.CommandQueue(context)]
@@ -115,6 +116,11 @@ def phase_factor_qrf(q, r, f, a=None, context=context, queue=queue, group_size=g
     Return:
     Numpy array [N] of complex amplitudes OR cl array if there are input cl arrays
     '''
+
+    if R is None:
+        R = np.eye(3,dtype=np.float32)
+    R16 = np.zeros([16],dtype=np.float32)
+    R16[0:9] = R.flatten().astype(np.float32)
 
     n_pixels = np.int32(q.shape[0])
     n_atoms = np.int32(r.shape[0])
@@ -125,7 +131,7 @@ def phase_factor_qrf(q, r, f, a=None, context=context, queue=queue, group_size=g
     
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
     
-    phase_factor_qrf_cl(queue, (global_size,), (group_size,), q_dev.data, r_dev.data, f_dev.data, a_dev.data, n_atoms, n_pixels)
+    phase_factor_qrf_cl(queue, (global_size,), (group_size,), q_dev.data, r_dev.data, f_dev.data, R16, a_dev.data, n_atoms, n_pixels)
 
     if a is None:
         return a_dev.get()
@@ -134,9 +140,9 @@ def phase_factor_qrf(q, r, f, a=None, context=context, queue=queue, group_size=g
 
 
 phase_factor_pad_cl = programs.phase_factor_pad
-phase_factor_pad_cl.set_scalar_arg_dtypes([None,None,None,np.int32,np.int32,np.int32,np.int32,np.float32,None,None,None,None])
+phase_factor_pad_cl.set_scalar_arg_dtypes([None,None,None,None,np.int32,np.int32,np.int32,np.int32,np.float32,None,None,None,None])
 
-def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=context, queue=queue, group_size=group_size):
+def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, R=None, a=None, context=context, queue=queue, group_size=group_size):
 
     '''
     This should simulate detector panels.  
@@ -155,6 +161,7 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=context, queue
     nF:      Number of fast-scan pixels (corresponding to F vector) in the detector panel
     nS:      Number of slow-scan pixels (corresponding to S vector) in the detector panel
     w:       The photon wavelength in meters
+    R:       Optional numpy array [3x3] specifying rotation of q vectors
     a:       Optional output complex scattering amplitude cl array 
     context: Optional pyopencl context [cl.create_some_context()]
     queue:   Optional pyopencl queue [cl.CommandQueue(context)]
@@ -163,6 +170,11 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=context, queue
     Output:
     A:        A numpy array of length nF*nS containing complex scattering amplitudes 
     '''
+
+    if R is None:
+        R = np.eye(3,dtype=np.float32)
+    R16 = np.zeros([16],dtype=np.float32)
+    R16[0:9] = R.flatten().astype(np.float32)
 
     nF = np.int32(nF)
     nS = np.int32(nS)
@@ -178,7 +190,7 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, a=None, context=context, queue
 
     global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
 
-    phase_factor_pad_cl(queue, (global_size,), (group_size,), r_dev.data,f_dev.data,a_dev.data,n_pixels,n_atoms,nF,nS,w,T,F,S,B)
+    phase_factor_pad_cl(queue, (global_size,), (group_size,), r_dev.data,f_dev.data,R16,a_dev.data,n_pixels,n_atoms,nF,nS,w,T,F,S,B)
 
     if a is None:
         return a_dev.get()
@@ -270,7 +282,6 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, R=None, a_out_dev=None, contex
  
     if R is None:
         R = np.eye(3,dtype=np.float32)
-
     R16 = np.zeros([16],dtype=np.float32)
     R16[0:9] = R.flatten().astype(np.float32)
 

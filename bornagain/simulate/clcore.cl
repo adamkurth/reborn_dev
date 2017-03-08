@@ -5,9 +5,10 @@ kernel void phase_factor_qrf(
     global const float *q,
     global const float *r,
     global const float2 *f,
+    const float16 R,
     global float2 *a,
-    int n_atoms,
-    int n_pixels)
+    const int n_atoms,
+    const int n_pixels)
 {
     const int gi = get_global_id(0); /* Global index */
     const int li = get_local_id(0);  /* Local group index */
@@ -17,12 +18,21 @@ kernel void phase_factor_qrf(
 
     // Each global index corresponds to a particular q-vector.  Note that the
     // global index could be larger than the number of pixels because it must be a
-    // multiple of the group size.
-    float4 q4;
+    // multiple of the group size.  We must check if it is larger...
+    float4 q4, q4r;
     if (gi < n_pixels){
+
+        // Move original q vector to private memory
         q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+
+        // Rotate the q vector
+        q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
+        q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
+        q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
+
     } else {
-        q4 = (float4)(0.0f,0.0f,0.0f,0.0f);
+        // Dummy values; doesn't really matter what they are.
+        q4r = (float4)(0.0f,0.0f,0.0f,0.0f);
     }
     local float4 rg[GROUP_SIZE];
     local float2 fg[GROUP_SIZE];
@@ -50,7 +60,7 @@ kernel void phase_factor_qrf(
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
-            ph = -dot(q4,rg[n]);
+            ph = -dot(q4r,rg[n]);
             sinph = native_sin(ph);
             cosph = native_cos(ph);
             a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
@@ -70,16 +80,17 @@ kernel void phase_factor_qrf(
 kernel void phase_factor_pad(
     global const float *r,
     global const float2 *f,
+    const float16 R,
     global float2 *a,
-    int n_pixels,
-    int n_atoms,
-    int nF,
-    int nS,
-    float w,
-    float4 T,
-    float4 F,
-    float4 S,
-    float4 B)
+    const int n_pixels,
+    const int n_atoms,
+    const int nF,
+    const int nS,
+    const float w,
+    const float4 T,
+    const float4 F,
+    const float4 S,
+    const float4 B)
 {
     const int gi = get_global_id(0); /* Global index */
     const int i = gi % nF;          /* Pixel coordinate i */
@@ -149,11 +160,11 @@ kernel void phase_factor_mesh(
     global const float *r,
     global const float2 *f,
     global float2 *a,
-    int n_pixels,
-    int n_atoms,
-    int4 N,
-    float4 deltaQ,
-    float4 q_min)
+    const int n_pixels,
+    const int n_atoms,
+    const int4 N,
+    const float4 deltaQ,
+    const float4 q_min)
 {
 
     const int Nxy = N.x*N.y;
@@ -233,9 +244,9 @@ kernel void buffer_mesh_lookup(
     const float4 q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
     const float4 q4r = (float4)(0.0f,0.0f,0.0f,0.0f);
 
-    q4r.x = R.s0*q4.x + R.s3*q4.y + R.s6*q4.z;
-    q4r.y = R.s1*q4.x + R.s4*q4.y + R.s7*q4.z;
-    q4r.z = R.s2*q4.x + R.s5*q4.y + R.s8*q4.z;
+    q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
+    q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
+    q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
 
     // Floating point coordinates
     const float i_f = (q4r.x - q_min.x)/deltaQ.x;

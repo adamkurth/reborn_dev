@@ -3,8 +3,6 @@ import time
 
 import numpy as np
 import matplotlib.pyplot as plt
-import pyopencl as cl
-import pyopencl.array
 
 sys.path.append("../..")
 import bornagain as ba
@@ -49,15 +47,16 @@ show_all = show
 
 
 
-if 0:
+if 1:
     
     print("Access q vectors from memory (i.e. compute them on cpu first)")
     q = pl.Q  # These are the scattering vectors, Nx3 array.
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
+    R = np.eye(3)
     for i in range(0, n_trials):
         t = time.time()
-        A = clcore.phase_factor_qrf(q, r, f, context=context, queue=queue,group_size=group_size)
+        A = clcore.phase_factor_qrf(q, r, f, R, context=context, queue=queue,group_size=group_size)
         tf = time.time() - t
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -71,7 +70,7 @@ if 0:
     print("")
 
 
-if 0:
+if 1:
     
     print("Compute q vectors on cpu, but load into GPU memory only once (at the beginning)")
     t = time.time()
@@ -85,7 +84,7 @@ if 0:
     print('Move to device memory: %7.03f ms' % (tf*1e3))
     for i in range(0, n_trials):
         t = time.time()
-        a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, a_dev,group_size=group_size)
+        a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, None, a_dev,group_size=group_size)
         tf = time.time() - t
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -103,16 +102,17 @@ if 0:
     del a_dev
 
 
-if 0:
+if 1:
     
     print("Compute q vectors on the fly.  Faster than accessing q's from memory?")
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
     n_pixels = p.nF*p.nS
     n_atoms = r.shape[0]
+    R = np.eye(3)
     for i in range(0, n_trials):
         t = time.time()
         A = clcore.phase_factor_pad(
-            r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, context=context, queue=queue,group_size=group_size)
+            r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, R, context=context, queue=queue,group_size=group_size)
         tf = time.time() - t
         print('phase_factor_pad: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -127,7 +127,7 @@ if 0:
     print("")
 
 
-if 0:
+if 1:
     
     print("Make a full 3D diffraction amplitude map...")
     res = 1e-10  # Resolution
@@ -171,7 +171,6 @@ if 1:
         print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
     print('')
-    print(A)
     
     pl = ba.detector.PanelList()
     nPixels = 1000
@@ -208,7 +207,7 @@ if 1:
     print('As above, but first move arrays to device memory (%7.03f ms)' % (tf*1e3))
     n_atoms = 0
     n_pixels = q.shape[0]
-    R = ba.utils.random_rotation_matrix()
+    R = np.eye(3) #ba.utils.random_rotation_matrix()
     for i in range(0,n_trials):
         t = time.time()
         clcore.buffer_mesh_lookup(a_map_dev, N, qmin, qmax, q_dev, R, a_out_dev,
