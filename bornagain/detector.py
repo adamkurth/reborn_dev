@@ -31,6 +31,7 @@ class Panel(object):
         self._beam = source.beam()  # Container for x-ray beam information
         self._data = None  # Diffraction intensity data
         self._mask = None
+        self._dark = None
 
         # Cached parameters
         self._pixel_size = None  # Pixel size derived from F/S vectors
@@ -569,6 +570,7 @@ class PanelList(object):
         # Derived data (concatenated from individual panels)
         self._data = None  # Concatenated intensity data
         self._mask = None  # Identify bad pixels [1 means good, 0 means bad]
+        self._dark = None  # Counts on detector when there are no x-rays
         # Common pixel size (if not common amongst panels, this will be 'None')
         self._pixel_size = None
         self._sa = None  # Concatenated solid angles
