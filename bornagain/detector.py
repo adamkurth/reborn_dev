@@ -132,6 +132,20 @@ class Panel(object):
         self._mask = mask
 
     @property
+    def dark(self):
+
+        """ Dark signal. """
+
+        if self._dark is None:
+            self._dark = np.zeros(self.data.shape)
+        return self._dark
+
+    @dark.setter
+    def dark(self, dark):
+
+        self._dark = dark
+
+    @property
     def beam(self):
 
         """ X-ray beam data, taken from parent Panel list if one exists."""
@@ -832,6 +846,33 @@ class PanelList(object):
             nPix = p.n_pixels
             p.mask = mask[n:(n + nPix)]
             p.mask = p.mask.reshape((p.nS, p.nF))
+            n += nPix
+
+    @property
+    def dark(self):
+
+        """ Concatenated dark."""
+
+        if self._dark is None:
+
+            self._dark = np.concatenate([p.dark.reshape(np.product(p.dark.shape)) for p in self])
+
+        return self._dark
+
+    @dark.setter
+    def dark(self, dark):
+
+        """ Check that dark is of the correct type."""
+
+        if not isinstance(dark, np.ndarray) and dark.ndim == 1 and dark.size == self.n_pixels:
+            raise ValueError("Must be flattened ndarray of size %d" % self.n_pixels)
+
+        self._dark = dark
+        n = 0
+        for p in self:
+            nPix = p.n_pixels
+            p.dark = dark[n:(n + nPix)]
+            p.dark = p.dark.reshape((p.nS, p.nF))
             n += nPix
 
     @property
