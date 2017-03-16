@@ -1,264 +1,263 @@
-import    numpy         as np
-from      bornagain import detector
-import                     re
+import numpy as np
+from bornagain import detector
+import re
 
 
-def geomToDict(geomFile=None,rawStrings=False):
+def geom_to_dict(geomFile=None, rawStrings=False):
+    """ Convert a crystfel "geom" file into a sensible Python dictionary.  For details
+            see:
 
-	""" Convert a crystfel "geom" file into a sensible Python dictionary.  For details
-		see:
-		
-		http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html.
-		
-		By default, this will convert values to floats, integers, or bools, as
-		appropriate. Use the option "rawStrings = True" to load only raw strings."""
+            http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html.
 
-	def interpretVectorString(s):
+            By default, this will convert values to floats, integers, or bools, as
+            appropriate. Use the option "rawStrings = True" to load only raw strings."""
 
-		""" Parse fast/slow scan vectors """
+    def interpret_vector_string(s):
+        """ Parse fast/slow scan vectors """
 
-		s = s.strip()
-		coords = list("".join(i for i in s if i in "xyz"))
-		vals = {}
-		for coord in coords:
-			s = s.split(coord)
-			for i in range(len(s)):
-				s[i] = s[i].strip()
-			if s[0] == '':   # CrystFEL allows simply "x" in place of "1x"
-				s[0] = 1
-			vals[coord] = float(s[0])
-			s = s[1]
+        s = s.strip()
+        coords = list("".join(i for i in s if i in "xyz"))
+        vals = {}
+        for coord in coords:
+            s = s.split(coord)
+            for i in range(len(s)):
+                s[i] = s[i].strip()
+            if s[0] == '':   # CrystFEL allows simply "x" in place of "1x"
+                s[0] = 1
+            vals[coord] = float(s[0])
+            s = s[1]
 
-		vec = [0,0,0]
-		if 'x' in vals.keys():
-			vec[0] = vals['x']
-		if 'y' in vals.keys():
-			vec[1] = vals['y']
-		if 'z' in vals.keys():
-			vec[2] = vals['z']
+        vec = [0, 0, 0]
+        if 'x' in vals.keys():
+            vec[0] = vals['x']
+        if 'y' in vals.keys():
+            vec[1] = vals['y']
+        if 'z' in vals.keys():
+            vec[2] = vals['z']
 
-		return vec
+        return vec
 
-	def seekDictionaryByName(dictionaryList,dictionaryName):
+    def seek_dictionary_by_name(dictionaryList, dictionaryName):
+        """ We will deal with lists of dictionaries.  Here is how we seek a specific entry in the list by name """
 
-		""" We will deal with lists of dictionaries.  Here is how we seek a specific entry in the list by name """
+        theDictionary = None
+        for item in dictionaryList:
+            if item['name'] == dictionaryName:
+                theDictionary = item
+        return theDictionary
 
-		theDictionary = None
-		for item in dictionaryList:
-			if item['name'] == dictionaryName:
-				theDictionary = item
-		return theDictionary
+    def convert_types(mydict):
+        """ Convert dictionary entries into numeric types, as appropriate """
 
-	def convertTypes(mydict):
+        for key in mydict.keys():
+            # Convert floating point values
+            if key in set(['adu_per_eV', 'res', 'clen', 'coffset', 'corner_x', 'corner_y', 'max_adu', 'photon_energy', 'photon_energy_scale']):
+                try:
+                    mydict[key] = float(mydict[key])
+                    continue
+                except:
+                    continue
+            # Integers
+            if key in set(['min_fs', 'min_ss', 'max_fs', 'max_ss']):
+                try:
+                    mydict[key] = int(mydict[key])
+                    continue
+                except:
+                    continue
+            # Vectors
+            if key in set(['fs', 'ss']):
+                try:
+                    mydict[key] = interpret_vector_string(mydict[key])
+                    continue
+                except:
+                    continue
+            # Boolean
+            if key in set(['no_index']):
+                if mydict[key] == '1':
+                    mydict[key] = True
+                else:
+                    mydict[key] = False
+            continue
 
-		""" Convert dictionary entries into numeric types, as appropriate """
+    # These are the Panel keys allowed by crystfel
+    panelKeys = ['name', 'data', 'dim0', 'dim1', 'dim2', 'min_fs', 'min_ss', 'max_fs', 'max_ss', 'adu_per_eV', 'badrow_direction', 'res', 'clen', 'coffset', 'fs', 'ss',
+                 'corner_x', 'corner_y', 'max_adu', 'no_index', 'mask', 'mask_file', 'saturation_map', 'saturation_map_file', 'mask_good', 'mask_bad', 'photon_energy', 'photon_energy_scale']
 
-		for key in mydict.keys():
-			# Convert floating point values
-			if key in set(['adu_per_eV','res','clen','coffset','corner_x','corner_y','max_adu','photon_energy','photon_energy_scale']):
-				try:
-					mydict[key] = float(mydict[key])
-					continue
-				except:
-					continue
-			# Integers
-			if key in set(['min_fs','min_ss','max_fs','max_ss']):
-				try:
-					mydict[key] = int(mydict[key])
-					continue
-				except:
-					continue
-			# Vectors
-			if key in set(['fs','ss']):
-				try:
-					mydict[key] = interpretVectorString(mydict[key])
-					continue
-				except:
-					continue
-			# Boolean
-			if key in set(['no_index']):
-				if mydict[key] == '1':
-					mydict[key] = True
-				else:
-					mydict[key] = False
-			continue
+    # Here is our template Panel dictionary.  Also for the global Panel dictionary,
+    # which fills in the undefined properties of panels.
+    panelDictTemplate = {}
+    # Initialized with None for all keys
+    for key in panelKeys:
+        panelDictTemplate[key] = None
 
-	# These are the Panel keys allowed by crystfel
-	panelKeys = ['name','data','dim0','dim1','dim2','min_fs','min_ss','max_fs','max_ss','adu_per_eV','badrow_direction','res','clen','coffset','fs','ss','corner_x','corner_y','max_adu','no_index','mask','mask_file','saturation_map','saturation_map_file','mask_good','mask_bad','photon_energy','photon_energy_scale']
+    # These are the bad region keys allowed by crystfel
+    badRegionKeys = ['name', 'min_x', 'max_x', 'min_y', 'max_y', 'Panel']
 
-	# Here is our template Panel dictionary.  Also for the global Panel dictionary,
-	# which fills in the undefined properties of panels.
-	panelDictTemplate = {}
-	# Initialized with None for all keys
-	for key in panelKeys:
-		panelDictTemplate[key] = None
-	
-	# These are the bad region keys allowed by crystfel
-	badRegionKeys = ['name','min_x','max_x','min_y','max_y','Panel']
+    # Initialize a template dictionary for bad regions.
+    badRegionDictTemplate = {}
+    for key in badRegionKeys:
+        badRegionDictTemplate[key] = None
 
-	# Initialize a template dictionary for bad regions.
-	badRegionDictTemplate = {}
-	for key in badRegionKeys:
-		badRegionDictTemplate[key] = None
+    # Initialize a template dictionary for rigid groups
+    rigidGroupDictTemplate = {'name': None, 'panels': []}
 
-	# Initialize a template dictionary for rigid groups
-	rigidGroupDictTemplate = {'name' : None, 'panels' : []}
-	
-	# Initialize a template dictionary for rigid group collections
-	rigidGroupCollectionDictTemplate = {'name' : None, 'groups' : []}
+    # Initialize a template dictionary for rigid group collections
+    rigidGroupCollectionDictTemplate = {'name': None, 'groups': []}
 
-	# Initialize the lists we will populate as we scan the file
-	globals = panelDictTemplate.copy()
-	panels = []
-	rigidGroups = []
-	rigidGroupCollections = []
-	badRegions = []
+    # Initialize the lists we will populate as we scan the file
+    globals_ = panelDictTemplate.copy()
+    panels = []
+    rigidGroups = []
+    rigidGroupCollections = []
+    badRegions = []
 
-	# Now begin scanning the file
+    # Now begin scanning the file
 
-	if geomFile is None:
-		raise ValueError("No geometry file specified")
+    if geomFile is None:
+        raise ValueError("No geometry file specified")
 
-	h = open(geomFile, "r")
+    h = open(geomFile, "r")
 
-	for originalline in h:
+    for originalline in h:
 
-		# Avoid any issues with whitespace
-		line = originalline.strip()
+        # Avoid any issues with whitespace
+        line = originalline.strip()
 
-		# Skip empty lines
-		if len(line) == 0:
-			continue
+        # Skip empty lines
+        if len(line) == 0:
+            continue
 
-		# Skip comment lines
-		if line[0] == ';':
-			continue
+        # Skip comment lines
+        if line[0] == ';':
+            continue
 
-		# Remove trailing comments
-		line = line.split(';')
-		line = line[0]
-		line = line.strip()
+        # Remove trailing comments
+        line = line.split(';')
+        line = line[0]
+        line = line.strip()
 
-		# Search for appropriate lines.  Firstly, we must have an "=" character
-		line = line.split("=")
-		if len(line) != 2:
-			continue
+        # Search for appropriate lines.  Firstly, we must have an "=" character
+        line = line.split("=")
+        if len(line) != 2:
+            continue
 
-		# Split key/values
-		value = line[1].strip()
-		key = line[0].strip()
+        # Split key/values
+        value = line[1].strip()
+        key = line[0].strip()
 
-		# Check for global key
-		if key in set(panelDictTemplate.keys()):
-			globals[key] = value
-			continue
+        # Check for global key
+        if key in set(panelDictTemplate.keys()):
+            globals_[key] = value
+            continue
 
-		# Check for rigid group collection
-		if re.search("^rigid_group_collection", key):
-			name = key.split("_")[-1]
-			thisDict = seekDictionaryByName(rigidGroupCollections,name)
-			if thisDict is None:
-				thisDict = rigidGroupCollectionDictTemplate.copy()
-				thisDict['name'] = name
-				rigidGroupCollections.append(thisDict)
-			thisDict['groups'] = ([k.strip() for k in value.split(',')])
-			continue
+        # Check for rigid group collection
+        if re.search("^rigid_group_collection", key):
+            name = key.split("_")[-1]
+            thisDict = seek_dictionary_by_name(rigidGroupCollections, name)
+            if thisDict is None:
+                thisDict = rigidGroupCollectionDictTemplate.copy()
+                thisDict['name'] = name
+                rigidGroupCollections.append(thisDict)
+            thisDict['groups'] = ([k.strip() for k in value.split(',')])
+            continue
 
-		# Check for rigid group
-		if re.search("^rigid_group", key):
-			name = key.split("_")[-1]
-			thisDict = seekDictionaryByName(rigidGroups,name)
-			if thisDict is None:
-				thisDict = rigidGroupDictTemplate.copy()
-				thisDict['name'] = name
-				rigidGroups.append(thisDict)
-			thisDict['panels'] = ([k.strip() for k in value.split(',')])
-			continue
+        # Check for rigid group
+        if re.search("^rigid_group", key):
+            name = key.split("_")[-1]
+            thisDict = seek_dictionary_by_name(rigidGroups, name)
+            if thisDict is None:
+                thisDict = rigidGroupDictTemplate.copy()
+                thisDict['name'] = name
+                rigidGroups.append(thisDict)
+            thisDict['panels'] = ([k.strip() for k in value.split(',')])
+            continue
 
-		# Check for bad region
-		if re.search("^bad", key):
-			key = key.split("/")
-			name = key[0].strip()
-			key = key[1].strip()
-			thisDict = seekDictionaryByName(badRegions,name)
-			if thisDict is None:
-				thisDict = badRegionDictTemplate.copy()
-				thisDict['name'] = name
-				badRegions.append(thisDict)
-			thisDict[key] = value
-			continue
+        # Check for bad region
+        if re.search("^bad", key):
+            key = key.split("/")
+            name = key[0].strip()
+            key = key[1].strip()
+            thisDict = seek_dictionary_by_name(badRegions, name)
+            if thisDict is None:
+                thisDict = badRegionDictTemplate.copy()
+                thisDict['name'] = name
+                badRegions.append(thisDict)
+            thisDict[key] = value
+            continue
 
-		# If not any of the above types, check if it is a Panel-specific specification
-		key = key.split("/")
-		if len(key) != 2:
-			print('Cannot interpret string %s' % originalline)
-			continue
+        # If not any of the above types, check if it is a Panel-specific
+        # specification
+        key = key.split("/")
+        if len(key) != 2:
+            print('Cannot interpret string %s' % originalline)
+            continue
 
-		# Split name from key/value pairs
-		name = key[0].strip()
-		key = key[1].strip()
-		
-		if key in set(panelKeys):
-			thisDict = seekDictionaryByName(panels,name)
-			if thisDict is None:
-				thisDict = panelDictTemplate.copy()
-				thisDict['name'] = name
-				panels.append(thisDict)
-			thisDict[key] = value
-			continue
-		
-		print("Cannot interpret: %s" % originalline)
+        # Split name from key/value pairs
+        name = key[0].strip()
+        key = key[1].strip()
 
-	# Convert strings to numeric types as appropriate
-	if rawStrings is not True:
-		for Panel in panels:
-			convertTypes(Panel)
-		convertTypes(globals)
-		for badRegion in badRegions:
-			convertTypes(badRegion)
+        if key in set(panelKeys):
+            thisDict = seek_dictionary_by_name(panels, name)
+            if thisDict is None:
+                thisDict = panelDictTemplate.copy()
+                thisDict['name'] = name
+                panels.append(thisDict)
+            thisDict[key] = value
+            continue
 
-	# Populate the missing values in each Panel with global values
-	for Panel in panels:
-		for key in panelKeys:
-			if Panel[key] is None:
-				Panel[key] = globals[key]
+        print("Cannot interpret: %s" % originalline)
 
-	# Now package up the results and return
-	geomDict = {'globals' : globals, 'panels' : panels, 'rigidGroups' : rigidGroups, 'rigidGroupCollections' : rigidGroupCollections, 'badRegions' : badRegions}
-	return geomDict
-	
+    # Convert strings to numeric types as appropriate
+    if rawStrings is not True:
+        for Panel in panels:
+            convert_types(Panel)
+        convert_types(globals_)
+        for badRegion in badRegions:
+            convert_types(badRegion)
 
-def geomDictToPanelList(geomDict):
+    # Populate the missing values in each Panel with global values
+    for Panel in panels:
+        for key in panelKeys:
+            if Panel[key] is None:
+                Panel[key] = globals_[key]
 
-	""" Convert a CrystFEL geometry dictionary to a PanelList object. """
+    # Now package up the results and return
+    geomDict = {'globals_': globals_, 'panels': panels, 'rigidGroups': rigidGroups,
+                'rigidGroupCollections': rigidGroupCollections, 'badRegions': badRegions}
+    return geomDict
 
-	PanelList = detector.PanelList()
-	PanelList.beam.B = np.array([0, 0, 1])
-	
-	for p in geomDict['panels']:
 
-		Panel = detector.Panel()
+def geom_dict_to_panellist(geomDict):
+    """ Convert a CrystFEL geometry dictionary to a PanelList object. """
 
-		Panel.name = p['name']
-		Panel.F = np.array(p['fs']) # Unit vectors
-		Panel.S = np.array(p['ss'])
-		Panel.nF = p['max_fs'] - p['min_fs'] + 1
-		Panel.nS = p['max_ss'] - p['min_ss'] + 1
-		z = 0.0
-		if type(p['coffset']) is not str:
-			z += p['coffset']
-		Panel.T = np.array([p['corner_x']/p['res'],p['corner_y']/p['res'],z])
-		Panel.pixel_size = 1.0 / p['res']
-		Panel.adu_per_ev = p['adu_per_eV']
-		PanelList.append(Panel)
+    PanelList = detector.PanelList()
+    PanelList.beam.B = np.array([0, 0, 1])
 
-	return PanelList
+    for p in geomDict['panels']:
+
+        Panel = detector.Panel()
+
+        Panel.name = p['name']
+        Panel.F = np.array(p['fs'])  # Unit vectors
+        Panel.S = np.array(p['ss'])
+        Panel.nF = p['max_fs'] - p['min_fs'] + 1
+        Panel.nS = p['max_ss'] - p['min_ss'] + 1
+        z = 0.0
+        if type(p['coffset']) is not str:
+            z += p['coffset']
+        Panel.T = np.array(
+            [p['corner_x'] / p['res'], p['corner_y'] / p['res'], z])
+        Panel.pixel_size = 1.0 / p['res']
+        Panel.adu_per_ev = p['adu_per_eV']
+        PanelList.append(Panel)
+
+    return PanelList
 
 #        if key == "coffset":
 #            p.T[2] += float(value)
 #        if key == "clen":
 #            p.T[2] += float(value)
-#		
+#
 #    # Now adjust Panel list according to global parameters, convert units, etc.
 #    i = 0
 #    for p in pa:
@@ -306,20 +305,19 @@ def geomDictToPanelList(geomDict):
 #    return pa
 
 
-def loadCheetahMask(maskArray,PanelList,geomDict):
+def load_cheetah_mask(maskArray, PanelList, geomDict):
+    """ Populate Panel masks with cheetah mask array. """
 
-	""" Populate Panel masks with cheetah mask array. """
+    fail = False
 
-	fail = False
+    for p in geomDict['panels']:
+        PanelList[p['name']].mask = maskArray[
+            p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)]
 
-	for p in geomDict['panels']:
-		PanelList[p['name']].mask = maskArray[p['min_ss']:(p['max_ss']+1),p['min_fs']:(p['max_fs']+1)]
-
-	return fail
+    return fail
 
 
-def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
-
+def geom_to_panellist(geomFile=None, beamFile=None, PanelList=None):
     """ Convert a crystfel "geom" file into a Panel list """
 
     # For parsing the very loose fast/slow scan vector specification
@@ -337,7 +335,7 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
             vals[coord] = float(s[0])
             s = s[1]
 
-        vec = [0,0,0]
+        vec = [0, 0, 0]
         if 'x' in vals.keys():
             vec[0] = vals['x']
         if 'y' in vals.keys():
@@ -446,7 +444,8 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
         if re.search("^bad_", key):
             continue
 
-        # If not a global key, check for Panel-specific keys, which always have a "/" character
+        # If not a global key, check for Panel-specific keys, which always have
+        # a "/" character
         key = key.split("/")
         if len(key) != 2:
             continue
@@ -534,8 +533,10 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
             p.T[2] += global_coffset
             p.detOffsetField = None  # Cannot have offset value *and* field
         if global_photon_energy is not None:
-            p.beam.wavelength = 1.2398e-6 / global_photon_energy  # CrystFEL uses eV units
-            p.photonEnergyField = None  # Cannot have both energy value *and* field
+            # CrystFEL uses eV units
+            p.beam.wavelength = 1.2398e-6 / global_photon_energy
+            # Cannot have both energy value *and* field
+            p.photonEnergyField = None
 
         i += 1
 
@@ -553,4 +554,3 @@ def geomToPanelList(geomFile=None, beamFile=None, PanelList=None):
         pa.addRigidGroup(cn, rgn)
 
     return pa
-
