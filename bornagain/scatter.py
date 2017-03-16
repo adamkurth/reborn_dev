@@ -32,9 +32,11 @@ class RadialProfile(object):
 			self.maxQ = qRange[1]
 	
 		self.nBins = nBins
-		self.binSize = self.maxQ / (self.nBins - 1)
+		self.binSize = (self.maxQ-self.minQ) / (self.nBins)
 		self.bins = (np.arange(0,self.nBins) + 0.5)*self.binSize
 		self.binIndices = np.int64(np.floor(self.Qmag / self.binSize))
+		self.binIndices[self.binIndices < 0] = 0
+		self.binIndices[self.binIndices >= nBins] = nBins-1
 		if mask is None:
 			self.mask = np.ones([len(self.binIndices)])
 		else:
@@ -44,10 +46,8 @@ class RadialProfile(object):
 
 	def get_profile(self, PanelList, average=True):
 
-		fail = False
-
 		profile = np.bincount(self.binIndices, PanelList.data*self.mask, self.nBins)
 		if average:
 			profile.flat[self.countsNonZero] /= self.counts.flat[self.countsNonZero]
 	
-		return profile, fail
+		return profile

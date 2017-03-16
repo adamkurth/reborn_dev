@@ -28,7 +28,7 @@ class Panel(object):
         self._nS = 0  # Number of pixels along the slow-scan direction
         # Number of arbitrary data units per eV of photon energy
         self.adu_per_ev = 0
-        self._beam = source.beam()  # Container for x-ray beam information
+        self._beam = None  # Container for x-ray beam information
         self._data = None  # Diffraction intensity data
         self._mask = None
         self._dark = None
@@ -153,6 +153,8 @@ class Panel(object):
             beam = self.PanelList._beam
             self._beam = None
         else:
+            if self._beam is None:
+                self._beam = source.beam()
             beam = self._beam
 
         return beam
@@ -563,7 +565,7 @@ class PanelList(object):
         # Configured data
         self._name = None  # The name of this list (useful for rigid groups)
         # X-ray beam information, common to all panels
-        self._beam = source.beam()
+        self._beam = None
         self._PanelList = []  # List of individual panels
 
         # Derived data (concatenated from individual panels)
@@ -650,7 +652,7 @@ class PanelList(object):
 
         self._beam = beam
         for p in self:
-            p.beam = beam
+            p._beam = None
 
     @property
     def n_pixels(self):
@@ -679,11 +681,9 @@ class PanelList(object):
         elif p.name == "":
             p.name = "%d" % self.nPanels
 
-        # Inherit first beam from append
+        # Inherit beam from first append
         if self._beam is None:
-            self._beam = p.beam.copy()
-
-        p._beam = None
+            self._beam = p._beam
 
         self._PanelList.append(p)
 
@@ -728,7 +728,7 @@ class PanelList(object):
     @property
     def Q(self):
         """ Concatenated reciprocal-space vectors."""
-
+        
         return 2 * np.pi * self.K / self.beam.wavelength
 
     @property

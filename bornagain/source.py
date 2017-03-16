@@ -62,7 +62,10 @@ class beam(object):
     def __str__(self):
 
         s = ""
-        s += "wavelength : %g\n" % self.wavelength
+        if self.wavelength is not None:
+            s += "wavelength : %g\n" % self.wavelength
+        else:
+            s += "wavelength : None\n"
         s += "B : [%g, %g, %g]\n" % (self.B[0], self.B[1], self.B[2])
         return s
 
