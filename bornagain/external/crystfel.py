@@ -3,14 +3,18 @@ from bornagain import detector
 import re
 
 
-def geom_to_dict(geomFile=None, rawStrings=False):
-    """ Convert a crystfel "geom" file into a sensible Python dictionary.  For details
-            see:
+def geom_to_dict(geom_file, raw_strings=False):
+	
+    """ 
+    Convert a crystfel "geom" file into a sensible Python dictionary.  For details see:
+    http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html.
 
-            http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html.
-
-            By default, this will convert values to floats, integers, or bools, as
-            appropriate. Use the option "rawStrings = True" to load only raw strings."""
+    Input:
+    geom_file:   Path to the geometry file
+    raw_strings: By default, this function will convert values to floats, integers, or bools, 
+    as appropriate. Set this option to "True" if you want to store the raw strings in the output
+    dictionary.
+    """
 
     def interpret_vector_string(s):
         """ Parse fast/slow scan vectors """
@@ -113,10 +117,10 @@ def geom_to_dict(geomFile=None, rawStrings=False):
 
     # Now begin scanning the file
 
-    if geomFile is None:
+    if geom_file is None:
         raise ValueError("No geometry file specified")
 
-    h = open(geomFile, "r")
+    h = open(geom_file, "r")
 
     for originalline in h:
 
@@ -208,7 +212,7 @@ def geom_to_dict(geomFile=None, rawStrings=False):
         print("Cannot interpret: %s" % originalline)
 
     # Convert strings to numeric types as appropriate
-    if rawStrings is not True:
+    if raw_strings is not True:
         for Panel in panels:
             convert_types(Panel)
         convert_types(globals_)
@@ -316,6 +320,16 @@ def load_cheetah_mask(maskArray, PanelList, geomDict):
 
     return fail
 
+def load_cheetah_dark(darkArray, PanelList, geomDict):
+    """ Populate Panel darks with cheetah dark array. """
+
+    fail = False
+
+    for p in geomDict['panels']:
+        PanelList[p['name']].dark = darkArray[
+            p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)]
+
+    return fail
 
 def geom_to_panellist(geomFile=None, beamFile=None, PanelList=None):
     """ Convert a crystfel "geom" file into a Panel list """
