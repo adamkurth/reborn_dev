@@ -113,8 +113,7 @@ class Panel(object):
     def data(self, val):
 
         if val.shape[0] != self.nS or val.shape[1] != self.nF:
-            raise ValueError('Panel data should have shape (%d,%d), not (%d,%d)' % (
-                self.nS, self.nF, val.shape[0], val.shape[1]))
+            raise ValueError('Panel data should have shape (%d,%d)' % (self.nS, self.nF))
 
         self._data = val
         # Must clear out any derived data that depends on this input
@@ -778,8 +777,7 @@ class PanelList(object):
         n = 0
         for p in self:
             nPix = p.n_pixels
-            p.data = data[n:(n + nPix)]
-            p.data = p.data.reshape((p.nS, p.nF))
+            p.data = data[n:(n + nPix)].reshape((p.nS, p.nF))
             n += nPix
 
     @property
