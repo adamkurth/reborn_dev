@@ -376,7 +376,7 @@ A numpy array of complex amplitudes.
 
     a_map_dev = to_device(queue, a_map, dtype=np.complex64)
     q_dev = to_device(queue, q, dtype=np.float32)
-    R_dev = to_device(queue, R, dtype=np.float32)
+    #R_dev = to_device(queue, R, dtype=np.float32)
     N = vec4(N, dtype=np.int32)
     deltaQ = vec4(deltaQ, dtype=np.float32)
     q_min = vec4(q_min, dtype=np.float32)
