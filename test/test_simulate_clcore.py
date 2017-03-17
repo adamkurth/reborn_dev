@@ -1,7 +1,15 @@
+"""
+Test the clcore simulation engine in bornagain.simulate.  This requires pytest.  You can also run from main
+like this: 
+> python test_simulate_clcore.py
+If you want to view results just add the keyword "view" 
+> python test_simulate_clcore.py view
+"""
+
+
 import sys
 
 import numpy as np
-import matplotlib.pyplot as plt
 import pytest
 
 sys.path.append('..')
@@ -11,6 +19,13 @@ try:
     havecl = True
 except ImportError:
     havecl = False
+
+view = False
+
+if len(sys.argv) > 1:
+    view = True
+    import matplotlib.pyplot as plt
+    
 
 clskip = pytest.mark.skipif(havecl is False, reason="Requires pyopencl module")
 
@@ -82,19 +97,57 @@ def test_equivalence_pad_qrf(main=False):
     dif = np.max(np.abs(A1-A2))
     
     if main:
-        print('Max difference: %g' % (dif))
-        print('Showing qrf and pad')
-        A1 = np.reshape(np.abs(A1)**2,[nS,nF])
-        A2 = np.reshape(np.abs(A2)**2,[nS,nF])
-        plt.imshow(A1,cmap='gray',interpolation='nearest')
-        plt.show()
-        plt.imshow(A2,cmap='gray',interpolation='nearest')
-        plt.show()
-        plt.imshow(A1-A2,cmap='gray',interpolation='nearest')
-        plt.show()
+        print('test_equivalence_pad_qrf max error: %g' % (dif))
+        if view:
+            print('Showing qrf and pad')
+            A1 = np.reshape(np.abs(A1)**2,[nS,nF])
+            A2 = np.reshape(np.abs(A2)**2,[nS,nF])
+            plt.imshow(A1,cmap='gray',interpolation='nearest')
+            plt.show()
+            plt.imshow(A2,cmap='gray',interpolation='nearest')
+            plt.show()
+            plt.imshow(A1-A2,cmap='gray',interpolation='nearest')
+            plt.show()
     
-    # This is a pretty weak tolerance...
+    # This is a pretty weak tolerance... something is probably wrong
     assert(dif <= 1e-4)
+
+def test_rotations(main=False):
+    
+    """
+    Test that rotations go in the correct direction.
+    """
+    
+    R = ba.utils.random_rotation_matrix()
+    
+    pl = ba.detector.PanelList()
+    pl.simple_setup(100,101,100e-6,0.1,1.5e-9)
+    q = pl[0].Q
+    
+    r = np.random.random([5,3])*1e-10
+    f = np.random.random([5])
+    
+    q = q.astype(np.float32)
+    R = R.astype(np.float32)
+    qR = q.dot(R.T)
+    
+    A1 = clcore.phase_factor_qrf(q,r,f,R)
+    A2 = clcore.phase_factor_qrf(qR,r,f)
+    
+    dif = np.max(np.abs(A1-A2))
+    
+    if main:
+        print("test_rotations: max error is %g" % (dif))
+    
+    assert(dif < 1e-5)
+
+
+
+
+
+
+
+
     
 if __name__ == '__main__':
     
@@ -102,4 +155,9 @@ if __name__ == '__main__':
     main = True
     test_two_atoms(main)
     test_equivalence_pad_qrf(main)
+    test_rotations(main)
+    
+
+
+    
     
