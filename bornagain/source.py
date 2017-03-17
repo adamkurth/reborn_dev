@@ -1,9 +1,10 @@
 """
-Classes related to x-ray sources.  
+Classes related to x-ray sources.
 """
 
 import numpy as np
 import utils
+
 
 class beam(object):
 
@@ -57,7 +58,6 @@ class beam(object):
     def P(self, value):
 
         self._P = value
-
 
     def __str__(self):
 

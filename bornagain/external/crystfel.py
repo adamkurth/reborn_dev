@@ -4,15 +4,16 @@ import re
 
 
 def geom_to_dict(geom_file, raw_strings=False):
-	
-    """ 
-    Convert a crystfel "geom" file into a sensible Python dictionary.  For details see:
+    """
+    Convert a crystfel "geom" file into a sensible Python dictionary.  For
+    details see:
     http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html.
 
     Input:
     geom_file:   Path to the geometry file
-    raw_strings: By default, this function will convert values to floats, integers, or bools, 
-    as appropriate. Set this option to "True" if you want to store the raw strings in the output
+    raw_strings: By default, this function will convert values to floats,
+                 integers, or bools, as appropriate. Set this option to "True"
+                 if you want to store the raw strings in the output
     dictionary.
     """
 
@@ -42,7 +43,8 @@ def geom_to_dict(geom_file, raw_strings=False):
         return vec
 
     def seek_dictionary_by_name(dictionaryList, dictionaryName):
-        """ We will deal with lists of dictionaries.  Here is how we seek a specific entry in the list by name """
+        """ We will deal with lists of dictionaries.  Here is how we seek a
+        specific entry in the list by name """
 
         theDictionary = None
         for item in dictionaryList:
@@ -55,7 +57,9 @@ def geom_to_dict(geom_file, raw_strings=False):
 
         for key in mydict.keys():
             # Convert floating point values
-            if key in set(['adu_per_eV', 'res', 'clen', 'coffset', 'corner_x', 'corner_y', 'max_adu', 'photon_energy', 'photon_energy_scale']):
+            if key in set(['adu_per_eV', 'res', 'clen', 'coffset', 'corner_x',
+                           'corner_y', 'max_adu', 'photon_energy',
+                           'photon_energy_scale']):
                 try:
                     mydict[key] = float(mydict[key])
                     continue
@@ -84,11 +88,16 @@ def geom_to_dict(geom_file, raw_strings=False):
             continue
 
     # These are the Panel keys allowed by crystfel
-    panelKeys = ['name', 'data', 'dim0', 'dim1', 'dim2', 'min_fs', 'min_ss', 'max_fs', 'max_ss', 'adu_per_eV', 'badrow_direction', 'res', 'clen', 'coffset', 'fs', 'ss',
-                 'corner_x', 'corner_y', 'max_adu', 'no_index', 'mask', 'mask_file', 'saturation_map', 'saturation_map_file', 'mask_good', 'mask_bad', 'photon_energy', 'photon_energy_scale']
+    panelKeys = ['name', 'data', 'dim0', 'dim1', 'dim2', 'min_fs', 'min_ss',
+                 'max_fs', 'max_ss', 'adu_per_eV', 'badrow_direction', 'res',
+                 'clen', 'coffset', 'fs', 'ss',
+                 'corner_x', 'corner_y', 'max_adu', 'no_index', 'mask',
+                 'mask_file', 'saturation_map', 'saturation_map_file',
+                 'mask_good', 'mask_bad', 'photon_energy',
+                 'photon_energy_scale']
 
-    # Here is our template Panel dictionary.  Also for the global Panel dictionary,
-    # which fills in the undefined properties of panels.
+    # Here is our template Panel dictionary.  Also for the global Panel
+    # dictionary, which fills in the undefined properties of panels.
     panelDictTemplate = {}
     # Initialized with None for all keys
     for key in panelKeys:
@@ -226,8 +235,11 @@ def geom_to_dict(geom_file, raw_strings=False):
                 Panel[key] = globals_[key]
 
     # Now package up the results and return
-    geomDict = {'globals_': globals_, 'panels': panels, 'rigidGroups': rigidGroups,
-                'rigidGroupCollections': rigidGroupCollections, 'badRegions': badRegions}
+    geomDict = {'globals_': globals_,
+                'panels': panels,
+                'rigidGroups': rigidGroups,
+                'rigidGroupCollections': rigidGroupCollections,
+                'badRegions': badRegions}
     return geomDict
 
 
@@ -247,7 +259,7 @@ def geom_dict_to_panellist(geomDict):
         Panel.nF = p['max_fs'] - p['min_fs'] + 1
         Panel.nS = p['max_ss'] - p['min_ss'] + 1
         z = 0.0
-        if type(p['coffset']) is not str:
+        if not isinstance(p['coffset'], str):
             z += p['coffset']
         Panel.T = np.array(
             [p['corner_x'] / p['res'], p['corner_y'] / p['res'], z])
@@ -256,57 +268,6 @@ def geom_dict_to_panellist(geomDict):
         PanelList.append(Panel)
 
     return PanelList
-
-#        if key == "coffset":
-#            p.T[2] += float(value)
-#        if key == "clen":
-#            p.T[2] += float(value)
-#
-#    # Now adjust Panel list according to global parameters, convert units, etc.
-#    i = 0
-#    for p in pa:
-#
-#        # Unit conversions
-#        if pixel_size[i] == 0:
-#            if global_res is not None:
-#                pixel_size[i] = 1 / global_res
-#        p.pixel_size = pixel_size[i]
-#        p.T[0:2] *= pixel_size[i]
-#
-#        # Data array size
-#        p.nF = p.fRange[1] - p.fRange[0] + 1
-#        p.nS = p.sRange[1] - p.sRange[0] + 1
-#
-#        # Check for extra global configurations
-#        p.adu_per_ev = global_adu_per_ev
-#        p.dataField = global_data
-#        p.detOffsetField = global_clen_field
-#        if global_clen is not None:
-#            p.T[2] += global_clen
-#            p.detOffsetField = None  # Cannot have clen value *and* path
-#        if global_coffset is not None:
-#            p.T[2] += global_coffset
-#            p.detOffsetField = None  # Cannot have offset value *and* field
-#        if global_photon_energy is not None:
-#            p.beam.wavelength = 1.2398e-6 / global_photon_energy  # CrystFEL uses eV units
-#            p.photonEnergyField = None  # Cannot have both energy value *and* field
-#
-#        i += 1
-#
-#    for i in range(len(rigidGroups)):
-#        pa.addRigidGroup(rigidGroupNames[i], rigidGroups[i])
-#
-#    for i in range(len(rigidGroupCollections)):
-#        cn = rigidGroupCollectionNames[i]
-#        rgc = rigidGroupCollections[i]
-#        rgn = []
-#        for j in rgc:
-#            rg = pa.rigidGroup(j)
-#            for k in rg:
-#                rgn.append(k.name)
-#        pa.addRigidGroup(cn, rgn)
-#
-#    return pa
 
 
 def load_cheetah_mask(maskArray, PanelList, geomDict):
@@ -320,6 +281,7 @@ def load_cheetah_mask(maskArray, PanelList, geomDict):
 
     return fail
 
+
 def load_cheetah_dark(darkArray, PanelList, geomDict):
     """ Populate Panel darks with cheetah dark array. """
 
@@ -330,6 +292,7 @@ def load_cheetah_dark(darkArray, PanelList, geomDict):
             p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)]
 
     return fail
+
 
 def geom_to_panellist(geomFile=None, beamFile=None, PanelList=None):
     """ Convert a crystfel "geom" file into a Panel list """
