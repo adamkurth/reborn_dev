@@ -5,16 +5,16 @@ import re
 
 def geom_to_dict(geom_file, raw_strings=False):
     """
-    Convert a crystfel "geom" file into a sensible Python dictionary.  For
-    details see:
-    http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html.
+Convert a crystfel "geom" file into a sensible Python dictionary.  For
+details see:
+http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html.
 
-    Input:
-    geom_file:   Path to the geometry file
-    raw_strings: By default, this function will convert values to floats,
-                 integers, or bools, as appropriate. Set this option to "True"
-                 if you want to store the raw strings in the output
-    dictionary.
+Input:
+geom_file: Path to the geometry file
+raw_strings: By default, this function will convert values to floats,
+integers, or bools, as appropriate. Set this option to "True"
+if you want to store the raw strings in the output
+dictionary.
     """
 
     def interpret_vector_string(s):

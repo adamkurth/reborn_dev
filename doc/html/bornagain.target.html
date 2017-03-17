@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bornagain.target package &mdash; bornagain 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" />
+    <link rel="up" title="bornagain package" href="bornagain.html" />
+    <link rel="next" title="bornagain.viewers package" href="bornagain.viewers.html" />
+    <link rel="prev" title="bornagain.simulate package" href="bornagain.simulate.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bornagain.viewers.html" title="bornagain.viewers package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bornagain.simulate.html" title="bornagain.simulate package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bornagain.html" accesskey="U">bornagain package</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bornagain.target package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-bornagain.target.crystal">bornagain.target.crystal module</a></li>
+<li><a class="reference internal" href="#module-bornagain.target">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bornagain.simulate.html"
+                        title="previous chapter">bornagain.simulate package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bornagain.viewers.html"
+                        title="next chapter">bornagain.viewers package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bornagain.target.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bornagain-target-package">
+<h1>bornagain.target package<a class="headerlink" href="#bornagain-target-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bornagain.target.crystal">
+<span id="bornagain-target-crystal-module"></span><h2>bornagain.target.crystal module<a class="headerlink" href="#module-bornagain.target.crystal" title="Permalink to this headline">¶</a></h2>
+<p>Basic utilities for dealing with crystalline objects.</p>
+<dl class="function">
+<dt id="bornagain.target.crystal.hermannMauguinToNumber">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">hermannMauguinToNumber</code><span class="sig-paren">(</span><em>hm</em>, <em>hall=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#hermannMauguinToNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.hermannMauguinToNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is needed to convert the Hermann Mauguin space group specifications
+in PDB files to the space group number or the &#8220;Hall number&#8221; that is used by</p>
+<blockquote>
+<div>the spglib module.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.parsePDB">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">parsePDB</code><span class="sig-paren">(</span><em>pdbFilePath</em>, <em>crystalStruct=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#parsePDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.parsePDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a structure object with PDB information.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.target.crystal.structure">
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">structure</code><span class="sig-paren">(</span><em>pdbFilePath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Stuff needed to deal with an atomistic crystal structure.</p>
+<p>A note on coordinate transformations and the orthogonalization matrix
+O:
+Convert from fractional coordinates x to real-space coordinates r:
+r = cryst.O.dot(x)
+Convert from real-space coordinates r to fractional coordinates x:
+x = cryst.Oinv.dot(r)
+Convert from q-space to h-space:
+h = cryst.O.T.dot(q)</p>
+<dl class="method">
+<dt id="bornagain.target.crystal.structure.loadPDB">
+<code class="descname">loadPDB</code><span class="sig-paren">(</span><em>pdbFilePath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.loadPDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.loadPDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate all the attributes from a PDB file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.structure.setCell">
+<code class="descname">setCell</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>alpha</em>, <em>beta</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.setCell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.setCell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the unit cell and all quantities derived from the unit cell.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.x">
+<code class="descname">x</code><a class="headerlink" href="#bornagain.target.crystal.structure.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fractional coordinates of atoms.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-bornagain.target">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bornagain.target" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bornagain.viewers.html" title="bornagain.viewers package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="bornagain.simulate.html" title="bornagain.simulate package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bornagain.html" >bornagain package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, Richard A Kirian.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

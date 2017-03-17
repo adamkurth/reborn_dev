@@ -5,7 +5,7 @@ detectors (PADs).
 
 import numpy as np
 from numpy.linalg import norm
-from numpy.random import random, randn
+# from numpy.random import random, randn
 
 from utils import vecNorm, vecMag
 import source
@@ -339,25 +339,25 @@ class Panel(object):
 
         return vecMag(self.Q)
 
-    @property
-    def mcQ(self):
-        """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
-        incident beam direction for each pixel independently. """
-
-        i = np.arange(self.nF)
-        j = np.arange(self.nS)
-        [i, j] = np.meshgrid(i, j)
-        i = i.ravel() + random(self.n_pixels) - 0.5
-        j = j.ravel() + random(self.n_pixels) - 0.5
-        F = np.outer(i, self.F)
-        S = np.outer(j, self.S)
-        V = self.T + F + S
-        B = np.outer(np.ones(self.n_pixels), self.B) + \
-            randn(self.n_pixels, 3) * self.beam.divergence
-        K = vecNorm(V) - vecNorm(B)
-        lam = self.beam.wavelength * \
-            (1 + randn(self.n_pixels) * self.beam.spectralWidth)
-        return 2 * np.pi * K / np.outer(lam, np.ones(3))
+#     @property
+#     def mcQ(self):
+#         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
+#         incident beam direction for each pixel independently. """
+# 
+#         i = np.arange(self.nF)
+#         j = np.arange(self.nS)
+#         [i, j] = np.meshgrid(i, j)
+#         i = i.ravel() + random(self.n_pixels) - 0.5
+#         j = j.ravel() + random(self.n_pixels) - 0.5
+#         F = np.outer(i, self.F)
+#         S = np.outer(j, self.S)
+#         V = self.T + F + S
+#         B = np.outer(np.ones(self.n_pixels), self.B) + \
+#             randn(self.n_pixels, 3) * self.beam.divergence
+#         K = vecNorm(V) - vecNorm(B)
+#         lam = self.beam.wavelength * \
+#             (1 + randn(self.n_pixels) * self.beam.spectralWidth)
+#         return 2 * np.pi * K / np.outer(lam, np.ones(3))
 
     @property
     def stol(self):
@@ -754,13 +754,13 @@ class PanelList(object):
 
         return vecMag(self.Q)
 
-    @property
-    def mcQ(self):
-        """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
-        incident beam direction for each pixel independently. """
-
-        return np.concatenate(
-            [p.mcQ.reshape(np.product(p.mcQ.shape) / 3, 3) for p in self])
+#     @property
+#     def mcQ(self):
+#         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
+#         incident beam direction for each pixel independently. """
+# 
+#         return np.concatenate(
+#             [p.mcQ.reshape(np.product(p.mcQ.shape) / 3, 3) for p in self])
 
     @property
     def stol(self):

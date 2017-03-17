@@ -16,7 +16,7 @@ def memoize(function):
     """
     This is a function decorator for caching results from a function, to avoid
     excessive computation or reading from disk.  Search the web for more
-    details of how this works.  It is a standard practice in Python 2.
+    details of how this works.
     """
 
     memo = {}
@@ -34,14 +34,13 @@ def memoize(function):
 
 def atomic_symbols_to_numbers(symbols):
     """
-    Convert atomic symbols (such as C, N, He, Be) to atomic numbers.
+Convert atomic symbols (such as C, N, He, Be) to atomic numbers.
 
-    Input:
-    symbols: A single scalar or list-like object containing strings with atomic
-    symbols. This is not sensitive to case.
+Arguments:
+    symbols (string/list-like): Atomic symbol strings. Case insensitive.
 
-    Output:
-    numbers: A numpy array of atomic numbers (integer data type)
+Returns:
+    numbers (numpy array): Atomic numbers.
     """
 
     symbols = np.array(symbols)
@@ -62,14 +61,13 @@ def atomic_symbols_to_numbers(symbols):
 
 def atomic_numbers_to_symbols(numbers):
     """
-    Convert atomic numbers to atomic symbols (such as C, N, He, Ca)
-    
-    Input:
-    numbers: A list-like object containing atomic numbers (integers)
-    
-    Output:
-    symbols: A numpy string array containing atomic element symbols (such as H,
-    He, Be)
+Convert atomic numbers to atomic symbols (such as C, N, He, Ca)
+
+Arguments:
+    numbers (int/list-like): Atomic numbers
+
+Returns:
+    symbols (numpy string array): Atomic element symbols (such as H, He, Be)
     """
 
     numbers = np.array(numbers, dtype=np.int)
@@ -82,22 +80,21 @@ def atomic_numbers_to_symbols(numbers):
 @memoize
 def get_henke_data(atomic_number):
     """
-    Load Henke scattering factor data from disk, cache for future retrieval.
-    The Henke data was gathered from the Center for X-Ray Optics web page at
-    the Lawrence Berkeley National Laboratory.  There is a publication with
-    details (reference to be added).
+Load Henke scattering factor data from disk, cache for future retrieval. The
+Henke data was gathered from the Center for X-Ray Optics web page at the
+Lawrence Berkeley National Laboratory.  There is a publication with details
+(reference to be added).
 
-    Input:
-    atomic_number: The atomic number of interest (scalar, not an array)
+Arguments:
+    atomic_number (int): The atomic number of interest
 
-    Output:
-    data: A dictionary with the following fields:
-            'Atomic Number'  : Atomic number of the element
-            'Element Symbol' : Standard element symbol (e.g. He)
-            'Photon Energy'  : A numpy array of photon energies (SI units)
-            'Scatter Factor' : A numpy array of complex atomic scattering
-                                factors that correspond to the photon energies
-                                above.
+Returns:
+    data (dictionary): A dictionary with the following fields 
+        'Atomic Number' -- Atomic number of the element
+        'Element Symbol' -- Standard element symbol (e.g. He)
+        'Photon Energy' -- A numpy array of photon energies (SI units)
+        'Scatter Factor' -- A numpy array of complex atomic scattering factors 
+        that correspond to the photon energies above.
     """
 
     sym = atomic_numbers_to_symbols(atomic_number)
@@ -114,18 +111,14 @@ def get_henke_data(atomic_number):
 
 def get_scattering_factors(atomic_numbers, photon_energy):
     """
-    Get the atomic scattering factors for a list of atomic numbers and for a
-    given photon energy.
+Get complex atomic scattering factors.
 
-    Input:
-    atomic_numbers: A list-like object containing atomic numbers (integers)
-    photon_energy:  A scalar value representing the photon energy (in SI units
-                      of course)
+Arguments:
+    atomic_numbers (int/list-like): Atomic numbers.
+    photon_energy (float): Photon energy.
 
-    Output:
-    scattering_factors: A numpy array of complex scattering factors
-                          correspondig to the input atomic numbers and
-                          photon_energy.
+Returns:
+    scattering_factors (complex/numpy array): Complex scattering factors.
     """
 
     # TODO: finish off this function, which should use get_henke_data()

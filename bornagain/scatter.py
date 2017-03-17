@@ -1,7 +1,7 @@
 """
 Classes related to x-ray "scattering", which usually is distinguished from
 "diffraction" because there are many objects in random orientations.  SAXS/WAXS
- is the canonical example.
+is the canonical example.
 """
 
 import numpy as np

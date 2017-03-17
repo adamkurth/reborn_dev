@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bornagain.simulate.atoms &mdash; bornagain 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bornagain.simulate.atoms</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">bornagain</span> <span class="kn">import</span> <span class="n">units</span>
+
+<span class="n">atomic_symbols_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
+    <span class="s">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s">&#39;data/atomic_symbols.csv&#39;</span><span class="p">)</span>
+<span class="n">atomic_symbols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span>
+    <span class="n">atomic_symbols_file</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">str_</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+<span class="n">atomic_symbols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atomic_symbols</span><span class="p">])</span>
+<span class="n">henke_data_path</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
+    <span class="s">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s">&#39;data/henke&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="memoize"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.memoize">[docs]</a><span class="k">def</span> <span class="nf">memoize</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a function decorator for caching results from a function, to avoid</span>
+<span class="sd">    excessive computation or reading from disk.  Search the web for more</span>
+<span class="sd">    details of how this works.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">memo</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">memo</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">memo</span><span class="p">[</span><span class="n">args</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">memo</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="n">rv</span>
+            <span class="k">return</span> <span class="n">rv</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+</div>
+<div class="viewcode-block" id="atomic_symbols_to_numbers"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.atomic_symbols_to_numbers">[docs]</a><span class="k">def</span> <span class="nf">atomic_symbols_to_numbers</span><span class="p">(</span><span class="n">symbols</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Convert atomic symbols (such as C, N, He, Be) to atomic numbers.</span>
+
+<span class="sd">Arguments:</span>
+<span class="sd">    symbols (string/list-like): Atomic symbol strings. Case insensitive.</span>
+
+<span class="sd">Returns:</span>
+<span class="sd">    numbers (numpy array): Atomic numbers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">symbols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">symbols</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">symbols</span><span class="p">)])</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">U</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">atomic_symbols</span> <span class="o">==</span> <span class="n">u</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
+            <span class="n">Z</span><span class="p">[</span><span class="n">symbols</span> <span class="o">==</span> <span class="n">u</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">Z</span> <span class="o">=</span> <span class="n">Z</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">atomic_symbols</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">str_</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">Z</span>
+
+</div>
+<div class="viewcode-block" id="atomic_numbers_to_symbols"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.atomic_numbers_to_symbols">[docs]</a><span class="k">def</span> <span class="nf">atomic_numbers_to_symbols</span><span class="p">(</span><span class="n">numbers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Convert atomic numbers to atomic symbols (such as C, N, He, Ca)</span>
+
+<span class="sd">Arguments:</span>
+<span class="sd">    numbers (int/list-like): Atomic numbers</span>
+
+<span class="sd">Returns:</span>
+<span class="sd">    symbols (numpy string array): Atomic element symbols (such as H, He, Be)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">numbers</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="n">atomic_symbols</span><span class="p">[</span><span class="n">numbers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">symbols</span>
+
+</div>
+<span class="nd">@memoize</span>
+<div class="viewcode-block" id="get_henke_data"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.get_henke_data">[docs]</a><span class="k">def</span> <span class="nf">get_henke_data</span><span class="p">(</span><span class="n">atomic_number</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Load Henke scattering factor data from disk, cache for future retrieval. The</span>
+<span class="sd">Henke data was gathered from the Center for X-Ray Optics web page at the</span>
+<span class="sd">Lawrence Berkeley National Laboratory.  There is a publication with details</span>
+<span class="sd">(reference to be added).</span>
+
+<span class="sd">Arguments:</span>
+<span class="sd">    atomic_number (int): The atomic number of interest</span>
+
+<span class="sd">Returns:</span>
+<span class="sd">    data (dictionary): A dictionary with the following fields </span>
+<span class="sd">        &#39;Atomic Number&#39; -- Atomic number of the element</span>
+<span class="sd">        &#39;Element Symbol&#39; -- Standard element symbol (e.g. He)</span>
+<span class="sd">        &#39;Photon Energy&#39; -- A numpy array of photon energies (SI units)</span>
+<span class="sd">        &#39;Scatter Factor&#39; -- A numpy array of complex atomic scattering factors </span>
+<span class="sd">        that correspond to the photon energies above.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sym</span> <span class="o">=</span> <span class="n">atomic_numbers_to_symbols</span><span class="p">(</span><span class="n">atomic_number</span><span class="p">)</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span>
+        <span class="n">henke_data_path</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="n">sym</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39;.nff&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;Atomic Number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">atomic_number</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;Element Symbol&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sym</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;Photon Energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">eV</span>
+    <span class="n">data</span><span class="p">[</span><span class="s">&#39;Scatter Factor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+
+</div>
+<div class="viewcode-block" id="get_scattering_factors"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.get_scattering_factors">[docs]</a><span class="k">def</span> <span class="nf">get_scattering_factors</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">photon_energy</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Get complex atomic scattering factors.</span>
+
+<span class="sd">Arguments:</span>
+<span class="sd">    atomic_numbers (int/list-like): Atomic numbers.</span>
+<span class="sd">    photon_energy (float): Photon energy.</span>
+
+<span class="sd">Returns:</span>
+<span class="sd">    scattering_factors (complex/numpy array): Complex scattering factors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># TODO: finish off this function, which should use get_henke_data()</span>
+
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">Z</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">U</span><span class="p">:</span>
+        <span class="n">dat</span> <span class="o">=</span> <span class="n">get_henke_data</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s">&#39;Photon Energy&#39;</span><span class="p">]</span>
+        <span class="n">fdat</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s">&#39;Scatter Factor&#39;</span><span class="p">]</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">E</span> <span class="o">-</span> <span class="n">photon_energy</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Z</span> <span class="o">==</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdat</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, Richard A Kirian.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

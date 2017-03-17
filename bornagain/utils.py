@@ -24,16 +24,16 @@ dimension other than 3, but for now 3-vectors are all that we work with.
 
 Input:
 
-vec:        The object that we are trying to make conform to our assumption
-              about vectors.
+vec: The object that we are trying to make conform to our assumption
+about vectors.
 
-hardcheck:  If True, then this function will raise a ValueError if the check
-              fails.  If False, then this function attempts to fix the problem
-              with the input.
+hardcheck: If True, then this function will raise a ValueError if the check
+fails.  If False, then this function attempts to fix the problem
+with the input.
 
 ==== Output:
-vec:        The original input if it satisfies our conditions.  Otherwise
-              return a modified numpy ndarray with the correct shape.
+vec: The original input if it satisfies our conditions.  Otherwise
+return a modified numpy ndarray with the correct shape.
     """
 
     if hardcheck:  # Raise an error if the input isn't perfect
@@ -132,105 +132,105 @@ def rot3(angle):
                      [np.sin(angle), np.cos(angle), 0]])
 
 
-def axisAndAngleToMatrix(axis, angle):
-    """Generate the rotation matrix from the axis-angle notation.
-
-    Conversion equations
-    ====================
-
-    From Wikipedia (http://en.wikipedia.org/wiki/Rotation_matrix),
-    the conversion is given by::
-
-        c = cos(angle); s = sin(angle); C = 1-c
-        xs = x*s;   ys = y*s;   zs = z*s
-        xC = x*C;   yC = y*C;   zC = z*C
-        xyC = x*yC; yzC = y*zC; zxC = z*xC
-        [ x*xC+c   xyC-zs   zxC+ys ]
-        [ xyC+zs   y*yC+c   yzC-xs ]
-        [ zxC-ys   yzC+xs   z*zC+c ]
-
-
-    @param matrix:  The 3x3 rotation matrix to update.
-    @type matrix:   3x3 numpy array
-    @param axis:    The 3D rotation axis.
-    @type axis:     numpy array, len 3
-    @param angle:   The rotation angle.
-    @type angle:    float
-    """
-
-    # Trig factors.
-    ca = np.cos(angle)
-    sa = np.sin(angle)
-    C = 1 - ca
-
-    # Depack the axis.
-    a = axis.ravel()
-    x = a[0]
-    y = a[1]
-    z = a[2]
-#     x, y, z = axis
-
-    # Multiplications (to remove duplicate calculations).
-    xs = x * sa
-    ys = y * sa
-    zs = z * sa
-    xC = x * C
-    yC = y * C
-    zC = z * C
-    xyC = x * yC
-    yzC = y * zC
-    zxC = z * xC
-
-    matrix = np.zeros([3, 3])
-
-    # Update the rotation matrix.
-    matrix[0, 0] = x * xC + ca
-    matrix[0, 1] = xyC - zs
-    matrix[0, 2] = zxC + ys
-    matrix[1, 0] = xyC + zs
-    matrix[1, 1] = y * yC + ca
-    matrix[1, 2] = yzC - xs
-    matrix[2, 0] = zxC - ys
-    matrix[2, 1] = yzC + xs
-    matrix[2, 2] = z * zC + ca
-
-    return matrix
-
-
-class ScalarMonitor(object):
-
-    """ Class for monitoring a scalar for which we expect many observations.
-        Array will grow as needed, and basic calculations can be done."""
-
-    def __init__(self, size=1000):
-
-        self.idx = 0         # Current index of observation
-        self.size = size     # Size of array
-        self.data = np.zeros([size])  # Data array
-        self.maxSize = 10e6  # Don't grow array larger than this
-
-    def append(self, value):
-
-        if (self.idx + 1) > self.size:
-            if (self.size * 2) > self.maxSize:
-                print("Cannot grow array larger than %d" % self.size * 2)
-                return None
-            self.data = np.concatenate([self.data, np.zeros([self.size])])
-            self.size = self.data.shape[0]
-        self.data[self.idx] = value
-        self.idx += 1
-
-    def getData(self):
-
-        return self.data[0:self.idx]
-
-    def getMean(self):
-
-        return np.mean(self.getData())
-
-    def getStd(self):
-
-        return np.std(self.getData())
+# def axisAndAngleToMatrix(axis, angle):
+#     """Generate the rotation matrix from the axis-angle notation.
+# 
+#     Conversion equations
+#     ====================
+# 
+#     From Wikipedia (http://en.wikipedia.org/wiki/Rotation_matrix),
+#     the conversion is given by::
+# 
+#         c = cos(angle); s = sin(angle); C = 1-c
+#         xs = x*s;   ys = y*s;   zs = z*s
+#         xC = x*C;   yC = y*C;   zC = z*C
+#         xyC = x*yC; yzC = y*zC; zxC = z*xC
+#         [ x*xC+c   xyC-zs   zxC+ys ]
+#         [ xyC+zs   y*yC+c   yzC-xs ]
+#         [ zxC-ys   yzC+xs   z*zC+c ]
+# 
+# 
+#     @param matrix:  The 3x3 rotation matrix to update.
+#     @type matrix:   3x3 numpy array
+#     @param axis:    The 3D rotation axis.
+#     @type axis:     numpy array, len 3
+#     @param angle:   The rotation angle.
+#     @type angle:    float
+#     """
+# 
+#     # Trig factors.
+#     ca = np.cos(angle)
+#     sa = np.sin(angle)
+#     C = 1 - ca
+# 
+#     # Depack the axis.
+#     a = axis.ravel()
+#     x = a[0]
+#     y = a[1]
+#     z = a[2]
+# #     x, y, z = axis
+# 
+#     # Multiplications (to remove duplicate calculations).
+#     xs = x * sa
+#     ys = y * sa
+#     zs = z * sa
+#     xC = x * C
+#     yC = y * C
+#     zC = z * C
+#     xyC = x * yC
+#     yzC = y * zC
+#     zxC = z * xC
+# 
+#     matrix = np.zeros([3, 3])
+# 
+#     # Update the rotation matrix.
+#     matrix[0, 0] = x * xC + ca
+#     matrix[0, 1] = xyC - zs
+#     matrix[0, 2] = zxC + ys
+#     matrix[1, 0] = xyC + zs
+#     matrix[1, 1] = y * yC + ca
+#     matrix[1, 2] = yzC - xs
+#     matrix[2, 0] = zxC - ys
+#     matrix[2, 1] = yzC + xs
+#     matrix[2, 2] = z * zC + ca
+# 
+#     return matrix
+# 
+# 
+# class ScalarMonitor(object):
+# 
+#     """ Class for monitoring a scalar for which we expect many observations.
+#         Array will grow as needed, and basic calculations can be done."""
+# 
+#     def __init__(self, size=1000):
+# 
+#         self.idx = 0         # Current index of observation
+#         self.size = size     # Size of array
+#         self.data = np.zeros([size])  # Data array
+#         self.maxSize = 10e6  # Don't grow array larger than this
+# 
+#     def append(self, value):
+# 
+#         if (self.idx + 1) > self.size:
+#             if (self.size * 2) > self.maxSize:
+#                 print("Cannot grow array larger than %d" % self.size * 2)
+#                 return None
+#             self.data = np.concatenate([self.data, np.zeros([self.size])])
+#             self.size = self.data.shape[0]
+#         self.data[self.idx] = value
+#         self.idx += 1
+# 
+#     def getData(self):
+# 
+#         return self.data[0:self.idx]
+# 
+#     def getMean(self):
+# 
+#         return np.mean(self.getData())
+# 
+#     def getStd(self):
+# 
+#         return np.std(self.getData())
 
 
 def random_rotation_matrix(deflection=1.0, randnums=None):

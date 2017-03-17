@@ -13,16 +13,17 @@ from bornagain.simulate import atoms
 
 class structure(object):
 
-    ''' Stuff needed to deal with an atomistic crystal structure.
+    ''' 
+Stuff needed to deal with an atomistic crystal structure.
 
-        A note on coordinate transformations and the orthogonalization matrix
-        O:
-          Convert from fractional coordinates x to real-space coordinates r:
-            r = cryst.O.dot(x)
-          Convert from real-space coordinates r to fractional coordinates x:
-            x = cryst.Oinv.dot(r)
-          Convert from q-space to h-space:
-            h = cryst.O.T.dot(q)
+A note on coordinate transformations and the orthogonalization matrix
+O:
+Convert from fractional coordinates x to real-space coordinates r:
+r = cryst.O.dot(x)
+Convert from real-space coordinates r to fractional coordinates x:
+x = cryst.Oinv.dot(r)
+Convert from q-space to h-space:
+h = cryst.O.T.dot(q)
     '''
 
     def __init__(self, pdbFilePath=None):
