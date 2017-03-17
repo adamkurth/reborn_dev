@@ -2,22 +2,22 @@
 Totally experimental.  Nothing useful here.
 """
 
-import bornagain
-import pyqtgraph as pg
-from pyqtgraph.Qt import QtGui
-
-# create GUI
-app = QtGui.QApplication([])
-w = pg.GraphicsWindow(size=(800, 800))
-w.setWindowTitle('QTV')
-
-w4 = w.addLayout()
-v4 = w4.addViewBox(row=1, col=0, lockAspect=True)
-g = pg.GridItem()
-v4.addItem(g)
-
-rs = []
-imgs = []
+#import bornagain
+#import pyqtgraph as pg
+#from pyqtgraph.Qt import QtGui
+#
+## create GUI
+#app = QtGui.QApplication([])
+#w = pg.GraphicsWindow(size=(800, 800))
+#w.setWindowTitle('QTV')
+#
+#w4 = w.addLayout()
+#v4 = w4.addViewBox(row=1, col=0, lockAspect=True)
+#g = pg.GridItem()
+#v4.addItem(g)
+#
+#rs = []
+#imgs = []
 
 # for i in range(1):
 # 

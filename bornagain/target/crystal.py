@@ -242,9 +242,9 @@ def parsePDB(pdbFilePath, crystalStruct=None):
 
 def hermannMauguinToNumber(hm, hall=False):
     '''
-    This is needed to convert the Hermann Mauguin space group specifications
-    in PDB files to the space group number or the "Hall number" that is used by
-     the spglib module.
+This is needed to convert the Hermann Mauguin space group specifications
+in PDB files to the space group number or the "Hall number" that is used by
+the spglib module.
     '''
 
     sgnum = [
