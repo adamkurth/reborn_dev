@@ -1,11 +1,6 @@
 bornagain.target package
 ========================
 
-.. automodule:: bornagain.target
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Submodules
 ----------
 
@@ -18,3 +13,10 @@ bornagain.target.crystal module
     :show-inheritance:
 
 
+Module contents
+---------------
+
+.. automodule:: bornagain.target
+    :members:
+    :undoc-members:
+    :show-inheritance:

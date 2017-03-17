@@ -1,8 +1,10 @@
 # Remove trailing whitespace
-find . -type f -name '*.ext' -print0 | xargs -0 perl -pi -e 's/ +$//'
+> find . -type f -name '*.ext' -print0 | xargs -0 perl -pi -e 's/ +$//'
 
 # Refactor with perl
-perl p i e 's/oldString/newString/g' `find ./ name '.py'` 
+> perl p i e 's/oldString/newString/g' `find ./ name '.py'` 
 
 # Clear out all the .pyc files
-find . -name '*.pyc' -type f -exec rm {} \+
+> find . -name '*.pyc' -type f -exec rm {} \+
+
+

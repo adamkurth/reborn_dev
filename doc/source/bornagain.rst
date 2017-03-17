@@ -1,11 +1,6 @@
 bornagain package
 =================
 
-.. automodule:: bornagain
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Subpackages
 -----------
 
@@ -14,6 +9,7 @@ Subpackages
     bornagain.external
     bornagain.simulate
     bornagain.target
+    bornagain.viewers
 
 Submodules
 ----------
@@ -22,22 +18,6 @@ bornagain.detector module
 -------------------------
 
 .. automodule:: bornagain.detector
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.map module
---------------------
-
-.. automodule:: bornagain.map
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.maps module
----------------------
-
-.. automodule:: bornagain.maps
     :members:
     :undoc-members:
     :show-inheritance:
@@ -75,3 +55,10 @@ bornagain.utils module
     :show-inheritance:
 
 
+Module contents
+---------------
+
+.. automodule:: bornagain
+    :members:
+    :undoc-members:
+    :show-inheritance:

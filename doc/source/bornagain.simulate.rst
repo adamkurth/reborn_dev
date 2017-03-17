@@ -1,11 +1,6 @@
 bornagain.simulate package
 ==========================
 
-.. automodule:: bornagain.simulate
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Submodules
 ----------
 
@@ -33,12 +28,19 @@ bornagain.simulate.cycore module
     :undoc-members:
     :show-inheritance:
 
-bornagain.simulate.simulate module
-----------------------------------
+bornagain.simulate.cycore_ module
+---------------------------------
 
-.. automodule:: bornagain.simulate.simulate
+.. automodule:: bornagain.simulate.cycore_
     :members:
     :undoc-members:
     :show-inheritance:
 
 
+Module contents
+---------------
+
+.. automodule:: bornagain.simulate
+    :members:
+    :undoc-members:
+    :show-inheritance:

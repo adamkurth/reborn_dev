@@ -1,11 +1,6 @@
 bornagain.external package
 ==========================
 
-.. automodule:: bornagain.external
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Submodules
 ----------
 
@@ -26,3 +21,10 @@ bornagain.external.lcls module
     :show-inheritance:
 
 
+Module contents
+---------------
+
+.. automodule:: bornagain.external
+    :members:
+    :undoc-members:
+    :show-inheritance:

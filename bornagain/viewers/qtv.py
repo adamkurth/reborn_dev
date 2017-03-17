@@ -19,29 +19,29 @@ v4.addItem(g)
 rs = []
 imgs = []
 
-for i in range(1):
-
-    pan = p[i]
-
-    xmn = pan.T[0] / pan.pixSize
-    ymn = pan.T[1] / pan.pixSize
-
-    xmx = xmn + pan.nF
-    ymx = ymn + pan.nS
-
-    bb = pan.getRealSpaceBoundingBox() / pan.pixSize
-
-    rs.append(pg.ROI([xmn, xmx], [ymn, ymx]))
-    rs[i].addRotateHandle([1, 0], [0.5, 0.5])
-    imgs.append(pg.ImageItem(pan.data))
-    imgs[i].setParentItem(rs[i])
-    v4.addItem(rs[i])
-
-
-v4.disableAutoRange('xy')
-v4.autoRange()
-
-QtGui.QApplication.instance().exec_()
+# for i in range(1):
+# 
+#     pan = p[i]
+# 
+#     xmn = pan.T[0] / pan.pixSize
+#     ymn = pan.T[1] / pan.pixSize
+# 
+#     xmx = xmn + pan.nF
+#     ymx = ymn + pan.nS
+# 
+#     bb = pan.getRealSpaceBoundingBox() / pan.pixSize
+# 
+#     rs.append(pg.ROI([xmn, xmx], [ymn, ymx]))
+#     rs[i].addRotateHandle([1, 0], [0.5, 0.5])
+#     imgs.append(pg.ImageItem(pan.data))
+#     imgs[i].setParentItem(rs[i])
+#     v4.addItem(rs[i])
+# 
+# 
+# v4.disableAutoRange('xy')
+# v4.autoRange()
+# 
+# QtGui.QApplication.instance().exec_()
 
 
 # p = pad.panelArray()

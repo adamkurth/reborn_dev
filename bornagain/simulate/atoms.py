@@ -38,7 +38,7 @@ def atomic_symbols_to_numbers(symbols):
 
     Input:
     symbols: A single scalar or list-like object containing strings with atomic
-               symbols. This is not sensitive to case.
+    symbols. This is not sensitive to case.
 
     Output:
     numbers: A numpy array of atomic numbers (integer data type)
@@ -63,13 +63,13 @@ def atomic_symbols_to_numbers(symbols):
 def atomic_numbers_to_symbols(numbers):
     """
     Convert atomic numbers to atomic symbols (such as C, N, He, Ca)
-
+    
     Input:
     numbers: A list-like object containing atomic numbers (integers)
-
+    
     Output:
     symbols: A numpy string array containing atomic element symbols (such as H,
-               He, Be)
+    He, Be)
     """
 
     numbers = np.array(numbers, dtype=np.int)
