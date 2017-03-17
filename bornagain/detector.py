@@ -113,7 +113,8 @@ class Panel(object):
     def data(self, val):
 
         if val.shape[0] != self.nS or val.shape[1] != self.nF:
-            raise ValueError('Panel data should have shape (%d,%d)' % (self.nS, self.nF))
+            raise ValueError(
+                'Panel data should have shape (%d,%d)' % (self.nS, self.nF))
 
         self._data = val
         # Must clear out any derived data that depends on this input
@@ -283,6 +284,7 @@ class Panel(object):
     def T(self, val):
         """ Must be an ndarray of length 3."""
 
+        val = np.array(val)
         if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
             self._T = val
             self.clear_geometry_cache()
@@ -728,7 +730,7 @@ class PanelList(object):
     @property
     def Q(self):
         """ Concatenated reciprocal-space vectors."""
-        
+
         return 2 * np.pi * self.K / self.beam.wavelength
 
     @property
