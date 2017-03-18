@@ -1,4 +1,7 @@
-#define GROUP_SIZE 32
+#ifndef GROUP_SIZE
+    #define GROUP_SIZE 32
+#endif
+
 #define PI2 6.28318530718f
 
 kernel void phase_factor_qrf(
@@ -10,7 +13,7 @@ kernel void phase_factor_qrf(
     const int n_atoms,
     const int n_pixels)
 {
-    const int gi = get_global_id(0); /* Global index */
+    const int gi = get_global_id(0); /* Global index: pixel ID */
     const int li = get_local_id(0);  /* Local group index */
 
     float ph, sinph, cosph;
@@ -55,7 +58,7 @@ kernel void phase_factor_qrf(
         // atom information into local memory.
         barrier(CLK_LOCAL_MEM_FENCE);
 
-        // We use a local real and imaginary part to avoid floatint point overflow
+        // We use a local real and imaginary part to avoid floating point overflow
         float2 a_temp = (float2)(0.0f,0.0f);
 
         // Now sum up the amplitudes from this subset of atoms
@@ -92,8 +95,8 @@ kernel void phase_factor_pad(
     const float4 S,
     const float4 B)
 {
-    const int gi = get_global_id(0); /* Global index */
-    const int i = gi % nF;          /* Pixel coordinate i */
+    const int gi = get_global_id(0); /* Global index: pixel ID */
+    const int i = gi % nF;           /* Pixel coordinate i */
     const int j = gi/nF;             /* Pixel coordinate j */
     const int li = get_local_id(0);  /* Local group index */
 

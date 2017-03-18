@@ -7,6 +7,7 @@ Some environment variables that affect this module:
 otherwise be 32, which may fail on CPUs.
 """
 
+import sys
 import os
 import pkg_resources
 
@@ -14,26 +15,24 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array
 
-
 clcore_file = pkg_resources.resource_filename(
     'bornagain.simulate', 'clcore.cl')
 
-context = cl.create_some_context()
-queue = cl.CommandQueue(context)
+default_context = cl.create_some_context()
+default_queue = cl.CommandQueue(default_context)
 
-default_context = context
-default_queue = queue
+default_group_size = np.int(os.environ.get('BORNAGAIN_CL_GROUPSIZE'))
+if default_group_size is None:
+    default_group_size = 32
+max_group_size = default_queue.device.max_work_group_size
+if default_group_size > max_group_size:
+    sys.stderr.write('Changing group size from %d to %d.\n'
+                     'Set BORNAGAIN_CL_GROUPSIZE=%d to avoid this error.\n' 
+                     % (default_group_size, max_group_size, max_group_size))
+    default_group_size = max_group_size
 
-group_size = os.environ.get('BORNAGAIN_CL_GROUPSIZE')
-if group_size is None:
-    group_size = 32
-if group_size > queue.device.max_work_group_size:
-    group_size = queue.device.max_work_group_size
-
-default_group_size = group_size
-
-programs = cl.Program(context, open(clcore_file).read()).build()
-
+programs = cl.Program(default_context, open(clcore_file).read()).build(
+                        options=['-D', 'GROUP_SIZE=%d' % default_group_size])
 
 def vec4(x, dtype=np.float32):
     """

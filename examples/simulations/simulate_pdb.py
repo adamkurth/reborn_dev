@@ -37,9 +37,9 @@ r = cryst.r
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelength)
 
 # Create an opencl context and queue
-context = clcore.context
-queue = clcore.queue
-group_size = clcore.group_size
+context = clcore.default_context
+queue = clcore.default_queue
+group_size = clcore.default_group_size
 
 n_trials = 3
 if len(sys.argv) > 1:
