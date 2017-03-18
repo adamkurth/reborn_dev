@@ -80,10 +80,10 @@ if 1:
     t = time.time()
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
-    q_dev = clcore.to_device(queue, q, dtype=np.float32)
-    r_dev = clcore.to_device(queue, r, dtype=np.float32)
-    f_dev = clcore.to_device(queue, f, dtype=np.complex64)
-    a_dev = clcore.to_device(queue, np.zeros([q_dev.shape[0]],dtype=np.complex64))
+    q_dev = clcore.to_device(q, dtype=np.float32)
+    r_dev = clcore.to_device(r, dtype=np.float32)
+    f_dev = clcore.to_device(f, dtype=np.complex64)
+    a_dev = clcore.to_device(np.zeros([q_dev.shape[0]],dtype=np.complex64))
     tf = time.time() - t
     print('Move to device memory: %7.03f ms' % (tf*1e3))
     for i in range(0, n_trials):
@@ -204,9 +204,9 @@ if 1:
     print("")
     
     t = time.time()
-    q_dev = clcore.to_device(queue, q, dtype=np.float32)
-    a_map_dev = clcore.to_device(queue, A, dtype=np.complex64)
-    a_out_dev = clcore.to_device(queue, dtype=np.complex64, shape=(n_pixels))
+    q_dev = clcore.to_device(q, dtype=np.float32)
+    a_map_dev = clcore.to_device(A, dtype=np.complex64)
+    a_out_dev = clcore.to_device(dtype=np.complex64, shape=(n_pixels))
     tf = time.time() - t
     print('[clcore] As above, but first move arrays to device memory (%7.03f ms)' % (tf*1e3))
     n_atoms = 0

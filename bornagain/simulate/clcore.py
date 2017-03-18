@@ -55,7 +55,7 @@ Returns:
     return np.array([x[0], x[1], x[2], 0.0], dtype=dtype)
 
 
-def to_device(queue=None, array=None, shape=None, dtype=None):
+def to_device(array=None, shape=None, dtype=None, queue=None):
     """
 This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy 
 array into a pyopencl.array and send it to the device memory.  So far this only
@@ -132,10 +132,10 @@ Returns:
 
     n_pixels = np.int32(q.shape[0])
     n_atoms = np.int32(r.shape[0])
-    q_dev = to_device(queue, q, dtype=np.float32)
-    r_dev = to_device(queue, r, dtype=np.float32)
-    f_dev = to_device(queue, f, dtype=np.complex64)
-    a_dev = to_device(queue, a, dtype=np.complex64, shape=(n_pixels))
+    q_dev = to_device(q, dtype=np.float32, queue=queue)
+    r_dev = to_device(r, dtype=np.float32, queue=queue)
+    f_dev = to_device(f, dtype=np.complex64, queue=queue)
+    a_dev = to_device(a, dtype=np.complex64, shape=(n_pixels), queue=queue)
 
     global_size = np.int(np.ceil(n_pixels / np.float(group_size)) * group_size)
 
@@ -207,13 +207,13 @@ amplitudes
     nS = np.int32(nS)
     n_pixels = np.int32(nF * nS)
     n_atoms = np.int32(r.shape[0])
-    r_dev = to_device(queue, r, dtype=np.float32)
-    f_dev = to_device(queue, f, dtype=np.complex64)
+    r_dev = to_device(r, dtype=np.float32, queue=queue)
+    f_dev = to_device(f, dtype=np.complex64, queue=queue)
     T = vec4(T)
     F = vec4(F)
     S = vec4(S)
     B = vec4(B)
-    a_dev = to_device(queue, a, dtype=np.complex64, shape=(n_pixels))
+    a_dev = to_device(a, dtype=np.complex64, shape=(n_pixels), queue=queue)
 
     global_size = np.int(np.ceil(n_pixels / np.float(group_size)) * group_size)
 
@@ -280,12 +280,12 @@ Returns:
 
     # Setup buffers.  This is very fast.  However, we are assuming that we can
     # just load all atoms into memory, which might not be possible...
-    r_dev = to_device(queue, r, dtype=np.float32)
-    f_dev = to_device(queue, f, dtype=np.complex64)
+    r_dev = to_device(r, dtype=np.float32, queue=queue)
+    f_dev = to_device(f, dtype=np.complex64, queue=queue)
     N = vec4(N, dtype=np.int32)
     deltaQ = vec4(deltaQ, dtype=np.float32)
     q_min = vec4(q_min, dtype=np.float32)
-    a_dev = to_device(queue, a, dtype=np.complex64, shape=(n_pixels))
+    a_dev = to_device(a, dtype=np.complex64, shape=(n_pixels), queue=queue)
 
     global_size = np.int(np.ceil(n_pixels / np.float(group_size)) * group_size)
 
@@ -355,14 +355,13 @@ Returns:
 
     n_pixels = np.int32(q.shape[0])
 
-    a_map_dev = to_device(queue, a_map, dtype=np.complex64)
-    q_dev = to_device(queue, q, dtype=np.float32)
-    #R_dev = to_device(queue, R, dtype=np.float32)
+    a_map_dev = to_device(a_map, dtype=np.complex64, queue=queue)
+    q_dev = to_device(q, dtype=np.float32, queue=queue)
     N = vec4(N, dtype=np.int32)
     deltaQ = vec4(deltaQ, dtype=np.float32)
     q_min = vec4(q_min, dtype=np.float32)
     a_out_dev = to_device(
-        queue, a_out_dev, dtype=np.complex64, shape=(n_pixels))
+        a_out_dev, dtype=np.complex64, shape=(n_pixels), queue=queue)
 
     global_size = np.int(np.ceil(n_pixels / np.float(group_size)) * group_size)
 
