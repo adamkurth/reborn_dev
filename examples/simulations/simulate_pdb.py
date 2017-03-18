@@ -36,11 +36,6 @@ r = cryst.r
 # Look up atomic scattering factors (they are complex numbers)
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelength)
 
-# Create an opencl context and queue
-context = clcore.default_context
-queue = clcore.default_queue
-group_size = clcore.default_group_size
-
 n_trials = 3
 if len(sys.argv) > 1:
     show = 1
@@ -60,7 +55,7 @@ if 1:
     R = np.eye(3)
     for i in range(0, n_trials):
         t = time.time()
-        A = clcore.phase_factor_qrf(q, r, f, R, context=context, queue=queue,group_size=group_size)
+        A = clcore.phase_factor_qrf(q, r, f, R)
         tf = time.time() - t
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -88,7 +83,7 @@ if 1:
     print('Move to device memory: %7.03f ms' % (tf*1e3))
     for i in range(0, n_trials):
         t = time.time()
-        a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, None, a_dev,group_size=group_size)
+        a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, None, a_dev)
         tf = time.time() - t
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -116,7 +111,7 @@ if 1:
     for i in range(0, n_trials):
         t = time.time()
         A = clcore.phase_factor_pad(
-            r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, R, context=context, queue=queue,group_size=group_size)
+            r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, R)
         tf = time.time() - t
         print('phase_factor_pad: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -142,7 +137,7 @@ if 1:
     n_pixels = N**3
     for i in range(0, n_trials):
         t = time.time()
-        A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, context=context, queue=queue,group_size=group_size)
+        A = clcore.phase_factor_mesh(r, f, N, qmin, qmax)
         tf = time.time() - t
         print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -168,9 +163,7 @@ if 1:
     print("[clcore] First compute a 3D diffraction amplitude map...")
     for i in range(0,n_trials):
         t = time.time()
-        A = clcore.phase_factor_mesh(r, f, N, qmin, qmax, 
-                                        context=context, queue=queue,
-                                        get=False,group_size=group_size)
+        A = clcore.phase_factor_mesh(r, f, N, qmin, qmax)
         tf = time.time() - t
         print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -188,9 +181,7 @@ if 1:
     print("[clcore] Now look up amplitudes for a set of q vectors, using the 3D map")
     for i in range(0,n_trials):
         t = time.time()
-        AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, q, None, 
-                                           context=context,queue=queue,
-                                           group_size=group_size)
+        AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, q)
         tf = time.time() - t
         print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -214,9 +205,7 @@ if 1:
     R = np.eye(3) #ba.utils.random_rotation_matrix()
     for i in range(0,n_trials):
         t = time.time()
-        clcore.buffer_mesh_lookup(a_map_dev, N, qmin, qmax, q_dev, R, a_out_dev,
-                                           context=context,queue=queue,
-                                           group_size=group_size, get=False)
+        clcore.buffer_mesh_lookup(a_map_dev, N, qmin, qmax, q_dev, R, a_out_dev)
         tf = time.time() - t
         print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))

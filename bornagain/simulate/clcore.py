@@ -232,7 +232,7 @@ phase_factor_mesh_cl.set_scalar_arg_dtypes(
 
 
 def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=None,
-                     queue=None, group_size=None, get=True):
+                     queue=None, group_size=None):
     '''
 Compute phase factors on a regular 3D mesh of q-space samples.
 
@@ -293,7 +293,7 @@ Returns:
                          f_dev.data, a_dev.data, n_pixels, n_atoms, N, deltaQ,
                          q_min)
 
-    if get is True:
+    if a is None:
         return a_dev.get()
     else:
         return a_dev
@@ -304,9 +304,8 @@ buffer_mesh_lookup_cl.set_scalar_arg_dtypes(
     [None, None, None, np.int32, None, None, None, None])
 
 
-def buffer_mesh_lookup(a_map, N, q_min, q_max, q, R=None, a_out_dev=None,
-                       context=None, queue=None, group_size=None,
-                       get=True):
+def buffer_mesh_lookup(a_map, N, q_min, q_max, q, R=None, a_out=None,
+                       context=None, queue=None, group_size=None):
     """
 This is supposed to lookup intensities from a 3d mesh of amplitudes.
 
@@ -361,7 +360,7 @@ Returns:
     deltaQ = vec4(deltaQ, dtype=np.float32)
     q_min = vec4(q_min, dtype=np.float32)
     a_out_dev = to_device(
-        a_out_dev, dtype=np.complex64, shape=(n_pixels), queue=queue)
+        a_out, dtype=np.complex64, shape=(n_pixels), queue=queue)
 
     global_size = np.int(np.ceil(n_pixels / np.float(group_size)) * group_size)
 
@@ -369,7 +368,7 @@ Returns:
                           q_dev.data, a_out_dev.data, n_pixels, N, deltaQ,
                           q_min, R16)
 
-    if get is True:
+    if a_out is None:
         return a_out_dev.get()
     else:
         return None
