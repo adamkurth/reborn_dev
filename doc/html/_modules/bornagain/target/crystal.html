@@ -78,7 +78,7 @@
 <span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="kn">import</span> <span class="n">atoms</span>
 
 
-<div class="viewcode-block" id="structure"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.structure">[docs]</a><span class="k">class</span> <span class="nc">structure</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="structure"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.structure">[docs]</a><span class="k">class</span> <span class="nc">structure</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">Stuff needed to deal with an atomistic crystal structure.</span>
@@ -121,11 +121,11 @@
         <span class="k">if</span> <span class="n">pdbFilePath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">loadPDB</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">)</span>
 
-<div class="viewcode-block" id="structure.loadPDB"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.structure.loadPDB">[docs]</a>    <span class="k">def</span> <span class="nf">loadPDB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdbFilePath</span><span class="p">):</span>
+<div class="viewcode-block" id="structure.loadPDB"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.structure.loadPDB">[docs]</a>    <span class="k">def</span> <span class="nf">loadPDB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdbFilePath</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Populate all the attributes from a PDB file. &#39;&#39;&#39;</span>
         <span class="n">parsePDB</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="structure.setCell"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.structure.setCell">[docs]</a>    <span class="k">def</span> <span class="nf">setCell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
+<div class="viewcode-block" id="structure.setCell"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.structure.setCell">[docs]</a>    <span class="k">def</span> <span class="nf">setCell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Set the unit cell and all quantities derived from the unit cell.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
@@ -166,7 +166,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span>
 
 </div>
-<div class="viewcode-block" id="parsePDB"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.parsePDB">[docs]</a><span class="k">def</span> <span class="nf">parsePDB</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">,</span> <span class="n">crystalStruct</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="parsePDB"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.parsePDB">[docs]</a><span class="k">def</span> <span class="nf">parsePDB</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">,</span> <span class="n">crystalStruct</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; Return a structure object with PDB information. &#39;&#39;&#39;</span>
 
     <span class="n">maxAtoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e5</span><span class="p">)</span>
@@ -307,11 +307,11 @@
 <span class="c">#    pg.QtGui.QApplication.exec_()</span>
 
 </div>
-<div class="viewcode-block" id="hermannMauguinToNumber"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.hermannMauguinToNumber">[docs]</a><span class="k">def</span> <span class="nf">hermannMauguinToNumber</span><span class="p">(</span><span class="n">hm</span><span class="p">,</span> <span class="n">hall</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="hermannMauguinToNumber"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.hermannMauguinToNumber">[docs]</a><span class="k">def</span> <span class="nf">hermannMauguinToNumber</span><span class="p">(</span><span class="n">hm</span><span class="p">,</span> <span class="n">hall</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    This is needed to convert the Hermann Mauguin space group specifications</span>
-<span class="sd">    in PDB files to the space group number or the &quot;Hall number&quot; that is used by</span>
-<span class="sd">     the spglib module.</span>
+<span class="sd">This is needed to convert the Hermann Mauguin space group specifications</span>
+<span class="sd">in PDB files to the space group number or the &quot;Hall number&quot; that is used by</span>
+<span class="sd">the spglib module.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">sgnum</span> <span class="o">=</span> <span class="p">[</span>

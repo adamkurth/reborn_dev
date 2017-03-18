@@ -4,22 +4,10 @@ bornagain.simulate package
 Submodules
 ----------
 
-bornagain.simulate.atoms module
--------------------------------
+.. toctree::
 
-.. automodule:: bornagain.simulate.atoms
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.simulate.clcore module
---------------------------------
-
-.. automodule:: bornagain.simulate.clcore
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   bornagain.simulate.atoms
+   bornagain.simulate.clcore
 
 Module contents
 ---------------

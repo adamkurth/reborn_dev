@@ -4,14 +4,9 @@ bornagain.viewers package
 Submodules
 ----------
 
-bornagain.viewers.qtv module
-----------------------------
+.. toctree::
 
-.. automodule:: bornagain.viewers.qtv
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   bornagain.viewers.qtv
 
 Module contents
 ---------------

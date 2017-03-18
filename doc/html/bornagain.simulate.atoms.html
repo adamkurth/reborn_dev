@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bornagain.simulate.atoms module &mdash; bornagain 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" />
+    <link rel="up" title="bornagain.simulate package" href="bornagain.simulate.html" />
+    <link rel="next" title="bornagain.simulate.clcore module" href="bornagain.simulate.clcore.html" />
+    <link rel="prev" title="bornagain.simulate package" href="bornagain.simulate.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bornagain.simulate.clcore.html" title="bornagain.simulate.clcore module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bornagain.simulate.html" title="bornagain.simulate package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bornagain.html" >bornagain package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="bornagain.simulate.html" accesskey="U">bornagain.simulate package</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bornagain.simulate.html"
+                        title="previous chapter">bornagain.simulate package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bornagain.simulate.clcore.html"
+                        title="next chapter">bornagain.simulate.clcore module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bornagain.simulate.atoms.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bornagain.simulate.atoms">
+<span id="bornagain-simulate-atoms-module"></span><h1>bornagain.simulate.atoms module<a class="headerlink" href="#module-bornagain.simulate.atoms" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="bornagain.simulate.atoms.atomic_numbers_to_symbols">
+<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">atomic_numbers_to_symbols</code><span class="sig-paren">(</span><em>numbers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#atomic_numbers_to_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.atomic_numbers_to_symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert atomic numbers to atomic symbols (such as C, N, He, Ca)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>numbers</strong> (<em>int/list-like</em>) &#8211; Atomic numbers</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Atomic element symbols (such as H, He, Be)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">symbols (numpy string array)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.atoms.atomic_symbols_to_numbers">
+<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">atomic_symbols_to_numbers</code><span class="sig-paren">(</span><em>symbols</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#atomic_symbols_to_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.atomic_symbols_to_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert atomic symbols (such as C, N, He, Be) to atomic numbers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>symbols</strong> (<em>string/list-like</em>) &#8211; Atomic symbol strings. Case insensitive.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Atomic numbers.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numbers (numpy array)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.atoms.get_henke_data">
+<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">get_henke_data</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#get_henke_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.get_henke_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Henke scattering factor data from disk, cache for future retrieval. The
+Henke data was gathered from the Center for X-Ray Optics web page at the
+Lawrence Berkeley National Laboratory.  There is a publication with details
+(reference to be added).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>atomic_number</strong> (<em>int</em>) &#8211; The atomic number of interest</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>A dictionary with the following fields</dt>
+<dd>&#8216;Atomic Number&#8217; &#8211; Atomic number of the element
+&#8216;Element Symbol&#8217; &#8211; Standard element symbol (e.g. He)
+&#8216;Photon Energy&#8217; &#8211; A numpy array of photon energies (SI units)
+&#8216;Scatter Factor&#8217; &#8211; A numpy array of complex atomic scattering factors
+that correspond to the photon energies above.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">data (dictionary)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.atoms.get_scattering_factors">
+<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">get_scattering_factors</code><span class="sig-paren">(</span><em>atomic_numbers</em>, <em>photon_energy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#get_scattering_factors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.get_scattering_factors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get complex atomic scattering factors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atomic_numbers</strong> (<em>int/list-like</em>) &#8211; Atomic numbers.</li>
+<li><strong>photon_energy</strong> (<em>float</em>) &#8211; Photon energy.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Complex scattering factors.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">scattering_factors (complex/numpy array)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.atoms.memoize">
+<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">memoize</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#memoize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.memoize" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a function decorator for caching results from a function, to avoid
+excessive computation or reading from disk.  Search the web for more
+details of how this works.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bornagain.simulate.clcore.html" title="bornagain.simulate.clcore module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="bornagain.simulate.html" title="bornagain.simulate package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bornagain.html" >bornagain package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="bornagain.simulate.html" >bornagain.simulate package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, Richard A Kirian.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

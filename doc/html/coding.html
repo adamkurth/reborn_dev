@@ -45,6 +45,13 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Coding guidlines for developers</a></li>
+<li><a class="reference internal" href="#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
+<li><a class="reference internal" href="#generation-of-documentation">Generation of documentation</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="api_detector.html"
                         title="previous chapter">Module: bornagain.detector</a></p>
@@ -78,16 +85,44 @@
             
   <div class="section" id="coding-guidlines-for-developers">
 <h1>Coding guidlines for developers<a class="headerlink" href="#coding-guidlines-for-developers" title="Permalink to this headline">¶</a></h1>
+<p>(This project is still in an early stage, so many of the guidelines below have not been followed.  We&#8217;ll fix that in the next months.)</p>
+<p>Some things to consider before writing code:</p>
 <ul class="simple">
-<li>The bornagain API is meant to be an &#8220;interface&#8221; for analysis and simulation.  That is, we envision that the user will be working from an iPython prompt or similar.  We will be walking a fine line between keeping the high-level classes clean yet powerful.</li>
-<li>Don&#8217;t worry about speed until it is necessary.  Usability is first.</li>
-<li>Always write tests along with modules.  We will use <a class="reference external" href="http://doc.pytest.org/">pytest</a> for testing.</li>
-<li>All units are SI (angles in radians) unless there is a very good reason to do something different.</li>
+<li>The bornagain API should be thought of as an &#8220;interface&#8221; for analysis and simulation.  That is, we envision that the user will be working from an iPython prompt or similar, and they plan to accomplish something that can&#8217;t be done easily with existing programs.</li>
+<li>The scope of this project is diffraction under the Born approximation.  It will not grow beyond that.</li>
+<li>Usability is more important than speed.  If speed is needed, we will tuck the details away (as in the clcore.py module).</li>
+<li>Always write tests along with modules.  We will use <a class="reference external" href="http://doc.pytest.org/">pytest</a> for testing.  Read about pytest.</li>
+<li>All units are SI (angles in radians) unless there is a <em>very</em> good reason to do something different.</li>
 <li>Follow the PEP8 guidelines to the greatest extent possible.  The <a class="reference external" href="https://pypi.python.org/pypi/pep8/">pep8</a> program can be used to check for this.</li>
 <li>Use four spaces, not tabs.</li>
-<li>Just because you <em>can</em> do something clever, doesn&#8217;t mean you should.  Keep the code clean.</li>
+<li>Just because you <em>can</em> do something clever, doesn&#8217;t mean you should.</li>
 <li>Docstrings follow the <a class="reference external" href="https://sphinxcontrib-napoleon.readthedocs.io/en/latest/">Google format</a>.</li>
+<li>Never create a function without a docstring.  At least note what the function does.</li>
 </ul>
+</div>
+<div class="section" id="checking-for-pep8-compliance">
+<h1>Checking for PEP8 compliance<a class="headerlink" href="#checking-for-pep8-compliance" title="Permalink to this headline">¶</a></h1>
+<p>Use the <cite>pep8</cite> program to check for inconsistencies (install <cite>pep8</cite> with pip if need be).  In the base directory of the git repo, do this</p>
+<div class="highlight-bash"><div class="highlight"><pre>pep8 bornagain
+</pre></div>
+</div>
+<p>For simple errors like whitespace, you can use <cite>autopep8</cite>:</p>
+<p>For other problems you&#8217;ll need to fix things by hand.  We aim to have no errors coming from the <cite>pep8</cite> program.</p>
+</div>
+<div class="section" id="generation-of-documentation">
+<h1>Generation of documentation<a class="headerlink" href="#generation-of-documentation" title="Permalink to this headline">¶</a></h1>
+<p>So far we are following the Google-style doc strings.  There are some examples <a class="reference external" href="http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html">here</a>.</p>
+<p>Docstrings from within the python code find their way into this documentation via Sphinx.  If docstrings are changed, then the documentation should be updated.</p>
+<p>For generating documenation, you can first run the <cite>sphinx-apidoc</cite> program, from the doc directory:</p>
+<div class="highlight-bash"><div class="highlight"><pre>sphinx-apidoc -f -o <span class="nb">source</span> ../bornagain
+</pre></div>
+</div>
+<p>Then you can build the html documentation:</p>
+<div class="highlight-bash"><div class="highlight"><pre>make clean
+make html
+</pre></div>
+</div>
+<p>The main documentation page will be in doc/build/html/index.html .  Once we are happy with changes the html documentation should be moved to doc/html so that it can be included in the git repository.  (Maybe it will be moved out of git later...)</p>
 </div>
 
 

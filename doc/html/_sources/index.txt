@@ -12,6 +12,7 @@ Contents
    :maxdepth: 2
    
    bornagain
+   installation
    api
    api_detector
    coding

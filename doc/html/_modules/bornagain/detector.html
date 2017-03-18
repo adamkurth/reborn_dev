@@ -78,7 +78,7 @@
 <span class="kn">import</span> <span class="nn">source</span>
 
 
-<div class="viewcode-block" id="Panel"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel">[docs]</a><span class="k">class</span> <span class="nc">Panel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel">[docs]</a><span class="k">class</span> <span class="nc">Panel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Individual detector Panel: a 2D lattice of square pixels.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
@@ -114,7 +114,7 @@
         <span class="c"># If this Panel is a part of a list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">PanelList</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># This is the link to the Panel list</span>
 
-<div class="viewcode-block" id="Panel.copy"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">derived</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.copy"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">derived</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Deep copy of everything.  Parent Panel list is stripped away.&quot;&quot;&quot;</span>
 
         <span class="n">p</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">()</span>
@@ -469,13 +469,13 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pf</span>
 
-<div class="viewcode-block" id="Panel.check"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.check"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Check for any known issues with this Panel.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">check_geometry</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">True</span>
 </div>
-<div class="viewcode-block" id="Panel.check_geometry"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.check_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">check_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.check_geometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.check_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">check_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Check for valid geometry configuration.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -515,7 +515,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_hash</span>
 
-<div class="viewcode-block" id="Panel.computeRealSpaceGeometry"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.computeRealSpaceGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">computeRealSpaceGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.computeRealSpaceGeometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.computeRealSpaceGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">computeRealSpaceGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Compute arrays relevant to real-space geometry.&quot;&quot;&quot;</span>
 
         <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">)</span>
@@ -525,7 +525,7 @@
         <span class="n">j</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixelsToVectors</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="Panel.pixelsToVectors"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.pixelsToVectors">[docs]</a>    <span class="k">def</span> <span class="nf">pixelsToVectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.pixelsToVectors"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.pixelsToVectors">[docs]</a>    <span class="k">def</span> <span class="nf">pixelsToVectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Convert pixel indices to translation vectors (i=fast scan, j=slow</span>
 <span class="sd">        scan).&quot;&quot;&quot;</span>
 
@@ -534,13 +534,13 @@
         <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">F</span> <span class="o">+</span> <span class="n">S</span>
         <span class="k">return</span> <span class="n">V</span>
 </div>
-<div class="viewcode-block" id="Panel.computeReciprocalSpaceGeometry"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.computeReciprocalSpaceGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">computeReciprocalSpaceGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.computeReciprocalSpaceGeometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.computeReciprocalSpaceGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">computeReciprocalSpaceGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Compute the reciprocal-space scattering vectors, multiplied by</span>
 <span class="sd">        wavelength.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_K</span> <span class="o">=</span> <span class="n">vecNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span>
 </div>
-<div class="viewcode-block" id="Panel.clear_geometry_cache"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.clear_geometry_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_geometry_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.clear_geometry_cache"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.clear_geometry_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_geometry_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Clear out all derived geometry data.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_pixel_size</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Pixel size derived from F/S vectors</span>
@@ -555,12 +555,12 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PanelList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">PanelList</span><span class="o">.</span><span class="n">clear_geometry_cache</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="Panel.deleteDerivedData"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.deleteDerivedData">[docs]</a>    <span class="k">def</span> <span class="nf">deleteDerivedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.deleteDerivedData"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.deleteDerivedData">[docs]</a>    <span class="k">def</span> <span class="nf">deleteDerivedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PanelList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">PanelList</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">None</span>
 </div>
-<div class="viewcode-block" id="Panel.get_vertices"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.get_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">get_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.get_vertices"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.get_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">get_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Get Panel get_vertices; positions of corner pixels.&quot;&quot;&quot;</span>
 
         <span class="n">nF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span> <span class="o">-</span> <span class="mi">1</span>
@@ -581,7 +581,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixelsToVectors</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="Panel.get_center"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.get_center">[docs]</a>    <span class="k">def</span> <span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.get_center"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.get_center">[docs]</a>    <span class="k">def</span> <span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Vector to center of Panel.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_vertices</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -591,7 +591,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRealSpaceBoundingBox</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Panel.getRealSpaceBoundingBox"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.getRealSpaceBoundingBox">[docs]</a>    <span class="k">def</span> <span class="nf">getRealSpaceBoundingBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.getRealSpaceBoundingBox"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.getRealSpaceBoundingBox">[docs]</a>    <span class="k">def</span> <span class="nf">getRealSpaceBoundingBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the minimum and maximum values of the four corners.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rsbb</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -603,7 +603,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rsbb</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="Panel.simple_setup"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="Panel.simple_setup"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                      <span class="n">nF</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">nS</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">pixelSize</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -638,7 +638,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelength</span>
 
 </div></div>
-<div class="viewcode-block" id="PanelList"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList">[docs]</a><span class="k">class</span> <span class="nc">PanelList</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList">[docs]</a><span class="k">class</span> <span class="nc">PanelList</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; List container for detector panels, with extra functionality.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -671,7 +671,7 @@
             <span class="s">&#39;_geometry_hash&#39;</span>
         <span class="p">]</span>  <span class="c"># Default values of these are &#39;None&#39;</span>
 
-<div class="viewcode-block" id="PanelList.copy"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">derived</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.copy"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">derived</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create a deep copy.&quot;&quot;&quot;</span>
 
         <span class="n">pa</span> <span class="o">=</span> <span class="n">PanelList</span><span class="p">()</span>
@@ -750,7 +750,7 @@
 
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_PanelList</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PanelList.append"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.append"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Append a Panel, check that it is of the correct type.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -771,7 +771,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_PanelList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="PanelList.getPanelIndexByName"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.getPanelIndexByName">[docs]</a>    <span class="k">def</span> <span class="nf">getPanelIndexByName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.getPanelIndexByName"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.getPanelIndexByName">[docs]</a>    <span class="k">def</span> <span class="nf">getPanelIndexByName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Find the integer index of a Panel by it&#39;s unique name &quot;&quot;&quot;</span>
 
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
@@ -781,7 +781,7 @@
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="bp">None</span>
 </div>
-<div class="viewcode-block" id="PanelList.computeRealSpaceGeometry"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.computeRealSpaceGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">computeRealSpaceGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.computeRealSpaceGeometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.computeRealSpaceGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">computeRealSpaceGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Compute real-space geometry of all panels.&quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
@@ -947,7 +947,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigidGroups</span>
 
-<div class="viewcode-block" id="PanelList.addRigidGroup"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.addRigidGroup">[docs]</a>    <span class="k">def</span> <span class="nf">addRigidGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.addRigidGroup"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.addRigidGroup">[docs]</a>    <span class="k">def</span> <span class="nf">addRigidGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Append to the list of rigid groups. A rigid group is techically</span>
 <span class="sd">        just a truncated Panel list pointing to members of the parent Panel</span>
 <span class="sd">        list.  &quot;&quot;&quot;</span>
@@ -963,14 +963,14 @@
             <span class="n">pl</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">PanelList</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rigidGroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pl</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="PanelList.appendToRigidGroup"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.appendToRigidGroup">[docs]</a>    <span class="k">def</span> <span class="nf">appendToRigidGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.appendToRigidGroup"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.appendToRigidGroup">[docs]</a>    <span class="k">def</span> <span class="nf">appendToRigidGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Append more panels to an existing rigid group. &quot;&quot;&quot;</span>
 
         <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rigidGroup</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">:</span>
             <span class="n">g</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="PanelList.rigidGroup"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.rigidGroup">[docs]</a>    <span class="k">def</span> <span class="nf">rigidGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.rigidGroup"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.rigidGroup">[docs]</a>    <span class="k">def</span> <span class="nf">rigidGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Get a rigid group by name. &quot;&quot;&quot;</span>
 
         <span class="n">thisGroup</span> <span class="o">=</span> <span class="bp">None</span>
@@ -1014,7 +1014,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pf</span>
 
-<div class="viewcode-block" id="PanelList.assembleData"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.assembleData">[docs]</a>    <span class="k">def</span> <span class="nf">assembleData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.assembleData"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.assembleData">[docs]</a>    <span class="k">def</span> <span class="nf">assembleData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Project all intensity data along the beam direction.  Nearest</span>
 <span class="sd">        neighbor interpolation.  This is a crude way to display data... &quot;&quot;&quot;</span>
 
@@ -1112,7 +1112,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pixel_size</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-<div class="viewcode-block" id="PanelList.get_center"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.get_center">[docs]</a>    <span class="k">def</span> <span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.get_center"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.get_center">[docs]</a>    <span class="k">def</span> <span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Mean center of Panel list. &quot;&quot;&quot;</span>
 
         <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nPanels</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
@@ -1123,7 +1123,7 @@
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="PanelList.check_geometry"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.check_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">check_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.check_geometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.check_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">check_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Check that geometry is sane. &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
@@ -1134,7 +1134,7 @@
 
         <span class="k">return</span> <span class="bp">True</span>
 </div>
-<div class="viewcode-block" id="PanelList.clear_geometry_cache"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.clear_geometry_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_geometry_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.clear_geometry_cache"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.clear_geometry_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_geometry_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Delete derived data relevant to geometry.  Normally used</span>
 <span class="sd">         internally. &quot;&quot;&quot;</span>
 
@@ -1163,7 +1163,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_hash</span>
 
-<div class="viewcode-block" id="PanelList.simple_setup"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="PanelList.simple_setup"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                      <span class="n">nF</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">nS</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">pixelSize</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -1189,7 +1189,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">beam</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="PanelList.RadialProfile"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.RadialProfile">[docs]</a>    <span class="k">def</span> <span class="nf">RadialProfile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.RadialProfile"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.RadialProfile">[docs]</a>    <span class="k">def</span> <span class="nf">RadialProfile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
         <span class="n">qmag</span> <span class="o">=</span> <span class="n">vecMag</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>

@@ -26,8 +26,8 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" />
     <link rel="up" title="bornagain package" href="bornagain.html" />
-    <link rel="next" title="bornagain.target package" href="bornagain.target.html" />
-    <link rel="prev" title="bornagain.external package" href="bornagain.external.html" /> 
+    <link rel="next" title="bornagain.simulate.atoms module" href="bornagain.simulate.atoms.html" />
+    <link rel="prev" title="bornagain.external.lcls module" href="bornagain.external.lcls.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -40,10 +40,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="bornagain.target.html" title="bornagain.target package"
+          <a href="bornagain.simulate.atoms.html" title="bornagain.simulate.atoms module"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="bornagain.external.html" title="bornagain.external package"
+          <a href="bornagain.external.lcls.html" title="bornagain.external.lcls module"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="bornagain.html" accesskey="U">bornagain package</a> &raquo;</li> 
@@ -55,19 +55,17 @@
   <ul>
 <li><a class="reference internal" href="#">bornagain.simulate package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-bornagain.simulate.atoms">bornagain.simulate.atoms module</a></li>
-<li><a class="reference internal" href="#module-bornagain.simulate.clcore">bornagain.simulate.clcore module</a></li>
 <li><a class="reference internal" href="#module-bornagain.simulate">Module contents</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="bornagain.external.html"
-                        title="previous chapter">bornagain.external package</a></p>
+  <p class="topless"><a href="bornagain.external.lcls.html"
+                        title="previous chapter">bornagain.external.lcls module</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="bornagain.target.html"
-                        title="next chapter">bornagain.target package</a></p>
+  <p class="topless"><a href="bornagain.simulate.atoms.html"
+                        title="next chapter">bornagain.simulate.atoms module</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -100,259 +98,12 @@
 <h1>bornagain.simulate package<a class="headerlink" href="#bornagain-simulate-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-bornagain.simulate.atoms">
-<span id="bornagain-simulate-atoms-module"></span><h2>bornagain.simulate.atoms module<a class="headerlink" href="#module-bornagain.simulate.atoms" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="bornagain.simulate.atoms.atomic_numbers_to_symbols">
-<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">atomic_numbers_to_symbols</code><span class="sig-paren">(</span><em>numbers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#atomic_numbers_to_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.atomic_numbers_to_symbols" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert atomic numbers to atomic symbols (such as C, N, He, Ca)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>numbers</strong> (<em>int/list-like</em>) &#8211; Atomic numbers</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Atomic element symbols (such as H, He, Be)</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">symbols (numpy string array)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.atoms.atomic_symbols_to_numbers">
-<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">atomic_symbols_to_numbers</code><span class="sig-paren">(</span><em>symbols</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#atomic_symbols_to_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.atomic_symbols_to_numbers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert atomic symbols (such as C, N, He, Be) to atomic numbers.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>symbols</strong> (<em>string/list-like</em>) &#8211; Atomic symbol strings. Case insensitive.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Atomic numbers.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numbers (numpy array)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.atoms.get_henke_data">
-<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">get_henke_data</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#get_henke_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.get_henke_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load Henke scattering factor data from disk, cache for future retrieval. The
-Henke data was gathered from the Center for X-Ray Optics web page at the
-Lawrence Berkeley National Laboratory.  There is a publication with details
-(reference to be added).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>atomic_number</strong> (<em>int</em>) &#8211; The atomic number of interest</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
-<dt>A dictionary with the following fields</dt>
-<dd>&#8216;Atomic Number&#8217; &#8211; Atomic number of the element
-&#8216;Element Symbol&#8217; &#8211; Standard element symbol (e.g. He)
-&#8216;Photon Energy&#8217; &#8211; A numpy array of photon energies (SI units)
-&#8216;Scatter Factor&#8217; &#8211; A numpy array of complex atomic scattering factors
-that correspond to the photon energies above.</dd>
-</dl>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">data (dictionary)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.atoms.get_scattering_factors">
-<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">get_scattering_factors</code><span class="sig-paren">(</span><em>atomic_numbers</em>, <em>photon_energy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#get_scattering_factors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.get_scattering_factors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get complex atomic scattering factors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>atomic_numbers</strong> (<em>int/list-like</em>) &#8211; Atomic numbers.</li>
-<li><strong>photon_energy</strong> (<em>float</em>) &#8211; Photon energy.</li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.simulate.atoms.html">bornagain.simulate.atoms module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.simulate.clcore.html">bornagain.simulate.clcore module</a></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Complex scattering factors.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">scattering_factors (complex/numpy array)</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.atoms.memoize">
-<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">memoize</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#memoize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.memoize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is a function decorator for caching results from a function, to avoid
-excessive computation or reading from disk.  Search the web for more
-details of how this works.</p>
-</dd></dl>
-
 </div>
-<div class="section" id="module-bornagain.simulate.clcore">
-<span id="bornagain-simulate-clcore-module"></span><h2>bornagain.simulate.clcore module<a class="headerlink" href="#module-bornagain.simulate.clcore" title="Permalink to this headline">¶</a></h2>
-<p>This module contains some core functions that are useful for simulating
-diffraction on GPU devices.  It is not finished yet...</p>
-<p>Some environment variables that affect this module:
-&#8216;BORNAGAIN_CL_GROUPSIZE&#8217; : This sets the default groupsize.  It will
-otherwise be 32, which may fail on CPUs.</p>
-<dl class="function">
-<dt id="bornagain.simulate.clcore.buffer_mesh_lookup">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">buffer_mesh_lookup</code><span class="sig-paren">(</span><em>a_map</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>q</em>, <em>R=None</em>, <em>a_out_dev=None</em>, <em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em>, <em>get=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#buffer_mesh_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.buffer_mesh_lookup" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is supposed to lookup intensities from a 3d mesh of amplitudes.</p>
-<p>Input:
-a:       Numpy array of complex scattering amplitudes generated from the
-function phase_factor_mesh()
-N:       As defined in phase_factor_mesh()
-q_min:   As defined in phase_factor_mesh()
-q_max:   As defined in phase_factor_mesh()
-q:       An Nx3 numpy array of q-space coordinates at which we want to
-interpolate
-the complex amplitudes in a_dev
-R:       A 3x3 rotation matrix which will act on the q vectors
-context: Optional pyopencl context [cl.create_some_context()]
-queue:   Optional pyopencl queue [cl.CommandQueue(context)]
-group_size: Optional specification of pyopencl group size (default 64 or
-maximum)</p>
-<p>Output:
-A numpy array of complex amplitudes.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.clcore.cap_group_size">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">cap_group_size</code><span class="sig-paren">(</span><em>group_size</em>, <em>queue</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#cap_group_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.cap_group_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check that the cl group size does not exceed device limit.  Cap the group
-if need be.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.clcore.get_context_and_queue">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">get_context_and_queue</code><span class="sig-paren">(</span><em>var=None</em>, <em>context=None</em>, <em>queue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#get_context_and_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.get_context_and_queue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attempt to determine cl context and queue from input buffers.  Check for
-consistency and raise ValueError if there are problems.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.clcore.phase_factor_mesh">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">phase_factor_mesh</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>a=None</em>, <em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em>, <em>get=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#phase_factor_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.phase_factor_mesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>This should simulate a regular 3D mesh of q-space samples.</p>
-<p>Input:
-r:       An Nx3 numpy array of atomic coordinates (meters)
-f:       A numpy array of complex atomic scattering factors
-N:       A scalar or length-3 array specifying the number of q-space
-samples in each of the three dimensions
-q_min:   A scalar or length-3 array specifying the minimum q-space
-magnitudes in the 3d mesh.  These values specify the center of
-the voxel.
-q_max:   A scalar or length-3 array specifying the maximum q-space
-magnitudes in the 3d mesh.  These values specify the center of
-the voxel.
-context: Optional pyopencl context [cl.create_some_context()]
-queue:   Optional pyopencl queue [cl.CommandQueue(context)]
-group_size: Optional specification of pyopencl group size (default 64 or
-maximum)</p>
-<p>Output:
-An array of complex scattering amplitudes.  By default this is a normal
-numpy array.  Optionally, this may be an opencl buffer.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.clcore.phase_factor_pad">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">phase_factor_pad</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>T</em>, <em>F</em>, <em>S</em>, <em>B</em>, <em>nF</em>, <em>nS</em>, <em>w</em>, <em>R=None</em>, <em>a=None</em>, <em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#phase_factor_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.phase_factor_pad" title="Permalink to this definition">¶</a></dt>
-<dd><p>This should simulate detector panels.</p>
-<p>Input:
-r:       An Nx3 numpy array with atomic coordinates (meters)
-f:       A numpy array with complex scattering factors
-T:       A 1x3 numpy array with vector components pointing from sample to
-the center of the first pixel in memory
-F:       A 1x3 numpy array containing the basis vector components pointing
-in the direction corresponding to contiguous pixels in memory
-(&#8220;fast scan&#8221;).
-S:       A 1x3 numpy array containing the basis vector components pointing
-in the direction corresponding to non-contiguous pixels in
-memory (&#8220;slow scan&#8221;).
-B:       A 1x3 numpy array with unit-vector components corresponding to the
-incident x-ray beam direction
-nF:      Number of fast-scan pixels (corresponding to F vector) in the
-detector panel
-nS:      Number of slow-scan pixels (corresponding to S vector) in the
-detector panel
-w:       The photon wavelength in meters
-R:       Optional numpy array [3x3] specifying rotation of q vectors
-a:       Optional output complex scattering amplitude cl array
-context: Optional pyopencl context [cl.create_some_context()]
-queue:   Optional pyopencl queue [cl.CommandQueue(context)]
-group_size: Optional specification of pyopencl group size (default 64 or
-maximum)</p>
-<p>Output:
-A:        A numpy array of length nF*nS containing complex scattering
-amplitudes</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.clcore.phase_factor_qrf">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">phase_factor_qrf</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f</em>, <em>R=None</em>, <em>a=None</em>, <em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#phase_factor_qrf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.phase_factor_qrf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>q</strong> (<em>numpy/cl float array [N,3]</em>) &#8211; Scattering vectors (2pi/lambda).</li>
-<li><strong>r</strong> (<em>numpy/cl float array [M,3]</em>) &#8211; Atomic coordinates.</li>
-<li><strong>f</strong> (<em>numpy/cl complex array [M]</em>) &#8211; Complex scattering factors.</li>
-<li><strong>R</strong> (<em>numpy array [3,3]</em>) &#8211; Rotation matrix acting on q vectors.</li>
-<li><strong>a</strong> (<em>cl complex array [N]</em>) &#8211; Optional container for complex scattering
-amplitudes.</li>
-<li><strong>context</strong> (<em>pyopencl context</em>) &#8211; Optional pyopencl context (e.g. use
-cl.create_some_context() to create one).</li>
-<li><strong>queue</strong> (<em>pyopencl context</em>) &#8211; Optional pyopencl queue (e.g use
-cl.CommandQueue(context) to create one).</li>
-<li><strong>group_size</strong> (<em>int</em>) &#8211; Optional pyopencl group size.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
-<dt>Diffraction amplitudes.  Will be a cl array</dt>
-<dd><p class="first last">if there are input cl arrays.</p>
-</dd>
-</dl>
-</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [N])</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.clcore.to_device">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">to_device</code><span class="sig-paren">(</span><em>queue</em>, <em>x=None</em>, <em>shape=None</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#to_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.to_device" title="Permalink to this definition">¶</a></dt>
-<dd><p>For convenience: create a cl array from numpy array or size, return input
-if already a cl array.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.clcore.vec4">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">vec4</code><span class="sig-paren">(</span><em>x</em>, <em>dtype=&lt;type 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#vec4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.vec4" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evdidently pyopencl does not deal with 3-vectors very well, so we use
-4-vectors and pad with a zero at the end.</p>
-</dd></dl>
-
 </div>
 <div class="section" id="module-bornagain.simulate">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bornagain.simulate" title="Permalink to this headline">¶</a></h2>
@@ -375,10 +126,10 @@ if already a cl array.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="bornagain.target.html" title="bornagain.target package"
+          <a href="bornagain.simulate.atoms.html" title="bornagain.simulate.atoms module"
              >next</a> |</li>
         <li class="right" >
-          <a href="bornagain.external.html" title="bornagain.external package"
+          <a href="bornagain.external.lcls.html" title="bornagain.external.lcls module"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="bornagain.html" >bornagain package</a> &raquo;</li> 

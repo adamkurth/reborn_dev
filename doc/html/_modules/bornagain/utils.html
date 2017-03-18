@@ -82,7 +82,7 @@
 <span class="n">joulesPerEv</span> <span class="o">=</span> <span class="mf">1.60217657e-19</span>
 
 
-<div class="viewcode-block" id="vecCheck"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vecCheck">[docs]</a><span class="k">def</span> <span class="nf">vecCheck</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">hardcheck</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="vecCheck"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vecCheck">[docs]</a><span class="k">def</span> <span class="nf">vecCheck</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">hardcheck</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Check that a vector meets our assumption of an Nx3 numpy array.  This is</span>
 <span class="sd">helpful, for example, when we want to ensure that dot products and broadcasting</span>
@@ -129,25 +129,25 @@
     <span class="k">return</span> <span class="n">vec</span>
 
 </div>
-<div class="viewcode-block" id="eV2Joules"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.eV2Joules">[docs]</a><span class="k">def</span> <span class="nf">eV2Joules</span><span class="p">(</span><span class="n">eV</span><span class="p">):</span>
+<div class="viewcode-block" id="eV2Joules"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.eV2Joules">[docs]</a><span class="k">def</span> <span class="nf">eV2Joules</span><span class="p">(</span><span class="n">eV</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Convert electron volts into Joules. &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">eV</span> <span class="o">*</span> <span class="mf">1.60217657e-19</span>
 
 </div>
-<div class="viewcode-block" id="photonEnergy2Wavelength"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.photonEnergy2Wavelength">[docs]</a><span class="k">def</span> <span class="nf">photonEnergy2Wavelength</span><span class="p">(</span><span class="n">energy</span><span class="p">):</span>
+<div class="viewcode-block" id="photonEnergy2Wavelength"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.photonEnergy2Wavelength">[docs]</a><span class="k">def</span> <span class="nf">photonEnergy2Wavelength</span><span class="p">(</span><span class="n">energy</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Convert photon energy to photon wavelength. SI units, as always. &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">hc</span> <span class="o">/</span> <span class="n">energy</span>
 
 </div>
-<div class="viewcode-block" id="photonWavelength2Energy"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.photonWavelength2Energy">[docs]</a><span class="k">def</span> <span class="nf">photonWavelength2Energy</span><span class="p">(</span><span class="n">wavelength</span><span class="p">):</span>
+<div class="viewcode-block" id="photonWavelength2Energy"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.photonWavelength2Energy">[docs]</a><span class="k">def</span> <span class="nf">photonWavelength2Energy</span><span class="p">(</span><span class="n">wavelength</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Convert photon wavelength to energy. SI units, as always. &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">hc</span> <span class="o">/</span> <span class="n">wavelength</span>
 
 </div>
-<div class="viewcode-block" id="vecNorm"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vecNorm">[docs]</a><span class="k">def</span> <span class="nf">vecNorm</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
+<div class="viewcode-block" id="vecNorm"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vecNorm">[docs]</a><span class="k">def</span> <span class="nf">vecNorm</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
 
     <span class="n">v</span> <span class="o">=</span> <span class="n">V</span>
     <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
@@ -156,26 +156,26 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
 </div>
-<div class="viewcode-block" id="vecMag"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vecMag">[docs]</a><span class="k">def</span> <span class="nf">vecMag</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
+<div class="viewcode-block" id="vecMag"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vecMag">[docs]</a><span class="k">def</span> <span class="nf">vecMag</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">V</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;V must have one or two dimensions.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">V</span> <span class="o">*</span> <span class="n">V</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 
 </div>
-<div class="viewcode-block" id="warn"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.warn">[docs]</a><span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+<div class="viewcode-block" id="warn"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.warn">[docs]</a><span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Simple warning message &quot;&quot;&quot;</span>
 
     <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;WARNING: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="error"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.error">[docs]</a><span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+<div class="viewcode-block" id="error"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.error">[docs]</a><span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Simple error message (to be replaced later...) &quot;&quot;&quot;</span>
 
     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;ERROR: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="rot1"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.rot1">[docs]</a><span class="k">def</span> <span class="nf">rot1</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+<div class="viewcode-block" id="rot1"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.rot1">[docs]</a><span class="k">def</span> <span class="nf">rot1</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Rotate about axis 1. &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)],</span>
@@ -183,7 +183,7 @@
                      <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)]])</span>
 
 </div>
-<div class="viewcode-block" id="rot2"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.rot2">[docs]</a><span class="k">def</span> <span class="nf">rot2</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+<div class="viewcode-block" id="rot2"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.rot2">[docs]</a><span class="k">def</span> <span class="nf">rot2</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Rotate about axis 2. &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)],</span>
@@ -191,7 +191,7 @@
                      <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)]])</span>
 
 </div>
-<div class="viewcode-block" id="rot3"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.rot3">[docs]</a><span class="k">def</span> <span class="nf">rot3</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+<div class="viewcode-block" id="rot3"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.rot3">[docs]</a><span class="k">def</span> <span class="nf">rot3</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Rotate about axis 2. &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
@@ -300,7 +300,7 @@
 <span class="c">#         return np.std(self.getData())</span>
 
 </div>
-<div class="viewcode-block" id="random_rotation_matrix"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.random_rotation_matrix">[docs]</a><span class="k">def</span> <span class="nf">random_rotation_matrix</span><span class="p">(</span><span class="n">deflection</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">randnums</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="random_rotation_matrix"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.random_rotation_matrix">[docs]</a><span class="k">def</span> <span class="nf">random_rotation_matrix</span><span class="p">(</span><span class="n">deflection</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">randnums</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a random rotation matrix.</span>
 <span class="sd">    </span>

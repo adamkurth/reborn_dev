@@ -1,0 +1,563 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bornagain.detector module &mdash; bornagain 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" />
+    <link rel="up" title="bornagain package" href="bornagain.html" />
+    <link rel="next" title="bornagain.scatter module" href="bornagain.scatter.html" />
+    <link rel="prev" title="bornagain.viewers.qtv module" href="bornagain.viewers.qtv.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bornagain.scatter.html" title="bornagain.scatter module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bornagain.viewers.qtv.html" title="bornagain.viewers.qtv module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bornagain.html" accesskey="U">bornagain package</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bornagain.viewers.qtv.html"
+                        title="previous chapter">bornagain.viewers.qtv module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bornagain.scatter.html"
+                        title="next chapter">bornagain.scatter module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bornagain.detector.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bornagain.detector">
+<span id="bornagain-detector-module"></span><h1>bornagain.detector module<a class="headerlink" href="#module-bornagain.detector" title="Permalink to this headline">¶</a></h1>
+<p>Classes for analyzing/simulating diffraction data contained in pixel array
+detectors (PADs).</p>
+<dl class="class">
+<dt id="bornagain.detector.Panel">
+<em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">Panel</code><span class="sig-paren">(</span><em>name=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Individual detector Panel: a 2D lattice of square pixels.</p>
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.B">
+<code class="descname">B</code><a class="headerlink" href="#bornagain.detector.Panel.B" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nominal beam direction vector (normalized).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.F">
+<code class="descname">F</code><a class="headerlink" href="#bornagain.detector.Panel.F" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fast-scan vector (length equal to pixel size).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.K">
+<code class="descname">K</code><a class="headerlink" href="#bornagain.detector.Panel.K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalized scattering vectors.   Similar to the conventional
+scattering vectors, but multiplied by wavelength.  This does not have
+the 2*pi factor included.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.N">
+<code class="descname">N</code><a class="headerlink" href="#bornagain.detector.Panel.N" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normal vector to Panel surface (F X S).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.Q">
+<code class="descname">Q</code><a class="headerlink" href="#bornagain.detector.Panel.Q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scattering vectors, with 2*pi factor and wavelength included.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.Qmag">
+<code class="descname">Qmag</code><a class="headerlink" href="#bornagain.detector.Panel.Qmag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scattering vector magnitudes, with 2*pi factor and wavelength
+included.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.S">
+<code class="descname">S</code><a class="headerlink" href="#bornagain.detector.Panel.S" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slow-scan vector (length equal to pixel size).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.T">
+<code class="descname">T</code><a class="headerlink" href="#bornagain.detector.Panel.T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translation vector pointing from interaction region to center of
+first pixel.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.V">
+<code class="descname">V</code><a class="headerlink" href="#bornagain.detector.Panel.V" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vectors pointing from interaction region to pixel centers.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.beam">
+<code class="descname">beam</code><a class="headerlink" href="#bornagain.detector.Panel.beam" title="Permalink to this definition">¶</a></dt>
+<dd><p>X-ray beam data, taken from parent Panel list if one exists.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.check">
+<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for any known issues with this Panel.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.check_geometry">
+<code class="descname">check_geometry</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.check_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.check_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for valid geometry configuration.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.clear_geometry_cache">
+<code class="descname">clear_geometry_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.clear_geometry_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.clear_geometry_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear out all derived geometry data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.computeRealSpaceGeometry">
+<code class="descname">computeRealSpaceGeometry</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.computeRealSpaceGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.computeRealSpaceGeometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute arrays relevant to real-space geometry.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.computeReciprocalSpaceGeometry">
+<code class="descname">computeReciprocalSpaceGeometry</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.computeReciprocalSpaceGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.computeReciprocalSpaceGeometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the reciprocal-space scattering vectors, multiplied by
+wavelength.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><em>derived=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deep copy of everything.  Parent Panel list is stripped away.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.dark">
+<code class="descname">dark</code><a class="headerlink" href="#bornagain.detector.Panel.dark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dark signal.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.data">
+<code class="descname">data</code><a class="headerlink" href="#bornagain.detector.Panel.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intensity data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.deleteDerivedData">
+<code class="descname">deleteDerivedData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.deleteDerivedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.deleteDerivedData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.geometry_hash">
+<code class="descname">geometry_hash</code><a class="headerlink" href="#bornagain.detector.Panel.geometry_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hash all of the configured geometry values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.getRealSpaceBoundingBox">
+<code class="descname">getRealSpaceBoundingBox</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.getRealSpaceBoundingBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.getRealSpaceBoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum and maximum values of the four corners.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.get_center">
+<code class="descname">get_center</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.get_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.get_center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vector to center of Panel.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.get_vertices">
+<code class="descname">get_vertices</code><span class="sig-paren">(</span><em>edge=False</em>, <em>loop=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.get_vertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.get_vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Panel get_vertices; positions of corner pixels.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.mask">
+<code class="descname">mask</code><a class="headerlink" href="#bornagain.detector.Panel.mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bad pixel mask.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.nF">
+<code class="descname">nF</code><a class="headerlink" href="#bornagain.detector.Panel.nF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of fast-scan pixels.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.nS">
+<code class="descname">nS</code><a class="headerlink" href="#bornagain.detector.Panel.nS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of slow-scan pixels.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.n_pixels">
+<code class="descname">n_pixels</code><a class="headerlink" href="#bornagain.detector.Panel.n_pixels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of pixels.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.name">
+<code class="descname">name</code><a class="headerlink" href="#bornagain.detector.Panel.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of this Panel.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.pixel_size">
+<code class="descname">pixel_size</code><a class="headerlink" href="#bornagain.detector.Panel.pixel_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the pixel size only if both fast/slow-scan vectors are the
+same length. Setting this value will modify the fast- and slow-scan
+vectors F and S.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.pixelsToVectors">
+<code class="descname">pixelsToVectors</code><span class="sig-paren">(</span><em>j</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.pixelsToVectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.pixelsToVectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert pixel indices to translation vectors (i=fast scan, j=slow
+scan).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.polarization_factor">
+<code class="descname">polarization_factor</code><a class="headerlink" href="#bornagain.detector.Panel.polarization_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The scattering polarization factor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.realSpaceBoundingBox">
+<code class="descname">realSpaceBoundingBox</code><a class="headerlink" href="#bornagain.detector.Panel.realSpaceBoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.simple_setup">
+<code class="descname">simple_setup</code><span class="sig-paren">(</span><em>nF=None</em>, <em>nS=None</em>, <em>pixelSize=None</em>, <em>distance=None</em>, <em>wavelength=None</em>, <em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.simple_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.simple_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple way to create a Panel with centered beam.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.solidAngle">
+<code class="descname">solidAngle</code><a class="headerlink" href="#bornagain.detector.Panel.solidAngle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solid angles of pixels.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.Panel.stol">
+<code class="descname">stol</code><a class="headerlink" href="#bornagain.detector.Panel.stol" title="Permalink to this definition">¶</a></dt>
+<dd><p>sin(theta)/lambda, where theta is the half angle</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.detector.PanelList">
+<em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">PanelList</code><a class="reference internal" href="_modules/bornagain/detector.html#PanelList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>List container for detector panels, with extra functionality.</p>
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.K">
+<code class="descname">K</code><a class="headerlink" href="#bornagain.detector.PanelList.K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenated reciprocal-space vectors.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.Q">
+<code class="descname">Q</code><a class="headerlink" href="#bornagain.detector.PanelList.Q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenated reciprocal-space vectors.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.Qmag">
+<code class="descname">Qmag</code><a class="headerlink" href="#bornagain.detector.PanelList.Qmag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatentated reciprocal-space vector magnitudes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.RadialProfile">
+<code class="descname">RadialProfile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.RadialProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.RadialProfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.V">
+<code class="descname">V</code><a class="headerlink" href="#bornagain.detector.PanelList.V" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenated pixel position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.addRigidGroup">
+<code class="descname">addRigidGroup</code><span class="sig-paren">(</span><em>name</em>, <em>vals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.addRigidGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.addRigidGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append to the list of rigid groups. A rigid group is techically
+just a truncated Panel list pointing to members of the parent Panel
+list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>p=None</em>, <em>name=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a Panel, check that it is of the correct type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.appendToRigidGroup">
+<code class="descname">appendToRigidGroup</code><span class="sig-paren">(</span><em>name</em>, <em>vals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.appendToRigidGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.appendToRigidGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append more panels to an existing rigid group.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.assembleData">
+<code class="descname">assembleData</code><span class="sig-paren">(</span><em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.assembleData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.assembleData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project all intensity data along the beam direction.  Nearest
+neighbor interpolation.  This is a crude way to display data...</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.assembledData">
+<code class="descname">assembledData</code><a class="headerlink" href="#bornagain.detector.PanelList.assembledData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project all intensity data along the beam direction.  Nearest
+neighbor interpolation.  This is a crude way to display data...</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.beam">
+<code class="descname">beam</code><a class="headerlink" href="#bornagain.detector.PanelList.beam" title="Permalink to this definition">¶</a></dt>
+<dd><p>X-ray beam data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.check_geometry">
+<code class="descname">check_geometry</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.check_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.check_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that geometry is sane.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.clear_geometry_cache">
+<code class="descname">clear_geometry_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.clear_geometry_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.clear_geometry_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete derived data relevant to geometry.  Normally used
+internally.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.computeRealSpaceGeometry">
+<code class="descname">computeRealSpaceGeometry</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.computeRealSpaceGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.computeRealSpaceGeometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute real-space geometry of all panels.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><em>derived=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a deep copy.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.dark">
+<code class="descname">dark</code><a class="headerlink" href="#bornagain.detector.PanelList.dark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenated dark.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.data">
+<code class="descname">data</code><a class="headerlink" href="#bornagain.detector.PanelList.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenated intensity data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.geometry_hash">
+<code class="descname">geometry_hash</code><a class="headerlink" href="#bornagain.detector.PanelList.geometry_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hash all of the configured geometry values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.getPanelIndexByName">
+<code class="descname">getPanelIndexByName</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.getPanelIndexByName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.getPanelIndexByName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the integer index of a Panel by it&#8217;s unique name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.get_center">
+<code class="descname">get_center</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.get_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.get_center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean center of Panel list.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.mask">
+<code class="descname">mask</code><a class="headerlink" href="#bornagain.detector.PanelList.mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenated mask.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.nPanels">
+<code class="descname">nPanels</code><a class="headerlink" href="#bornagain.detector.PanelList.nPanels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of panels.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.n_pixels">
+<code class="descname">n_pixels</code><a class="headerlink" href="#bornagain.detector.PanelList.n_pixels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of pixels in all panels.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.name">
+<code class="descname">name</code><a class="headerlink" href="#bornagain.detector.PanelList.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of this Panel list</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.pixel_size">
+<code class="descname">pixel_size</code><a class="headerlink" href="#bornagain.detector.PanelList.pixel_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the average pixel size, if all pixels are identical.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.polarization_factor">
+<code class="descname">polarization_factor</code><a class="headerlink" href="#bornagain.detector.PanelList.polarization_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenated polarization factors.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.realSpaceBoundingBox">
+<code class="descname">realSpaceBoundingBox</code><a class="headerlink" href="#bornagain.detector.PanelList.realSpaceBoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>This returns the coordinates of a box just big enough to fit all
+of the panels.  Useful for display purposes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.rigidGroup">
+<code class="descname">rigidGroup</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.rigidGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.rigidGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a rigid group by name.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.rigidGroups">
+<code class="descname">rigidGroups</code><a class="headerlink" href="#bornagain.detector.PanelList.rigidGroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Groups of panels that one might like to manipulate together.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.simple_setup">
+<code class="descname">simple_setup</code><span class="sig-paren">(</span><em>nF=None</em>, <em>nS=None</em>, <em>pixelSize=None</em>, <em>distance=None</em>, <em>wavelength=None</em>, <em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.simple_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.simple_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a Panel using the simple setup method.</p>
+<p>Arguments:
+nF         : Number of fast-scan pixels
+nS         : Number of slow-scan pixels
+pixel_size  : Pixel size in meters
+distance   : Distance in meters
+wavelength : Wavelength in meters
+T          : Translation from sample to center of first pixel in meters</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.solidAngle">
+<code class="descname">solidAngle</code><a class="headerlink" href="#bornagain.detector.PanelList.solidAngle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenated solid angles.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.stol">
+<code class="descname">stol</code><a class="headerlink" href="#bornagain.detector.PanelList.stol" title="Permalink to this definition">¶</a></dt>
+<dd><p>sin(theta)/lambda, where theta is the half angle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.detector.PanelList.wavelength">
+<code class="descname">wavelength</code><a class="headerlink" href="#bornagain.detector.PanelList.wavelength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bornagain.scatter.html" title="bornagain.scatter module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="bornagain.viewers.qtv.html" title="bornagain.viewers.qtv module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bornagain.html" >bornagain package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, Richard A Kirian.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

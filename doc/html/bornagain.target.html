@@ -26,8 +26,8 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" />
     <link rel="up" title="bornagain package" href="bornagain.html" />
-    <link rel="next" title="bornagain.viewers package" href="bornagain.viewers.html" />
-    <link rel="prev" title="bornagain.simulate package" href="bornagain.simulate.html" /> 
+    <link rel="next" title="bornagain.target.crystal module" href="bornagain.target.crystal.html" />
+    <link rel="prev" title="bornagain.simulate.clcore module" href="bornagain.simulate.clcore.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -40,10 +40,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="bornagain.viewers.html" title="bornagain.viewers package"
+          <a href="bornagain.target.crystal.html" title="bornagain.target.crystal module"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="bornagain.simulate.html" title="bornagain.simulate package"
+          <a href="bornagain.simulate.clcore.html" title="bornagain.simulate.clcore module"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="bornagain.html" accesskey="U">bornagain package</a> &raquo;</li> 
@@ -55,18 +55,17 @@
   <ul>
 <li><a class="reference internal" href="#">bornagain.target package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-bornagain.target.crystal">bornagain.target.crystal module</a></li>
 <li><a class="reference internal" href="#module-bornagain.target">Module contents</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="bornagain.simulate.html"
-                        title="previous chapter">bornagain.simulate package</a></p>
+  <p class="topless"><a href="bornagain.simulate.clcore.html"
+                        title="previous chapter">bornagain.simulate.clcore module</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="bornagain.viewers.html"
-                        title="next chapter">bornagain.viewers package</a></p>
+  <p class="topless"><a href="bornagain.target.crystal.html"
+                        title="next chapter">bornagain.target.crystal module</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -99,58 +98,11 @@
 <h1>bornagain.target package<a class="headerlink" href="#bornagain-target-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.target.crystal.html">bornagain.target.crystal module</a></li>
+</ul>
 </div>
-<div class="section" id="module-bornagain.target.crystal">
-<span id="bornagain-target-crystal-module"></span><h2>bornagain.target.crystal module<a class="headerlink" href="#module-bornagain.target.crystal" title="Permalink to this headline">¶</a></h2>
-<p>Basic utilities for dealing with crystalline objects.</p>
-<dl class="function">
-<dt id="bornagain.target.crystal.hermannMauguinToNumber">
-<code class="descclassname">bornagain.target.crystal.</code><code class="descname">hermannMauguinToNumber</code><span class="sig-paren">(</span><em>hm</em>, <em>hall=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#hermannMauguinToNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.hermannMauguinToNumber" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is needed to convert the Hermann Mauguin space group specifications
-in PDB files to the space group number or the &#8220;Hall number&#8221; that is used by</p>
-<blockquote>
-<div>the spglib module.</div></blockquote>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.target.crystal.parsePDB">
-<code class="descclassname">bornagain.target.crystal.</code><code class="descname">parsePDB</code><span class="sig-paren">(</span><em>pdbFilePath</em>, <em>crystalStruct=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#parsePDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.parsePDB" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a structure object with PDB information.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="bornagain.target.crystal.structure">
-<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">structure</code><span class="sig-paren">(</span><em>pdbFilePath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Stuff needed to deal with an atomistic crystal structure.</p>
-<p>A note on coordinate transformations and the orthogonalization matrix
-O:
-Convert from fractional coordinates x to real-space coordinates r:
-r = cryst.O.dot(x)
-Convert from real-space coordinates r to fractional coordinates x:
-x = cryst.Oinv.dot(r)
-Convert from q-space to h-space:
-h = cryst.O.T.dot(q)</p>
-<dl class="method">
-<dt id="bornagain.target.crystal.structure.loadPDB">
-<code class="descname">loadPDB</code><span class="sig-paren">(</span><em>pdbFilePath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.loadPDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.loadPDB" title="Permalink to this definition">¶</a></dt>
-<dd><p>Populate all the attributes from a PDB file.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.target.crystal.structure.setCell">
-<code class="descname">setCell</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>alpha</em>, <em>beta</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.setCell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.setCell" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the unit cell and all quantities derived from the unit cell.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.structure.x">
-<code class="descname">x</code><a class="headerlink" href="#bornagain.target.crystal.structure.x" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fractional coordinates of atoms.</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="module-bornagain.target">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bornagain.target" title="Permalink to this headline">¶</a></h2>
@@ -173,10 +125,10 @@ h = cryst.O.T.dot(q)</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="bornagain.viewers.html" title="bornagain.viewers package"
+          <a href="bornagain.target.crystal.html" title="bornagain.target.crystal module"
              >next</a> |</li>
         <li class="right" >
-          <a href="bornagain.simulate.html" title="bornagain.simulate package"
+          <a href="bornagain.simulate.clcore.html" title="bornagain.simulate.clcore module"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="bornagain.html" >bornagain package</a> &raquo;</li> 

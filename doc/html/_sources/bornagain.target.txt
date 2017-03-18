@@ -4,14 +4,9 @@ bornagain.target package
 Submodules
 ----------
 
-bornagain.target.crystal module
--------------------------------
+.. toctree::
 
-.. automodule:: bornagain.target.crystal
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   bornagain.target.crystal
 
 Module contents
 ---------------

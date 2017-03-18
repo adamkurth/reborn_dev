@@ -70,7 +70,7 @@
 <span class="kn">import</span> <span class="nn">re</span>
 
 
-<div class="viewcode-block" id="geom_to_dict"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.geom_to_dict">[docs]</a><span class="k">def</span> <span class="nf">geom_to_dict</span><span class="p">(</span><span class="n">geom_file</span><span class="p">,</span> <span class="n">raw_strings</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="geom_to_dict"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geom_to_dict">[docs]</a><span class="k">def</span> <span class="nf">geom_to_dict</span><span class="p">(</span><span class="n">geom_file</span><span class="p">,</span> <span class="n">raw_strings</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Convert a crystfel &quot;geom&quot; file into a sensible Python dictionary.  For</span>
 <span class="sd">details see:</span>
@@ -310,7 +310,7 @@
     <span class="k">return</span> <span class="n">geomDict</span>
 
 </div>
-<div class="viewcode-block" id="geom_dict_to_panellist"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.geom_dict_to_panellist">[docs]</a><span class="k">def</span> <span class="nf">geom_dict_to_panellist</span><span class="p">(</span><span class="n">geomDict</span><span class="p">):</span>
+<div class="viewcode-block" id="geom_dict_to_panellist"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geom_dict_to_panellist">[docs]</a><span class="k">def</span> <span class="nf">geom_dict_to_panellist</span><span class="p">(</span><span class="n">geomDict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Convert a CrystFEL geometry dictionary to a PanelList object. &quot;&quot;&quot;</span>
 
     <span class="n">PanelList</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">PanelList</span><span class="p">()</span>
@@ -337,7 +337,7 @@
     <span class="k">return</span> <span class="n">PanelList</span>
 
 </div>
-<div class="viewcode-block" id="load_cheetah_mask"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.load_cheetah_mask">[docs]</a><span class="k">def</span> <span class="nf">load_cheetah_mask</span><span class="p">(</span><span class="n">maskArray</span><span class="p">,</span> <span class="n">PanelList</span><span class="p">,</span> <span class="n">geomDict</span><span class="p">):</span>
+<div class="viewcode-block" id="load_cheetah_mask"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.load_cheetah_mask">[docs]</a><span class="k">def</span> <span class="nf">load_cheetah_mask</span><span class="p">(</span><span class="n">maskArray</span><span class="p">,</span> <span class="n">PanelList</span><span class="p">,</span> <span class="n">geomDict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Populate Panel masks with cheetah mask array. &quot;&quot;&quot;</span>
 
     <span class="n">fail</span> <span class="o">=</span> <span class="bp">False</span>
@@ -349,7 +349,7 @@
     <span class="k">return</span> <span class="n">fail</span>
 
 </div>
-<div class="viewcode-block" id="load_cheetah_dark"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.load_cheetah_dark">[docs]</a><span class="k">def</span> <span class="nf">load_cheetah_dark</span><span class="p">(</span><span class="n">darkArray</span><span class="p">,</span> <span class="n">PanelList</span><span class="p">,</span> <span class="n">geomDict</span><span class="p">):</span>
+<div class="viewcode-block" id="load_cheetah_dark"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.load_cheetah_dark">[docs]</a><span class="k">def</span> <span class="nf">load_cheetah_dark</span><span class="p">(</span><span class="n">darkArray</span><span class="p">,</span> <span class="n">PanelList</span><span class="p">,</span> <span class="n">geomDict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Populate Panel darks with cheetah dark array. &quot;&quot;&quot;</span>
 
     <span class="n">fail</span> <span class="o">=</span> <span class="bp">False</span>
@@ -361,7 +361,7 @@
     <span class="k">return</span> <span class="n">fail</span>
 
 </div>
-<div class="viewcode-block" id="geom_to_panellist"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.geom_to_panellist">[docs]</a><span class="k">def</span> <span class="nf">geom_to_panellist</span><span class="p">(</span><span class="n">geomFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">beamFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">PanelList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="geom_to_panellist"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geom_to_panellist">[docs]</a><span class="k">def</span> <span class="nf">geom_to_panellist</span><span class="p">(</span><span class="n">geomFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">beamFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">PanelList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Convert a crystfel &quot;geom&quot; file into a Panel list &quot;&quot;&quot;</span>
 
     <span class="c"># For parsing the very loose fast/slow scan vector specification</span>
