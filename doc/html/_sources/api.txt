@@ -1,5 +1,5 @@
-Overview of the bornagain package
-=================================
+Overview
+========
 
 Some diagrams and brief text describing how everything fits together.
 

@@ -96,95 +96,115 @@ otherwise be 32.  If you are using a CPU you might want to set
 BORNAGAIN_CL_GROUPSIZE=1 .</p>
 <dl class="function">
 <dt id="bornagain.simulate.clcore.buffer_mesh_lookup">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">buffer_mesh_lookup</code><span class="sig-paren">(</span><em>a_map</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>q</em>, <em>R=None</em>, <em>a_out_dev=None</em>, <em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em>, <em>get=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#buffer_mesh_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.buffer_mesh_lookup" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">buffer_mesh_lookup</code><span class="sig-paren">(</span><em>a_map</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>q</em>, <em>R=None</em>, <em>a_out=None</em>, <em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#buffer_mesh_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.buffer_mesh_lookup" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is supposed to lookup intensities from a 3d mesh of amplitudes.</p>
-<p>Input:
-a:       Numpy array of complex scattering amplitudes generated from the
-function phase_factor_mesh()
-N:       As defined in phase_factor_mesh()
-q_min:   As defined in phase_factor_mesh()
-q_max:   As defined in phase_factor_mesh()
-q:       An Nx3 numpy array of q-space coordinates at which we want to
-interpolate
-the complex amplitudes in a_dev
-R:       A 3x3 rotation matrix which will act on the q vectors
-context: Optional pyopencl context [cl.create_some_context()]
-queue:   Optional pyopencl queue [cl.CommandQueue(context)]
-group_size: Optional specification of pyopencl group size (default 64 or
-maximum)</p>
-<p>Output:
-A numpy array of complex amplitudes.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.clcore.cap_group_size">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">cap_group_size</code><span class="sig-paren">(</span><em>group_size</em>, <em>queue</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#cap_group_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.cap_group_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check that the cl group size does not exceed device limit.  Cap the group
-if need be.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.simulate.clcore.get_context_and_queue">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">get_context_and_queue</code><span class="sig-paren">(</span><em>var=None</em>, <em>context=None</em>, <em>queue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#get_context_and_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.get_context_and_queue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attempt to determine cl context and queue from input buffers.  Check for
-consistency and raise ValueError if there are problems.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>numpy array</em>) &#8211; Complex scattering amplitudes (usually generated from the
+function phase_factor_mesh())</li>
+<li><strong>N</strong> (<em>int</em>) &#8211; As defined in phase_factor_mesh()</li>
+<li><strong>q_min</strong> (<em>float</em>) &#8211; As defined in phase_factor_mesh()</li>
+<li><strong>q_max</strong> (<em>float</em>) &#8211; As defined in phase_factor_mesh()</li>
+<li><strong>q</strong> (<em>Nx3 numpy array</em>) &#8211; q-space coordinates at which we want to interpolate
+the complex amplitudes in a_dev</li>
+<li><strong>R</strong> (<em>3x3 numpy array</em>) &#8211; Rotation matrix that will act on the q vectors</li>
+<li><strong>context</strong> (<em>pyopencl context</em>) &#8211; Optional, usually via cl.create_some_context()</li>
+<li><strong>queue</strong> (<em>pyopencl queue</em>) &#8211; Optional, usually via cl.CommandQueue(context)</li>
+<li><strong>group_size</strong> (<em>int</em>) &#8211; Optional specification of pyopencl group size (default 64 or
+maximum)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">numpy array of complex amplitudes</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="bornagain.simulate.clcore.phase_factor_mesh">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">phase_factor_mesh</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>a=None</em>, <em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em>, <em>get=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#phase_factor_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.phase_factor_mesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>This should simulate a regular 3D mesh of q-space samples.</p>
-<p>Input:
-r:       An Nx3 numpy array of atomic coordinates (meters)
-f:       A numpy array of complex atomic scattering factors
-N:       A scalar or length-3 array specifying the number of q-space
-samples in each of the three dimensions
-q_min:   A scalar or length-3 array specifying the minimum q-space
-magnitudes in the 3d mesh.  These values specify the center of
-the voxel.
-q_max:   A scalar or length-3 array specifying the maximum q-space
-magnitudes in the 3d mesh.  These values specify the center of
-the voxel.
-context: Optional pyopencl context [cl.create_some_context()]
-queue:   Optional pyopencl queue [cl.CommandQueue(context)]
-group_size: Optional specification of pyopencl group size (default 64 or
-maximum)</p>
-<p>Output:
-An array of complex scattering amplitudes.  By default this is a normal
-numpy array.  Optionally, this may be an opencl buffer.</p>
+<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">phase_factor_mesh</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>a=None</em>, <em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#phase_factor_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.phase_factor_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute phase factors on a regular 3D mesh of q-space samples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>r</strong> (<em>Nx3 numpy array</em>) &#8211; Atomic coordinates</li>
+<li><strong>f</strong> (<em>numpy array</em>) &#8211; A numpy array of complex atomic scattering factors</li>
+<li><strong>N</strong> (<em>numpy array length 3</em>) &#8211; Number of q-space samples in each of the three
+dimensions</li>
+<li><strong>q_min</strong> (<em>numpy array length 3</em>) &#8211; Minimum q-space magnitudes in the 3d mesh.
+These values specify the <em>center</em> of the first voxel.</li>
+<li><strong>q_max</strong> (<em>numpy array length 3</em>) &#8211; Naximum q-space magnitudes in the 3d mesh.
+These values specify the <em>center</em> of the voxel.</li>
+<li><strong>context</strong> (<em>pyopencl context</em>) &#8211; Optional, usually via cl.create_some_context()</li>
+<li><strong>queue</strong> (<em>pyopencl queue</em>) &#8211; Optional, usually via cl.CommandQueue(context)</li>
+<li><strong>group_size</strong> (<em>int</em>) &#8211; Optional specification of pyopencl group size (default 64 or
+maximum)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>An array of complex scattering amplitudes.  By default this is a normal</dt>
+<dd><p class="first last">numpy array.  Optionally, this may be an opencl buffer.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="bornagain.simulate.clcore.phase_factor_pad">
 <code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">phase_factor_pad</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>T</em>, <em>F</em>, <em>S</em>, <em>B</em>, <em>nF</em>, <em>nS</em>, <em>w</em>, <em>R=None</em>, <em>a=None</em>, <em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#phase_factor_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.phase_factor_pad" title="Permalink to this definition">¶</a></dt>
 <dd><p>This should simulate detector panels.</p>
-<p>Input:
-r:       An Nx3 numpy array with atomic coordinates (meters)
-f:       A numpy array with complex scattering factors
-T:       A 1x3 numpy array with vector components pointing from sample to
-the center of the first pixel in memory
-F:       A 1x3 numpy array containing the basis vector components pointing
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>r</strong> &#8211; An Nx3 numpy array with atomic coordinates (meters)</li>
+<li><strong>f</strong> &#8211; A numpy array with complex scattering factors</li>
+<li><strong>T</strong> &#8211; A 1x3 numpy array with vector components pointing from sample to
+the center of the first pixel in memory</li>
+<li><strong>F</strong> &#8211; A 1x3 numpy array containing the basis vector components pointing
 in the direction corresponding to contiguous pixels in memory
-(&#8220;fast scan&#8221;).
-S:       A 1x3 numpy array containing the basis vector components pointing
+(&#8220;fast scan&#8221;).</li>
+<li><strong>S</strong> &#8211; A 1x3 numpy array containing the basis vector components pointing
 in the direction corresponding to non-contiguous pixels in
-memory (&#8220;slow scan&#8221;).
-B:       A 1x3 numpy array with unit-vector components corresponding to the
-incident x-ray beam direction
-nF:      Number of fast-scan pixels (corresponding to F vector) in the
-detector panel
-nS:      Number of slow-scan pixels (corresponding to S vector) in the
-detector panel
-w:       The photon wavelength in meters
-R:       Optional numpy array [3x3] specifying rotation of q vectors
-a:       Optional output complex scattering amplitude cl array
-context: Optional pyopencl context [cl.create_some_context()]
-queue:   Optional pyopencl queue [cl.CommandQueue(context)]
-group_size: Optional specification of pyopencl group size (default 64 or
-maximum)</p>
-<p>Output:
-A:        A numpy array of length nF*nS containing complex scattering
-amplitudes</p>
+memory (&#8220;slow scan&#8221;).</li>
+<li><strong>B</strong> &#8211; A 1x3 numpy array with unit-vector components corresponding to the
+incident x-ray beam direction</li>
+<li><strong>nF</strong> &#8211; Number of fast-scan pixels (corresponding to F vector) in the
+detector panel</li>
+<li><strong>nS</strong> &#8211; Number of slow-scan pixels (corresponding to S vector) in the
+detector panel</li>
+<li><strong>w</strong> &#8211; The photon wavelength in meters</li>
+<li><strong>R</strong> &#8211; Optional numpy array [3x3] specifying rotation of q vectors</li>
+<li><strong>a</strong> &#8211; Optional output complex scattering amplitude cl array</li>
+<li><strong>context</strong> &#8211; Optional pyopencl context [cl.create_some_context()]</li>
+<li><strong>queue</strong> &#8211; Optional pyopencl queue [cl.CommandQueue(context)]</li>
+<li><strong>group_size</strong> &#8211; Optional specification of pyopencl group size (default 64 or
+maximum)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A numpy array of length nF*nS containing complex scattering</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">A</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>amplitudes</p>
 </dd></dl>
 
 <dl class="function">
@@ -227,16 +247,50 @@ cl.CommandQueue(context) to create one).</li>
 
 <dl class="function">
 <dt id="bornagain.simulate.clcore.to_device">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">to_device</code><span class="sig-paren">(</span><em>queue</em>, <em>x=None</em>, <em>shape=None</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#to_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.to_device" title="Permalink to this definition">¶</a></dt>
-<dd><p>For convenience: create a cl array from numpy array or size, return input
-if already a cl array.</p>
+<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">to_device</code><span class="sig-paren">(</span><em>array=None</em>, <em>shape=None</em>, <em>dtype=None</em>, <em>queue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#to_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.to_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
+array into a pyopencl.array and send it to the device memory.  So far this only
+deals with float and comlex arrays, and it should figure out which type it is.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>array</strong> (<em>numpy/cl array; float/complex type</em>) &#8211; Input array.</li>
+<li><strong>shape</strong> (<em>tuple</em>) &#8211; Optionally specify the shape of the desired array.  This is
+ignored if array is not None.</li>
+<li><strong>dtype</strong> (<em>np.dtype</em>) &#8211; Specify the desired type in opencl.  The two types that
+are useful here are np.float32 and np.complex64</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pyopencl array</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="bornagain.simulate.clcore.vec4">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">vec4</code><span class="sig-paren">(</span><em>x</em>, <em>dtype=&lt;type 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#vec4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.vec4" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">vec4</code><span class="sig-paren">(</span><em>x</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#vec4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.vec4" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evdidently pyopencl does not deal with 3-vectors very well, so we use
 4-vectors and pad with a zero at the end.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; array</li>
+<li><strong>dtype</strong> &#8211; Optional np.dtype (default np.float32)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">numpy array of length 4</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
