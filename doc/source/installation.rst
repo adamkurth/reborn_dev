@@ -1,6 +1,14 @@
 Installation
 ============
 
+So far there is no installation scripts.  We're not at that stage yet.  For now, just add bornagain to your python path:
+
+.. code-block:: python
+
+	import sys
+	sys.path.append("../foo/bar")
+
+
 Using Anaconda and pip
 ----------------------
 

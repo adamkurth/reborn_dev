@@ -37,76 +37,58 @@ if default_group_size > max_group_size:
 programs = cl.Program(default_context, open(clcore_file).read()).build(
                         options=['-D', 'GROUP_SIZE=%d' % default_group_size])
 
-def vec4(x, dtype=np.float32):
+def vec4(x, dtype=None):
     """
-    Evdidently pyopencl does not deal with 3-vectors very well, so we use
-    4-vectors and pad with a zero at the end.
-    """
+Evdidently pyopencl does not deal with 3-vectors very well, so we use
+4-vectors and pad with a zero at the end.
 
+Arguments:
+    x: array
+    dtype: Optional np.dtype (default np.float32)
+    
+Returns:
+    numpy array of length 4
+    """
+    
+    if dtype is None:
+        dtype = np.float32
     return np.array([x[0], x[1], x[2], 0.0], dtype=dtype)
 
 
-def to_device(queue, x=None, shape=None, dtype=None):
+def to_device(queue=None, array=None, shape=None, dtype=None):
     """
-    For convenience: create a cl array from numpy array or size, return input
-    if already a cl array.
+This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy 
+array into a pyopencl.array and send it to the device memory.  So far this only
+deals with float and comlex arrays, and it should figure out which type it is.
+
+Arguments:
+    array (numpy/cl array; float/complex type): Input array.
+    shape (tuple): Optionally specify the shape of the desired array.  This is 
+                    ignored if array is not None. 
+    dtype (np.dtype): Specify the desired type in opencl.  The two types that 
+                       are useful here are np.float32 and np.complex64
+
+Returns:
+    pyopencl array
     """
 
-    if isinstance(x, cl.array.Array):
-        return x
+    if queue is None:
+        queue = default_queue
 
-    if x is None:
-        x = np.zeros(shape, dtype=dtype)
+    if isinstance(array, cl.array.Array):
+        return array
+
+    if array is None:
+        array = np.zeros(shape, dtype=dtype)
 
     if dtype is None:
-        if np.iscomplexobj(x):
+        if np.iscomplexobj(array):
             dtype = np.complex64
         else:
             dtype = np.float32
 
-    return cl.array.to_device(queue, x.astype(dtype))
+    return cl.array.to_device(queue, array.astype(dtype))
 
-
-def get_context_and_queue(var=None, context=None, queue=None):
-    """
-    Attempt to determine cl context and queue from input buffers.  Check for
-    consistency and raise ValueError if there are problems.
-    """
-
-    if var is not None:
-        for v in var:
-            if v is None:
-                continue
-            if isinstance(v, cl.array.Array):
-                q = v.queue
-                c = v.context
-                if context is None:
-                    context = c
-                if queue is None:
-                    queue = q
-                if c != context:
-                    raise ValueError
-                if q != queue:
-                    raise ValueError
-
-    if queue is None:
-        if context is None:
-            context = cl.create_some_context()
-        queue = cl.CommandQueue(context)
-
-    return context, queue
-
-
-def cap_group_size(group_size, queue):
-    """
-    Check that the cl group size does not exceed device limit.  Cap the group
-    if need be.
-    """
-
-    if group_size > queue.device.max_work_group_size:
-        group_size = queue.device.max_work_group_size
-
-    return group_size
 
 phase_factor_qrf_cl = programs.phase_factor_qrf
 phase_factor_qrf_cl.set_scalar_arg_dtypes(
@@ -179,33 +161,33 @@ def phase_factor_pad(r, f, T, F, S, B, nF, nS, w, R=None,
     '''
 This should simulate detector panels.
 
-Input:
-r:       An Nx3 numpy array with atomic coordinates (meters)
-f:       A numpy array with complex scattering factors
-T:       A 1x3 numpy array with vector components pointing from sample to
-the center of the first pixel in memory
-F:       A 1x3 numpy array containing the basis vector components pointing
-in the direction corresponding to contiguous pixels in memory
-("fast scan").
-S:       A 1x3 numpy array containing the basis vector components pointing
-in the direction corresponding to non-contiguous pixels in
-memory ("slow scan").
-B:       A 1x3 numpy array with unit-vector components corresponding to the
-incident x-ray beam direction
-nF:      Number of fast-scan pixels (corresponding to F vector) in the
-detector panel
-nS:      Number of slow-scan pixels (corresponding to S vector) in the
-detector panel
-w:       The photon wavelength in meters
-R:       Optional numpy array [3x3] specifying rotation of q vectors
-a:       Optional output complex scattering amplitude cl array
-context: Optional pyopencl context [cl.create_some_context()]
-queue:   Optional pyopencl queue [cl.CommandQueue(context)]
-group_size: Optional specification of pyopencl group size (default 64 or
-maximum)
+Arguments:
+    r: An Nx3 numpy array with atomic coordinates (meters)
+    f: A numpy array with complex scattering factors
+    T: A 1x3 numpy array with vector components pointing from sample to
+       the center of the first pixel in memory
+    F: A 1x3 numpy array containing the basis vector components pointing
+        in the direction corresponding to contiguous pixels in memory
+        ("fast scan").
+    S: A 1x3 numpy array containing the basis vector components pointing
+        in the direction corresponding to non-contiguous pixels in
+        memory ("slow scan").
+    B: A 1x3 numpy array with unit-vector components corresponding to the
+        incident x-ray beam direction
+    nF: Number of fast-scan pixels (corresponding to F vector) in the
+        detector panel
+    nS: Number of slow-scan pixels (corresponding to S vector) in the
+        detector panel
+    w: The photon wavelength in meters
+    R: Optional numpy array [3x3] specifying rotation of q vectors
+    a: Optional output complex scattering amplitude cl array
+    context: Optional pyopencl context [cl.create_some_context()]
+    queue:   Optional pyopencl queue [cl.CommandQueue(context)]
+    group_size: Optional specification of pyopencl group size (default 64 or
+       maximum)
 
-Output:
-A:        A numpy array of length nF*nS containing complex scattering
+Returns:
+    A: A numpy array of length nF*nS containing complex scattering
 amplitudes
     '''
 
@@ -252,27 +234,25 @@ phase_factor_mesh_cl.set_scalar_arg_dtypes(
 def phase_factor_mesh(r, f, N, q_min, q_max, a=None, context=None,
                      queue=None, group_size=None, get=True):
     '''
-This should simulate a regular 3D mesh of q-space samples.
+Compute phase factors on a regular 3D mesh of q-space samples.
 
-Input:
-r:       An Nx3 numpy array of atomic coordinates (meters)
-f:       A numpy array of complex atomic scattering factors
-N:       A scalar or length-3 array specifying the number of q-space
-samples in each of the three dimensions
-q_min:   A scalar or length-3 array specifying the minimum q-space
-magnitudes in the 3d mesh.  These values specify the center of
-the voxel.
-q_max:   A scalar or length-3 array specifying the maximum q-space
-magnitudes in the 3d mesh.  These values specify the center of
-the voxel.
-context: Optional pyopencl context [cl.create_some_context()]
-queue:   Optional pyopencl queue [cl.CommandQueue(context)]
-group_size: Optional specification of pyopencl group size (default 64 or
-maximum)
+Arguments:
+    r (Nx3 numpy array): Atomic coordinates
+    f (numpy array): A numpy array of complex atomic scattering factors
+    N (numpy array length 3): Number of q-space samples in each of the three 
+       dimensions
+    q_min (numpy array length 3): Minimum q-space magnitudes in the 3d mesh.  
+       These values specify the *center* of the first voxel.
+    q_max (numpy array length 3): Naximum q-space magnitudes in the 3d mesh.  
+       These values specify the *center* of the voxel.
+    context (pyopencl context): Optional, usually via cl.create_some_context()
+    queue (pyopencl queue): Optional, usually via cl.CommandQueue(context)
+    group_size (int): Optional specification of pyopencl group size (default 64 or
+       maximum)
 
-Output:
-An array of complex scattering amplitudes.  By default this is a normal
-numpy array.  Optionally, this may be an opencl buffer.
+Returns:
+    An array of complex scattering amplitudes.  By default this is a normal
+       numpy array.  Optionally, this may be an opencl buffer.
     '''
 
     if context is None:
@@ -330,23 +310,22 @@ def buffer_mesh_lookup(a_map, N, q_min, q_max, q, R=None, a_out_dev=None,
     """
 This is supposed to lookup intensities from a 3d mesh of amplitudes.
 
-Input:
-a:       Numpy array of complex scattering amplitudes generated from the
-function phase_factor_mesh()
-N:       As defined in phase_factor_mesh()
-q_min:   As defined in phase_factor_mesh()
-q_max:   As defined in phase_factor_mesh()
-q:       An Nx3 numpy array of q-space coordinates at which we want to
-interpolate
-the complex amplitudes in a_dev
-R:       A 3x3 rotation matrix which will act on the q vectors
-context: Optional pyopencl context [cl.create_some_context()]
-queue:   Optional pyopencl queue [cl.CommandQueue(context)]
-group_size: Optional specification of pyopencl group size (default 64 or
-maximum)
+Arguments:
+    a (numpy array): Complex scattering amplitudes (usually generated from the
+       function phase_factor_mesh())
+    N (int): As defined in phase_factor_mesh()
+    q_min (float): As defined in phase_factor_mesh()
+    q_max (float): As defined in phase_factor_mesh()
+    q (Nx3 numpy array): q-space coordinates at which we want to interpolate
+       the complex amplitudes in a_dev
+    R (3x3 numpy array): Rotation matrix that will act on the q vectors
+    context (pyopencl context): Optional, usually via cl.create_some_context()
+    queue (pyopencl queue): Optional, usually via cl.CommandQueue(context)
+    group_size (int): Optional specification of pyopencl group size (default 64 or
+       maximum)
 
-Output:
-A numpy array of complex amplitudes.
+Returns:
+    numpy array of complex amplitudes
     """
 
     if context is None:
