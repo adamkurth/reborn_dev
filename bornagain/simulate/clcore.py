@@ -4,7 +4,8 @@ diffraction on GPU devices.  It is not finished yet...
 
 Some environment variables that affect this module:
 'BORNAGAIN_CL_GROUPSIZE' : This sets the default groupsize.  It will
-otherwise be 32, which may fail on CPUs.
+otherwise be 32.  If you are using a CPU you might want to set 
+BORNAGAIN_CL_GROUPSIZE=1 .
 """
 
 import sys
