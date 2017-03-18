@@ -22,7 +22,9 @@ clcore_file = pkg_resources.resource_filename(
 default_context = cl.create_some_context()
 default_queue = cl.CommandQueue(default_context)
 
-default_group_size = np.int(os.environ.get('BORNAGAIN_CL_GROUPSIZE'))
+default_group_size = None
+if os.environ.get('BORNAGAIN_CL_GROUPSIZE') is not None:
+    default_group_size = np.int(os.environ.get('BORNAGAIN_CL_GROUPSIZE'))
 if default_group_size is None:
     default_group_size = 32
 max_group_size = default_queue.device.max_work_group_size
