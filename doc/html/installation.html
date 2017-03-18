@@ -25,8 +25,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" />
-    <link rel="next" title="API Overview" href="api.html" />
-    <link rel="prev" title="bornagain.utils module" href="bornagain.utils.html" /> 
+    <link rel="next" title="bornagain package" href="bornagain.html" />
+    <link rel="prev" title="Overview of the bornagain package" href="api.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -39,10 +39,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="api.html" title="API Overview"
+          <a href="bornagain.html" title="bornagain package"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="bornagain.utils.html" title="bornagain.utils module"
+          <a href="api.html" title="Overview of the bornagain package"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -51,17 +51,20 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Installation</a></li>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#using-anaconda-and-pip">Using Anaconda and pip</a></li>
 <li><a class="reference internal" href="#case-studies-in-dependency-madness">Case studies in dependency madness</a></li>
 <li><a class="reference internal" href="#extra-dependencies-for-building-the-documentation">Extra dependencies for building the documentation</a></li>
 </ul>
+</li>
+</ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="bornagain.utils.html"
-                        title="previous chapter">bornagain.utils module</a></p>
-  <h4>Next topic</h4>
   <p class="topless"><a href="api.html"
-                        title="next chapter">API Overview</a></p>
+                        title="previous chapter">Overview of the bornagain package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bornagain.html"
+                        title="next chapter">bornagain package</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -92,6 +95,8 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="using-anaconda-and-pip">
+<h2>Using Anaconda and pip<a class="headerlink" href="#using-anaconda-and-pip" title="Permalink to this headline">¶</a></h2>
 <p>To keep the installation as painless as possible, you should probably use the <a class="reference external" href="https://anaconda.org">Anaconda</a> Python 2.7 distribution.  The dependencies below assume that <cite>numpy</cite> and other popular scientific modules are available.</p>
 <p>For manipulating crystals you need to install <cite>spglib</cite>:</p>
 <div class="highlight-bash"><div class="highlight"><pre>pip install spglib
@@ -108,7 +113,7 @@
 <p>The above seems to work well on Apple computers, so far.</p>
 </div>
 <div class="section" id="case-studies-in-dependency-madness">
-<h1>Case studies in dependency madness<a class="headerlink" href="#case-studies-in-dependency-madness" title="Permalink to this headline">¶</a></h1>
+<h2>Case studies in dependency madness<a class="headerlink" href="#case-studies-in-dependency-madness" title="Permalink to this headline">¶</a></h2>
 <p>Scientific Linux 6 (SL6) sucks.  Never use this Linux distribution.  It is supposed to be stable, but therefore has very old versions of many key libraries such as gcc.  To install <cite>pyopencl</cite> on SL6 I downloaded the pyopencl-2016.2.1 source, and then from within the directory I did the following:</p>
 <div class="highlight-bash"><div class="highlight"><pre>sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
 sudo yum install devtoolset-2
@@ -119,7 +124,7 @@ make install
 </div>
 </div>
 <div class="section" id="extra-dependencies-for-building-the-documentation">
-<h1>Extra dependencies for building the documentation<a class="headerlink" href="#extra-dependencies-for-building-the-documentation" title="Permalink to this headline">¶</a></h1>
+<h2>Extra dependencies for building the documentation<a class="headerlink" href="#extra-dependencies-for-building-the-documentation" title="Permalink to this headline">¶</a></h2>
 <p>This documentation is generated with <a class="reference external" href="http://www.sphinx-doc.org">Sphinx</a>. If you want to build the documentation for <cite>bornagain</cite>, then you need to install Sphinx:</p>
 <div class="highlight-bash"><div class="highlight"><pre>pip install sphinx
 </pre></div>
@@ -127,6 +132,7 @@ make install
 <p>We also use the napoleon extension for converting Google-style docstrings:</p>
 <div class="highlight-bash"><div class="highlight"><pre>pip install sphinxcontrib-napoleon
 </pre></div>
+</div>
 </div>
 </div>
 
@@ -146,10 +152,10 @@ make install
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="api.html" title="API Overview"
+          <a href="bornagain.html" title="bornagain package"
              >next</a> |</li>
         <li class="right" >
-          <a href="bornagain.utils.html" title="bornagain.utils module"
+          <a href="api.html" title="Overview of the bornagain package"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li> 
       </ul>

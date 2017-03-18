@@ -1,6 +1,9 @@
 Coding guidlines for developers
 ===============================
 
+Overview of bornagain
+---------------------
+
 (This project is still in an early stage, so many of the guidelines below have not been followed.  We'll fix that in the next months.)
 
 Some things to consider before writing code:
@@ -18,7 +21,7 @@ Some things to consider before writing code:
 
 
 Checking for PEP8 compliance
-============================
+----------------------------
 
 Use the `pep8` program to check for inconsistencies (install `pep8` with pip if need be).  In the base directory of the git repo, do this
 
@@ -35,7 +38,7 @@ For simple errors like whitespace, you can use `autopep8`:
 For other problems you'll need to fix things by hand.  We aim to have no errors coming from the `pep8` program.
 
 Generation of documentation
-===========================
+---------------------------
 
 So far we are following the Google-style doc strings.  There are some examples `here <http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`_.
 

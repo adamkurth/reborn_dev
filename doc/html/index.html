@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="bornagain 0.0.1 documentation" href="#" />
-    <link rel="next" title="bornagain package" href="bornagain.html" /> 
+    <link rel="next" title="Overview of the bornagain package" href="api.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -38,7 +38,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="bornagain.html" title="bornagain package"
+          <a href="api.html" title="Overview of the bornagain package"
              accesskey="N">next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">bornagain 0.0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -50,12 +50,11 @@
 <li><a class="reference internal" href="#">bornagain&#8217;s documentation</a></li>
 <li><a class="reference internal" href="#contents">Contents</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
-<li><a class="reference internal" href="#module-detector">Testing</a></li>
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="bornagain.html"
-                        title="next chapter">bornagain package</a></p>
+  <p class="topless"><a href="api.html"
+                        title="next chapter">Overview of the bornagain package</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -88,26 +87,32 @@
 <h1>bornagain&#8217;s documentation<a class="headerlink" href="#bornagain-s-documentation" title="Permalink to this headline">¶</a></h1>
 <p>The bornagain python module is meant to be used for the analysis and simulation of
 x-ray diffraction under the Born approximation.  It is not the first attempt to create
-such a module, hence the name &#8220;bornagain&#8221;...</p>
+such a module, hence the name &#8220;bornagain&#8221;.</p>
+<p>Nothing is finished in bornagain so far.  But there is a decent class for handling diffraction patterns with multi-panel detectors.  And there is a fast gpu simulation core that is coming along.  We will eventually add a few file readers and viewers.</p>
 </div>
 <div class="section" id="contents">
 <h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Overview of the bornagain package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#using-anaconda-and-pip">Using Anaconda and pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#case-studies-in-dependency-madness">Case studies in dependency madness</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#extra-dependencies-for-building-the-documentation">Extra dependencies for building the documentation</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.html">bornagain package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#case-studies-in-dependency-madness">Case studies in dependency madness</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#extra-dependencies-for-building-the-documentation">Extra dependencies for building the documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api_detector.html">Module: bornagain.detector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html#generation-of-documentation">Generation of documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="coding.html#overview-of-bornagain">Overview of bornagain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coding.html#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coding.html#generation-of-documentation">Generation of documentation</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -118,11 +123,6 @@ such a module, hence the name &#8220;bornagain&#8221;...</p>
 <li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
 <li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
 </ul>
-</div>
-<div class="section" id="module-detector">
-<span id="testing"></span><h1>Testing<a class="headerlink" href="#module-detector" title="Permalink to this headline">¶</a></h1>
-<p>Classes for analyzing/simulating diffraction data contained in pixel array
-detectors (PADs).</p>
 </div>
 
 
@@ -141,7 +141,7 @@ detectors (PADs).</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="bornagain.html" title="bornagain package"
+          <a href="api.html" title="Overview of the bornagain package"
              >next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">bornagain 0.0.1 documentation</a> &raquo;</li> 
       </ul>
