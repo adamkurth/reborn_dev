@@ -68,8 +68,6 @@ cman = refdata.get_cromermann_parameters(cryst.Z) #
 form_facts = refdata.get_cmann_form_factors(cman, q) # form factors!
 r = cryst.r*1e10 # atom positions!
 
-#f = ba.simulate.atoms.get_scattering_factors(cryst.Z, si_energy)
-
 lookup = {}
 form_facts_arr = np.zeros( (len(form_facts), q.shape[0] )  )
 for i,z in enumerate(form_facts):
@@ -85,15 +83,12 @@ context = cl.Context(devices=my_gpu_devices)
 queue = clcore.queue
 group_size = clcore.group_size
 
+
+# Molecular transform
 A_mol = clcore.phase_factor_qrf2(q, r, form_facts_arr, atomID, R=None, 
     context=context, queue=queue,group_size=group_size)
 
 img_mol = (np.abs(A_mol)**2).reshape(img_sh)
-
-# for comparing methods
-#A0 = clcore.phase_factor_qrf(q, r, f, R=None, 
-#    context=context, queue=queue,group_size=group_size)
-#img0 = (np.abs(A0)**2).reshape(img_sh)
 
 
 ################################
@@ -133,20 +128,6 @@ print("Took %.4f sec"%(time.time() - t))
 
 img_lat = (np.abs(A_lat)**2).reshape(img_sh)
 
-# Full image baby
+# Full image 
 img = (np.abs(A_lat*A_mol)**2).reshape(img_sh)
 
-def amplitudes_with_cmans(q, r, Z):
-    cman = refdata.get_cromermann_parameters(Z) # 
-    form_facts = refdata.get_cmann_form_factors(cman, q) 
-    ff_mat = array( [form_facts[z] for z in cryst.Z]).T
-    amps = np.dot( q, r.T)
-    amps = np.exp( 1j*amps)
-    amps = np.sum( amps*ff_mat, 1)
-    return amps
-
-def amplitudes(q, r):
-    amps = np.dot( q, r.T)
-    amps = np.exp( 1j*amps)
-    amps = np.sum( amps,1)
-    return amps

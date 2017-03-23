@@ -14,7 +14,7 @@ import pyopencl as cl
 import pyopencl.array
 
 
-clcore_file = pkg_resources.resource_filename('bornagain.simulate','clcore.cl')
+clcore_file = pkg_resources.resource_filename('bornagain.simulate','clcore.cpp')
 
 context = cl.create_some_context()
 queue = cl.CommandQueue(context)
@@ -109,7 +109,7 @@ def phase_factor_qrf2(q, r, f, atomID, R=None, a=None,context=context, queue=que
     q:       Numpy or cl array [N,3] of scattering vectors (2.pi/lambda)
     r:       Numpy or cl array [M,3] of atomic coordinates
     f:       Numpy or cl array [M_unique_atom , N] of real scattering factors
-             where M_unique_atom is an atomID from 0 to M_unique_atom-1
+             where the 0th axis corresponds to an atom ID from 0 to M_unique_atom-1
     atomID:  Numpy or cl array [M] of atomic IDs (mapped from atomic number)
     R:       Optional numpy array [3x3] specifying rotation of q vectors
     a:       Optional cl array [N] of complex scattering amplitudes
