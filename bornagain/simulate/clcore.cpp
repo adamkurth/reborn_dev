@@ -293,86 +293,75 @@ kernel void buffer_mesh_lookup(
 
 }
 
+__kernel void qrf_default(
+    __global float *q_vecs,
+    __global float *r_vecs,
+    __global float *form_facts,
+    __global int *atomID,
+    __global float *R,
+    __global float2 *A,
+    const int n_pixels,
+    const int n_atoms){
+    
+    int q_idx = get_global_id(0);
 
-kernel void phase_factor_qrf2(
-    global const float *q,
-    global const float *r,
-    global const float *f,
-    global const int *atomID,
-    const float16 R,
-    global float2 *a,
-    const int n_atoms,
-    const int n_pixels)
-{
-    const int gi = get_global_id(0); /* Global index */
-    const int li = get_local_id(0);  /* Local group index */
+    A[q_idx].x =0;
+    A[q_idx].y =0;
 
-    float ph, sinph, cosph;
-    float2 a_sum = (float2)(0.0f,0.0f);
+    if ( q_idx < n_pixels) {
 
-    // Each global index corresponds to a particular q-vector.  Note that the
-    // global index could be larger than the number of pixels because it must be a
-    // multiple of the group size.  We must check if it is larger...
-    float4 q4, q4r;
-    if (gi < n_pixels){
+        float qx = q_vecs[q_idx*3];
+        float qy = q_vecs[ q_idx*3+1];
+        float qz = q_vecs[ q_idx*3+2];
 
-        // Move original q vector to private memory
-        q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
-
-        // Rotate the q vector
-        q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
-        q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
-        q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
-
-    } else {
-        // Dummy values; doesn't really matter what they are.
-        q4r = (float4)(0.0f,0.0f,0.0f,0.0f);
-    }
-    local float4 rg[GROUP_SIZE];
-    //local float2 fg[GROUP_SIZE];
-    local float fg[GROUP_SIZE];
-
-    for (int g=0; g<n_atoms; g+=GROUP_SIZE){
-
-        // Here we will move a chunk of atoms to local memory.  Each worker in a
-        // group moves one atom.
-        int ai = g+li;
-
-        if (ai < n_atoms & gi < n_pixels ){
-            rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
+        float qRx = R[0]*qx + R[1]*qy + R[2]*qz;
+        float qRy = R[3]*qx + R[4]*qy + R[5]*qz;
+        float qRz = R[6]*qx + R[7]*qy + R[8]*qz;
         
-            fg[li] = f[ atomID[ai]*n_pixels + gi];
-            //fg[li] = f[ai];
+        for (int r_idx=0; r_idx< n_atoms; r_idx++){
         
-        } else {
-            rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
-            //fg[li] = (float2)(0.0f,0.0f);
-            fg[li] = 0.0f; //(float2)(0.0f,0.0f);
+            float rx = r_vecs[ r_idx*3];
+            float ry = r_vecs[ r_idx*3+1];
+            float rz = r_vecs[ r_idx*3+2];
+            
+            float frm_fct = form_facts[ atomID[r_idx]*n_pixels + q_idx  ];
+
+            float phase = qRx*rx + qRy*ry + qRz*rz;
+            
+            float cosph = native_cos(-phase);
+            float sinph = native_sin(-phase);
+            
+            A[q_idx].x += frm_fct*cosph;
+            A[q_idx].y += frm_fct*sinph;
+            }
         }
-
-        // Don't proceed until **all** members of the group have finished moving
-        // atom information into local memory.
-        barrier(CLK_LOCAL_MEM_FENCE);
-
-        // We use a local real and imaginary part to avoid floatint point overflow
-        float2 a_temp = (float2)(0.0f,0.0f);
-
-        // Now sum up the amplitudes from this subset of atoms
-        for (int n=0; n < GROUP_SIZE; n++){
-            ph = -dot(q4r,rg[n]);
-            sinph = native_sin(ph);
-            cosph = native_cos(ph);
-            a_temp.x += fg[n]*cosph;
-            a_temp.y += fg[n]*sinph; 
+   
+    // each processing unit should do the same thing? 
+    if ( !(q_idx < n_pixels)) {
+        
+        float qx = q_vecs[0];//dummies
+        float qy = q_vecs[1];
+        float qz = q_vecs[2];
+        
+        float qRx = R[0]*qx + R[1]*qy + R[2]*qz;
+        float qRy = R[3]*qx + R[4]*qy + R[5]*qz;
+        float qRz = R[6]*qx + R[7]*qy + R[8]*qz;
+        
+        for (int r_idx=0; r_idx< n_atoms; r_idx++){
+        
+            float rx = r_vecs[0];//dummies
+            float ry = r_vecs[1];
+            float rz = r_vecs[2];
+            
+            float frm_fct = form_facts[  0  ]; //dummie
+            
+            float phase = qRx*rx + qRy*ry + qRz*rz;
+            
+            float sinph = native_sin(-phase);
+            float cosph = native_cos(-phase);
+            
+            A[q_idx].x += 0;
+            A[q_idx].y += 0;
+            }
         }
-        a_sum += a_temp;
-
-        // Don't proceed until this subset of atoms are completed.
-        barrier(CLK_LOCAL_MEM_FENCE);
     }
-    if (gi < n_pixels){
-        a[gi] = a_sum;
-    }
-}
-
-
