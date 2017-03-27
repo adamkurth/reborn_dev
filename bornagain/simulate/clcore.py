@@ -96,59 +96,8 @@ def cap_group_size(group_size, queue):
     return group_size
 
 
-phase_factor_qrf_cl2 = programs.phase_factor_qrf2
-phase_factor_qrf_cl2.set_scalar_arg_dtypes([None,None,None,None,None,None,np.int32,np.int32])
-
-def phase_factor_qrf2(q, r, f, atomID, R=None, a=None,context=context, queue=queue, group_size=group_size):
-
-    '''
-    Calculate diffraction amplitudes using real-valued atomic form factors: 
-        sum over f_n*exp(-iq.r_n)
-
-    Input:
-    q:       Numpy or cl array [N,3] of scattering vectors (2.pi/lambda)
-    r:       Numpy or cl array [M,3] of atomic coordinates
-    f:       Numpy or cl array [M_unique_atom , N] of real scattering factors
-             where the 0th axis corresponds to an atom ID from 0 to M_unique_atom-1
-    atomID:  Numpy or cl array [M] of atomic IDs (mapped from atomic number)
-    R:       Optional numpy array [3x3] specifying rotation of q vectors
-    a:       Optional cl array [N] of complex scattering amplitudes
-    context: Optional pyopencl context [cl.create_some_context()]
-    queue:   Optional pyopencl queue [cl.CommandQueue(context)]
-    group_size: Optional specification of pyopencl group size (default 64 or maximum)
-    
-    Return:
-    Numpy array [N] of complex amplitudes OR cl array if there are input cl arrays
-    '''
-
-    if R is None:
-        R = np.eye(3,dtype=np.float32)
-    
-    R16 = np.zeros([16],dtype=np.float32)
-    R16[0:9] = R.flatten().astype(np.float32)
-
-    n_pixels = np.int32(q.shape[0])
-    n_atoms = np.int32(r.shape[0])
-    q_dev = to_device(queue, q, dtype=np.float32)
-    r_dev = to_device(queue, r, dtype=np.float32)
-    f_dev = to_device(queue, f, dtype=np.float32)
-    atomID_dev = to_device(queue, atomID, dtype=np.int32)
-    a_dev = to_device(queue, a, dtype=np.complex64, shape=(n_pixels))
-    
-    global_size = np.int(np.ceil(n_pixels/np.float(group_size))*group_size)
-    
-    phase_factor_qrf_cl2(queue, (global_size,), (group_size,), q_dev.data, r_dev.data, 
-        f_dev.data, atomID_dev.data, R16, a_dev.data, n_atoms, n_pixels)
-
-    if a is None:
-        return a_dev.get()
-    else:
-        return a_dev
-
-
 phase_factor_qrf_cl = programs.phase_factor_qrf
 phase_factor_qrf_cl.set_scalar_arg_dtypes([None,None,None,None,None,np.int32,np.int32])
-
 def phase_factor_qrf(q, r, f, R=None, a=None, context=context, queue=queue, group_size=group_size):
 
     '''
