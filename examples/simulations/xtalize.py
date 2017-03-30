@@ -41,15 +41,11 @@ class SimpleDetector:
 #       shape of the 2D det panel (2D image)
         self.img_sh = (self.pl[0].nS, self.pl[0].nF)
 
-    def det_info(self):
-        print("num pixels: %d;  ")
-
     def readout(self, amplitudes):
         self.intens = (np.abs(amplitudes)**2).reshape(self.img_sh)
         return self.intens
 
     def readout_finite(self, amplitudes, qmin, qmax, flux=1e20):
-        
         struct_fact =( np.abs( amplitudes)**2).astype(np.float64)
 
         if qmin < self.qmags.min():
@@ -71,7 +67,7 @@ class SimpleDetector:
 
         pvals = struct_fact / struct_fact.sum()
 
-        self.intens = np.random.multinomial(  total_phot, pvals )
+        self.intens = np.random.multinomial(total_phot, pvals)
         
         self.intens = self.intens.reshape( self.img_sh)
 
@@ -95,44 +91,64 @@ class SimpleDetector:
         ax.set_ylabel(r'$q_y\,\,\AA^{-1}$')
         
         cbar = fig.colorbar(ax_img)
-        cbar.ax.set_ylabel('photon counts', rotation=270, labelpad=15)
+        cbar.ax.set_ylabel('photon counts', rotation=270, labelpad=12)
             
 class Atoms:
-    def __init__(self, xyz, atomic_num):
+    def __init__(self, xyz, atomic_num, elem=None):
         self.xyz = xyz
         self.x = self.xyz[:,0]
         self.y = self.xyz[:,1]
         self.z = self.xyz[:,2]
         self.Z = atomic_num
 
-        self.xyzZ = np.zeros((self.x.shape[0],4))
-        self.xyzZ[:,:3] = self.xyz
-        self.xyzZ[:,3] = self.Z
-
-def transform(x,y,z):
-     xyz = np.zeros( (x.shape[0],3))
-     xyz[:,0] = x
-     xyz[:,1] = y
-     xyz[:,2] = z
-     return xyz
-
-def mat_mult_many(M,V):
-    return np.einsum('ij,kj->ki', M,V )
-
-
-class SimpleMolecule:
-    def __init__(self, pdbFile = '/home/dermen/.local/ext/bornagain/examples/data/pdb/2LYZ.pdb'):
-        self.cryst = crystal.structure(pdbFile)
-        self.atom_vecs = self.cryst.r*1e10 # atom positions!
-        self.Z = self.cryst.Z
-
-        self.lat = Lattice( self.cryst.a*1e10, self.cryst.b*1e10, self.cryst.c*1e10, 
-            self.cryst.alpha*180/np.pi, self.cryst.beta*180/np.pi, self.cryst.gamma*180/np.pi)
-
-        self.O = np.matrix(self.cryst.O*1e10)
-        self.Oinv = np.matrix(self.cryst.Oinv*1e-10)
+        self.coor = np.zeros((self.x.shape[0],4))
+        self.coor[:,:3] = self.xyz
+        self.coor[:,3] = self.Z
         
-        self.atom_fracs = self.mat_mult_many( self.Oinv, self.atom_vecs)
+        self.coor[:,3] = self.Z
+
+        self.elem = elem
+        if elem is not None:
+            self.xyz_format = np.zeros( (self.x.shape[0],4), dtype='S16')
+            self.xyz_format[:,0] = self.elem
+            self.xyz_format[:,1:] = self.xyz.astype(str)
+   
+    @classmethod
+    def aggregate(cls, atoms_list):
+        
+        xyz = np.vstack(  [a.xyz for a in atoms_list])
+
+        if all([ a.elem is not None for a in atoms_list]):
+            elem = np.hstack(  [a.elem for a in atoms_list])
+        else:
+            elem = None
+
+        Z =  np.hstack(  [a.Z for a in atoms_list])
+
+        return cls(  xyz, Z, elem)
+
+    def to_xyz(self, fname):
+        if self.elem is not None:
+            np.savetxt(fname, self.xyz_format, fmt='%s')
+        else:
+            print("Cannot save to xyz because element strings were not provided...")
+
+    def set_elem(self, elem):
+        """sets list of elements names for use in xyz format files"""
+        elem = np.array(elem, dtype='S16')
+        assert( self.elem.shape[0] == self.x.shape[0])
+        self.elem = elem
+
+class Molecule(crystal.structure):
+    def __init__(self, *args, **kwargs):
+        crystal.structure.__init__(self, *args, **kwargs)
+        
+        self.atom_vecs = self.r*1e10 # atom positions!
+
+        self.lat = Lattice( self.a*1e10, self.b*1e10, self.c*1e10, 
+            self.alpha*180/np.pi, self.beta*180/np.pi, self.gamma*180/np.pi)
+
+        self.atom_fracs = self.mat_mult_many( self.Oinv*1e-10, self.atom_vecs)
 
 
     def get_1d_coords(self):
@@ -153,72 +169,17 @@ class SimpleMolecule:
         xyz[:,0] = x
         xyz[:,1] = y
         xyz[:,2] = z
-        xyz = self.mat_mult_many(self.O,xyz)
-        return Atoms( xyz, self.Z)
+        xyz = self.mat_mult_many(self.O*1e10, xyz)
+        return Atoms( xyz, self.Z, self.elements)
 
-        
+    def get_monomers(self):
+        monomers = []
+        for R,T in zip( self.symRs, self.symTs ):
+            transformed = self.mat_mult_many(R, self.atom_fracs) + T
+            transformed = self.mat_mult_many( self.O*1e10, transformed)
+            monomers.append( Atoms( transformed, self.Z, self.elements))
+        return monomers
 
-
-
-class Molecule:
-    def __init__(self, pdbFile = '/home/dermen/.local/ext/bornagain/examples/data/pdb/2LYZ.pdb'):
-        self.cryst = crystal.structure(pdbFile)
-        self.atom_vecs = self.cryst.r*1e10 # atom positions!
-        self.Z = self.cryst.Z
-
-        self.lat = Lattice( self.cryst.a*1e10, self.cryst.b*1e10, self.cryst.c*1e10, 
-            self.cryst.alpha*180/np.pi, self.cryst.beta*180/np.pi, self.cryst.gamma*180/np.pi)
-
-        self.O = np.matrix(self.cryst.O*1e10)
-        self.Oinv = np.matrix(self.cryst.Oinv*1e-10)
-        
-        self.atom_fracs = mat_mult_many( self.Oinv, self.atom_vecs)
-
-        self._Rs = self.cryst.symOps['rotations']
-        self._Ts = self.cryst.symOps['translations']
-
-        self._rotated = [ Atoms(mat_mult_many( self.O, mat_mult_many(R, self.atom_fracs)) , self.Z ) 
-            for R in self._Rs]
-        
-        self._transformed = [ Atoms( mat_mult_many( self.O, mat_mult_many(R, self.atom_fracs) + T), self.Z ) 
-            for R,T in zip( self._Rs, self._Ts)]
-
-        group_ids = {T:i for i,T in enumerate({tuple(T) for T in self._Ts})}
-        
-        self.mol_groups = [{ 'rot':[], 'rot_and_trans':[] } for _ in xrange(len(group_ids))]
-
-        for i,T in enumerate(self._Ts):
-            key = group_ids[tuple(T)]
-            self.mol_groups[key]['rot'].append( self._rotated[i] )
-            self.mol_groups[key]['rot_and_trans'].append( self._rotated[i] )
-            self.mol_groups[key]['trans_vec'] = T # overwrites but doesnt matter
-            self.mol_groups[key]['trans_scaled'] = np.dot( self.O, T) # overwrites but doesnt matter
-            
-        
-        for i,g in enumerate( self.mol_groups):
-            combined_vecs = np.vstack( [atoms.xyzZ for atoms in g['rot'] ] )
-            self.mol_groups[i]['rigid_unit_not_translated'] = Atoms(combined_vecs[:,:3], combined_vecs[:,3])
-
-
-
-class SimpleLattice:
-    def __init__(self, a=79.1, b=79.1, c=37.9 ):
-#       unit cell edges
-        self.a = np.array([a, 0, 0]) # angstroms
-        self.b = np.array([0, b, 0])
-        self.c = np.array([0, 0, c])
-
-    def assemble(self, n_unit=10, spherical=False):
-
-#       lattice coordinates
-        self.vecs = np.array( [ i*self.a + j*self.b + k*self.c 
-            for i in xrange( n_unit) 
-                for j in xrange( n_unit) 
-                    for k in xrange(n_unit) ] )
-
-#       sphericalize the lattice.. 
-        if spherical:
-            self.vecs = ba.utils.sphericalize( self.vecs)
 
 class Lattice:
     def __init__(self, a=281., b=281., c=165.2, alpha=90., beta=90., gamma=120. ):
@@ -253,6 +214,21 @@ class Lattice:
         if spherical:
             self.vecs = ba.utils.sphericalize( self.vecs)
 
+
+class SimpleLattice:     
+    
+    def __init__(self, a=79.1, b=79.1, c=37.9 ): #
+        self.a = np.array([a, 0, 0]) # angstroms         
+        self.b = np.array([0, b, 0])         
+        self.c = np.array([0, 0, c])
+    
+    def assemble(self, n_unit=10, spherical=False): 
+        self.vecs = np.array( [ i*self.a + j*self.b + k*self.c             
+            for i in xrange( n_unit)                 
+                for j in xrange( n_unit)                     
+                    for k in xrange(n_unit) ] )
+        if spherical: 
+            self.vecs = ba.utils.sphericalize( self.vecs)
 
 class ThornAgain:
     def __init__(self, q_vecs, atom_vecs, atomic_nums=None, load_default=True):
@@ -312,22 +288,32 @@ class ThornAgain:
 
 #       create openCL data buffers
 #       inputs
-        self.q_buff = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.q_vecs)
-        self.r_buff = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.atom_vecs)
-        self.form_facts_buff = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, 
-            hostbuf=self.form_facts_arr)
-        self.atomID_buff = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.atomIDs)
-        self.rot_buff = cl.Buffer(self.context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=self.rot_mat)
+        #self.q_buff = cl.Buffer(self.context, mf.READ_ONLY | mf.USE_HOST_PTR, hostbuf=self.q_vecs)
+        #self.r_buff = cl.Buffer(self.context, mf.READ_ONLY | mf.USE_HOST_PTR, hostbuf=self.atom_vecs)
+        #self.form_facts_buff = cl.Buffer(self.context, mf.READ_ONLY | mf.USE_HOST_PTR, 
+        #    hostbuf=self.form_facts_arr)
+        #self.atomID_buff = cl.Buffer(self.context, mf.READ_ONLY | mf.USE_HOST_PTR, hostbuf=self.atomIDs)
+        #self.rot_buff = cl.Buffer(self.context, mf.READ_ONLY | mf.USE_HOST_PTR, hostbuf=self.rot_mat)
+        
+        
+        self.atomID_buff = clcore.to_device( self.queue, self.atomIDs, dtype=np.int32 )
+        self.form_facts_buff = clcore.to_device( self.queue, self.form_facts_arr, dtype=np.float32 )
+        self.r_buff = clcore.to_device( self.queue, self.atom_vecs, dtype=np.float32 )
+        self.q_buff = clcore.to_device( self.queue, self.q_vecs, dtype=np.float32 )
+        self.rot_buff = clcore.to_device( self.queue, self.rot_mat, dtype=np.float32 )
 #       outputs 
         self.A_buff = clcore.to_device( self.queue, None, shape=(self.Npix+self.Nextra_pix), dtype=np.complex64 )
     
-        self.prg_args = [ self.queue, (self.Npix,), None, self.q_buff, self.r_buff, self.form_facts_buff, 
-            self.atomID_buff, self.rot_buff, self.A_buff.data, self.Npix, self.Nato ]
-
+        #self.prg_args = [ self.queue, (self.Npix,), None, self.q_buff, self.r_buff, self.form_facts_buff, 
+        #    self.atomID_buff, self.rot_buff, self.A_buff.data, self.Npix, self.Nato ]
+        self.prg_args = [ self.queue, (self.Npix,), None, self.q_buff.data, self.r_buff.data, self.form_facts_buff.data, 
+            self.atomID_buff.data, self.rot_buff.data, self.A_buff.data, self.Npix, self.Nato ]
 
     def _set_rand_rot(self):
-        self.rot_buff = cl.Buffer(self.context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=self.rot_mat)
-        self.prg_args[7] = self.rot_buff # consider kwargs ?
+        #self.rot_buff = cl.Buffer(self.context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=self.rot_mat)
+        #self.prg_args[7] = self.rot_buff # consider kwargs ?
+        self.rot_buff = clcore.to_device( self.queue, self.rot_mat, dtype=np.float32 )
+        self.prg_args[7] = self.rot_buff.data # consider kwargs ?
 
     def run(self, rand_rot=False, force_rot_mat=None):
 #       set the rotation        
@@ -365,44 +351,156 @@ class ThornAgain:
             kern_src = f.read()
         self.all_prg = cl.Program(self.context, kern_src).build()
 
-
-
-
 if __name__ == '__main__':
 
+#   simple detector object, reads in scattering amplitudes and outputs intensity
     det = SimpleDetector()
-    mol = SimpleMolecule(pdbFile='1jb0.pdb')
     
+#   so.. lets generate some amplitudes...
+
+#   made this class to inherit from bornagain.crystal.structure
+#   (it uses Angstrom units)
+    mol = Molecule(pdbFilePath='1jb0.pdb')
+    
+#   1d vectors of fractional coors, for use below
     x,y,z = mol.get_1d_frac_coords()
 
-    mono1 = mol.transform( x,y,z )
-    mono2 = mol.transform( -y,x-y,z )
-    mono3 = mol.transform( -x+y,-x,z )
+#   This is the funky bit only pertaining to the 
+#   problem involving PhotoSys1
+#   since the symOps dont generate trimer aggregats
+#   we have to adjust them (hence the plus 1 business)...
 
-    monomers = np.vstack([ mono1.xyz, mono2.xyz, mono3.xyz])
-    monomers_Z = np.vstack([ mono1.Z, mono2.Z, mono3.Z])
+#   Each call to mol.transform returns an Atoms instance
+    mono1 = mol.transform( x, y, z ) # transforms are in fractional coors 
+    mono2 = mol.transform( -y+1, x-y, z )
+    mono3 = mol.transform( -x+y+1,-x+1, z )
+    trimer1 = Atoms.aggregate([ mono1, mono2, mono3])
+    trimer1.to_xyz('trimer1.xyz') # save for vis with e.g. Pymol
+    
+#   make another trimer, offset doesn't matter, but orientation does.. 
+    mono4 = mol.transform( -x+2,-y+1,z+.5 )
+    mono5 = mol.transform( x-y+1,x,z+.5 )
+    mono6 = mol.transform( y+1,-x+y+1,z+.5 )
+    trimer2 = Atoms.aggregate([ mono4, mono5, mono6])
+    trimer2.to_xyz('trimer2.xyz')
 
-    trimer = Atoms(  monomers, monomers_Z      )
 
-    #mol.lat.assemble(spherical=True, n_unit=40)
+#   if you want the full unit you can simply
+    monomers = mol.get_monomers()
+#   ... monomers contains, in this case, 6 Atoms instances
+    hexemer = Atoms.aggregate(monomers) # e.g.
 
+    # build the lattice, extend it n_units along each lattice vector 
+    mol.lat.assemble(n_unit=20, spherical=1) # 100 x 100 x 100 Unit cells
 
-
-
-    #rig_u = mol.mol_groups[0]['rigid_unit_not_translated']
+#   lattice coordinates (in cartesian units) are
+    lat_vecs = mol.lat.vecs # only after running assemble
 
 #   simulators
-    #Tmol = ThornAgain(det.q_vecs, rig_u.xyz, rig_u.Z )
-    #Tlat = ThornAgain(det.q_vecs, lat.vecs )
+    Tmol = ThornAgain(det.q_vecs, trimer1.xyz, trimer1.Z )
+    Amol = Tmol.run(rand_rot=True)
     
-    #Amol = Tmol.run(rand_rot=True)
-    #Alat = Tlat.run(force_rot_mat=Tmol.rot_mat)
+    Tlat = ThornAgain(det.q_vecs, mol.lat.vecs )
+    Alat = Tlat.run(force_rot_mat=Tmol.rot_mat)
 
 #   get the intensity
-    #qmin = 0.2 # inv angstrom
-    #qmax = 5 
-    #flux = 1e26 # photon per cm**2
-    #img = det.readout_finite(Alat*Amol, qmin=qmin, qmax=qmax, flux=flux)
-    #det.display()
+    qmin = 0.2 # inv angstrom
+    qmax = 5 
+    flux = 1e27 # photon per cm**2
+    img = det.readout_finite(Alat*Amol, qmin=qmin, qmax=qmax, flux=flux)
+    det.display()
+
+#   that was for one trimer... 
+#   now we want to simulate the scattering for two trimers
+#   aranged on the lattice, with random occupancy 
+#   occuring at the boundary
+
+#   the easiest way to do this is to create a sub lattice (called Lattice2)
+#   similar to the first (Lattice1), only shifted by the symmetry translation operator
+#   ... then we can put the second trimer (trimer2 above) on this second lattice
+#   ...then by making a "large" double lattice (one per trimer) we can simulate
+#   random shape boundary effects by selecting different spherical
+#   regions within the double lattice, as a randomly drawn sphere will isolate different
+#   points from each lattice
+
+#   first lets make a big lattice
+    mol.lat.assemble(n_unit=40,spherical=False)
+    lat1 = mol.lat
+
+#   to create the second lattice, first examine the symmetry translations:
+    print mol.symTs
+    #[array([[ 0.,  0.,  0.]]),
+    # array([[ 0. ,  0. ,  0.5]]),
+    # array([[ 0.,  0.,  0.]]),
+    # array([[ 0. ,  0. ,  0.5]]),
+    # array([[ 0.,  0.,  0.]]),
+    # array([[ 0. ,  0. ,  0.5]])]
+
+#   as you can see, there are two, one trimer is at 0,0,0
+#   and the other is at 0,0,.5
+
+#   trimer 2 is placed
+#   at z+.5 (corresponding to lattice vector c)
+    lat1 = mol.lat.vecs
+    lat2 = lat1 + mol.lat.c*.5
+    dbl_lat = np.vstack( [lat1, lat2] )
+
+#   these are the intices correspinding to 
+#   each lattice
+    n_lat_pts = mol.lat.vecs.shape[0]
+    inds_lat1 = np.arange( n_lat_pts  )
+    inds_lat2 = np.arange( n_lat_pts, 2*n_lat_pts  )
+
+#   find the lattice center point
+    lat_center = dbl_lat.mean(0)
+#   and distance from center of each lattice point
+    lat_rads = np.sqrt( np.sum( (dbl_lat - lat_center)**2,1))
+    
+#   maximum direction from center such that 
+#   we can fit a sphere inside the lattice
+    max_rad = min( dbl_lat.max(0))/2.
+
+#   choose an inner sphere within which to jitter the
+#   sphere center
+    inner_rad = 0.2*max_rad
+
+#   choose a random point within the inner sphere
+    phi = np.random.uniform(0,2*pi)
+    costheta = np.random.uniform(-1,1)
+    u = random.random()
+
+    theta = arccos( costheta )
+    r = inner_rad * np.power( u, 1/3. )
+
+    x = r * np.sin( theta) * np.cos( phi )
+    y = r * np.sin( theta) * np.sin( phi )
+    z = r * np.cos( theta )
+
+    rand_sphere_cent = np.array( [x,y,z])
+
+#   choose a random radius now, such that it does not exceed max_rad
+    outer_rad = max_rad - inner_rad
+    u = random.random()
+    r = outer_rad * np.power( u, 1/3. )
+
+#   select all points within the newly defined sphere
+    lat_rads_rand = np.sqrt( np.sum( (dbl_lat - rand_sphere_cent)**2,1))
+
+    rand_lat1 = lat1[ (lat_rads_rand < r) [inds_lat1]]
+    rand_lat2 = lat2[ (lat_rads_rand < r)[inds_lat2]]
+
+#   simulate each lattice now
+    Tlat1 = ThornAgain(det.q_vecs, rand_lat1 )
+    Tlat2 = ThornAgain(det.q_vecs, rand_lat2 )
+    Alat1 = Tlat1.run(force_rot_mat=Tmol.rot_mat)
+    Alat2 = Tlat2.run(force_rot_mat=Tmol.rot_mat)
+
+#   now just simulate the second trimer, but relative the lattice2.. 
+    Tmol2 = ThornAgain(det.q_vecs, trimer2.xyz-mol.lat.c*.5, trimer2.Z )
+    Amol2 = Tmol.run(force_rot_mat=Tmol.rot_mat)
+    
+
+    
+
 
 
