@@ -277,8 +277,9 @@ def load_cheetah_mask(maskArray, PanelList, geomDict):
 
     for p in geomDict['panels']:
         PanelList[p['name']].mask = maskArray[
-            p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)]
-
+            p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)].copy()
+    PanelList._mask = None
+ 
     return fail
 
 
