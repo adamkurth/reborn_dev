@@ -668,7 +668,12 @@ class PanelList(object):
             i += 1
         
         return [start,stop]
+    
+    def panel_slice(self,idx,dat):
+        """ Slice a panel out of a concatentated array. """
         
+        r = self.get_panel_indices(idx)
+        return dat[r[0]:r[1]]
 
     @property
     def beam(self):
