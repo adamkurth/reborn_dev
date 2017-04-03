@@ -651,6 +651,25 @@ class PanelList(object):
 
         return len(self._PanelList)
 
+    def get_panel_indices(self,idx):
+        """ Get the indices of a panel for slicing a PanelList array """
+        
+        idx = self.getPanelIndexByName(idx)
+        
+        i = 0 # Panel number
+        n = 0 # Start index
+        for p in self:
+            np = p.n_pixels
+            start = n
+            stop = n + np
+            n += np
+            if i == idx:
+                break
+            i += 1
+        
+        return [start,stop]
+        
+
     @property
     def beam(self):
         """ X-ray beam data. """
@@ -707,11 +726,15 @@ class PanelList(object):
     def getPanelIndexByName(self, name):
         """ Find the integer index of a Panel by it's unique name """
 
+        if not isinstance(name, basestring):
+            return name
+
         i = 0
         for p in self:
             if p.name == name:
                 return i
             i += 1
+            
         return None
 
     def computeRealSpaceGeometry(self):
