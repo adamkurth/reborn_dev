@@ -293,7 +293,8 @@ kernel void buffer_mesh_lookup(
 
 }
 
-__kernel void qrf_default(
+
+__kernel void qrf_default2(
     __global float *q_vecs,
     __global float *r_vecs,
     __global float *form_facts,
@@ -317,6 +318,79 @@ __kernel void qrf_default(
         float qRx = R[0]*qx + R[1]*qy + R[2]*qz;
         float qRy = R[3]*qx + R[4]*qy + R[5]*qz;
         float qRz = R[6]*qx + R[7]*qy + R[8]*qz;
+        
+        for (int r_idx=0; r_idx< n_atoms; r_idx++){
+        
+            float rx = r_vecs[ r_idx*3];
+            float ry = r_vecs[ r_idx*3+1];
+            float rz = r_vecs[ r_idx*3+2];
+            
+            float frm_fct = form_facts[ atomID[r_idx]*n_pixels + q_idx  ];
+
+            float phase = qRx*rx + qRy*ry + qRz*rz;
+            
+            float cosph = native_cos(-phase);
+            float sinph = native_sin(-phase);
+            
+            A[q_idx].x += frm_fct*cosph;
+            A[q_idx].y += frm_fct*sinph;
+            }
+        }
+   
+    // each processing unit should do the same thing? 
+    if ( !(q_idx < n_pixels)) {
+        
+        float qx = q_vecs[0];//dummies
+        float qy = q_vecs[1];
+        float qz = q_vecs[2];
+        
+        float qRx = R[0]*qx + R[1]*qy + R[2]*qz;
+        float qRy = R[3]*qx + R[4]*qy + R[5]*qz;
+        float qRz = R[6]*qx + R[7]*qy + R[8]*qz;
+        
+        for (int r_idx=0; r_idx< n_atoms; r_idx++){
+        
+            float rx = r_vecs[0];//dummies
+            float ry = r_vecs[1];
+            float rz = r_vecs[2];
+            
+            float frm_fct = form_facts[  0  ]; //dummie
+            
+            float phase = qRx*rx + qRy*ry + qRz*rz;
+            
+            float sinph = native_sin(-phase);
+            float cosph = native_cos(-phase);
+            
+            A[q_idx].x += 0;
+            A[q_idx].y += 0;
+            }
+        }
+    }
+
+__kernel void qrf_default(
+    __global float *q_vecs,
+    __global float *r_vecs,
+    __global float *form_facts,
+    __global int *atomID,
+    __global float *R,
+    __global float2 *A,
+    const int n_pixels,
+    const int n_atoms){
+    
+    int q_idx = get_global_id(0);
+
+    A[q_idx].x =0;
+    A[q_idx].y =0;
+
+    if ( q_idx < n_pixels) {
+
+        float qx = q_vecs[q_idx*3];
+        float qy = q_vecs[ q_idx*3+1];
+        float qz = q_vecs[ q_idx*3+2];
+
+        float qRx = R[0]*qx + R[3]*qy + R[6]*qz;
+        float qRy = R[1]*qx + R[4]*qy + R[7]*qz;
+        float qRz = R[2]*qx + R[5]*qy + R[8]*qz;
         
         for (int r_idx=0; r_idx< n_atoms; r_idx++){
         
