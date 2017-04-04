@@ -293,100 +293,46 @@ kernel void buffer_mesh_lookup(
 
 }
 
-
-__kernel void qrf_default2(
-    __global float *q_vecs,
-    __global float *r_vecs,
-    __global float *form_facts,
-    __global int *atomID,
-    __global float *R,
-    __global float2 *A,
-    const int n_pixels,
-    const int n_atoms){
-    
-    int q_idx = get_global_id(0);
-
-    A[q_idx].x =0;
-    A[q_idx].y =0;
-
-    if ( q_idx < n_pixels) {
-
-        float qx = q_vecs[q_idx*3];
-        float qy = q_vecs[ q_idx*3+1];
-        float qz = q_vecs[ q_idx*3+2];
-
-        float qRx = R[0]*qx + R[1]*qy + R[2]*qz;
-        float qRy = R[3]*qx + R[4]*qy + R[5]*qz;
-        float qRz = R[6]*qx + R[7]*qy + R[8]*qz;
-        
-        for (int r_idx=0; r_idx< n_atoms; r_idx++){
-        
-            float rx = r_vecs[ r_idx*3];
-            float ry = r_vecs[ r_idx*3+1];
-            float rz = r_vecs[ r_idx*3+2];
-            
-            float frm_fct = form_facts[ atomID[r_idx]*n_pixels + q_idx  ];
-
-            float phase = qRx*rx + qRy*ry + qRz*rz;
-            
-            float cosph = native_cos(-phase);
-            float sinph = native_sin(-phase);
-            
-            A[q_idx].x += frm_fct*cosph;
-            A[q_idx].y += frm_fct*sinph;
-            }
-        }
-   
-    // each processing unit should do the same thing? 
-    if ( !(q_idx < n_pixels)) {
-        
-        float qx = q_vecs[0];//dummies
-        float qy = q_vecs[1];
-        float qz = q_vecs[2];
-        
-        float qRx = R[0]*qx + R[1]*qy + R[2]*qz;
-        float qRy = R[3]*qx + R[4]*qy + R[5]*qz;
-        float qRz = R[6]*qx + R[7]*qy + R[8]*qz;
-        
-        for (int r_idx=0; r_idx< n_atoms; r_idx++){
-        
-            float rx = r_vecs[0];//dummies
-            float ry = r_vecs[1];
-            float rz = r_vecs[2];
-            
-            float frm_fct = form_facts[  0  ]; //dummie
-            
-            float phase = qRx*rx + qRy*ry + qRz*rz;
-            
-            float sinph = native_sin(-phase);
-            float cosph = native_cos(-phase);
-            
-            A[q_idx].x += 0;
-            A[q_idx].y += 0;
-            }
-        }
-    }
-
 __kernel void qrf_default(
-    __global float *q_vecs,
-    __global float *r_vecs,
-    __global float *form_facts,
-    __global int *atomID,
-    __global float *R,
-    __global float2 *A,
+    __global float16 *q_vecs,
+    __global float4 *r_vecs,
+    __constant float *R,
+    __global float2 *A, 
     const int n_pixels,
     const int n_atoms){
-    
+
+    __local float4 atoms[GROUP_SIZE][32];
+    int li = get_global_id(0);
+    for (int i=0; i < 32; i++)
+        atoms[li][i] = r_vecs[i*GROUP_SIZE+li];
+
     int q_idx = get_global_id(0);
+
 
     A[q_idx].x =0;
     A[q_idx].y =0;
 
-    if ( q_idx < n_pixels) {
+    float ff[13];
 
-        float qx = q_vecs[q_idx*3];
-        float qy = q_vecs[ q_idx*3+1];
-        float qz = q_vecs[ q_idx*3+2];
+    if ( q_idx < n_pixels) {
+        
+        ff[0] = q_vecs[q_idx].s3;
+        ff[1] = q_vecs[q_idx].s4;
+        ff[2] = q_vecs[q_idx].s5;
+        ff[3] = q_vecs[q_idx].s6;
+        ff[4] = q_vecs[q_idx].s7;
+        ff[5] = q_vecs[q_idx].s8;
+        ff[6] = q_vecs[q_idx].s9;
+        ff[7] = q_vecs[q_idx].sA;
+        ff[8] = q_vecs[q_idx].sB;
+        ff[9] = q_vecs[q_idx].sC;
+        ff[10] = q_vecs[q_idx].sD;
+        ff[11] = q_vecs[q_idx].sE;
+        ff[12] = q_vecs[q_idx].sF;
+
+        float qx = q_vecs[q_idx].s0;
+        float qy = q_vecs[q_idx].s1;
+        float qz = q_vecs[q_idx].s2;
 
         float qRx = R[0]*qx + R[3]*qy + R[6]*qz;
         float qRy = R[1]*qx + R[4]*qy + R[7]*qz;
@@ -394,11 +340,14 @@ __kernel void qrf_default(
         
         for (int r_idx=0; r_idx< n_atoms; r_idx++){
         
-            float rx = r_vecs[ r_idx*3];
-            float ry = r_vecs[ r_idx*3+1];
-            float rz = r_vecs[ r_idx*3+2];
+            float rx = r_vecs[ r_idx].x;
+            float ry = r_vecs[ r_idx].y;
+            float rz = r_vecs[ r_idx].z;
             
-            float frm_fct = form_facts[ atomID[r_idx]*n_pixels + q_idx  ];
+            int species_id = (global int) (r_vecs[r_idx].w);
+
+            float frm_fct = ff[ species_id ];
+            //float frm_fct = form_facts[ species_id*n_pixels + q_idx  ];
 
             float phase = qRx*rx + qRy*ry + qRz*rz;
             
@@ -412,30 +361,7 @@ __kernel void qrf_default(
    
     // each processing unit should do the same thing? 
     if ( !(q_idx < n_pixels)) {
-        
-        float qx = q_vecs[0];//dummies
-        float qy = q_vecs[1];
-        float qz = q_vecs[2];
-        
-        float qRx = R[0]*qx + R[1]*qy + R[2]*qz;
-        float qRy = R[3]*qx + R[4]*qy + R[5]*qz;
-        float qRz = R[6]*qx + R[7]*qy + R[8]*qz;
-        
-        for (int r_idx=0; r_idx< n_atoms; r_idx++){
-        
-            float rx = r_vecs[0];//dummies
-            float ry = r_vecs[1];
-            float rz = r_vecs[2];
-            
-            float frm_fct = form_facts[  0  ]; //dummie
-            
-            float phase = qRx*rx + qRy*ry + qRz*rz;
-            
-            float sinph = native_sin(-phase);
-            float cosph = native_cos(-phase);
-            
-            A[q_idx].x += 0;
-            A[q_idx].y += 0;
-            }
+        A[q_idx].x += 0;
+        A[q_idx].y += 0;
         }
     }
