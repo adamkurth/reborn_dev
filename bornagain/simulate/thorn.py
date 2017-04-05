@@ -288,7 +288,7 @@ class ThornAgain:
         my_gpu_devices = platform[0].get_devices(
             device_type=cl.device_type.GPU)
 
-        self.group_size = clcore.group_size
+        self.group_size = 1024 #clcore.group_size
         self.context = cl.Context(devices=my_gpu_devices)
         self.queue = cl.CommandQueue(self.context)
 
@@ -329,7 +329,7 @@ class ThornAgain:
             shape=(self.Npix+self.Nextra_pix), dtype=np.complex64 )
 
 #       list of kernel args
-        self.prg_args = [self.queue, (self.Npix,), None,
+        self.prg_args = [self.queue, (self.Npix+self.Nextra_pix,),(1024,),
                          self.q_buff.data, self.r_buff.data,
                          self.rot_buff.data, self.A_buff.data, self.Npix, self.Nato]
 
@@ -353,10 +353,7 @@ class ThornAgain:
 #       run the program
         t = time.time()
         self.prg(*self.prg_args)
-
-#       copy from device to host
-        Amps = self.A_buff.get()[:-self.Nextra_pix]
-        #cl.enqueue_copy(self.queue, self.A, self.A_buff)
+        Amps = self.A_buff.get() [:-self.Nextra_pix]
         print ("Took %.4f sec to complete..." % float(time.time() - t))
 
         return Amps

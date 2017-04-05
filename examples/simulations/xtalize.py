@@ -1,7 +1,6 @@
 import bornagain.simulate.thorn as thorn
 import numpy as np
 
-
 class PhotoSystem1:
 
     def __init__(self, nPixels, wavelen, detdist, pixsize, n_unit,
@@ -60,7 +59,7 @@ class PhotoSystem1:
         self.lat2 = self.mol.lat.vecs + self.t2_com
         self.dbl_lat = np.vstack([self.lat1, self.lat2])
 
-#       these are the intices correspinding to
+#       these are the indices corresponding to
 #       each lattice
         n_lat_pts = self.mol.lat.vecs.shape[0]
         self.inds_lat1 = np.arange(n_lat_pts)
@@ -130,4 +129,4 @@ class PhotoSystem1:
 PS1 = PhotoSystem1(nPixels=2000, wavelen=6.53, detdist=0.2, pixsize=0.00005,
                    n_unit=150, make_sims=True, make_latt=True)
 
-#img = PS1.make_hit( qmin=.02, qmax=2, flux=1e27)
+img = PS1.make_hit( qmin=.02, qmax=2, flux=1e27)
