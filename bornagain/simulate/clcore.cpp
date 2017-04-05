@@ -293,6 +293,7 @@ kernel void buffer_mesh_lookup(
 
 }
 
+
 __kernel void qrf_default(
     __global float16 *q_vecs,
     __global float4 *r_vecs,
@@ -301,19 +302,14 @@ __kernel void qrf_default(
     const int n_pixels,
     const int n_atoms){
 
-    __local float4 atoms[GROUP_SIZE][32];
-    int li = get_global_id(0);
-    for (int i=0; i < 32; i++)
-        atoms[li][i] = r_vecs[i*GROUP_SIZE+li];
-
     int q_idx = get_global_id(0);
+    int l_idx = get_local_id(0);
+
+    float Areal=0.0f;
+    float Aimag=0.0f;
 
 
-    A[q_idx].x =0;
-    A[q_idx].y =0;
-
-    float ff[13];
-
+    float ff[16];
     if ( q_idx < n_pixels) {
         
         ff[0] = q_vecs[q_idx].s3;
@@ -329,6 +325,9 @@ __kernel void qrf_default(
         ff[10] = q_vecs[q_idx].sD;
         ff[11] = q_vecs[q_idx].sE;
         ff[12] = q_vecs[q_idx].sF;
+        ff[13] = 0.0f;
+        ff[14] = 0.0f;
+        ff[15] = 0.0f;
 
         float qx = q_vecs[q_idx].s0;
         float qy = q_vecs[q_idx].s1;
@@ -338,30 +337,33 @@ __kernel void qrf_default(
         float qRy = R[1]*qx + R[4]*qy + R[7]*qz;
         float qRz = R[2]*qx + R[5]*qy + R[8]*qz;
         
-        for (int r_idx=0; r_idx< n_atoms; r_idx++){
-        
-            float rx = r_vecs[ r_idx].x;
-            float ry = r_vecs[ r_idx].y;
-            float rz = r_vecs[ r_idx].z;
-            
-            int species_id = (global int) (r_vecs[r_idx].w);
+        __local float4 LOC_ATOMS[1024];
+        for (int g=0; g<n_atoms; g+=1024){
+            int ai = g + l_idx;
+            if (ai < n_atoms)
+                LOC_ATOMS[l_idx] = r_vecs[ai];
+            if( !(ai < n_atoms))
+                LOC_ATOMS[l_idx] = (float4)(1.0f, 1.0f, 1.0f, 10.0f);
 
-            float frm_fct = ff[ species_id ];
-            //float frm_fct = form_facts[ species_id*n_pixels + q_idx  ];
+            barrier(CLK_LOCAL_MEM_FENCE);
+            
+            for (int i=0; i< 1024; i++){
 
-            float phase = qRx*rx + qRy*ry + qRz*rz;
-            
-            float cosph = native_cos(-phase);
-            float sinph = native_sin(-phase);
-            
-            A[q_idx].x += frm_fct*cosph;
-            A[q_idx].y += frm_fct*sinph;
+                float phase = qRx*LOC_ATOMS[i].x + qRy*LOC_ATOMS[i].y + qRz*LOC_ATOMS[i].z;
+                int species_id = (int) (LOC_ATOMS[i].w);
+                
+                Areal += native_cos(-phase)*ff[species_id];
+                Aimag += native_sin(-phase)*ff[species_id];
             }
+            barrier(CLK_LOCAL_MEM_FENCE);
         }
+    }
    
     // each processing unit should do the same thing? 
     if ( !(q_idx < n_pixels)) {
-        A[q_idx].x += 0;
-        A[q_idx].y += 0;
+        Areal += 0;
+        Aimag += 0;
         }
-    }
+    A[q_idx].x = Areal;
+    A[q_idx].y = Aimag;
+}
