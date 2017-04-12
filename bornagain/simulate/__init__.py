@@ -1,2 +1,2 @@
 import atoms
-import thorn
+from .thorn import ThornAgain
