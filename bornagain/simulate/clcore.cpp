@@ -308,9 +308,17 @@ __kernel void qrf_default(
     float Areal=0.0f;
     float Aimag=0.0f;
 
-
     float ff[16];
+    
     if ( q_idx < n_pixels) {
+        
+        float qx = q_vecs[q_idx].s0;
+        float qy = q_vecs[q_idx].s1;
+        float qz = q_vecs[q_idx].s2;
+
+        float qRx = R[0]*qx + R[3]*qy + R[6]*qz;
+        float qRy = R[1]*qx + R[4]*qy + R[7]*qz;
+        float qRz = R[2]*qx + R[5]*qy + R[8]*qz;
         
         ff[0] = q_vecs[q_idx].s3;
         ff[1] = q_vecs[q_idx].s4;
@@ -329,13 +337,6 @@ __kernel void qrf_default(
         ff[14] = 0.0f;
         ff[15] = 0.0f;
 
-        float qx = q_vecs[q_idx].s0;
-        float qy = q_vecs[q_idx].s1;
-        float qz = q_vecs[q_idx].s2;
-
-        float qRx = R[0]*qx + R[3]*qy + R[6]*qz;
-        float qRy = R[1]*qx + R[4]*qy + R[7]*qz;
-        float qRz = R[2]*qx + R[5]*qy + R[8]*qz;
         
         __local float4 LOC_ATOMS[1024];
         for (int g=0; g<n_atoms; g+=1024){
@@ -343,7 +344,7 @@ __kernel void qrf_default(
             if (ai < n_atoms)
                 LOC_ATOMS[l_idx] = r_vecs[ai];
             if( !(ai < n_atoms))
-                LOC_ATOMS[l_idx] = (float4)(1.0f, 1.0f, 1.0f, 10.0f);
+                LOC_ATOMS[l_idx] = (float4)(1.0f, 1.0f, 1.0f, 15.0f); // make atom ID 15, s.t. ff=0
 
             barrier(CLK_LOCAL_MEM_FENCE);
             

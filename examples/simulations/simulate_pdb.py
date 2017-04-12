@@ -23,7 +23,7 @@ pl.simple_setup(nPixels, nPixels+1, pixelSize, detectorDistance, wavelength)
 q = pl[0].Q
 
 # Load a crystal structure from pdb file
-pdbFile = '../data/pdb/2LYZ.pdb'  # Lysozyme
+pdbFile = '/home/dermen/.local/ext/bornagain/examples/data/pdb/2LYZ.pdb'  # Lysozyme
 #pdbFile = '../data/pdb/1jb0.pdb'  # Photosystem I
 cryst = crystal.structure(pdbFile)
 print('')
@@ -43,8 +43,6 @@ else:
     show = 0
 show_all = show
 #plt.ion()
-
-
 
 if 1:
     
@@ -85,6 +83,7 @@ if 1:
         t = time.time()
         a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, None, a_dev)
         tf = time.time() - t
+        a_dev.get() # I think this is necessary for the comparison...
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
     imdisp = np.abs(a.get())**2
