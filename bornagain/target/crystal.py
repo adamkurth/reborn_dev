@@ -237,17 +237,37 @@ class Molecule(structure):
 
         self.atom_fracs = self.mat_mult_many(self.Oinv * 1e-10, self.atom_vecs)
 
+    def _separate_xyz(self, xyz):
+        x,y,z = map(np.array, zip(*xyz))
+        return x,y,z
+
     def get_1d_coords(self):
-        x, y, z = map(np.array, zip(*self.atom_vecs))
+        x, y, z = self._seprate_xyz( self.atom_vecs)
         return x, y, z
 
     def get_1d_frac_coords(self):
-        x, y, z = map(np.array, zip(*self.atom_fracs))
+        x, y, z = self._separate_xyz(self.atom_fracs)
         return x, y, z
 
     def mat_mult_many(self, M, V):
         """ helper for applying matrix multiplications on many vectors"""
         return np.einsum('ij,kj->ki', M, V)
+
+    def shift(self, monomer, na, nb, nc):
+        xyz_frac =  self.mat_mult_many( self.Oinv*1e-10, monomer.xyz)
+        x,y,z = self._separate_xyz(xyz_frac)
+        
+        x += na
+        y += nb
+        z += nc
+        
+        xyz_new = np.zeros_like(monomer.xyz)
+        xyz_new[:,0] = x
+        xyz_new[:,1] = y
+        xyz_new[:,2] = z
+        xyz_new = self.mat_mult_many(self.O * 1e10, xyz_new)
+        return Atoms(xyz_new, self.Z, self.elements)
+
 
     def transform(self, x, y, z):
         """x,y,z are fractional coordinates"""
@@ -303,7 +323,7 @@ class Lattice:
 
 #       sphericalize the lattice..
         if spherical:
-            self.vecs = ba.utils.sphericalize(self.vecs)
+            self.vecs = utils.sphericalize(self.vecs)
 
 
 
