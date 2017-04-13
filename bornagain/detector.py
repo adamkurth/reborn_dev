@@ -2,6 +2,7 @@
 Classes for analyzing/simulating diffraction data contained in pixel array
 detectors (PADs).
 """
+import sys
 
 import numpy as np
 from numpy.linalg import norm
@@ -1205,13 +1206,13 @@ class SimpleDetector(Panel):
     def readout_finite(self, amplitudes, qmin, qmax, flux=1e20):
         struct_fact = (np.abs(amplitudes)**2).astype(np.float64)
 
-        if qmin < self.qmags.min():
-            qmin = self.qmags.min()
-        if qmax > self.qmags.max():
-            qmax = self.qmags.max()
+        if qmin < self.Qmag.min():
+            qmin = self.Qmag.min()
+        if qmax > self.Qmag.max():
+            qmax = self.Qmag.max()
 
-        ilow = np.where(self.qmags < qmin)[0]
-        ihigh = np.where(self.qmags > qmax)[0]
+        ilow = np.where(self.Qmag < qmin)[0]
+        ihigh = np.where(self.Qmag > qmax)[0]
 
         if ilow.size:
             struct_fact[ilow] = 0
@@ -1219,7 +1220,7 @@ class SimpleDetector(Panel):
             struct_fact[ihigh] = 0
 
         rad_electron = 2.82e-13  # cm
-        phot_per_pix = struct_fact * self.pl.solidAngle * flux * rad_electron**2
+        phot_per_pix = struct_fact * self.solidAngle * flux * rad_electron**2
         total_phot = int(phot_per_pix.sum())
 
         pvals = struct_fact / struct_fact.sum()
@@ -1239,8 +1240,8 @@ class SimpleDetector(Panel):
         fig = plt.figure()
         ax = plt.gca()
 
-        qx_min, qy_min = self.q_vecs[:, :2].min(0)
-        qx_max, qy_max = self.q_vecs[:, :2].max(0)
+        qx_min, qy_min = self.Q[:, :2].min(0)
+        qx_max, qy_max = self.Q[:, :2].max(0)
         extent = (qx_min, qx_max, qy_min, qy_max)
         if use_log:
             ax_img = ax.imshow(

@@ -23,8 +23,7 @@ pl.simple_setup(nPixels, nPixels+1, pixelSize, detectorDistance, wavelength)
 q = pl[0].Q
 
 # Load a crystal structure from pdb file
-pdbFile = '/home/dermen/.local/ext/bornagain/examples/data/pdb/2LYZ.pdb'  # Lysozyme
-#pdbFile = '../data/pdb/1jb0.pdb'  # Photosystem I
+pdbFile = '../data/pdb/2LYZ.pdb'  # Lysozyme
 cryst = crystal.structure(pdbFile)
 print('')
 print('Loading pdb file: %s' % pdbFile)
@@ -48,6 +47,7 @@ if 1:
     
     print("[clcore] Access q vectors from memory (i.e. compute them on cpu first)")
     q = pl.Q  # These are the scattering vectors, Nx3 array.
+    
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
     R = np.eye(3)
@@ -66,7 +66,6 @@ if 1:
         plt.show()
     print("")
 
-
 if 1:
     
     print("[clcore] Compute q vectors on cpu, but load into GPU memory only once (at the beginning)")
@@ -81,12 +80,13 @@ if 1:
     print('Move to device memory: %7.03f ms' % (tf*1e3))
     for i in range(0, n_trials):
         t = time.time()
+        #a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, None, a_dev).get()
         a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, None, a_dev)
         tf = time.time() - t
-        a_dev.get() # I think this is necessary for the comparison...
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
     imdisp = np.abs(a.get())**2
+    #imdisp = np.abs(a)**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
     imdisp = np.log(imdisp + 0.1)
     if show_all and show:

@@ -8,8 +8,8 @@ from bornagain.target import Atoms, Molecule, Lattice
 
 class PhotoSystem1:
 
-    def __init__(self, n_pixels, wavelen, detdist, pixsize, n_unit,
-                 spherical=False, inner_perc=.2, make_sims=True, make_latt=True):
+    def __init__(self, n_pixels=500, wavelen=6.53, detdist=0.2, pixsize=0.00007, n_unit=20,
+                 spherical=False, inner_perc=.2, make_sims=True, make_latt=False):
 
         """
         Parameters
@@ -89,7 +89,7 @@ class PhotoSystem1:
             self.trimer2.Z[:])
 
     def make_lattice(self, n_unit, spherical, inner_perc):
-        #       build the lattice, extend it n_units along each lattice vector
+#       build the lattice, extend it n_units along each lattice vector
         self.mol.lat.assemble(n_unit=n_unit, spherical=spherical)
 
 #       first lets make a big lattice
