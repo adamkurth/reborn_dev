@@ -52,7 +52,7 @@ Returns:
             Z[symbols == u] = w[0] + 1
             Z = Z.astype(np.int)
     else:
-        print(symbols)
+        #print(symbols)
         w = np.nonzero(atomic_symbols == np.str_(symbols).capitalize())
         Z = w[0] + 1
 
