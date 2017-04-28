@@ -1,7 +1,4 @@
-#ifndef GROUP_SIZE
-    #define GROUP_SIZE 32
-#endif
-
+#define GROUP_SIZE 32
 #define PI2 6.28318530718f
 
 kernel void phase_factor_qrf(
@@ -13,7 +10,7 @@ kernel void phase_factor_qrf(
     const int n_atoms,
     const int n_pixels)
 {
-    const int gi = get_global_id(0); /* Global index: pixel ID */
+    const int gi = get_global_id(0); /* Global index */
     const int li = get_local_id(0);  /* Local group index */
 
     float ph, sinph, cosph;
@@ -58,7 +55,7 @@ kernel void phase_factor_qrf(
         // atom information into local memory.
         barrier(CLK_LOCAL_MEM_FENCE);
 
-        // We use a local real and imaginary part to avoid floating point overflow
+        // We use a local real and imaginary part to avoid floatint point overflow
         float2 a_temp = (float2)(0.0f,0.0f);
 
         // Now sum up the amplitudes from this subset of atoms
@@ -95,8 +92,8 @@ kernel void phase_factor_pad(
     const float4 S,
     const float4 B)
 {
-    const int gi = get_global_id(0); /* Global index: pixel ID */
-    const int i = gi % nF;           /* Pixel coordinate i */
+    const int gi = get_global_id(0); /* Global index */
+    const int i = gi % nF;          /* Pixel coordinate i */
     const int j = gi/nF;             /* Pixel coordinate j */
     const int li = get_local_id(0);  /* Local group index */
 
@@ -294,4 +291,80 @@ kernel void buffer_mesh_lookup(
         a_out[gi] = (float2)(0.0f,0.0f);
     }
 
+}
+
+
+__kernel void qrf_default(
+    __global float16 *q_vecs,
+    __global float4 *r_vecs,
+    __constant float *R,
+    __global float2 *A, 
+    const int n_pixels,
+    const int n_atoms){
+
+    int q_idx = get_global_id(0);
+    int l_idx = get_local_id(0);
+
+    float Areal=0.0f;
+    float Aimag=0.0f;
+
+    float ff[16];
+    
+    if ( q_idx < n_pixels) {
+        
+        float qx = q_vecs[q_idx].s0;
+        float qy = q_vecs[q_idx].s1;
+        float qz = q_vecs[q_idx].s2;
+
+        float qRx = R[0]*qx + R[3]*qy + R[6]*qz;
+        float qRy = R[1]*qx + R[4]*qy + R[7]*qz;
+        float qRz = R[2]*qx + R[5]*qy + R[8]*qz;
+        
+        ff[0] = q_vecs[q_idx].s3;
+        ff[1] = q_vecs[q_idx].s4;
+        ff[2] = q_vecs[q_idx].s5;
+        ff[3] = q_vecs[q_idx].s6;
+        ff[4] = q_vecs[q_idx].s7;
+        ff[5] = q_vecs[q_idx].s8;
+        ff[6] = q_vecs[q_idx].s9;
+        ff[7] = q_vecs[q_idx].sA;
+        ff[8] = q_vecs[q_idx].sB;
+        ff[9] = q_vecs[q_idx].sC;
+        ff[10] = q_vecs[q_idx].sD;
+        ff[11] = q_vecs[q_idx].sE;
+        ff[12] = q_vecs[q_idx].sF;
+        ff[13] = 0.0f;
+        ff[14] = 0.0f;
+        ff[15] = 0.0f;
+
+        
+        __local float4 LOC_ATOMS[1024];
+        for (int g=0; g<n_atoms; g+=1024){
+            int ai = g + l_idx;
+            if (ai < n_atoms)
+                LOC_ATOMS[l_idx] = r_vecs[ai];
+            if( !(ai < n_atoms))
+                LOC_ATOMS[l_idx] = (float4)(1.0f, 1.0f, 1.0f, 15.0f); // make atom ID 15, s.t. ff=0
+
+            barrier(CLK_LOCAL_MEM_FENCE);
+            
+            for (int i=0; i< 1024; i++){
+
+                float phase = qRx*LOC_ATOMS[i].x + qRy*LOC_ATOMS[i].y + qRz*LOC_ATOMS[i].z;
+                int species_id = (int) (LOC_ATOMS[i].w);
+                
+                Areal += native_cos(-phase)*ff[species_id];
+                Aimag += native_sin(-phase)*ff[species_id];
+            }
+            barrier(CLK_LOCAL_MEM_FENCE);
+        }
+    }
+   
+    // each processing unit should do the same thing? 
+    if ( !(q_idx < n_pixels)) {
+        Areal += 0;
+        Aimag += 0;
+        }
+    A[q_idx].x = Areal;
+    A[q_idx].y = Aimag;
 }
