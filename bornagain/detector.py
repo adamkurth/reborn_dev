@@ -8,6 +8,7 @@ import numpy as np
 from numpy.linalg import norm
 try:
     import matplotlib
+    import pylab as plt
 except ImportError:
     pass
 # from numpy.random import random, randn
@@ -1231,13 +1232,12 @@ class SimpleDetector(Panel):
 
         return self.intens
 
-    def display(self, use_log=True, vmax=None):
+    def display(self, use_log=True, vmax=None, **kwargs):
         if 'matplotlib' not in sys.modules:
             print("You need matplotlib to plot!")
             return
-
-        plt = matplotlib.pylab
-        fig = plt.figure()
+        #plt = matplotlib.pylab
+        fig = plt.figure(**kwargs)
         ax = plt.gca()
 
         qx_min, qy_min = self.Q[:, :2].min(0)
@@ -1266,4 +1266,4 @@ class SimpleDetector(Panel):
         ax.set_xlabel(r'$q_x\,\,\AA^{-1}$')
         ax.set_ylabel(r'$q_y\,\,\AA^{-1}$')
 
-
+        plt.show()
