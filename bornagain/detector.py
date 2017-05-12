@@ -348,7 +348,7 @@ class Panel(object):
         return N / norm(N)
 
     @property
-    def solidAngle(self):
+    def solid_angle(self):
         """ Solid angles of pixels."""
 
         if self._sa is None:
@@ -922,13 +922,13 @@ class PanelList(object):
         self.beam.wavelength = val
 
     @property
-    def solidAngle(self):
+    def solid_angle(self):
         """ Concatenated solid angles."""
 
         if self._sa is None:
 
             self._sa = np.concatenate([
-                p.solidAngle.reshape(np.product(p.solidAngle.shape))
+                p.solid_angle.reshape(np.product(p.solid_angle.shape))
                 for p in self
             ])
 
@@ -947,7 +947,7 @@ class PanelList(object):
 
         return self._pf
 
-    def assembleData(self, data=None):
+    def assemble_data(self, data=None):
         """ Project all intensity data along the beam direction.  Nearest
         neighbor interpolation.  This is a crude way to display data... """
 
@@ -976,7 +976,7 @@ class PanelList(object):
         return adat
 
     @property
-    def assembledData(self):
+    def assembled_data(self):
         """ Project all intensity data along the beam direction.  Nearest
         neighbor interpolation.  This is a crude way to display data... """
 
