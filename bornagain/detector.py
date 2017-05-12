@@ -281,7 +281,7 @@ class Panel(object):
         """ Vectors pointing from interaction region to pixel centers."""
 
         if self._V is None:
-            self.computeRealSpaceGeometry()
+            self.compute_real_space_geometry()
         return self._V
 
     @property
@@ -420,7 +420,7 @@ class Panel(object):
 
         return self._geometry_hash
 
-    def computeRealSpaceGeometry(self):
+    def compute_real_space_geometry(self):
         """ Compute arrays relevant to real-space geometry."""
 
         i = np.arange(self.nF)
@@ -597,7 +597,7 @@ class PanelList(object):
         """ Get a Panel. Panels may be referenced by name or index."""
 
         if isinstance(key, str):
-            key = self.getPanelIndexByName(key)
+            key = self.get_panel_index_by_name(key)
             if key is None:
                 raise IndexError("There is no Panel named %s" % key)
                 return None
@@ -626,7 +626,7 @@ class PanelList(object):
     def get_panel_indices(self, idx):
         """ Get the indices of a panel for slicing a PanelList array """
 
-        idx = self.getPanelIndexByName(idx)
+        idx = self.get_panel_index_by_name(idx)
 
         i = 0  # Panel number
         n = 0  # Start index
@@ -674,7 +674,7 @@ class PanelList(object):
         return np.sum([p.n_pixels for p in self])
 
     @property
-    def nPanels(self):
+    def n_panels(self):
         """ Number of panels."""
 
         return len(self._PanelList)
@@ -692,7 +692,7 @@ class PanelList(object):
         if name != "":
             p.name = name
         elif p.name == "":
-            p.name = "%d" % self.nPanels
+            p.name = "%d" % self.n_panels
 
         # Inherit beam from first append
         if self._beam is None:
@@ -700,7 +700,7 @@ class PanelList(object):
 
         self._PanelList.append(p)
 
-    def getPanelIndexByName(self, name):
+    def get_panel_index_by_name(self, name):
         """ Find the integer index of a Panel by it's unique name """
 
         if not isinstance(name, basestring):
@@ -714,11 +714,11 @@ class PanelList(object):
 
         return None
 
-    def computeRealSpaceGeometry(self):
+    def compute_real_space_geometry(self):
         """ Compute real-space geometry of all panels."""
 
         for p in self:
-            p.computeRealSpaceGeometry()
+            p.compute_real_space_geometry()
 
     @property
     def V(self):
@@ -972,7 +972,7 @@ class PanelList(object):
         if self._rsbb is None:
 
             r = np.zeros([2, 3])
-            v = np.zeros([2 * self.nPanels, 3])
+            v = np.zeros([2 * self.n_panels, 3])
 
             i = 0
             for p in self:
@@ -991,7 +991,7 @@ class PanelList(object):
 
         if self._pixel_size is None:
 
-            pix = np.zeros(self.nPanels)
+            pix = np.zeros(self.n_panels)
             i = 0
             for p in self:
                 pix[i] = p.pixel_size
@@ -1008,7 +1008,7 @@ class PanelList(object):
     def get_center(self):
         """ Mean center of Panel list. """
 
-        c = np.zeros((self.nPanels, 3))
+        c = np.zeros((self.n_panels, 3))
         i = 0
         for p in self:
             c[i, :] = p.get_center()
