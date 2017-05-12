@@ -90,7 +90,6 @@ class Panel(object):
 
         self._data = val
         # Must clear out any derived data that depends on this input
-        self.deleteDerivedData()
 
     @property
     def mask(self):
@@ -460,11 +459,6 @@ class Panel(object):
         if self.PanelList is not None:
             self.PanelList.clear_geometry_cache()
 
-    def deleteDerivedData(self):
-
-        if self.PanelList is not None:
-            self.PanelList._data = None
-
     def get_vertices(self, edge=False, loop=False):
         """ Get Panel get_vertices; positions of corner pixels."""
 
@@ -494,9 +488,9 @@ class Panel(object):
     @property
     def real_space_bounding_box(self):
 
-        return self.getRealSpaceBoundingBox()
+        return self.get_real_space_bounding_box()
 
-    def getRealSpaceBoundingBox(self):
+    def get_real_space_bounding_box(self):
         """ Return the minimum and maximum values of the four corners."""
 
         if self._rsbb is None:
@@ -575,15 +569,6 @@ class PanelList(object):
             '_pixel_size', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix',
             '_geometry_hash'
         ]  # Default values of these are 'None'
-
-    def copy(self, derived=True):
-        """ Create a deep copy."""
-
-        pa = PanelList()
-        for p in self:
-            pa.append(p.copy(derived=derived))
-
-        return pa
 
     def __str__(self):
         """ Print something useful when in interactive mode."""
@@ -976,7 +961,7 @@ class PanelList(object):
 
             i = 0
             for p in self:
-                v[i:(i + 2), :] = p.getRealSpaceBoundingBox()
+                v[i:(i + 2), :] = p.get_real_space_bounding_box()
                 i += 2
 
             r[0, :] = np.min(v, axis=0)
