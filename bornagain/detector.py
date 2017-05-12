@@ -492,7 +492,7 @@ class Panel(object):
         return np.mean(self.get_vertices(), axis=0)
 
     @property
-    def realSpaceBoundingBox(self):
+    def real_space_bounding_box(self):
 
         return self.getRealSpaceBoundingBox()
 
@@ -953,7 +953,7 @@ class PanelList(object):
 
         if self._vll is None:
             pixelSize = self.pixel_size
-            r = self.realSpaceBoundingBox
+            r = self.real_space_bounding_box
             rpix = r / pixelSize
             rpix[0, :] = np.floor(rpix[0, :])
             rpix[1, :] = np.ceil(rpix[1, :])
@@ -985,7 +985,7 @@ class PanelList(object):
 
         if self._vll is None:
             pixelSize = self.pixel_size
-            r = self.realSpaceBoundingBox
+            r = self.real_space_bounding_box
             rpix = r / pixelSize
             rpix[0, :] = np.floor(rpix[0, :])
             rpix[1, :] = np.ceil(rpix[1, :])
@@ -1005,7 +1005,7 @@ class PanelList(object):
         return adat
 
     @property
-    def realSpaceBoundingBox(self):
+    def real_space_bounding_box(self):
         """ This returns the coordinates of a box just big enough to fit all
         of the panels.  Useful for display purposes. """
 
