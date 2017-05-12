@@ -7,6 +7,8 @@ likely also be removed.
 import sys
 import numpy as np
 
+from bornagain.simulate import refdata
+
 c = 299792458  # Speed of light
 h = 6.62606957e-34  # Planck constant
 hc = h * c  # Planck's constant * light speed
@@ -26,7 +28,7 @@ def amplitudes_with_cmans(q, r, Z):
     
     cman = refdata.get_cromermann_parameters(Z) # 
     form_facts = refdata.get_cmann_form_factors(cman, q) 
-    ff_mat = array( [form_facts[z] for z in Z]).T.astype(np.float32)
+    ff_mat = np.array( [form_facts[z] for z in Z]).T.astype(np.float32)
     amps = (np.dot( q, r.T) ).astype(np.float32)
     amps = np.exp( 1j*amps) .astype(np.complex64)
     amps = np.sum( amps*ff_mat, 1).astype(np.complex64)
