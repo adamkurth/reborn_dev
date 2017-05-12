@@ -1121,23 +1121,3 @@ class PanelList(object):
         p.simple_setup(nF, nS, pixelSize, distance, wavelength, T)
         self.beam = p.beam
         self.append(p)
-
-    def RadialProfile(self):
-
-        q = self.Q / 2 / np.pi
-        qmag = vecMag(q)
-        maxq = np.max(qmag)
-
-        nBins = 100
-        binSize = maxq / (nBins - 1)
-        bins = (np.arange(0, nBins) + 0.5) * binSize
-        binIndices = np.int64(np.floor(qmag / binSize))
-
-        c = np.bincount(binIndices, self.mask, nBins)
-        c = c.astype(np.double)
-        c[c == 0] = 1e100
-        c[np.isnan(c)] = 1e100
-        pr = np.bincount(binIndices, self.data * self.mask, nBins)
-        pr /= c
-
-        return pr, bins
