@@ -874,46 +874,6 @@ class PanelList(object):
 
         self._name = name
 
-    @property
-    def rigidGroups(self):
-        """ Groups of panels that one might like to manipulate together. """
-
-        return self._rigidGroups
-
-    def addRigidGroup(self, name, vals):
-        """ Append to the list of rigid groups. A rigid group is techically
-        just a truncated Panel list pointing to members of the parent Panel
-        list.  """
-
-        if self._rigidGroups is None:
-            self._rigidGroups = []
-
-        pl = PanelList()
-        pl.beam = self.beam
-        pl.name = name
-        for val in vals:
-            pl.append(self[val])
-            pl[-1].PanelList = self
-        self._rigidGroups.append(pl)
-
-    def appendToRigidGroup(self, name, vals):
-        """ Append more panels to an existing rigid group. """
-
-        g = self.rigidGroup(name)
-        for val in vals:
-            g.append(val)
-
-    def rigidGroup(self, name):
-        """ Get a rigid group by name. """
-
-        thisGroup = None
-        for g in self.rigidGroups:
-            if g.name == name:
-                thisGroup = g
-                break
-
-        return thisGroup
-
     @wavelength.setter
     def wavelength(self, val):
 
