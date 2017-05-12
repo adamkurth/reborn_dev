@@ -18,7 +18,7 @@ class Panel(object):
         """ Make no assumptions during initialization."""
 
         # Configured parameters
-        self._name = name  # Panel name for convenience
+        self.name = name  # Panel name for convenience
         self._F = None  # Fast-scan vector
         self._S = None  # Slow-scan vector
         # Translation of this Panel (from interaction region to center of first
@@ -60,20 +60,6 @@ class Panel(object):
         s += "T = %s\n" % self.T.__str__()
         s += "adu_per_ev = %g\n" % self.adu_per_ev
         return s
-
-    @property
-    def name(self):
-        """ Name of this Panel. """
-
-        return self._name
-
-    @name.setter
-    def name(self, val):
-
-        #        if self._name != "":
-        #            raise ValueError('Cannot rename a detector Panel')
-
-        self._name = val
 
     @property
     def data(self):
@@ -290,7 +276,7 @@ class Panel(object):
         the 2*pi factor included."""
 
         if self._K is None:
-            self.computeReciprocalSpaceGeometry()
+            self.compute_reciprocal_space_geometry()
         return self._K
 
     @property
@@ -427,9 +413,9 @@ class Panel(object):
         [i, j] = np.meshgrid(i, j)
         i.ravel()
         j.ravel()
-        self._V = self.pixelsToVectors(j, i)
+        self._V = self.pixels_to_vectors(j, i)
 
-    def pixelsToVectors(self, j, i):
+    def pixels_to_vectors(self, j, i):
         """ Convert pixel indices to translation vectors (i=fast scan, j=slow
         scan)."""
 
@@ -438,7 +424,7 @@ class Panel(object):
         V = self.T + F + S
         return V
 
-    def computeReciprocalSpaceGeometry(self):
+    def compute_reciprocal_space_geometry(self):
         """ Compute the reciprocal-space scattering vectors, multiplied by
         wavelength."""
 
@@ -478,7 +464,7 @@ class Panel(object):
             i.append(i[0])
             j.append(j[0])
 
-        return self.pixelsToVectors(i, j)
+        return self.pixels_to_vectors(i, j)
 
     def get_center(self):
         """ Vector to center of Panel."""
@@ -564,8 +550,7 @@ class PanelList(object):
         self._pf = None  # Polarization facto
         self._geometry_hash = None  # Hash of geometries
         # Groups of panels that might be manipulated together
-        self._rigidGroups = None
-        self._derivedGeometry = [
+        self._derived_geometry = [
             '_pixel_size', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix',
             '_geometry_hash'
         ]  # Default values of these are 'None'
