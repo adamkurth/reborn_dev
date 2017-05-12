@@ -338,8 +338,8 @@ __kernel void qrf_default(
         ff[15] = 0.0f;
 
         
-        __local float4 LOC_ATOMS[1024];
-        for (int g=0; g<n_atoms; g+=1024){
+        __local float4 LOC_ATOMS[64];
+        for (int g=0; g<n_atoms; g+=64){
             int ai = g + l_idx;
             if (ai < n_atoms)
                 LOC_ATOMS[l_idx] = r_vecs[ai];
@@ -348,7 +348,7 @@ __kernel void qrf_default(
 
             barrier(CLK_LOCAL_MEM_FENCE);
             
-            for (int i=0; i< 1024; i++){
+            for (int i=0; i< 64; i++){
 
                 float phase = qRx*LOC_ATOMS[i].x + qRy*LOC_ATOMS[i].y + qRz*LOC_ATOMS[i].z;
                 int species_id = (int) (LOC_ATOMS[i].w);
