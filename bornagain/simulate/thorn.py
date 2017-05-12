@@ -136,6 +136,17 @@ class ThornAgain:
             kern_src = f.read()
         self.all_prg = cl.Program(self.context, kern_src).build()
 
+def test():
+    natom = 100
+    coors = np.random.random( (natom,3) )
+    atomZ = np.ones(natom)
+    D = ba.detector.SimpleDetector() 
+    T = ThornAgain(D.Q, coors, atomZ, group_size=32)
+    A = T.run(rand_rot=1)
+    I = D.readout(A)
+
+if __name__=="__main__":
+    test()
 
 
 
