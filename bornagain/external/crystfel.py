@@ -433,7 +433,7 @@ def geom_to_panellist(geomFile=None, beamFile=None, PanelList=None):
         key = key[1].strip()
 
         # Get index of this Panel
-        i = pa.getPanelIndexByName(name)
+        i = pa.get_panel_index_by_name(name)
         # If it is a new Panel:
         if i is None:
             # Initialize Panel

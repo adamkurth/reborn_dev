@@ -24,7 +24,7 @@ class Panel(object):
         """ Make no assumptions during initialization."""
 
         # Configured parameters
-        self._name = name  # Panel name for convenience
+        self.name = name  # Panel name for convenience
         self._F = None  # Fast-scan vector
         self._S = None  # Slow-scan vector
         
@@ -54,34 +54,6 @@ class Panel(object):
         # If this Panel is a part of a list
         self.PanelList = None  # This is the link to the Panel list
 
-    def copy(self, derived=True):
-        """ Deep copy of everything.  Parent Panel list is stripped away."""
-
-        p = Panel()
-        p.name = self.name
-        p.F = self._F.copy()
-        p.S = self._S.copy()
-        p.T = self._T.copy()
-        p.nF = self.nF
-        p.nS = self.nS
-        p.adu_per_ev = self.adu_per_ev
-        p.beam = self.beam.copy()
-        p.data = self.data.copy()
-        if derived is True:
-            if self._V is not None:
-                p._V = self._V.copy()
-            if self._K is not None:
-                p._K = self._K.copy()
-            if self._sa is not None:
-                p._sa = self._sa.copy()
-            if self._pf is not None:
-                p._pf = self._pf.copy()
-            if self._rsbb is not None:
-                p._rsbb = self._rsbb.copy()
-        p.PanelList = None
-
-        return p
-
     def __str__(self):
         """ Print something useful when in interactive mode."""
 
@@ -95,20 +67,6 @@ class Panel(object):
         s += "T = %s\n" % self.T.__str__()
         s += "adu_per_ev = %g\n" % self.adu_per_ev
         return s
-
-    @property
-    def name(self):
-        """ Name of this Panel. """
-
-        return self._name
-
-    @name.setter
-    def name(self, val):
-
-        #        if self._name != "":
-        #            raise ValueError('Cannot rename a detector Panel')
-
-        self._name = val
 
     @property
     def data(self):
@@ -125,7 +83,6 @@ class Panel(object):
 
         self._data = val
         # Must clear out any derived data that depends on this input
-        self.deleteDerivedData()
 
     @property
     def mask(self):
@@ -316,7 +273,7 @@ class Panel(object):
         """ Vectors pointing from interaction region to pixel centers."""
 
         if self._V is None:
-            self.computeRealSpaceGeometry()
+            self.compute_real_space_geometry()
         return self._V
 
     @property
@@ -326,7 +283,7 @@ class Panel(object):
         the 2*pi factor included."""
 
         if self._K is None:
-            self.computeReciprocalSpaceGeometry()
+            self.compute_reciprocal_space_geometry()
         return self._K
 
     @property
@@ -350,7 +307,7 @@ class Panel(object):
 #     def mcQ(self):
 #         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
 #         incident beam direction for each pixel independently. """
-# 
+#
 #         i = np.arange(self.nF)
 #         j = np.arange(self.nS)
 #         [i, j] = np.meshgrid(i, j)
@@ -383,7 +340,7 @@ class Panel(object):
         return N / norm(N)
 
     @property
-    def solidAngle(self):
+    def solid_angle(self):
         """ Solid angles of pixels."""
 
         if self._sa is None:
@@ -455,7 +412,7 @@ class Panel(object):
 
         return self._geometry_hash
 
-    def computeRealSpaceGeometry(self):
+    def compute_real_space_geometry(self):
         """ Compute arrays relevant to real-space geometry."""
 
         i = np.arange(self.nF)
@@ -463,9 +420,9 @@ class Panel(object):
         [i, j] = np.meshgrid(i, j)
         i.ravel()
         j.ravel()
-        self._V = self.pixelsToVectors(j, i)
+        self._V = self.pixels_to_vectors(j, i)
 
-    def pixelsToVectors(self, j, i):
+    def pixels_to_vectors(self, j, i):
         """ Convert pixel indices to translation vectors (i=fast scan, j=slow
         scan)."""
 
@@ -474,7 +431,7 @@ class Panel(object):
         V = self.T + F + S
         return V
 
-    def computeReciprocalSpaceGeometry(self):
+    def compute_reciprocal_space_geometry(self):
         """ Compute the reciprocal-space scattering vectors, multiplied by
         wavelength."""
 
@@ -495,11 +452,6 @@ class Panel(object):
         if self.PanelList is not None:
             self.PanelList.clear_geometry_cache()
 
-    def deleteDerivedData(self):
-
-        if self.PanelList is not None:
-            self.PanelList._data = None
-
     def get_vertices(self, edge=False, loop=False):
         """ Get Panel get_vertices; positions of corner pixels."""
 
@@ -519,7 +471,7 @@ class Panel(object):
             i.append(i[0])
             j.append(j[0])
 
-        return self.pixelsToVectors(i, j)
+        return self.pixels_to_vectors(i, j)
 
     def get_center(self):
         """ Vector to center of Panel."""
@@ -527,11 +479,11 @@ class Panel(object):
         return np.mean(self.get_vertices(), axis=0)
 
     @property
-    def realSpaceBoundingBox(self):
+    def real_space_bounding_box(self):
 
-        return self.getRealSpaceBoundingBox()
+        return self.get_real_space_bounding_box()
 
-    def getRealSpaceBoundingBox(self):
+    def get_real_space_bounding_box(self):
         """ Return the minimum and maximum values of the four corners."""
 
         if self._rsbb is None:
@@ -605,20 +557,10 @@ class PanelList(object):
         self._pf = None  # Polarization facto
         self._geometry_hash = None  # Hash of geometries
         # Groups of panels that might be manipulated together
-        self._rigidGroups = None
-        self._derivedGeometry = [
+        self._derived_geometry = [
             '_pixel_size', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix',
             '_geometry_hash'
         ]  # Default values of these are 'None'
-
-    def copy(self, derived=True):
-        """ Create a deep copy."""
-
-        pa = PanelList()
-        for p in self:
-            pa.append(p.copy(derived=derived))
-
-        return pa
 
     def __str__(self):
         """ Print something useful when in interactive mode."""
@@ -632,7 +574,7 @@ class PanelList(object):
         """ Get a Panel. Panels may be referenced by name or index."""
 
         if isinstance(key, str):
-            key = self.getPanelIndexByName(key)
+            key = self.get_panel_index_by_name(key)
             if key is None:
                 raise IndexError("There is no Panel named %s" % key)
                 return None
@@ -658,13 +600,13 @@ class PanelList(object):
 
         return len(self._PanelList)
 
-    def get_panel_indices(self,idx):
+    def get_panel_indices(self, idx):
         """ Get the indices of a panel for slicing a PanelList array """
-        
-        idx = self.getPanelIndexByName(idx)
-        
-        i = 0 # Panel number
-        n = 0 # Start index
+
+        idx = self.get_panel_index_by_name(idx)
+
+        i = 0  # Panel number
+        n = 0  # Start index
         for p in self:
             np = p.n_pixels
             start = n
@@ -673,12 +615,12 @@ class PanelList(object):
             if i == idx:
                 break
             i += 1
-        
-        return [start,stop]
-    
-    def panel_slice(self,idx,dat):
+
+        return [start, stop]
+
+    def panel_slice(self, idx, dat):
         """ Slice a panel out of a concatentated array. """
-        
+
         r = self.get_panel_indices(idx)
         return dat[r[0]:r[1]]
 
@@ -709,7 +651,7 @@ class PanelList(object):
         return np.sum([p.n_pixels for p in self])
 
     @property
-    def nPanels(self):
+    def n_panels(self):
         """ Number of panels."""
 
         return len(self._PanelList)
@@ -727,7 +669,7 @@ class PanelList(object):
         if name != "":
             p.name = name
         elif p.name == "":
-            p.name = "%d" % self.nPanels
+            p.name = "%d" % self.n_panels
 
         # Inherit beam from first append
         if self._beam is None:
@@ -735,7 +677,7 @@ class PanelList(object):
 
         self._PanelList.append(p)
 
-    def getPanelIndexByName(self, name):
+    def get_panel_index_by_name(self, name):
         """ Find the integer index of a Panel by it's unique name """
 
         if not isinstance(name, basestring):
@@ -746,14 +688,14 @@ class PanelList(object):
             if p.name == name:
                 return i
             i += 1
-            
+
         return None
 
-    def computeRealSpaceGeometry(self):
+    def compute_real_space_geometry(self):
         """ Compute real-space geometry of all panels."""
 
         for p in self:
-            p.computeRealSpaceGeometry()
+            p.compute_real_space_geometry()
 
     @property
     def V(self):
@@ -793,7 +735,7 @@ class PanelList(object):
 #     def mcQ(self):
 #         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
 #         incident beam direction for each pixel independently. """
-# 
+#
 #         return np.concatenate(
 #             [p.mcQ.reshape(np.product(p.mcQ.shape) / 3, 3) for p in self])
 
@@ -909,46 +851,6 @@ class PanelList(object):
 
         self._name = name
 
-    @property
-    def rigidGroups(self):
-        """ Groups of panels that one might like to manipulate together. """
-
-        return self._rigidGroups
-
-    def addRigidGroup(self, name, vals):
-        """ Append to the list of rigid groups. A rigid group is techically
-        just a truncated Panel list pointing to members of the parent Panel
-        list.  """
-
-        if self._rigidGroups is None:
-            self._rigidGroups = []
-
-        pl = PanelList()
-        pl.beam = self.beam
-        pl.name = name
-        for val in vals:
-            pl.append(self[val])
-            pl[-1].PanelList = self
-        self._rigidGroups.append(pl)
-
-    def appendToRigidGroup(self, name, vals):
-        """ Append more panels to an existing rigid group. """
-
-        g = self.rigidGroup(name)
-        for val in vals:
-            g.append(val)
-
-    def rigidGroup(self, name):
-        """ Get a rigid group by name. """
-
-        thisGroup = None
-        for g in self.rigidGroups:
-            if g.name == name:
-                thisGroup = g
-                break
-
-        return thisGroup
-
     @wavelength.setter
     def wavelength(self, val):
 
@@ -957,13 +859,13 @@ class PanelList(object):
         self.beam.wavelength = val
 
     @property
-    def solidAngle(self):
+    def solid_angle(self):
         """ Concatenated solid angles."""
 
         if self._sa is None:
 
             self._sa = np.concatenate([
-                p.solidAngle.reshape(np.product(p.solidAngle.shape))
+                p.solid_angle.reshape(np.product(p.solid_angle.shape))
                 for p in self
             ])
 
@@ -982,13 +884,13 @@ class PanelList(object):
 
         return self._pf
 
-    def assembleData(self, data=None):
+    def assemble_data(self, data=None):
         """ Project all intensity data along the beam direction.  Nearest
         neighbor interpolation.  This is a crude way to display data... """
 
         if self._vll is None:
             pixelSize = self.pixel_size
-            r = self.realSpaceBoundingBox
+            r = self.real_space_bounding_box
             rpix = r / pixelSize
             rpix[0, :] = np.floor(rpix[0, :])
             rpix[1, :] = np.ceil(rpix[1, :])
@@ -1011,7 +913,7 @@ class PanelList(object):
         return adat
 
     @property
-    def assembledData(self):
+    def assembled_data(self):
         """ Project all intensity data along the beam direction.  Nearest
         neighbor interpolation.  This is a crude way to display data... """
 
@@ -1020,7 +922,7 @@ class PanelList(object):
 
         if self._vll is None:
             pixelSize = self.pixel_size
-            r = self.realSpaceBoundingBox
+            r = self.real_space_bounding_box
             rpix = r / pixelSize
             rpix[0, :] = np.floor(rpix[0, :])
             rpix[1, :] = np.ceil(rpix[1, :])
@@ -1040,18 +942,18 @@ class PanelList(object):
         return adat
 
     @property
-    def realSpaceBoundingBox(self):
+    def real_space_bounding_box(self):
         """ This returns the coordinates of a box just big enough to fit all
         of the panels.  Useful for display purposes. """
 
         if self._rsbb is None:
 
             r = np.zeros([2, 3])
-            v = np.zeros([2 * self.nPanels, 3])
+            v = np.zeros([2 * self.n_panels, 3])
 
             i = 0
             for p in self:
-                v[i:(i + 2), :] = p.getRealSpaceBoundingBox()
+                v[i:(i + 2), :] = p.get_real_space_bounding_box()
                 i += 2
 
             r[0, :] = np.min(v, axis=0)
@@ -1066,7 +968,7 @@ class PanelList(object):
 
         if self._pixel_size is None:
 
-            pix = np.zeros(self.nPanels)
+            pix = np.zeros(self.n_panels)
             i = 0
             for p in self:
                 pix[i] = p.pixel_size
@@ -1083,7 +985,7 @@ class PanelList(object):
     def get_center(self):
         """ Mean center of Panel list. """
 
-        c = np.zeros((self.nPanels, 3))
+        c = np.zeros((self.n_panels, 3))
         i = 0
         for p in self:
             c[i, :] = p.get_center()
