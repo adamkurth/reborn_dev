@@ -47,34 +47,6 @@ class Panel(object):
         # If this Panel is a part of a list
         self.PanelList = None  # This is the link to the Panel list
 
-    def copy(self, derived=True):
-        """ Deep copy of everything.  Parent Panel list is stripped away."""
-
-        p = Panel()
-        p.name = self.name
-        p.F = self._F.copy()
-        p.S = self._S.copy()
-        p.T = self._T.copy()
-        p.nF = self.nF
-        p.nS = self.nS
-        p.adu_per_ev = self.adu_per_ev
-        p.beam = self.beam.copy()
-        p.data = self.data.copy()
-        if derived is True:
-            if self._V is not None:
-                p._V = self._V.copy()
-            if self._K is not None:
-                p._K = self._K.copy()
-            if self._sa is not None:
-                p._sa = self._sa.copy()
-            if self._pf is not None:
-                p._pf = self._pf.copy()
-            if self._rsbb is not None:
-                p._rsbb = self._rsbb.copy()
-        p.PanelList = None
-
-        return p
-
     def __str__(self):
         """ Print something useful when in interactive mode."""
 
@@ -343,7 +315,7 @@ class Panel(object):
 #     def mcQ(self):
 #         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
 #         incident beam direction for each pixel independently. """
-# 
+#
 #         i = np.arange(self.nF)
 #         j = np.arange(self.nS)
 #         [i, j] = np.meshgrid(i, j)
@@ -651,13 +623,13 @@ class PanelList(object):
 
         return len(self._PanelList)
 
-    def get_panel_indices(self,idx):
+    def get_panel_indices(self, idx):
         """ Get the indices of a panel for slicing a PanelList array """
-        
+
         idx = self.getPanelIndexByName(idx)
-        
-        i = 0 # Panel number
-        n = 0 # Start index
+
+        i = 0  # Panel number
+        n = 0  # Start index
         for p in self:
             np = p.n_pixels
             start = n
@@ -666,12 +638,12 @@ class PanelList(object):
             if i == idx:
                 break
             i += 1
-        
-        return [start,stop]
-    
-    def panel_slice(self,idx,dat):
+
+        return [start, stop]
+
+    def panel_slice(self, idx, dat):
         """ Slice a panel out of a concatentated array. """
-        
+
         r = self.get_panel_indices(idx)
         return dat[r[0]:r[1]]
 
@@ -739,7 +711,7 @@ class PanelList(object):
             if p.name == name:
                 return i
             i += 1
-            
+
         return None
 
     def computeRealSpaceGeometry(self):
@@ -786,7 +758,7 @@ class PanelList(object):
 #     def mcQ(self):
 #         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
 #         incident beam direction for each pixel independently. """
-# 
+#
 #         return np.concatenate(
 #             [p.mcQ.reshape(np.product(p.mcQ.shape) / 3, 3) for p in self])
 
