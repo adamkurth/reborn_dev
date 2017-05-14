@@ -101,24 +101,6 @@ return a modified numpy ndarray with the correct shape.
     return vec
 
 
-def eV2Joules(eV):
-    """ Convert electron volts into Joules. """
-
-    return eV * 1.60217657e-19
-
-
-def photonEnergy2Wavelength(energy):
-    """ Convert photon energy to photon wavelength. SI units, as always. """
-
-    return hc / energy
-
-
-def photonWavelength2Energy(wavelength):
-    """ Convert photon wavelength to energy. SI units, as always. """
-
-    return hc / wavelength
-
-
 def vecNorm(V):
 
     v = V
@@ -145,30 +127,6 @@ def error(message):
     """ Simple error message (to be replaced later...) """
 
     sys.stderr.write("ERROR: %s\n" % message)
-
-
-def rot1(angle):
-    """ Rotate about axis 1. """
-
-    return np.array([[0, np.cos(angle), -np.sin(angle)],
-                     [1, 0, 0],
-                     [0, np.sin(angle), np.cos(angle)]])
-
-
-def rot2(angle):
-    """ Rotate about axis 2. """
-
-    return np.array([[np.cos(angle), 0, -np.sin(angle)],
-                     [0, 1, 0],
-                     [np.sin(angle), 0, np.cos(angle)]])
-
-
-def rot3(angle):
-    """ Rotate about axis 2. """
-
-    return np.array([[np.cos(angle), -np.sin(angle), 0],
-                     [0, 0, 1],
-                     [np.sin(angle), np.cos(angle), 0]])
 
 
 # def axisAndAngleToMatrix(axis, angle):
