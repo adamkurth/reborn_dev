@@ -13,7 +13,7 @@ except ImportError:
     pass
 # from numpy.random import random, randn
 
-from utils import vecNorm, vecMag
+from utils import vec_norm, vec_mag
 import source
 import units
 
@@ -309,7 +309,7 @@ class Panel(object):
         """ Scattering vector magnitudes, with 2*pi factor and wavelength
         included."""
 
-        return vecMag(self.Q)
+        return vec_mag(self.Q)
 
 #     @property
 #     def mcQ(self):
@@ -326,7 +326,7 @@ class Panel(object):
 #         V = self.T + F + S
 #         B = np.outer(np.ones(self.n_pixels), self.B) + \
 #             randn(self.n_pixels, 3) * self.beam.divergence
-#         K = vecNorm(V) - vecNorm(B)
+#         K = vec_norm(V) - vec_norm(B)
 #         lam = self.beam.wavelength * \
 #             (1 + randn(self.n_pixels) * self.beam.spectralWidth)
 #         return 2 * np.pi * K / np.outer(lam, np.ones(3))
@@ -338,7 +338,7 @@ class Panel(object):
         if self.beam.wavelength is None:
             raise ValueError("No wavelength is defined.  Cannot compute stol.")
 
-        return 0.5 * vecMag(self.K) / self.beam.wavelength
+        return 0.5 * vec_mag(self.K) / self.beam.wavelength
 
     @property
     def N(self):
@@ -352,7 +352,7 @@ class Panel(object):
         """ Solid angles of pixels."""
 
         if self._sa is None:
-            v = vecNorm(self.V)
+            v = vec_norm(self.V)
             n = self.N
             V2 = np.sum(self.V**2, axis=-1)
             A = norm(np.cross(self.F, self.S))
@@ -369,7 +369,7 @@ class Panel(object):
 
         if self._pf is None:
             p = self.beam.P
-            u = vecNorm(self.V)
+            u = vec_norm(self.V)
             self._pf = 1.0 - np.abs(u.dot(p))**2
 
         return self._pf
@@ -443,7 +443,7 @@ class Panel(object):
         """ Compute the reciprocal-space scattering vectors, multiplied by
         wavelength."""
 
-        self._K = vecNorm(self.V) - self.B
+        self._K = vec_norm(self.V) - self.B
 
     def clear_geometry_cache(self):
         """ Clear out all derived geometry data."""
@@ -738,7 +738,7 @@ class PanelList(object):
     def Qmag(self):
         """ Concatentated reciprocal-space vector magnitudes."""
 
-        return vecMag(self.Q)
+        return vec_mag(self.Q)
 
 #     @property
 #     def mcQ(self):
@@ -756,7 +756,7 @@ class PanelList(object):
 
             raise ValueError("No wavelength is defined.  Cannot compute stol.")
 
-        return 0.5 * vecMag(self.K) / self.wavelength
+        return 0.5 * vec_mag(self.K) / self.wavelength
 
     @property
     def data(self):

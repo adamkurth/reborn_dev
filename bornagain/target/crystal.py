@@ -163,8 +163,8 @@ def parsePDB(pdbFilePath, crystalStruct=None):
 
     T = SCALE[:, 3]
 
-    cryst.r = utils.vecCheck(r)
-    cryst.T = utils.vecCheck(T)
+    cryst.r = utils.vec_check(r)
+    cryst.T = utils.vec_check(T)
     cryst.elements = elements
     cryst.Z = atoms.atomic_symbols_to_numbers(elements)
     cryst.spaceGroupNumber = hermannMauguinToNumber(spcgrp)
@@ -175,7 +175,7 @@ def parsePDB(pdbFilePath, crystalStruct=None):
     cryst.nMolecules = len(cryst.symOps['rotations'])
     cryst.symRs = [R for R in cryst.symOps['rotations']]
     cryst.symRinvs = [np.linalg.inv(R) for R in cryst.symOps['rotations']]
-    cryst.symTs = [utils.vecCheck(T) for T in cryst.symOps['translations']]
+    cryst.symTs = [utils.vec_check(T) for T in cryst.symOps['translations']]
 
     return cryst
 
@@ -347,7 +347,7 @@ class Lattice:
 #        R = cryst.symRs[i]
 #        T = cryst.symTs[i]
 #        for Tp in occupancies[i]:
-#            Tp = utils.vecCheck(Tp)
+#            Tp = utils.vec_check(Tp)
 #            ff = cryst.O.dot(R.dot(cryst.x)+T+Tp)
 #            plt = gl.GLScatterPlotItem(pos=ff.T*scl,color=utils.glColors[i+2],
 #                                       size=siz)
