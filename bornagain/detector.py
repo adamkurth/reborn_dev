@@ -107,10 +107,18 @@ class Panel(object):
     def beam(self):
         """ X-ray beam data, taken from parent Panel list if one exists."""
 
+        # We want to avoid the possibility that multiple beam objects
+        # exist.  If this Panel is a member of a PanelList, then get the 
+        # beam information from the PanelList, and destroy this beam object.
+        # This is overly complicated, so it would make more sense to just 
+        # remove beam from Panel objects and assume that PanelList is the 
+        # basic data structure and Panels are only used by PanelList.
         if self.PanelList is not None:
             beam = self.PanelList._beam
             self._beam = None
         else:
+            # The beam info is not initialized on creation of the panel.  Here
+            # we create the beam object if needed.
             if self._beam is None:
                 self._beam = source.beam()
             beam = self._beam
@@ -491,7 +499,7 @@ class Panel(object):
     def simple_setup(self,
                      nF=None,
                      nS=None,
-                     pixelSize=None,
+                     pixel_size=None,
                      distance=None,
                      wavelength=None,
                      T=None):
@@ -501,19 +509,20 @@ class Panel(object):
             raise ValueError("Number of fast scan pixels is unspecified.")
         if nS is None:
             raise ValueError("Number of slow scan pixels is unspecified.")
-        if pixelSize is None:
+        if pixel_size is None:
             raise ValueError("Pixel size is unspecified.")
 
         self.nF = nF
         self.nS = nS
-        self.F = np.array([1, 0, 0]) * pixelSize
-        self.S = np.array([0, 1, 0]) * pixelSize
+        self.F = np.array([1, 0, 0]) * pixel_size
+        self.S = np.array([0, 1, 0]) * pixel_size
 
         if T is None:
             if distance is None:
                 raise ValueError("Distance is unspecified")
-            self.T = np.array([0, 0, distance]) - self.F * \
-                self.nF / 2.0 - self.S * self.nS / 2.0
+            self.T = np.array([0, 0, distance]) \
+                - self.F * (self.nF / 2.0 - 0.5) \
+                - self.S * (self.nS / 2.0 - 0.5) 
         else:
             self.T = T
 
@@ -1029,7 +1038,7 @@ class PanelList(object):
     def simple_setup(self,
                      nF=None,
                      nS=None,
-                     pixelSize=None,
+                     pixel_size=None,
                      distance=None,
                      wavelength=None,
                      T=None):
@@ -1048,6 +1057,6 @@ class PanelList(object):
         """
 
         p = Panel()
-        p.simple_setup(nF, nS, pixelSize, distance, wavelength, T)
+        p.simple_setup(nF, nS, pixel_size, distance, wavelength, T)
         self.beam = p.beam
         self.append(p)

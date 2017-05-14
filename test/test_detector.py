@@ -25,7 +25,51 @@ def test_set_data(main=False):
     
     assert(np.max(np.abs(a - pl.data)) == 0)
     
+def test_beam(main=False):
+    
+    p = ba.detector.Panel()
+    wavelength = 1
+    p.beam.wavelength = wavelength
+    if main:
+        print(p.beam)
+    assert(p.beam.wavelength == wavelength) 
+    
+    pl = ba.detector.PanelList()
+    pl.wavelength = 1 
+    assert(pl.beam.wavelength == wavelength)
+    
+    if main:
+        print(pl.beam)
+        print(p._beam)
+
+def test_simple_setup(main=False):
+    
+    p = ba.detector.Panel()
+    nF = 3
+    nS = 4
+    p.simple_setup(nF=nF,nS=nS,pixel_size=1,distance=1,wavelength=1)
+    if main:
+        print(p.V[0,:],p.V[-1,:])
+    assert(p.V[0,0] == -nF/2.0 + 0.5)
+    assert(p.V[-1,0] == nF/2.0 - 0.5)
+    assert(p.V[0,1] == -nS/2.0 + 0.5)
+    assert(p.V[-1,1] == nS/2.0 - 0.5)
+    
+    pl = ba.detector.PanelList()
+    pl.simple_setup(nF=nF,nS=nS,pixel_size=1,distance=1,wavelength=1)
+    assert(pl[0].V[0,0] == -nF/2.0 + 0.5)
+    assert(pl[0].V[-1,0] == nF/2.0 - 0.5)
+    assert(pl[0].V[0,1] == -nS/2.0 + 0.5)
+    assert(pl[0].V[-1,1] == nS/2.0 - 0.5)
+    assert(pl.V[0,0] == -nF/2.0 + 0.5)
+    assert(pl.V[-1,0] == nF/2.0 - 0.5)
+    assert(pl.V[0,1] == -nS/2.0 + 0.5)
+    assert(pl.V[-1,1] == nS/2.0 - 0.5)
+
+    
 if __name__ == "__main__":
     
     main = True
     test_set_data(main)
+    test_simple_setup(main)
+    test_beam(main)
