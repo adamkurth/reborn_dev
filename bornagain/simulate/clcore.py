@@ -17,7 +17,7 @@ import pyopencl as cl
 import pyopencl.array
 
 clcore_file = pkg_resources.resource_filename(
-    'bornagain.simulate', 'clcore.cl')
+    'bornagain.simulate', 'clcore.cpp')
 
 default_context = cl.create_some_context()
 default_queue = cl.CommandQueue(default_context)

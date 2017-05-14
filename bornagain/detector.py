@@ -2,14 +2,20 @@
 Classes for analyzing/simulating diffraction data contained in pixel array
 detectors (PADs).
 """
+import sys
 
 import numpy as np
 from numpy.linalg import norm
+try:
+    import matplotlib
+    import pylab as plt
+except ImportError:
+    pass
 # from numpy.random import random, randn
 
 from utils import vecNorm, vecMag
 import source
-
+import units
 
 class Panel(object):
     """ Individual detector Panel: a 2D lattice of square pixels."""
@@ -21,6 +27,7 @@ class Panel(object):
         self.name = name  # Panel name for convenience
         self._F = None  # Fast-scan vector
         self._S = None  # Slow-scan vector
+        
         # Translation of this Panel (from interaction region to center of first
         # pixel)
         self._T = None
@@ -1060,3 +1067,94 @@ class PanelList(object):
         p.simple_setup(nF, nS, pixel_size, distance, wavelength, T)
         self.beam = p.beam
         self.append(p)
+
+
+class SimpleDetector(Panel):
+
+    def __init__(self, n_pixels=1000, pixsize=0.00005,
+                 detdist=0.05, wavelen=1, *args, **kwargs):
+
+        Panel.__init__(self, *args, **kwargs)
+
+        self.detector_distance = detdist
+        self.wavelength = wavelen
+        self.si_energy = units.hc/ (wavelen*1e-10)
+
+#       make a single panel detector:
+        self.simple_setup(
+            n_pixels,
+            n_pixels + 1,
+            pixsize,
+            detdist,
+            wavelen,)
+        
+#       shape of the 2D det panel (2D image)
+        self.img_sh = (self.nS, self.nF)
+
+    def readout(self, amplitudes):
+        self.intens = (np.abs(amplitudes)**2).reshape(self.img_sh)
+        return self.intens
+
+    def readout_finite(self, amplitudes, qmin, qmax, flux=1e20):
+        struct_fact = (np.abs(amplitudes)**2).astype(np.float64)
+
+        if qmin < self.Qmag.min():
+            qmin = self.Qmag.min()
+        if qmax > self.Qmag.max():
+            qmax = self.Qmag.max()
+
+        ilow = np.where(self.Qmag < qmin)[0]
+        ihigh = np.where(self.Qmag > qmax)[0]
+
+        if ilow.size:
+            struct_fact[ilow] = 0
+        if ihigh.size:
+            struct_fact[ihigh] = 0
+
+        rad_electron = 2.82e-13  # cm
+        phot_per_pix = struct_fact * self.solidAngle * flux * rad_electron**2
+        total_phot = int(phot_per_pix.sum())
+
+        pvals = struct_fact / struct_fact.sum()
+
+        self.intens = np.random.multinomial(total_phot, pvals)
+
+        self.intens = self.intens.reshape(self.img_sh)
+
+        return self.intens
+
+    def display(self, use_log=True, vmax=None, **kwargs):
+        if 'matplotlib' not in sys.modules:
+            print("You need matplotlib to plot!")
+            return
+        #plt = matplotlib.pylab
+        fig = plt.figure(**kwargs)
+        ax = plt.gca()
+
+        qx_min, qy_min = self.Q[:, :2].min(0)
+        qx_max, qy_max = self.Q[:, :2].max(0)
+        extent = (qx_min, qx_max, qy_min, qy_max)
+        if use_log:
+            ax_img = ax.imshow(
+                np.log1p(
+                    self.intens),
+                extent=extent,
+                cmap='viridis',
+                interpolation='lanczos')
+            cbar = fig.colorbar(ax_img)
+            cbar.ax.set_ylabel('log(photon counts)', rotation=270, labelpad=12)
+        else:
+            assert(vmax is not None)
+            ax_img = ax.imshow(
+                self.intens,
+                extent=extent,
+                cmap='viridis',
+                interpolation='lanczos',
+                vmax=vmax)
+            cbar = fig.colorbar(ax_img)
+            cbar.ax.set_ylabel('photon counts', rotation=270, labelpad=12)
+
+        ax.set_xlabel(r'$q_x\,\,\AA^{-1}$')
+        ax.set_ylabel(r'$q_y\,\,\AA^{-1}$')
+
+        plt.show()
