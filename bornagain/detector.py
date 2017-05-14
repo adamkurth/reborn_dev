@@ -31,17 +31,16 @@ class Panel(object):
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
         self.adu_per_ev = 0 # Arbitrary data units per eV of photon energy
-        self.beam = None # Placeholder for beam object
+        self.beam = source.beam() # Placeholder for beam object
 
         # Cached parameters
-        self._pixel_size = None  # Pixel size derived from F/S vectors
-        self._V = None # Vectors to pixel centers
+        self._ps = None  # Pixel size derived from F/S vectors
+        self._v = None # Vectors to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
         self._pf = None  # Polarization factor
-        self._K = None  # Reciprocal space vectors multiplied by wavelength
+        self._k = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
-        # Hash of the configured geometry parameters
-        self._geometry_hash = None
+        self._gh = None # Hash of the configured geometry parameters
 
         # If this Panel is a part of a list
         self.PanelList = None  # This is the link to the Panel list
@@ -108,7 +107,7 @@ class Panel(object):
         same length. Setting this value will modify the fast- and slow-scan
         vectors F and S. """
 
-        if self._pixel_size is None:
+        if self._ps is None:
             p1 = norm(self.F)
             p2 = norm(self.S)
             if abs(p1 - p2) / np.float(p2) > 1e-6 or abs(p1 - p2) / np.float(
@@ -117,8 +116,8 @@ class Panel(object):
                     """Pixel size is not consistent between F and S vectors
                     (%10f, %10f)."""
                     % (p1, p2))
-            self._pixel_size = np.mean([p1, p2])
-        return self._pixel_size.copy()
+            self._ps = np.mean([p1, p2])
+        return self._ps.copy()
 
     @pixel_size.setter
     def pixel_size(self, val):
@@ -144,14 +143,11 @@ class Panel(object):
         return self._F
 
     @F.setter
-    def F(self, val):
+    def F(self, F):
         """ Must be a numpy ndarray of length 3."""
 
-        if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
-            self._F = val
-            self.clear_geometry_cache()
-        else:
-            raise ValueError("F must be a numpy ndarray of length 3.")
+        self._F = vec_check(F)
+        self.clear_geometry_cache()
 
     @property
     def S(self):
@@ -160,32 +156,25 @@ class Panel(object):
         return self._S
 
     @S.setter
-    def S(self, val):
+    def S(self, S):
         """ Must be a numpy ndarray of length 3."""
 
-        if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
-            self._S = val
-            self.clear_geometry_cache()
-        else:
-            raise ValueError("S must be a numpy array of length 3.")
+        self._S = vec_check(S)
+        self.clear_geometry_cache()
 
     @property
     def T(self):
         """ Translation vector pointing from interaction region to center of
-        first pixel."""
+        first pixel in memory."""
 
         return self._T
 
     @T.setter
-    def T(self, val):
+    def T(self, T):
         """ Must be an ndarray of length 3."""
 
-        val = np.array(val)
-        if isinstance(val, np.ndarray) and val.size == 3 and val.ndim == 1:
-            self._T = val
-            self.clear_geometry_cache()
-        else:
-            raise ValueError("Must be a numpy array of length 3.")
+        self._T = vec_check(T)
+        self.clear_geometry_cache()
 
     @property
     def B(self):
@@ -199,9 +188,9 @@ class Panel(object):
     def V(self):
         """ Vectors pointing from interaction region to pixel centers."""
 
-        if self._V is None:
+        if self._v is None:
             self.compute_real_space_geometry()
-        return self._V
+        return self._v
 
     @property
     def K(self):
@@ -209,9 +198,9 @@ class Panel(object):
         scattering vectors, but multiplied by wavelength.  This does not have
         the 2*pi factor included."""
 
-        if self._K is None:
+        if self._k is None:
             self.compute_reciprocal_space_geometry()
-        return self._K
+        return self._k
 
     @property
     def Q(self):
@@ -275,16 +264,13 @@ class Panel(object):
             n = self.N
             V2 = np.sum(self.V**2, axis=-1)
             A = norm(np.cross(self.F, self.S))
-            self._sa = A / V2 * np.dot(v, n)
+            self._sa = A / V2 * np.dot(v, n.T)
 
         return self._sa
 
     @property
     def polarization_factor(self):
         """ The scattering polarization factor. """
-
-        if self.beam.polarizationRatio != 1:
-            raise ValueError("Only linear polarization handled at this time.")
 
         if self._pf is None:
             p = self.beam.P
@@ -318,26 +304,26 @@ class Panel(object):
     def geometry_hash(self):
         """ Hash all of the configured geometry values. """
 
-        if self._geometry_hash is None:
+        if self._gh is None:
 
             F = self._F
             S = self._S
             T = self._T
 
             if F is None:
-                self._geometry_hash = None
-                return self._geometry_hash
+                self._gh = None
+                return self._gh
             elif S is None:
-                self._geometry_hash = None
-                return self._geometry_hash
+                self._gh = None
+                return self._gh
             elif T is None:
-                self._geometry_hash = None
-                return self._geometry_hash
+                self._gh = None
+                return self._gh
 
-            self._geometry_hash = hash((F[0], F[1], F[2], S[0], S[1], S[2],
+            self._gh = hash((F[0], F[1], F[2], S[0], S[1], S[2],
                                         T[0], T[1], T[2], self._nF, self._nS))
 
-        return self._geometry_hash
+        return self._gh
 
     def compute_real_space_geometry(self):
         """ Compute arrays relevant to real-space geometry."""
@@ -347,7 +333,7 @@ class Panel(object):
         [i, j] = np.meshgrid(i, j)
         i.ravel()
         j.ravel()
-        self._V = self.pixels_to_vectors(j, i)
+        self._v = self.pixels_to_vectors(j, i)
 
     def pixels_to_vectors(self, j, i):
         """ Convert pixel indices to translation vectors (i=fast scan, j=slow
@@ -362,19 +348,20 @@ class Panel(object):
         """ Compute the reciprocal-space scattering vectors, multiplied by
         wavelength."""
 
-        self._K = vec_norm(self.V) - self.B
+        self._k = vec_norm(self.V) - self.B
 
     def clear_geometry_cache(self):
         """ Clear out all derived geometry data."""
 
-        self._pixel_size = None  # Pixel size derived from F/S vectors
+        self._ps = None  # Pixel size derived from F/S vectors
         # 3D vectors pointing from interaction region to pixel centers
-        self._V = None
+        self._v = None
         self._sa = None  # Solid angles corresponding to each pixel
-        self._K = None  # Reciprocal space vectors multiplied by wavelength
+        self._pf = None 
+        self._k = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
         # Hash of the configured geometry parameters
-        self._geometry_hash = None
+        self._gh = None
 
         if self.PanelList is not None:
             self.PanelList.clear_geometry_cache()
@@ -475,19 +462,19 @@ class PanelList(object):
         self._mask = None  # Identify bad pixels [1 means good, 0 means bad]
         self._dark = None  # Counts on detector when there are no x-rays
         # Common pixel size (if not common amongst panels, this will be 'None')
-        self._pixel_size = None
+        self._ps = None
         self._sa = None  # Concatenated solid angles
-        self._V = None  # Concatenated pixel positions
-        self._K = None  # Concatenated reciprocal-space vectors
+        self._v = None  # Concatenated pixel positions
+        self._k = None  # Concatenated reciprocal-space vectors
         self._rsbb = None  # Real-space bounding box of entire Panel list
         self._vll = None  # Look-up table for simple projection
         self._rpix = None  # junk
         self._pf = None  # Polarization facto
-        self._geometry_hash = None  # Hash of geometries
+        self._gh = None  # Hash of geometries
         # Groups of panels that might be manipulated together
         self._derived_geometry = [
-            '_pixel_size', '_V', '_sa', '_K', '_pf', '_rsbb', '_vll', '_rpix',
-            '_geometry_hash'
+            '_ps', '_v', '_sa', '_k', '_pf', '_rsbb', '_vll', '_rpix',
+            '_gh'
         ]  # Default values of these are 'None'
 
     def __str__(self):
@@ -601,7 +588,7 @@ class PanelList(object):
 
         # Inherit beam from first append
         if self._beam is None:
-            self._beam = p._beam
+            self._beam = p.beam
 
         self._PanelList.append(p)
 
@@ -629,23 +616,23 @@ class PanelList(object):
     def V(self):
         """ Concatenated pixel position."""
 
-        if self._V is None:
+        if self._v is None:
 
-            self._V = np.concatenate(
+            self._v = np.concatenate(
                 [p.V.reshape(np.product(p.V.shape) / 3, 3) for p in self])
 
-        return self._V
+        return self._v
 
     @property
     def K(self):
         """ Concatenated reciprocal-space vectors."""
 
-        if self._K is None or self._K.shape[0] != self.n_pixels:
+        if self._k is None or self._k.shape[0] != self.n_pixels:
 
-            self._K = np.concatenate(
+            self._k = np.concatenate(
                 [p.K.reshape(np.product(p.K.shape) / 3, 3) for p in self])
 
-        return self._K
+        return self._k
 
     @property
     def Q(self):
@@ -894,7 +881,7 @@ class PanelList(object):
     def pixel_size(self):
         """ Return the average pixel size, if all pixels are identical."""
 
-        if self._pixel_size is None:
+        if self._ps is None:
 
             pix = np.zeros(self.n_panels)
             i = 0
@@ -903,12 +890,12 @@ class PanelList(object):
                 i += 1
             mnpix = np.mean(pix)
             if all(np.absolute((pix - mnpix) / mnpix) < 1e-6):
-                self._pixel_size = mnpix
+                self._ps = mnpix
             else:
                 raise ValueError(
                     "Pixel sizes in Panel list are not all the same.")
 
-        return self._pixel_size.copy()
+        return self._ps.copy()
 
     def get_center(self):
         """ Mean center of Panel list. """
@@ -936,30 +923,30 @@ class PanelList(object):
         """ Delete derived data relevant to geometry.  Normally used
          internally. """
 
-        self._pixel_size = None  # Pixel size derived from F/S vectors
+        self._ps = None  # Pixel size derived from F/S vectors
         # 3D vectors pointing from interaction region to pixel centers
-        self._V = None
+        self._v = None
         self._sa = None  # Solid angles corresponding to each pixel
-        self._K = None  # Reciprocal space vectors multiplied by wavelength
+        self._k = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
         # Hash of the configured geometry parameters
-        self._geometry_hash = None
+        self._gh = None
 
     @property
     def geometry_hash(self):
         """ Hash all of the configured geometry values. """
 
-        if self._geometry_hash is None:
+        if self._gh is None:
 
             a = tuple([p.geometry_hash for p in self])
 
             if None in a:
-                self._geometry_hash = None
-                return self._geometry_hash
+                self._gh = None
+                return self._gh
 
-            self._geometry_hash = hash(a)
+            self._gh = hash(a)
 
-        return self._geometry_hash
+        return self._gh
 
     def simple_setup(self,
                      nF=None,
