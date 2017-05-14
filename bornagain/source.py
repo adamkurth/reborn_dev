@@ -10,54 +10,15 @@ class beam(object):
 
     def __init__(self):
 
-        self._wavelength = None
-        self._B = np.array([0, 0, 1])
-        self._P = np.array([1, 0, 0])
-        self.polarizationRatio = 1
-        self.spectralWidth = 0
-        self.photonEnergy = 0
+        self.wavelength = None
+        self.B = np.array([0, 0, 1])
+        self.P = np.array([1, 0, 0])
+        self.photon_energy = 0
         self.divergence = 0
-        self.pulseEnergy = 0
-        self.nPhotons = 0
+        self.pulse_energy = 0
+        self.n_photons = 0
         self.profile = "tophat"
-        self.meanFluence = 0
-
-    def copy(self):
-
-        b = beam()
-        b._wavelength = self._wavelength
-        b.B = self.B.copy()
-        return b
-
-    @property
-    def wavelength(self):
-
-        return self._wavelength
-
-    @wavelength.setter
-    def wavelength(self, value):
-
-        self._wavelength = value
-
-    @property
-    def B(self):
-
-        return self._B
-
-    @B.setter
-    def B(self, value):
-
-        self._B = value
-
-    @property
-    def P(self):
-
-        return self._P
-
-    @P.setter
-    def P(self, value):
-
-        self._P = value
+        self.mean_fluence = 0
 
     def __str__(self):
 
