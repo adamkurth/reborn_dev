@@ -49,7 +49,7 @@ def sphericalize(lattice):
     return lattice[rads < max_rad]
 
 
-def vec_check(vec, hardcheck=False):
+def vec_check(vec, hardcheck=False, dimension=3):
     """
 Check that a vector meets our assumption of an Nx3 numpy array.  This is
 helpful, for example, when we want to ensure that dot products and broadcasting

@@ -42,7 +42,25 @@ def test_beam(main=False):
         print(pl.beam)
         print(p._beam)
 
-def test_simple_setup(main=False):
+def test_reshape(main=False):
+    
+    p = ba.detector.Panel()
+    nF = 3
+    nS = 4
+    p.simple_setup(nF=nF,nS=nS,pixel_size=1,distance=1,wavelength=1)
+    d = np.arange(0,nF*nS)
+    p.data = d.copy()
+    if main:
+        print(d)
+    d = p.reshape(d)
+    if main:
+        print(d.shape)
+        print(d)
+        print(p.data)
+    assert(d.shape[1] == nF)
+    assert(d.shape[0] == nS)
+
+def test_panel_simple_setup(main=False):
     
     p = ba.detector.Panel()
     nF = 3
@@ -55,17 +73,28 @@ def test_simple_setup(main=False):
     assert(p.V[0,1] == -nS/2.0 + 0.5)
     assert(p.V[-1,1] == nS/2.0 - 0.5)
     
-    pl = ba.detector.PanelList()
-    pl.simple_setup(nF=nF,nS=nS,pixel_size=1,distance=1,wavelength=1)
-    assert(pl[0].V[0,0] == -nF/2.0 + 0.5)
-    assert(pl[0].V[-1,0] == nF/2.0 - 0.5)
-    assert(pl[0].V[0,1] == -nS/2.0 + 0.5)
-    assert(pl[0].V[-1,1] == nS/2.0 - 0.5)
-    assert(pl.V[0,0] == -nF/2.0 + 0.5)
-    assert(pl.V[-1,0] == nF/2.0 - 0.5)
-    assert(pl.V[0,1] == -nS/2.0 + 0.5)
-    assert(pl.V[-1,1] == nS/2.0 - 0.5)
+# def test_panellist_simple_setup(main=False):
+#     
+#     pl = ba.detector.PanelList()
+#     pl.simple_setup(nF=nF,nS=nS,pixel_size=1,distance=1,wavelength=1)
+#     assert(pl[0].V[0,0] == -nF/2.0 + 0.5)
+#     assert(pl[0].V[-1,0] == nF/2.0 - 0.5)
+#     assert(pl[0].V[0,1] == -nS/2.0 + 0.5)
+#     assert(pl[0].V[-1,1] == nS/2.0 - 0.5)
+#     assert(pl.V[0,0] == -nF/2.0 + 0.5)
+#     assert(pl.V[-1,0] == nF/2.0 - 0.5)
+#     assert(pl.V[0,1] == -nS/2.0 + 0.5)
+#     assert(pl.V[-1,1] == nS/2.0 - 0.5)
 
+def test_data(main=False):
+    
+    p = ba.detector.Panel()
+    nF = 3
+    nS = 4
+    p.simple_setup(nF=nF,nS=nS,pixel_size=1,distance=1,wavelength=1)
+    d = np.arange(0,nF*nS)
+    p.data = d
+    
     
 if __name__ == "__main__":
     
@@ -73,3 +102,5 @@ if __name__ == "__main__":
     test_set_data(main)
     test_simple_setup(main)
     test_beam(main)
+    test_reshape(main)
+    

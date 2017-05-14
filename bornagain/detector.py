@@ -13,7 +13,7 @@ except ImportError:
     pass
 # from numpy.random import random, randn
 
-from utils import vec_norm, vec_mag
+from utils import vec_norm, vec_mag, vec_check
 import source
 import units
 
@@ -27,23 +27,15 @@ class Panel(object):
         self.name = name  # Panel name for convenience
         self._F = None  # Fast-scan vector
         self._S = None  # Slow-scan vector
-        
-        # Translation of this Panel (from interaction region to center of first
-        # pixel)
-        self._T = None
+        self._T = None # Translation to center of first pixel
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
-        # Number of arbitrary data units per eV of photon energy
-        self.adu_per_ev = 0
-        self._beam = None  # Container for x-ray beam information
-        self._data = None  # Diffraction intensity data
-        self._mask = None
-        self._dark = None
+        self.adu_per_ev = 0 # Arbitrary data units per eV of photon energy
+        self.beam = None # Placeholder for beam object
 
         # Cached parameters
         self._pixel_size = None  # Pixel size derived from F/S vectors
-        # 3D vectors pointing from interaction region to pixel centers
-        self._V = None
+        self._V = None # Vectors to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
         self._pf = None  # Polarization factor
         self._K = None  # Reciprocal space vectors multiplied by wavelength
@@ -68,121 +60,47 @@ class Panel(object):
         s += "adu_per_ev = %g\n" % self.adu_per_ev
         return s
 
-    @property
-    def data(self):
-        """ Intensity data. """
+    def reshape(self,data):
+        """ Reshape array to panel shape.  Return ValueError if this fails."""
+        
+        return data.reshape(self.nS,self.nF)
 
-        return self._data
-
-    @data.setter
-    def data(self, val):
-
-        if val.shape[0] != self.nS or val.shape[1] != self.nF:
-            raise ValueError('Panel data should have shape (%d,%d)' %
-                             (self.nS, self.nF))
-
-        self._data = val
-        # Must clear out any derived data that depends on this input
-
-    @property
-    def mask(self):
-        """ Bad pixel mask. """
-
-        if self._mask is None:
-            self._mask = np.ones(self.data.shape)
-        return self._mask
-
-    @mask.setter
-    def mask(self, mask):
-
-        self._mask = mask
-
-    @property
-    def dark(self):
-        """ Dark signal. """
-
-        if self._dark is None:
-            self._dark = np.zeros(self.data.shape)
-        return self._dark
-
-    @dark.setter
-    def dark(self, dark):
-
-        self._dark = dark
-
-    @property
-    def beam(self):
-        """ X-ray beam data, taken from parent Panel list if one exists."""
-
-        # We want to avoid the possibility that multiple beam objects
-        # exist.  If this Panel is a member of a PanelList, then get the 
-        # beam information from the PanelList, and destroy this beam object.
-        # This is overly complicated, so it would make more sense to just 
-        # remove beam from Panel objects and assume that PanelList is the 
-        # basic data structure and Panels are only used by PanelList.
-        if self.PanelList is not None:
-            beam = self.PanelList._beam
-            self._beam = None
-        else:
-            # The beam info is not initialized on creation of the panel.  Here
-            # we create the beam object if needed.
-            if self._beam is None:
-                self._beam = source.beam()
-            beam = self._beam
-
-        return beam
-
-    @beam.setter
-    def beam(self, beam):
-
-        if not isinstance(beam, source.beam):
-            raise TypeError("Beam info must be a source.beam class")
-
-        if self.PanelList is not None:
-            self.PanelList._beam = beam
-            self._beam = None
-        else:
-            self._beam = beam
+    def check_data(self,data):
+        """ Check that a data array is consistent with panel shape."""
+        
+        try:
+            d = data.reshape(self.nS,self.nF)
+        except:
+            raise ValueError('Data array is not of correct type.  Must be' 
+                             ' a numpy array of shape %dx%d or length %d' 
+                             % (self.nS,self.nF,self.nS*self.nF))
+        return d
 
     @property
     def nF(self):
         """ Number of fast-scan pixels."""
 
-        if self._nF is 0:
-            if self.data is not None:
-                self.nF = self.data.shape[1]
         return self._nF
 
     @nF.setter
     def nF(self, val):
-        """ Changing the fast-scan pixel count destroys all derived geometry
-        data, and any unmatched intensity data."""
+        """ Destroy geometry cache."""
 
         self._nF = np.int(val)
         self.clear_geometry_cache()
-        if self.data is not None:
-            if self.data.shape[1] != self._nF:
-                self._data = None
 
     @property
     def nS(self):
         """ Number of slow-scan pixels."""
 
-        if self._nS is 0:
-            if self.data is not None:
-                self._nS = self.data.shape[0]
         return self._nS
 
     @nS.setter
     def nS(self, val):
-        """ Changing the fast-scan pixel count destroys all derived geometry
-        data, and any unmatched intensity data."""
+        """ Destroy geometry cache."""
 
         self._nS = np.int(val)
         self.clear_geometry_cache()
-        if self.data is not None:
-            if self.data.shape[0] != self._nS:
-                self._data = None
 
     @property
     def pixel_size(self):
@@ -204,6 +122,7 @@ class Panel(object):
 
     @pixel_size.setter
     def pixel_size(self, val):
+        """ Destroy geometry cache."""
 
         val = val
         pf = norm(self.F)
