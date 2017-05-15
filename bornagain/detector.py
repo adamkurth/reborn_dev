@@ -979,6 +979,15 @@ class SimpleDetector(Panel):
 
     def __init__(self, n_pixels=1000, pixsize=0.00005,
                  detdist=0.05, wavelen=1, *args, **kwargs):
+        """
+        this is a docstring
+        
+        Parametes
+        =========
+        n_pixels, int
+            the number of pixels along one edge
+        """
+
 
         Panel.__init__(self, *args, **kwargs)
 
