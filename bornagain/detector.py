@@ -997,6 +997,8 @@ class SimpleDetector(Panel):
 #       shape of the 2D det panel (2D image)
         self.img_sh = (self.nS, self.nF)
 
+        self.SOLID_ANG = np.cos( np.arcsin( self.Qmag*self.wavelength / 4 / np.pi) )**3
+
     def readout(self, amplitudes):
         self.intens = (np.abs(amplitudes)**2).reshape(self.img_sh)
         return self.intens
@@ -1018,7 +1020,7 @@ class SimpleDetector(Panel):
             struct_fact[ihigh] = 0
 
         rad_electron = 2.82e-13  # cm
-        phot_per_pix = struct_fact * self.solidAngle * flux * rad_electron**2
+        phot_per_pix = struct_fact * self.SOLID_ANG * flux * rad_electron**2
         total_phot = int(phot_per_pix.sum())
 
         pvals = struct_fact / struct_fact.sum()
