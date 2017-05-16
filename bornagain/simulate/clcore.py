@@ -87,7 +87,7 @@ Returns:
         else:
             dtype = np.float32
 
-    return cl.array.to_device(queue, array.astype(dtype))
+    return cl.array.to_device(queue, np.ascontiguousarray(array.astype(dtype)))
 
 
 phase_factor_qrf_cl = programs.phase_factor_qrf
