@@ -1,6 +1,7 @@
 import time
 import pkg_resources
 import sys
+import os
 
 import numpy as np
 import pyopencl as cl
@@ -13,8 +14,12 @@ import refdata
 
 
 class ThornAgain:
-    def __init__(self, q_vecs, atom_vecs, atomic_nums=None, load_default=True, group_size=1024):
-        self.group_size = group_size
+    def __init__(self, q_vecs, atom_vecs, atomic_nums=None, load_default=True, group_size=32):
+       
+        if os.environ.get('BORNAGAIN_CL_GROUPSIZE') is not None:
+            self.group_size = group_size
+        else:
+            self.group_size = int(os.environ.get('BORNAGAIN_CL_GROUPSIZE'))
         self.q_vecs = q_vecs.astype(np.float32)
         self.atom_vecs = atom_vecs.astype(np.float32)
         self.atomic_nums = atomic_nums
