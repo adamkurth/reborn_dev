@@ -17,6 +17,7 @@ from utils import vec_norm, vec_mag, vec_check
 import source
 import units
 
+
 class Panel(object):
     """ Individual detector Panel: a 2D lattice of square pixels."""
 
@@ -27,20 +28,20 @@ class Panel(object):
         self.name = name  # Panel name for convenience
         self._F = None  # Fast-scan vector
         self._S = None  # Slow-scan vector
-        self._T = None # Translation to center of first pixel
+        self._T = None  # Translation to center of first pixel
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
-        self.adu_per_ev = 0 # Arbitrary data units per eV of photon energy
-        self.beam = source.beam() # Placeholder for beam object
+        self.adu_per_ev = 0  # Arbitrary data units per eV of photon energy
+        self.beam = source.beam()  # Placeholder for beam object
 
         # Cached parameters
         self._ps = None  # Pixel size derived from F/S vectors
-        self._v = None # Vectors to pixel centers
+        self._v = None  # Vectors to pixel centers
         self._sa = None  # Solid angles corresponding to each pixel
         self._pf = None  # Polarization factor
         self._k = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
-        self._gh = None # Hash of the configured geometry parameters
+        self._gh = None  # Hash of the configured geometry parameters
 
         # If this Panel is a part of a list
         self.PanelList = None  # This is the link to the Panel list
@@ -59,20 +60,30 @@ class Panel(object):
         s += "adu_per_ev = %g\n" % self.adu_per_ev
         return s
 
-    def reshape(self,data):
-        """ Reshape array to panel shape.  Return ValueError if this fails."""
-        
-        return data.reshape(self.nS,self.nF)
+    def reshape(self, data):
+        """ Reshape array to panel shape. """
 
-    def check_data(self,data):
+        return data.reshape(self.nS, self.nF)
+
+    def ones(self):
+        """ Return array of ones with shape (nS,nF). """
+
+        return np.ones((self.nS, self.nF))
+
+    def zeros(self):
+        """ Return array of zeros with shape (nS,nF). """
+
+        return np.zeros((self.nS, self.nF))
+
+    def check_data(self, data):
         """ Check that a data array is consistent with panel shape."""
-        
+
         try:
-            d = data.reshape(self.nS,self.nF)
+            d = data.reshape(self.nS, self.nF)
         except:
-            raise ValueError('Data array is not of correct type.  Must be' 
-                             ' a numpy array of shape %dx%d or length %d' 
-                             % (self.nS,self.nF,self.nS*self.nF))
+            raise ValueError('Data array is not of correct type.  Must be'
+                             ' a numpy array of shape %dx%d or length %d'
+                             % (self.nS, self.nF, self.nS * self.nF))
         return d
 
     @property
@@ -302,13 +313,16 @@ class Panel(object):
 
     @property
     def geometry_hash(self):
-        """ Hash all of the configured geometry values. """
+        """ Hash all of the configured geometry values. Useful for determining
+        if anything has changed, or if two panels are different."""
 
         if self._gh is None:
 
             F = self._F
             S = self._S
             T = self._T
+            nS = self._nS
+            nF = self._nF
 
             if F is None:
                 self._gh = None
@@ -319,9 +333,15 @@ class Panel(object):
             elif T is None:
                 self._gh = None
                 return self._gh
+            elif nS == 0:
+                self._gh = None
+                return self._gh
+            elif nF == 0:
+                self._gh = None
+                return self._gh
 
-            self._gh = hash((F[0], F[1], F[2], S[0], S[1], S[2],
-                                        T[0], T[1], T[2], self._nF, self._nS))
+            self._gh = hash((F.flat[0], F.flat[1], F.flat[2], S.flat[0], S.flat[1], S.flat[2],
+                             T.flat[0], T.flat[1], T.flat[2], nF, nS))
 
         return self._gh
 
@@ -357,7 +377,7 @@ class Panel(object):
         # 3D vectors pointing from interaction region to pixel centers
         self._v = None
         self._sa = None  # Solid angles corresponding to each pixel
-        self._pf = None 
+        self._pf = None
         self._k = None  # Reciprocal space vectors multiplied by wavelength
         self._rsbb = None  # Real-space bounding box information
         # Hash of the configured geometry parameters
@@ -394,6 +414,8 @@ class Panel(object):
 
     @property
     def real_space_bounding_box(self):
+        """ Minimum and maximum values of the four corners.  Useful for 
+        displays"""
 
         return self.get_real_space_bounding_box()
 
@@ -435,7 +457,7 @@ class Panel(object):
                 raise ValueError("Distance is unspecified")
             self.T = np.array([0, 0, distance]) \
                 - self.F * (self.nF / 2.0 - 0.5) \
-                - self.S * (self.nS / 2.0 - 0.5) 
+                - self.S * (self.nS / 2.0 - 0.5)
         else:
             self.T = T
 
@@ -984,7 +1006,7 @@ class SimpleDetector(Panel):
 
         self.detector_distance = detdist
         self.wavelength = wavelen
-        self.si_energy = units.hc/ (wavelen*1e-10)
+        self.si_energy = units.hc / (wavelen * 1e-10)
 
 #       make a single panel detector:
         self.simple_setup(
@@ -993,7 +1015,7 @@ class SimpleDetector(Panel):
             pixsize,
             detdist,
             wavelen,)
-        
+
 #       shape of the 2D det panel (2D image)
         self.img_sh = (self.nS, self.nF)
 
