@@ -475,7 +475,7 @@ class PanelList(object):
 
         # Configured data
         self._name = "" # The name of this list (useful for rigid groups)
-        self._beam = source.Beam() # X-ray Beam information, common to all panels
+        self.beam = source.Beam() # X-ray Beam information, common to all panels
         self._panels = []  # List of individual panels
 
         # Derived data (concatenated from individual panels)
@@ -580,26 +580,6 @@ class PanelList(object):
         return dl     
 
     @property
-    def beam(self):
-        """ X-ray Beam data. """
-
-        if self._beam is None:
-            self._beam = source.Beam()
-
-        return self._beam
-
-    @beam.setter
-    def beam(self, beam):
-        """ X-ray Beam data setter. """
-
-        if not isinstance(beam, source.Beam):
-            raise TypeError("Beam info must be a source.Beam class")
-
-        self._beam = beam
-        for p in self:
-            p._beam = None
-
-    @property
     def n_pixels(self):
         """ Total number of pixels in all panels."""
 
@@ -625,10 +605,6 @@ class PanelList(object):
             p.name = name
         elif p.name == "":
             p.name = "%d" % self.n_panels
-
-        # Inherit Beam from first append
-        if self._beam is None:
-            self._beam = p.beam
 
         self._panels.append(p)
 
