@@ -29,7 +29,6 @@ def test_panel(main=False):
     assert(p.T is None)
     assert(p.name == "")
 
-
     # It should be possible to use any sort of 3-tuple to set a vector
     p.T = T
     p.F = F
@@ -38,7 +37,11 @@ def test_panel(main=False):
     p.nS = nS
     p.beam.wavelength = wavelength
 
+    ###########################################################################
     # Check creation and clearing of geometry cache
+    ###########################################################################
+
+    # Check that cache is cleared
     def cache_cleared():
         assert(p._v is None)
         assert(p._sa is None)
@@ -47,7 +50,7 @@ def test_panel(main=False):
         assert(p._ps is None)
         assert(p._rsbb is None)
         assert(p._gh is None)
-    # Request the various cached data
+    # Load cache by requesting arrays
 
     def create_cache():
         V = p.V
@@ -69,6 +72,16 @@ def test_panel(main=False):
     create_cache()
     p.pixel_size = pixel_size  # This should clear the cache
     cache_cleared()
+    create_cache()
+    p.nF = nF  # This should clear the cache
+    cache_cleared()
+    create_cache()
+    p.nS = nS  # This should clear the cache
+    cache_cleared()
+
+    ###########################################################################
+    # Test simple setup utility
+    ###########################################################################
 
     p.simple_setup(nF=nF, nS=nS, pixel_size=1,
                    distance=distance, wavelength=wavelength)
