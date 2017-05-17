@@ -82,6 +82,7 @@
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
@@ -90,6 +91,7 @@
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
  | <a href="#X"><strong>X</strong></a>
+ | <a href="#Z"><strong>Z</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -122,10 +124,6 @@
   </dt>
 
       
-  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.assembled_data">assembled_data (bornagain.detector.PanelList attribute)</a>, <a href="bornagain.html#bornagain.detector.PanelList.assembled_data">[1]</a>
-  </dt>
-
-      
   <dt><a href="bornagain.simulate.atoms.html#bornagain.simulate.atoms.atomic_numbers_to_symbols">atomic_numbers_to_symbols() (in module bornagain.simulate.atoms)</a>, <a href="bornagain.simulate.html#bornagain.simulate.atoms.atomic_numbers_to_symbols">[1]</a>
   </dt>
 
@@ -148,15 +146,9 @@
   </dt>
 
       
-  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.beam">beam (bornagain.detector.PanelList attribute)</a>, <a href="bornagain.html#bornagain.detector.PanelList.beam">[1]</a>
+  <dt><a href="bornagain.html#bornagain.source.Beam">Beam (class in bornagain.source)</a>, <a href="bornagain.source.html#bornagain.source.Beam">[1]</a>
   </dt>
 
-      <dd><dl>
-        
-  <dt><a href="bornagain.html#bornagain.source.beam">(class in bornagain.source)</a>, <a href="bornagain.source.html#bornagain.source.beam">[1]</a>
-  </dt>
-
-      </dl></dd>
       
   <dt><a href="bornagain.html#module-bornagain">bornagain (module)</a>
   </dt>
@@ -247,7 +239,7 @@
 
       <dd><dl>
         
-  <dt><a href="bornagain.html#bornagain.source.beam.check">(bornagain.source.beam method)</a>, <a href="bornagain.source.html#bornagain.source.beam.check">[1]</a>
+  <dt><a href="bornagain.html#bornagain.source.Beam.check">(bornagain.source.Beam method)</a>, <a href="bornagain.source.html#bornagain.source.Beam.check">[1]</a>
   </dt>
 
       </dl></dd>
@@ -255,16 +247,6 @@
   <dt><a href="bornagain.detector.html#bornagain.detector.Panel.check_data">check_data() (bornagain.detector.Panel method)</a>, <a href="bornagain.html#bornagain.detector.Panel.check_data">[1]</a>
   </dt>
 
-      
-  <dt><a href="bornagain.detector.html#bornagain.detector.Panel.check_geometry">check_geometry() (bornagain.detector.Panel method)</a>, <a href="bornagain.html#bornagain.detector.Panel.check_geometry">[1]</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.check_geometry">(bornagain.detector.PanelList method)</a>, <a href="bornagain.html#bornagain.detector.PanelList.check_geometry">[1]</a>
-  </dt>
-
-      </dl></dd>
       
   <dt><a href="bornagain.detector.html#bornagain.detector.Panel.clear_geometry_cache">clear_geometry_cache() (bornagain.detector.Panel method)</a>, <a href="bornagain.html#bornagain.detector.Panel.clear_geometry_cache">[1]</a>
   </dt>
@@ -278,17 +260,7 @@
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="bornagain.detector.html#bornagain.detector.Panel.compute_real_space_geometry">compute_real_space_geometry() (bornagain.detector.Panel method)</a>, <a href="bornagain.html#bornagain.detector.Panel.compute_real_space_geometry">[1]</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.compute_real_space_geometry">(bornagain.detector.PanelList method)</a>, <a href="bornagain.html#bornagain.detector.PanelList.compute_real_space_geometry">[1]</a>
-  </dt>
-
-      </dl></dd>
-      
-  <dt><a href="bornagain.detector.html#bornagain.detector.Panel.compute_reciprocal_space_geometry">compute_reciprocal_space_geometry() (bornagain.detector.Panel method)</a>, <a href="bornagain.html#bornagain.detector.Panel.compute_reciprocal_space_geometry">[1]</a>
+  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.concatentate_panel_data">concatentate_panel_data() (bornagain.detector.PanelList method)</a>, <a href="bornagain.html#bornagain.detector.PanelList.concatentate_panel_data">[1]</a>
   </dt>
 
       
@@ -401,6 +373,10 @@
 
       
   <dt><a href="bornagain.target.crystal.html#bornagain.target.crystal.Molecule.get_monomers">get_monomers() (bornagain.target.crystal.Molecule method)</a>, <a href="bornagain.target.html#bornagain.target.crystal.Molecule.get_monomers">[1]</a>
+  </dt>
+
+      
+  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.get_panel_data">get_panel_data() (bornagain.detector.PanelList method)</a>, <a href="bornagain.html#bornagain.detector.PanelList.get_panel_data">[1]</a>
   </dt>
 
       
@@ -550,15 +526,27 @@
   </dl></td>
 </tr></table>
 
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="bornagain.detector.html#bornagain.detector.Panel.ones">ones() (bornagain.detector.Panel method)</a>, <a href="bornagain.html#bornagain.detector.Panel.ones">[1]</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.ones">(bornagain.detector.PanelList method)</a>, <a href="bornagain.html#bornagain.detector.PanelList.ones">[1]</a>
+  </dt>
+
+      </dl></dd>
+  </dl></td>
+</tr></table>
+
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="bornagain.detector.html#bornagain.detector.Panel">Panel (class in bornagain.detector)</a>, <a href="bornagain.html#bornagain.detector.Panel">[1]</a>
-  </dt>
-
-      
-  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.panel_slice">panel_slice() (bornagain.detector.PanelList method)</a>, <a href="bornagain.html#bornagain.detector.PanelList.panel_slice">[1]</a>
   </dt>
 
       
@@ -573,12 +561,12 @@
   <dt><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.phase_factor_mesh">phase_factor_mesh() (in module bornagain.simulate.clcore)</a>, <a href="bornagain.simulate.html#bornagain.simulate.clcore.phase_factor_mesh">[1]</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.phase_factor_pad">phase_factor_pad() (in module bornagain.simulate.clcore)</a>, <a href="bornagain.simulate.html#bornagain.simulate.clcore.phase_factor_pad">[1]</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.phase_factor_qrf">phase_factor_qrf() (in module bornagain.simulate.clcore)</a>, <a href="bornagain.simulate.html#bornagain.simulate.clcore.phase_factor_qrf">[1]</a>
   </dt>
@@ -607,6 +595,10 @@
   </dt>
 
       </dl></dd>
+      
+  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.put_panel_data">put_panel_data() (bornagain.detector.PanelList method)</a>, <a href="bornagain.html#bornagain.detector.PanelList.put_panel_data">[1]</a>
+  </dt>
+
   </dl></td>
 </tr></table>
 
@@ -709,12 +701,12 @@
   </dt>
 
       </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="bornagain.detector.html#bornagain.detector.SimpleDetector">SimpleDetector (class in bornagain.detector)</a>, <a href="bornagain.html#bornagain.detector.SimpleDetector">[1]</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="bornagain.detector.html#bornagain.detector.Panel.solid_angle">solid_angle (bornagain.detector.Panel attribute)</a>, <a href="bornagain.html#bornagain.detector.Panel.solid_angle">[1]</a>
   </dt>
@@ -727,6 +719,10 @@
       </dl></dd>
       
   <dt><a href="bornagain.html#bornagain.utils.sphericalize">sphericalize() (in module bornagain.utils)</a>, <a href="bornagain.utils.html#bornagain.utils.sphericalize">[1]</a>
+  </dt>
+
+      
+  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.split_panel_data">split_panel_data() (bornagain.detector.PanelList method)</a>, <a href="bornagain.html#bornagain.detector.PanelList.split_panel_data">[1]</a>
   </dt>
 
       
@@ -835,6 +831,22 @@
   <dt><a href="bornagain.target.crystal.html#bornagain.target.crystal.structure.x">x (bornagain.target.crystal.structure attribute)</a>, <a href="bornagain.target.html#bornagain.target.crystal.structure.x">[1]</a>
   </dt>
 
+  </dl></td>
+</tr></table>
+
+<h2 id="Z">Z</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="bornagain.detector.html#bornagain.detector.Panel.zeros">zeros() (bornagain.detector.Panel method)</a>, <a href="bornagain.html#bornagain.detector.Panel.zeros">[1]</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="bornagain.detector.html#bornagain.detector.PanelList.zeros">(bornagain.detector.PanelList method)</a>, <a href="bornagain.html#bornagain.detector.PanelList.zeros">[1]</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
 </tr></table>
 

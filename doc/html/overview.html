@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>bornagain.scatter module &mdash; bornagain 0.0.1 documentation</title>
+    <title>Overview &mdash; bornagain 0.0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,7 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" /> 
+    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="bornagain’s documentation" href="index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -36,15 +38,37 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="bornagain’s documentation"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Overview</a><ul>
+<li><a class="reference internal" href="#some-basics">Some basics</a></li>
+<li><a class="reference internal" href="#detectors">Detectors</a></li>
+<li><a class="reference internal" href="#simulation">Simulation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">bornagain&#8217;s documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">Installation</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/bornagain.scatter.txt"
+      <li><a href="_sources/overview.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -69,28 +93,27 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-bornagain.scatter">
-<span id="bornagain-scatter-module"></span><h1>bornagain.scatter module<a class="headerlink" href="#module-bornagain.scatter" title="Permalink to this headline">¶</a></h1>
-<p>Classes related to x-ray &#8220;scattering&#8221;, which usually is distinguished from
-&#8220;diffraction&#8221; because there are many objects in random orientations.  SAXS/WAXS
-is the canonical example.</p>
-<dl class="class">
-<dt id="bornagain.scatter.RadialProfile">
-<em class="property">class </em><code class="descclassname">bornagain.scatter.</code><code class="descname">RadialProfile</code><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="method">
-<dt id="bornagain.scatter.RadialProfile.get_profile">
-<code class="descname">get_profile</code><span class="sig-paren">(</span><em>data</em>, <em>PanelList=None</em>, <em>average=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile.get_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile.get_profile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="bornagain.scatter.RadialProfile.make_plan">
-<code class="descname">make_plan</code><span class="sig-paren">(</span><em>PanelList</em>, <em>mask=None</em>, <em>nBins=100</em>, <em>qRange=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile.make_plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile.make_plan" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use PanelList as template to cache information for radial binning.</p>
-</dd></dl>
-
-</dd></dl>
-
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>Here you will find an overview of basic concepts, which hopefully help you understand how the modules in bornagain are meant to fit together.</p>
+<div class="section" id="some-basics">
+<h2>Some basics<a class="headerlink" href="#some-basics" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>All units in bornagain are SI.  Angles are radians.  Exceptions are very rare.</li>
+<li>All vectors should have a numpy shape of Nx3, in order to keep vector components close in memory.  We are quite strict about this.</li>
+<li>Detector panels are often segmented in real experiments.  The classes in the detector module are intended to help ease the burden of working with such detectors.</li>
+<li>Learn how to use iPython to explore the functionality of bornagain classes.</li>
+<li>If documentation is missing, tell someone (e.g. rkirian at asu dot edu).</li>
+</ul>
+</div>
+<div class="section" id="detectors">
+<h2>Detectors<a class="headerlink" href="#detectors" title="Permalink to this headline">¶</a></h2>
+<p>Some description about detectors here, with diagrams and usage examples.</p>
+</div>
+<div class="section" id="simulation">
+<h2>Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline">¶</a></h2>
+<p>Some description of how we work with opencl.</p>
+</div>
 </div>
 
 
@@ -108,6 +131,12 @@ is the canonical example.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="bornagain’s documentation"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
