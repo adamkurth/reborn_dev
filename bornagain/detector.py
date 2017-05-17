@@ -216,7 +216,7 @@ class Panel(object):
         the 2*pi factor included."""
 
         if self._k is None:
-            self.compute_reciprocal_space_geometry()
+            self._k = vec_norm(self.V) - self.B
         return self._k
 
     @property
@@ -359,12 +359,6 @@ class Panel(object):
         S = np.outer(j, self.S)
         V = self.T + F + S
         return V
-
-    def compute_reciprocal_space_geometry(self):
-        """ Compute the reciprocal-space scattering vectors, multiplied by
-        wavelength."""
-
-        self._k = vec_norm(self.V) - self.B
 
     def clear_geometry_cache(self):
         """ Clear out all derived geometry data."""
