@@ -43,8 +43,7 @@ class ThornAgain:
             return
 
         croman_coef = refdata.get_cromermann_parameters(self.atomic_nums)
-        form_facts_dict = refdata.get_cmann_form_factors(
-            croman_coef, self.q_vecs)  # form factors!
+        form_facts_dict = refdata.get_cmann_form_factors(croman_coef, self.q_vecs)
 
         lookup = {}  # for matching atomID to atomic number
         self.form_facts_arr = np.zeros(
@@ -103,11 +102,22 @@ class ThornAgain:
 #       make output buffer
         self.A_buff = clcore.to_device(
             np.zeros(self.Npix+self.Nextra_pix), dtype=np.complex64, queue=self.queue )
+        self._set_args()
 
 #       list of kernel args
+    def _set_args(self):
         self.prg_args = [self.queue, (self.Npix+self.Nextra_pix,),(self.group_size,),
                          self.q_buff.data, self.r_buff.data,
                          self.rot_buff.data, self.A_buff.data, self.Npix, self.Nato]
+
+    def update_rbuff(self, new_atoms):
+        """
+        new_atoms, float Nx3 of atoms
+        """
+        self.atom_vecs[:,:3] = new_atoms[:self.Nato]
+        self.r_buff = clcore.to_device(
+            self.atom_vecs, dtype=np.float32, queue=self.queue)
+        self.prg_args[4] = self.r_buff.data
 
     def _set_rand_rot(self):
         self.rot_buff = clcore.to_device(
@@ -127,10 +137,8 @@ class ThornAgain:
         self._set_rand_rot()
 
 #       run the program
-        t = time.time()
         self.prg(*self.prg_args)
         Amps = self.A_buff.get() [:-self.Nextra_pix]
-        print ("Took %.4f sec to complete..." % float(time.time() - t))
 
         return Amps
 
