@@ -302,21 +302,6 @@ class Panel(object):
         self.check_geometry()
         return True
 
-    def check_geometry(self):
-        """ Check for valid geometry configuration."""
-
-        if self._T is None:
-            raise ValueError("Panel translation vector T is not defined.")
-        if self._F is None:
-            raise ValueError("Panel basis vector F is not defined.")
-        if self._S is None:
-            raise ValueError("Panel basis vector S is not defined.")
-        if self.nF == 0 or self.nS == 0:
-            raise ValueError("Data array has zero size (%d x %d)." %
-                             (self.nF, self.nS))
-
-        return True
-
     @property
     def geometry_hash(self):
         """ Hash all of the configured geometry values. Useful for determining
@@ -799,7 +784,7 @@ class PanelList(object):
 
         return self._pf
 
-    def assemble_data(self, data=None):
+    def assemble_data(self, data):
         """ Project all intensity data along the Beam direction.  Nearest
         neighbor interpolation.  This is a crude way to display data... """
 
@@ -820,39 +805,7 @@ class PanelList(object):
         adat = np.zeros(
             [rpix[1, 1] - rpix[0, 1] + 1, rpix[1, 0] - rpix[0, 0] + 1])
 
-        if data is None:
-            data = self.data
-
         adat[Vll[:, 1], Vll[:, 0]] = data
-
-        return adat
-
-    @property
-    def assembled_data(self):
-        """ Project all intensity data along the Beam direction.  Nearest
-        neighbor interpolation.  This is a crude way to display data... """
-
-        if len(self) == 1:
-            return self[0].data
-
-        if self._vll is None:
-            pixelSize = self.pixel_size
-            r = self.real_space_bounding_box
-            rpix = r / pixelSize
-            rpix[0, :] = np.floor(rpix[0, :])
-            rpix[1, :] = np.ceil(rpix[1, :])
-            V = self.V[:, 0:2] / pixelSize - rpix[0, 0:2]
-            Vll = np.round(V).astype(np.int32)
-            self._vll = Vll
-            self._rpix = rpix
-        else:
-            Vll = self._vll
-            rpix = self._rpix
-
-        adat = np.zeros(
-            [rpix[1, 1] - rpix[0, 1] + 1, rpix[1, 0] - rpix[0, 0] + 1])
-
-        adat[Vll[:, 1], Vll[:, 0]] = self.data
 
         return adat
 
@@ -907,17 +860,6 @@ class PanelList(object):
             i += 1
 
         return np.mean(c, axis=0)
-
-    def check_geometry(self):
-        """ Check that geometry is sane. """
-
-        for p in self:
-
-            if not p.check_geometry():
-
-                return False
-
-        return True
 
     def clear_geometry_cache(self):
         """ Delete derived data relevant to geometry.  Normally used
