@@ -46,10 +46,8 @@ class RadialProfile(object):
         self.counts = np.bincount(self.binIndices, self.mask, self.nBins)
         self.countsNonZero = self.counts > 0
 
-    def get_profile(self, PanelList=None, data=None, average=True):
+    def get_profile(self, data, PanelList=None, average=True):
 
-        if PanelList is not None:
-            data = PanelList.data
         profile = np.bincount(self.binIndices, data * self.mask, self.nBins)
         if average:
             profile.flat[

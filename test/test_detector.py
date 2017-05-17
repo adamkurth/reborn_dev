@@ -194,10 +194,115 @@ def test_panellist(main=False):
     assert(all(ds[1] == 1))
 
     ###########################################################################
-    # Test the manipulation of data
+    # Test cache creation/deletion
     ###########################################################################
     
+    def panellist_setup():
+        p0 = panel1_setup()
+        p1 = panel2_setup()
+        pl = ba.detector.PanelList()
+        pl.append(p0)
+        pl.append(p1)
+        pl.beam.wavelength = 0.1
+        return pl
+    # Check that cache is cleared
+    def cache_cleared(pl):
+        assert(pl._v is None)
+        assert(pl._sa is None)
+        assert(pl._pf is None)
+        assert(pl._k is None)
+        assert(pl._ps is None)
+        assert(pl._rsbb is None)
+        assert(pl._gh is None)
+    # Check that cache is created
+    def cache_created(pl):
+        assert(pl._v is not None)
+        assert(pl._sa is not None)
+        assert(pl._pf is not None)
+        assert(pl._k is not None)
+        assert(pl._ps is not None)
+        assert(pl._rsbb is not None)
+        assert(pl._gh is not None)
+    # Load cache by requesting arrays
+    def create_cache(pl):
+        V = pl.V
+        sa = pl.solid_angle
+        pf = pl.polarization_factor
+        q = pl.Q
+        ps = pl.pixel_size
+        rsbb = pl.real_space_bounding_box
+        gh = pl.geometry_hash
+    
+    pl = panellist_setup()
+    cache_cleared(pl)
+    create_cache(pl)
+    cache_created(pl)
+    
+    pl = panellist_setup()
+    create_cache(pl)
+    pl[0].F = (1,0,0)  # This should clear the cache
+    cache_cleared(pl) 
+    pl = panellist_setup()
+    create_cache(pl)
+    pl[0].S = (1,0,0)  # This should clear the cache
+    cache_cleared(pl) 
+    pl = panellist_setup()
+    create_cache(pl)
+    pl[0].T = (1,0,0)  # This should clear the cache
+    cache_cleared(pl) 
+    pl = panellist_setup()
+    create_cache(pl)
+    pl[0].nF = 5  # This should clear the cache
+    cache_cleared(pl)  
+    pl = panellist_setup()
+    create_cache(pl)
+    pl[0].nS = 5  # This should clear the cache
+    cache_cleared(pl)    
+    
+    ###########################################################################
+    # Test that geometry hash works
+    ###########################################################################
 
+    # Geometry hash is None by default
+    pl = ba.detector.PanelList()
+    assert(pl.geometry_hash is None)
+    
+    # Self consistency
+    pl = panellist_setup()
+    assert(pl.geometry_hash == pl.geometry_hash)
+ 
+    # Comparison between two identical setups
+    pl1 = panellist_setup()
+    pl2 = panellist_setup()
+    assert(pl1.geometry_hash == pl2.geometry_hash)
+ 
+    # Check mismatch if something is changed
+    p1 = panellist_setup()
+    p2 = panellist_setup()
+    p2[0].nF += 1
+    assert(p1.geometry_hash != p2.geometry_hash)
+    p1 = panellist_setup()
+    p2 = panellist_setup()
+    p2[0].nS += 1
+    assert(p1.geometry_hash != p2.geometry_hash)
+    p1 = panellist_setup()
+    p2 = panellist_setup()
+    p2[0].F += 1
+    assert(p1.geometry_hash != p2.geometry_hash)
+    p1 = panellist_setup()
+    p2 = panellist_setup()
+    p2[0].S += 1
+    assert(p1.geometry_hash != p2.geometry_hash)
+    p1 = panellist_setup()
+    p2 = panellist_setup()
+    p2[0].T += 1
+    assert(p1.geometry_hash != p2.geometry_hash)    
+    
+    
+    
+    
+    
+    
 # def test_set_data(main=False):
 # 
 #     pl = ba.detector.PanelList()

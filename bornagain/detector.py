@@ -511,6 +511,16 @@ class PanelList(object):
 
         return len(self._panels)
 
+    def zeros(self):
+        """ Return an array of zeros of length n_pixels."""
+        
+        return np.zeros([self.n_pixels])
+    
+    def ones(self):
+        """ Return array of ones of length n_pixels."""
+        
+        return np.ones([self.n_pixels])
+
     def get_panel_indices(self, idx):
         """ Get the indices of a panel for slicing a PanelList array """
 
@@ -865,13 +875,12 @@ class PanelList(object):
         """ Delete derived data relevant to geometry.  Normally used
          internally. """
 
-        self._ps = None  # Pixel size derived from F/S vectors
-        # 3D vectors pointing from interaction region to pixel centers
+        self._ps = None
         self._v = None
-        self._sa = None  # Solid angles corresponding to each pixel
-        self._k = None  # Reciprocal space vectors multiplied by wavelength
-        self._rsbb = None  # Real-space bounding box information
-        # Hash of the configured geometry parameters
+        self._pf = None 
+        self._sa = None
+        self._k = None
+        self._rsbb = None
         self._gh = None
 
     @property
@@ -880,8 +889,12 @@ class PanelList(object):
 
         if self._gh is None:
 
+            if self.n_panels == 0:
+                self._gh = None
+                return self._gh
+            
             a = tuple([p.geometry_hash for p in self])
-
+            
             if None in a:
                 self._gh = None
                 return self._gh
