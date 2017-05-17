@@ -32,7 +32,7 @@ class Panel(object):
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
         self.adu_per_ev = 0  # Arbitrary data units per eV of photon energy
-        self.beam = source.beam()  # Placeholder for beam object
+        self.Beam = source.Beam()  # Placeholder for Beam object
 
         # Cached parameters
         self._ps = None  # Pixel size derived from F/S vectors
@@ -189,11 +189,11 @@ class Panel(object):
 
     @property
     def B(self):
-        """ Nominal beam direction vector (normalized)."""
+        """ Nominal Beam direction vector (normalized)."""
 
-        if self.beam is None:
-            raise ValueError("Panel has no beam information.")
-        return self.beam.B
+        if self.Beam is None:
+            raise ValueError("Panel has no Beam information.")
+        return self.Beam.B
 
     @property
     def V(self):
@@ -217,11 +217,11 @@ class Panel(object):
     def Q(self):
         """ Scattering vectors, with 2*pi factor and wavelength included."""
 
-        if self.beam.wavelength is None:
+        if self.Beam.wavelength is None:
             raise ValueError(
                 "No wavelength is defined.  Cannot compute Q vectors.")
 
-        return 2.0 * np.pi * self.K / self.beam.wavelength
+        return 2.0 * np.pi * self.K / self.Beam.wavelength
 
     @property
     def Qmag(self):
@@ -233,7 +233,7 @@ class Panel(object):
 #     @property
 #     def mcQ(self):
 #         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
-#         incident beam direction for each pixel independently. """
+#         incident Beam direction for each pixel independently. """
 #
 #         i = np.arange(self.nF)
 #         j = np.arange(self.nS)
@@ -244,20 +244,20 @@ class Panel(object):
 #         S = np.outer(j, self.S)
 #         V = self.T + F + S
 #         B = np.outer(np.ones(self.n_pixels), self.B) + \
-#             randn(self.n_pixels, 3) * self.beam.divergence
+#             randn(self.n_pixels, 3) * self.Beam.divergence
 #         K = vec_norm(V) - vec_norm(B)
-#         lam = self.beam.wavelength * \
-#             (1 + randn(self.n_pixels) * self.beam.spectralWidth)
+#         lam = self.Beam.wavelength * \
+#             (1 + randn(self.n_pixels) * self.Beam.spectralWidth)
 #         return 2 * np.pi * K / np.outer(lam, np.ones(3))
 
     @property
     def stol(self):
         """ sin(theta)/lambda, where theta is the half angle """
 
-        if self.beam.wavelength is None:
+        if self.Beam.wavelength is None:
             raise ValueError("No wavelength is defined.  Cannot compute stol.")
 
-        return 0.5 * vec_mag(self.K) / self.beam.wavelength
+        return 0.5 * vec_mag(self.K) / self.Beam.wavelength
 
     @property
     def N(self):
@@ -284,7 +284,7 @@ class Panel(object):
         """ The scattering polarization factor. """
 
         if self._pf is None:
-            p = self.beam.P
+            p = self.Beam.P
             u = vec_norm(self.V)
             self._pf = 1.0 - np.abs(u.dot(p))**2
 
@@ -438,7 +438,7 @@ class Panel(object):
                      distance=None,
                      wavelength=None,
                      T=None):
-        """ Simple way to create a Panel with centered beam."""
+        """ Simple way to create a Panel with centered Beam."""
 
         if nF is None:
             raise ValueError("Number of fast scan pixels is unspecified.")
@@ -462,9 +462,9 @@ class Panel(object):
             self.T = T
 
         if wavelength is not None:
-            if self.beam is None:
-                self.beam = source.beam()
-            self.beam.wavelength = wavelength
+            if self.Beam is None:
+                self.Beam = source.Beam()
+            self.Beam.wavelength = wavelength
 
 
 class PanelList(object):
@@ -474,9 +474,8 @@ class PanelList(object):
         """ Create an empty Panel array."""
 
         # Configured data
-        self._name = None  # The name of this list (useful for rigid groups)
-        # X-ray beam information, common to all panels
-        self._beam = None
+        self._name = None # The name of this list (useful for rigid groups)
+        self._beam = source.Beam() # X-ray Beam information, common to all panels
         self._PanelList = []  # List of individual panels
 
         # Derived data (concatenated from individual panels)
@@ -562,22 +561,22 @@ class PanelList(object):
         return dat[r[0]:r[1]]
 
     @property
-    def beam(self):
-        """ X-ray beam data. """
+    def Beam(self):
+        """ X-ray Beam data. """
 
         if self._beam is None:
-            self._beam = source.beam()
+            self._beam = source.Beam()
 
         return self._beam
 
     @beam.setter
-    def beam(self, beam):
-        """ X-ray beam data setter. """
+    def Beam(self, Beam):
+        """ X-ray Beam data setter. """
 
-        if not isinstance(beam, source.beam):
-            raise TypeError("Beam info must be a source.beam class")
+        if not isinstance(Beam, source.Beam):
+            raise TypeError("Beam info must be a source.Beam class")
 
-        self._beam = beam
+        self._beam = Beam
         for p in self:
             p._beam = None
 
@@ -608,9 +607,9 @@ class PanelList(object):
         elif p.name == "":
             p.name = "%d" % self.n_panels
 
-        # Inherit beam from first append
+        # Inherit Beam from first append
         if self._beam is None:
-            self._beam = p.beam
+            self._beam = p.Beam
 
         self._PanelList.append(p)
 
@@ -660,7 +659,7 @@ class PanelList(object):
     def Q(self):
         """ Concatenated reciprocal-space vectors."""
 
-        return 2 * np.pi * self.K / self.beam.wavelength
+        return 2 * np.pi * self.K / self.Beam.wavelength
 
     @property
     def Qmag(self):
@@ -671,7 +670,7 @@ class PanelList(object):
 #     @property
 #     def mcQ(self):
 #         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
-#         incident beam direction for each pixel independently. """
+#         incident Beam direction for each pixel independently. """
 #
 #         return np.concatenate(
 #             [p.mcQ.reshape(np.product(p.mcQ.shape) / 3, 3) for p in self])
@@ -680,7 +679,7 @@ class PanelList(object):
     def stol(self):
         """ sin(theta)/lambda, where theta is the half angle """
 
-        if self.beam.wavelength is None:
+        if self.Beam.wavelength is None:
 
             raise ValueError("No wavelength is defined.  Cannot compute stol.")
 
@@ -775,7 +774,7 @@ class PanelList(object):
     @property
     def wavelength(self):
 
-        return self.beam.wavelength
+        return self.Beam.wavelength
 
     @property
     def name(self):
@@ -791,9 +790,9 @@ class PanelList(object):
     @wavelength.setter
     def wavelength(self, val):
 
-        if self.beam is None:
-            self.beam = source.beam()
-        self.beam.wavelength = val
+        if self.Beam is None:
+            self.Beam = source.Beam()
+        self.Beam.wavelength = val
 
     @property
     def solid_angle(self):
@@ -822,7 +821,7 @@ class PanelList(object):
         return self._pf
 
     def assemble_data(self, data=None):
-        """ Project all intensity data along the beam direction.  Nearest
+        """ Project all intensity data along the Beam direction.  Nearest
         neighbor interpolation.  This is a crude way to display data... """
 
         if self._vll is None:
@@ -851,7 +850,7 @@ class PanelList(object):
 
     @property
     def assembled_data(self):
-        """ Project all intensity data along the beam direction.  Nearest
+        """ Project all intensity data along the Beam direction.  Nearest
         neighbor interpolation.  This is a crude way to display data... """
 
         if len(self) == 1:
@@ -993,7 +992,7 @@ class PanelList(object):
 
         p = Panel()
         p.simple_setup(nF, nS, pixel_size, distance, wavelength, T)
-        self.beam = p.beam
+        self.Beam = p.Beam
         self.append(p)
 
 
