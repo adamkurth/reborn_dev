@@ -344,8 +344,9 @@
 
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s">&#39;panels&#39;</span><span class="p">]:</span>
         <span class="n">PanelList</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">maskArray</span><span class="p">[</span>
-            <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
-
+            <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">PanelList</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="bp">None</span>
+ 
     <span class="k">return</span> <span class="n">fail</span>
 
 </div>
@@ -499,7 +500,7 @@
         <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
         <span class="c"># Get index of this Panel</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">getPanelIndexByName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">get_panel_index_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="c"># If it is a new Panel:</span>
         <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="c"># Initialize Panel</span>
