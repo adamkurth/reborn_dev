@@ -28,6 +28,7 @@ def test_panel(main=False):
     assert(p.S is None)
     assert(p.T is None)
     assert(p.name == "")
+    assert(p.panellist is None)
 
     # It should be possible to use any sort of 3-tuple to set a vector
     p.T = T
@@ -135,51 +136,113 @@ def test_panel(main=False):
     assert(p1.geometry_hash != p2.geometry_hash)
 
 
-def test_set_data(main=False):
-
+def test_panellist(main=False):
+     
+    def panel1_setup():
+        p = ba.detector.Panel()
+        p.simple_setup(nF=3, nS=4, pixel_size=1, distance=1, wavelength=1)
+        return p
+ 
+    def panel2_setup():
+        p = ba.detector.Panel()
+        p.simple_setup(nF=4, nS=5, pixel_size=1, distance=1, wavelength=1)
+        return p
+ 
+    ###########################################################################
+    # Test the initial setup of a panellist
+    ###########################################################################
+ 
     pl = ba.detector.PanelList()
-    p = ba.detector.Panel()
-    p.simple_setup(100, 101, 100e-6, 1, 1.5e-10)
-    p.data = np.ones([p.nS, p.nF])
-    pl.append(p)
-    p = ba.detector.Panel()
-    p.simple_setup(102, 103, 100e-6, 1, 1.5e-10)
-    p.data = np.zeros([p.nS, p.nF])
-    pl.append(p)
+     
+    # Check all defaults
+    assert(pl.name == "")
+    assert(pl.n_panels == 0)
+    
+    p1 = panel1_setup()
+    p2 = panel2_setup()
+    
+    pl.append(p1)
+    pl.append(p2)
+    
+    # Check that links to the PanelList are created
+    assert(p1.panellist is not None)
+    assert(p2.panellist is not None)
+    assert(p1.panellist is p2.panellist)
+    
+    # Misc checks
+    assert(pl.n_panels == 2)
+    
+    ###########################################################################
+    # Test the manipulation of data
+    ###########################################################################
+   
+    d0 = pl[0].zeros()
+    d1 = pl[1].ones()
+    dl = pl.concatentate_panel_data([d0,d1])
+    assert(dl[0] == 0)
+    assert(dl[pl[0].n_pixels-1] == 0)
+    assert(dl[pl[0].n_pixels] == 1)
+    assert(dl[pl.n_pixels-1] == 1)
+    
+    d0a = pl.get_panel_data(0,dl)
+    d1a = pl.get_panel_data(1,dl)
+    assert(all(d0a == 0))
+    assert(all(d1a == 1))
+    
+    ds = pl.split_panel_data(dl)
+    assert(all(ds[0] == 0))
+    assert(all(ds[1] == 1))
 
-    a = pl.data
-    pl.data = a
+    ###########################################################################
+    # Test the manipulation of data
+    ###########################################################################
+    
 
-    q = pl.Q
-    q = pl[0].Q
+# def test_set_data(main=False):
+# 
+#     pl = ba.detector.PanelList()
+#     p = ba.detector.Panel()
+#     p.simple_setup(100, 101, 100e-6, 1, 1.5e-10)
+#     p.data = np.ones([p.nS, p.nF])
+#     pl.append(p)
+#     p = ba.detector.Panel()
+#     p.simple_setup(102, 103, 100e-6, 1, 1.5e-10)
+#     p.data = np.zeros([p.nS, p.nF])
+#     pl.append(p)
+# 
+#     a = pl.data
+#     pl.data = a
+# 
+#     q = pl.Q
+#     q = pl[0].Q
+# 
+#     assert(np.max(np.abs(a - pl.data)) == 0)
 
-    assert(np.max(np.abs(a - pl.data)) == 0)
+
+# def test_beam(main=False):
+# 
+#     p = ba.detector.Panel()
+#     wavelength = 1
+#     p.beam.wavelength = wavelength
+# 
+#     assert(p.beam.wavelength == wavelength)
+# 
+#     pl = ba.detector.PanelList()
+#     pl.wavelength = 1
+#     assert(pl.beam.wavelength == wavelength)
 
 
-def test_beam(main=False):
-
-    p = ba.detector.Panel()
-    wavelength = 1
-    p.beam.wavelength = wavelength
-
-    assert(p.beam.wavelength == wavelength)
-
-    pl = ba.detector.PanelList()
-    pl.wavelength = 1
-    assert(pl.beam.wavelength == wavelength)
-
-
-def test_reshape(main=False):
-
-    p = ba.detector.Panel()
-    nF = 3
-    nS = 4
-    p.simple_setup(nF=nF, nS=nS, pixel_size=1, distance=1, wavelength=1)
-    d = np.arange(0, nF * nS)
-    p.data = d.copy()
-    d = p.reshape(d)
-    assert(d.shape[1] == nF)
-    assert(d.shape[0] == nS)
+# def test_reshape(main=False):
+# 
+#     p = ba.detector.Panel()
+#     nF = 3
+#     nS = 4
+#     p.simple_setup(nF=nF, nS=nS, pixel_size=1, distance=1, wavelength=1)
+#     d = np.arange(0, nF * nS)
+#     p.data = d.copy()
+#     d = p.reshape(d)
+#     assert(d.shape[1] == nF)
+#     assert(d.shape[0] == nS)
 
 
 # def test_panellist_simple_setup(main=False):
@@ -199,7 +262,8 @@ def test_reshape(main=False):
 if __name__ == "__main__":
 
     main = True
-    test_set_data(main)
+#     test_set_data(main)
     test_panel(main)
-    test_beam(main)
-    test_reshape(main)
+    test_panellist(main)
+#     test_beam(main)
+#     test_reshape(main)

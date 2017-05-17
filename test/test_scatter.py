@@ -6,6 +6,7 @@ import bornagain as ba
 def test_all():
     
     pl = ba.detector.PanelList()
+    pl.beam.wavelength = 1.5e-10
     p = ba.detector.Panel()
     p.simple_setup(100,101,1000e-6,0.1,1.5e-10)
     p.data = np.ones([p.nS,p.nF])

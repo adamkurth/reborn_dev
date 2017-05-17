@@ -32,7 +32,7 @@ class Panel(object):
         self._nF = 0  # Number of pixels along the fast-scan direction
         self._nS = 0  # Number of pixels along the slow-scan direction
         self.adu_per_ev = 0  # Arbitrary data units per eV of photon energy
-        self.Beam = source.Beam()  # Placeholder for Beam object
+        self.beam = source.Beam()  # Placeholder for Beam object
 
         # Cached parameters
         self._ps = None  # Pixel size derived from F/S vectors
@@ -44,7 +44,7 @@ class Panel(object):
         self._gh = None  # Hash of the configured geometry parameters
 
         # If this Panel is a part of a list
-        self.PanelList = None  # This is the link to the Panel list
+        self.panellist = None  # This is the link to the Panel list
 
     def __str__(self):
         """ Print something useful when in interactive mode."""
@@ -191,9 +191,9 @@ class Panel(object):
     def B(self):
         """ Nominal Beam direction vector (normalized)."""
 
-        if self.Beam is None:
+        if self.beam is None:
             raise ValueError("Panel has no Beam information.")
-        return self.Beam.B
+        return self.beam.B
 
     @property
     def V(self):
@@ -217,11 +217,11 @@ class Panel(object):
     def Q(self):
         """ Scattering vectors, with 2*pi factor and wavelength included."""
 
-        if self.Beam.wavelength is None:
+        if self.beam.wavelength is None:
             raise ValueError(
                 "No wavelength is defined.  Cannot compute Q vectors.")
 
-        return 2.0 * np.pi * self.K / self.Beam.wavelength
+        return 2.0 * np.pi * self.K / self.beam.wavelength
 
     @property
     def Qmag(self):
@@ -233,7 +233,7 @@ class Panel(object):
 #     @property
 #     def mcQ(self):
 #         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
-#         incident Beam direction for each pixel independently. """
+#         incident beam direction for each pixel independently. """
 #
 #         i = np.arange(self.nF)
 #         j = np.arange(self.nS)
@@ -244,20 +244,20 @@ class Panel(object):
 #         S = np.outer(j, self.S)
 #         V = self.T + F + S
 #         B = np.outer(np.ones(self.n_pixels), self.B) + \
-#             randn(self.n_pixels, 3) * self.Beam.divergence
+#             randn(self.n_pixels, 3) * self.beam.divergence
 #         K = vec_norm(V) - vec_norm(B)
-#         lam = self.Beam.wavelength * \
-#             (1 + randn(self.n_pixels) * self.Beam.spectralWidth)
+#         lam = self.beam.wavelength * \
+#             (1 + randn(self.n_pixels) * self.beam.spectralWidth)
 #         return 2 * np.pi * K / np.outer(lam, np.ones(3))
 
     @property
     def stol(self):
         """ sin(theta)/lambda, where theta is the half angle """
 
-        if self.Beam.wavelength is None:
+        if self.beam.wavelength is None:
             raise ValueError("No wavelength is defined.  Cannot compute stol.")
 
-        return 0.5 * vec_mag(self.K) / self.Beam.wavelength
+        return 0.5 * vec_mag(self.K) / self.beam.wavelength
 
     @property
     def N(self):
@@ -284,7 +284,7 @@ class Panel(object):
         """ The scattering polarization factor. """
 
         if self._pf is None:
-            p = self.Beam.P
+            p = self.beam.P
             u = vec_norm(self.V)
             self._pf = 1.0 - np.abs(u.dot(p))**2
 
@@ -383,8 +383,8 @@ class Panel(object):
         # Hash of the configured geometry parameters
         self._gh = None
 
-        if self.PanelList is not None:
-            self.PanelList.clear_geometry_cache()
+        if self.panellist is not None:
+            self.panellist.clear_geometry_cache()
 
     def get_vertices(self, edge=False, loop=False):
         """ Get Panel get_vertices; positions of corner pixels."""
@@ -462,9 +462,9 @@ class Panel(object):
             self.T = T
 
         if wavelength is not None:
-            if self.Beam is None:
-                self.Beam = source.Beam()
-            self.Beam.wavelength = wavelength
+            if self.beam is None:
+                self.beam = source.Beam()
+            self.beam.wavelength = wavelength
 
 
 class PanelList(object):
@@ -474,9 +474,9 @@ class PanelList(object):
         """ Create an empty Panel array."""
 
         # Configured data
-        self._name = None # The name of this list (useful for rigid groups)
+        self._name = "" # The name of this list (useful for rigid groups)
         self._beam = source.Beam() # X-ray Beam information, common to all panels
-        self._PanelList = []  # List of individual panels
+        self._panels = []  # List of individual panels
 
         # Derived data (concatenated from individual panels)
         self._data = None  # Concatenated intensity data
@@ -490,7 +490,7 @@ class PanelList(object):
         self._rsbb = None  # Real-space bounding box of entire Panel list
         self._vll = None  # Look-up table for simple projection
         self._rpix = None  # junk
-        self._pf = None  # Polarization facto
+        self._pf = None  # Polarization factor
         self._gh = None  # Hash of geometries
         # Groups of panels that might be manipulated together
         self._derived_geometry = [
@@ -514,7 +514,7 @@ class PanelList(object):
             if key is None:
                 raise IndexError("There is no Panel named %s" % key)
                 return None
-        return self._PanelList[key]
+        return self._panels[key]
 
     def __setitem__(self, key, value):
         """ Set a Panel, check that it is the appropriate type."""
@@ -524,17 +524,17 @@ class PanelList(object):
         if value.name == "":
             # Give the  Panel a name if it wasn't provided
             value.name = "%d" % key
-        self._PanelList[key] = value
+        self._panels[key] = value
 
     def __iter__(self):
         """ Iterate through panels. """
 
-        return iter(self._PanelList)
+        return iter(self._panels)
 
     def __len__(self):
         """ Return length of Panel list."""
 
-        return len(self._PanelList)
+        return len(self._panels)
 
     def get_panel_indices(self, idx):
         """ Get the indices of a panel for slicing a PanelList array """
@@ -554,14 +554,33 @@ class PanelList(object):
 
         return [start, stop]
 
-    def panel_slice(self, idx, dat):
+    def get_panel_data(self, idx, dat):
         """ Slice a panel out of a concatentated array. """
 
         r = self.get_panel_indices(idx)
         return dat[r[0]:r[1]]
+    
+    def put_panel_data(self, idx, panel_dat, panel_list_dat):
+        """ Put panel data into panellist array. """
+        
+        r = self.get_panel_indices(idx)
+        panel_list_dat[r[0]:r[1]] = panel_dat.flat()
+        
+    def concatentate_panel_data(self,datalist):
+        """ Make one contiguous array from a list of panel data arrays."""
+        
+        return np.concatenate([d.flat for d in datalist])
+
+    def split_panel_data(self,datalist):
+        """ Make one contiguous array from a list of panel data arrays."""
+        
+        dl = []
+        for i in range(0,self.n_panels):
+            dl.append(self.get_panel_data(i,datalist))
+        return dl     
 
     @property
-    def Beam(self):
+    def beam(self):
         """ X-ray Beam data. """
 
         if self._beam is None:
@@ -570,13 +589,13 @@ class PanelList(object):
         return self._beam
 
     @beam.setter
-    def Beam(self, Beam):
+    def beam(self, beam):
         """ X-ray Beam data setter. """
 
-        if not isinstance(Beam, source.Beam):
+        if not isinstance(beam, source.Beam):
             raise TypeError("Beam info must be a source.Beam class")
 
-        self._beam = Beam
+        self._beam = beam
         for p in self:
             p._beam = None
 
@@ -590,7 +609,7 @@ class PanelList(object):
     def n_panels(self):
         """ Number of panels."""
 
-        return len(self._PanelList)
+        return len(self._panels)
 
     def append(self, p=None, name=""):
         """ Append a Panel, check that it is of the correct type."""
@@ -599,7 +618,7 @@ class PanelList(object):
             p = Panel()
         if not isinstance(p, Panel):
             raise TypeError("You may only append panels to a PanelList object")
-        p.PanelList = self
+        p.panellist = self
 
         # Create name if one doesn't exist
         if name != "":
@@ -609,9 +628,9 @@ class PanelList(object):
 
         # Inherit Beam from first append
         if self._beam is None:
-            self._beam = p.Beam
+            self._beam = p.beam
 
-        self._PanelList.append(p)
+        self._panels.append(p)
 
     def get_panel_index_by_name(self, name):
         """ Find the integer index of a Panel by it's unique name """
@@ -659,7 +678,7 @@ class PanelList(object):
     def Q(self):
         """ Concatenated reciprocal-space vectors."""
 
-        return 2 * np.pi * self.K / self.Beam.wavelength
+        return 2 * np.pi * self.K / self.beam.wavelength
 
     @property
     def Qmag(self):
@@ -679,7 +698,7 @@ class PanelList(object):
     def stol(self):
         """ sin(theta)/lambda, where theta is the half angle """
 
-        if self.Beam.wavelength is None:
+        if self.beam.wavelength is None:
 
             raise ValueError("No wavelength is defined.  Cannot compute stol.")
 
@@ -774,7 +793,7 @@ class PanelList(object):
     @property
     def wavelength(self):
 
-        return self.Beam.wavelength
+        return self.beam.wavelength
 
     @property
     def name(self):
@@ -790,9 +809,9 @@ class PanelList(object):
     @wavelength.setter
     def wavelength(self, val):
 
-        if self.Beam is None:
-            self.Beam = source.Beam()
-        self.Beam.wavelength = val
+        if self.beam is None:
+            self.beam = source.Beam()
+        self.beam.wavelength = val
 
     @property
     def solid_angle(self):
@@ -992,7 +1011,7 @@ class PanelList(object):
 
         p = Panel()
         p.simple_setup(nF, nS, pixel_size, distance, wavelength, T)
-        self.Beam = p.Beam
+        self.beam = p.beam
         self.append(p)
 
 
