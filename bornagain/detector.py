@@ -200,7 +200,13 @@ class Panel(object):
         """ Vectors pointing from interaction region to pixel centers."""
 
         if self._v is None:
-            self.compute_real_space_geometry()
+            i = np.arange(self.nF)
+            j = np.arange(self.nS)
+            [i, j] = np.meshgrid(i, j)
+            i.ravel()
+            j.ravel()
+            self._v = self.pixels_to_vectors(j, i)
+        
         return self._v
 
     @property
@@ -344,16 +350,6 @@ class Panel(object):
                              T.flat[0], T.flat[1], T.flat[2], nF, nS))
 
         return self._gh
-
-    def compute_real_space_geometry(self):
-        """ Compute arrays relevant to real-space geometry."""
-
-        i = np.arange(self.nF)
-        j = np.arange(self.nS)
-        [i, j] = np.meshgrid(i, j)
-        i.ravel()
-        j.ravel()
-        self._v = self.pixels_to_vectors(j, i)
 
     def pixels_to_vectors(self, j, i):
         """ Convert pixel indices to translation vectors (i=fast scan, j=slow
@@ -621,12 +617,6 @@ class PanelList(object):
             i += 1
 
         return None
-
-    def compute_real_space_geometry(self):
-        """ Compute real-space geometry of all panels."""
-
-        for p in self:
-            p.compute_real_space_geometry()
 
     @property
     def V(self):
