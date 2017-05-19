@@ -12,6 +12,30 @@ import bornagain as ba
 import clcore
 import refdata
 
+def make_q_vectors(qmin, qmax, wavelen, dq=0.02, dphi=0.05):
+# ~~~~~~~ your code goes here(below) ~~~~~~~~
+
+    Nphi = int(2*np.pi / dphi)
+    
+    q_values = np.arange(qmin, qmax, dq)
+    Nq = q_values.shape[0]
+
+    img_sh = (Nq, Nphi)
+
+    qs = np.array([q_values] * Nphi).T
+    phis = np.array([np.arange(Nphi) * 2 * np.pi / Nphi] * Nq) 
+    thetas = np.arcsin(qs * wavelen / 4 / np.pi)
+
+    qx = np.cos(thetas) * qs * np.cos(phis)
+    qy = np.cos(thetas) * qs * np.sin(phis)
+    qz = np.sin(thetas) * qs
+
+# ~~~~~~ your code ends here ~~~~~~~~
+
+    qxyz = np.vstack((qx.ravel(), qy.ravel(), qz.ravel())).T
+    print("\t\tsimulating into %d q vectors." % qxyz.shape[0])
+    return img_sh, qxyz
+
 
 class ThornAgain:
     def __init__(self, q_vecs, atom_vecs, atomic_nums=None, load_default=True, group_size=32):
@@ -153,10 +177,12 @@ def test():
     natom = 100
     coors = np.random.random( (natom,3) )
     atomZ = np.ones(natom)
-    D = ba.detector.SimpleDetector() 
-    T = ThornAgain(D.Q, coors, atomZ, group_size=32)
+    D = ba.detector.SimpleDetector(n_pixels=2000) 
+    T = ThornAgain(D.Q, coors, atomZ)
     A = T.run(rand_rot=1)
     I = D.readout(A)
+
+    print("Passed testing mode!")
 
 if __name__=="__main__":
     test()
