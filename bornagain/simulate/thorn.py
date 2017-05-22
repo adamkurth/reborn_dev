@@ -38,7 +38,10 @@ def make_q_vectors(qmin, qmax, wavelen, dq=0.02, dphi=0.05):
 
 
 class ThornAgain:
-    def __init__(self, q_vecs, atom_vecs, atomic_nums=None, load_default=True, group_size=32, cpu=False):
+    def __init__(self, q_vecs, atom_vecs, atomic_nums=None, which='default', 
+        group_size=32, cpu=False, sub_com=False):
+        
+        assert( which in ['default','kam'])
        
         if os.environ.get('BORNAGAIN_CL_GROUPSIZE') is not None:
             self.group_size = group_size
@@ -48,19 +51,24 @@ class ThornAgain:
         self.atom_vecs = atom_vecs.astype(np.float32)
         self.atomic_nums = atomic_nums
 
+        if sub_com:
+            self.atom_vecs -= self.atom_vecs.mean(0)
+
         self.cpu = cpu
 
 #       set dimensions
         self.Nato = np.int32(atom_vecs.shape[0])
         self.Npix = np.int32(q_vecs.shape[0])
+#       allow these to overflow (not sure if necess.)
+        self.Nextra_pix = (self.group_size - self.Npix % self.group_size)
 
         self._make_croman_data()
         assert(self._setup_openCL())
         self._load_sources()
 
-        if load_default:
-            self.load_program()
-
+        self.which=which
+        self.load_program(self.which)
+        
     def _make_croman_data(self):
         if self.atomic_nums is None:
             self.form_facts_arr = np.ones((self.Npix,1), dtype=np.float32)
@@ -110,19 +118,35 @@ class ThornAgain:
         self.queue = cl.CommandQueue(self.context)
         return True
 
-    def load_program(self, which='default'):
+    def load_program(self, which):
         if which == 'default':
             self.prg = self.all_prg.qrf_default
             self.prg.set_scalar_arg_dtypes(
                 [None, None, None, None, np.int32, np.int32])
             self._prime_buffers_default()
+        elif which=='kam':
+            self.prg = self.all_prg.qrf_kam
+            self.prg.set_scalar_arg_dtypes(
+                [None, None, None, None,None, np.int32, np.int32])
+            self._prime_buffers_kam()
+
+    def _prime_buffers_kam(self):
+        """ get all the data onto the GPU"""
+#       setup device buffers
+        self._set_atom_buffer()
+
+        self._set_q_buffer()
+        
+        self._set_rot_buffer()
+
+        self._set_com_buffer()
+        
+        self._set_amp_buffer()
+
+        self._set_args_kam()
 
     def _prime_buffers_default(self):
         """ get all the data onto the GPU"""
-
-#       allow these to overflow (not sure if necess.)
-        self.Nextra_pix = (self.group_size - self.Npix % self.group_size)
-
 #       setup device buffers
         self._set_atom_buffer()
 
@@ -151,6 +175,12 @@ class ThornAgain:
         self.q_vecs[:,3:3+self.Nspecies] = self.form_facts_arr
         self.q_buff = clcore.to_device( self.q_vecs, dtype=np.float32, queue=self.queue )
 
+    def _set_com_buffer(self):
+#       make a dummie translation vector
+        self.com_vec = np.zeros(3).astype(np.float32)
+        self.com_buff = clcore.to_device(
+            self.com_vec, dtype=np.float32, queue=self.queue)
+
     def _set_rot_buffer(self):
 #       make a dummie rotation mat
         self.rot_mat = np.eye(3).ravel().astype(np.float32)
@@ -166,6 +196,11 @@ class ThornAgain:
         self.prg_args = [self.queue, (self.Npix+self.Nextra_pix,),(self.group_size,),
                          self.q_buff.data, self.r_buff.data,
                          self.rot_buff.data, self.A_buff.data, self.Npix, self.Nato]
+    
+    def _set_args_kam(self):
+        self.prg_args = [self.queue, (self.Npix+self.Nextra_pix,),(self.group_size,),
+                         self.q_buff.data, self.r_buff.data,
+                         self.rot_buff.data, self.com_buff, self.A_buff.data, self.Npix, self.Nato]
 
     def update_rbuff(self, new_atoms):
         """
@@ -180,8 +215,13 @@ class ThornAgain:
         self.rot_buff = clcore.to_device(
             self.rot_mat, dtype=np.float32, queue=self.queue)
         self.prg_args[5] = self.rot_buff.data  # consider kwargs ?
+    
+    def _set_com_vec(self):
+        self.com_buff = clcore.to_device(
+            self.com_vec, dtype=np.float32, queue=self.queue)
+        self.prg_args[6] = self.com_buff.data 
 
-    def run_transient(self, rand_rot=False, force_rot_mat=None):
+    def run_transient(self, rand_rot=False, force_rot_mat=None, com=None):
         
 #       set the rotation
         if rand_rot:
@@ -194,11 +234,15 @@ class ThornAgain:
 
         self._set_rand_rot()
 
+        if com is not None:
+            self.com_vec = com
+            self._set_com_vec()
+
 #       run the program
         self.prg(*self.prg_args)
 
 
-    def run(self, rand_rot=False, force_rot_mat=None):
+    def run(self, rand_rot=False, force_rot_mat=None, com=None):
 #       set the rotation
         if rand_rot:
             self.rot_mat = ba.utils.random_rotation_matrix().ravel().astype(np.float32)
@@ -210,6 +254,11 @@ class ThornAgain:
 
         self._set_rand_rot()
 
+
+        if com is not None:
+            self.com_vec = com
+            self._set_com_vec()
+    
 #       run the program
         self.prg(*self.prg_args)
         Amps = self.A_buff.get() [:-self.Nextra_pix]

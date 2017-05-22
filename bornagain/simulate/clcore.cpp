@@ -373,3 +373,92 @@ __kernel void qrf_default(
     A[q_idx].x = Areal;
     A[q_idx].y = Aimag;
 }
+
+
+__kernel void qrf_kam(
+    __global float16 *q_vecs,
+    __global float4 *r_vecs,
+    __constant float *R,
+    __constant float *T, 
+    __global float2 *A,
+    const int n_pixels,
+    const int n_atoms){
+
+    int q_idx = get_global_id(0);
+    int l_idx = get_local_id(0);
+
+    //float Areal=0.0f;
+    //float Aimag=0.0f;
+    float Areal;
+    float Aimag;
+
+    float ff[16];
+    
+
+    // multiply trans vector by inverse rotation matrix  
+    float Tx = R[0]*T[0] + R[3]*T[1] + R[6]*T[2];
+    float Ty = R[1]*T[0] + R[4]*T[1] + R[7]*T[2];
+    float Tz = R[2]*T[0] + R[5]*T[1] + R[8]*T[2];
+
+    if ( q_idx < n_pixels) {
+        
+        Areal=A[q_idx].x;
+        Aimag=A[q_idx].y;
+
+        float qx = q_vecs[q_idx].s0;
+        float qy = q_vecs[q_idx].s1;
+        float qz = q_vecs[q_idx].s2;
+
+        float qRx = R[0]*qx + R[3]*qy + R[6]*qz;
+        float qRy = R[1]*qx + R[4]*qy + R[7]*qz;
+        float qRz = R[2]*qx + R[5]*qy + R[8]*qz;
+        
+        ff[0] = q_vecs[q_idx].s3;
+        ff[1] = q_vecs[q_idx].s4;
+        ff[2] = q_vecs[q_idx].s5;
+        ff[3] = q_vecs[q_idx].s6;
+        ff[4] = q_vecs[q_idx].s7;
+        ff[5] = q_vecs[q_idx].s8;
+        ff[6] = q_vecs[q_idx].s9;
+        ff[7] = q_vecs[q_idx].sA;
+        ff[8] = q_vecs[q_idx].sB;
+        ff[9] = q_vecs[q_idx].sC;
+        ff[10] = q_vecs[q_idx].sD;
+        ff[11] = q_vecs[q_idx].sE;
+        ff[12] = q_vecs[q_idx].sF;
+        ff[13] = 0.0f;
+        ff[14] = 0.0f;
+        ff[15] = 0.0f;
+
+        __local float4 LOC_ATOMS[GROUP_SIZE];
+        for (int g=0; g<n_atoms; g+=GROUP_SIZE){
+            int ai = g + l_idx;
+            if (ai < n_atoms)
+                LOC_ATOMS[l_idx] = r_vecs[ai];
+            if( !(ai < n_atoms))
+                LOC_ATOMS[l_idx] = (float4)(1.0f, 1.0f, 1.0f, 15.0f); // make atom ID 15, s.t. ff=0
+
+            barrier(CLK_LOCAL_MEM_FENCE);
+            
+            for (int i=0; i< GROUP_SIZE; i++){
+
+                float phase = qRx*(LOC_ATOMS[i].x+Tx) + qRy*(LOC_ATOMS[i].y+Ty) + 
+                    qRz*(LOC_ATOMS[i].z+Tz);
+                int species_id = (int) (LOC_ATOMS[i].w);
+                
+                Areal += native_cos(-phase)*ff[species_id];
+                Aimag += native_sin(-phase)*ff[species_id];
+            }
+            barrier(CLK_LOCAL_MEM_FENCE);
+        }
+    }
+   
+    // each processing unit should do the same thing? 
+    //if ( !(q_idx < n_pixels)) {
+    //    Areal += 0;
+    //    Aimag += 0;
+    //    }
+    A[q_idx].x = Areal;
+    A[q_idx].y = Aimag;
+}
+
