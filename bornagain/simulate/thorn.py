@@ -38,7 +38,7 @@ def make_q_vectors(qmin, qmax, wavelen, dq=0.02, dphi=0.05):
 
 
 class ThornAgain:
-    def __init__(self, q_vecs, atom_vecs, atomic_nums=None, load_default=True, group_size=32):
+    def __init__(self, q_vecs, atom_vecs, atomic_nums=None, load_default=True, group_size=32, cpu=False):
        
         if os.environ.get('BORNAGAIN_CL_GROUPSIZE') is not None:
             self.group_size = group_size
@@ -48,12 +48,14 @@ class ThornAgain:
         self.atom_vecs = atom_vecs.astype(np.float32)
         self.atomic_nums = atomic_nums
 
+        self.cpu = cpu
+
 #       set dimensions
         self.Nato = np.int32(atom_vecs.shape[0])
         self.Npix = np.int32(q_vecs.shape[0])
 
         self._make_croman_data()
-        self._setup_openCL()
+        assert(self._setup_openCL())
         self._load_sources()
 
         if load_default:
@@ -83,13 +85,30 @@ class ThornAgain:
         #^ this assertion is so we can pass inputs to GPU as a float16, 3 q vectors and 13 atom species
         # where one is reserved to be a dummie 
 
-    def _setup_openCL(self):
-        platform = cl.get_platforms()
-        my_gpu_devices = platform[0].get_devices(
-            device_type=cl.device_type.GPU)
+    def _setup_openCL(self, plat_ind=None):
+        platforms = cl.get_platforms()
+        if len(platforms) >1 and plat_ind is None:
+            print("Provide a plat_ind to select compute platform")
+            return False
+        elif len(platforms) == 1:
+            plat_ind = 0
+        if self.cpu:
+            device_type = cl.device_type.CPU
+        else:
+            device_type = cl.device_type.GPU
 
-        self.context = cl.Context(devices=my_gpu_devices)
+        my_devices = platforms[plat_ind].get_devices(
+            device_type=device_type)
+    
+        print my_devices
+
+        if not my_devices:
+            print("No devices selected")
+            return False
+
+        self.context = cl.Context(devices=my_devices)
         self.queue = cl.CommandQueue(self.context)
+        return True
 
     def load_program(self, which='default'):
         if which == 'default':
@@ -99,36 +118,50 @@ class ThornAgain:
             self._prime_buffers_default()
 
     def _prime_buffers_default(self):
-        # allow these to overflow (not sure if necess.)
+        """ get all the data onto the GPU"""
+
+#       allow these to overflow (not sure if necess.)
         self.Nextra_pix = (self.group_size - self.Npix % self.group_size)
 
-        #mf = cl.mem_flags  # how to handle the buffers
+#       setup device buffers
+        self._set_atom_buffer()
 
-#       make a rotation mat
-        self.rot_mat = np.eye(3).ravel().astype(np.float32)
+        self._set_q_buffer()
+        
+        self._set_rot_buffer()
 
+        self._set_amp_buffer()
+
+        self._set_args()
+
+    def _set_atom_buffer(self):
+        """ combine atom vectors with atom ID
+        to make a 4-vector for openCL device"""
 #       combine atom vectors and atom IDs (species IDs)
         self.atom_vecs = np.concatenate(
             (self.atom_vecs, self.atomIDs[:, None]), axis=1)
-        
+        self.r_buff = clcore.to_device(
+            self.atom_vecs, dtype=np.float32, queue=self.queue)
+    def _set_q_buffer(self):
+        """ combine form factors and q-vectors
+        for openCL device"""
 #       combine form factors with q_vectors for faster reads... 
         q_zeros = np.zeros((self.q_vecs.shape[0], 13))
         self.q_vecs = np.concatenate((self.q_vecs, q_zeros), axis=1)
         self.q_vecs[:,3:3+self.Nspecies] = self.form_facts_arr
-
-#       make input buffers
-        self.r_buff = clcore.to_device(
-            self.atom_vecs, dtype=np.float32, queue=self.queue)
         self.q_buff = clcore.to_device( self.q_vecs, dtype=np.float32, queue=self.queue )
+
+    def _set_rot_buffer(self):
+#       make a dummie rotation mat
+        self.rot_mat = np.eye(3).ravel().astype(np.float32)
         self.rot_buff = clcore.to_device(
             self.rot_mat, dtype=np.float32, queue=self.queue)
-
-#       make output buffer
+    def _set_amp_buffer(self):
+#       make output buffer; initialize as 0s
         self.A_buff = clcore.to_device(
             np.zeros(self.Npix+self.Nextra_pix), dtype=np.complex64, queue=self.queue )
-        self._set_args()
 
-#       list of kernel args
+#   list of kernel args
     def _set_args(self):
         self.prg_args = [self.queue, (self.Npix+self.Nextra_pix,),(self.group_size,),
                          self.q_buff.data, self.r_buff.data,
@@ -148,6 +181,23 @@ class ThornAgain:
             self.rot_mat, dtype=np.float32, queue=self.queue)
         self.prg_args[5] = self.rot_buff.data  # consider kwargs ?
 
+    def run_transient(self, rand_rot=False, force_rot_mat=None):
+        
+#       set the rotation
+        if rand_rot:
+            self.rot_mat = ba.utils.random_rotation_matrix().ravel().astype(np.float32)
+        else:
+            self.rot_mat = np.eye(3).ravel().astype(np.float32)
+
+        if force_rot_mat is not None:
+            self.rot_mat = force_rot_mat.astype(np.float32)
+
+        self._set_rand_rot()
+
+#       run the program
+        self.prg(*self.prg_args)
+
+
     def run(self, rand_rot=False, force_rot_mat=None):
 #       set the rotation
         if rand_rot:
@@ -165,6 +215,10 @@ class ThornAgain:
         Amps = self.A_buff.get() [:-self.Nextra_pix]
 
         return Amps
+        
+    def release_ampitudes(self):
+        Amps = self.A_buff.get() [:-self.Nextra_pix]
+        return Amps
 
     def _load_sources(self):
         clcore_file = pkg_resources.resource_filename(
@@ -174,13 +228,14 @@ class ThornAgain:
         self.all_prg = cl.Program(self.context, kern_src).build()
 
 def test():
-    natom = 100
+    natom = 10
     coors = np.random.random( (natom,3) )
     atomZ = np.ones(natom)
-    D = ba.detector.SimpleDetector(n_pixels=2000) 
-    T = ThornAgain(D.Q, coors, atomZ)
+    D = ba.detector.SimpleDetector(n_pixels=100) 
+    T = ThornAgain(D.Q, coors, atomZ, cpu=False)
     A = T.run(rand_rot=1)
     I = D.readout(A)
+    D.display()
 
     print("Passed testing mode!")
 

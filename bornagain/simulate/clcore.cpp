@@ -305,13 +305,18 @@ __kernel void qrf_default(
     int q_idx = get_global_id(0);
     int l_idx = get_local_id(0);
 
-    float Areal=0.0f;
-    float Aimag=0.0f;
+    //float Areal=0.0f;
+    //float Aimag=0.0f;
+    float Areal;
+    float Aimag;
 
     float ff[16];
     
     if ( q_idx < n_pixels) {
         
+        Areal=A[q_idx].x;
+        Aimag=A[q_idx].y;
+
         float qx = q_vecs[q_idx].s0;
         float qy = q_vecs[q_idx].s1;
         float qz = q_vecs[q_idx].s2;
@@ -361,10 +366,10 @@ __kernel void qrf_default(
     }
    
     // each processing unit should do the same thing? 
-    if ( !(q_idx < n_pixels)) {
-        Areal += 0;
-        Aimag += 0;
-        }
+    //if ( !(q_idx < n_pixels)) {
+    //    Areal += 0;
+    //    Aimag += 0;
+    //    }
     A[q_idx].x = Areal;
     A[q_idx].y = Aimag;
 }
