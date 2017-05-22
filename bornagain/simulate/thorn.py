@@ -241,7 +241,6 @@ class ThornAgain:
 #       run the program
         self.prg(*self.prg_args)
 
-
     def run(self, rand_rot=False, force_rot_mat=None, com=None):
 #       set the rotation
         if rand_rot:
@@ -265,7 +264,7 @@ class ThornAgain:
 
         return Amps
         
-    def release_ampitudes(self):
+    def release_amplitudes(self):
         Amps = self.A_buff.get() [:-self.Nextra_pix]
         return Amps
 
