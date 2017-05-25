@@ -60,6 +60,11 @@ class Panel(object):
         s += "adu_per_ev = %g\n" % self.adu_per_ev
         return s
 
+    def shape(self):
+        """ Return expected shape of data arrays. """
+
+        return (self.nS, self.nF)
+
     def reshape(self, data):
         """ Reshape array to panel shape. """
 
@@ -206,7 +211,7 @@ class Panel(object):
             i.ravel()
             j.ravel()
             self._v = self.pixels_to_vectors(j, i)
-        
+
         return self._v
 
     @property
@@ -295,12 +300,6 @@ class Panel(object):
             self._pf = 1.0 - np.abs(u.dot(p))**2
 
         return self._pf
-
-    def check(self):
-        """ Check for any known issues with this Panel."""
-
-        self.check_geometry()
-        return True
 
     @property
     def geometry_hash(self):
@@ -449,8 +448,8 @@ class PanelList(object):
         """ Create an empty Panel array."""
 
         # Configured data
-        self._name = "" # The name of this list (useful for rigid groups)
-        self.beam = source.Beam() # X-ray Beam information, common to all panels
+        self._name = ""  # The name of this list (useful for rigid groups)
+        self.beam = source.Beam()  # X-ray Beam information, common to all panels
         self._panels = []  # List of individual panels
 
         # Derived data (concatenated from individual panels)
@@ -513,12 +512,12 @@ class PanelList(object):
 
     def zeros(self):
         """ Return an array of zeros of length n_pixels."""
-        
+
         return np.zeros([self.n_pixels])
-    
+
     def ones(self):
         """ Return array of ones of length n_pixels."""
-        
+
         return np.ones([self.n_pixels])
 
     def get_panel_indices(self, idx):
@@ -544,25 +543,25 @@ class PanelList(object):
 
         r = self.get_panel_indices(idx)
         return dat[r[0]:r[1]]
-    
+
     def put_panel_data(self, idx, panel_dat, panel_list_dat):
         """ Put panel data into panellist array. """
-        
+
         r = self.get_panel_indices(idx)
-        panel_list_dat[r[0]:r[1]] = panel_dat.flat()
-        
-    def concatentate_panel_data(self,datalist):
+        panel_list_dat[r[0]:r[1]] = panel_dat.ravel()
+
+    def concatentate_panel_data(self, datalist):
         """ Make one contiguous array from a list of panel data arrays."""
-        
+
         return np.concatenate([d.flat for d in datalist])
 
-    def split_panel_data(self,datalist):
+    def split_panel_data(self, datalist):
         """ Make one contiguous array from a list of panel data arrays."""
-        
+
         dl = []
-        for i in range(0,self.n_panels):
-            dl.append(self.get_panel_data(i,datalist))
-        return dl     
+        for i in range(0, self.n_panels):
+            dl.append(self.get_panel_data(i, datalist))
+        return dl
 
     @property
     def n_pixels(self):
@@ -877,7 +876,7 @@ class PanelList(object):
 
         self._ps = None
         self._v = None
-        self._pf = None 
+        self._pf = None
         self._sa = None
         self._k = None
         self._rsbb = None
@@ -892,9 +891,9 @@ class PanelList(object):
             if self.n_panels == 0:
                 self._gh = None
                 return self._gh
-            
+
             a = tuple([p.geometry_hash for p in self])
-            
+
             if None in a:
                 self._gh = None
                 return self._gh
