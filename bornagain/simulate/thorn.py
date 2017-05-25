@@ -266,6 +266,12 @@ class ThornAgain:
         
     def release_amplitudes(self):
         Amps = self.A_buff.get() [:-self.Nextra_pix]
+        self._set_amp_buffer()
+        if self.which=='kam':
+            self.prg_args[7]=self.A_buff.data
+        else:
+            self.prg_args[6]=self.A_buff.data
+
         return Amps
 
     def _load_sources(self):
