@@ -24,10 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" />
-    <link rel="up" title="bornagain package" href="bornagain.html" />
-    <link rel="next" title="Coding guidlines for developers" href="coding.html" />
-    <link rel="prev" title="bornagain.units module" href="bornagain.units.html" /> 
+    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -39,24 +36,11 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="coding.html" title="Coding guidlines for developers"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="bornagain.units.html" title="bornagain.units module"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="bornagain.html" accesskey="U">bornagain package</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="bornagain.units.html"
-                        title="previous chapter">bornagain.units module</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="coding.html"
-                        title="next chapter">Coding guidlines for developers</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -91,27 +75,24 @@
 conversions will be removed.  There are some old functions here that will
 likely also be removed.</p>
 <dl class="function">
-<dt id="bornagain.utils.eV2Joules">
-<code class="descclassname">bornagain.utils.</code><code class="descname">eV2Joules</code><span class="sig-paren">(</span><em>eV</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#eV2Joules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.eV2Joules" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert electron volts into Joules.</p>
+<dt id="bornagain.utils.amplitudes">
+<code class="descclassname">bornagain.utils.</code><code class="descname">amplitudes</code><span class="sig-paren">(</span><em>q</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#amplitudes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.amplitudes" title="Permalink to this definition">¶</a></dt>
+<dd><p>q: 2D np.array of q vectors
+r: 2D np.array of atom coors</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.amplitudes_with_cmans">
+<code class="descclassname">bornagain.utils.</code><code class="descname">amplitudes_with_cmans</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>Z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#amplitudes_with_cmans"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.amplitudes_with_cmans" title="Permalink to this definition">¶</a></dt>
+<dd><p>q: 2D np.array of q vectors
+r: 2D np.array of atom coors
+Z: 1D np.array of atomic numbers corresponding to r</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="bornagain.utils.error">
 <code class="descclassname">bornagain.utils.</code><code class="descname">error</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple error message (to be replaced later...)</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.photonEnergy2Wavelength">
-<code class="descclassname">bornagain.utils.</code><code class="descname">photonEnergy2Wavelength</code><span class="sig-paren">(</span><em>energy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#photonEnergy2Wavelength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.photonEnergy2Wavelength" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert photon energy to photon wavelength. SI units, as always.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.photonWavelength2Energy">
-<code class="descclassname">bornagain.utils.</code><code class="descname">photonWavelength2Energy</code><span class="sig-paren">(</span><em>wavelength</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#photonWavelength2Energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.photonWavelength2Energy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert photon wavelength to energy. SI units, as always.</p>
 </dd></dl>
 
 <dl class="function">
@@ -124,26 +105,14 @@ randnums: 3 random numbers in the range [0, 1]. If <cite>None</cite>, they will 
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.utils.rot1">
-<code class="descclassname">bornagain.utils.</code><code class="descname">rot1</code><span class="sig-paren">(</span><em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#rot1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.rot1" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rotate about axis 1.</p>
+<dt id="bornagain.utils.sphericalize">
+<code class="descclassname">bornagain.utils.</code><code class="descname">sphericalize</code><span class="sig-paren">(</span><em>lattice</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#sphericalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.sphericalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>attempt to sphericalize a 2D lattice point array</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.utils.rot2">
-<code class="descclassname">bornagain.utils.</code><code class="descname">rot2</code><span class="sig-paren">(</span><em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#rot2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.rot2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rotate about axis 2.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.rot3">
-<code class="descclassname">bornagain.utils.</code><code class="descname">rot3</code><span class="sig-paren">(</span><em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#rot3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.rot3" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rotate about axis 2.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.vecCheck">
-<code class="descclassname">bornagain.utils.</code><code class="descname">vecCheck</code><span class="sig-paren">(</span><em>vec</em>, <em>hardcheck=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vecCheck"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vecCheck" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.utils.vec_check">
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_check</code><span class="sig-paren">(</span><em>vec</em>, <em>hardcheck=False</em>, <em>dimension=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that a vector meets our assumption of an Nx3 numpy array.  This is
 helpful, for example, when we want to ensure that dot products and broadcasting
 will work as expected. We could of course add an argument for vectors of
@@ -160,13 +129,13 @@ return a modified numpy ndarray with the correct shape.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.utils.vecMag">
-<code class="descclassname">bornagain.utils.</code><code class="descname">vecMag</code><span class="sig-paren">(</span><em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vecMag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vecMag" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.utils.vec_mag">
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_mag</code><span class="sig-paren">(</span><em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_mag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_mag" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="bornagain.utils.vecNorm">
-<code class="descclassname">bornagain.utils.</code><code class="descname">vecNorm</code><span class="sig-paren">(</span><em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vecNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vecNorm" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.utils.vec_norm">
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_norm</code><span class="sig-paren">(</span><em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_norm" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -192,14 +161,7 @@ return a modified numpy ndarray with the correct shape.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="coding.html" title="Coding guidlines for developers"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="bornagain.units.html" title="bornagain.units module"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="bornagain.html" >bornagain package</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

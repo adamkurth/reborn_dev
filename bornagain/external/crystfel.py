@@ -247,7 +247,7 @@ def geom_dict_to_panellist(geomDict):
     """ Convert a CrystFEL geometry dictionary to a PanelList object. """
 
     PanelList = detector.PanelList()
-    PanelList.beam.B = np.array([0, 0, 1])
+    PanelList.Beam.B = np.array([0, 0, 1])
 
     for p in geomDict['panels']:
 
@@ -482,8 +482,8 @@ def geom_to_panellist(geomFile=None, beamFile=None, PanelList=None):
     # We are now done reading the geometry file
     h.close()
 
-    # Initialize beam information for this Panel array
-    pa.beam.B = np.array([0, 0, 1])
+    # Initialize Beam information for this Panel array
+    pa.Beam.B = np.array([0, 0, 1])
 
     # Now adjust Panel list according to global parameters, convert units, etc.
     i = 0
@@ -512,7 +512,7 @@ def geom_to_panellist(geomFile=None, beamFile=None, PanelList=None):
             p.detOffsetField = None  # Cannot have offset value *and* field
         if global_photon_energy is not None:
             # CrystFEL uses eV units
-            p.beam.wavelength = 1.2398e-6 / global_photon_energy
+            p.Beam.wavelength = 1.2398e-6 / global_photon_energy
             # Cannot have both energy value *and* field
             p.photonEnergyField = None
 

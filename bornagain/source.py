@@ -6,7 +6,7 @@ import numpy as np
 import utils
 
 
-class beam(object):
+class Beam(object):
 
     def __init__(self):
 

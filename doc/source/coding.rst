@@ -44,17 +44,4 @@ So far we are following the Google-style doc strings.  There are some examples `
 
 Docstrings from within the python code find their way into this documentation via Sphinx.  If docstrings are changed, then the documentation should be updated.
 
-For generating documenation, you can first run the `sphinx-apidoc` program, from the doc directory:
-
-.. code-block:: bash
-
-    sphinx-apidoc -f -o source ../bornagain
-    
-Then you can build the html documentation:
-
-.. code-block:: bash
-
-    make clean
-    make html
-    
-The main documentation page will be in doc/build/html/index.html .  Once we are happy with changes the html documentation should be moved to doc/html so that it can be included in the git repository.  (Maybe it will be moved out of git later...)
+If you modify code and wish to update this documentation, the easiest way to do so is to run the script "update-documentation" from within the doc directory.  First make sure you have the appropriate dependencies, as discussed in the installation section.
