@@ -932,13 +932,23 @@ class PanelList(object):
 class SimpleDetector(Panel):
 
     def __init__(self, n_pixels=1000, pixsize=0.00005,
-                 detdist=0.05, wavelen=1, *args, **kwargs):
+                 detdist=0.05, wavelen=1., *args, **kwargs):
+        """
+        this is a docstring
+        
+        Parametes
+        =========
+        n_pixels, int
+            the number of pixels along one edge
+        """
+
 
         Panel.__init__(self, *args, **kwargs)
 
         self.detector_distance = detdist
         self.wavelength = wavelen
         self.si_energy = units.hc / (wavelen * 1e-10)
+
 
 #       make a single panel detector:
         self.simple_setup(
@@ -950,8 +960,12 @@ class SimpleDetector(Panel):
 
 #       shape of the 2D det panel (2D image)
         self.img_sh = (self.nS, self.nF)
+        self.center = map( lambda x: x/2., self.img_sh)
 
         self.SOLID_ANG = np.cos( np.arcsin( self.Qmag*self.wavelength / 4 / np.pi) )**3
+
+        self.rad2q = lambda rad: 4 * np.pi * np.sin( .5 * np.arctan(rad * pixsize / detdist) ) / wavelen
+        self.q2rad = lambda q: np.tan( np.arcsin( q*wavelen / 4 / np.pi ) * 2) * detdist / pixsize
 
     def readout(self, amplitudes):
         self.intens = (np.abs(amplitudes)**2).reshape(self.img_sh)
