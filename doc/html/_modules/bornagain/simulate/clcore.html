@@ -84,7 +84,7 @@
 <span class="kn">import</span> <span class="nn">pyopencl.array</span>
 
 <span class="n">clcore_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
-    <span class="s">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s">&#39;clcore.cl&#39;</span><span class="p">)</span>
+    <span class="s">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s">&#39;clcore.cpp&#39;</span><span class="p">)</span>
 
 <span class="n">default_context</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">create_some_context</span><span class="p">()</span>
 <span class="n">default_queue</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">CommandQueue</span><span class="p">(</span><span class="n">default_context</span><span class="p">)</span>

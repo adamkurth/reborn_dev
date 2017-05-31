@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sphinx-apidoc -f -o source ../bornagain
+make clean
+make html
+cp -r build/html/* html
