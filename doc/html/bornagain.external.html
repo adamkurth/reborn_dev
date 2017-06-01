@@ -26,7 +26,7 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" />
     <link rel="up" title="bornagain package" href="bornagain.html" />
-    <link rel="next" title="bornagain.external.crystfel module" href="bornagain.external.crystfel.html" />
+    <link rel="next" title="bornagain.simulate package" href="bornagain.simulate.html" />
     <link rel="prev" title="bornagain package" href="bornagain.html" /> 
   </head>
   <body role="document">
@@ -40,7 +40,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="bornagain.external.crystfel.html" title="bornagain.external.crystfel module"
+          <a href="bornagain.simulate.html" title="bornagain.simulate package"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="bornagain.html" title="bornagain package"
@@ -55,6 +55,8 @@
   <ul>
 <li><a class="reference internal" href="#">bornagain.external package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-bornagain.external.crystfel">bornagain.external.crystfel module</a></li>
+<li><a class="reference internal" href="#module-bornagain.external.lcls">bornagain.external.lcls module</a></li>
 <li><a class="reference internal" href="#module-bornagain.external">Module contents</a></li>
 </ul>
 </li>
@@ -64,8 +66,8 @@
   <p class="topless"><a href="bornagain.html"
                         title="previous chapter">bornagain package</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="bornagain.external.crystfel.html"
-                        title="next chapter">bornagain.external.crystfel module</a></p>
+  <p class="topless"><a href="bornagain.simulate.html"
+                        title="next chapter">bornagain.simulate package</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -98,12 +100,67 @@
 <h1>bornagain.external package<a class="headerlink" href="#bornagain-external-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="bornagain.external.crystfel.html">bornagain.external.crystfel module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bornagain.external.lcls.html">bornagain.external.lcls module</a></li>
-</ul>
 </div>
+<div class="section" id="module-bornagain.external.crystfel">
+<span id="bornagain-external-crystfel-module"></span><h2>bornagain.external.crystfel module<a class="headerlink" href="#module-bornagain.external.crystfel" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="bornagain.external.crystfel.geom_dict_to_panellist">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geom_dict_to_panellist</code><span class="sig-paren">(</span><em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geom_dict_to_panellist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geom_dict_to_panellist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a CrystFEL geometry dictionary to a PanelList object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.crystfel.geom_to_dict">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geom_to_dict</code><span class="sig-paren">(</span><em>geom_file</em>, <em>raw_strings=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geom_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geom_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a crystfel &#8220;geom&#8221; file into a sensible Python dictionary.  For
+details see:
+<a class="reference external" href="http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html">http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html</a>.</p>
+<p>Input:
+geom_file: Path to the geometry file
+raw_strings: By default, this function will convert values to floats,
+integers, or bools, as appropriate. Set this option to &#8220;True&#8221;
+if you want to store the raw strings in the output
+dictionary.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.crystfel.geom_to_panellist">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geom_to_panellist</code><span class="sig-paren">(</span><em>geomFile=None</em>, <em>beamFile=None</em>, <em>PanelList=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geom_to_panellist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geom_to_panellist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a crystfel &#8220;geom&#8221; file into a Panel list</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.crystfel.load_cheetah_dark">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">load_cheetah_dark</code><span class="sig-paren">(</span><em>darkArray</em>, <em>PanelList</em>, <em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#load_cheetah_dark"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.load_cheetah_dark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate Panel darks with cheetah dark array.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.crystfel.load_cheetah_mask">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">load_cheetah_mask</code><span class="sig-paren">(</span><em>maskArray</em>, <em>PanelList</em>, <em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#load_cheetah_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.load_cheetah_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate Panel masks with cheetah mask array.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bornagain.external.lcls">
+<span id="bornagain-external-lcls-module"></span><h2>bornagain.external.lcls module<a class="headerlink" href="#module-bornagain.external.lcls" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="bornagain.external.lcls.cspadReshapePsanaToCheetah">
+<code class="descclassname">bornagain.external.lcls.</code><code class="descname">cspadReshapePsanaToCheetah</code><span class="sig-paren">(</span><em>im</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#cspadReshapePsanaToCheetah"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.cspadReshapePsanaToCheetah" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform psana cspad numpy array (32,185,388) array to Cheetah 2D
+array (1480, 1552).  This only works on standard CSPAD.  I&#8217;m not aware of
+a way to do this generically for any CSPAD such as the 2x2 without
+hard-coding.  Wish I knew how.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.lcls.cspadToPanelList">
+<code class="descclassname">bornagain.external.lcls.</code><code class="descname">cspadToPanelList</code><span class="sig-paren">(</span><em>dataIn</em>, <em>PanelList</em>, <em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#cspadToPanelList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.cspadToPanelList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump the psana cspad numpy array (32,185,388) into a PanelList object.
+This function assumes that a CrystFEL geometry file has been transformed
+into a CrystFEL geomDict dictionary.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-bornagain.external">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bornagain.external" title="Permalink to this headline">¶</a></h2>
@@ -130,7 +187,7 @@ data, etc.  This should be kept to a minimum...</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="bornagain.external.crystfel.html" title="bornagain.external.crystfel module"
+          <a href="bornagain.simulate.html" title="bornagain.simulate package"
              >next</a> |</li>
         <li class="right" >
           <a href="bornagain.html" title="bornagain package"

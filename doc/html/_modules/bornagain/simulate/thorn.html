@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bornagain.simulate.thorn &mdash; bornagain 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bornagain.simulate.thorn</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyopencl</span> <span class="kn">as</span> <span class="nn">cl</span>
+<span class="kn">import</span> <span class="nn">pyopencl.array</span> <span class="kn">as</span> <span class="nn">pycl_array</span>
+
+
+<span class="kn">import</span> <span class="nn">bornagain</span> <span class="kn">as</span> <span class="nn">ba</span>
+<span class="kn">import</span> <span class="nn">clcore</span>
+<span class="kn">import</span> <span class="nn">refdata</span>
+
+
+<div class="viewcode-block" id="ThornAgain"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain">[docs]</a><span class="k">class</span> <span class="nc">ThornAgain</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_vecs</span><span class="p">,</span> <span class="n">atom_vecs</span><span class="p">,</span> <span class="n">atomic_nums</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">load_default</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">group_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">=</span> <span class="n">group_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span> <span class="o">=</span> <span class="n">q_vecs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span> <span class="o">=</span> <span class="n">atom_vecs</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomic_nums</span> <span class="o">=</span> <span class="n">atomic_nums</span>
+
+<span class="c">#       set dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">atom_vecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">q_vecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_make_croman_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_openCL</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_sources</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">load_default</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_program</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_make_croman_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_nums</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">form_facts_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nato</span><span class="p">)</span>  <span class="c"># , dtype=np.int32)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Nspecies</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">return</span>
+
+        <span class="n">croman_coef</span> <span class="o">=</span> <span class="n">refdata</span><span class="o">.</span><span class="n">get_cromermann_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomic_nums</span><span class="p">)</span>
+        <span class="n">form_facts_dict</span> <span class="o">=</span> <span class="n">refdata</span><span class="o">.</span><span class="n">get_cmann_form_factors</span><span class="p">(</span>
+            <span class="n">croman_coef</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span><span class="p">)</span>  <span class="c"># form factors!</span>
+
+        <span class="n">lookup</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c"># for matching atomID to atomic number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form_facts_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">form_facts_dict</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">form_facts_dict</span><span class="p">):</span>
+            <span class="n">lookup</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>  <span class="c"># set the key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">form_facts_arr</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">form_facts_dict</span><span class="p">[</span><span class="n">z</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lookup</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_nums</span><span class="p">])</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nspecies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_nums</span><span class="p">)</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="k">assert</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nspecies</span> <span class="o">&lt;</span> <span class="mi">13</span><span class="p">)</span> <span class="c"># can easily change this later if necessary... </span>
+        <span class="c">#^ this assertion is so we can pass inputs to GPU as a float16, 3 q vectors and 13 atom species</span>
+        <span class="c"># where one is reserved to be a dummie </span>
+
+    <span class="k">def</span> <span class="nf">_setup_openCL</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">platform</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">get_platforms</span><span class="p">()</span>
+        <span class="n">my_gpu_devices</span> <span class="o">=</span> <span class="n">platform</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span>
+            <span class="n">device_type</span><span class="o">=</span><span class="n">cl</span><span class="o">.</span><span class="n">device_type</span><span class="o">.</span><span class="n">GPU</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">Context</span><span class="p">(</span><span class="n">devices</span><span class="o">=</span><span class="n">my_gpu_devices</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">CommandQueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ThornAgain.load_program"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.load_program">[docs]</a>    <span class="k">def</span> <span class="nf">load_program</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s">&#39;default&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">which</span> <span class="o">==</span> <span class="s">&#39;default&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_prg</span><span class="o">.</span><span class="n">qrf_default</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prg</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">(</span>
+                <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prime_buffers_default</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_prime_buffers_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># allow these to overflow (not sure if necess.)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
+
+        <span class="c">#mf = cl.mem_flags  # how to handle the buffers</span>
+
+<span class="c">#       make a rotation mat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+<span class="c">#       combine atom vectors and atom IDs (species IDs)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+<span class="c">#       combine form factors with q_vectors for faster reads... </span>
+        <span class="n">q_zeros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">13</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span><span class="p">,</span> <span class="n">q_zeros</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span><span class="p">[:,</span><span class="mi">3</span><span class="p">:</span><span class="mi">3</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">Nspecies</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_facts_arr</span>
+
+<span class="c">#       make input buffers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
+
+<span class="c">#       make output buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="p">)</span>
+
+<span class="c">#       list of kernel args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">,),(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">q_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Npix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_set_rand_rot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span><span class="o">.</span><span class="n">data</span>  <span class="c"># consider kwargs ?</span>
+
+<div class="viewcode-block" id="ThornAgain.run"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rand_rot</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<span class="c">#       set the rotation</span>
+        <span class="k">if</span> <span class="n">rand_rot</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">random_rotation_matrix</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">force_rot_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">force_rot_mat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_rand_rot</span><span class="p">()</span>
+
+<span class="c">#       run the program</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prg</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">)</span>
+        <span class="n">Amps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="p">[:</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">]</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s">&quot;Took </span><span class="si">%.4f</span><span class="s"> sec to complete...&quot;</span> <span class="o">%</span> <span class="nb">float</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">Amps</span>
+</div>
+    <span class="k">def</span> <span class="nf">_load_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">clcore_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
+            <span class="s">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s">&#39;clcore.cpp&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">clcore_file</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">kern_src</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_prg</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">Program</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">kern_src</span><span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="test"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.test">[docs]</a><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="n">natom</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">coors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span> <span class="p">(</span><span class="n">natom</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">atomZ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">natom</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">SimpleDetector</span><span class="p">()</span> 
+    <span class="n">T</span> <span class="o">=</span> <span class="n">ThornAgain</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="n">coors</span><span class="p">,</span> <span class="n">atomZ</span><span class="p">,</span> <span class="n">group_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rand_rot</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">readout</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, Richard A Kirian.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
