@@ -263,8 +263,9 @@ class ThornAgain:
     
 #       run the program
         self.prg(*self.prg_args)
-        Amps = self.A_buff.get() [:-self.Nextra_pix]
-
+        
+        Amps = self.release_amplitudes() #self.A_buff.get() [:-self.Nextra_pix]
+        
         return Amps
         
     def release_amplitudes(self):
