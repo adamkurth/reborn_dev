@@ -15,6 +15,7 @@ import pytest
 sys.path.append('..')
 try:
     from bornagain.simulate import clcore
+    import pyopencl
     import bornagain as ba
     havecl = True
 except ImportError:
@@ -112,6 +113,7 @@ def test_equivalence_pad_qrf(main=False):
     # This is a pretty weak tolerance... something is probably wrong
     assert(dif <= 1e-4)
 
+@clskip
 def test_rotations(main=False):
     
     """
@@ -140,15 +142,67 @@ def test_rotations(main=False):
         print("test_rotations: max error is %g" % (dif))
     
     assert(dif < 1e-5)
-
-
-
-
-
-
-
-
     
+
+@clskip
+def test_ClCore(main=False):
+    
+    # Check that we can set the group size
+    core = clcore.ClCore(context=None,queue=None,group_size=1)
+    assert(core.get_group_size() == core.group_size)
+    
+    # Check that there are no errors in phase_factor_qrf
+    # TODO: actually check that the amplitudes are correct
+    def setup_panel_list():
+        pl = ba.detector.PanelList()
+        pl.simple_setup(nF=3,nS=4,pixel_size=1,distance=1,wavelength=1)
+        return pl
+       
+    pl = setup_panel_list()
+    N = 10 
+    R = np.eye(3,dtype=core.real_t)
+    q = pl[0].Q
+    r = np.random.random([N,3])
+    f = np.random.random([N])*1j
+    
+    A = core.phase_factor_qrf(q,r,f,R)
+    assert(type(A) is np.ndarray)
+    
+    q = core.to_device(q)
+    r = core.to_device(r)
+    f = core.to_device(r)
+    a = core.to_device(shape=(pl.n_pixels),dtype=np.complex64)
+    
+    A = core.phase_factor_qrf(q,r,f,R,a)
+    assert(type(A) is pyopencl.array.Array)
+    del q, r, f, a, R, N, pl
+    
+    # Check for errors in phase_factor_pad
+    # TODO: check that amplitudes are correct
+    N = 10 
+    R = np.eye(3,dtype=core.real_t)
+    r = np.random.random([N,3]).astype(dtype=core.real_t)
+    f = np.random.random([N]).astype(dtype=core.complex_t)
+    T = np.array([0,0,0], dtype=core.real_t)
+    F = np.array([1,0,0], dtype=core.real_t)
+    S = np.array([0,1,0], dtype=core.real_t)
+    B = np.array([0,0,1], dtype=core.real_t)
+    nF = 3
+    nS = 4
+    w = 1
+    R = np.eye(3,dtype=core.real_t)
+    
+    A = core.phase_factor_pad(r, f, T, F, S, B, nF, nS, w, R, a=None)
+
+    r = core.to_device(r)
+    f = core.to_device(f)
+    a = core.to_device(shape=(nF*nS),dtype=core.complex_t)
+
+    A = core.phase_factor_pad(r, f, T, F, S, B, nF, nS, w, R, a)
+
+    del N, r, f, T, F, S, B, nF, nS, w, R, a
+    
+
 if __name__ == '__main__':
     
     print('Running as main')
@@ -156,6 +210,7 @@ if __name__ == '__main__':
     test_two_atoms(main)
     test_equivalence_pad_qrf(main)
     test_rotations(main)
+    test_ClCore(main)
     
 
 
