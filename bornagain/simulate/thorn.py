@@ -12,19 +12,33 @@ import bornagain as ba
 import clcore
 import refdata
 
-def make_q_vectors(qmin, qmax, wavelen, dq=0.02, dphi=0.05):
+nextPow2 = lambda x: int(2**(np.ceil(np.log2(x))))
+prevPow2 = lambda x: int(2**(np.floor(np.log2(x))))
+
+def make_q_vectors(qmin, qmax, wavelen, dq=0.02, dphi=0.05, pow2=None):
 # ~~~~~~~ your code goes here(below) ~~~~~~~~
 
-    Nphi = int(2*np.pi / dphi)
-    
-    q_values = np.arange(qmin, qmax, dq)
-    Nq = q_values.shape[0]
+    Nphi = int(2.*np.pi / dphi)
+    Nq = int( (qmax - qmin) / dq)
+
+   
+    if pow2 is not None: 
+        assert (pow2 in ['prev','next'])
+        if pow2 == 'prev':
+            Nphi = prevPow2(Nphi)
+            Nq = prevPow2(Nq)
+        if pow2=='next':
+            Nphi = nextPow2(Nphi)
+            Nq = nextPow2(Nq)
+
+    phi_values = np.arange(Nphi)*2.*np.pi / Nphi
+    q_values = np.arange( Nq) * (qmax-qmin) / Nq
 
     img_sh = (Nq, Nphi)
 
     qs = np.array([q_values] * Nphi).T
-    phis = np.array([np.arange(Nphi) * 2 * np.pi / Nphi] * Nq) 
-    thetas = np.arcsin(qs * wavelen / 4 / np.pi)
+    phis = np.array([phi_values] * Nq) 
+    thetas = np.arcsin(qs * wavelen / 4. / np.pi)
 
     qx = np.cos(thetas) * qs * np.cos(phis)
     qy = np.cos(thetas) * qs * np.sin(phis)
@@ -263,9 +277,8 @@ class ThornAgain:
     
 #       run the program
         self.prg(*self.prg_args)
-        
-        Amps = self.release_amplitudes() #self.A_buff.get() [:-self.Nextra_pix]
-        
+        Amps = self.A_buff.get() [:-self.Nextra_pix]
+
         return Amps
         
     def release_amplitudes(self):
