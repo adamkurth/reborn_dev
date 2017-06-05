@@ -1,5 +1,15 @@
-#define GROUP_SIZE 32
+#ifndef GROUP_SIZE
+    #define GROUP_SIZE 32
+#endif
 #define PI2 6.28318530718f
+
+kernel void get_group_size(
+    global int *g){
+    const int gi = get_global_id(0); /* Global index */
+    if (gi == 0){
+        g[gi] = GROUP_SIZE;
+    }
+}
 
 kernel void phase_factor_qrf(
     global const float *q,
