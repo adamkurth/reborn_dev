@@ -13,7 +13,7 @@ try:
 except:
     print('Cannot import clcore; check that pyopencl is installed')
 
-clcore = core.ClCore(group_size=32,double_precision=True)
+clcore = core.ClCore(group_size=32,double_precision=False)
 
 # Create a detector
 pl = ba.detector.PanelList()

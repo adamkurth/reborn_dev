@@ -425,11 +425,11 @@ class ClCore(object):
         
         # Abstract real and complex types to allow for double/single
         if self.double_precision:
-            self.int_t = np.int
+            self.int_t = np.int32
             self.real_t = np.float64
             self.complex_t = np.complex128
         else:
-            self.int_t = np.int
+            self.int_t = np.int32
             self.real_t = np.float32
             self.complex_t = np.complex64
         
@@ -455,7 +455,7 @@ class ClCore(object):
         options=['-D', 'GROUP_SIZE=%d' % self.group_size]
         if double_precision:
             options.append('-D')
-            options.append('CONFIG_USE_DOUBLE')
+            options.append('CONFIG_USE_DOUBLE=1')
         self.programs = cl.Program(self.context, open(clcore_file).read()
                                    ).build(options=options)
 
