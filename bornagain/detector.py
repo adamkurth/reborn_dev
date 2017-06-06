@@ -934,12 +934,37 @@ class SimpleDetector(Panel):
     def __init__(self, n_pixels=1000, pixsize=0.00005,
                  detdist=0.05, wavelen=1., *args, **kwargs):
         """
-        this is a docstring
+        A simple wrapper for folks who wish to use use the Panels
+        class without learning the intricacies.
+
+        This will return a detector object `D`representing a
+        square detector whose array-shape is given by `D.img_sh`
         
-        Parametes
-        =========
+        The pixel q-vectors are found by `D.Q`
+
+        One can readout pixel intensities using `I=D.readout(A)` where `A` is a
+        complex np.ndarray of scattering amplitudes that has the 
+        same length as `D.Q`.
+
+        After reading out amplitudes, one can display pixels using
+        `D.display()`
+
+        This class inherits from Panel, so all of the attributes and methods
+        of the Panel class are available.
+
         n_pixels, int
             the number of pixels along one edge
+
+        pixsize, float
+            the edge length of the square pixels in meters
+
+        detdist, float
+            the distance from the interaction region to the point where
+            the forward beam intersects the detector (in meters)
+
+        wavelen, float
+            the wavelength of the photons (in Angstroms)
+
         """
 
 
@@ -967,11 +992,42 @@ class SimpleDetector(Panel):
         self.rad2q = lambda rad: 4 * np.pi * np.sin( .5 * np.arctan(rad * pixsize / detdist) ) / wavelen
         self.q2rad = lambda q: np.tan( np.arcsin( q*wavelen / 4 / np.pi ) * 2) * detdist / pixsize
 
+        self.intens = None
+
     def readout(self, amplitudes):
+        """
+        Parameters
+        amplitudes, complex np.ndarray 
+            scattering amplitudes same shape as `self.Q`
+        
+        Returns
+        self.intens, np.ndarray
+            scattering intensities as a 2-D image.
+        """
         self.intens = (np.abs(amplitudes)**2).reshape(self.img_sh)
         return self.intens
 
     def readout_finite(self, amplitudes, qmin, qmax, flux=1e20):
+        """
+        Get scattering intensities as a two-D image considering 
+        finite scattered photons
+
+        Parameters
+        amplitudes, complex np.ndarray 
+            scattering amplitudes same shape as `self.Q`
+        
+        qmin, float
+            minimum q to generate intensities
+        qmax, float
+            maximum q to generate intenities
+        flux, float
+            forward beam flux in Photons per square centimeter
+
+        Returns
+        self.intens, np.ndarray
+            scattering intensities as a 2-D image.
+        """
+        self.intens = (np.abs(amplitudes)**2).reshape(self.img_sh)
         struct_fact = (np.abs(amplitudes)**2).astype(np.float64)
 
         if qmin < self.Qmag.min():
@@ -1000,6 +1056,27 @@ class SimpleDetector(Panel):
         return self.intens
 
     def display(self, use_log=True, vmax=None, **kwargs):
+
+        """
+        Display a detector image afer reading out amplitudes 
+        
+        Requires matplotlib!
+        
+        Parameters
+        use_log, bool
+            whether to use log-scaling when displaying
+            the intensity image
+
+        vmax, float
+            colorbar scaling argument
+        
+        kwargs,
+            keyword arguments that are passed to the pylab.figure
+        """
+
+        
+        assert( self.intens is not None)
+
         if 'matplotlib' not in sys.modules:
             print("You need matplotlib to plot!")
             return
@@ -1015,7 +1092,7 @@ class SimpleDetector(Panel):
                 np.log1p(
                     self.intens),
                 extent=extent,
-                cmap='viridis',
+                cmap='gnuplot',
                 interpolation='lanczos')
             cbar = fig.colorbar(ax_img)
             cbar.ax.set_ylabel('log(photon counts)', rotation=270, labelpad=12)
@@ -1024,7 +1101,7 @@ class SimpleDetector(Panel):
             ax_img = ax.imshow(
                 self.intens,
                 extent=extent,
-                cmap='viridis',
+                cmap='gnuplot',
                 interpolation='lanczos',
                 vmax=vmax)
             cbar = fig.colorbar(ax_img)
