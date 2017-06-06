@@ -13,7 +13,12 @@ try:
 except:
     print('Cannot import clcore; check that pyopencl is installed')
 
-clcore = core.ClCore(group_size=32,double_precision=False)
+show = False   # Display the simulated patterns
+double = False # Use double precision if available
+if 'view' in sys.argv: show = True
+if 'double' in sys.argv: double = True
+
+clcore = core.ClCore(group_size=32,double_precision=double)
 
 # Create a detector
 pl = ba.detector.PanelList()
@@ -38,10 +43,6 @@ r = cryst.r
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelength)
 
 n_trials = 3
-if len(sys.argv) > 1:
-    show = 1
-else:
-    show = 0
 show_all = show
 #plt.ion()
 
