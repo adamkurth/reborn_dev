@@ -24,14 +24,17 @@ kernel void phase_factor_qrf(
     const int li = get_local_id(0);  /* Local group index */
 
     float ph, sinph, cosph;
-    float2 a_sum = (float2)(0.0f,0.0f);
 
     // Each global index corresponds to a particular q-vector.  Note that the
     // global index could be larger than the number of pixels because it must be a
     // multiple of the group size.  We must check if it is larger...
+    float2 a_sum = (float2)(0.0f,0.0f);
     float4 q4, q4r;
     if (gi < n_pixels){
 
+        a_sum.x = a[gi].x;
+        a_sum.y = a[gi].y;
+        
         // Move original q vector to private memory
         q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
 

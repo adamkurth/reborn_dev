@@ -516,6 +516,57 @@ Returns:
         
         return group_size_dev.get()[0]
 
+    def phase_factor_qrf_inplace(self, q, r, f, R=None):
+        '''
+Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
+
+Arguments:
+    q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
+    r (numpy/cl float array [M,3]): Atomic coordinates.
+    f (numpy/cl complex array [M]): Complex scattering factors.
+    R (numpy array [3,3]): Rotation matrix acting on q vectors.
+    a (cl complex array [N]): Optional container for complex scattering 
+      amplitudes.
+    context (pyopencl context): Optional pyopencl context (e.g. use 
+      cl.create_some_context() to create one).
+    queue (pyopencl context): Optional pyopencl queue (e.g use 
+      cl.CommandQueue(context) to create one).
+    group_size (int): Optional pyopencl group size.
+
+Returns:
+    (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
+      if there are input cl arrays.
+        '''
+
+        if R is None:
+            R = np.eye(3, dtype=self.real_t)
+        R16 = np.zeros([16], dtype=self.real_t)
+        R16[0:9] = R.flatten().astype(self.real_t)
+    
+        n_pixels = self.int_t(q.shape[0])
+        n_atoms = self.int_t(r.shape[0])
+        q_dev = self.to_device(q, dtype=self.real_t)
+        r_dev = self.to_device(r, dtype=self.real_t)
+        f_dev = self.to_device(f, dtype=self.complex_t)
+    
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
+                             * self.group_size)
+    
+        self.phase_factor_qrf_cl(self.queue, (global_size,), 
+                                 (self.group_size,), q_dev.data, r_dev.data, 
+                                 f_dev.data, R16, self.a_dev.data, n_atoms,
+                                 n_pixels)
+    
+    def init_amps(self, Npix):
+        self.a_dev = self.to_device( np.zeros( Npix), dtype=self.complex_t, shape=(Npix))
+        
+    def release_amps(self, reset=False):
+        amps = self.a_dev.get()
+        if reset:
+            self.init_amps(amps.shape[0])
+        return amps
+
+    
     def phase_factor_qrf(self, q, r, f, R=None, a=None):
         '''
 Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
