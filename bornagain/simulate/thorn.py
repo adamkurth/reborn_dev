@@ -12,19 +12,33 @@ import bornagain as ba
 import clcore
 import refdata
 
-def make_q_vectors(qmin, qmax, wavelen, dq=0.02, dphi=0.05):
+nextPow2 = lambda x: int(2**(np.ceil(np.log2(x))))
+prevPow2 = lambda x: int(2**(np.floor(np.log2(x))))
+
+def make_q_vectors(qmin, qmax, wavelen, dq=0.02, dphi=0.05, pow2=None):
 # ~~~~~~~ your code goes here(below) ~~~~~~~~
 
-    Nphi = int(2*np.pi / dphi)
-    
-    q_values = np.arange(qmin, qmax, dq)
-    Nq = q_values.shape[0]
+    Nphi = int(2.*np.pi / dphi)
+    Nq = int( (qmax - qmin) / dq)
+
+   
+    if pow2 is not None: 
+        assert (pow2 in ['prev','next'])
+        if pow2 == 'prev':
+            Nphi = prevPow2(Nphi)
+            Nq = prevPow2(Nq)
+        if pow2=='next':
+            Nphi = nextPow2(Nphi)
+            Nq = nextPow2(Nq)
+
+    phi_values = np.arange(Nphi)*2.*np.pi / Nphi
+    q_values = np.arange( Nq) * (qmax-qmin) / Nq
 
     img_sh = (Nq, Nphi)
 
     qs = np.array([q_values] * Nphi).T
-    phis = np.array([np.arange(Nphi) * 2 * np.pi / Nphi] * Nq) 
-    thetas = np.arcsin(qs * wavelen / 4 / np.pi)
+    phis = np.array([phi_values] * Nq) 
+    thetas = np.arcsin(qs * wavelen / 4. / np.pi)
 
     qx = np.cos(thetas) * qs * np.cos(phis)
     qy = np.cos(thetas) * qs * np.sin(phis)
@@ -43,7 +57,7 @@ class ThornAgain:
         
         assert( which in ['default','kam'])
        
-        if os.environ.get('BORNAGAIN_CL_GROUPSIZE') is not None:
+        if os.environ.get('BORNAGAIN_CL_GROUPSIZE') is None:
             self.group_size = group_size
         else:
             self.group_size = int(os.environ.get('BORNAGAIN_CL_GROUPSIZE'))
@@ -71,7 +85,7 @@ class ThornAgain:
         
     def _make_croman_data(self):
         if self.atomic_nums is None:
-            self.form_facts_arr = np.ones((self.Npix,1), dtype=np.float32)
+            self.form_facts_arr = np.ones((self.Npix+self.Nextra_pix,1), dtype=np.float32)
             self.atomIDs = np.zeros(self.Nato)  # , dtype=np.int32)
             self.Nspecies = 1
             return
@@ -81,10 +95,10 @@ class ThornAgain:
 
         lookup = {}  # for matching atomID to atomic number
         self.form_facts_arr = np.zeros(
-            (self.q_vecs.shape[0], len(form_facts_dict)), dtype=np.float32)
+            (self.Npix+self.Nextra_pix, len(form_facts_dict)), dtype=np.float32)
         for i, z in enumerate(form_facts_dict):
             lookup[z] = i  # set the key
-            self.form_facts_arr[:,i] = form_facts_dict[z]
+            self.form_facts_arr[:self.Npix,i] = form_facts_dict[z]
         self.atomIDs = np.array([lookup[z] for z in self.atomic_nums])
         
         self.Nspecies = np.unique( self.atomic_nums).size
@@ -108,7 +122,7 @@ class ThornAgain:
         my_devices = platforms[plat_ind].get_devices(
             device_type=device_type)
     
-        print my_devices
+        print ("Using device:",my_devices[0] ) 
 
         if not my_devices:
             print("No devices selected")
@@ -122,12 +136,12 @@ class ThornAgain:
         if which == 'default':
             self.prg = self.all_prg.qrf_default
             self.prg.set_scalar_arg_dtypes(
-                [None, None, None, None, np.int32, np.int32])
+                [None, None, None, None,  np.int32])
             self._prime_buffers_default()
         elif which=='kam':
             self.prg = self.all_prg.qrf_kam
             self.prg.set_scalar_arg_dtypes(
-                [None, None, None, None,None, np.int32, np.int32])
+                [None, None, None, None,None, np.int32])
             self._prime_buffers_kam()
 
     def _prime_buffers_kam(self):
@@ -170,10 +184,13 @@ class ThornAgain:
         """ combine form factors and q-vectors
         for openCL device"""
 #       combine form factors with q_vectors for faster reads... 
-        q_zeros = np.zeros((self.q_vecs.shape[0], 13))
-        self.q_vecs = np.concatenate((self.q_vecs, q_zeros), axis=1)
-        self.q_vecs[:,3:3+self.Nspecies] = self.form_facts_arr
-        self.q_buff = clcore.to_device( self.q_vecs, dtype=np.float32, queue=self.queue )
+        q_zeros = np.zeros((self.Npix+self.Nextra_pix, 16))
+        q_zeros[:self.Npix, :3] = self.q_vecs
+        q_zeros[:,3:3+self.Nspecies] = self.form_facts_arr
+        #self.q_vecs = np.concatenate((self.q_vecs, q_zeros), axis=1)
+        #self.q_vecs[:,3:3+self.Nspecies] = self.form_facts_arr
+        
+        self.q_buff = clcore.to_device( q_zeros, dtype=np.float32, queue=self.queue )
 
     def _set_com_buffer(self):
 #       make a dummie translation vector
@@ -195,12 +212,12 @@ class ThornAgain:
     def _set_args(self):
         self.prg_args = [self.queue, (self.Npix+self.Nextra_pix,),(self.group_size,),
                          self.q_buff.data, self.r_buff.data,
-                         self.rot_buff.data, self.A_buff.data, self.Npix, self.Nato]
+                         self.rot_buff.data, self.A_buff.data, self.Nato]
     
     def _set_args_kam(self):
         self.prg_args = [self.queue, (self.Npix+self.Nextra_pix,),(self.group_size,),
                          self.q_buff.data, self.r_buff.data,
-                         self.rot_buff.data, self.com_buff, self.A_buff.data, self.Npix, self.Nato]
+                         self.rot_buff.data, self.com_buff, self.A_buff.data, self.Nato]
 
     def update_rbuff(self, new_atoms):
         """
@@ -286,6 +303,7 @@ def test():
     coors = np.random.random( (natom,3) )
     atomZ = np.ones(natom)
     D = ba.detector.SimpleDetector(n_pixels=100) 
+    print ("\tSimulating into %d pixels"%D.Q.shape[0])
     T = ThornAgain(D.Q, coors, atomZ, cpu=False)
     A = T.run(rand_rot=1)
     I = D.readout(A)
