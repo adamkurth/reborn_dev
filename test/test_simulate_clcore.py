@@ -165,17 +165,34 @@ def test_ClCore(main=False):
     r = np.random.random([N,3])
     f = np.random.random([N])*1j
     
-    A = core.phase_factor_qrf(q,r,f,R)
+    core.init_amps(Npix=pl.n_pixels)
+    core.phase_factor_qrf_inplace(q,r,f,R)
+    assert(type(core.a_dev) is pyopencl.array.Array)
+    A = core.release_amps(reset=True)
     assert(type(A) is np.ndarray)
     
-    q = core.to_device(q)
+#   make device arrays first
+    q = core.to_device(q) 
     r = core.to_device(r)
     f = core.to_device(r)
-    a = core.to_device(shape=(pl.n_pixels),dtype=np.complex64)
     
-    A = core.phase_factor_qrf(q,r,f,R,a)
-    assert(type(A) is pyopencl.array.Array)
-    del q, r, f, a, R, N, pl
+    core.phase_factor_qrf_inplace(q,r,f,R)
+    A1 = core.release_amps(reset=False)
+    
+    core.phase_factor_qrf_inplace(q,r,f,R)
+    A2 = core.release_amps(reset=False)
+    
+    assert( np.allclose(2*A1,A2))
+
+    core.init_amps(pl.n_pixels)
+    for _ in xrange(10):
+        core.phase_factor_qrf_inplace(q,r,f,R)
+    
+    A10 = core.release_amps()
+    
+    assert( np.allclose(10*A1,A10))
+
+    del q, r, f, R, N, pl
     
     # Check for errors in phase_factor_pad
     # TODO: check that amplitudes are correct
