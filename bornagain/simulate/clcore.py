@@ -53,7 +53,7 @@ Returns:
     
     if dtype is None:
         dtype = np.float32
-    return np.array([x[0], x[1], x[2], 0.0], dtype=dtype)
+    return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
 
 
 def to_device(array=None, shape=None, dtype=None, queue=None):
@@ -396,18 +396,14 @@ Returns:
 
 class ClCore(object):
     
-    def __init__(self,context=None,queue=None,group_size=None):
+    def __init__(self,context=None,queue=None,group_size=None,
+                 double_precision=False):
         
         self.context = None
         self.queue = None
         self.group_size = None
         self.programs = None
-        
-        # Abstract real and complex types to allow for double/single in the
-        # future.
-        self.int_t = np.int32
-        self.real_t = np.float32
-        self.complex_t = np.complex64
+        self.double_precision = double_precision
         
         # Setup the context
         if context is None:
@@ -420,6 +416,23 @@ class ClCore(object):
             self.queue = cl.CommandQueue(self.context)
         else:
             self.queue = queue
+        
+        if self.double_precision:
+            if 'cl_khr_fp64' not in self.queue.device.extensions.split():
+                sys.stderr.write('Double precision not supported.  Fallback to'
+                                 ' single precision\n')
+                self.double_precision = False
+        
+        # Abstract real and complex types to allow for double/single
+        if self.double_precision:
+            self.int_t = np.int
+            self.real_t = np.float64
+            self.complex_t = np.complex128
+        else:
+            self.int_t = np.int
+            self.real_t = np.float32
+            self.complex_t = np.complex64
+        
         
         # Setup the group size.
         # If the environment variable BORNAGAIN_CL_GROUPSIZE is set then use
@@ -439,9 +452,12 @@ class ClCore(object):
         self.group_size = group_size
         
         # Build the programs
+        options=['-D', 'GROUP_SIZE=%d' % self.group_size]
+        if double_precision:
+            options.append('-D')
+            options.append('CONFIG_USE_DOUBLE')
         self.programs = cl.Program(self.context, open(clcore_file).read()
-                                   ).build(
-                        options=['-D', 'GROUP_SIZE=%d' % self.group_size])
+                                   ).build(options=options)
 
         # Configure the python interface to the cl programs
         self.get_group_size_cl = self.programs.get_group_size
@@ -458,11 +474,11 @@ class ClCore(object):
         
         self.phase_factor_mesh_cl = self.programs.phase_factor_mesh
         self.phase_factor_mesh_cl.set_scalar_arg_dtypes(
-             [None, None, None, np.int32, np.int32, None, None, None])
+             [None, None, None, self.int_t, self.int_t, None, None, None])
 
         self.buffer_mesh_lookup_cl = self.programs.buffer_mesh_lookup
         self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes(
-             [None, None, None, np.int32, None, None, None, None])
+             [None, None, None, self.int_t, None, None, None, None])
         
     def vec4(self, x, dtype=None):
         """
@@ -479,7 +495,7 @@ Returns:
         
         if dtype is None:
             dtype = self.real_t
-        return np.array([x[0], x[1], x[2], 0.0], dtype=dtype)
+        return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
  
 
     def to_device(self, array=None, shape=None, dtype=None):
@@ -765,7 +781,7 @@ Returns:
         q_min = np.array(q_min, dtype=self.real_t)
     
         if len(N.shape) == 0:
-            N = self.int_t(np.ones(3)*N)
+            N = (np.ones(3)*N).astype(self.int_t)
         if len(q_max.shape) == 0:
             q_max = self.real_t(np.ones(3)*q_max)
         if len(q_min.shape) == 0:
