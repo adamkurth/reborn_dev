@@ -65,7 +65,7 @@
           <div class="body" role="main">
             
   <h1>Source code for bornagain.external.crystfel</h1><div class="highlight"><pre>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">bornagain</span> <span class="kn">import</span> <span class="n">detector</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
@@ -88,24 +88,24 @@
         <span class="sd">&quot;&quot;&quot; Parse fast/slow scan vectors &quot;&quot;&quot;</span>
 
         <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="s">&quot;xyz&quot;</span><span class="p">))</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="s2">&quot;xyz&quot;</span><span class="p">))</span>
         <span class="n">vals</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)):</span>
                 <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>   <span class="c"># CrystFEL allows simply &quot;x&quot; in place of &quot;1x&quot;</span>
+            <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>   <span class="c1"># CrystFEL allows simply &quot;x&quot; in place of &quot;1x&quot;</span>
                 <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">vals</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="n">vec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s">&#39;x&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s">&#39;y&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s">&#39;z&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s">&#39;z&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;y&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;z&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">vec</span>
 
@@ -115,7 +115,7 @@
 
         <span class="n">theDictionary</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">dictionaryList</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">dictionaryName</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">dictionaryName</span><span class="p">:</span>
                 <span class="n">theDictionary</span> <span class="o">=</span> <span class="n">item</span>
         <span class="k">return</span> <span class="n">theDictionary</span>
 
@@ -123,156 +123,156 @@
         <span class="sd">&quot;&quot;&quot; Convert dictionary entries into numeric types, as appropriate &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mydict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="c"># Convert floating point values</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;adu_per_eV&#39;</span><span class="p">,</span> <span class="s">&#39;res&#39;</span><span class="p">,</span> <span class="s">&#39;clen&#39;</span><span class="p">,</span> <span class="s">&#39;coffset&#39;</span><span class="p">,</span> <span class="s">&#39;corner_x&#39;</span><span class="p">,</span>
-                           <span class="s">&#39;corner_y&#39;</span><span class="p">,</span> <span class="s">&#39;max_adu&#39;</span><span class="p">,</span> <span class="s">&#39;photon_energy&#39;</span><span class="p">,</span>
-                           <span class="s">&#39;photon_energy_scale&#39;</span><span class="p">]):</span>
+            <span class="c1"># Convert floating point values</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;adu_per_eV&#39;</span><span class="p">,</span> <span class="s1">&#39;res&#39;</span><span class="p">,</span> <span class="s1">&#39;clen&#39;</span><span class="p">,</span> <span class="s1">&#39;coffset&#39;</span><span class="p">,</span> <span class="s1">&#39;corner_x&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;corner_y&#39;</span><span class="p">,</span> <span class="s1">&#39;max_adu&#39;</span><span class="p">,</span> <span class="s1">&#39;photon_energy&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;photon_energy_scale&#39;</span><span class="p">]):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
                     <span class="k">continue</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="k">continue</span>
-            <span class="c"># Integers</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;min_fs&#39;</span><span class="p">,</span> <span class="s">&#39;min_ss&#39;</span><span class="p">,</span> <span class="s">&#39;max_fs&#39;</span><span class="p">,</span> <span class="s">&#39;max_ss&#39;</span><span class="p">]):</span>
+            <span class="c1"># Integers</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;min_fs&#39;</span><span class="p">,</span> <span class="s1">&#39;min_ss&#39;</span><span class="p">,</span> <span class="s1">&#39;max_fs&#39;</span><span class="p">,</span> <span class="s1">&#39;max_ss&#39;</span><span class="p">]):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
                     <span class="k">continue</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="k">continue</span>
-            <span class="c"># Vectors</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;fs&#39;</span><span class="p">,</span> <span class="s">&#39;ss&#39;</span><span class="p">]):</span>
+            <span class="c1"># Vectors</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;fs&#39;</span><span class="p">,</span> <span class="s1">&#39;ss&#39;</span><span class="p">]):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_vector_string</span><span class="p">(</span><span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
                     <span class="k">continue</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="k">continue</span>
-            <span class="c"># Boolean</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;no_index&#39;</span><span class="p">]):</span>
-                <span class="k">if</span> <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;1&#39;</span><span class="p">:</span>
+            <span class="c1"># Boolean</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;no_index&#39;</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span>
                     <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
             <span class="k">continue</span>
 
-    <span class="c"># These are the Panel keys allowed by crystfel</span>
-    <span class="n">panelKeys</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="s">&#39;dim0&#39;</span><span class="p">,</span> <span class="s">&#39;dim1&#39;</span><span class="p">,</span> <span class="s">&#39;dim2&#39;</span><span class="p">,</span> <span class="s">&#39;min_fs&#39;</span><span class="p">,</span> <span class="s">&#39;min_ss&#39;</span><span class="p">,</span>
-                 <span class="s">&#39;max_fs&#39;</span><span class="p">,</span> <span class="s">&#39;max_ss&#39;</span><span class="p">,</span> <span class="s">&#39;adu_per_eV&#39;</span><span class="p">,</span> <span class="s">&#39;badrow_direction&#39;</span><span class="p">,</span> <span class="s">&#39;res&#39;</span><span class="p">,</span>
-                 <span class="s">&#39;clen&#39;</span><span class="p">,</span> <span class="s">&#39;coffset&#39;</span><span class="p">,</span> <span class="s">&#39;fs&#39;</span><span class="p">,</span> <span class="s">&#39;ss&#39;</span><span class="p">,</span>
-                 <span class="s">&#39;corner_x&#39;</span><span class="p">,</span> <span class="s">&#39;corner_y&#39;</span><span class="p">,</span> <span class="s">&#39;max_adu&#39;</span><span class="p">,</span> <span class="s">&#39;no_index&#39;</span><span class="p">,</span> <span class="s">&#39;mask&#39;</span><span class="p">,</span>
-                 <span class="s">&#39;mask_file&#39;</span><span class="p">,</span> <span class="s">&#39;saturation_map&#39;</span><span class="p">,</span> <span class="s">&#39;saturation_map_file&#39;</span><span class="p">,</span>
-                 <span class="s">&#39;mask_good&#39;</span><span class="p">,</span> <span class="s">&#39;mask_bad&#39;</span><span class="p">,</span> <span class="s">&#39;photon_energy&#39;</span><span class="p">,</span>
-                 <span class="s">&#39;photon_energy_scale&#39;</span><span class="p">]</span>
+    <span class="c1"># These are the Panel keys allowed by crystfel</span>
+    <span class="n">panelKeys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;dim0&#39;</span><span class="p">,</span> <span class="s1">&#39;dim1&#39;</span><span class="p">,</span> <span class="s1">&#39;dim2&#39;</span><span class="p">,</span> <span class="s1">&#39;min_fs&#39;</span><span class="p">,</span> <span class="s1">&#39;min_ss&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;max_fs&#39;</span><span class="p">,</span> <span class="s1">&#39;max_ss&#39;</span><span class="p">,</span> <span class="s1">&#39;adu_per_eV&#39;</span><span class="p">,</span> <span class="s1">&#39;badrow_direction&#39;</span><span class="p">,</span> <span class="s1">&#39;res&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;clen&#39;</span><span class="p">,</span> <span class="s1">&#39;coffset&#39;</span><span class="p">,</span> <span class="s1">&#39;fs&#39;</span><span class="p">,</span> <span class="s1">&#39;ss&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;corner_x&#39;</span><span class="p">,</span> <span class="s1">&#39;corner_y&#39;</span><span class="p">,</span> <span class="s1">&#39;max_adu&#39;</span><span class="p">,</span> <span class="s1">&#39;no_index&#39;</span><span class="p">,</span> <span class="s1">&#39;mask&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;mask_file&#39;</span><span class="p">,</span> <span class="s1">&#39;saturation_map&#39;</span><span class="p">,</span> <span class="s1">&#39;saturation_map_file&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;mask_good&#39;</span><span class="p">,</span> <span class="s1">&#39;mask_bad&#39;</span><span class="p">,</span> <span class="s1">&#39;photon_energy&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;photon_energy_scale&#39;</span><span class="p">]</span>
 
-    <span class="c"># Here is our template Panel dictionary.  Also for the global Panel</span>
-    <span class="c"># dictionary, which fills in the undefined properties of panels.</span>
+    <span class="c1"># Here is our template Panel dictionary.  Also for the global Panel</span>
+    <span class="c1"># dictionary, which fills in the undefined properties of panels.</span>
     <span class="n">panelDictTemplate</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="c"># Initialized with None for all keys</span>
+    <span class="c1"># Initialized with None for all keys</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">panelKeys</span><span class="p">:</span>
         <span class="n">panelDictTemplate</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="c"># These are the bad region keys allowed by crystfel</span>
-    <span class="n">badRegionKeys</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;min_x&#39;</span><span class="p">,</span> <span class="s">&#39;max_x&#39;</span><span class="p">,</span> <span class="s">&#39;min_y&#39;</span><span class="p">,</span> <span class="s">&#39;max_y&#39;</span><span class="p">,</span> <span class="s">&#39;Panel&#39;</span><span class="p">]</span>
+    <span class="c1"># These are the bad region keys allowed by crystfel</span>
+    <span class="n">badRegionKeys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;min_x&#39;</span><span class="p">,</span> <span class="s1">&#39;max_x&#39;</span><span class="p">,</span> <span class="s1">&#39;min_y&#39;</span><span class="p">,</span> <span class="s1">&#39;max_y&#39;</span><span class="p">,</span> <span class="s1">&#39;Panel&#39;</span><span class="p">]</span>
 
-    <span class="c"># Initialize a template dictionary for bad regions.</span>
+    <span class="c1"># Initialize a template dictionary for bad regions.</span>
     <span class="n">badRegionDictTemplate</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">badRegionKeys</span><span class="p">:</span>
         <span class="n">badRegionDictTemplate</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="c"># Initialize a template dictionary for rigid groups</span>
-    <span class="n">rigidGroupDictTemplate</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;panels&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+    <span class="c1"># Initialize a template dictionary for rigid groups</span>
+    <span class="n">rigidGroupDictTemplate</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;panels&#39;</span><span class="p">:</span> <span class="p">[]}</span>
 
-    <span class="c"># Initialize a template dictionary for rigid group collections</span>
-    <span class="n">rigidGroupCollectionDictTemplate</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;groups&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+    <span class="c1"># Initialize a template dictionary for rigid group collections</span>
+    <span class="n">rigidGroupCollectionDictTemplate</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;groups&#39;</span><span class="p">:</span> <span class="p">[]}</span>
 
-    <span class="c"># Initialize the lists we will populate as we scan the file</span>
+    <span class="c1"># Initialize the lists we will populate as we scan the file</span>
     <span class="n">globals_</span> <span class="o">=</span> <span class="n">panelDictTemplate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">panels</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">rigidGroups</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">rigidGroupCollections</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">badRegions</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="c"># Now begin scanning the file</span>
+    <span class="c1"># Now begin scanning the file</span>
 
     <span class="k">if</span> <span class="n">geom_file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;No geometry file specified&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No geometry file specified&quot;</span><span class="p">)</span>
 
-    <span class="n">h</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">geom_file</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">geom_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">originalline</span> <span class="ow">in</span> <span class="n">h</span><span class="p">:</span>
 
-        <span class="c"># Avoid any issues with whitespace</span>
+        <span class="c1"># Avoid any issues with whitespace</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">originalline</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="c"># Skip empty lines</span>
+        <span class="c1"># Skip empty lines</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="c"># Skip comment lines</span>
-        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;;&#39;</span><span class="p">:</span>
+        <span class="c1"># Skip comment lines</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;;&#39;</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="c"># Remove trailing comments</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)</span>
+        <span class="c1"># Remove trailing comments</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="c"># Search for appropriate lines.  Firstly, we must have an &quot;=&quot; character</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">)</span>
+        <span class="c1"># Search for appropriate lines.  Firstly, we must have an &quot;=&quot; character</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="c"># Split key/values</span>
+        <span class="c1"># Split key/values</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="c"># Check for global key</span>
+        <span class="c1"># Check for global key</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">panelDictTemplate</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="n">globals_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
             <span class="k">continue</span>
 
-        <span class="c"># Check for rigid group collection</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;^rigid_group_collection&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Check for rigid group collection</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^rigid_group_collection&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">thisDict</span> <span class="o">=</span> <span class="n">seek_dictionary_by_name</span><span class="p">(</span><span class="n">rigidGroupCollections</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">thisDict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">thisDict</span> <span class="o">=</span> <span class="n">rigidGroupCollectionDictTemplate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">thisDict</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
                 <span class="n">rigidGroupCollections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thisDict</span><span class="p">)</span>
-            <span class="n">thisDict</span><span class="p">[</span><span class="s">&#39;groups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)])</span>
+            <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;groups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)])</span>
             <span class="k">continue</span>
 
-        <span class="c"># Check for rigid group</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;^rigid_group&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Check for rigid group</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^rigid_group&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">thisDict</span> <span class="o">=</span> <span class="n">seek_dictionary_by_name</span><span class="p">(</span><span class="n">rigidGroups</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">thisDict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">thisDict</span> <span class="o">=</span> <span class="n">rigidGroupDictTemplate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">thisDict</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
                 <span class="n">rigidGroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thisDict</span><span class="p">)</span>
-            <span class="n">thisDict</span><span class="p">[</span><span class="s">&#39;panels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)])</span>
+            <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)])</span>
             <span class="k">continue</span>
 
-        <span class="c"># Check for bad region</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;^bad&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span>
+        <span class="c1"># Check for bad region</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^bad&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">thisDict</span> <span class="o">=</span> <span class="n">seek_dictionary_by_name</span><span class="p">(</span><span class="n">badRegions</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">thisDict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">thisDict</span> <span class="o">=</span> <span class="n">badRegionDictTemplate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">thisDict</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
                 <span class="n">badRegions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thisDict</span><span class="p">)</span>
             <span class="n">thisDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
             <span class="k">continue</span>
 
-        <span class="c"># If not any of the above types, check if it is a Panel-specific</span>
-        <span class="c"># specification</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span>
+        <span class="c1"># If not any of the above types, check if it is a Panel-specific</span>
+        <span class="c1"># specification</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Cannot interpret string </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">originalline</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Cannot interpret string </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">originalline</span><span class="p">)</span>
             <span class="k">continue</span>
 
-        <span class="c"># Split name from key/value pairs</span>
+        <span class="c1"># Split name from key/value pairs</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
@@ -280,14 +280,14 @@
             <span class="n">thisDict</span> <span class="o">=</span> <span class="n">seek_dictionary_by_name</span><span class="p">(</span><span class="n">panels</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">thisDict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">thisDict</span> <span class="o">=</span> <span class="n">panelDictTemplate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">thisDict</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
                 <span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thisDict</span><span class="p">)</span>
             <span class="n">thisDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
             <span class="k">continue</span>
 
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Cannot interpret: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">originalline</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Cannot interpret: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">originalline</span><span class="p">)</span>
 
-    <span class="c"># Convert strings to numeric types as appropriate</span>
+    <span class="c1"># Convert strings to numeric types as appropriate</span>
     <span class="k">if</span> <span class="n">raw_strings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">True</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">Panel</span> <span class="ow">in</span> <span class="n">panels</span><span class="p">:</span>
             <span class="n">convert_types</span><span class="p">(</span><span class="n">Panel</span><span class="p">)</span>
@@ -295,108 +295,108 @@
         <span class="k">for</span> <span class="n">badRegion</span> <span class="ow">in</span> <span class="n">badRegions</span><span class="p">:</span>
             <span class="n">convert_types</span><span class="p">(</span><span class="n">badRegion</span><span class="p">)</span>
 
-    <span class="c"># Populate the missing values in each Panel with global values</span>
+    <span class="c1"># Populate the missing values in each Panel with global values</span>
     <span class="k">for</span> <span class="n">Panel</span> <span class="ow">in</span> <span class="n">panels</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">panelKeys</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">Panel</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">Panel</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">globals_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-    <span class="c"># Now package up the results and return</span>
-    <span class="n">geomDict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;globals_&#39;</span><span class="p">:</span> <span class="n">globals_</span><span class="p">,</span>
-                <span class="s">&#39;panels&#39;</span><span class="p">:</span> <span class="n">panels</span><span class="p">,</span>
-                <span class="s">&#39;rigidGroups&#39;</span><span class="p">:</span> <span class="n">rigidGroups</span><span class="p">,</span>
-                <span class="s">&#39;rigidGroupCollections&#39;</span><span class="p">:</span> <span class="n">rigidGroupCollections</span><span class="p">,</span>
-                <span class="s">&#39;badRegions&#39;</span><span class="p">:</span> <span class="n">badRegions</span><span class="p">}</span>
-    <span class="k">return</span> <span class="n">geomDict</span>
+    <span class="c1"># Now package up the results and return</span>
+    <span class="n">geomDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;globals_&#39;</span><span class="p">:</span> <span class="n">globals_</span><span class="p">,</span>
+                <span class="s1">&#39;panels&#39;</span><span class="p">:</span> <span class="n">panels</span><span class="p">,</span>
+                <span class="s1">&#39;rigidGroups&#39;</span><span class="p">:</span> <span class="n">rigidGroups</span><span class="p">,</span>
+                <span class="s1">&#39;rigidGroupCollections&#39;</span><span class="p">:</span> <span class="n">rigidGroupCollections</span><span class="p">,</span>
+                <span class="s1">&#39;badRegions&#39;</span><span class="p">:</span> <span class="n">badRegions</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">geomDict</span></div>
 
-</div>
+
 <div class="viewcode-block" id="geom_dict_to_panellist"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geom_dict_to_panellist">[docs]</a><span class="k">def</span> <span class="nf">geom_dict_to_panellist</span><span class="p">(</span><span class="n">geomDict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Convert a CrystFEL geometry dictionary to a PanelList object. &quot;&quot;&quot;</span>
 
     <span class="n">PanelList</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">PanelList</span><span class="p">()</span>
     <span class="n">PanelList</span><span class="o">.</span><span class="n">Beam</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s">&#39;panels&#39;</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
 
         <span class="n">Panel</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">Panel</span><span class="p">()</span>
 
-        <span class="n">Panel</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
-        <span class="n">Panel</span><span class="o">.</span><span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;fs&#39;</span><span class="p">])</span>  <span class="c"># Unit vectors</span>
-        <span class="n">Panel</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;ss&#39;</span><span class="p">])</span>
-        <span class="n">Panel</span><span class="o">.</span><span class="n">nF</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">Panel</span><span class="o">.</span><span class="n">nS</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">Panel</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">Panel</span><span class="o">.</span><span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">])</span>  <span class="c1"># Unit vectors</span>
+        <span class="n">Panel</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;ss&#39;</span><span class="p">])</span>
+        <span class="n">Panel</span><span class="o">.</span><span class="n">nF</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">Panel</span><span class="o">.</span><span class="n">nS</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">z</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;coffset&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">z</span> <span class="o">+=</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;coffset&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;coffset&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">z</span> <span class="o">+=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;coffset&#39;</span><span class="p">]</span>
         <span class="n">Panel</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;corner_x&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;res&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;corner_y&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;res&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">])</span>
-        <span class="n">Panel</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;res&#39;</span><span class="p">]</span>
-        <span class="n">Panel</span><span class="o">.</span><span class="n">adu_per_ev</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;adu_per_eV&#39;</span><span class="p">]</span>
+            <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;corner_x&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;corner_y&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">])</span>
+        <span class="n">Panel</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">]</span>
+        <span class="n">Panel</span><span class="o">.</span><span class="n">adu_per_ev</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;adu_per_eV&#39;</span><span class="p">]</span>
         <span class="n">PanelList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Panel</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">PanelList</span>
+    <span class="k">return</span> <span class="n">PanelList</span></div>
 
-</div>
+
 <div class="viewcode-block" id="load_cheetah_mask"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.load_cheetah_mask">[docs]</a><span class="k">def</span> <span class="nf">load_cheetah_mask</span><span class="p">(</span><span class="n">maskArray</span><span class="p">,</span> <span class="n">PanelList</span><span class="p">,</span> <span class="n">geomDict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Populate Panel masks with cheetah mask array. &quot;&quot;&quot;</span>
 
     <span class="n">fail</span> <span class="o">=</span> <span class="bp">False</span>
 
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s">&#39;panels&#39;</span><span class="p">]:</span>
-        <span class="n">PanelList</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">maskArray</span><span class="p">[</span>
-            <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
+        <span class="n">PanelList</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">maskArray</span><span class="p">[</span>
+            <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">PanelList</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="bp">None</span>
  
-    <span class="k">return</span> <span class="n">fail</span>
+    <span class="k">return</span> <span class="n">fail</span></div>
 
-</div>
+
 <div class="viewcode-block" id="load_cheetah_dark"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.load_cheetah_dark">[docs]</a><span class="k">def</span> <span class="nf">load_cheetah_dark</span><span class="p">(</span><span class="n">darkArray</span><span class="p">,</span> <span class="n">PanelList</span><span class="p">,</span> <span class="n">geomDict</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Populate Panel darks with cheetah dark array. &quot;&quot;&quot;</span>
 
     <span class="n">fail</span> <span class="o">=</span> <span class="bp">False</span>
 
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s">&#39;panels&#39;</span><span class="p">]:</span>
-        <span class="n">PanelList</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">dark</span> <span class="o">=</span> <span class="n">darkArray</span><span class="p">[</span>
-            <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
+        <span class="n">PanelList</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">dark</span> <span class="o">=</span> <span class="n">darkArray</span><span class="p">[</span>
+            <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
 
-    <span class="k">return</span> <span class="n">fail</span>
+    <span class="k">return</span> <span class="n">fail</span></div>
 
-</div>
+
 <div class="viewcode-block" id="geom_to_panellist"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geom_to_panellist">[docs]</a><span class="k">def</span> <span class="nf">geom_to_panellist</span><span class="p">(</span><span class="n">geomFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">beamFile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">PanelList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Convert a crystfel &quot;geom&quot; file into a Panel list &quot;&quot;&quot;</span>
 
-    <span class="c"># For parsing the very loose fast/slow scan vector specification</span>
+    <span class="c1"># For parsing the very loose fast/slow scan vector specification</span>
     <span class="k">def</span> <span class="nf">splitxysum</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
 
         <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="s">&quot;xyz&quot;</span><span class="p">))</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="s2">&quot;xyz&quot;</span><span class="p">))</span>
         <span class="n">vals</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)):</span>
                 <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>   <span class="c"># CrystFEL allows simply &quot;x&quot; in place of &quot;1x&quot;</span>
+            <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>   <span class="c1"># CrystFEL allows simply &quot;x&quot; in place of &quot;1x&quot;</span>
                 <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">vals</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="n">vec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s">&#39;x&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s">&#39;y&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s">&#39;z&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s">&#39;z&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;y&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;z&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">vec</span>
 
-    <span class="c"># Geometry file is required</span>
+    <span class="c1"># Geometry file is required</span>
     <span class="k">if</span> <span class="n">geomFile</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;No geometry file specified&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No geometry file specified&quot;</span><span class="p">)</span>
 
-    <span class="n">h</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">geomFile</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">geomFile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 
-    <span class="c"># Global settings affecting all panels</span>
+    <span class="c1"># Global settings affecting all panels</span>
     <span class="n">global_coffset</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="n">global_clen_field</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="n">global_clen</span> <span class="o">=</span> <span class="bp">None</span>
@@ -411,7 +411,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">pa</span> <span class="o">=</span> <span class="n">PanelList</span>
 
-    <span class="c"># Place holder for pixel sizes</span>
+    <span class="c1"># Place holder for pixel sizes</span>
     <span class="n">pixel_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
 
     <span class="n">rigidGroupNames</span> <span class="o">=</span> <span class="p">[]</span>
@@ -423,94 +423,94 @@
 
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="c"># Skip empty lines</span>
+        <span class="c1"># Skip empty lines</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="c"># Skip commented lines</span>
-        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;;&#39;</span><span class="p">:</span>
+        <span class="c1"># Skip commented lines</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;;&#39;</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="c"># Remove comments</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)</span>
+        <span class="c1"># Remove comments</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="c"># Search for appropriate lines, which must have an &quot;=&quot; character</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;=&quot;</span><span class="p">)</span>
+        <span class="c1"># Search for appropriate lines, which must have an &quot;=&quot; character</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="c"># Split key/values</span>
+        <span class="c1"># Split key/values</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="c"># Check for global keys first</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;coffset&quot;</span><span class="p">:</span>
-            <span class="c"># This will be summed with clen</span>
+        <span class="c1"># Check for global keys first</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;coffset&quot;</span><span class="p">:</span>
+            <span class="c1"># This will be summed with clen</span>
             <span class="n">global_coffset</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;clen&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;clen&quot;</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="c"># If a value is given</span>
+                <span class="c1"># If a value is given</span>
                 <span class="n">global_clen</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="c"># If a path to value in hdf5 file is given</span>
+                <span class="c1"># If a path to value in hdf5 file is given</span>
                 <span class="n">global_clen_field</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="n">global_clen</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;adu_per_eV&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;adu_per_eV&quot;</span><span class="p">:</span>
             <span class="n">global_adu_per_ev</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&#39;res&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;res&#39;</span><span class="p">:</span>
             <span class="n">global_res</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;data&quot;</span><span class="p">:</span>
-            <span class="c"># This is the hdf5 path to the data array</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span>
+            <span class="c1"># This is the hdf5 path to the data array</span>
             <span class="n">global_data</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;photon_energy&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;photon_energy&quot;</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="c"># If a value is given</span>
+                <span class="c1"># If a value is given</span>
                 <span class="n">global_photon_energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="c"># If a path to value in hdf5 file is given</span>
+                <span class="c1"># If a path to value in hdf5 file is given</span>
                 <span class="n">global_photon_energy_field</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="n">global_photon_energy</span> <span class="o">=</span> <span class="bp">None</span>
 
-        <span class="c"># For dealing with rigid groups</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;^rigid_group_collection&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-            <span class="n">keymod</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)</span>
+        <span class="c1"># For dealing with rigid groups</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^rigid_group_collection&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="n">keymod</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
             <span class="n">rigidGroupCollectionNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">keymod</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">rigidGroupCollections</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)])</span>
+            <span class="n">rigidGroupCollections</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)])</span>
             <span class="k">continue</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;^rigid_group&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-            <span class="n">keymod</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^rigid_group&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="n">keymod</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
             <span class="n">rigidGroupNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">keymod</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">rigidGroups</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)])</span>
+            <span class="n">rigidGroups</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)])</span>
             <span class="k">continue</span>
 
-        <span class="c"># Specification of &quot;bad&quot; regions... we don&#39;t handle these for now</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&quot;^bad_&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="c1"># Specification of &quot;bad&quot; regions... we don&#39;t handle these for now</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^bad_&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
             <span class="k">continue</span>
 
-        <span class="c"># If not a global key, check for Panel-specific keys, which always have</span>
-        <span class="c"># a &quot;/&quot; character</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span>
+        <span class="c1"># If not a global key, check for Panel-specific keys, which always have</span>
+        <span class="c1"># a &quot;/&quot; character</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="c"># Split name from key/value pairs</span>
+        <span class="c1"># Split name from key/value pairs</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="c"># Get index of this Panel</span>
+        <span class="c1"># Get index of this Panel</span>
         <span class="n">i</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">get_panel_index_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="c"># If it is a new Panel:</span>
+        <span class="c1"># If it is a new Panel:</span>
         <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="c"># Initialize Panel</span>
+            <span class="c1"># Initialize Panel</span>
             <span class="n">pa</span><span class="o">.</span><span class="n">append</span><span class="p">()</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">pa</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">pa</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
             <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
             <span class="n">p</span><span class="o">.</span><span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
             <span class="n">p</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
             <span class="n">p</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-            <span class="c"># add some extra attributes to the Panel object</span>
+            <span class="c1"># add some extra attributes to the Panel object</span>
             <span class="n">p</span><span class="o">.</span><span class="n">fRange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
             <span class="n">p</span><span class="o">.</span><span class="n">sRange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
             <span class="n">p</span><span class="o">.</span><span class="n">dataField</span> <span class="o">=</span> <span class="bp">None</span>
@@ -520,67 +520,67 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">pa</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-        <span class="c"># Parse Panel-specific keys</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;corner_x&quot;</span><span class="p">:</span>
+        <span class="c1"># Parse Panel-specific keys</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;corner_x&quot;</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;corner_y&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;corner_y&quot;</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;min_fs&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;min_fs&quot;</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">fRange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;max_fs&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;max_fs&quot;</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">fRange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;min_ss&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;min_ss&quot;</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">sRange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;max_ss&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;max_ss&quot;</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">sRange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;coffset&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;coffset&quot;</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;clen&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;clen&quot;</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;res&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;res&quot;</span><span class="p">:</span>
             <span class="n">pixel_size</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;fs&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;fs&quot;</span><span class="p">:</span>
             <span class="n">vec</span> <span class="o">=</span> <span class="n">splitxysum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="n">p</span><span class="o">.</span><span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s">&quot;ss&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;ss&quot;</span><span class="p">:</span>
             <span class="n">vec</span> <span class="o">=</span> <span class="n">splitxysum</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="n">p</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
 
-    <span class="c"># We are now done reading the geometry file</span>
+    <span class="c1"># We are now done reading the geometry file</span>
     <span class="n">h</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-    <span class="c"># Initialize Beam information for this Panel array</span>
+    <span class="c1"># Initialize Beam information for this Panel array</span>
     <span class="n">pa</span><span class="o">.</span><span class="n">Beam</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 
-    <span class="c"># Now adjust Panel list according to global parameters, convert units, etc.</span>
+    <span class="c1"># Now adjust Panel list according to global parameters, convert units, etc.</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pa</span><span class="p">:</span>
 
-        <span class="c"># Unit conversions</span>
+        <span class="c1"># Unit conversions</span>
         <span class="k">if</span> <span class="n">pixel_size</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">global_res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">pixel_size</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">global_res</span>
         <span class="n">p</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="n">pixel_size</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="n">pixel_size</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-        <span class="c"># Data array size</span>
+        <span class="c1"># Data array size</span>
         <span class="n">p</span><span class="o">.</span><span class="n">nF</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">fRange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">fRange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">p</span><span class="o">.</span><span class="n">nS</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">sRange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">sRange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
 
-        <span class="c"># Check for extra global configurations</span>
+        <span class="c1"># Check for extra global configurations</span>
         <span class="n">p</span><span class="o">.</span><span class="n">adu_per_ev</span> <span class="o">=</span> <span class="n">global_adu_per_ev</span>
         <span class="n">p</span><span class="o">.</span><span class="n">dataField</span> <span class="o">=</span> <span class="n">global_data</span>
         <span class="n">p</span><span class="o">.</span><span class="n">detOffsetField</span> <span class="o">=</span> <span class="n">global_clen_field</span>
         <span class="k">if</span> <span class="n">global_clen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">global_clen</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">detOffsetField</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Cannot have clen value *and* path</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">detOffsetField</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Cannot have clen value *and* path</span>
         <span class="k">if</span> <span class="n">global_coffset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">global_coffset</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">detOffsetField</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Cannot have offset value *and* field</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">detOffsetField</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Cannot have offset value *and* field</span>
         <span class="k">if</span> <span class="n">global_photon_energy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="c"># CrystFEL uses eV units</span>
+            <span class="c1"># CrystFEL uses eV units</span>
             <span class="n">p</span><span class="o">.</span><span class="n">Beam</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1.2398e-6</span> <span class="o">/</span> <span class="n">global_photon_energy</span>
-            <span class="c"># Cannot have both energy value *and* field</span>
+            <span class="c1"># Cannot have both energy value *and* field</span>
             <span class="n">p</span><span class="o">.</span><span class="n">photonEnergyField</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -621,7 +621,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2017, Richard A Kirian.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>

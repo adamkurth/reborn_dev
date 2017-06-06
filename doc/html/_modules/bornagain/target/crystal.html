@@ -65,7 +65,7 @@
           <div class="body" role="main">
             
   <h1>Source code for bornagain.target.crystal</h1><div class="highlight"><pre>
-<span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Basic utilities for dealing with crystalline objects.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
@@ -95,36 +95,36 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdbFilePath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c"># Atomic coordinates (3xN array)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="bp">None</span>    <span class="c"># Fractional coordinates (3xN array)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c"># Orthogonalization matrix (3x3 array)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Inverse orthogonalization matrix (3x3 array)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c1"># Atomic coordinates (3xN array)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="bp">None</span>    <span class="c1"># Fractional coordinates (3xN array)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c1"># Orthogonalization matrix (3x3 array)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Inverse orthogonalization matrix (3x3 array)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Ainv</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="c"># Translation vector that goes with orthogonalization matrix (??)</span>
+        <span class="c1"># Translation vector that goes with orthogonalization matrix (??)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Atomic element symbols</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Z</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c"># Atomic numbers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spaceGroupNumber</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Space group number in the Int. Tables</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hermannMauguinSymbol</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Spacegroup Hermann Mauguin symbol</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c"># Lattice constant</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c"># Lattice constant</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c"># Lattice constant</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Lattice angle</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Lattice angle</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Lattice angle</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c"># Unit cell volume</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nAtoms</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Number of atoms</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nMolecules</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Number of molecules per unit cell</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symOps</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Symmetry operations for fractional coords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Atomic element symbols</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Z</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c1"># Atomic numbers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spaceGroupNumber</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Space group number in the Int. Tables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hermannMauguinSymbol</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Spacegroup Hermann Mauguin symbol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c1"># Lattice constant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c1"># Lattice constant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c1"># Lattice constant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Lattice angle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Lattice angle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Lattice angle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="bp">None</span>     <span class="c1"># Unit cell volume</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nAtoms</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Number of atoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nMolecules</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Number of molecules per unit cell</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symOps</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Symmetry operations for fractional coords</span>
 
         <span class="k">if</span> <span class="n">pdbFilePath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">loadPDB</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">)</span>
 
 <div class="viewcode-block" id="structure.loadPDB"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.structure.loadPDB">[docs]</a>    <span class="k">def</span> <span class="nf">loadPDB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdbFilePath</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Populate all the attributes from a PDB file. &#39;&#39;&#39;</span>
-        <span class="n">parsePDB</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-</div>
+        <span class="n">parsePDB</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="structure.setCell"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.structure.setCell">[docs]</a>    <span class="k">def</span> <span class="nf">setCell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Set the unit cell and all quantities derived from the unit cell.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -156,16 +156,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span> <span class="o">=</span> <span class="n">Oinv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">Oinv</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Ainv</span> <span class="o">=</span> <span class="n">O</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">V</span>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">V</span></div>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Fractional coordinates of atoms. &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span></div>
 
-</div>
+
 <div class="viewcode-block" id="parsePDB"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.parsePDB">[docs]</a><span class="k">def</span> <span class="nf">parsePDB</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">,</span> <span class="n">crystalStruct</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; Return a structure object with PDB information. &#39;&#39;&#39;</span>
 
@@ -183,27 +183,27 @@
 
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pdbfile</span><span class="p">:</span>
 
-            <span class="c"># This is the inverse of the &quot;orthogonalization matrix&quot;  along with</span>
-            <span class="c"># translation vector.  See Rupp for an explanation.</span>
+            <span class="c1"># This is the inverse of the &quot;orthogonalization matrix&quot;  along with</span>
+            <span class="c1"># translation vector.  See Rupp for an explanation.</span>
 
-            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;SCALE&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SCALE&#39;</span><span class="p">:</span>
                 <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
                 <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">])</span>
                 <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span><span class="p">])</span>
                 <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span>
                 <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">45</span><span class="p">:</span><span class="mi">55</span><span class="p">])</span>
 
-            <span class="c"># The crystal lattice and symmetry</span>
+            <span class="c1"># The crystal lattice and symmetry</span>
 
-            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;CRYST1&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;CRYST1&#39;</span><span class="p">:</span>
                 <span class="n">cryst1</span> <span class="o">=</span> <span class="n">line</span>
-                <span class="c"># As always, everything in our programs are in SI units.</span>
-                <span class="c"># PDB files use angstrom units.</span>
+                <span class="c1"># As always, everything in our programs are in SI units.</span>
+                <span class="c1"># PDB files use angstrom units.</span>
                 <span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">15</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
                 <span class="n">b</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">24</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
                 <span class="n">c</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">33</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="c"># And of course degrees are converted to radians (though we</span>
-                <span class="c"># loose the perfection of rational quotients like 360/4=90...)</span>
+                <span class="c1"># And of course degrees are converted to radians (though we</span>
+                <span class="c1"># loose the perfection of rational quotients like 360/4=90...)</span>
                 <span class="n">al</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">33</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
                 <span class="n">be</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">47</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
                 <span class="n">ga</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">47</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
@@ -211,19 +211,19 @@
                 <span class="n">cryst</span><span class="o">.</span><span class="n">setCell</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">al</span><span class="p">,</span> <span class="n">be</span><span class="p">,</span> <span class="n">ga</span><span class="p">)</span>
                 <span class="n">spcgrp</span> <span class="o">=</span> <span class="n">cryst1</span><span class="p">[</span><span class="mi">55</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;ATOM  &#39;</span> <span class="ow">or</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;HETATM&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ATOM  &#39;</span> <span class="ow">or</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;HETATM&quot;</span><span class="p">:</span>
                 <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">atomIndex</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">38</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
                 <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">atomIndex</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">38</span><span class="p">:</span><span class="mi">46</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
                 <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="n">atomIndex</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">46</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
                 <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">76</span><span class="p">:</span><span class="mi">78</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
-                <span class="c"># z = atoms.atomic_symbols_to_numbers(elements[atomIndex])</span>
-                <span class="c"># #xr.SymbolToAtomicNumber(elements[atomIndex])</span>
+                <span class="c1"># z = atoms.atomic_symbols_to_numbers(elements[atomIndex])</span>
+                <span class="c1"># #xr.SymbolToAtomicNumber(elements[atomIndex])</span>
                 <span class="n">atomIndex</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">if</span> <span class="n">atomIndex</span> <span class="o">==</span> <span class="n">maxAtoms</span><span class="p">:</span>
                 <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="n">maxAtoms</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="c"># Truncate atom list since we pre-allocated extra memory</span>
+    <span class="c1"># Truncate atom list since we pre-allocated extra memory</span>
     <span class="n">nAtoms</span> <span class="o">=</span> <span class="n">atomIndex</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[:,</span> <span class="p">:</span><span class="n">nAtoms</span><span class="p">]</span>
     <span class="n">elements</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[:</span><span class="n">nAtoms</span><span class="p">]</span>
@@ -239,13 +239,13 @@
     <span class="n">cryst</span><span class="o">.</span><span class="n">nAtoms</span> <span class="o">=</span> <span class="n">nAtoms</span>
     <span class="n">cryst</span><span class="o">.</span><span class="n">symOps</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">get_symmetry_from_database</span><span class="p">(</span>
         <span class="n">hermannMauguinToNumber</span><span class="p">(</span><span class="n">spcgrp</span><span class="p">,</span> <span class="n">hall</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
-    <span class="n">cryst</span><span class="o">.</span><span class="n">nMolecules</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cryst</span><span class="o">.</span><span class="n">symOps</span><span class="p">[</span><span class="s">&#39;rotations&#39;</span><span class="p">])</span>
-    <span class="n">cryst</span><span class="o">.</span><span class="n">symRs</span> <span class="o">=</span> <span class="p">[</span><span class="n">R</span> <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="n">cryst</span><span class="o">.</span><span class="n">symOps</span><span class="p">[</span><span class="s">&#39;rotations&#39;</span><span class="p">]]</span>
-    <span class="n">cryst</span><span class="o">.</span><span class="n">symRinvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="n">cryst</span><span class="o">.</span><span class="n">symOps</span><span class="p">[</span><span class="s">&#39;rotations&#39;</span><span class="p">]]</span>
-    <span class="n">cryst</span><span class="o">.</span><span class="n">symTs</span> <span class="o">=</span> <span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">vec_check</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">cryst</span><span class="o">.</span><span class="n">symOps</span><span class="p">[</span><span class="s">&#39;translations&#39;</span><span class="p">]]</span>
+    <span class="n">cryst</span><span class="o">.</span><span class="n">nMolecules</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cryst</span><span class="o">.</span><span class="n">symOps</span><span class="p">[</span><span class="s1">&#39;rotations&#39;</span><span class="p">])</span>
+    <span class="n">cryst</span><span class="o">.</span><span class="n">symRs</span> <span class="o">=</span> <span class="p">[</span><span class="n">R</span> <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="n">cryst</span><span class="o">.</span><span class="n">symOps</span><span class="p">[</span><span class="s1">&#39;rotations&#39;</span><span class="p">]]</span>
+    <span class="n">cryst</span><span class="o">.</span><span class="n">symRinvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="n">cryst</span><span class="o">.</span><span class="n">symOps</span><span class="p">[</span><span class="s1">&#39;rotations&#39;</span><span class="p">]]</span>
+    <span class="n">cryst</span><span class="o">.</span><span class="n">symTs</span> <span class="o">=</span> <span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">vec_check</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">cryst</span><span class="o">.</span><span class="n">symOps</span><span class="p">[</span><span class="s1">&#39;translations&#39;</span><span class="p">]]</span>
 
-    <span class="k">return</span> <span class="n">cryst</span>
-</div>
+    <span class="k">return</span> <span class="n">cryst</span></div>
+
 <div class="viewcode-block" id="Atoms"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Atoms">[docs]</a><span class="k">class</span> <span class="nc">Atoms</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">atomic_num</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz</span>
@@ -262,7 +262,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">elem</span> <span class="o">=</span> <span class="n">elem</span>
         <span class="k">if</span> <span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">xyz_format</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;S16&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xyz_format</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;S16&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">xyz_format</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elem</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">xyz_format</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
@@ -278,26 +278,26 @@
 
         <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">Z</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span>
-</div>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Atoms.to_xyz"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Atoms.to_xyz">[docs]</a>    <span class="k">def</span> <span class="nf">to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz_format</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz_format</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s">&quot;Cannot save to xyz because element strings were not provided...&quot;</span><span class="p">)</span>
-</div>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Cannot save to xyz because element strings were not provided...&quot;</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Atoms.set_elem"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Atoms.set_elem">[docs]</a>    <span class="k">def</span> <span class="nf">set_elem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;sets list of elements names for use in xyz format files&quot;&quot;&quot;</span>
-        <span class="n">elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;S16&#39;</span><span class="p">)</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;S16&#39;</span><span class="p">)</span>
         <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elem</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">elem</span> <span class="o">=</span> <span class="n">elem</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elem</span> <span class="o">=</span> <span class="n">elem</span></div></div>
 
-</div></div>
+
 <div class="viewcode-block" id="Molecule"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Molecule">[docs]</a><span class="k">class</span> <span class="nc">Molecule</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">structure</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">*</span> <span class="mf">1e10</span>  <span class="c"># atom positions!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">*</span> <span class="mf">1e10</span>  <span class="c1"># atom positions!</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">Lattice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span>
                            <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
@@ -310,16 +310,16 @@
 
 <div class="viewcode-block" id="Molecule.get_1d_coords"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Molecule.get_1d_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_1d_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seprate_xyz</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
-</div>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+
 <div class="viewcode-block" id="Molecule.get_1d_frac_coords"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Molecule.get_1d_frac_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_1d_frac_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_separate_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_fracs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
-</div>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+
 <div class="viewcode-block" id="Molecule.mat_mult_many"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Molecule.mat_mult_many">[docs]</a>    <span class="k">def</span> <span class="nf">mat_mult_many</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">V</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; helper for applying matrix multiplications on many vectors&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s">&#39;ij,kj-&gt;ki&#39;</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
-</div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij,kj-&gt;ki&#39;</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Molecule.shift"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Molecule.shift">[docs]</a>    <span class="k">def</span> <span class="nf">shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">monomer</span><span class="p">,</span> <span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">nc</span><span class="p">):</span>
         <span class="n">xyz_frac</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span><span class="o">*</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">monomer</span><span class="o">.</span><span class="n">xyz</span><span class="p">)</span>
         <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_separate_xyz</span><span class="p">(</span><span class="n">xyz_frac</span><span class="p">)</span>
@@ -333,9 +333,9 @@
         <span class="n">xyz_new</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
         <span class="n">xyz_new</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
         <span class="n">xyz_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span> <span class="n">xyz_new</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">xyz_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">xyz_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span></div>
 
-</div>
+
 <div class="viewcode-block" id="Molecule.transform"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Molecule.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;x,y,z are fractional coordinates&quot;&quot;&quot;</span>
         <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">))</span>
@@ -343,17 +343,17 @@
         <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
         <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
         <span class="n">xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span> <span class="n">xyz</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
-</div>
+        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Molecule.get_monomers"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Molecule.get_monomers">[docs]</a>    <span class="k">def</span> <span class="nf">get_monomers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">monomers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">R</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symRs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">symTs</span><span class="p">):</span>
             <span class="n">transformed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_fracs</span><span class="p">)</span> <span class="o">+</span> <span class="n">T</span>
             <span class="n">transformed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span> <span class="n">transformed</span><span class="p">)</span>
             <span class="n">monomers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Atoms</span><span class="p">(</span><span class="n">transformed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">monomers</span>
+        <span class="k">return</span> <span class="n">monomers</span></div></div>
 
-</div></div>
+
 <div class="viewcode-block" id="Lattice"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Lattice">[docs]</a><span class="k">class</span> <span class="nc">Lattice</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">281.</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">281.</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mf">165.2</span><span class="p">,</span>
                  <span class="n">alpha</span><span class="o">=</span><span class="mf">90.</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">90.</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">120.</span><span class="p">):</span>
@@ -362,7 +362,7 @@
 <span class="sd">        alpha, beta, gamma are in degrees</span>
 <span class="sd">        default is for PS1</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-<span class="c">#       unit cell edges</span>
+<span class="c1">#       unit cell edges</span>
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.</span>
         <span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.</span>
         <span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.</span>
@@ -382,79 +382,79 @@
 
 <div class="viewcode-block" id="Lattice.assemble"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Lattice.assemble">[docs]</a>    <span class="k">def</span> <span class="nf">assemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_unit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">spherical</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
 
-        <span class="c">#       lattice coordinates</span>
+        <span class="c1">#       lattice coordinates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">+</span> <span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">+</span> <span class="n">k</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span>
                               <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)</span>
                               <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)</span>
                               <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)])</span>
 
-<span class="c">#       sphericalize the lattice..</span>
+<span class="c1">#       sphericalize the lattice..</span>
         <span class="k">if</span> <span class="n">spherical</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">vecs</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sphericalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vecs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vecs</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sphericalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vecs</span><span class="p">)</span></div></div>
 
 
 
 
-<span class="c"># def viewClusterAtoms(cryst,occupancies=None):</span>
-<span class="c">#</span>
-<span class="c">#    &#39;&#39;&#39; Simple 3D viewer to see atomic coordinates and unit cell.  Not very</span>
-<span class="c">#    featureful, but works as a basic sanity check for transformations.&#39;&#39;&#39;</span>
-<span class="c">#</span>
-<span class="c">#    if occupancies is None:</span>
-<span class="c">#        occupancies = [[np.zeros([3])] for i in range(0,cryst.nMolecules)]</span>
+<span class="c1"># def viewClusterAtoms(cryst,occupancies=None):</span>
+<span class="c1">#</span>
+<span class="c1">#    &#39;&#39;&#39; Simple 3D viewer to see atomic coordinates and unit cell.  Not very</span>
+<span class="c1">#    featureful, but works as a basic sanity check for transformations.&#39;&#39;&#39;</span>
+<span class="c1">#</span>
+<span class="c1">#    if occupancies is None:</span>
+<span class="c1">#        occupancies = [[np.zeros([3])] for i in range(0,cryst.nMolecules)]</span>
 
-<span class="c">#    app=pg.QtGui.QApplication([])</span>
-<span class="c">#    w = gl.GLViewWidget()</span>
-<span class="c">#    scl = 1e10</span>
-<span class="c">#    siz = 1</span>
+<span class="c1">#    app=pg.QtGui.QApplication([])</span>
+<span class="c1">#    w = gl.GLViewWidget()</span>
+<span class="c1">#    scl = 1e10</span>
+<span class="c1">#    siz = 1</span>
 
-    <span class="c"># Plot each symmetry partner in different colors</span>
-<span class="c">#    for i in range(0,cryst.nMolecules):</span>
-<span class="c">#        print(i)</span>
-<span class="c">#        R = cryst.symRs[i]</span>
-<span class="c">#        T = cryst.symTs[i]</span>
-<span class="c">#        for Tp in occupancies[i]:</span>
-<span class="c">#            Tp = utils.vec_check(Tp)</span>
-<span class="c">#            ff = cryst.O.dot(R.dot(cryst.x)+T+Tp)</span>
-<span class="c">#            plt = gl.GLScatterPlotItem(pos=ff.T*scl,color=utils.glColors[i+2],</span>
-<span class="c">#                                       size=siz)</span>
-<span class="c">#            w.addItem(plt)</span>
+    <span class="c1"># Plot each symmetry partner in different colors</span>
+<span class="c1">#    for i in range(0,cryst.nMolecules):</span>
+<span class="c1">#        print(i)</span>
+<span class="c1">#        R = cryst.symRs[i]</span>
+<span class="c1">#        T = cryst.symTs[i]</span>
+<span class="c1">#        for Tp in occupancies[i]:</span>
+<span class="c1">#            Tp = utils.vec_check(Tp)</span>
+<span class="c1">#            ff = cryst.O.dot(R.dot(cryst.x)+T+Tp)</span>
+<span class="c1">#            plt = gl.GLScatterPlotItem(pos=ff.T*scl,color=utils.glColors[i+2],</span>
+<span class="c1">#                                       size=siz)</span>
+<span class="c1">#            w.addItem(plt)</span>
 
-    <span class="c"># Plot points at the origin and lattice vector tips</span>
-<span class="c">#    o = np.array([0,0,0])</span>
-<span class="c">#    tips = [cryst.O.dot(np.array([1,0,0])),</span>
-<span class="c">#            cryst.O.dot(np.array([0,1,0])),</span>
-<span class="c">#            cryst.O.dot(np.array([0,0,1]))]</span>
+    <span class="c1"># Plot points at the origin and lattice vector tips</span>
+<span class="c1">#    o = np.array([0,0,0])</span>
+<span class="c1">#    tips = [cryst.O.dot(np.array([1,0,0])),</span>
+<span class="c1">#            cryst.O.dot(np.array([0,1,0])),</span>
+<span class="c1">#            cryst.O.dot(np.array([0,0,1]))]</span>
 
-    <span class="c"># Draw the unit cell in white</span>
-<span class="c">#    wid=1</span>
-<span class="c">#    C=pg.glColor([255,255,255])</span>
-<span class="c">#    for i in range(0,3):</span>
-<span class="c">#        plt = gl.GLLinePlotItem(pos=np.array([o,tips[i]])*scl,mode=&#39;lines&#39;,</span>
-<span class="c">#                                width=wid,color=C)</span>
-<span class="c">#        w.addItem(plt)</span>
-<span class="c">#        plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+1)%3])*scl,</span>
-<span class="c">#                                mode=&#39;lines&#39;,width=wid,color=C)</span>
-<span class="c">#        w.addItem(plt)</span>
-<span class="c">#        plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+2)%3])*scl,</span>
-<span class="c">#                                        mode=&#39;lines&#39;,width=wid,color=C)</span>
-<span class="c">#        w.addItem(plt)</span>
-<span class="c">#        plt = gl.GLLinePlotItem(pos=(np.array([o,</span>
-<span class="c">#                tips[i]])+tips[(i+1)%3]+tips[(i+2)%3])*scl,</span>
-<span class="c">#                mode=&#39;lines&#39;,width=wid,color=C)</span>
-<span class="c">#        w.addItem(plt)</span>
+    <span class="c1"># Draw the unit cell in white</span>
+<span class="c1">#    wid=1</span>
+<span class="c1">#    C=pg.glColor([255,255,255])</span>
+<span class="c1">#    for i in range(0,3):</span>
+<span class="c1">#        plt = gl.GLLinePlotItem(pos=np.array([o,tips[i]])*scl,mode=&#39;lines&#39;,</span>
+<span class="c1">#                                width=wid,color=C)</span>
+<span class="c1">#        w.addItem(plt)</span>
+<span class="c1">#        plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+1)%3])*scl,</span>
+<span class="c1">#                                mode=&#39;lines&#39;,width=wid,color=C)</span>
+<span class="c1">#        w.addItem(plt)</span>
+<span class="c1">#        plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+2)%3])*scl,</span>
+<span class="c1">#                                        mode=&#39;lines&#39;,width=wid,color=C)</span>
+<span class="c1">#        w.addItem(plt)</span>
+<span class="c1">#        plt = gl.GLLinePlotItem(pos=(np.array([o,</span>
+<span class="c1">#                tips[i]])+tips[(i+1)%3]+tips[(i+2)%3])*scl,</span>
+<span class="c1">#                mode=&#39;lines&#39;,width=wid,color=C)</span>
+<span class="c1">#        w.addItem(plt)</span>
 
-    <span class="c"># Draw the basis vectors in color</span>
-<span class="c">#    for i in range(0,3):</span>
-<span class="c">#        plt = gl.GLLinePlotItem(pos=np.array([o,tips[i]])*scl,mode=&#39;lines&#39;,</span>
-<span class="c">#                                    width=5,color=utils.glColors[i+2])</span>
-<span class="c">#        w.addItem(plt)</span>
+    <span class="c1"># Draw the basis vectors in color</span>
+<span class="c1">#    for i in range(0,3):</span>
+<span class="c1">#        plt = gl.GLLinePlotItem(pos=np.array([o,tips[i]])*scl,mode=&#39;lines&#39;,</span>
+<span class="c1">#                                    width=5,color=utils.glColors[i+2])</span>
+<span class="c1">#        w.addItem(plt)</span>
 
-<span class="c">#    w.setCameraPosition(distance=1000)</span>
-<span class="c">#    w.show()</span>
-<span class="c">#    pg.QtGui.QApplication.exec_()</span>
+<span class="c1">#    w.setCameraPosition(distance=1000)</span>
+<span class="c1">#    w.show()</span>
+<span class="c1">#    pg.QtGui.QApplication.exec_()</span>
 
-</div></div>
+
 <div class="viewcode-block" id="hermannMauguinToNumber"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.hermannMauguinToNumber">[docs]</a><span class="k">def</span> <span class="nf">hermannMauguinToNumber</span><span class="p">(</span><span class="n">hm</span><span class="p">,</span> <span class="n">hall</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">This is needed to convert the Hermann Mauguin space group specifications</span>
@@ -994,536 +994,536 @@
         <span class="mi">229</span><span class="p">,</span>
         <span class="mi">230</span><span class="p">]</span>
     <span class="n">hmsym</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s">&#39;P 1&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -1&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/m &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2/c &#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 2 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 21 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 21 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 21 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 2 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 21 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 2 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A 21 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B 2 21 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A 2 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B 2 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F 2 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 2 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 21 21 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m c 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c m 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b 21 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m 21 b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c c 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b 2 b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m a 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m 2 a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c a 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b c 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 a b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 c a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c 21 b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b 21 a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n c 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c n 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 n a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 a n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b 2 n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n 2 b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m n 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n m 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 m n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 n m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n 21 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m 21 n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b a 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c 2 a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n a 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b n 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 n b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 c n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c 21 n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n 21 a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n n 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 n n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n 2 n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A 2 m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B m 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m c 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c m 21&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A 21 m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A 21 a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b 21 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B m 21 b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c c 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A 2 a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b 2 b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A m m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B m m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B 2 m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A m 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A b m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B m a 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B 2 c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m 2 a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A c 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A m a 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B 2 m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A m 2 a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A b a 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b a 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B 2 c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C 2 c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c 2 a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A c 2 a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F m m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F 2 m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F m 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F d d 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F 2 d d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F d 2 d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 2 m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I b a 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 2 c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I c 2 a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m a 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I b m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 2 m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 2 c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I c 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m 2 a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n n n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n n n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b a n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b a n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c n a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c n a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n n a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n n b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b n n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c n n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n c n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n a n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m n a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b m n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c n m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m a n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c c a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b a b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c c n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b n b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m c a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m a b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n n m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m n n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n m n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m m n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m m n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m n m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m n m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b c n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c a n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n c a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n a b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b n a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c n b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b c a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c a b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m n b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P b n m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P c m n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m c n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A m m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A m a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B m m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m c a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A b m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A c a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B m a b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A m m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B m m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A m a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C m m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A b m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A c m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B m c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B m a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c c a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c c a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;C c c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A b a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A b a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A c a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;A c a a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b a b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;B b a b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F m m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F d d d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F d d d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I b a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m c b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I c m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I b c a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I c a b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m m a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m m b&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I b m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I c m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m a m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 41&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 43&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 4&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I -4&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 4/m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41/a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41/a&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4 21 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 41 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 41 21 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42 21 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 43 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 43 21 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 4 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4 m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4 b m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42 c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42 n m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4 c c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4 n c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42 m c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42 b c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 4 m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 4 c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41 m d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41 c d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4 2 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4 21 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4 21 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4 m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4 c 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4 b 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4 n 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I -4 m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I -4 c 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I -4 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I -4 2 d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/m m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/m c c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/n b m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/n b m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/n n c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/n n c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/m b m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/m n c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/n m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/n m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/n c c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4/n c c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/m m c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/m c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/n b c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/n b c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/n n m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/n n m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/m b c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/m n m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/n m c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/n m c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/n c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42/n c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 4/m m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 4/m c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41/a m d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41/a m d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41/a c d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41/a c d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 31&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 32&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R -3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R -3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 3 1 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 3 2 1&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 31 1 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 31 2 1&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 32 1 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 32 2 1&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R 3 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R 3 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 3 m 1&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 3 1 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 3 c 1&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 3 1 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R 3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R 3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R 3 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R 3 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -3 1 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -3 1 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -3 m 1&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -3 c 1&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R -3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R -3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R -3 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;R -3 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 6&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 61&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 65&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 62&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 64&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 63&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -6&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 6/m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 63/m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 6 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 61 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 65 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 62 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 64 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 63 2 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 6 m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 6 c c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 63 c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 63 m c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -6 m 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -6 c 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -6 2 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -6 2 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 6/m m m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 6/m c c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 63/m c m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 63/m m c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 2 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F 2 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 2 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 21 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 21 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F m 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F d 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F d 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P a 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I a 3&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 4 3 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 42 3 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F 4 3 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F 41 3 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 4 3 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 43 3 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P 41 3 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I 41 3 2&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4 3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F -4 3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I -4 3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P -4 3 n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F -4 3 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I -4 3 d&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m -3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n -3 n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n -3 n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P m -3 n&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n -3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;P n -3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F m -3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F m -3 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F d -3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F d -3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F d -3 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;F d -3 c&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I m -3 m&#39;</span><span class="p">,</span>
-        <span class="s">&#39;I a -3 d&#39;</span><span class="p">]</span>
+        <span class="s1">&#39;P 1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/m &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2/c &#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 2 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 21 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 21 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 21 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 2 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 21 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 2 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A 21 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B 2 21 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A 2 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B 2 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F 2 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 2 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 21 21 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m c 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c m 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b 21 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m 21 b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c c 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b 2 b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m a 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m 2 a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c a 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b c 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 a b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 c a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c 21 b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b 21 a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n c 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c n 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 n a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 a n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b 2 n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n 2 b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m n 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n m 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 m n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 n m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n 21 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m 21 n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b a 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c 2 a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n a 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b n 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 n b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 c n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c 21 n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n 21 a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n n 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 n n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n 2 n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A 2 m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B m 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m c 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c m 21&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A 21 m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A 21 a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b 21 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B m 21 b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c c 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A 2 a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b 2 b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A m m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B m m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B 2 m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A m 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A b m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B m a 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B 2 c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m 2 a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A c 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A m a 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B 2 m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A m 2 a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A b a 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b a 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B 2 c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C 2 c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c 2 a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A c 2 a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F m m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F 2 m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F m 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F d d 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F 2 d d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F d 2 d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 2 m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I b a 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 2 c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I c 2 a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m a 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I b m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 2 m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 2 c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I c 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m 2 a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n n n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n n n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b a n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b a n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c n a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c n a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n n a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n n b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b n n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c n n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n c n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n a n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m n a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b m n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c n m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m a n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c c a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b a b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c c n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b n b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m c a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m a b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n n m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m n n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n m n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m m n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m m n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m n m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m n m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b c n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c a n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n c a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n a b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b n a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c n b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b c a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c a b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m n b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P b n m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P c m n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m c n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A m m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A m a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B m m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m c a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A b m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A c a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B m a b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A m m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B m m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A m a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C m m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A b m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A c m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B m c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B m a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c c a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c c a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C c c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A b a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A b a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A c a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;A c a a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b a b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;B b a b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F m m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F d d d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F d d d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I b a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m c b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I c m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I b c a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I c a b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m m a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m m b&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I b m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I c m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m a m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 41&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 43&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I -4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 4/m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41/a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41/a&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4 21 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 41 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 41 21 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42 21 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 43 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 43 21 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 4 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4 m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4 b m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42 c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42 n m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4 c c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4 n c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42 m c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42 b c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 4 m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 4 c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41 m d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41 c d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4 2 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4 21 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4 21 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4 m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4 c 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4 b 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4 n 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I -4 m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I -4 c 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I -4 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I -4 2 d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/m m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/m c c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/n b m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/n b m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/n n c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/n n c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/m b m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/m n c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/n m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/n m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/n c c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4/n c c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/m m c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/m c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/n b c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/n b c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/n n m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/n n m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/m b c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/m n m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/n m c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/n m c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/n c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42/n c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 4/m m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 4/m c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41/a m d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41/a m d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41/a c d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41/a c d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 31&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 32&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R -3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R -3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 3 1 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 3 2 1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 31 1 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 31 2 1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 32 1 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 32 2 1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R 3 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R 3 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 3 m 1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 3 1 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 3 c 1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 3 1 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R 3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R 3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R 3 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R 3 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -3 1 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -3 1 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -3 m 1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -3 c 1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R -3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R -3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R -3 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;R -3 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 6&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 61&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 65&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 62&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 64&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 63&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -6&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 6/m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 63/m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 6 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 61 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 65 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 62 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 64 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 63 2 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 6 m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 6 c c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 63 c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 63 m c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -6 m 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -6 c 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -6 2 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -6 2 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 6/m m m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 6/m c c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 63/m c m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 63/m m c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 2 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F 2 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 2 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 21 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 21 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F m 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F d 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F d 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P a 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I a 3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 4 3 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 42 3 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F 4 3 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F 41 3 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 4 3 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 43 3 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P 41 3 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I 41 3 2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4 3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F -4 3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I -4 3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P -4 3 n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F -4 3 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I -4 3 d&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m -3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n -3 n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n -3 n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P m -3 n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n -3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P n -3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F m -3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F m -3 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F d -3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F d -3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F d -3 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;F d -3 c&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I m -3 m&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I a -3 d&#39;</span><span class="p">]</span>
 
     <span class="n">foundMatch</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sym</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hmsym</span><span class="p">):</span>
@@ -1561,7 +1561,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2017, Richard A Kirian.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>

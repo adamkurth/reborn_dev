@@ -206,12 +206,6 @@ first pixel in memory.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.detector.Panel.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.check" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check for any known issues with this Panel.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="bornagain.detector.Panel.check_data">
 <code class="descname">check_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.check_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.check_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that a data array is consistent with panel shape.</p>
@@ -304,6 +298,12 @@ displays</p>
 <dt id="bornagain.detector.Panel.reshape">
 <code class="descname">reshape</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.reshape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.reshape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reshape array to panel shape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.Panel.shape">
+<code class="descname">shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return expected shape of data arrays.</p>
 </dd></dl>
 
 <dl class="method">
@@ -530,7 +530,7 @@ T          : Translation from sample to center of first pixel in meters</p>
 
 <dl class="class">
 <dt id="bornagain.detector.SimpleDetector">
-<em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">SimpleDetector</code><span class="sig-paren">(</span><em>n_pixels=1000</em>, <em>pixsize=5e-05</em>, <em>detdist=0.05</em>, <em>wavelen=1</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimpleDetector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimpleDetector" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">SimpleDetector</code><span class="sig-paren">(</span><em>n_pixels=1000</em>, <em>pixsize=5e-05</em>, <em>detdist=0.05</em>, <em>wavelen=1.0</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimpleDetector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimpleDetector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="bornagain.detector.html#bornagain.detector.Panel" title="bornagain.detector.Panel"><code class="xref py py-class docutils literal"><span class="pre">bornagain.detector.Panel</span></code></a></p>
 <dl class="method">
 <dt id="bornagain.detector.SimpleDetector.display">
@@ -701,7 +701,7 @@ return a modified numpy ndarray with the correct shape.</p>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2017, Richard A Kirian.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>
