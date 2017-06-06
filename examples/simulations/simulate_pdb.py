@@ -9,9 +9,16 @@ import bornagain as ba
 import bornagain.target.crystal as crystal
 
 try:
-    import bornagain.simulate.clcore as clcore
+    import bornagain.simulate.clcore as core
 except:
     print('Cannot import clcore; check that pyopencl is installed')
+
+show = False   # Display the simulated patterns
+double = False # Use double precision if available
+if 'view' in sys.argv: show = True
+if 'double' in sys.argv: double = True
+
+clcore = core.ClCore(group_size=32,double_precision=double)
 
 # Create a detector
 pl = ba.detector.PanelList()
@@ -36,10 +43,6 @@ r = cryst.r
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z,ba.units.hc/pl.beam.wavelength)
 
 n_trials = 3
-if len(sys.argv) > 1:
-    show = 1
-else:
-    show = 0
 show_all = show
 #plt.ion()
 
@@ -72,10 +75,10 @@ if 1:
     t = time.time()
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
-    q_dev = clcore.to_device(q, dtype=np.float32)
-    r_dev = clcore.to_device(r, dtype=np.float32)
-    f_dev = clcore.to_device(f, dtype=np.complex64)
-    a_dev = clcore.to_device(np.zeros([q_dev.shape[0]],dtype=np.complex64))
+    q_dev = clcore.to_device(q, dtype=clcore.real_t)
+    r_dev = clcore.to_device(r, dtype=clcore.real_t)
+    f_dev = clcore.to_device(f, dtype=clcore.complex_t)
+    a_dev = clcore.to_device(np.zeros([q_dev.shape[0]],dtype=clcore.complex_t))
     tf = time.time() - t
     print('Move to device memory: %7.03f ms' % (tf*1e3))
     for i in range(0, n_trials):
@@ -194,9 +197,9 @@ if 1:
     print("")
     
     t = time.time()
-    q_dev = clcore.to_device(q, dtype=np.float32)
-    a_map_dev = clcore.to_device(A, dtype=np.complex64)
-    a_out_dev = clcore.to_device(dtype=np.complex64, shape=(n_pixels))
+    q_dev = clcore.to_device(q, dtype=clcore.real_t)
+    a_map_dev = clcore.to_device(A, dtype=clcore.complex_t)
+    a_out_dev = clcore.to_device(dtype=clcore.complex_t, shape=(n_pixels))
     tf = time.time() - t
     print('[clcore] As above, but first move arrays to device memory (%7.03f ms)' % (tf*1e3))
     n_atoms = 0
@@ -234,7 +237,7 @@ if 1:
 #     n_pixels = q.shape[0]
 #     for i in range(0,n_trials):
 #         t = time.time()
-#         A = cycore.molecularFormFactor(q.astype(np.float32),r.astype(np.float32),f.astype(np.complex64))
+#         A = cycore.molecularFormFactor(q.astype(clcore.real_t),r.astype(clcore.real_t),f.astype(clcore.complex_t))
 #         tf = time.time() - t
 #         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
 #               (tf*1e3,n_atoms,n_pixels))

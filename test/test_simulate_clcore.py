@@ -153,6 +153,14 @@ def test_ClCore(main=False):
 
     core = clcore.ClCore(context=None, queue=None, group_size=1)
     assert(core.get_group_size() == core.group_size)
+    
+    ###########################################################################
+    # Check that we can set double precision if available
+    ###########################################################################
+
+    core = clcore.ClCore(context=None, queue=None, group_size=1,
+                         double_precision=True)
+    print(core.double_precision)
 
     ###########################################################################
     # Check that there are no errors in phase_factor_qrf
@@ -197,6 +205,7 @@ def test_ClCore(main=False):
 
     del q, r, f, R, N, pl
     
+    ###########################################################################
     # Check for errors in phase_factor_pad
     # TODO: check that amplitudes are correct
     ###########################################################################
@@ -291,8 +300,8 @@ if __name__ == '__main__':
 
     print('Running as main')
     main = True
-    test_two_atoms(main)
-    test_equivalence_pad_qrf(main)
-    test_rotations(main)
+#     test_two_atoms(main)
+#     test_equivalence_pad_qrf(main)
+#     test_rotations(main)
     test_ClCore(main)
 
