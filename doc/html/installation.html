@@ -96,23 +96,23 @@
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>So far there is no installation scripts.  We&#8217;re not at that stage yet.  For now, just add bornagain to your python path:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;../foo/bar&quot;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;../foo/bar&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="section" id="using-anaconda-and-pip">
 <h2>Using Anaconda and pip<a class="headerlink" href="#using-anaconda-and-pip" title="Permalink to this headline">¶</a></h2>
 <p>To keep the installation as painless as possible, you should probably use the <a class="reference external" href="https://anaconda.org">Anaconda</a> Python 2.7 distribution.  The dependencies below assume that <cite>numpy</cite> and other popular scientific modules are available.</p>
 <p>For manipulating crystals you need to install <cite>spglib</cite>:</p>
-<div class="highlight-bash"><div class="highlight"><pre>pip install spglib
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install spglib
 </pre></div>
 </div>
 <p>For running GPU simulations you need to install <cite>pyopencl</cite>:</p>
-<div class="highlight-bash"><div class="highlight"><pre>pip install pyopencl
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install pyopencl
 </pre></div>
 </div>
 <p>For displaying data you need to install <cite>pyqtgraph</cite>:</p>
-<div class="highlight-bash"><div class="highlight"><pre>pip install pyqtgraph
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install pyqtgraph
 </pre></div>
 </div>
 <p>The above seems to work well on Apple computers, so far.</p>
@@ -120,9 +120,9 @@
 <div class="section" id="case-studies-in-dependency-madness">
 <h2>Case studies in dependency madness<a class="headerlink" href="#case-studies-in-dependency-madness" title="Permalink to this headline">¶</a></h2>
 <p>Scientific Linux 6 (SL6) sucks.  Never use this Linux distribution.  It is supposed to be stable, but therefore has very old versions of many key libraries such as gcc.  To install <cite>pyopencl</cite> on SL6 I downloaded the pyopencl-2016.2.1 source, and then from within the directory I did the following:</p>
-<div class="highlight-bash"><div class="highlight"><pre>sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
 sudo yum install devtoolset-2
-scl <span class="nb">enable </span>devtoolset-2 bash
+scl <span class="nb">enable</span> devtoolset-2 bash
 ./configure.py --cl-inc-dir<span class="o">=</span>/usr/local/cuda/include --cl-lib-dir<span class="o">=</span>/usr/local/cuda/lib64
 make install
 </pre></div>
@@ -131,11 +131,11 @@ make install
 <div class="section" id="extra-dependencies-for-building-the-documentation">
 <h2>Extra dependencies for building the documentation<a class="headerlink" href="#extra-dependencies-for-building-the-documentation" title="Permalink to this headline">¶</a></h2>
 <p>This documentation is generated with <a class="reference external" href="http://www.sphinx-doc.org">Sphinx</a>. If you want to build the documentation for <cite>bornagain</cite>, then you need to install Sphinx:</p>
-<div class="highlight-bash"><div class="highlight"><pre>pip install sphinx
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install sphinx
 </pre></div>
 </div>
 <p>We also use the napoleon extension for converting Google-style docstrings:</p>
-<div class="highlight-bash"><div class="highlight"><pre>pip install sphinxcontrib-napoleon
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install sphinxcontrib-napoleon
 </pre></div>
 </div>
 </div>
@@ -167,7 +167,7 @@ make install
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2017, Richard A Kirian.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>

@@ -456,6 +456,14 @@ class ClCore(object):
              [None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t,
               self.real_t, None, None, None, None])
         
+        self.phase_factor_mesh_cl = self.programs.phase_factor_mesh
+        self.phase_factor_mesh_cl.set_scalar_arg_dtypes(
+             [None, None, None, np.int32, np.int32, None, None, None])
+
+        self.buffer_mesh_lookup_cl = self.programs.buffer_mesh_lookup
+        self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes(
+             [None, None, None, np.int32, None, None, None, None])
+        
     def vec4(self, x, dtype=None):
         """
 Evdidently pyopencl does not deal with 3-vectors very well, so we use
@@ -578,11 +586,6 @@ Arguments:
     R (numpy array [3,3]): Rotation matrix acting on q vectors.
     a (cl complex array [N]): Optional container for complex scattering 
       amplitudes.
-    context (pyopencl context): Optional pyopencl context (e.g. use 
-      cl.create_some_context() to create one).
-    queue (pyopencl context): Optional pyopencl queue (e.g use 
-      cl.CommandQueue(context) to create one).
-    group_size (int): Optional pyopencl group size.
 
 Returns:
     (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
@@ -675,8 +678,121 @@ amplitudes
         else:
             return a_dev
 
+    def phase_factor_mesh(self, r, f, N, q_min, q_max, a=None):
+        '''
+Compute phase factors on a regular 3D mesh of q-space samples.
 
+Arguments:
+    r (Nx3 numpy array): Atomic coordinates
+    f (numpy array): A numpy array of complex atomic scattering factors
+    N (numpy array length 3): Number of q-space samples in each of the three 
+       dimensions
+    q_min (numpy array length 3): Minimum q-space magnitudes in the 3d mesh.  
+       These values specify the *center* of the first voxel.
+    q_max (numpy array length 3): Naximum q-space magnitudes in the 3d mesh.  
+       These values specify the *center* of the voxel.
 
+Returns:
+    An array of complex scattering amplitudes.  By default this is a normal
+       numpy array.  Optionally, this may be an opencl buffer.
+        '''
+    
+        N = np.array(N, dtype=self.int_t)
+        q_max = np.array(q_max, dtype=self.real_t)
+        q_min = np.array(q_min, dtype=self.real_t)
+    
+        if len(N.shape) == 0:
+            N = np.ones(3, dtype=self.int_t) * N
+        if len(q_max.shape) == 0:
+            q_max = np.ones(3, dtype=self.real_t) * q_max
+        if len(q_min.shape) == 0:
+            q_min = np.ones(3, dtype=self.real_t) * q_min
+    
+        deltaQ = np.array((q_max - q_min) / (N - 1.0), dtype=self.real_t)
+    
+        n_atoms = self.int_t(r.shape[0])
+        n_pixels = self.int_t(N[0] * N[1] * N[2])
+    
+        # Setup buffers.  This is very fast.  However, we are assuming that we can
+        # just load all atoms into memory, which might not be possible...
+        r_dev = self.to_device(r, dtype=self.real_t)
+        f_dev = self.to_device(f, dtype=self.complex_t)
+        N = self.vec4(N, dtype=self.int_t)
+        deltaQ = self.vec4(deltaQ, dtype=self.real_t)
+        q_min = self.vec4(q_min, dtype=self.real_t)
+        a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
+    
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
+                             * self.group_size)
+    
+        self.phase_factor_mesh_cl(self.queue, (global_size,), 
+                                  (self.group_size,), r_dev.data, f_dev.data, 
+                                  a_dev.data, n_pixels, n_atoms, N, deltaQ,
+                                  q_min)
+    
+        if a is None:
+            return a_dev.get()
+        else:
+            return a_dev
 
+    def buffer_mesh_lookup(self, a_map, N, q_min, q_max, q, R=None, 
+                           a_out=None):
+        """
+This is supposed to lookup intensities from a 3d mesh of amplitudes.
 
+Arguments:
+    a_map (numpy array): Complex scattering amplitudes (usually generated from 
+       the function phase_factor_mesh())
+    N (int): As defined in phase_factor_mesh()
+    q_min (float): As defined in phase_factor_mesh()
+    q_max (float): As defined in phase_factor_mesh()
+    q (Nx3 numpy array): q-space coordinates at which we want to interpolate
+       the complex amplitudes in a_dev
+    R (3x3 numpy array): Rotation matrix that will act on the q vectors
+    a_out: (clarray) The output array (optional)
+
+Returns:
+    numpy array of complex amplitudes
+        """
+    
+        if R is None:
+            R = np.eye(3, dtype=self.real_t)
+        R16 = np.zeros([16], dtype=self.real_t)
+        R16[0:9] = R.flatten().astype(self.real_t)
+    
+        N = np.array(N, dtype=self.int_t)
+        q_max = np.array(q_max, dtype=self.real_t)
+        q_min = np.array(q_min, dtype=self.real_t)
+    
+        if len(N.shape) == 0:
+            N = self.int_t(np.ones(3)*N)
+        if len(q_max.shape) == 0:
+            q_max = self.real_t(np.ones(3)*q_max)
+        if len(q_min.shape) == 0:
+            q_min = self.real_t(np.ones(3)*q_min)
+    
+        deltaQ = np.array((q_max - q_min) / (N - 1.0), dtype=self.real_t)
+    
+        n_pixels = self.int_t(q.shape[0])
+    
+        a_map_dev = self.to_device(a_map, dtype=self.complex_t)
+        q_dev = self.to_device(q, dtype=self.real_t)
+        N = self.vec4(N, dtype=self.int_t)
+        deltaQ = self.vec4(deltaQ, dtype=self.real_t)
+        q_min = self.vec4(q_min, dtype=self.real_t)
+        a_out_dev = self.to_device(
+            a_out, dtype=self.complex_t, shape=(n_pixels))
+    
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
+                             * self.group_size)
+    
+        self.buffer_mesh_lookup_cl(self.queue, (global_size,), (self.group_size,), 
+                              a_map_dev.data, q_dev.data, a_out_dev.data, 
+                              n_pixels, N, deltaQ, q_min, R16)
+    
+        if a_out is None:
+            return a_out_dev.get()
+        else:
+            return a_out_dev
+    
 
