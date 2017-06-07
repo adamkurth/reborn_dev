@@ -38,6 +38,78 @@ kernel void get_group_size(
     }
 }
 
+kernel void phase_factor_qrf2(
+    global const gfloat *q,
+    global const gfloat *r,
+    global const gfloat2 *f,
+    const gfloat16 R,
+    global gfloat2 *a,
+    const int n_atoms)
+
+{
+    const int gi = get_global_id(0); /* Global index */
+    const int li = get_local_id(0);  /* Local group index */
+
+    gfloat ph, sinph, cosph;
+
+    // Each global index corresponds to a particular q-vector.  Note that the
+    // global index could be larger than the number of pixels because it must be a
+    // multiple of the group size.  We must check if it is larger...
+    gfloat2 a_sum = (gfloat2)(0.0f,0.0f);
+    gfloat4 q4, q4r;
+
+    a_sum.x = a[gi].x;
+    a_sum.y = a[gi].y;
+    
+    // Move original q vector to private memory
+    q4 = (gfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+
+    // Rotate the q vector
+    q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
+    q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
+    q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
+
+    local gfloat4 rg[GROUP_SIZE];
+    local gfloat2 fg[GROUP_SIZE];
+
+    for (int g=0; g<n_atoms; g+=GROUP_SIZE){
+
+        // Here we will move a chunk of atoms to local memory.  Each worker in a
+        // group moves one atom.
+        int ai = g+li;
+
+        if (ai < n_atoms ){
+            rg[li] = (gfloat4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
+            fg[li] = f[ai];
+        } else {
+            rg[li] = (gfloat4)(0.0f,0.0f,0.0f,0.0f);
+            fg[li] = (gfloat2)(0.0f,0.0f);
+        }
+
+        // Don't proceed until **all** members of the group have finished moving
+        // atom information into local memory.
+        barrier(CLK_LOCAL_MEM_FENCE);
+
+        // We use a local real and imaginary part to avoid floatint point overflow
+        gfloat2 a_temp = (gfloat2)(0.0f,0.0f);
+
+        // Now sum up the amplitudes from this subset of atoms
+        for (int n=0; n < GROUP_SIZE; n++){
+            ph = -dot(q4r,rg[n]);
+            sinph = native_sin(ph);
+            cosph = native_cos(ph);
+            a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
+            a_temp.y += fg[n].x*sinph + fg[n].y*cosph;
+        }
+        a_sum += a_temp;
+
+        // Don't proceed until this subset of atoms are completed.
+        barrier(CLK_LOCAL_MEM_FENCE);
+    }
+}
+
+
+
 kernel void phase_factor_qrf(
     global const gfloat *q,
     global const gfloat *r,

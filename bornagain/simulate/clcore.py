@@ -478,6 +478,7 @@ class ClCore(object):
         self._build_openCL_programs()
         self._load_get_group_size()
         self._load_phase_factor_qrf()
+        self._load_phase_factor_qrf2()
         self._load_phase_factor_pad()
         self._load_phase_factor_mesh()
         self._load_buffer_mesh_lookup()
@@ -497,6 +498,11 @@ class ClCore(object):
         self.get_group_size_cl = self.programs.get_group_size
         self.get_group_size_cl.set_scalar_arg_dtypes([None])
 
+    def _load_phase_factor_qrf2(self):
+        self.phase_factor_qrf2_cl = self.programs.phase_factor_qrf2
+        self.phase_factor_qrf2_cl.set_scalar_arg_dtypes(
+                    [None, None, None, None, None, self.int_t])
+    
     def _load_phase_factor_qrf(self):
         self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
         self.phase_factor_qrf_cl.set_scalar_arg_dtypes(
@@ -592,7 +598,7 @@ class ClCore(object):
         return group_size_dev.get()[0]
 
 
-    def phase_factor_qrf_inplace(self, q, r, f, R=None):
+    def phase_factor_qrf2_inplace(self, q, r, f, R=None):
         '''
         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
 
@@ -628,11 +634,55 @@ class ClCore(object):
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
                              * self.group_size)
     
+        self.phase_factor_qrf2_cl(self.queue, (global_size,), 
+                                 (self.group_size,), q_dev.data, r_dev.data, 
+                                 f_dev.data, R16, self.a_dev.data, n_atoms)
+
+    def phase_factor_qrf_inplace(self, q, r, f, R=None):
+        '''
+        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
+
+        Arguments:
+            q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
+            r (numpy/cl float array [M,3]): Atomic coordinates.
+            f (numpy/cl complex array [M]): Complex scattering factors.
+            R (numpy array [3,3]): Rotation matrix acting on q vectors.
+            a (cl complex array [N]): Optional container for complex scattering 
+              amplitudes.
+            context (pyopencl context): Optional pyopencl context (e.g. use 
+              cl.create_some_context() to create one).
+            queue (pyopencl context): Optional pyopencl queue (e.g use 
+              cl.CommandQueue(context) to create one).
+            group_size (int): Optional pyopencl group size.
+
+        Returns:
+            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
+              if there are input cl arrays.
+        '''
+
+        if R is None:
+            R = np.eye(3, dtype=self.real_t)
+        R16 = np.zeros([16], dtype=self.real_t)
+        R16[0:9] = R.flatten().astype(self.real_t)
+    
+        n_pixels = self.int_t(q.shape[0])
+        n_atoms = self.int_t(r.shape[0])
+        q_dev = self.to_device(q, dtype=self.real_t)
+        r_dev = self.to_device(r, dtype=self.real_t)
+        f_dev = self.to_device(f, dtype=self.complex_t)
+    
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
+                             * self.group_size)
+    
         self.phase_factor_qrf_cl(self.queue, (global_size,), 
                                  (self.group_size,), q_dev.data, r_dev.data, 
                                  f_dev.data, R16, self.a_dev.data, n_atoms,
                                  n_pixels)
     
+    
+    def next_multiple_groupsize(self, N):
+        return self.int_t(self.group_size - N % self.group_size)
+        
     def init_amps(self, Npix):
         self.a_dev = self.to_device( np.zeros( Npix), dtype=self.complex_t, shape=(Npix))
         
@@ -1075,23 +1125,54 @@ class ClCore(object):
 def test():
 
     import time
-    natom = n_pixels = 1000
+    natom = 10000
+    n_pixels = 1000
     atom_pos = np.random.random( (natom,3) )
     atomic_nums = np.ones(natom)
     D = ba.detector.SimpleDetector(n_pixels=n_pixels) 
-    
     print ("\tSimulating into %d pixels"%D.Q.shape[0])
     
+#   test q-independent
     core = ClCore()
+    Npix = D.Q.shape[0]
+    Nextra = core.next_multiple_groupsize(Npix)
+    
+    padq = np.zeros(( Npix+Nextra,4), core.real_t)
+    padq[:Npix,:3] = D.Q
+
+    q = core.to_device(D.Q)
+    padq = core.to_device(padq)
+    r = core.to_device( np.random.random([natom,3]))
+    f = core.to_device( np.random.random([natom])*1j)
+    
+    core.init_amps(Npix+Nextra)
+    t = time.time()
+    core.phase_factor_qrf2_inplace(padq,r,f)
+    A_wpad = core.release_amps(reset=False)[:-Nextra]
+    print ("Took %f.4 seconds"%(time.time() - t))
+    
+    core.init_amps(Npix)
+    t = time.time()
+    core.phase_factor_qrf_inplace(q,r,f)
+    A = core.release_amps(reset=False)
+    print ("Took %f.4 seconds"%(time.time() - t))
+    exit()
+
     core.prime_cromermann_simulator(D.Q, atomic_nums)
     q = core.get_q_cromermann()
     t = time.time()
     r = core.get_r_cromermann(atom_pos, sub_com=False) 
     core.run_cromermann(q, r, rand_rot=True)
     A = core.release_amplitudes()
-    print ("Took %f.4 seconds"%(time.time() - t))
     I = D.readout(A)
     D.display()
+    
+
+    
+
+    
+
+
 
     print("Passed testing mode!")
 
