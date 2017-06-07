@@ -404,6 +404,7 @@ class ClCore(object):
         self.group_size = None
         self.programs = None
         self.double_precision = double_precision
+
         
         # Setup the context
         if context is None:
@@ -425,6 +426,9 @@ class ClCore(object):
         
         # setup the programs
         self._load_programs()
+
+        # important for comermann pipeline
+        self.primed_cromermann=False
 
     def set_groupsize(self, group_size):
         """
@@ -517,12 +521,12 @@ class ClCore(object):
     def _load_qrf_default(self):
         self.qrf_default_cl = self.programs.qrf_default
         self.qrf_default_cl.set_scalar_arg_dtypes(
-            [None, None, None, None,  np.int32])
+            [None, None, None, None,  self.int_t])
     
     def _load_qrf_kam(self):
         self.qrf_kam_cl = self.programs.qrf_kam
         self.qrf_kam_cl.set_scalar_arg_dtypes(
-            [None, None, None, None,None, np.int32])
+            [None, None, None, None,None, self.int_t])
     
     def vec4(self, x, dtype=None):
         """
@@ -859,6 +863,58 @@ class ClCore(object):
         else:
             return a_out_dev
 
+    def prime_cromermann_simulator(self, q_vecs, atomic_nums):
+        """
+        Prepare special array data for cromermann simulation
+
+        Arguments
+            - q_vecs, np.ndarray
+                Npixels x 3 array of cartesian pixels qx, qy, qz
+            - atomic_num, np.ndarray
+                Natoms x 1 array of atomic numbers corresponding
+                to the atoms in the target
+        """
+
+        self.q_vecs = q_vecs
+
+        self.Npix = self.int_t(q_vecs.shape[0])
+
+#       allow these to overflow
+        self.Nextra_pix = self.int_t(self.group_size - self.Npix % self.group_size)
+
+        if atomic_nums is None:
+            self.form_facts_arr = np.ones((self.Npix+self.Nextra_pix,1), dtype=self.real_t)
+            self.atomIDs = np.zeros(self.Nato)  
+            self.Nspecies = 1
+            self._load_amp_buffer()
+            self.primed_cromermann = True
+            return
+
+        croman_coef = refdata.get_cromermann_parameters(atomic_nums)
+        form_facts_dict = refdata.get_cmann_form_factors(croman_coef, self.q_vecs)
+
+        lookup = {}  # for matching atomID to atomic number
+        
+        self.form_facts_arr = np.zeros(
+            (self.Npix+self.Nextra_pix, len(form_facts_dict)), dtype=self.real_t)
+        
+        for i, z in enumerate(form_facts_dict):
+            lookup[z] = i  # set the key
+            self.form_facts_arr[:self.Npix,i] = form_facts_dict[z]
+        
+        self.atomIDs = np.array([lookup[z] for z in atomic_nums])
+
+        self.Nspecies = np.unique( atomic_nums).size
+
+        assert( self.Nspecies < 13) # can easily change this later if necessary... 
+        #^ this assertion is so we can pass inputs to GPU as a float16, 3 q vectors and 13 atom species
+        # where one is reserved to be a dummie 
+
+#       load the amplitudes
+        self._load_amp_buffer()
+
+        self.primed_cromermann = True
+
     def get_r_cromermann(self, atom_vecs, sub_com=False):
         """
         combine atomic vectors and atomic flux factors
@@ -874,11 +930,13 @@ class ClCore(object):
             - pyopenCL buffer data
                 Natoms x 4 contiguous openCL buffer array
         """
-        
+       
+        assert(self.primed_cromermann), "run ClCore.prime_comermann_simulator first"
+
         if sub_com:
             atom_vecs -= atom_vecs.mean(0)
         
-        self.Nato = np.int32(atom_vecs.shape[0])
+        self.Nato = self.int_t(atom_vecs.shape[0])
 
         self._load_r_buffer(atom_vecs)
 
@@ -889,7 +947,7 @@ class ClCore(object):
             (atom_vecs, self.atomIDs[:, None]), axis=1)
         
         self.r_buff = to_device(
-            self.r_vecs, dtype=np.float32, queue=self.queue)
+            self.r_vecs, dtype=self.real_t, queue=self.queue)
 
 
     def get_q_cromermann(self):
@@ -909,6 +967,9 @@ class ClCore(object):
                 where Npixel buff is the first multiple of 
                 group_size that is greater than Npixels
         """
+        
+        assert(self.primed_cromermann), "run ClCore.prime_comermann_simulator first"
+
 #       load onto device
         self._load_q_buffer()
     
@@ -918,52 +979,12 @@ class ClCore(object):
         q_zeros = np.zeros((self.Npix+self.Nextra_pix, 16))
         q_zeros[:self.Npix, :3] = self.q_vecs
         q_zeros[:,3:3+self.Nspecies] = self.form_facts_arr
-        self.q_buff = to_device( q_zeros, dtype=np.float32, queue=self.queue )
-
-    def prime_cromermann_simulator(self, q_vecs, atomic_nums):
-
-        self.q_vecs = q_vecs
-
-        self.Npix = q_vecs.shape[0]
-
-#       allow these to overflow
-        self.Nextra_pix = (self.group_size - self.Npix % self.group_size)
-
-        if atomic_nums is None:
-            self.form_facts_arr = np.ones((self.Npix+self.Nextra_pix,1), dtype=np.float32)
-            self.atomIDs = np.zeros(self.Nato)  # , dtype=np.int32)
-            self.Nspecies = 1
-            self._load_amp_buffer()
-            return
-
-        croman_coef = refdata.get_cromermann_parameters(atomic_nums)
-        form_facts_dict = refdata.get_cmann_form_factors(croman_coef, self.q_vecs)
-
-        lookup = {}  # for matching atomID to atomic number
-        
-        self.form_facts_arr = np.zeros(
-            (self.Npix+self.Nextra_pix, len(form_facts_dict)), dtype=np.float32)
-        
-        for i, z in enumerate(form_facts_dict):
-            lookup[z] = i  # set the key
-            self.form_facts_arr[:self.Npix,i] = form_facts_dict[z]
-        
-        self.atomIDs = np.array([lookup[z] for z in atomic_nums])
-
-        self.Nspecies = np.unique( atomic_nums).size
-
-        assert( self.Nspecies < 13) # can easily change this later if necessary... 
-        #^ this assertion is so we can pass inputs to GPU as a float16, 3 q vectors and 13 atom species
-        # where one is reserved to be a dummie 
-
-#       load the amplitudes
-        self._load_amp_buffer()
-
+        self.q_buff = to_device( q_zeros, dtype=self.real_t, queue=self.queue )
 
     def _load_amp_buffer(self):
 #       make output buffer; initialize as 0s
         self.A_buff = to_device(
-            np.zeros(self.Npix+self.Nextra_pix), dtype=np.complex64, queue=self.queue )
+            np.zeros(self.Npix+self.Nextra_pix), dtype=self.complex_t, queue=self.queue )
 
         self._A_buff_data = self.A_buff.data
 
@@ -1006,19 +1027,19 @@ class ClCore(object):
 
 #       set the rotation
         if rand_rot:
-            self.rot_mat = ba.utils.random_rotation_matrix().ravel().astype(np.float32)
+            self.rot_mat = ba.utils.random_rotation_matrix().ravel().astype(self.real_t)
         elif force_rot_mat is not None:
-            self.rot_mat = force_rot_mat.astype(np.float32)
+            self.rot_mat = force_rot_mat.astype(self.real_t)
         else:
-            self.rot_mat = np.eye(3).ravel().astype(np.float32)
+            self.rot_mat = np.eye(3).ravel().astype(self.real_t)
 
         self._set_rand_rot()
 
 #       set the center of mass
         if com is not None:
-            self.com_vec = com.astype(np.float32)
+            self.com_vec = com.astype(self.real_t)
         else:
-            self.com_vec = np.zeros(3).astype(np.float32)
+            self.com_vec = np.zeros(3).astype(self.real_t)
         self._set_com_vec()
         
 #       run the program
@@ -1028,11 +1049,11 @@ class ClCore(object):
 
     def _set_rand_rot(self):
         self.rot_buff = to_device(
-            self.rot_mat, dtype=np.float32, queue=self.queue)
+            self.rot_mat, dtype=self.real_t, queue=self.queue)
     
     def _set_com_vec(self):
         self.com_buff = to_device(
-            self.com_vec, dtype=np.float32, queue=self.queue)
+            self.com_vec, dtype=self.real_t, queue=self.queue)
 
     def release_amplitudes(self, reset=False):
         """
@@ -1052,7 +1073,8 @@ class ClCore(object):
         return Amps
 
 def test():
-    
+
+    import time
     natom = n_pixels = 1000
     atom_pos = np.random.random( (natom,3) )
     atomic_nums = np.ones(natom)
@@ -1063,9 +1085,11 @@ def test():
     core = ClCore()
     core.prime_cromermann_simulator(D.Q, atomic_nums)
     q = core.get_q_cromermann()
+    t = time.time()
     r = core.get_r_cromermann(atom_pos, sub_com=False) 
     core.run_cromermann(q, r, rand_rot=True)
     A = core.release_amplitudes()
+    print ("Took %f.4 seconds"%(time.time() - t))
     I = D.readout(A)
     D.display()
 
