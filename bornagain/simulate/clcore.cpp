@@ -40,7 +40,7 @@ kernel void get_group_size(
 
 kernel void phase_factor_qrf2(
     __global gfloat4 *q,
-    __global gfloat4 *r,
+    __global gfloat *r,
     __global gfloat2 *f,
     const gfloat16 R,
     __global gfloat2 *a,
@@ -78,8 +78,13 @@ kernel void phase_factor_qrf2(
         // group moves one atom.
         int ai = g+li;
 
-        rg[li] = r[ai];
-        fg[li] = f[ai];
+        if (ai < n_atoms ){
+            rg[li] = (gfloat4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
+            fg[li] = f[ai];
+        } else {
+            rg[li] = (gfloat4)(0.0f,0.0f,0.0f,0.0f);
+            fg[li] = (gfloat2)(0.0f,0.0f);
+        }
 
         // Don't proceed until **all** members of the group have finished moving
         // atom information into local memory.
