@@ -963,11 +963,12 @@ class SimpleDetector(Panel):
         self.wavelength = wavelen
         self.si_energy = units.hc / (wavelen * 1e-10)
 
+        self.fig = None
 
 #       make a single panel detector:
         self.simple_setup(
             n_pixels,
-            n_pixels + 1,
+            n_pixels,
             pixsize,
             detdist,
             wavelen,)
@@ -1048,7 +1049,7 @@ class SimpleDetector(Panel):
 
         return self.intens
 
-    def display(self, use_log=True, vmax=None, **kwargs):
+    def display(self, use_log=True, vmax=None,pause=None, **kwargs):
         """
         Displays a detector. Extra kwargs are passed
         to matplotlib.figure
@@ -1073,9 +1074,13 @@ class SimpleDetector(Panel):
             print("You need matplotlib to plot!")
             return
         #plt = matplotlib.pylab
-        fig = plt.figure(**kwargs)
+        
+        if self.fig is None:
+            fig = plt.figure(**kwargs)
+        else:
+            fig = self.fig
+        fig.clear()
         ax = plt.gca()
-
         qx_min, qy_min = self.Q[:, :2].min(0)
         qx_max, qy_max = self.Q[:, :2].max(0)
         extent = (qx_min, qx_max, qy_min, qy_max)
@@ -1102,4 +1107,12 @@ class SimpleDetector(Panel):
         ax.set_xlabel(r'$q_x\,\,\AA^{-1}$')
         ax.set_ylabel(r'$q_y\,\,\AA^{-1}$')
 
-        plt.show()
+        if pause is None:
+            plt.show()
+        elif pause is not None and self.fig is None:
+            self.fig = fig
+            plt.draw()
+            plt.pause(pause)
+        else:
+            plt.draw()
+            plt.pause(pause)

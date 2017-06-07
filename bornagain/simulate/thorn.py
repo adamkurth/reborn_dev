@@ -61,6 +61,7 @@ class ThornAgain:
             self.group_size = group_size
         else:
             self.group_size = int(os.environ.get('BORNAGAIN_CL_GROUPSIZE'))
+        
         self.q_vecs = q_vecs.astype(np.float32)
         self.atom_vecs = atom_vecs.astype(np.float32)
         self.atomic_nums = atomic_nums
@@ -83,6 +84,28 @@ class ThornAgain:
         self.which=which
         self.load_program(self.which)
         
+    def set_groupsize(self, group_size):
+        """
+        If the environment variable BORNAGAIN_CL_GROUPSIZE is set then use
+        that value.
+        
+        If the group size exceeds the max allowed group size, then make it
+        smaller (but print warning)
+        """
+        if os.environ.get('BORNAGAIN_CL_GROUPSIZE') is not None:
+            group_size = np.int(os.environ.get('BORNAGAIN_CL_GROUPSIZE'))
+        if group_size is None:
+            group_size = 32
+        max_group_size = self.queue.device.max_work_group_size
+        if group_size > max_group_size:
+            sys.stderr.write('Changing group size from %d to %d.\n'
+                     'Set BORNAGAIN_CL_GROUPSIZE=%d to avoid this error.\n' 
+                     % (group_size, max_group_size, max_group_size))
+            group_size = max_group_size
+        self.group_size = group_size
+        
+    
+
     def _make_croman_data(self):
         if self.atomic_nums is None:
             self.form_facts_arr = np.ones((self.Npix+self.Nextra_pix,1), dtype=np.float32)
@@ -277,12 +300,14 @@ class ThornAgain:
     
 #       run the program
         self.prg(*self.prg_args)
-        Amps = self.A_buff.get() [:-self.Nextra_pix]
+
+        Amps = self.release_amplitudes() 
 
         return Amps
         
     def release_amplitudes(self):
         Amps = self.A_buff.get() [:-self.Nextra_pix]
+        
         self._set_amp_buffer()
         if self.which=='kam':
             self.prg_args[7]=self.A_buff.data
@@ -294,9 +319,13 @@ class ThornAgain:
     def _load_sources(self):
         clcore_file = pkg_resources.resource_filename(
             'bornagain.simulate', 'clcore.cpp')
+        
         with open(clcore_file, 'r') as f:
             kern_src = f.read()
-        self.all_prg = cl.Program(self.context, kern_src).build()
+        
+        build_opts = ['-D', 'GROUP_SIZE=%d' % self.group_size]
+        
+        self.all_prg = cl.Program(self.context, kern_src).build(options=build_opts)
 
 def test():
     natom = 1000

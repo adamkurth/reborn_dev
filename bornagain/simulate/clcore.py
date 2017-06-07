@@ -916,7 +916,7 @@ class ClCore(object):
         else:
             return a_out_dev
 
-    def prime_cromermann_simulator(self, q_vecs, atomic_nums):
+    def prime_cromermann_simulator(self, q_vecs, atomic_nums=None):
         """
         Prepare special array data for cromermann simulation
 
@@ -937,7 +937,7 @@ class ClCore(object):
 
         if atomic_nums is None:
             self.form_facts_arr = np.ones((self.Npix+self.Nextra_pix,1), dtype=self.real_t)
-            self.atomIDs = np.zeros(self.Nato)  
+            self.atomIDs = None
             self.Nspecies = 1
             self._load_amp_buffer()
             self.primed_cromermann = True
@@ -956,6 +956,7 @@ class ClCore(object):
             self.form_facts_arr[:self.Npix,i] = form_facts_dict[z]
         
         self.atomIDs = np.array([lookup[z] for z in atomic_nums])
+
 
         self.Nspecies = np.unique( atomic_nums).size
 
@@ -989,16 +990,20 @@ class ClCore(object):
         if sub_com:
             atom_vecs -= atom_vecs.mean(0)
         
-        self.Nato = self.int_t(atom_vecs.shape[0])
-
         self._load_r_buffer(atom_vecs)
 
         return self.r_buff.data
         
     def _load_r_buffer(self, atom_vecs):
-        self.r_vecs = np.concatenate(
-            (atom_vecs, self.atomIDs[:, None]), axis=1)
-        
+        if self.atomIDs is not None:
+            self.r_vecs = np.concatenate(
+                (atom_vecs, self.atomIDs[:, None]), axis=1)
+        else:
+            self.r_vecs = np.concatenate(
+                (atom_vecs, np.zeros( (atom_vecs.shape[0],1))), axis=1)
+
+        self.Nato = self.r_vecs.shape[0]
+
         self.r_buff = to_device(
             self.r_vecs, dtype=self.real_t, queue=self.queue)
 
