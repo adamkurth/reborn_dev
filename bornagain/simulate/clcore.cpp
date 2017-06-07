@@ -39,7 +39,7 @@ kernel void get_group_size(
 }
 
 kernel void phase_factor_qrf2(
-    global const gfloat *q,
+    global const gfloat4 *q,
     global const gfloat *r,
     global const gfloat2 *f,
     const gfloat16 R,
@@ -62,7 +62,7 @@ kernel void phase_factor_qrf2(
     a_sum.y = a[gi].y;
     
     // Move original q vector to private memory
-    q4 = (gfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+    q4 = q[gi];
 
     // Rotate the q vector
     q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
@@ -106,6 +106,7 @@ kernel void phase_factor_qrf2(
         // Don't proceed until this subset of atoms are completed.
         barrier(CLK_LOCAL_MEM_FENCE);
     }
+    a[gi] = a_sum;
 }
 
 
