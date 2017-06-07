@@ -295,6 +295,44 @@ def test_ClCore(main=False):
     del n_atoms, n_mesh, q_min, q_max, r, f, A, A2, a, q, a_out
 
 
+    ###########################################################################
+    # Check for errors in run_cromermann
+    ###########################################################################
+
+    # simulate 1000 random numbers into 1000x1000 pixels
+    natom = n_pixels_edge = 1000
+    atom_pos = np.random.random( (natom,3) )
+    atomic_nums = np.ones(natom)
+   
+#   make a simple detector 
+    #D = ba.detector.SimpleDetector(n_pixels=1000) 
+    
+    def dumb_detector(n_pixels_edge):
+        img_sh = (n_pixels_edge,n_pixels_edge)
+        py,px = np.indices(img_sh) # pixel integers
+        pr = np.sqrt( (py-n_pixels_edge/2. )**2 + (px-n_pixels_edge/2.)**2 ) # radial pixel value
+        
+        theta = np.arctan( (  pr * 0.00005/0.05 ) )/2. # 50 micron pixels, 50 mm detector distance
+        phi = np.arctan2( py-500., px-500. ) # pixel azimuthal
+        q = np.sin(theta) * 4*np.pi / 1. # 1 angstrom wavelen
+
+        qx = np.cos(theta) * q * np.cos(phi)
+        qy = np.cos(theta) * q * np.sin(phi)
+        qz = np.sin(theta) * q
+        q_vecs = np.vstack((qx.ravel(), qy.ravel(), qz.ravel())).T
+   
+        return img_sh, q_vecs
+
+    img_sh, q_vecs = dumb_detector(n_pixels_edge)
+
+    #core.prime_cromermann_simulator(D.Q, atomic_nums)
+    core.prime_cromermann_simulator(q_vecs, atomic_nums)
+    q = core.get_q_cromermann()
+    r = core.get_r_cromermann(atom_pos, sub_com=False) 
+    core.run_cromermann(q, r, rand_rot=True)
+    A = core.release_amplitudes()
+     
+
 
 if __name__ == '__main__':
 

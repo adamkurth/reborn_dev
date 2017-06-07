@@ -14,40 +14,40 @@ Subpackages
 Submodules
 ----------
 
-bornagain.detector module
--------------------------
+bornagain\.detector module
+--------------------------
 
 .. automodule:: bornagain.detector
     :members:
     :undoc-members:
     :show-inheritance:
 
-bornagain.scatter module
-------------------------
+bornagain\.scatter module
+-------------------------
 
 .. automodule:: bornagain.scatter
     :members:
     :undoc-members:
     :show-inheritance:
 
-bornagain.source module
------------------------
+bornagain\.source module
+------------------------
 
 .. automodule:: bornagain.source
     :members:
     :undoc-members:
     :show-inheritance:
 
-bornagain.units module
-----------------------
+bornagain\.units module
+-----------------------
 
 .. automodule:: bornagain.units
     :members:
     :undoc-members:
     :show-inheritance:
 
-bornagain.utils module
-----------------------
+bornagain\.utils module
+-----------------------
 
 .. automodule:: bornagain.utils
     :members:

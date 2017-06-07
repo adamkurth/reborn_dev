@@ -299,10 +299,10 @@ class ThornAgain:
         self.all_prg = cl.Program(self.context, kern_src).build()
 
 def test():
-    natom = 10
+    natom = 1000
     coors = np.random.random( (natom,3) )
     atomZ = np.ones(natom)
-    D = ba.detector.SimpleDetector(n_pixels=100) 
+    D = ba.detector.SimpleDetector(n_pixels=1000) 
     print ("\tSimulating into %d pixels"%D.Q.shape[0])
     T = ThornAgain(D.Q, coors, atomZ, cpu=False)
     A = T.run(rand_rot=1)
