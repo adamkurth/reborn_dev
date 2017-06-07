@@ -681,8 +681,11 @@ class ClCore(object):
     
     
     def next_multiple_groupsize(self, N):
-        return self.int_t(self.group_size - N % self.group_size)
-        
+        if N % self.group_size >0:
+            return self.int_t(self.group_size - N % self.group_size)
+        else:
+            return 0
+
     def init_amps(self, Npix):
         self.a_dev = self.to_device( np.zeros( Npix), dtype=self.complex_t, shape=(Npix))
         
