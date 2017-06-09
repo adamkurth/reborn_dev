@@ -189,6 +189,41 @@ kernel void phase_factor_qrf(
 }
 
 
+
+
+static gfloat4 q_pad(
+    const int i,
+    const int j,
+    const gfloat w,
+    const gfloat4 T,
+    const gfloat4 F,
+    const gfloat4 S,
+    const gfloat4 B
+    )
+{
+
+// Calculate the q vectors for a pixel-array detector
+
+// Input:
+// i, j are the pixel indices
+// w is the photon wavelength
+// T is the translation vector from origin to center of corner pixel
+// F, S are the fast/slow-scan basis vectors (pointing alont rows/columns)
+//      the length of these vectors is the pixel size
+// B is the direction of the incident beam
+//
+// Output: A single q vector
+
+    gfloat4 V;
+    gfloat4 q;
+
+    V = T + i*F + j*S;
+    V /= length(V);
+    q = (V-B)*PI2/w;
+
+    return q;
+}
+
 kernel void phase_factor_pad(
     global const gfloat *r,
     global const gfloat2 *f,
@@ -204,6 +239,24 @@ kernel void phase_factor_pad(
     const gfloat4 S,
     const gfloat4 B)
 {
+
+// Calculate the the scattering amplitude according to a set of point
+// scatterers:  A = sum{ f*exp(i r.q ) }
+//
+// Input:
+// r: atomic coordinates
+// f: complex atomic scattering factors
+// R: rotation matrix acting on the q vectors
+// a: output amplitudes
+// n_pixels: number of pixels
+// n_atoms: number of atoms
+// nF,nS: number of detector pixels in fast/slow-scan direction
+// w: photon wavelength
+// T: translation vector from origin to corner detector pixel
+// F,S: basis vectors pointing along fast/slow-scan directions (length is equal
+//    to the pixel size)
+// B: incident beam direction
+
     const int gi = get_global_id(0); /* Global index */
     const int i = gi % nF;          /* Pixel coordinate i */
     const int j = gi/nF;             /* Pixel coordinate j */
@@ -215,12 +268,7 @@ kernel void phase_factor_pad(
     gfloat im = 0;
 
     // Each global index corresponds to a particular q-vector
-    gfloat4 V;
-    gfloat4 q;
-
-    V = T + i*F + j*S;
-    V /= length(V);
-    q = (V-B)*PI2/w;
+    gfloat4 q = q_pad(i,j,w,T,F,S,B);
 
     local gfloat4 rg[GROUP_SIZE];
     local gfloat2 fg[GROUP_SIZE];
