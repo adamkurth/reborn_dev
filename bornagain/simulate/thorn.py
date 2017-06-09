@@ -69,6 +69,8 @@ class ThornAgain:
         if sub_com:
             self.atom_vecs -= self.atom_vecs.mean(0)
 
+        np.random.seed()
+
         self.cpu = cpu
 
 #       set dimensions
@@ -116,13 +118,13 @@ class ThornAgain:
         croman_coef = refdata.get_cromermann_parameters(self.atomic_nums)
         form_facts_dict = refdata.get_cmann_form_factors(croman_coef, self.q_vecs)
 
-        lookup = {}  # for matching atomID to atomic number
+        self.atom_id_lookup = {}  # for matching atomID to atomic number
         self.form_facts_arr = np.zeros(
             (self.Npix+self.Nextra_pix, len(form_facts_dict)), dtype=np.float32)
         for i, z in enumerate(form_facts_dict):
-            lookup[z] = i  # set the key
+            self.atom_id_lookup[z] = i  # set the key
             self.form_facts_arr[:self.Npix,i] = form_facts_dict[z]
-        self.atomIDs = np.array([lookup[z] for z in self.atomic_nums])
+        self.atomIDs = np.array([self.atom_id_lookup[z] for z in self.atomic_nums])
         
         self.Nspecies = np.unique( self.atomic_nums).size
 
@@ -203,6 +205,7 @@ class ThornAgain:
             (self.atom_vecs, self.atomIDs[:, None]), axis=1)
         self.r_buff = clcore.to_device(
             self.atom_vecs, dtype=np.float32, queue=self.queue)
+    
     def _set_q_buffer(self):
         """ combine form factors and q-vectors
         for openCL device"""
@@ -242,14 +245,27 @@ class ThornAgain:
                          self.q_buff.data, self.r_buff.data,
                          self.rot_buff.data, self.com_buff, self.A_buff.data, self.Nato]
 
-    def update_rbuff(self, new_atoms):
+    def update_rbuff(self, new_atoms, new_z=None):
         """
         new_atoms, float Nx3 of atoms
+        new_z, float Nx1 atomic numbers
         """
-        self.atom_vecs[:,:3] = new_atoms[:self.Nato]
-        self.r_buff = clcore.to_device(
-            self.atom_vecs, dtype=np.float32, queue=self.queue)
+        na = new_atoms.shape[0]
+        self.atom_vecs =  new_atoms
+        if new_z is not None:
+            assert( new_z.shape[0] == na)
+            assert( np.all( [z in self.atom_id_lookup for z in set(new_z)]))
+            self.atomIDs = np.array( [self.atom_id_lookup[z] for z in new_z])
+        else:
+            self.atomIDs = np.zeros(na)
+        
+        self.Nato = na
+        self._set_atom_buffer()
+
+        #self.r_buff = clcore.to_device(
+        #    self.atom_vecs, dtype=np.float32, queue=self.queue)
         self.prg_args[4] = self.r_buff.data
+        self.prg_args[-1] = self.Nato
 
     def _set_rand_rot(self):
         self.rot_buff = clcore.to_device(
@@ -292,7 +308,6 @@ class ThornAgain:
             self.rot_mat = force_rot_mat.astype(np.float32)
 
         self._set_rand_rot()
-
 
         if com is not None:
             self.com_vec = com
