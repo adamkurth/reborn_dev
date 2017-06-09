@@ -995,6 +995,7 @@ class ClCore(object):
         return self.r_buff.data
         
     def _load_r_buffer(self, atom_vecs):
+    
         if self.atomIDs is not None:
             self.r_vecs = np.concatenate(
                 (atom_vecs, self.atomIDs[:, None]), axis=1)
