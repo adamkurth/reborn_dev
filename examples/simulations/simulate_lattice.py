@@ -16,7 +16,7 @@ pl.simple_setup(nPix,nPix,100e-6,0.1,1.5e-10)
 
 # Scattering vectors
 q = pl.Q
-qmag = ba.utils.vecMag(q)
+qmag = ba.utils.vec_mag(q)
 
 # Atomic coordinates
 N = 2
