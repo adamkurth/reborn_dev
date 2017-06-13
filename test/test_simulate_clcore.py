@@ -18,6 +18,13 @@ try:
     import pyopencl
     import bornagain as ba
     havecl = True
+    # Check for double precision:
+    core = clcore.ClCore(context=None, queue=None, group_size=1,
+                         double_precision=True)
+    if core.double_precision:
+        have_double = True
+    else:
+        have_double = False
 except ImportError:
     havecl = False
 
@@ -29,6 +36,8 @@ if len(sys.argv) > 1:
 
 
 clskip = pytest.mark.skipif(havecl is False, reason="Requires pyopencl module")
+
+
 
 # @clskip
 # def test_two_atoms(main=False):
@@ -143,9 +152,7 @@ clskip = pytest.mark.skipif(havecl is False, reason="Requires pyopencl module")
 #
 #     assert(dif < 1e-5)
 
-
-@clskip
-def test_ClCore(main=False):
+def run_test_ClCore(main=False,double_precision=False):
 
     ###########################################################################
     # Check that we can set the group size and it propagates to the device
@@ -155,12 +162,11 @@ def test_ClCore(main=False):
     assert(core.get_group_size() == core.group_size)
     
     ###########################################################################
-    # Check that we can set double precision if available
+    # Setup the simulation core
     ###########################################################################
 
     core = clcore.ClCore(context=None, queue=None, group_size=1,
-                         double_precision=True)
-    print(core.double_precision)
+                         double_precision=double_precision)
 
     ###########################################################################
     # Check that there are no errors in phase_factor_qrf_inplace
@@ -326,12 +332,22 @@ def test_ClCore(main=False):
     img_sh, q_vecs = dumb_detector(n_pixels_edge)
 
     #core.prime_cromermann_simulator(D.Q, atomic_nums)
-#     core.prime_cromermann_simulator(q_vecs, atomic_nums)
-#     q = core.get_q_cromermann()
-#     r = core.get_r_cromermann(atom_pos, sub_com=False) 
-#     core.run_cromermann(q, r, rand_rot=True)
-#     A = core.release_amplitudes()
-     
+    core.prime_cromermann_simulator(q_vecs, atomic_nums)
+    q = core.get_q_cromermann()
+    r = core.get_r_cromermann(atom_pos, sub_com=False) 
+    core.run_cromermann(q, r, rand_rot=True)
+    A = core.release_amplitudes()
+
+
+@clskip
+def test_ClCore(main=False):
+    
+    # Frist test single precision
+    run_test_ClCore(main,double_precision=False)
+    
+    # Now test double precision if available
+    if have_double:
+        run_test_ClCore(main,double_precision=True)
 
 
 if __name__ == '__main__':
