@@ -492,13 +492,11 @@ class ClCore(object):
     
 
     def _build_openCL_programs(self):
-        if not self.double_precision:
-            clcore_file = pkg_resources.resource_filename(
-                'bornagain.simulate', 'clcore.cpp')
-        else:
-            clcore_file = pkg_resources.resource_filename(
-                'bornagain.simulate', 'clcore_dbl.cpp')
+        clcore_file = pkg_resources.resource_filename(
+            'bornagain.simulate', 'clcore.cpp')
         kern_str = open(clcore_file).read()
+        if self.double_precision:
+            kern_str = kern_str.replace("float", "double")
         build_opts = ['-D', 'GROUP_SIZE=%d' % self.group_size]
         self.programs = cl.Program(self.context, kern_str).build(options=build_opts)
     
