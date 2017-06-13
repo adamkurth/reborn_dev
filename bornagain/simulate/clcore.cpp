@@ -1,7 +1,13 @@
+
+// Group size may be set with a flag a compile time
 #ifndef GROUP_SIZE
     #define GROUP_SIZE 1
 #endif
 
+// We allow for either double or single precision calculations.  As of now,
+// this only affects floating-point numbers, not integers.  Do note that you
+// must use the gfloatN types rather than float or double types, or else there
+// will be compile or runtime errors.
 #if CONFIG_USE_DOUBLE
     #if defined(cl_khr_fp64)  // Khronos extension available?
         #pragma OPENCL EXTENSION cl_khr_fp64 : enable
@@ -30,6 +36,53 @@
     #define PI2 6.28318530718f
 #endif
 
+
+static gfloat4 rotate_vec(
+    const gfloat16 R,
+    const gfloat4 q)
+// Please, let's always rotate vectors in this way.  We will generally use a
+// gfloat16 to pass in a rotation matrix (only the first nine values are used).
+{
+    gfloat4 qout;
+    qout.x = R.s0*q.x + R.s1*q.y + R.s2*q.z;
+    qout.y = R.s3*q.x + R.s4*q.y + R.s5*q.z;
+    qout.z = R.s6*q.x + R.s7*q.y + R.s8*q.z;
+    return qout;
+}
+
+static gfloat4 q_pad(
+    const int i,
+    const int j,
+    const gfloat w,
+    const gfloat4 T,
+    const gfloat4 F,
+    const gfloat4 S,
+    const gfloat4 B
+    )
+{
+// Calculate the q vectors for a pixel-array detector
+//
+// Input:
+// i, j are the pixel indices
+// w is the photon wavelength
+// T is the translation vector from origin to center of corner pixel
+// F, S are the fast/slow-scan basis vectors (pointing alont rows/columns)
+//      the length of these vectors is the pixel size
+// B is the direction of the incident beam
+//
+// Output: A single q vector
+
+    gfloat4 V;
+    gfloat4 q;
+
+    V = T + i*F + j*S;
+    V /= length(V);
+    q = (V-B)*PI2/w;
+
+    return q;
+}
+
+
 kernel void get_group_size(
     global int *g){
     const int gi = get_global_id(0);
@@ -37,6 +90,7 @@ kernel void get_group_size(
         g[gi] = GROUP_SIZE;
     }
 }
+
 
 kernel void phase_factor_qrf2(
     __global gfloat4 *q,
@@ -56,18 +110,16 @@ kernel void phase_factor_qrf2(
     // global index could be larger than the number of pixels because it must be a
     // multiple of the group size.  We must check if it is larger...
     gfloat2 a_sum = (gfloat2)(0.0f,0.0f);
-    gfloat4 q4, q4r;
+    gfloat4 qr;
 
     a_sum.x = a[gi].x;
     a_sum.y = a[gi].y;
     
     // Move original q vector to private memory
-    q4 = q[gi];
+    qr = q[gi];
 
     // Rotate the q vector
-    q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
-    q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
-    q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
+    qr = rotate_vec(R,qr);
 
     local gfloat4 rg[GROUP_SIZE];
     local gfloat2 fg[GROUP_SIZE];
@@ -95,7 +147,7 @@ kernel void phase_factor_qrf2(
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
-            ph = -dot(q4r,rg[n]);
+            ph = -dot(qr,rg[n]);
             sinph = native_sin(ph);
             cosph = native_cos(ph);
             a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
@@ -119,6 +171,19 @@ kernel void phase_factor_qrf(
     const int n_atoms,
     const int n_pixels)
 {
+
+// Calculate the the scattering amplitude according to a set of point
+// scatterers:  A = sum{ f*exp(i r.q ) }
+//
+// Input:
+// q: scattering vectors
+// r: atomic coordinates
+// f: scattering factors
+// R: rotation matrix acting on q vectors
+// a: scattering amplitudes
+// n_atoms: number of atoms
+// n_pixels: number of q vectors
+
     const int gi = get_global_id(0); /* Global index */
     const int li = get_local_id(0);  /* Local group index */
 
@@ -128,23 +193,21 @@ kernel void phase_factor_qrf(
     // global index could be larger than the number of pixels because it must be a
     // multiple of the group size.  We must check if it is larger...
     gfloat2 a_sum = (gfloat2)(0.0f,0.0f);
-    gfloat4 q4, q4r;
+    gfloat4 qr;
     if (gi < n_pixels){
 
         a_sum.x = a[gi].x;
         a_sum.y = a[gi].y;
         
         // Move original q vector to private memory
-        q4 = (gfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+        qr = (gfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
 
         // Rotate the q vector
-        q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
-        q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
-        q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
+        qr = rotate_vec(R,qr);
 
     } else {
         // Dummy values; doesn't really matter what they are.
-        q4r = (gfloat4)(0.0f,0.0f,0.0f,0.0f);
+        qr = (gfloat4)(0.0f,0.0f,0.0f,0.0f);
     }
     local gfloat4 rg[GROUP_SIZE];
     local gfloat2 fg[GROUP_SIZE];
@@ -172,7 +235,7 @@ kernel void phase_factor_qrf(
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
-            ph = -dot(q4r,rg[n]);
+            ph = -dot(qr,rg[n]);
             sinph = native_sin(ph);
             cosph = native_cos(ph);
             a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
@@ -188,41 +251,6 @@ kernel void phase_factor_qrf(
     }
 }
 
-
-
-
-static gfloat4 q_pad(
-    const int i,
-    const int j,
-    const gfloat w,
-    const gfloat4 T,
-    const gfloat4 F,
-    const gfloat4 S,
-    const gfloat4 B
-    )
-{
-
-// Calculate the q vectors for a pixel-array detector
-
-// Input:
-// i, j are the pixel indices
-// w is the photon wavelength
-// T is the translation vector from origin to center of corner pixel
-// F, S are the fast/slow-scan basis vectors (pointing alont rows/columns)
-//      the length of these vectors is the pixel size
-// B is the direction of the incident beam
-//
-// Output: A single q vector
-
-    gfloat4 V;
-    gfloat4 q;
-
-    V = T + i*F + j*S;
-    V /= length(V);
-    q = (V-B)*PI2/w;
-
-    return q;
-}
 
 kernel void phase_factor_pad(
     global const gfloat *r,
@@ -266,9 +294,11 @@ kernel void phase_factor_pad(
     gfloat ph, sinph, cosph;
     gfloat re = 0;
     gfloat im = 0;
+    gfloat4 qr;
 
     // Each global index corresponds to a particular q-vector
-    gfloat4 q = q_pad(i,j,w,T,F,S,B);
+    qr = q_pad(i,j,w,T,F,S,B);
+    qr = rotate_vec(R,qr);
 
     local gfloat4 rg[GROUP_SIZE];
     local gfloat2 fg[GROUP_SIZE];
@@ -296,7 +326,7 @@ kernel void phase_factor_pad(
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
-            ph = -dot(q,rg[n]);
+            ph = -dot(qr,rg[n]);
             sinph = native_sin(ph);
             cosph = native_cos(ph);
             lre += fg[n].x*cosph - fg[n].y*sinph;
@@ -338,9 +368,10 @@ kernel void phase_factor_mesh(
     gfloat re = 0;
     gfloat im = 0;
     int ai;
+    gfloat4 qr;
 
     // Each global index corresponds to a particular q-vector
-    const gfloat4 q4 = (gfloat4)(i*deltaQ.x+q_min.x,
+    qr = (gfloat4)(i*deltaQ.x+q_min.x,
             j*deltaQ.y+q_min.y,
             k*deltaQ.z+q_min.z,0.0f);
 
@@ -369,7 +400,7 @@ kernel void phase_factor_mesh(
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
-            ph = -dot(q4,rg[n]);
+            ph = -dot(qr,rg[n]);
             sinph = native_sin(ph);
             cosph = native_cos(ph);
             lre += fg[n].x*cosph - fg[n].y*sinph;
@@ -401,17 +432,15 @@ kernel void buffer_mesh_lookup(
 {
     const int gi = get_global_id(0);
 
-    const gfloat4 q4 = (gfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
-    const gfloat4 q4r = (gfloat4)(0.0f,0.0f,0.0f,0.0f);
+    gfloat4 qr;
 
-    q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
-    q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
-    q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
+    qr = (gfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+    qr = rotate_vec(R,qr);
 
     // Floating point coordinates
-    const gfloat i_f = (q4r.x - q_min.x)/deltaQ.x;
-    const gfloat j_f = (q4r.y - q_min.y)/deltaQ.y;
-    const gfloat k_f = (q4r.z - q_min.z)/deltaQ.z;
+    const gfloat i_f = (qr.x - q_min.x)/deltaQ.x;
+    const gfloat j_f = (qr.y - q_min.y)/deltaQ.y;
+    const gfloat k_f = (qr.z - q_min.z)/deltaQ.z;
 
     // Integer coordinates
     const int i = (int)(floor(i_f));

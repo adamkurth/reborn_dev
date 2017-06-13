@@ -163,7 +163,7 @@ def test_ClCore(main=False):
     print(core.double_precision)
 
     ###########################################################################
-    # Check that there are no errors in phase_factor_qrf
+    # Check that there are no errors in phase_factor_qrf_inplace
     # TODO: actually check that the amplitudes are correct
     ###########################################################################
 
@@ -185,7 +185,7 @@ def test_ClCore(main=False):
 #   make device arrays first
     q = core.to_device(q) 
     r = core.to_device(r)
-    f = core.to_device(r)
+    f = core.to_device(f)
     
     core.phase_factor_qrf_inplace(q,r,f,R)
     A1 = core.release_amps(reset=False)
@@ -326,11 +326,11 @@ def test_ClCore(main=False):
     img_sh, q_vecs = dumb_detector(n_pixels_edge)
 
     #core.prime_cromermann_simulator(D.Q, atomic_nums)
-    core.prime_cromermann_simulator(q_vecs, atomic_nums)
-    q = core.get_q_cromermann()
-    r = core.get_r_cromermann(atom_pos, sub_com=False) 
-    core.run_cromermann(q, r, rand_rot=True)
-    A = core.release_amplitudes()
+#     core.prime_cromermann_simulator(q_vecs, atomic_nums)
+#     q = core.get_q_cromermann()
+#     r = core.get_r_cromermann(atom_pos, sub_com=False) 
+#     core.run_cromermann(q, r, rand_rot=True)
+#     A = core.release_amplitudes()
      
 
 

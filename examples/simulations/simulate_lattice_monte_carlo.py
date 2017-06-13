@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 sys.path.append("../..")
 import bornagain as ba
-from bornagain.utils import vec_norm
+from bornagain.utils import vec_norm, random_rotation_matrix
 from bornagain.simulate.clcore import ClCore
 
 clcore = ClCore()
@@ -70,21 +70,23 @@ r[:,2] = xx.flatten()
 # Scattering factors
 f = np.ones([N**3], dtype=np.complex64)
 
+# Rotation matrix which acts on q vectors
+R = random_rotation_matrix() #np.eye(3)
 
 # First a simulation without monte carlo
 q = panel.Q
-A = clcore.phase_factor_qrf(q,r,f)
+A = clcore.phase_factor_qrf(q,r,f,R)
 I0 = np.abs(A)**2
 
 
-mc_iterations = 10
+mc_iterations = 3
 I = 0
 for iter in range(mc_iterations):
     # Compute diffraction amplitudes
     # This can be ** much ** faster if we don't move data between cpu and gpu..
     t = time.time()
     q = mcQ(panel,wavelength,wavelength_sigma,divergence,True)
-    A = clcore.phase_factor_qrf(q,r,f)
+    A = clcore.phase_factor_qrf(q,r,f,R)
     I += np.abs(A)**2
     print(time.time() - t)
 
