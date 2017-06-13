@@ -235,6 +235,9 @@ amplitudes
     F = vec4(F)
     S = vec4(S)
     B = vec4(B)
+
+    T = to_devive(T)
+    F=to_de
     a_dev = to_device(a, dtype=np.complex64, shape=(n_pixels), queue=queue)
 
     global_size = np.int(np.ceil(n_pixels / np.float(group_size)) * group_size)
@@ -443,6 +446,8 @@ class ClCore(object):
         if group_size is None:
             group_size = 32
         max_group_size = self.queue.device.max_work_group_size
+        if self.double_precision:
+            max_group_size = int(max_group_size/2)
         if group_size > max_group_size:
             sys.stderr.write('Changing group size from %d to %d.\n'
                      'Set BORNAGAIN_CL_GROUPSIZE=%d to avoid this error.\n' 
@@ -461,7 +466,7 @@ class ClCore(object):
             self._use_float()
 
         else:
-            self.use_double()
+            self._use_double()
             self.double_precision = True
 
     def _use_double(self):
@@ -487,8 +492,12 @@ class ClCore(object):
     
 
     def _build_openCL_programs(self):
-        clcore_file = pkg_resources.resource_filename(
-            'bornagain.simulate', 'clcore.cpp')
+        if not self.double_precision:
+            clcore_file = pkg_resources.resource_filename(
+                'bornagain.simulate', 'clcore.cpp')
+        else:
+            clcore_file = pkg_resources.resource_filename(
+                'bornagain.simulate', 'clcore_dbl.cpp')
         kern_str = open(clcore_file).read()
         build_opts = ['-D', 'GROUP_SIZE=%d' % self.group_size]
         self.programs = cl.Program(self.context, kern_str).build(options=build_opts)
@@ -634,9 +643,10 @@ class ClCore(object):
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
                              * self.group_size)
     
+        R_dev = self.to_device(R16, dtype=self.real_t)
         self.phase_factor_qrf2_cl(self.queue, (global_size,), 
                                  (self.group_size,), q_dev.data, r_dev.data, 
-                                 f_dev.data, R16, self.a_dev.data, n_atoms)
+                                 f_dev.data, R16_dev.data, self.a_dev.data, n_atoms)
 
     def phase_factor_qrf_inplace(self, q, r, f, R=None):
         '''
@@ -660,25 +670,26 @@ class ClCore(object):
               if there are input cl arrays.
         '''
 
+
         if R is None:
             R = np.eye(3, dtype=self.real_t)
-        R16 = np.zeros([16], dtype=self.real_t)
-        R16[0:9] = R.flatten().astype(self.real_t)
+        R16 = np.zeros(16, dtype=self.real_t)
+        R16[0:9] = R.ravel()
     
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
         q_dev = self.to_device(q, dtype=self.real_t)
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
+        R16_dev = self.to_device(R16, dtype=self.real_t)
     
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
                              * self.group_size)
     
         self.phase_factor_qrf_cl(self.queue, (global_size,), 
                                  (self.group_size,), q_dev.data, r_dev.data, 
-                                 f_dev.data, R16, self.a_dev.data, n_atoms,
+                                 f_dev.data, R16_dev.data, self.a_dev.data, n_atoms,
                                  n_pixels)
-    
     
     def next_multiple_groupsize(self, N):
         if N % self.group_size >0:
@@ -728,9 +739,10 @@ class ClCore(object):
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
                              * self.group_size)
     
+        R16_dev = self.to_device(R16, dtype=self.real_t)
         self.phase_factor_qrf_cl(self.queue, (global_size,), 
                                  (self.group_size,), q_dev.data, r_dev.data, 
-                                 f_dev.data, R16, a_dev.data, n_atoms,
+                                 f_dev.data, R16_dev.data, a_dev.data, n_atoms,
                                  n_pixels)
     
         if a is None:
@@ -780,19 +792,28 @@ class ClCore(object):
         n_atoms = self.int_t(r.shape[0])
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
-        T = self.vec4(T)
-        F = self.vec4(F)
-        S = self.vec4(S)
-        B = self.vec4(B)
+        R16_dev = self.to_device(R16, dtype=self.real_t)
+        
+        #T = self.vec4(T)
+        #F = self.vec4(F)
+        #S = self.vec4(S)
+        #B = self.vec4(B)
+        
+        T_dev = self.to_device( T, dtype=self.real_t)
+        F_dev = self.to_device( F, dtype=self.real_t)
+        S_dev = self.to_device( S, dtype=self.real_t)
+        B_dev = self.to_device( B, dtype=self.real_t)
+        
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
     
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * 
                              self.group_size)
     
+        
         self.phase_factor_pad_cl(self.queue, (global_size,), 
                                  (self.group_size,), r_dev.data,
-                            f_dev.data, R16, a_dev.data, n_pixels, n_atoms, 
-                            nF, nS, w, T, F, S, B)
+                            f_dev.data, R16_dev.data, a_dev.data, n_pixels, n_atoms, 
+                            nF, nS, w, T_dev.data, F_dev.data, S_dev.data, B_dev.data)
     
         if a is None:
             return a_dev.get()

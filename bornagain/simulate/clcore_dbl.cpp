@@ -12,23 +12,8 @@
     #endif
 #endif // CONFIG_USE_DOUBLE
 
-//#if defined(DOUBLE_SUPPORT_AVAILABLE)
-    // double
-//    typedef double float;
-//    typedef double2 float2;
-//    typedef double4 float4;
-//    typedef double16 float16;
-//    #define PI 3.14159265358979323846
-//    #define PI2 6.28318530717958647693
-//#else
-    // float
-//    typedef float float;
-//    typedef float2 float2;
-//    typedef float4 float4;
-//    typedef float16 float16;
-#define PI 3.14159265359f
-#define PI2 6.28318530718f
-//#endif
+#define PI 3.14159265358979323846
+#define PI2 6.28318530717958647693
 
 kernel void get_group_size(
     global int *g){
@@ -39,24 +24,24 @@ kernel void get_group_size(
 }
 
 kernel void phase_factor_qrf2(
-    __global float4 *q,
-    __global float *r,
-    __global float2 *f,
-    const float16 R,
-    __global float2 *a,
+    __global double4 *q,
+    __global double *r,
+    __global double2 *f,
+    const double16 R,
+    __global double2 *a,
     const int n_atoms)
 
 {
     const int gi = get_global_id(0); /* Global index */
     const int li = get_local_id(0);  /* Local group index */
 
-    float ph, sinph, cosph;
+    double ph, sinph, cosph;
 
     // Each global index corresponds to a particular q-vector.  Note that the
     // global index could be larger than the number of pixels because it must be a
     // multiple of the group size.  We must check if it is larger...
-    float2 a_sum = (float2)(0.0f,0.0f);
-    float4 q4, q4r;
+    double2 a_sum = (double2)(0.0f,0.0f);
+    double4 q4, q4r;
 
     a_sum.x = a[gi].x;
     a_sum.y = a[gi].y;
@@ -69,8 +54,8 @@ kernel void phase_factor_qrf2(
     q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
     q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
 
-    local float4 rg[GROUP_SIZE];
-    local float2 fg[GROUP_SIZE];
+    local double4 rg[GROUP_SIZE];
+    local double2 fg[GROUP_SIZE];
 
     for (int g=0; g<n_atoms; g+=GROUP_SIZE){
 
@@ -79,11 +64,11 @@ kernel void phase_factor_qrf2(
         int ai = g+li;
 
         if (ai < n_atoms ){
-            rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
+            rg[li] = (double4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
             fg[li] = f[ai];
         } else {
-            rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
-            fg[li] = (float2)(0.0f,0.0f);
+            rg[li] = (double4)(0.0f,0.0f,0.0f,0.0f);
+            fg[li] = (double2)(0.0f,0.0f);
         }
 
         // Don't proceed until **all** members of the group have finished moving
@@ -91,7 +76,7 @@ kernel void phase_factor_qrf2(
         barrier(CLK_LOCAL_MEM_FENCE);
 
         // We use a local real and imaginary part to avoid floatint point overflow
-        float2 a_temp = (float2)(0.0f,0.0f);
+        double2 a_temp = (double2)(0.0f,0.0f);
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
@@ -111,31 +96,31 @@ kernel void phase_factor_qrf2(
 
 
 kernel void phase_factor_qrf(
-    global const float *q,
-    global const float *r,
-    global const float2 *f,
-    __constant float *R,
-    global float2 *a,
+    global const double *q,
+    global const double *r,
+    global const double2 *f,
+    __constant double *R,
+    global double2 *a,
     const int n_atoms,
     const int n_pixels)
 {
     const int gi = get_global_id(0); /* Global index */
     const int li = get_local_id(0);  /* Local group index */
 
-    float ph, sinph, cosph;
+    double ph, sinph, cosph;
 
     // Each global index corresponds to a particular q-vector.  Note that the
     // global index could be larger than the number of pixels because it must be a
     // multiple of the group size.  We must check if it is larger...
-    float2 a_sum = (float2)(0.0f,0.0f);
-    float4 q4, q4r;
+    double2 a_sum = (double2)(0.0f,0.0f);
+    double4 q4, q4r;
     if (gi < n_pixels){
 
         a_sum.x = a[gi].x;
         a_sum.y = a[gi].y;
         
         // Move original q vector to private memory
-        q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+        q4 = (double4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
 
         // Rotate the q vector
         //q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
@@ -148,10 +133,10 @@ kernel void phase_factor_qrf(
 
     } else {
         // Dummy values; doesn't really matter what they are.
-        q4r = (float4)(0.0f,0.0f,0.0f,0.0f);
+        q4r = (double4)(0.0f,0.0f,0.0f,0.0f);
     }
-    local float4 rg[GROUP_SIZE];
-    local float2 fg[GROUP_SIZE];
+    local double4 rg[GROUP_SIZE];
+    local double2 fg[GROUP_SIZE];
 
     for (int g=0; g<n_atoms; g+=GROUP_SIZE){
 
@@ -160,11 +145,11 @@ kernel void phase_factor_qrf(
         int ai = g+li;
 
         if (ai < n_atoms ){
-            rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
+            rg[li] = (double4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
             fg[li] = f[ai];
         } else {
-            rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
-            fg[li] = (float2)(0.0f,0.0f);
+            rg[li] = (double4)(0.0f,0.0f,0.0f,0.0f);
+            fg[li] = (double2)(0.0f,0.0f);
         }
 
         // Don't proceed until **all** members of the group have finished moving
@@ -172,7 +157,7 @@ kernel void phase_factor_qrf(
         barrier(CLK_LOCAL_MEM_FENCE);
 
         // We use a local real and imaginary part to avoid floatint point overflow
-        float2 a_temp = (float2)(0.0f,0.0f);
+        double2 a_temp = (double2)(0.0f,0.0f);
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
@@ -193,19 +178,19 @@ kernel void phase_factor_qrf(
 }
 
 kernel void phase_factor_pad(
-    global const float *r,
-    global const float2 *f,
-    __constant float *R,
-    global float2 *a,
+    global const double *r,
+    global const double2 *f,
+    __constant double *R,
+    global double2 *a,
     const int n_pixels,
     const int n_atoms,
     const int nF,
     const int nS,
-    const float w,
-    __constant float *T,
-    __constant float *F,
-    __constant float *S,
-    __constant float *B)
+    const double w,
+    __constant double *T,
+    __constant double *F,
+    __constant double *S,
+    __constant double *B)
 {
     const int gi = get_global_id(0); /* Global index */
     const int i = gi % nF;          /* Pixel coordinate i */
@@ -213,15 +198,15 @@ kernel void phase_factor_pad(
     const int li = get_local_id(0);  /* Local group index */
 
 
-    float ph, sinph, cosph;
-    float re = 0;
-    float im = 0;
+    double ph, sinph, cosph;
+    double re = 0;
+    double im = 0;
 
     // Each global index corresponds to a particular q-vector
-    //float4 V;
-    float4 q = (float4)(0.0f,0.0f,0.0f,0.0f);
+    //double4 V;
+    double4 q = (double4)(0.0f,0.0f,0.0f,0.0f);
 
-    float Vx,Vy,Vz,Vnorm;
+    double Vx,Vy,Vz,Vnorm;
     
     Vx = T[0] + i*F[0] + j*S[0];
     Vy = T[1] + i*F[1] + j*S[1];
@@ -235,8 +220,8 @@ kernel void phase_factor_pad(
     q.y = (Vy-B[1])*PI2/w;
     q.z = (Vz-B[2])*PI2/w;
 
-    local float4 rg[GROUP_SIZE];
-    local float2 fg[GROUP_SIZE];
+    local double4 rg[GROUP_SIZE];
+    local double2 fg[GROUP_SIZE];
 
     for (int g=0; g<n_atoms; g+=GROUP_SIZE){
 
@@ -245,19 +230,19 @@ kernel void phase_factor_pad(
         int ai = g+li;
 
         if (ai < n_atoms){
-            rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
+            rg[li] = (double4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
             fg[li] = f[ai];
         } else {
-            rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
-            fg[li] = (float2)(0.0f,0.0f);
+            rg[li] = (double4)(0.0f,0.0f,0.0f,0.0f);
+            fg[li] = (double2)(0.0f,0.0f);
         }
         // Don't proceed until **all** members of the group have finished moving
         // atom information into local memory.
         barrier(CLK_LOCAL_MEM_FENCE);
 
         // We use a local real and imaginary part to avoid floatint point overflow
-        float lre=0;
-        float lim=0;
+        double lre=0;
+        double lim=0;
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
@@ -282,14 +267,14 @@ kernel void phase_factor_pad(
 
 
 kernel void phase_factor_mesh(
-    global const float *r,
-    global const float2 *f,
-    global float2 *a,
+    global const double *r,
+    global const double2 *f,
+    global double2 *a,
     const int n_pixels,
     const int n_atoms,
     const int4 N,
-    const float4 deltaQ,
-    const float4 q_min)
+    const double4 deltaQ,
+    const double4 q_min)
 {
 
     const int Nxy = N.x*N.y;
@@ -299,18 +284,18 @@ kernel void phase_factor_mesh(
     const int k = gi/Nxy;            /* Voxel corrdinate k (z) */
     const int li = get_local_id(0);  /* Local group index */
 
-    float ph, sinph, cosph;
-    float re = 0;
-    float im = 0;
+    double ph, sinph, cosph;
+    double re = 0;
+    double im = 0;
     int ai;
 
     // Each global index corresponds to a particular q-vector
-    const float4 q4 = (float4)(i*deltaQ.x+q_min.x,
+    const double4 q4 = (double4)(i*deltaQ.x+q_min.x,
             j*deltaQ.y+q_min.y,
             k*deltaQ.z+q_min.z,0.0f);
 
-    local float4 rg[GROUP_SIZE];
-    local float2 fg[GROUP_SIZE];
+    local double4 rg[GROUP_SIZE];
+    local double2 fg[GROUP_SIZE];
 
     for (int g=0; g<n_atoms; g+=GROUP_SIZE){
 
@@ -318,19 +303,19 @@ kernel void phase_factor_mesh(
         // group moves one atom.
         ai = g+li;
         if (ai < n_atoms){
-            rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
+            rg[li] = (double4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
             fg[li] = f[ai];
         } else {
-            rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
-            fg[li] = (float2)(0.0f,0.0f);
+            rg[li] = (double4)(0.0f,0.0f,0.0f,0.0f);
+            fg[li] = (double2)(0.0f,0.0f);
         }
         // Don't proceed until **all** members of the group have finished moving
         // atom information into local memory.
         barrier(CLK_LOCAL_MEM_FENCE);
 
         // We use a local real and imaginary part to avoid floating point overflow
-        float lre=0;
-        float lim=0;
+        double lre=0;
+        double lim=0;
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
@@ -355,28 +340,28 @@ kernel void phase_factor_mesh(
 
 
 kernel void buffer_mesh_lookup(
-    global float2 *a_map,
-    global float *q,
-    global float2 *a_out,
+    global double2 *a_map,
+    global double *q,
+    global double2 *a_out,
     int n_pixels,
     int4 N,
-    float4 deltaQ,
-    float4 q_min,
-    float16 R)
+    double4 deltaQ,
+    double4 q_min,
+    double16 R)
 {
     const int gi = get_global_id(0);
 
-    const float4 q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
-    const float4 q4r = (float4)(0.0f,0.0f,0.0f,0.0f);
+    const double4 q4 = (double4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+    const double4 q4r = (double4)(0.0f,0.0f,0.0f,0.0f);
 
     q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
     q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
     q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
 
     // Floating point coordinates
-    const float i_f = (q4r.x - q_min.x)/deltaQ.x;
-    const float j_f = (q4r.y - q_min.y)/deltaQ.y;
-    const float k_f = (q4r.z - q_min.z)/deltaQ.z;
+    const double i_f = (q4r.x - q_min.x)/deltaQ.x;
+    const double j_f = (q4r.y - q_min.y)/deltaQ.y;
+    const double k_f = (q4r.z - q_min.z)/deltaQ.z;
 
     // Integer coordinates
     const int i = (int)(floor(i_f));
@@ -391,12 +376,12 @@ kernel void buffer_mesh_lookup(
     const int k1 = (k+1)*N.x*N.y;
     const int j1 = (j+1)*N.x;
     const int i1 = i+1;
-    const float x0 = i_f - floor(i_f);
-    const float y0 = j_f - floor(j_f);
-    const float z0 = k_f - floor(k_f);
-    const float x1 = 1.0f - x0;
-    const float y1 = 1.0f - y0;
-    const float z1 = 1.0f - z0;
+    const double x0 = i_f - floor(i_f);
+    const double y0 = j_f - floor(j_f);
+    const double z0 = k_f - floor(k_f);
+    const double x1 = 1.0f - x0;
+    const double y1 = 1.0f - y0;
+    const double z1 = 1.0f - z0;
 
     if (i >= 0 && i < N.x && j >= 0 && j < N.y && k >= 0 && k < N.z){
 
@@ -413,37 +398,37 @@ kernel void buffer_mesh_lookup(
                     a_map[i1 + j1 + k1] * x0 * y0 * z0   ;
 
     } else {
-        a_out[gi] = (float2)(0.0f,0.0f);
+        a_out[gi] = (double2)(0.0f,0.0f);
     }
 
 }
 
 
 __kernel void qrf_default(
-    __global float16 *q_vecs,
-    __global float4 *r_vecs,
-    __constant float *R,
-    __global float2 *A,
+    __global double16 *q_vecs,
+    __global double4 *r_vecs,
+    __constant double *R,
+    __global double2 *A,
     const int n_atoms){
 
     int q_idx = get_global_id(0);
     int l_idx = get_local_id(0);
 
-    float Areal;
-    float Aimag;
+    double Areal;
+    double Aimag;
 
-    float ff[16];
+    double ff[16];
     
     Areal=A[q_idx].x;
     Aimag=A[q_idx].y;
 
-    float qx = q_vecs[q_idx].s0;
-    float qy = q_vecs[q_idx].s1;
-    float qz = q_vecs[q_idx].s2;
+    double qx = q_vecs[q_idx].s0;
+    double qy = q_vecs[q_idx].s1;
+    double qz = q_vecs[q_idx].s2;
 
-    float qRx = R[0]*qx + R[3]*qy + R[6]*qz;
-    float qRy = R[1]*qx + R[4]*qy + R[7]*qz;
-    float qRz = R[2]*qx + R[5]*qy + R[8]*qz;
+    double qRx = R[0]*qx + R[3]*qy + R[6]*qz;
+    double qRy = R[1]*qx + R[4]*qy + R[7]*qz;
+    double qRz = R[2]*qx + R[5]*qy + R[8]*qz;
     
     ff[0] = q_vecs[q_idx].s3;
     ff[1] = q_vecs[q_idx].s4;
@@ -463,19 +448,19 @@ __kernel void qrf_default(
     ff[15] = 0.0f;
 
     
-    __local float4 LOC_ATOMS[GROUP_SIZE];
+    __local double4 LOC_ATOMS[GROUP_SIZE];
     for (int g=0; g<n_atoms; g+=GROUP_SIZE){
         int ai = g + l_idx;
         if (ai < n_atoms)
             LOC_ATOMS[l_idx] = r_vecs[ai];
         if( !(ai < n_atoms))
-            LOC_ATOMS[l_idx] = (float4)(1.0f, 1.0f, 1.0f, 15.0f); // make atom ID 15, s.t. ff=0
+            LOC_ATOMS[l_idx] = (double4)(1.0f, 1.0f, 1.0f, 15.0f); // make atom ID 15, s.t. ff=0
 
         barrier(CLK_LOCAL_MEM_FENCE);
         
         for (int i=0; i< GROUP_SIZE; i++){
 
-            float phase = qRx*LOC_ATOMS[i].x + qRy*LOC_ATOMS[i].y + qRz*LOC_ATOMS[i].z;
+            double phase = qRx*LOC_ATOMS[i].x + qRy*LOC_ATOMS[i].y + qRz*LOC_ATOMS[i].z;
             int species_id = (int) (LOC_ATOMS[i].w);
             
             Areal += native_cos(-phase)*ff[species_id];
@@ -490,39 +475,39 @@ __kernel void qrf_default(
 
 
 __kernel void qrf_kam(
-    __global float16 *q_vecs,
-    __global float4 *r_vecs,
-    __constant float *R,
-    __constant float *T,
-    __global float2 *A,
+    __global double16 *q_vecs,
+    __global double4 *r_vecs,
+    __constant double *R,
+    __constant double *T,
+    __global double2 *A,
     const int n_atoms){
 
     int q_idx = get_global_id(0);
     int l_idx = get_local_id(0);
 
-    //float Areal=0.0f;
-    //float Aimag=0.0f;
-    float Areal;
-    float Aimag;
+    //double Areal=0.0f;
+    //double Aimag=0.0f;
+    double Areal;
+    double Aimag;
 
-    float ff[16];
+    double ff[16];
     
 
     // multiply trans vector by inverse rotation matrix  
-    float Tx = R[0]*T[0] + R[3]*T[1] + R[6]*T[2];
-    float Ty = R[1]*T[0] + R[4]*T[1] + R[7]*T[2];
-    float Tz = R[2]*T[0] + R[5]*T[1] + R[8]*T[2];
+    double Tx = R[0]*T[0] + R[3]*T[1] + R[6]*T[2];
+    double Ty = R[1]*T[0] + R[4]*T[1] + R[7]*T[2];
+    double Tz = R[2]*T[0] + R[5]*T[1] + R[8]*T[2];
 
     Areal=A[q_idx].x;
     Aimag=A[q_idx].y;
 
-    float qx = q_vecs[q_idx].s0;
-    float qy = q_vecs[q_idx].s1;
-    float qz = q_vecs[q_idx].s2;
+    double qx = q_vecs[q_idx].s0;
+    double qy = q_vecs[q_idx].s1;
+    double qz = q_vecs[q_idx].s2;
 
-    float qRx = R[0]*qx + R[3]*qy + R[6]*qz;
-    float qRy = R[1]*qx + R[4]*qy + R[7]*qz;
-    float qRz = R[2]*qx + R[5]*qy + R[8]*qz;
+    double qRx = R[0]*qx + R[3]*qy + R[6]*qz;
+    double qRy = R[1]*qx + R[4]*qy + R[7]*qz;
+    double qRz = R[2]*qx + R[5]*qy + R[8]*qz;
     
     ff[0] = q_vecs[q_idx].s3;
     ff[1] = q_vecs[q_idx].s4;
@@ -541,19 +526,19 @@ __kernel void qrf_kam(
     ff[14] = 0.0f;
     ff[15] = 0.0f;
 
-    __local float4 LOC_ATOMS[GROUP_SIZE];
+    __local double4 LOC_ATOMS[GROUP_SIZE];
     for (int g=0; g<n_atoms; g+=GROUP_SIZE){
         int ai = g + l_idx;
         if (ai < n_atoms)
             LOC_ATOMS[l_idx] = r_vecs[ai];
         if( !(ai < n_atoms))
-            LOC_ATOMS[l_idx] = (float4)(1.0f, 1.0f, 1.0f, 15.0f); // make atom ID 15, s.t. ff=0
+            LOC_ATOMS[l_idx] = (double4)(1.0f, 1.0f, 1.0f, 15.0f); // make atom ID 15, s.t. ff=0
 
         barrier(CLK_LOCAL_MEM_FENCE);
         
         for (int i=0; i< GROUP_SIZE; i++){
 
-            float phase = qRx*(LOC_ATOMS[i].x+Tx) + qRy*(LOC_ATOMS[i].y+Ty) +
+            double phase = qRx*(LOC_ATOMS[i].x+Tx) + qRy*(LOC_ATOMS[i].y+Ty) +
                 qRz*(LOC_ATOMS[i].z+Tz);
             int species_id = (int) (LOC_ATOMS[i].w);
             

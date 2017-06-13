@@ -145,23 +145,24 @@ clskip = pytest.mark.skipif(havecl is False, reason="Requires pyopencl module")
 
 
 @clskip
-def test_ClCore(main=False):
+def test_ClCore_float(main=False):
+    _ClCore()
 
-    ###########################################################################
-    # Check that we can set the group size and it propagates to the device
-    ###########################################################################
+@clskip
+def test_ClCore_double(main=False):
+    _ClCore(double_precision=True)
 
-    core = clcore.ClCore(context=None, queue=None, group_size=1)
-    assert(core.get_group_size() == core.group_size)
-    
+
+def _ClCore(double_precision=False):
+
     ###########################################################################
     # Check that we can set double precision if available
     ###########################################################################
 
     core = clcore.ClCore(context=None, queue=None, group_size=1,
-                         double_precision=True)
-    print(core.double_precision)
+                         double_precision=double_precision)
 
+    assert(core.get_group_size() == core.group_size)
     ###########################################################################
     # Check that there are no errors in phase_factor_qrf
     # TODO: actually check that the amplitudes are correct
@@ -177,22 +178,26 @@ def test_ClCore(main=False):
     f = np.random.random([N])*1j
     
     core.init_amps(Npix=pl.n_pixels)
+    
     core.phase_factor_qrf_inplace(q,r,f,R)
     assert(type(core.a_dev) is pyopencl.array.Array)
     A = core.release_amps(reset=True)
+    print(A)
+    print("===============")
     assert(type(A) is np.ndarray)
     
 #   make device arrays first
     q = core.to_device(q) 
     r = core.to_device(r)
     f = core.to_device(r)
-    
+    R = None
     core.phase_factor_qrf_inplace(q,r,f,R)
     A1 = core.release_amps(reset=False)
-    
+   
+    print(A1)
     core.phase_factor_qrf_inplace(q,r,f,R)
     A2 = core.release_amps(reset=False)
-    
+    print(A2)
     assert( np.allclose(2*A1,A2))
 
     core.init_amps(pl.n_pixels)
