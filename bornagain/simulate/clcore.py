@@ -898,7 +898,8 @@ class ClCore(object):
         """
     
         if R is None:
-            R = np.eye(3, dtype=self.real_t)
+            R = np.eye(3, dtype=self.real_t).ravel()
+        
         R16 = np.zeros([16], dtype=self.real_t)
         R16[0:9] = R.flatten().astype(self.real_t)
     
@@ -927,10 +928,11 @@ class ClCore(object):
     
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
                              * self.group_size)
-    
+   
+        R16_dev = self.to_device(R16, dtype=self.real_t)
         self.buffer_mesh_lookup_cl(self.queue, (global_size,), (self.group_size,), 
                               a_map_dev.data, q_dev.data, a_out_dev.data, 
-                              n_pixels, N, deltaQ, q_min, R16)
+                              n_pixels, N, deltaQ, q_min, R16_dev.data)
     
         if a_out is None:
             return a_out_dev.get()

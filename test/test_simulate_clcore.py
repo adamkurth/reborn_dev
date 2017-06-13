@@ -18,6 +18,13 @@ try:
     import pyopencl
     import bornagain as ba
     havecl = True
+    # Check for double precision:
+    core = clcore.ClCore(context=None, queue=None, group_size=1,
+                         double_precision=True)
+    if core.double_precision:
+        have_double = True
+    else:
+        have_double = False
 except ImportError:
     havecl = False
 
@@ -29,6 +36,8 @@ if len(sys.argv) > 1:
 
 
 clskip = pytest.mark.skipif(havecl is False, reason="Requires pyopencl module")
+
+
 
 # @clskip
 # def test_two_atoms(main=False):
@@ -156,7 +165,7 @@ def test_ClCore_double(main=False):
 def _ClCore(double_precision=False):
 
     ###########################################################################
-    # Check that we can set double precision if available
+    # Setup the simulation core
     ###########################################################################
 
     core = clcore.ClCore(context=None, queue=None, group_size=1,
@@ -164,7 +173,7 @@ def _ClCore(double_precision=False):
 
     assert(core.get_group_size() == core.group_size)
     ###########################################################################
-    # Check that there are no errors in phase_factor_qrf
+    # Check that there are no errors in phase_factor_qrf_inplace
     # TODO: actually check that the amplitudes are correct
     ###########################################################################
 
@@ -191,6 +200,7 @@ def _ClCore(double_precision=False):
     r = core.to_device(r)
     f = core.to_device(r)
     R = None
+    
     core.phase_factor_qrf_inplace(q,r,f,R)
     A1 = core.release_amps(reset=False)
    
@@ -336,7 +346,6 @@ def _ClCore(double_precision=False):
     r = core.get_r_cromermann(atom_pos, sub_com=False) 
     core.run_cromermann(q, r, rand_rot=True)
     A = core.release_amplitudes()
-     
 
 
 if __name__ == '__main__':

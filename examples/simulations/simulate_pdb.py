@@ -17,6 +17,7 @@ show = False   # Display the simulated patterns
 double = False # Use double precision if available
 if 'view' in sys.argv: show = True
 if 'double' in sys.argv: double = True
+if 'rotate' in sys.argv: rotate=True
 
 clcore = core.ClCore(group_size=32,double_precision=double)
 
@@ -46,6 +47,12 @@ n_trials = 3
 show_all = show
 #plt.ion()
 
+if rotate:
+	phi = 0.5
+	R = np.array([[np.cos(phi),np.sin(phi),0],[-np.sin(phi),np.cos(phi),0],[0,0,1]])
+else:
+	R = np.eye(3)
+
 if 1:
     
     print("[clcore] Access q vectors from memory (i.e. compute them on cpu first)")
@@ -53,7 +60,6 @@ if 1:
     
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
-    R = np.eye(3)
     for i in range(0, n_trials):
         t = time.time()
         A = clcore.phase_factor_qrf(q, r, f, R)
@@ -84,12 +90,11 @@ if 1:
     for i in range(0, n_trials):
         t = time.time()
         #a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, None, a_dev).get()
-        a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, None, a_dev)
+        a = clcore.phase_factor_qrf(q_dev, r_dev, f_dev, R, a_dev)
         tf = time.time() - t
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
     imdisp = np.abs(a.get())**2
-    #imdisp = np.abs(a)**2
     imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
     imdisp = np.log(imdisp + 0.1)
     if show_all and show:
@@ -109,7 +114,6 @@ if 1:
     p = pl[0]  # p is the first panel in the PanelList (there is only one)
     n_pixels = p.nF*p.nS
     n_atoms = r.shape[0]
-    R = np.eye(3)
     for i in range(0, n_trials):
         t = time.time()
         A = clcore.phase_factor_pad(
@@ -183,7 +187,7 @@ if 1:
     print("[clcore] Now look up amplitudes for a set of q vectors, using the 3D map")
     for i in range(0,n_trials):
         t = time.time()
-        AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, q)
+        AA = clcore.buffer_mesh_lookup(A, N, qmin, qmax, q, R)
         tf = time.time() - t
         print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
               (tf*1e3,n_atoms,n_pixels))
@@ -204,7 +208,6 @@ if 1:
     print('[clcore] As above, but first move arrays to device memory (%7.03f ms)' % (tf*1e3))
     n_atoms = 0
     n_pixels = q.shape[0]
-    R = np.eye(3) #ba.utils.random_rotation_matrix()
     for i in range(0,n_trials):
         t = time.time()
         clcore.buffer_mesh_lookup(a_map_dev, N, qmin, qmax, q_dev, R, a_out_dev)
