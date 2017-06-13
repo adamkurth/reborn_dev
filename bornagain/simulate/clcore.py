@@ -631,7 +631,8 @@ class ClCore(object):
             R = np.eye(3, dtype=self.real_t)
         R16 = np.zeros([16], dtype=self.real_t)
         R16[0:9] = R.flatten().astype(self.real_t)
-    
+        R16_dev = self.to_device(R16, dtype=self.real_t)
+
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
         q_dev = self.to_device(q, dtype=self.real_t)
@@ -1154,55 +1155,52 @@ class ClCore(object):
 
 def test():
 
+    import pkg_resources
+    import bornagain.target.crystal as crystal
+    from bornagain import Molecule
+    pdb = pkg_resources.resource_filename('bornagain', '').replace('bornagain/bornagain','bornagain/examples/data/pdb/2LYZ.pdb')
+    mol = Molecule(pdb) 
+    form_facts = np.ones( mol.atom_vecs.shape[0], np.complex64)
+    
     import time
-    natom = 10000
-    n_pixels = 1000
-    atom_pos = np.random.random( (natom,3) )
-    atomic_nums = np.ones(natom)
+    n_pixels = 2048
     D = ba.detector.SimpleDetector(n_pixels=n_pixels) 
     print ("\tSimulating into %d pixels"%D.Q.shape[0])
     
 #   test q-independent
-    core = ClCore()
-    Npix = D.Q.shape[0]
-    Nextra = core.next_multiple_groupsize(Npix)
-    
-    padq = np.zeros(( Npix+Nextra,4), core.real_t)
-    padq[:Npix,:3] = D.Q
-
+    core = ClCore(double_precision=True)
+    Npix = D.n_pixels 
     q = core.to_device(D.Q)
-    padq = core.to_device(padq)
-    r = core.to_device( np.random.random([natom,3]))
-    f = core.to_device( np.random.random([natom])*1j)
-    
-    core.init_amps(Npix+Nextra)
-    t = time.time()
-    core.phase_factor_qrf2_inplace(padq,r,f)
-    A_wpad = core.release_amps(reset=False)[:-Nextra]
-    print ("Took %f.4 seconds"%(time.time() - t))
+    r = core.to_device( mol.atom_vecs, dtype=core.real_t)
+    ff = np.zeros( mol.atom_vecs.shape[0], dtype=core.complex_t)
+    ff.real = 1
+    f = core.to_device( ff , dtype=core.complex_t)
     
     core.init_amps(Npix)
+    print("Testing phase_factor_qrf")
     t = time.time()
     core.phase_factor_qrf_inplace(q,r,f)
-    A = core.release_amps(reset=False)
-    print ("Took %f.4 seconds"%(time.time() - t))
-    exit()
-
-    core.prime_cromermann_simulator(D.Q, atomic_nums)
-    q = core.get_q_cromermann()
-    t = time.time()
-    r = core.get_r_cromermann(atom_pos, sub_com=False) 
-    core.run_cromermann(q, r, rand_rot=True)
-    A = core.release_amplitudes()
-    I = D.readout(A)
+    A = core.release_amps(reset=True)
+    print ("\tTook %f.4 seconds"%(time.time() - t))
+    _ = D.readout(A)
     D.display()
+
+#   now test the cromermann simulation
+    print("Testing cromermann")
+    core.prime_cromermann_simulator(D.Q, None)
+    q = core.get_q_cromermann()
     
-
-    
-
-    
-
-
+    t = time.time()
+    r = core.get_r_cromermann(mol.atom_vecs, sub_com=False) 
+    core.run_cromermann(q, r, rand_rot=False)
+    A2 = core.release_amplitudes()
+    print ("\tTook %f.4 seconds"%(time.time() - t))
+    _ = D.readout(A2)
+    D.display()
+  
+#   there is slightttt difference between the two methods at low q, not sure why... 
+    _ = D.readout( A-A2)
+    D.display()
 
     print("Passed testing mode!")
 
