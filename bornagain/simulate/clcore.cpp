@@ -225,21 +225,21 @@ kernel void phase_factor_qrf(
     // global index could be larger than the number of pixels because it must be a
     // multiple of the group size.  We must check if it is larger...
     float2 a_sum = (float2)(0.0f,0.0f);
-    float4 q4, q4r;
+    float4 qr;
     if (gi < n_pixels){
 
         a_sum.x = a[gi].x;
         a_sum.y = a[gi].y;
         
         // Move original q vector to private memory
-        q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+        qr = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
 
         // Rotate the q vector
-        q4r = rotate_vec(R, q4);
+        qr = rotate_vec(R, qr);
 
     } else {
         // Dummy values; doesn't really matter what they are.
-        q4r = (float4)(0.0f,0.0f,0.0f,0.0f);
+        qr = (float4)(0.0f,0.0f,0.0f,0.0f);
     }
     local float4 rg[GROUP_SIZE];
     local float2 fg[GROUP_SIZE];
@@ -267,7 +267,7 @@ kernel void phase_factor_qrf(
 
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
-            ph = -dot(q4r,rg[n]);
+            ph = -dot(qr,rg[n]);
             sinph = native_sin(ph);
             cosph = native_cos(ph);
             a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
@@ -329,6 +329,9 @@ kernel void phase_factor_pad(
     //float4 V;
     float4 q; 
     q = q_pad( i,j,w,T,F,S,B);
+
+    // Rotate the q vector
+    q = rotate_vec(R, q);
 
     local float4 rg[GROUP_SIZE];
     local float2 fg[GROUP_SIZE];
@@ -401,7 +404,7 @@ kernel void phase_factor_mesh(
     float4 qr;
 
     // Each global index corresponds to a particular q-vector
-    const float4 q4 = (float4)(i*deltaQ.x+q_min.x,
+    qr = (float4)(i*deltaQ.x+q_min.x,
             j*deltaQ.y+q_min.y,
             k*deltaQ.z+q_min.z,0.0f);
 
