@@ -13,7 +13,7 @@ from bornagain.simulate import refdata
 def amplitudes_with_cmans(q, r, Z):
     """
     compute scattering amplitudes 
-    =============================
+    
     q: 2D np.array of q vectors 
     r: 2D np.array of atom coors
     Z: 1D np.array of atomic numbers corresponding to r
@@ -31,7 +31,7 @@ def amplitudes_with_cmans(q, r, Z):
 def amplitudes(q, r):
     """
     compute scattering amplitudes without form factors
-    ==================================================
+
     q: 2D np.array of q vectors 
     r: 2D np.array of atom coors
     """
