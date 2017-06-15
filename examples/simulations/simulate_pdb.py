@@ -15,6 +15,7 @@ except:
 
 show = False   # Display the simulated patterns
 double = False # Use double precision if available
+rotate = False # Check if rotation matrices work
 if 'view' in sys.argv: show = True
 if 'double' in sys.argv: double = True
 if 'rotate' in sys.argv: rotate=True
