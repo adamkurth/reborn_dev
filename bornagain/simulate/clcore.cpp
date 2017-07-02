@@ -5,9 +5,9 @@
 #endif
 
 // We allow for either double or single precision calculations.  As of now,
-// this only affects floating-point numbers, not integers.  Do note that you
-// must use the gfloatN types rather than float or double types, or else there
-// will be compile or runtime errors.
+// this only affects floating-point numbers, not integers.  Do note that the
+// Python layer will search-and-replace all "float" strings with "double"
+// before compiling this.
 #if CONFIG_USE_DOUBLE
     #if defined(cl_khr_fp64)  // Khronos extension available?
         #pragma OPENCL EXTENSION cl_khr_fp64 : enable
@@ -37,23 +37,15 @@
 //#endif
 
 
-// Why not pass a 9-vector? Also, this means we must do the translation/inverse in numpy, right?
-// Im cool with whatever convention as long as we are on the same page... -Derek
 static float4 rotate_vec(
-    //constfloat16 R,
     __constant float *R, //alternatively.. 
     const float4 q)
-
-// Please, let's always rotate vectors in this way.  We will generally use a
-// gfloat16 to pass in a rotation matrix (only the first nine values are used).
-
+// Please, let's always rotate vectors in this way... this is meant to act
+// on the q vectors, so that it is done once per global id rather than being
+// done on every atom, which would take more compute time
 {
     float4 qout = (float4)(0.0,0.0,0.0,0.0);
-//    qout.x = R.s0*q.x + R.s1*q.y + R.s2*q.z;
-//    qout.y = R.s3*q.x + R.s4*q.y + R.s5*q.z;
-//    qout.z = R.s6*q.x + R.s7*q.y + R.s8*q.z;
 
-//  alternatively
     qout.x = R[0]*q.x + R[1]*q.y + R[2]*q.z;
     qout.y = R[3]*q.x + R[4]*q.y + R[5]*q.z;
     qout.z = R[6]*q.x + R[7]*q.y + R[8]*q.z;
@@ -70,7 +62,6 @@ static float4 q_pad(
     __constant float *S,
     __constant float *B
     )
-{
 // Calculate the q vectors for a pixel-array detector
 //
 // Input:
@@ -82,18 +73,7 @@ static float4 q_pad(
 // B is the direction of the incident beam
 //
 // Output: A single q vector
-
-   // gfloat4 V;
-    //gfloat4 q;
-
-    //V = T + i*F + j*S;
-    //V /= length(V);
-    //q = (V-B)*PI2/w;
-
-//  sorry I ended up doing this to try and fix the 
-//  gfloat2 / double2 incompatibility, but I think it works
-//  and then we can get rid of the confusing vec4 thingy...
-//  lemme know... -Derek
+{
     float4 q = (float4)(0.0f,0.0f,0.0f,0.0f);
 
     float Vx,Vy,Vz,Vnorm;
@@ -124,76 +104,6 @@ kernel void get_group_size(
 }
 
 
-kernel void phase_factor_qrf2(
-    __global float4 *q,
-    __global float *r,
-    __global float2 *f,
-    __constant float *R,
-    __global float2 *a,
-    const int n_atoms)
-
-{
-    const int gi = get_global_id(0); /* Global index */
-    const int li = get_local_id(0);  /* Local group index */
-
-    float ph, sinph, cosph;
-
-    // Each global index corresponds to a particular q-vector.  Note that the
-    // global index could be larger than the number of pixels because it must be a
-    // multiple of the group size.  We must check if it is larger...
-    float2 a_sum = (float2)(0.0f,0.0f);
-    float4 q4, q4r;
-
-    a_sum.x = a[gi].x;
-    a_sum.y = a[gi].y;
-    
-    // Move original q vector to private memory
-    q4 = q[gi];
-
-    // Rotate the q vector
-    q4r = rotate_vec(R,q4);
-
-    local float4 rg[GROUP_SIZE];
-    local float2 fg[GROUP_SIZE];
-
-    for (int g=0; g<n_atoms; g+=GROUP_SIZE){
-
-        // Here we will move a chunk of atoms to local memory.  Each worker in a
-        // group moves one atom.
-        int ai = g+li;
-
-        if (ai < n_atoms ){
-            rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
-            fg[li] = f[ai];
-        } else {
-            rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
-            fg[li] = (float2)(0.0f,0.0f);
-        }
-
-        // Don't proceed until **all** members of the group have finished moving
-        // atom information into local memory.
-        barrier(CLK_LOCAL_MEM_FENCE);
-
-        // We use a local real and imaginary part to avoid floatint point overflow
-        float2 a_temp = (float2)(0.0f,0.0f);
-
-        // Now sum up the amplitudes from this subset of atoms
-        for (int n=0; n < GROUP_SIZE; n++){
-            ph = -dot(q4r,rg[n]);
-            sinph = native_sin(ph);
-            cosph = native_cos(ph);
-            a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
-            a_temp.y += fg[n].x*sinph + fg[n].y*cosph;
-        }
-        a_sum += a_temp;
-
-        // Don't proceed until this subset of atoms are completed.
-        barrier(CLK_LOCAL_MEM_FENCE);
-    }
-    a[gi] = a_sum;
-}
-
-
 kernel void phase_factor_qrf(
     global const float *q,
     global const float *r,
@@ -205,7 +115,9 @@ kernel void phase_factor_qrf(
 {
 
 // Calculate the the scattering amplitude according to a set of point
-// scatterers:  A = sum{ f*exp(i r.q ) }
+// scatterers:  A = sum{ f*exp(i r.q ) }.  This variant accepts as input a set
+// of q vectors (computed as you wish), and then the atomic positions and
+// scattering factors.  A rotation matrix acts on the q vectors.
 //
 // Input:
 // q: scattering vectors
@@ -300,7 +212,9 @@ kernel void phase_factor_pad(
 {
 
 // Calculate the the scattering amplitude according to a set of point
-// scatterers:  A = sum{ f*exp(i r.q ) }
+// scatterers:  A = sum{ f*exp(i r.q ) }.  This variant generates the q vectors
+// for a pixel-array detector on the fly.  The atomic positions and
+// scattering factors are specified.  A rotation matrix acts on the q vectors.
 //
 // Input:
 // r: atomic coordinates
@@ -338,8 +252,8 @@ kernel void phase_factor_pad(
 
     for (int g=0; g<n_atoms; g+=GROUP_SIZE){
 
-        // Here we will move a chunk of atoms to local memory.  Each worker in a
-        // group moves one atom.
+        // Here we will move a chunk of atoms to local memory.  Each worker in
+        // a group moves one atom.
         int ai = g+li;
 
         if (ai < n_atoms){
@@ -349,11 +263,12 @@ kernel void phase_factor_pad(
             rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
             fg[li] = (float2)(0.0f,0.0f);
         }
-        // Don't proceed until **all** members of the group have finished moving
-        // atom information into local memory.
+        // Don't proceed until **all** members of the group have finished
+        // moving atom information into local memory.
         barrier(CLK_LOCAL_MEM_FENCE);
 
-        // We use a local real and imaginary part to avoid floatint point overflow
+        // We use a local real and imaginary part to avoid floatint point
+        // overflow
         float lre=0;
         float lim=0;
 
@@ -388,8 +303,24 @@ kernel void phase_factor_mesh(
     const int4 N,
     const float4 deltaQ,
     const float4 q_min)
-{
 
+// Calculate the the scattering amplitude according to a set of point
+// scatterers:  A = sum{ f*exp(i r.q ) }.  This variant generates the q vectors
+// corresponding to a 3D lattice.  The atomic positions and
+// scattering factors are specified.
+//
+// Input:
+// r: atomic coordinates
+// f: scattering factors
+// a: scattering amplitudes
+// R: rotation matrix acting on q vectors
+// n_pixels: number of q vectors
+// n_atoms: number of atoms
+// N: the number of points on the 3D grid (3 numbers specified)
+// deltaQ: the spacing betwen points (3 numbers specified)
+// q_min: the start position; edge of grid (3 numbers specified)
+
+{
     const int Nxy = N.x*N.y;
     const int gi = get_global_id(0); /* Global index */
     const int i = gi % N.x;          /* Voxel coordinate i (x) */
@@ -462,6 +393,9 @@ kernel void buffer_mesh_lookup(
     float4 deltaQ,
     float4 q_min,
     __constant float *R)
+// This is meant to be used in conjunction with phase_factor_mesh.  This is
+// an interpolation routine that uses the output of phase_factor_mesh as the
+// "lookup table".  It does trilinear interpolation.
 {
     const int gi = get_global_id(0);
 
@@ -521,7 +455,9 @@ __kernel void qrf_default(
     __global float4 *r_vecs,
     __constant float *R,
     __global float2 *A,
-    const int n_atoms){
+    const int n_atoms)
+// Derek will add documentation to this one.
+{
 
     int q_idx = get_global_id(0);
     int l_idx = get_local_id(0);
@@ -592,7 +528,9 @@ __kernel void qrf_kam(
     __constant float *R,
     __constant float *T,
     __global float2 *A,
-    const int n_atoms){
+    const int n_atoms)
+// Derek will add documentation to this one.
+{
 
     int q_idx = get_global_id(0);
     int l_idx = get_local_id(0);
