@@ -740,7 +740,7 @@ class ClCore(object):
         self._set_com_vec()
         
 #       run the program
-        self.qrf_kam_cl( self.queue, (self.Npix+self.Nextra_pix,),(self.group_size,),
+        self.qrf_kam_cl( self.queue, (int(self.Npix+self.Nextra_pix),),(self.group_size,),
                          q_buff_data, r_buff_data, self.rot_buff.data, 
                          self.com_buff.data, self._A_buff_data, self.Nato)
 
