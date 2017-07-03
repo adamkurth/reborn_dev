@@ -602,3 +602,21 @@ __kernel void qrf_kam(
     A[q_idx].y = Aimag;
 }
 
+
+//__kernel void ideal_lattice_transform_intensity_qrf(
+//    __global float4 *q,
+//    __constant float *R,
+//    __constant float *U,
+//    __constant float *N,
+//    __global float *I,
+//    const int n_atoms)
+//// Calculate the lattice transform intensity for a parallelepiped crystal.
+////
+//// Input:
+//// q:
+//// U is the orthogonalization matrix defined in Rupp's textbook "Biomolecular
+//// Crystallography" as "O" (renamed to avoid confusion with zero).  The columns
+//// of this matrix are the a, b, and c lattice vectors.
+//{
+//
+//}

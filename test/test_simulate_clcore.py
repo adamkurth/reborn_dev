@@ -235,5 +235,5 @@ def _ClCore(double_precision=False):
 
 if __name__ == '__main__':
 
-    _ClCore(main)
+    test_ClCore_float()
 

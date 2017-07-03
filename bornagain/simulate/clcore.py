@@ -79,21 +79,36 @@ class ClCore(object):
             group_size = max_group_size
         self.group_size = group_size
         
+    def _double_precision_is_available(self):
+#         print(self.queue.device.name)
+        if 'cl_khr_fp64' not in self.queue.device.extensions.split():
+            return False
+        # Stupid error to do with Apple's CL implementation?
+        if self.queue.device.name == 'AMD Radeon HD - FirePro D700 Compute Engine':
+            return False
+        if self.queue.device.name == 'Intel(R) Xeon(R) CPU E5-1650 v2 @ 3.50GHz':
+            return False
+        return True
+        
     def _setup_precision(self, dbl):
         if not dbl:
             self._use_float()
             self.double_precision = False
-        elif 'cl_khr_fp64' not in self.queue.device.extensions.split() and dbl:
-            sys.stderr.write('Double precision not supported.  Fallback to'
-                             ' single precision\n')
-            self.double_precision = False
-            self._use_float()
-
-        else:
-            self._use_double()
-            self.double_precision = True
+        if dbl:
+            if self._double_precision_is_available():
+                sys.stderr.write('Attempting to use double precision.\n')
+                self._use_double()
+                self.double_precision = True
+            else:
+                sys.stderr.write('Double precision not supported on\n%s'
+                                 '\nFallback to single precision\n' 
+                                 % self.queue.device.name)
+                self.double_precision = False
+                self._use_float()
 
     def _use_double(self):
+        # TODO: Decide if integers should be made double also.  As of now, they
+        #       are all single precision.
         self.int_t = np.int32
         self.real_t = np.float64
         self.complex_t = np.complex128
@@ -858,10 +873,14 @@ def helpme():
         i+=1
         j=0
         for device in platform.get_devices():
-            print(10*'-',j,device)
+            print(2*'-',j,device)
             j += 1
     print(75*"=")
-        
+    print('')
+    print("You can set the environment variable PYOPENCL_CTX to choose the ")
+    print("device and platform automatically.  For example,")
+    print("> export PYOPENCL_CTX='1'")
+    
 
 def test():
 
