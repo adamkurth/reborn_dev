@@ -74,7 +74,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="RadialProfile"><a class="viewcode-back" href="../../bornagain.scatter.html#bornagain.scatter.RadialProfile">[docs]</a><span class="k">class</span> <span class="nc">RadialProfile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="RadialProfile"><a class="viewcode-back" href="../../bornagain.html#bornagain.scatter.RadialProfile">[docs]</a><span class="k">class</span> <span class="nc">RadialProfile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -86,7 +86,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qRange</span> <span class="o">=</span> <span class="bp">None</span>
 
-<div class="viewcode-block" id="RadialProfile.make_plan"><a class="viewcode-back" href="../../bornagain.scatter.html#bornagain.scatter.RadialProfile.make_plan">[docs]</a>    <span class="k">def</span> <span class="nf">make_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">PanelList</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nBins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">qRange</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="RadialProfile.make_plan"><a class="viewcode-back" href="../../bornagain.html#bornagain.scatter.RadialProfile.make_plan">[docs]</a>    <span class="k">def</span> <span class="nf">make_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">PanelList</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nBins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">qRange</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; Use PanelList as template to cache information for radial binning.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
@@ -113,7 +113,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binIndices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nBins</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">countsNonZero</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="RadialProfile.get_profile"><a class="viewcode-back" href="../../bornagain.scatter.html#bornagain.scatter.RadialProfile.get_profile">[docs]</a>    <span class="k">def</span> <span class="nf">get_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">PanelList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="RadialProfile.get_profile"><a class="viewcode-back" href="../../bornagain.html#bornagain.scatter.RadialProfile.get_profile">[docs]</a>    <span class="k">def</span> <span class="nf">get_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">PanelList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
 
         <span class="n">profile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binIndices</span><span class="p">,</span> <span class="n">data</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nBins</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">average</span><span class="p">:</span>

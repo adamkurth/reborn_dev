@@ -787,6 +787,11 @@ class ClCore(object):
 
 def helpme():
 
+    """
+    Print out some useful information about platforms and devices that are
+    available for running simulations.
+    """
+
     def print_info(obj, info_cls):
         for info_name in sorted(dir(info_cls)):
             if not info_name.startswith("_") and info_name != "to_string":

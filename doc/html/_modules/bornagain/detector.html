@@ -69,6 +69,8 @@
 <span class="sd">Classes for analyzing/simulating diffraction data contained in pixel array</span>
 <span class="sd">detectors (PADs).</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
+
 <span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -84,8 +86,7 @@
 <span class="kn">import</span> <span class="nn">source</span>
 <span class="kn">import</span> <span class="nn">units</span>
 
-
-<div class="viewcode-block" id="Panel"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel">[docs]</a><span class="k">class</span> <span class="nc">Panel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel">[docs]</a><span class="k">class</span> <span class="nc">Panel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Individual detector Panel: a 2D lattice of square pixels.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
@@ -127,27 +128,27 @@
         <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;adu_per_ev = </span><span class="si">%g</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">adu_per_ev</span>
         <span class="k">return</span> <span class="n">s</span>
 
-<div class="viewcode-block" id="Panel.shape"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.shape">[docs]</a>    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.shape"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.shape">[docs]</a>    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return expected shape of data arrays. &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Panel.reshape"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.reshape">[docs]</a>    <span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.reshape"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.reshape">[docs]</a>    <span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Reshape array to panel shape. &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Panel.ones"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.ones">[docs]</a>    <span class="k">def</span> <span class="nf">ones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.ones"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.ones">[docs]</a>    <span class="k">def</span> <span class="nf">ones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return array of ones with shape (nS,nF). &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Panel.zeros"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.zeros"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return array of zeros with shape (nS,nF). &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Panel.check_data"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.check_data">[docs]</a>    <span class="k">def</span> <span class="nf">check_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.check_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.check_data">[docs]</a>    <span class="k">def</span> <span class="nf">check_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Check that a data array is consistent with panel shape.&quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -402,7 +403,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gh</span>
 
-<div class="viewcode-block" id="Panel.pixels_to_vectors"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.pixels_to_vectors">[docs]</a>    <span class="k">def</span> <span class="nf">pixels_to_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.pixels_to_vectors"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.pixels_to_vectors">[docs]</a>    <span class="k">def</span> <span class="nf">pixels_to_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Convert pixel indices to translation vectors (i=fast scan, j=slow</span>
 <span class="sd">        scan).&quot;&quot;&quot;</span>
 
@@ -411,7 +412,7 @@
         <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">F</span> <span class="o">+</span> <span class="n">S</span>
         <span class="k">return</span> <span class="n">V</span></div>
 
-<div class="viewcode-block" id="Panel.clear_geometry_cache"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.clear_geometry_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_geometry_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.clear_geometry_cache"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.clear_geometry_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_geometry_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Clear out all derived geometry data.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ps</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Pixel size derived from F/S vectors</span>
@@ -427,7 +428,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">panellist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">panellist</span><span class="o">.</span><span class="n">clear_geometry_cache</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Panel.get_vertices"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.get_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">get_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.get_vertices"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.get_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">get_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Get Panel get_vertices; positions of corner pixels.&quot;&quot;&quot;</span>
 
         <span class="n">nF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span> <span class="o">-</span> <span class="mi">1</span>
@@ -448,7 +449,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixels_to_vectors</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Panel.get_center"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.get_center">[docs]</a>    <span class="k">def</span> <span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.get_center"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.get_center">[docs]</a>    <span class="k">def</span> <span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Vector to center of Panel.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_vertices</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
@@ -460,7 +461,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_real_space_bounding_box</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Panel.get_real_space_bounding_box"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.get_real_space_bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">get_real_space_bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Panel.get_real_space_bounding_box"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.get_real_space_bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">get_real_space_bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the minimum and maximum values of the four corners.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rsbb</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -472,7 +473,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rsbb</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Panel.simple_setup"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.Panel.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="Panel.simple_setup"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                      <span class="n">nF</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">nS</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">pixel_size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -508,7 +509,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelength</span></div></div>
 
 
-<div class="viewcode-block" id="PanelList"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList">[docs]</a><span class="k">class</span> <span class="nc">PanelList</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList">[docs]</a><span class="k">class</span> <span class="nc">PanelList</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; List container for detector panels, with extra functionality.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -577,17 +578,17 @@
 
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_panels</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PanelList.zeros"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.zeros"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return an array of zeros of length n_pixels.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pixels</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="PanelList.ones"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.ones">[docs]</a>    <span class="k">def</span> <span class="nf">ones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.ones"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.ones">[docs]</a>    <span class="k">def</span> <span class="nf">ones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return array of ones of length n_pixels.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pixels</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="PanelList.get_panel_indices"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.get_panel_indices">[docs]</a>    <span class="k">def</span> <span class="nf">get_panel_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.get_panel_indices"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.get_panel_indices">[docs]</a>    <span class="k">def</span> <span class="nf">get_panel_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Get the indices of a panel for slicing a PanelList array &quot;&quot;&quot;</span>
 
         <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_panel_index_by_name</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
@@ -605,24 +606,24 @@
 
         <span class="k">return</span> <span class="p">[</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="PanelList.get_panel_data"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.get_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dat</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.get_panel_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.get_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dat</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Slice a panel out of a concatentated array. &quot;&quot;&quot;</span>
 
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_panel_indices</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dat</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span></div>
 
-<div class="viewcode-block" id="PanelList.put_panel_data"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.put_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">put_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">panel_dat</span><span class="p">,</span> <span class="n">panel_list_dat</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.put_panel_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.put_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">put_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">panel_dat</span><span class="p">,</span> <span class="n">panel_list_dat</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Put panel data into panellist array. &quot;&quot;&quot;</span>
 
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_panel_indices</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
         <span class="n">panel_list_dat</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">panel_dat</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PanelList.concatentate_panel_data"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.concatentate_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">concatentate_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datalist</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.concatentate_panel_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.concatentate_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">concatentate_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datalist</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Make one contiguous array from a list of panel data arrays.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">flat</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datalist</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="PanelList.split_panel_data"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.split_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">split_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datalist</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.split_panel_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.split_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">split_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datalist</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Make one contiguous array from a list of panel data arrays.&quot;&quot;&quot;</span>
 
         <span class="n">dl</span> <span class="o">=</span> <span class="p">[]</span>
@@ -642,7 +643,7 @@
 
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_panels</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PanelList.append"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.append"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Append a Panel, check that it is of the correct type.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -659,7 +660,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PanelList.get_panel_index_by_name"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.get_panel_index_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_panel_index_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.get_panel_index_by_name"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.get_panel_index_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_panel_index_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Find the integer index of a Panel by it&#39;s unique name &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
@@ -860,7 +861,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pf</span>
 
-<div class="viewcode-block" id="PanelList.assemble_data"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.assemble_data">[docs]</a>    <span class="k">def</span> <span class="nf">assemble_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.assemble_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.assemble_data">[docs]</a>    <span class="k">def</span> <span class="nf">assemble_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Project all intensity data along the Beam direction.  Nearest</span>
 <span class="sd">        neighbor interpolation.  This is a crude way to display data... &quot;&quot;&quot;</span>
 
@@ -926,7 +927,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ps</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-<div class="viewcode-block" id="PanelList.get_center"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.get_center">[docs]</a>    <span class="k">def</span> <span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.get_center"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.get_center">[docs]</a>    <span class="k">def</span> <span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Mean center of Panel list. &quot;&quot;&quot;</span>
 
         <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_panels</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
@@ -937,7 +938,7 @@
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PanelList.clear_geometry_cache"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.clear_geometry_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_geometry_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PanelList.clear_geometry_cache"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.clear_geometry_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_geometry_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Delete derived data relevant to geometry.  Normally used</span>
 <span class="sd">         internally. &quot;&quot;&quot;</span>
 
@@ -969,7 +970,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gh</span>
 
-<div class="viewcode-block" id="PanelList.simple_setup"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PanelList.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="PanelList.simple_setup"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                      <span class="n">nF</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">nS</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">pixel_size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -996,19 +997,32 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="SimpleDetector"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.SimpleDetector">[docs]</a><span class="k">class</span> <span class="nc">SimpleDetector</span><span class="p">(</span><span class="n">Panel</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleDetector"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.SimpleDetector">[docs]</a><span class="k">class</span> <span class="nc">SimpleDetector</span><span class="p">(</span><span class="n">Panel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple wrapper for folks who wish to use use the Panels</span>
+<span class="sd">    class without learning the intricacies. This will return a detector object representing a</span>
+<span class="sd">    square detector</span>
+<span class="sd">    </span>
+<span class="sd">    .. note:: </span>
+<span class="sd">        - One can readout pixel intensities using :func:`readout`</span>
+<span class="sd">        - After reading out amplitudes, one can display pixels using :func:`display`</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_pixels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">pixsize</span><span class="o">=</span><span class="mf">0.00005</span><span class="p">,</span>
-                 <span class="n">detdist</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">wavelen</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        this is a docstring</span>
-<span class="sd">        </span>
-<span class="sd">        Parametes</span>
-<span class="sd">        =========</span>
-<span class="sd">        n_pixels, int</span>
+<span class="sd">    Arguments</span>
+<span class="sd">        - n_pixels (int)</span>
 <span class="sd">            the number of pixels along one edge</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        - pixsize (float)</span>
+<span class="sd">            the edge length of the square pixels in meters</span>
+
+<span class="sd">        - detdist (float)</span>
+<span class="sd">            the distance from the interaction region to the point where </span>
+<span class="sd">            the forward beam intersects the detector (in meters)</span>
+
+<span class="sd">        - wavelen (float)</span>
+<span class="sd">            the wavelength of the photons (in Angstroms)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_pixels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">pixsize</span><span class="o">=</span><span class="mf">0.00005</span><span class="p">,</span> <span class="n">detdist</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">wavelen</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="n">Panel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -1016,11 +1030,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelen</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">si_energy</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">hc</span> <span class="o">/</span> <span class="p">(</span><span class="n">wavelen</span> <span class="o">*</span> <span class="mf">1e-10</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="bp">None</span>
 
 <span class="c1">#       make a single panel detector:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">simple_setup</span><span class="p">(</span>
             <span class="n">n_pixels</span><span class="p">,</span>
-            <span class="n">n_pixels</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">n_pixels</span><span class="p">,</span>
             <span class="n">pixsize</span><span class="p">,</span>
             <span class="n">detdist</span><span class="p">,</span>
             <span class="n">wavelen</span><span class="p">,)</span>
@@ -1034,11 +1049,46 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rad2q</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">rad</span><span class="p">:</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span> <span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">rad</span> <span class="o">*</span> <span class="n">pixsize</span> <span class="o">/</span> <span class="n">detdist</span><span class="p">)</span> <span class="p">)</span> <span class="o">/</span> <span class="n">wavelen</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">q2rad</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span> <span class="n">q</span><span class="o">*</span><span class="n">wavelen</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">detdist</span> <span class="o">/</span> <span class="n">pixsize</span>
 
-<div class="viewcode-block" id="SimpleDetector.readout"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.SimpleDetector.readout">[docs]</a>    <span class="k">def</span> <span class="nf">readout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amplitudes</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="SimpleDetector.readout"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.SimpleDetector.readout">[docs]</a>    <span class="k">def</span> <span class="nf">readout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amplitudes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given scattering amplitudes, this calculates the corresponding intensity values.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">            - amplitudes (complex np.ndarray)</span>
+<span class="sd">                scattering amplitudes same shape as `self.Q`</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">            - np.ndarray</span>
+<span class="sd">                Scattering intensities as a 2-D image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_sh</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span></div>
 
-<div class="viewcode-block" id="SimpleDetector.readout_finite"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.SimpleDetector.readout_finite">[docs]</a>    <span class="k">def</span> <span class="nf">readout_finite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amplitudes</span><span class="p">,</span> <span class="n">qmin</span><span class="p">,</span> <span class="n">qmax</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="mf">1e20</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleDetector.readout_finite"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.SimpleDetector.readout_finite">[docs]</a>    <span class="k">def</span> <span class="nf">readout_finite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amplitudes</span><span class="p">,</span> <span class="n">qmin</span><span class="p">,</span> <span class="n">qmax</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="mf">1e20</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get scattering intensities as a 2D image considering </span>
+<span class="sd">        finite scattered photons</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">            - amplitudes (complex np.ndarray)</span>
+<span class="sd">                scattering amplitudes same shape as `self.Q`.</span>
+<span class="sd">        </span>
+<span class="sd">            - qmin (float)</span>
+<span class="sd">                minimum q to generate intensities</span>
+<span class="sd">        </span>
+<span class="sd">            - qmax (float)</span>
+<span class="sd">                maximum q to generate intenities</span>
+<span class="sd">        </span>
+<span class="sd">            - flux (float)</span>
+<span class="sd">                forward beam flux in Photons per square centimeter</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            - np.ndarray</span>
+<span class="sd">                Scattering intensities as a 2-D image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_sh</span><span class="p">)</span>
         <span class="n">struct_fact</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">qmin</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Qmag</span><span class="o">.</span><span class="n">min</span><span class="p">():</span>
@@ -1066,14 +1116,38 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span></div>
 
-<div class="viewcode-block" id="SimpleDetector.display"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.SimpleDetector.display">[docs]</a>    <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_log</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleDetector.display"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.SimpleDetector.display">[docs]</a>    <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_log</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">pause</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Displays a detector. Extra kwargs are passed</span>
+<span class="sd">        to matplotlib.figure</span>
+<span class="sd">        </span>
+<span class="sd">        .. note::</span>
+<span class="sd">            - Requires matplotlib.</span>
+<span class="sd">            - Must first run :func:`readout` or :func:`readout_finite`</span>
+<span class="sd">                at least one time</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments</span>
+<span class="sd">            - use_log (bool)</span>
+<span class="sd">                whether to use log-scaling when displaying the intensity image.</span>
+
+<span class="sd">            - vmax (float)</span>
+<span class="sd">                colorbar scaling argument.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        
+        <span class="k">assert</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="s1">&#39;matplotlib&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
             <span class="k">print</span><span class="p">(</span><span class="s2">&quot;You need matplotlib to plot!&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="c1">#plt = matplotlib.pylab</span>
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-
         <span class="n">qx_min</span><span class="p">,</span> <span class="n">qy_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">qx_max</span><span class="p">,</span> <span class="n">qy_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">extent</span> <span class="o">=</span> <span class="p">(</span><span class="n">qx_min</span><span class="p">,</span> <span class="n">qx_max</span><span class="p">,</span> <span class="n">qy_min</span><span class="p">,</span> <span class="n">qy_max</span><span class="p">)</span>
@@ -1082,7 +1156,7 @@
                 <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">intens</span><span class="p">),</span>
                 <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
-                <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span>
+                <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gnuplot&#39;</span><span class="p">,</span>
                 <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;lanczos&#39;</span><span class="p">)</span>
             <span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">ax_img</span><span class="p">)</span>
             <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;log(photon counts)&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
@@ -1091,7 +1165,7 @@
             <span class="n">ax_img</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">intens</span><span class="p">,</span>
                 <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
-                <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span>
+                <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gnuplot&#39;</span><span class="p">,</span>
                 <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;lanczos&#39;</span><span class="p">,</span>
                 <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
             <span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">ax_img</span><span class="p">)</span>
@@ -1100,7 +1174,15 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">r&#39;$q_x\,\,\AA^{-1}$&#39;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">r&#39;$q_y\,\,\AA^{-1}$&#39;</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div></div>
+        <span class="k">if</span> <span class="n">pause</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">pause</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">pause</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">pause</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

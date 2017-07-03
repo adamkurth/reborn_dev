@@ -77,10 +77,10 @@
 <span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="kn">import</span> <span class="n">refdata</span>
 
 
-<div class="viewcode-block" id="amplitudes_with_cmans"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.amplitudes_with_cmans">[docs]</a><span class="k">def</span> <span class="nf">amplitudes_with_cmans</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">Z</span><span class="p">):</span>
+<div class="viewcode-block" id="amplitudes_with_cmans"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.amplitudes_with_cmans">[docs]</a><span class="k">def</span> <span class="nf">amplitudes_with_cmans</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">Z</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    compute scattering amplitudes </span>
-<span class="sd">    =============================</span>
+<span class="sd">    </span>
 <span class="sd">    q: 2D np.array of q vectors </span>
 <span class="sd">    r: 2D np.array of atom coors</span>
 <span class="sd">    Z: 1D np.array of atomic numbers corresponding to r</span>
@@ -95,10 +95,10 @@
     <span class="k">return</span> <span class="n">amps</span></div>
 
 
-<div class="viewcode-block" id="amplitudes"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.amplitudes">[docs]</a><span class="k">def</span> <span class="nf">amplitudes</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<div class="viewcode-block" id="amplitudes"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.amplitudes">[docs]</a><span class="k">def</span> <span class="nf">amplitudes</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    compute scattering amplitudes without form factors</span>
-<span class="sd">    ==================================================</span>
+
 <span class="sd">    q: 2D np.array of q vectors </span>
 <span class="sd">    r: 2D np.array of atom coors</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -108,7 +108,7 @@
     <span class="k">return</span> <span class="n">amps</span></div>
 
 
-<div class="viewcode-block" id="sphericalize"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.sphericalize">[docs]</a><span class="k">def</span> <span class="nf">sphericalize</span><span class="p">(</span><span class="n">lattice</span><span class="p">):</span>
+<div class="viewcode-block" id="sphericalize"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.sphericalize">[docs]</a><span class="k">def</span> <span class="nf">sphericalize</span><span class="p">(</span><span class="n">lattice</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;attempt to sphericalize a 2D lattice point array&quot;&quot;&quot;</span>
     <span class="n">center</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">rads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">lattice</span> <span class="o">-</span> <span class="n">center</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -116,7 +116,7 @@
     <span class="k">return</span> <span class="n">lattice</span><span class="p">[</span><span class="n">rads</span> <span class="o">&lt;</span> <span class="n">max_rad</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="vec_check"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_check">[docs]</a><span class="k">def</span> <span class="nf">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">hardcheck</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<div class="viewcode-block" id="vec_check"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_check">[docs]</a><span class="k">def</span> <span class="nf">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">hardcheck</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Check that a vector meets our assumption of an Nx3 numpy array.  This is</span>
 <span class="sd">helpful, for example, when we want to ensure that dot products and broadcasting</span>
@@ -163,7 +163,7 @@
     <span class="k">return</span> <span class="n">vec</span></div>
 
 
-<div class="viewcode-block" id="vec_norm"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_norm">[docs]</a><span class="k">def</span> <span class="nf">vec_norm</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
+<div class="viewcode-block" id="vec_norm"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_norm">[docs]</a><span class="k">def</span> <span class="nf">vec_norm</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
 
     <span class="n">v</span> <span class="o">=</span> <span class="n">V</span>
     <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
@@ -172,20 +172,20 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
 
 
-<div class="viewcode-block" id="vec_mag"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_mag">[docs]</a><span class="k">def</span> <span class="nf">vec_mag</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
+<div class="viewcode-block" id="vec_mag"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_mag">[docs]</a><span class="k">def</span> <span class="nf">vec_mag</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">V</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;V must have one or two dimensions.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">V</span> <span class="o">*</span> <span class="n">V</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="warn"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.warn">[docs]</a><span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+<div class="viewcode-block" id="warn"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.warn">[docs]</a><span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Simple warning message &quot;&quot;&quot;</span>
 
     <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;WARNING: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="error"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.error">[docs]</a><span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+<div class="viewcode-block" id="error"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.error">[docs]</a><span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Simple error message (to be replaced later...) &quot;&quot;&quot;</span>
 
     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ERROR: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span></div>
@@ -292,7 +292,7 @@
 <span class="c1">#         return np.std(self.getData())</span>
 
 
-<div class="viewcode-block" id="random_rotation_matrix"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.random_rotation_matrix">[docs]</a><span class="k">def</span> <span class="nf">random_rotation_matrix</span><span class="p">(</span><span class="n">deflection</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">randnums</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="random_rotation_matrix"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.random_rotation_matrix">[docs]</a><span class="k">def</span> <span class="nf">random_rotation_matrix</span><span class="p">(</span><span class="n">deflection</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">randnums</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a random rotation matrix.</span>
 

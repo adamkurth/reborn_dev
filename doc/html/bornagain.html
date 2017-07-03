@@ -531,21 +531,160 @@ T          : Translation from sample to center of first pixel in meters</p>
 <dl class="class">
 <dt id="bornagain.detector.SimpleDetector">
 <em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">SimpleDetector</code><span class="sig-paren">(</span><em>n_pixels=1000</em>, <em>pixsize=5e-05</em>, <em>detdist=0.05</em>, <em>wavelen=1.0</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimpleDetector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimpleDetector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="bornagain.detector.html#bornagain.detector.Panel" title="bornagain.detector.Panel"><code class="xref py py-class docutils literal"><span class="pre">bornagain.detector.Panel</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#bornagain.detector.Panel" title="bornagain.detector.Panel"><code class="xref py py-class docutils literal"><span class="pre">bornagain.detector.Panel</span></code></a></p>
+<p>A simple wrapper for folks who wish to use use the Panels
+class without learning the intricacies. This will return a detector object representing a
+square detector</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>One can readout pixel intensities using <a class="reference internal" href="#bornagain.detector.SimpleDetector.readout" title="bornagain.detector.SimpleDetector.readout"><code class="xref py py-func docutils literal"><span class="pre">readout()</span></code></a></li>
+<li>After reading out amplitudes, one can display pixels using <a class="reference internal" href="#bornagain.detector.SimpleDetector.display" title="bornagain.detector.SimpleDetector.display"><code class="xref py py-func docutils literal"><span class="pre">display()</span></code></a></li>
+</ul>
+</div>
+<dl class="docutils">
+<dt>Arguments</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>n_pixels (int)</dt>
+<dd><p class="first last">the number of pixels along one edge</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>pixsize (float)</dt>
+<dd><p class="first last">the edge length of the square pixels in meters</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>detdist (float)</dt>
+<dd><p class="first last">the distance from the interaction region to the point where
+the forward beam intersects the detector (in meters)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>wavelen (float)</dt>
+<dd><p class="first last">the wavelength of the photons (in Angstroms)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="bornagain.detector.SimpleDetector.display">
-<code class="descname">display</code><span class="sig-paren">(</span><em>use_log=True</em>, <em>vmax=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimpleDetector.display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimpleDetector.display" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">display</code><span class="sig-paren">(</span><em>use_log=True</em>, <em>vmax=None</em>, <em>pause=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimpleDetector.display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimpleDetector.display" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays a detector. Extra kwargs are passed
+to matplotlib.figure</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last">
+<li><p class="first">Requires matplotlib.</p>
+</li>
+<li><dl class="first docutils">
+<dt>Must first run <a class="reference internal" href="#bornagain.detector.SimpleDetector.readout" title="bornagain.detector.SimpleDetector.readout"><code class="xref py py-func docutils literal"><span class="pre">readout()</span></code></a> or <a class="reference internal" href="#bornagain.detector.SimpleDetector.readout_finite" title="bornagain.detector.SimpleDetector.readout_finite"><code class="xref py py-func docutils literal"><span class="pre">readout_finite()</span></code></a></dt>
+<dd><p class="first last">at least one time</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<dl class="docutils">
+<dt>Arguments</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>use_log (bool)</dt>
+<dd><p class="first last">whether to use log-scaling when displaying the intensity image.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>vmax (float)</dt>
+<dd><p class="first last">colorbar scaling argument.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.detector.SimpleDetector.readout">
 <code class="descname">readout</code><span class="sig-paren">(</span><em>amplitudes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimpleDetector.readout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimpleDetector.readout" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Given scattering amplitudes, this calculates the corresponding intensity values.</p>
+<dl class="docutils">
+<dt>Arguments</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>amplitudes (complex np.ndarray)</dt>
+<dd><p class="first last">scattering amplitudes same shape as <cite>self.Q</cite></p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Returns</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>np.ndarray</dt>
+<dd><p class="first last">Scattering intensities as a 2-D image.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.detector.SimpleDetector.readout_finite">
 <code class="descname">readout_finite</code><span class="sig-paren">(</span><em>amplitudes</em>, <em>qmin</em>, <em>qmax</em>, <em>flux=1e+20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimpleDetector.readout_finite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimpleDetector.readout_finite" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get scattering intensities as a 2D image considering
+finite scattered photons</p>
+<dl class="docutils">
+<dt>Arguments</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>amplitudes (complex np.ndarray)</dt>
+<dd><p class="first last">scattering amplitudes same shape as <cite>self.Q</cite>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>qmin (float)</dt>
+<dd><p class="first last">minimum q to generate intensities</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>qmax (float)</dt>
+<dd><p class="first last">maximum q to generate intenities</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>flux (float)</dt>
+<dd><p class="first last">forward beam flux in Photons per square centimeter</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Returns</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>np.ndarray</dt>
+<dd><p class="first last">Scattering intensities as a 2-D image.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -602,14 +741,16 @@ likely also be removed.</p>
 <dl class="function">
 <dt id="bornagain.utils.amplitudes">
 <code class="descclassname">bornagain.utils.</code><code class="descname">amplitudes</code><span class="sig-paren">(</span><em>q</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#amplitudes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.amplitudes" title="Permalink to this definition">¶</a></dt>
-<dd><p>q: 2D np.array of q vectors
+<dd><p>compute scattering amplitudes without form factors</p>
+<p>q: 2D np.array of q vectors
 r: 2D np.array of atom coors</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="bornagain.utils.amplitudes_with_cmans">
 <code class="descclassname">bornagain.utils.</code><code class="descname">amplitudes_with_cmans</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>Z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#amplitudes_with_cmans"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.amplitudes_with_cmans" title="Permalink to this definition">¶</a></dt>
-<dd><p>q: 2D np.array of q vectors
+<dd><p>compute scattering amplitudes</p>
+<p>q: 2D np.array of q vectors
 r: 2D np.array of atom coors
 Z: 1D np.array of atomic numbers corresponding to r</p>
 </dd></dl>
