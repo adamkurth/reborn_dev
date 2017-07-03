@@ -80,13 +80,15 @@ class ClCore(object):
         self.group_size = group_size
         
     def _double_precision_is_available(self):
-#         print(self.queue.device.name)
+#         print(self.queue.platform)
         if 'cl_khr_fp64' not in self.queue.device.extensions.split():
             return False
-        # Stupid error to do with Apple's CL implementation?
-        if self.queue.device.name == 'AMD Radeon HD - FirePro D700 Compute Engine':
-            return False
-        if self.queue.device.name == 'Intel(R) Xeon(R) CPU E5-1650 v2 @ 3.50GHz':
+        # TODO: fix stupid errors to do with Apple's CL double implementation?
+#         if self.queue.device.name == 'AMD Radeon HD - FirePro D700 Compute Engine':
+#             return False
+#         if self.queue.device.name == 'Intel(R) Xeon(R) CPU E5-1650 v2 @ 3.50GHz':
+#             return False
+        if self.queue.device.platform.name == 'Apple':
             return False
         return True
         
