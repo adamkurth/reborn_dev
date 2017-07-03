@@ -344,8 +344,8 @@ def _ClCore(double_precision=False):
     core.prime_cromermann_simulator(q_vecs, atomic_nums)
     q = core.get_q_cromermann()
     r = core.get_r_cromermann(atom_pos, sub_com=False) 
-    core.run_cromermann(q, r, rand_rot=True)
-    A = core.release_amplitudes()
+#     core.run_cromermann(q, r, rand_rot=True)
+#     A = core.release_amplitudes()
 
 
 if __name__ == '__main__':

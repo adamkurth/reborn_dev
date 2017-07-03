@@ -483,7 +483,7 @@ class ClCore(object):
         self._build_openCL_programs()
         self._load_get_group_size()
         self._load_phase_factor_qrf()
-        self._load_phase_factor_qrf2()
+#         self._load_phase_factor_qrf2()
         self._load_phase_factor_pad()
         self._load_phase_factor_mesh()
         self._load_buffer_mesh_lookup()
@@ -505,10 +505,10 @@ class ClCore(object):
         self.get_group_size_cl = self.programs.get_group_size
         self.get_group_size_cl.set_scalar_arg_dtypes([None])
 
-    def _load_phase_factor_qrf2(self):
-        self.phase_factor_qrf2_cl = self.programs.phase_factor_qrf2
-        self.phase_factor_qrf2_cl.set_scalar_arg_dtypes(
-                    [None, None, None, None, None, self.int_t])
+#     def _load_phase_factor_qrf2(self):
+#         self.phase_factor_qrf2_cl = self.programs.phase_factor_qrf2
+#         self.phase_factor_qrf2_cl.set_scalar_arg_dtypes(
+#                     [None, None, None, None, None, self.int_t])
     
     def _load_phase_factor_qrf(self):
         self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
