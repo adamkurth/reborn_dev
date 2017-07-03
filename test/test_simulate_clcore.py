@@ -56,6 +56,7 @@ def _ClCore(double_precision=False):
                          double_precision=double_precision)
 
     assert(core.get_group_size() == core.group_size)
+    
     ###########################################################################
     # Check that there are no errors in phase_factor_qrf_inplace
     # TODO: actually check that the amplitudes are correct
@@ -82,7 +83,7 @@ def _ClCore(double_precision=False):
 #   make device arrays first
     q = core.to_device(q) 
     r = core.to_device(r)
-    f = core.to_device(r)
+    f = core.to_device(f)
     R = None
     
     core.phase_factor_qrf_inplace(q,r,f,R)
