@@ -195,6 +195,31 @@ class ClCore(object):
         return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
  
 
+    @staticmethod
+    def to_device_static(array, dtype, queue):
+        """
+        Static method
+
+        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy 
+        array into a pyopencl.array and send it to the device memory.  So far this only
+        deals with float and comlex arrays, and it should figure out which type it is.
+
+        Arguments:
+            array (numpy/cl array; float/complex type): Input array.
+            dtype (np.dtype): Specify the desired type in opencl.  The two types that 
+                               are useful here are np.float32 and np.complex64
+            queue, CL queue
+        Returns:
+            pyopencl array
+        """
+
+        if isinstance(array, cl.array.Array):
+            return array
+
+        return cl.array.to_device(queue, 
+                                  np.ascontiguousarray(array.astype(dtype)))
+
+
     def to_device(self, array=None, shape=None, dtype=None):
         """
         This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy 

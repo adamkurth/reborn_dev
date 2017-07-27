@@ -85,6 +85,8 @@ class ThornAgain:
 
         self.which=which
         self.load_program(self.which)
+
+        self.CLCORE = clcore.ClCore(queue=self.queue)
         
     def set_groupsize(self, group_size):
         """
@@ -203,7 +205,7 @@ class ThornAgain:
 #       combine atom vectors and atom IDs (species IDs)
         self.atom_vecs = np.concatenate(
             (self.atom_vecs, self.atomIDs[:, None]), axis=1)
-        self.r_buff = clcore.to_device(
+        self.r_buff = clcore.ClCore.to_device_static(
             self.atom_vecs, dtype=np.float32, queue=self.queue)
     
     def _set_q_buffer(self):
@@ -216,22 +218,22 @@ class ThornAgain:
         #self.q_vecs = np.concatenate((self.q_vecs, q_zeros), axis=1)
         #self.q_vecs[:,3:3+self.Nspecies] = self.form_facts_arr
         
-        self.q_buff = clcore.to_device( q_zeros, dtype=np.float32, queue=self.queue )
+        self.q_buff = clcore.ClCore.to_device_static( q_zeros, dtype=np.float32, queue=self.queue )
 
     def _set_com_buffer(self):
 #       make a dummie translation vector
         self.com_vec = np.zeros(3).astype(np.float32)
-        self.com_buff = clcore.to_device(
+        self.com_buff = clcore.ClCore.to_device_static(
             self.com_vec, dtype=np.float32, queue=self.queue)
 
     def _set_rot_buffer(self):
 #       make a dummie rotation mat
         self.rot_mat = np.eye(3).ravel().astype(np.float32)
-        self.rot_buff = clcore.to_device(
+        self.rot_buff = clcore.ClCore.to_device_static(
             self.rot_mat, dtype=np.float32, queue=self.queue)
     def _set_amp_buffer(self):
 #       make output buffer; initialize as 0s
-        self.A_buff = clcore.to_device(
+        self.A_buff = clcore.ClCore.to_device_static(
             np.zeros(self.Npix+self.Nextra_pix), dtype=np.complex64, queue=self.queue )
 
 #   list of kernel args
@@ -262,18 +264,18 @@ class ThornAgain:
         self.Nato = na
         self._set_atom_buffer()
 
-        #self.r_buff = clcore.to_device(
+        #self.r_buff = clcore.ClCore.to_device_static(
         #    self.atom_vecs, dtype=np.float32, queue=self.queue)
         self.prg_args[4] = self.r_buff.data
         self.prg_args[-1] = self.Nato
 
     def _set_rand_rot(self):
-        self.rot_buff = clcore.to_device(
+        self.rot_buff = clcore.ClCore.to_device_static(
             self.rot_mat, dtype=np.float32, queue=self.queue)
         self.prg_args[5] = self.rot_buff.data  # consider kwargs ?
     
     def _set_com_vec(self):
-        self.com_buff = clcore.to_device(
+        self.com_buff = clcore.ClCore.to_device_static(
             self.com_vec, dtype=np.float32, queue=self.queue)
         self.prg_args[6] = self.com_buff.data 
 
