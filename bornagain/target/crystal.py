@@ -52,13 +52,13 @@ h = cryst.O.T.dot(q)
         self.symOps = None  # Symmetry operations for fractional coords
 
         if pdbFilePath is not None:
-            self.loadPDB(pdbFilePath)
+            self.load_pdb(pdbFilePath)
 
-    def loadPDB(self, pdbFilePath):
+    def load_pdb(self, pdbFilePath):
         ''' Populate all the attributes from a PDB file. '''
-        parsePDB(pdbFilePath, self)
+        parse_pdb(pdbFilePath, self)
 
-    def setCell(self, a, b, c, alpha, beta, gamma):
+    def set_cell(self, a, b, c, alpha, beta, gamma):
         ''' Set the unit cell and all quantities derived from the unit cell.
         '''
 
@@ -99,7 +99,7 @@ h = cryst.O.T.dot(q)
         return self._x
 
 
-def parsePDB(pdbFilePath, crystalStruct=None):
+def parse_pdb(pdbFilePath, crystalStruct=None):
     ''' Return a structure object with PDB information. '''
 
     maxAtoms = int(1e5)
@@ -141,7 +141,7 @@ def parsePDB(pdbFilePath, crystalStruct=None):
                 be = float(cryst1[40:47]) * np.pi / 180.0
                 ga = float(cryst1[47:54]) * np.pi / 180.0
 
-                cryst.setCell(a, b, c, al, be, ga)
+                cryst.set_cell(a, b, c, al, be, ga)
                 spcgrp = cryst1[55:66].strip()
 
             if line[:6] == 'ATOM  ' or line[:6] == "HETATM":
@@ -167,11 +167,11 @@ def parsePDB(pdbFilePath, crystalStruct=None):
     cryst.T = utils.vec_check(T)
     cryst.elements = elements
     cryst.Z = atoms.atomic_symbols_to_numbers(elements)
-    cryst.spaceGroupNumber = hermannMauguinToNumber(spcgrp)
+    cryst.spaceGroupNumber = hermann_mauguin_to_number(spcgrp)
     cryst.hermannMauguinSymbol = spcgrp
     cryst.nAtoms = nAtoms
     cryst.symOps = sg.get_symmetry_from_database(
-        hermannMauguinToNumber(spcgrp, hall=True))
+        hermann_mauguin_to_number(spcgrp, hall=True))
     cryst.nMolecules = len(cryst.symOps['rotations'])
     cryst.symRs = [R for R in cryst.symOps['rotations']]
     cryst.symRinvs = [np.linalg.inv(R) for R in cryst.symOps['rotations']]
@@ -388,7 +388,7 @@ class Lattice:
 #    pg.QtGui.QApplication.exec_()
 
 
-def hermannMauguinToNumber(hm, hall=False):
+def hermann_mauguin_to_number(hm, hall=False):
     '''
 This is needed to convert the Hermann Mauguin space group specifications
 in PDB files to the space group number or the "Hall number" that is used by
