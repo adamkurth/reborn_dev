@@ -168,9 +168,10 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
     cryst.T = utils.vec_check(T)
     cryst.elements = elements
     cryst.Z = atoms.atomic_symbols_to_numbers(elements)
+    cryst.nAtoms = nAtoms
+
     cryst.spaceGroupNumber = hermann_mauguin_to_number(spcgrp)
     cryst.hermannMauguinSymbol = spcgrp
-    cryst.nAtoms = nAtoms
     cryst.symOps = sg.get_symmetry_from_database(
         hermann_mauguin_to_number(spcgrp, hall=True))
     cryst.nMolecules = len(cryst.symOps['rotations'])
@@ -187,7 +188,8 @@ def get_symmetry_operators_from_space_group(spcgrp):
     Hermann Mauguin space group specification.
     """
     
-    if isinstance(spcgrp, basestring):
+    # Convert spcgrp into space group number if it's a string (Hermann Mauguin symbol)
+    if isinstance(spcgrp, str): # Replaced basestring with str for compatibility with Python 3
         spcgrp = hermann_mauguin_to_number(spcgrp, hall=True)
     symops = sg.get_symmetry_from_database(spcgrp)
     
