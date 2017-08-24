@@ -39,7 +39,8 @@ h = cryst.O.T.dot(q)
         self.elements = None  # Atomic element symbols
         self.Z = None     # Atomic numbers
         self.spaceGroupNumber = None  # Space group number in the Int. Tables
-        self.hermannMauguinSymbol = None  # Spacegroup Hermann Mauguin symbol
+        self.hermannMauguinSymbol = None  # Spacegroup Hermann Mauguin symbol 
+                                    #(as it appears in a PDB file for example)
         self.a = None     # Lattice constant
         self.b = None     # Lattice constant
         self.c = None     # Lattice constant
@@ -174,10 +175,27 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
         hermann_mauguin_to_number(spcgrp, hall=True))
     cryst.nMolecules = len(cryst.symOps['rotations'])
     cryst.symRs = [R for R in cryst.symOps['rotations']]
-    cryst.symRinvs = [np.linalg.inv(R) for R in cryst.symOps['rotations']]
     cryst.symTs = [utils.vec_check(T) for T in cryst.symOps['translations']]
-
+    cryst.symRinvs = [np.linalg.inv(R) for R in cryst.symOps['rotations']]
+    
     return cryst
+
+
+def get_symmetry_operators_from_space_group(spcgrp):
+    
+    """ Return rotation and translation operators corresponding to a given 
+    Hermann Mauguin space group specification.
+    """
+    
+    if isinstance(spcgrp, basestring):
+        spcgrp = hermann_mauguin_to_number(spcgrp, hall=True)
+    symops = sg.get_symmetry_from_database(spcgrp)
+    
+    Rs = [R for R in symops['rotations']]
+    Ts = [utils.vec_check(T) for T in symops['translations']]
+
+    return Rs, Ts
+
 
 class Atoms:
     def __init__(self, xyz, atomic_num, elem=None):
@@ -324,68 +342,6 @@ class Lattice:
 #       sphericalize the lattice..
         if spherical:
             self.vecs = utils.sphericalize(self.vecs)
-
-
-
-
-# def viewClusterAtoms(cryst,occupancies=None):
-#
-#    ''' Simple 3D viewer to see atomic coordinates and unit cell.  Not very
-#    featureful, but works as a basic sanity check for transformations.'''
-#
-#    if occupancies is None:
-#        occupancies = [[np.zeros([3])] for i in range(0,cryst.nMolecules)]
-
-#    app=pg.QtGui.QApplication([])
-#    w = gl.GLViewWidget()
-#    scl = 1e10
-#    siz = 1
-
-    # Plot each symmetry partner in different colors
-#    for i in range(0,cryst.nMolecules):
-#        print(i)
-#        R = cryst.symRs[i]
-#        T = cryst.symTs[i]
-#        for Tp in occupancies[i]:
-#            Tp = utils.vec_check(Tp)
-#            ff = cryst.O.dot(R.dot(cryst.x)+T+Tp)
-#            plt = gl.GLScatterPlotItem(pos=ff.T*scl,color=utils.glColors[i+2],
-#                                       size=siz)
-#            w.addItem(plt)
-
-    # Plot points at the origin and lattice vector tips
-#    o = np.array([0,0,0])
-#    tips = [cryst.O.dot(np.array([1,0,0])),
-#            cryst.O.dot(np.array([0,1,0])),
-#            cryst.O.dot(np.array([0,0,1]))]
-
-    # Draw the unit cell in white
-#    wid=1
-#    C=pg.glColor([255,255,255])
-#    for i in range(0,3):
-#        plt = gl.GLLinePlotItem(pos=np.array([o,tips[i]])*scl,mode='lines',
-#                                width=wid,color=C)
-#        w.addItem(plt)
-#        plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+1)%3])*scl,
-#                                mode='lines',width=wid,color=C)
-#        w.addItem(plt)
-#        plt = gl.GLLinePlotItem(pos=(np.array([o,tips[i]])+tips[(i+2)%3])*scl,
-#                                        mode='lines',width=wid,color=C)
-#        w.addItem(plt)
-#        plt = gl.GLLinePlotItem(pos=(np.array([o,
-#                tips[i]])+tips[(i+1)%3]+tips[(i+2)%3])*scl,
-#                mode='lines',width=wid,color=C)
-#        w.addItem(plt)
-
-    # Draw the basis vectors in color
-#    for i in range(0,3):
-#        plt = gl.GLLinePlotItem(pos=np.array([o,tips[i]])*scl,mode='lines',
-#                                    width=5,color=utils.glColors[i+2])
-#        w.addItem(plt)
-
-#    w.setCameraPosition(distance=1000)
-#    w.show()
-#    pg.QtGui.QApplication.exec_()
 
 
 def hermann_mauguin_to_number(hm, hall=False):
