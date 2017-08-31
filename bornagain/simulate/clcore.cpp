@@ -104,6 +104,22 @@ kernel void get_group_size(
 }
 
 
+kernel void mod_squared_complex_to_real(
+        global const float2 *A,
+        global float *I,
+        const int n)
+{
+
+// Take the mod square of an array of complex numbers.  This is supposed to be
+// done with the pyopencl.array.Array class, but I only get seg. faults...
+
+    const int gi = get_global_id(0);
+    if (gi < n){
+        float2 a = A[gi];
+        I[gi] += a.x*a.x + a.y*a.y;
+    }
+}
+
 kernel void phase_factor_qrf(
     global const float *q,
     global const float *r,
@@ -601,6 +617,8 @@ __kernel void qrf_kam(
     A[q_idx].x = Areal;
     A[q_idx].y = Aimag;
 }
+
+
 
 
 //__kernel void ideal_lattice_transform_intensity_qrf(

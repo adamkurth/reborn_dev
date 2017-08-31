@@ -127,6 +127,7 @@ class ClCore(object):
         self._load_phase_factor_pad()
         self._load_phase_factor_mesh()
         self._load_buffer_mesh_lookup()
+        self._load_mod_squared_complex_to_real()
         self._load_qrf_default()
         self._load_qrf_kam()
 
@@ -164,6 +165,11 @@ class ClCore(object):
         self.buffer_mesh_lookup_cl = self.programs.buffer_mesh_lookup
         self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes(
              [None, None, None, self.int_t, None, None, None, None])
+
+    def _load_mod_squared_complex_to_real(self):
+        self.mod_squared_complex_to_real_cl = self.programs.mod_squared_complex_to_real
+        self.mod_squared_complex_to_real_cl.set_scalar_arg_dtypes(
+             [None, None, self.int_t])
     
     def _load_qrf_default(self):
         self.qrf_default_cl = self.programs.qrf_default
@@ -253,6 +259,8 @@ class ClCore(object):
                                   np.ascontiguousarray(array.astype(dtype)))
 
 
+
+
     def get_group_size(self):
         """
         retrieve the currently set group_size
@@ -305,6 +313,25 @@ class ClCore(object):
 #         self.phase_factor_qrf2_cl(self.queue, (global_size,), 
 #                                  (self.group_size,), q_dev.data, r_dev.data, 
 #                                  f_dev.data, R16_dev.data, self.a_dev.data, n_atoms)
+
+    def mod_squared_complex_to_real(self,A,I):
+        '''
+        Compute the real-valued modulus square of complex numbers.
+        Good example of a function that shouldn't exist, but I needed to add 
+        it here because the pyopencl.array.Array class fails at this seemingly
+        simple task.
+        '''
+        
+        A_dev = self.to_device(A, dtype=self.complex_t)
+        I_dev = self.to_device(I, dtype=self.real_t)
+        n = self.int_t(np.prod(A.shape))
+        
+        global_size = np.int(np.ceil(n / np.float(self.group_size)) 
+                             * self.group_size)
+        
+        self.mod_squared_complex_to_real_cl(self.queue, (global_size,), 
+                                 (self.group_size,), A.data, I.data, n)
+
 
     def phase_factor_qrf_inplace(self, q, r, f, R=None):
         '''
