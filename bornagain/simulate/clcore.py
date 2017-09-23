@@ -83,11 +83,8 @@ class ClCore(object):
 #         print(self.queue.platform)
         if 'cl_khr_fp64' not in self.queue.device.extensions.split():
             return False
-        # TODO: fix stupid errors to do with Apple's CL double implementation?
-#         if self.queue.device.name == 'AMD Radeon HD - FirePro D700 Compute Engine':
-#             return False
-#         if self.queue.device.name == 'Intel(R) Xeon(R) CPU E5-1650 v2 @ 3.50GHz':
-#             return False
+# TODO: fix stupid errors to do with Apple's CL double implementation?  Why
+#       doesn't double work on apple?
         if self.queue.device.platform.name == 'Apple':
             return False
         return True
@@ -130,6 +127,7 @@ class ClCore(object):
         self._load_mod_squared_complex_to_real()
         self._load_qrf_default()
         self._load_qrf_kam()
+        self._load_lattice_transform_intensities_pad()
 
     def _build_openCL_programs(self):
         clcore_file = pkg_resources.resource_filename(
@@ -165,6 +163,13 @@ class ClCore(object):
         self.buffer_mesh_lookup_cl = self.programs.buffer_mesh_lookup
         self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes(
              [None, None, None, self.int_t, None, None, None, None])
+
+    def _load_lattice_transform_intensities_pad(self):
+        self.lattice_transform_intensities_pad_cl = \
+              self.programs.lattice_transform_intensities_pad
+        self.lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
+             [None, None, None, None, self.int_t, self.int_t, self.int_t, 
+              self.real_t, None, None, None, None, self.int_t])
 
     def _load_mod_squared_complex_to_real(self):
         self.mod_squared_complex_to_real_cl = self.programs.mod_squared_complex_to_real
@@ -271,48 +276,6 @@ class ClCore(object):
         
         return group_size_dev.get()[0]
 
-
-#     def phase_factor_qrf2_inplace(self, q, r, f, R=None):
-#         '''
-#         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
-# 
-#         Arguments:
-#             q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
-#             r (numpy/cl float array [M,3]): Atomic coordinates.
-#             f (numpy/cl complex array [M]): Complex scattering factors.
-#             R (numpy array [3,3]): Rotation matrix acting on q vectors.
-#             a (cl complex array [N]): Optional container for complex scattering 
-#               amplitudes.
-#             context (pyopencl context): Optional pyopencl context (e.g. use 
-#               cl.create_some_context() to create one).
-#             queue (pyopencl context): Optional pyopencl queue (e.g use 
-#               cl.CommandQueue(context) to create one).
-#             group_size (int): Optional pyopencl group size.
-# 
-#         Returns:
-#             (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
-#               if there are input cl arrays.
-#             '''
-# 
-#         if R is None:
-#             R = np.eye(3, dtype=self.real_t)
-#         R16 = np.zeros([16], dtype=self.real_t)
-#         R16[0:9] = R.flatten().astype(self.real_t)
-#         R16_dev = self.to_device(R16, dtype=self.real_t)
-# 
-#         n_pixels = self.int_t(q.shape[0])
-#         n_atoms = self.int_t(r.shape[0])
-#         q_dev = self.to_device(q, dtype=self.real_t)
-#         r_dev = self.to_device(r, dtype=self.real_t)
-#         f_dev = self.to_device(f, dtype=self.complex_t)
-#     
-#         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
-#                              * self.group_size)
-#     
-#         R_dev = self.to_device(R16, dtype=self.real_t)
-#         self.phase_factor_qrf2_cl(self.queue, (global_size,), 
-#                                  (self.group_size,), q_dev.data, r_dev.data, 
-#                                  f_dev.data, R16_dev.data, self.a_dev.data, n_atoms)
 
     def mod_squared_complex_to_real(self,A,I):
         '''
@@ -435,8 +398,7 @@ class ClCore(object):
         else:
             return a_dev
         
-    def phase_factor_pad(self, r, f, T, F, S, B, nF, nS, w, R=None,
-                         a=None):
+    def phase_factor_pad(self, r, f, T, F, S, B, nF, nS, w, R=None, a=None):
         '''
         This should simulate detector panels.
 
@@ -623,6 +585,47 @@ class ClCore(object):
             return a_out_dev.get()
         else:
             return a_out_dev
+
+
+    def lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w, 
+                                          R=None, I=None, add=False):
+        """
+        This is not documentation.  That is Rick's fault.
+        """
+    
+        if R is None:
+            R = np.eye(3, dtype=self.real_t)
+    
+        nF = self.int_t(nF)
+        nS = self.int_t(nS)
+        n_pixels = self.int_t(nF * nS)
+        if add is True:
+            add = 1
+        else:
+            add = 0
+        add = self.int_t(add)
+        
+        abc_dev = self.to_device(abc, dtype=self.real_t)
+        N_dev = self.to_device(N, dtype=self.int_t)
+        R_dev = self.to_device(R, dtype=self.real_t)
+        T_dev = self.to_device(T, dtype=self.real_t)
+        F_dev = self.to_device(F, dtype=self.real_t)
+        S_dev = self.to_device(S, dtype=self.real_t)
+        B_dev = self.to_device(B, dtype=self.real_t)
+        I_dev = self.to_device(I, dtype=self.real_t, shape=(n_pixels))
+    
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * 
+                             self.group_size)
+        self.lattice_transform_intensities_pad_cl(self.queue, (global_size,), 
+                                 (self.group_size,), abc_dev.data,
+                            N_dev.data, R_dev.data, I_dev.data, n_pixels, 
+                            nF, nS, w, T_dev.data, F_dev.data, S_dev.data, B_dev.data, add)
+    
+        if I is None:
+            return I_dev.get()
+        else:
+            return I_dev
+
 
     def prime_cromermann_simulator(self, q_vecs, atomic_nums=None):
         """

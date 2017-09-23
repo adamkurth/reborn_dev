@@ -466,6 +466,63 @@ kernel void buffer_mesh_lookup(
 }
 
 
+kernel void lattice_transform_intensities_pad(
+    __constant float *abc,
+    __constant int *N,
+    __constant float *R,
+    global float *I,
+    const int n_pixels,
+    const int nF,
+    const int nS,
+    const float w,
+    __constant float *T,
+    __constant float *F,
+    __constant float *S,
+    __constant float *B,
+    const int add)
+{
+
+// TODO: add documentation Rick
+
+    const int gi = get_global_id(0); /* Global index */
+    const int i = gi % nF;           /* Pixel coordinate i */
+    const int j = gi/nF;             /* Pixel coordinate j */
+
+    // Each global index corresponds to a particular q-vector
+    float4 q;
+    q = q_pad( i,j,w,T,F,S,B);
+
+    // Rotate the q vector
+    q = rotate_vec(R, q);
+
+    float sn;
+    float s;
+    float It = 1.0;
+    for (int k=0; k<3; k++){
+        float4 v = (float4)(abc[k*3+0],abc[k*3+1],abc[k*3+2],0.0);
+        float x = dot(q,v) / 2.0;
+        float n = (float)N[k];
+        if (x == 0){
+            It *= native_powr(n,2);
+        } else {
+            // This does [ sin(Nx)/sin(x) ]^2
+            sn = native_sin(n*x);
+            s = native_sin(x);
+            It *= native_powr(sn/s,2);
+        }
+    }
+
+    if (gi < n_pixels ){
+        if (add == 1){
+            I[gi] += It;
+        } else {
+            I[gi] = It;
+        }
+    }
+}
+
+
+
 __kernel void qrf_default(
     __global float16 *q_vecs,
     __global float4 *r_vecs,
