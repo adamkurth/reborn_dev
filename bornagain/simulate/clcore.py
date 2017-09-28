@@ -439,7 +439,7 @@ class ClCore(object):
         n_atoms = self.int_t(r.shape[0])
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
-        R16_dev = self.to_device(R16, dtype=self.real_t)
+#         R16_dev = self.to_device(R16, dtype=self.real_t)
         
         #T = self.vec4(T)
         #F = self.vec4(F)
@@ -459,7 +459,7 @@ class ClCore(object):
         
         self.phase_factor_pad_cl(self.queue, (global_size,), 
                                  (self.group_size,), r_dev.data,
-                            f_dev.data, R16_dev.data, a_dev.data, n_pixels, n_atoms, 
+                            f_dev.data, R16, a_dev.data, n_pixels, n_atoms, 
                             nF, nS, w, T_dev.data, F_dev.data, S_dev.data, B_dev.data)
     
         if a is None:

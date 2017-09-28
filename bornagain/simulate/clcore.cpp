@@ -53,6 +53,23 @@ static float4 rotate_vec(
     return qout;
 }
 
+static float4 rotate_vec2(
+    const float16 R, //alternatively..
+    const float4 q4)
+// Please, let's always rotate vectors in this way... this is meant to act
+// on the q vectors, so that it is done once per global id rather than being
+// done on every atom, which would take more compute time
+{
+    float4 q4r = (float4)(0.0,0.0,0.0,0.0);
+
+    // Rotate the q vector
+    q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
+    q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
+    q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
+
+    return q4r;
+}
+
 static float4 q_pad(
     const int i,
     const int j,
@@ -268,7 +285,7 @@ kernel void phase_factor_qrf(
 kernel void phase_factor_pad(
     global const float *r,
     global const float2 *f,
-    __constant float *R,
+    const float16 R,
     global float2 *a,
     const int n_pixels,
     const int n_atoms,
@@ -315,7 +332,7 @@ kernel void phase_factor_pad(
     q = q_pad( i,j,w,T,F,S,B);
 
     // Rotate the q vector
-    q = rotate_vec(R, q);
+    q = rotate_vec2(R, q);
 
     local float4 rg[GROUP_SIZE];
     local float2 fg[GROUP_SIZE];
