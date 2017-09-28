@@ -361,11 +361,24 @@ kernel void phase_factor_pad(
 
     // Each global index corresponds to a particular q-vector
     //float4 V;
-    float4 q; 
-    q = q_pad2( i,j,w,T,F,S,B);
+    //float4 q;
+    //q = q_pad2( i,j,w,T,F,S,B);
+    float4 qt = (float4)(0.0f,0.0f,0.0f,0.0f);
+    float4 V;
+
+    V = T + i*F + j*S;
+    V /= length(V);
+    qt = (V-B)*PI2/w;
 
     // Rotate the q vector
-    q = rotate_vec2(R, q);
+//    q = rotate_vec2(R, q);
+
+    float4 q = (float4)(0.0,0.0,0.0,0.0);
+
+    // Rotate the q vector
+    q.x = R.s0*qt.x + R.s1*qt.y + R.s2*qt.z;
+    q.y = R.s3*qt.x + R.s4*qt.y + R.s5*qt.z;
+    q.z = R.s6*qt.x + R.s7*qt.y + R.s8*qt.z;
 
     local float4 rg[GROUP_SIZE];
     local float2 fg[GROUP_SIZE];
