@@ -95,6 +95,60 @@ static float4 q_pad(
 }
 
 
+//static float4 q_pad_mc(
+//    const int i,
+//    const int j,
+//    const float w,
+//    const float w_sig,
+//    const float div_sig,
+//    __constant float *T,
+//    __constant float *F,
+//    __constant float *S,
+//    __constant float *B,
+//    const float lc_x,
+//    const float lc_a,
+//    const float lc_c,
+//    const float lc_m
+//    )
+//// Calculate the q vectors for a pixel-array detector
+////
+//// Input:
+//// i, j are the pixel indices
+//// w is the photon wavelength
+//// T is the translation vector from origin to center of corner pixel
+//// F, S are the fast/slow-scan basis vectors (pointing alont rows/columns)
+////      the length of these vectors is the pixel size
+//// B is the direction of the incident beam
+////
+//// Output: A single q vector
+//{
+//    float4 q = (float4)(0.0f,0.0f,0.0f,0.0f);
+//
+//    // Random number from linear congruential recurrence relation
+//    lc_x1 = (lc_a*lc_x + lc_c) % m
+//    float del_w;
+//
+//    float Vx,Vy,Vz,Vnorm;
+//
+//    Vx = T[0] + i*F[0] + j*S[0];
+//    Vy = T[1] + i*F[1] + j*S[1];
+//    Vz = T[2] + i*F[2] + j*S[2];
+//    Vnorm = sqrt(Vx*Vx + Vy*Vy + Vz*Vz);
+//    Vx = Vx/Vnorm;
+//    Vy = Vy/Vnorm;
+//    Vz = Vz/Vnorm;
+//
+//
+//
+//    q.x = (Vx-B[0])*PI2/w;
+//    q.y = (Vy-B[1])*PI2/w;
+//    q.z = (Vz-B[2])*PI2/w;
+//
+//    return q;
+//
+//}
+
+
 kernel void get_group_size(
     global int *g){
     const int gi = get_global_id(0);

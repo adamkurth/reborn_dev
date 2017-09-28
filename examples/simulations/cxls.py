@@ -16,12 +16,12 @@ if 'view' in sys.argv: show = True
 if 'double' in sys.argv: double = True
 cl_group_size = 32
 cl_double_precision = False
-n_pixels = 500
-pixel_size = 100e-6
+n_pixels = 1500
+pixel_size = 5e-6
 detector_distance = 0.05
 wavelength = 2.0e-10
-wavelength_fwhm = wavelength*0.05
-beam_fwhm = 0.004 # radians
+wavelength_fwhm = wavelength*0#.05
+beam_fwhm = 0.001 # radians
 
 print("Setup opencl programs")
 clcore = core.ClCore(group_size=cl_group_size,double_precision=cl_double_precision)
@@ -34,7 +34,7 @@ panel_list.simple_setup(n_pixels, n_pixels, pixel_size, detector_distance, wavel
 p = panel_list[0]
 print(panel_list)
 
-d = 300e-10
+d = 200e-10
 abc = np.array([[d,0,0],[0,d,0],[0,0,d]],dtype=clcore.real_t)
 
 n_pixels = p.nF*p.nS
