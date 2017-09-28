@@ -112,6 +112,39 @@ static float4 q_pad(
 }
 
 
+static float4 q_pad2(
+    const int i,
+    const int j,
+    const float w,
+    const float4 T,
+    const float4 F,
+    const float4 S,
+    const float4 B
+    )
+// Calculate the q vectors for a pixel-array detector
+//
+// Input:
+// i, j are the pixel indices
+// w is the photon wavelength
+// T is the translation vector from origin to center of corner pixel
+// F, S are the fast/slow-scan basis vectors (pointing alont rows/columns)
+//      the length of these vectors is the pixel size
+// B is the direction of the incident beam
+//
+// Output: A single q vector
+{
+    float4 q = (float4)(0.0f,0.0f,0.0f,0.0f);
+    float4 V;
+
+    V = T + i*F + j*S;
+    V /= length(V);
+    q = (V-B)*PI2/w;
+
+    return q;
+
+}
+
+
 //static float4 q_pad_mc(
 //    const int i,
 //    const int j,
@@ -292,10 +325,10 @@ kernel void phase_factor_pad(
     const int nF,
     const int nS,
     const float w,
-    __constant float *T,
-    __constant float *F,
-    __constant float *S,
-    __constant float *B)
+    const float4 T,
+    const float4 F,
+    const float4 S,
+    const float4 B)
 {
 
 // Calculate the the scattering amplitude according to a set of point
@@ -329,7 +362,7 @@ kernel void phase_factor_pad(
     // Each global index corresponds to a particular q-vector
     //float4 V;
     float4 q; 
-    q = q_pad( i,j,w,T,F,S,B);
+    q = q_pad2( i,j,w,T,F,S,B);
 
     // Rotate the q vector
     q = rotate_vec2(R, q);
