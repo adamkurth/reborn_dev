@@ -270,7 +270,7 @@ def geom_dict_to_panellist(geomDict):
     return PanelList
 
 
-def load_cheetah_data(maskArray,panelList,geomDict):
+def load_cheetah_data(dataArray,panelList,geomDict):
     
     fail = False
 
