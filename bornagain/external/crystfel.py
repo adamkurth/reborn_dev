@@ -1,5 +1,6 @@
 import numpy as np
 from bornagain import detector
+from bornagain.detector import PanelList, Panel
 import re
 
 
@@ -240,6 +241,9 @@ dictionary.
                 'rigidGroups': rigidGroups,
                 'rigidGroupCollections': rigidGroupCollections,
                 'badRegions': badRegions}
+    
+    
+    
     return geomDict
 
 
@@ -247,7 +251,7 @@ def geom_dict_to_panellist(geomDict):
     """ Convert a CrystFEL geometry dictionary to a PanelList object. """
 
     PanelList = detector.PanelList()
-    PanelList.Beam.B = np.array([0, 0, 1])
+    PanelList.beam.B = np.array([0, 0, 1])
 
     for p in geomDict['panels']:
 
@@ -260,7 +264,8 @@ def geom_dict_to_panellist(geomDict):
         Panel.nS = p['max_ss'] - p['min_ss'] + 1
         z = 0.0
         if not isinstance(p['coffset'], str):
-            z += p['coffset']
+            if p['coffset'] is not None:
+                z += p['coffset']
         Panel.T = np.array(
             [p['corner_x'] / p['res'], p['corner_y'] / p['res'], z])
         Panel.pixel_size = 1.0 / p['res']
@@ -494,7 +499,7 @@ def geom_to_panellist(geomFile=None, beamFile=None, PanelList=None):
     h.close()
 
     # Initialize Beam information for this Panel array
-    pa.Beam.B = np.array([0, 0, 1])
+    pa.beam.B = np.array([0, 0, 1])
 
     # Now adjust Panel list according to global parameters, convert units, etc.
     i = 0
@@ -523,7 +528,7 @@ def geom_to_panellist(geomFile=None, beamFile=None, PanelList=None):
             p.detOffsetField = None  # Cannot have offset value *and* field
         if global_photon_energy is not None:
             # CrystFEL uses eV units
-            p.Beam.wavelength = 1.2398e-6 / global_photon_energy
+            p.beam.wavelength = 1.2398e-6 / global_photon_energy
             # Cannot have both energy value *and* field
             p.photonEnergyField = None
 
