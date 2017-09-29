@@ -270,6 +270,17 @@ def geom_dict_to_panellist(geomDict):
     return PanelList
 
 
+def load_cheetah_data(maskArray,panelList,geomDict):
+    
+    fail = False
+
+    for p in geomDict['panels']:
+        PanelList[p['name']].data = dataArray[
+            p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)].copy()
+ 
+    return fail
+
+
 def load_cheetah_mask(maskArray, PanelList, geomDict):
     """ Populate Panel masks with cheetah mask array. """
 
