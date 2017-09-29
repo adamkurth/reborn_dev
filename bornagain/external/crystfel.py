@@ -1,6 +1,5 @@
 import numpy as np
 from bornagain import detector
-from bornagain.detector import PanelList, Panel
 import re
 
 
@@ -280,7 +279,7 @@ def load_cheetah_data(dataArray,panelList,geomDict):
     fail = False
 
     for p in geomDict['panels']:
-        PanelList[p['name']].data = dataArray[
+        panelList[p['name']].data = dataArray[
             p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)].copy()
  
     return fail
