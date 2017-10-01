@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import pyqtgraph as pg
 
 do_monte_carlo = True
-n_monte_carlo_iterations = 1000
+n_monte_carlo_iterations = 200
 n_cells = 20
 show = True   # Display the simulated patterns
 double = False # Use double precision if available
@@ -74,12 +74,17 @@ for n in np.arange(1,(n_monte_carlo_iterations+1)):
     print('%d: %7.03f ms' % (n, tf*1e3))
 
 I = I.get()/n
+print(np.sort(I.ravel()))
+I[np.isinf(I)] = n_cells^3
+#I[np.isnan(I)] = 0
 I = I.reshape((p.nS, p.nF))
 imdisp = np.log(I + 1e5)
-imdisp[np.isinf(imdisp)] = n_cells^3
-pg.image(imdisp)
-# plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
-# plt.show()
+if False:
+	# pyqtgraph sucks.  doesn't work sometimes.
+	pg.image(imdisp)
+else:
+	plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
+	plt.show()
 
 
 print("done")
