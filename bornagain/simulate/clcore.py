@@ -8,6 +8,7 @@ otherwise be 32.  If you are using a CPU you might want to set
 BORNAGAIN_CL_GROUPSIZE=1 .
 """
 
+import time
 import sys
 import os
 import pkg_resources
@@ -377,21 +378,26 @@ class ClCore(object):
         R16 = np.zeros([16], dtype=self.real_t)
         R16[0:9] = R.flatten().astype(self.real_t)
     
+        t = time.time()
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
         q_dev = self.to_device(q, dtype=self.real_t)
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
+        print('TIME1: %0.3g' % ((time.time()-t)*1000))
     
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
-                             * self.group_size)
-    
-        R16_dev = self.to_device(R16, dtype=self.real_t)
-        self.phase_factor_qrf_cl(self.queue, (global_size,), 
-                                 (self.group_size,), q_dev.data, r_dev.data, 
-                                 f_dev.data, R16_dev.data, a_dev.data, n_atoms,
-                                 n_pixels)
+        for i in range(0,10):
+            t = time.time()
+            global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) 
+                                 * self.group_size)
+        
+            R16_dev = self.to_device(R16, dtype=self.real_t)
+            self.phase_factor_qrf_cl(self.queue, (global_size,), 
+                                     (self.group_size,), q_dev.data, r_dev.data, 
+                                     f_dev.data, R16_dev.data, a_dev.data, n_atoms,
+                                     n_pixels)
+            print('TIME2: %0.3g' % ((time.time()-t)*1000))
     
         if a is None:
             return a_dev.get()

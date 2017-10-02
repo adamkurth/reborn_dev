@@ -7,7 +7,9 @@ import bornagain as ba
 import bornagain.target.crystal as crystal
 import bornagain.simulate.clcore as core
 import matplotlib.pyplot as plt
+import pyqtgraph as pg
 
+do_monte_carlo = True
 n_monte_carlo_iterations = 1000
 n_cells = 20
 show = True   # Display the simulated patterns
@@ -58,6 +60,10 @@ def random_wavelength(w0,fwhm):
 
 R = np.eye(3,dtype=clcore.real_t)
 
+if not do_monte_carlo:
+    beam_fwhm = 0
+    wavelength_fwhm = 0
+
 for n in np.arange(1,(n_monte_carlo_iterations+1)):
 
     B = random_B(beam_fwhm)
@@ -70,8 +76,10 @@ for n in np.arange(1,(n_monte_carlo_iterations+1)):
 I = I.get()/n
 I = I.reshape((p.nS, p.nF))
 imdisp = np.log(I + 1e5)
-plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
-plt.show()
+imdisp[np.isinf(imdisp)] = n_cells^3
+pg.image(imdisp)
+# plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
+# plt.show()
 
 
 print("done")
