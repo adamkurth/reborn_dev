@@ -14,7 +14,9 @@ n_monte_carlo_iterations = 200
 n_cells = 20
 show = True   # Display the simulated patterns
 double = False # Use double precision if available
+useqt=False # Display with pyqtgraph
 if 'view' in sys.argv: show = True
+if 'viewqt' in sys.argv: useqt = True
 if 'double' in sys.argv: double = True
 cl_group_size = 32
 cl_double_precision = False
@@ -76,10 +78,11 @@ for n in np.arange(1,(n_monte_carlo_iterations+1)):
 I = I.get()/n
 print(np.sort(I.ravel()))
 I[np.isinf(I)] = n_cells^3
-#I[np.isnan(I)] = 0
+print(np.sort(I.ravel()))
+print(np.sum(np.isnan(I)))
 I = I.reshape((p.nS, p.nF))
 imdisp = np.log(I + 1e5)
-if False:
+if useqt:
 	# pyqtgraph sucks.  doesn't work sometimes.
 	pg.image(imdisp)
 else:
