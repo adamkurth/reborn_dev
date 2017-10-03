@@ -38,37 +38,22 @@
 
 
 static float4 rotate_vec(
-    __constant float *R, //alternatively.. 
-    const float4 q)
-// Please, let's always rotate vectors in this way... this is meant to act
-// on the q vectors, so that it is done once per global id rather than being
-// done on every atom, which would take more compute time
+    __constant float *R,
+    const float4 v)
+// Rotate a 4-vector.
+// R is the rotation matrix
+// v is the input 4-vector
+// return is the rotated 4-vector
 {
-    float4 qout = (float4)(0.0,0.0,0.0,0.0);
+    float4 v_rot = (float4)(0.0,0.0,0.0,0.0);
 
-    qout.x = R[0]*q.x + R[1]*q.y + R[2]*q.z;
-    qout.y = R[3]*q.x + R[4]*q.y + R[5]*q.z;
-    qout.z = R[6]*q.x + R[7]*q.y + R[8]*q.z;
+    v_rot.x = R[0]*q.x + R[1]*q.y + R[2]*q.z;
+    v_rot.y = R[3]*q.x + R[4]*q.y + R[5]*q.z;
+    v_rot.z = R[6]*q.x + R[7]*q.y + R[8]*q.z;
     
-    return qout;
+    return v_rot;
 }
 
-static float4 rotate_vec2(
-    const float16 R, //alternatively..
-    const float4 q4)
-// Please, let's always rotate vectors in this way... this is meant to act
-// on the q vectors, so that it is done once per global id rather than being
-// done on every atom, which would take more compute time
-{
-    float4 q4r = (float4)(0.0,0.0,0.0,0.0);
-
-    // Rotate the q vector
-    q4r.x = R.s0*q4.x + R.s1*q4.y + R.s2*q4.z;
-    q4r.y = R.s3*q4.x + R.s4*q4.y + R.s5*q4.z;
-    q4r.z = R.s6*q4.x + R.s7*q4.y + R.s8*q4.z;
-
-    return q4r;
-}
 
 static float4 q_pad(
     const int i,
@@ -106,39 +91,6 @@ static float4 q_pad(
     q.x = (Vx-B[0])*PI2/w;
     q.y = (Vy-B[1])*PI2/w;
     q.z = (Vz-B[2])*PI2/w;
-
-    return q;
-
-}
-
-
-static float4 q_pad2(
-    const int i,
-    const int j,
-    const float w,
-    const float4 T,
-    const float4 F,
-    const float4 S,
-    const float4 B
-    )
-// Calculate the q vectors for a pixel-array detector
-//
-// Input:
-// i, j are the pixel indices
-// w is the photon wavelength
-// T is the translation vector from origin to center of corner pixel
-// F, S are the fast/slow-scan basis vectors (pointing alont rows/columns)
-//      the length of these vectors is the pixel size
-// B is the direction of the incident beam
-//
-// Output: A single q vector
-{
-    float4 q = (float4)(0.0f,0.0f,0.0f,0.0f);
-    float4 V;
-
-    V = T + i*F + j*S;
-    V /= length(V);
-    q = (V-B)*PI2/w;
 
     return q;
 
@@ -318,17 +270,17 @@ kernel void phase_factor_qrf(
 kernel void phase_factor_pad(
     global const float *r,
     global const float2 *f,
-    const float16 R,
+    __constant float *R,
     global float2 *a,
     const int n_pixels,
     const int n_atoms,
     const int nF,
     const int nS,
     const float w,
-    const float4 T,
-    const float4 F,
-    const float4 S,
-    const float4 B)
+    __constant float *T,
+    __constant float *F,
+    __constant float *S,
+    __constant float *B)
 {
 
 // Calculate the the scattering amplitude according to a set of point
@@ -360,25 +312,11 @@ kernel void phase_factor_pad(
     float im = 0;
 
     // Each global index corresponds to a particular q-vector
-    //float4 V;
-    //float4 q;
-    //q = q_pad2( i,j,w,T,F,S,B);
-    float4 qt = (float4)(0.0f,0.0f,0.0f,0.0f);
-    float4 V;
-
-    V = T + i*F + j*S;
-    V /= length(V);
-    qt = (V-B)*PI2/w;
+    float4 q;
+    q = q_pad( i,j,w,T,F,S,B);
 
     // Rotate the q vector
-//    q = rotate_vec2(R, q);
-
-    float4 q = (float4)(0.0,0.0,0.0,0.0);
-
-    // Rotate the q vector
-    q.x = R.s0*qt.x + R.s1*qt.y + R.s2*qt.z;
-    q.y = R.s3*qt.x + R.s4*qt.y + R.s5*qt.z;
-    q.z = R.s6*qt.x + R.s7*qt.y + R.s8*qt.z;
+    q = rotate_vec(R, q);
 
     local float4 rg[GROUP_SIZE];
     local float2 fg[GROUP_SIZE];
@@ -607,6 +545,8 @@ kernel void lattice_transform_intensities_pad(
 
     // Each global index corresponds to a particular q-vector
     float4 q;
+
+    // Get the q vector
     q = q_pad( i,j,w,T,F,S,B);
 
     // Rotate the q vector
