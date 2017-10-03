@@ -47,9 +47,9 @@ static float4 rotate_vec(
 {
     float4 v_rot = (float4)(0.0,0.0,0.0,0.0);
 
-    v_rot.x = R[0]*q.x + R[1]*q.y + R[2]*q.z;
-    v_rot.y = R[3]*q.x + R[4]*q.y + R[5]*q.z;
-    v_rot.z = R[6]*q.x + R[7]*q.y + R[8]*q.z;
+    v_rot.x = R[0]*v.x + R[1]*v.y + R[2]*v.z;
+    v_rot.y = R[3]*v.x + R[4]*v.y + R[5]*v.z;
+    v_rot.z = R[6]*v.x + R[7]*v.y + R[8]*v.z;
     
     return v_rot;
 }
