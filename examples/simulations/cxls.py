@@ -4,17 +4,16 @@ import numpy as np
 
 sys.path.append("../..")
 import bornagain as ba
-import bornagain.target.crystal as crystal
 import bornagain.simulate.clcore as core
 import matplotlib.pyplot as plt
-import pyqtgraph as pg
+# import pyqtgraph as pg
 
 do_monte_carlo = True
-n_monte_carlo_iterations = 200
+n_monte_carlo_iterations = 1000
 n_cells = 20
 show = True   # Display the simulated patterns
 double = False # Use double precision if available
-useqt=False # Display with pyqtgraph
+useqt = False # Display with pyqtgraph
 if 'view' in sys.argv: show = True
 if 'viewqt' in sys.argv: useqt = True
 if 'double' in sys.argv: double = True
@@ -42,7 +41,7 @@ d = 200e-10
 abc = np.array([[d,0,0],[0,d,0],[0,0,d]],dtype=clcore.real_t)
 
 n_pixels = p.nF*p.nS
-I = clcore.to_device(shape=[n_pixels],dtype=clcore.real_t)
+I = clcore.to_device(shape=(n_pixels),dtype=clcore.real_t)
 
 B0 = np.array([0,0,1])
 def random_B(div_fwhm):
