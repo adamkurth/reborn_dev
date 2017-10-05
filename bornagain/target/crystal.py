@@ -3,8 +3,6 @@
 Basic utilities for dealing with crystalline objects.
 '''
 
-
-import spglib as sg
 import numpy as np
 from numpy import sin, cos, sqrt
 
