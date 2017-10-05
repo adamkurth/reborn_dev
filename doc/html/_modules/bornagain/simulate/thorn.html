@@ -152,6 +152,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">which</span><span class="o">=</span><span class="n">which</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_program</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">which</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">CLCORE</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">ClCore</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
         
 <div class="viewcode-block" id="ThornAgain.set_groupsize"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.set_groupsize">[docs]</a>    <span class="k">def</span> <span class="nf">set_groupsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_size</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -270,7 +272,7 @@
 <span class="c1">#       combine atom vectors and atom IDs (species IDs)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">ClCore</span><span class="o">.</span><span class="n">to_device_static</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="nf">_set_q_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -283,22 +285,22 @@
         <span class="c1">#self.q_vecs = np.concatenate((self.q_vecs, q_zeros), axis=1)</span>
         <span class="c1">#self.q_vecs[:,3:3+self.Nspecies] = self.form_facts_arr</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">q_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span> <span class="n">q_zeros</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">ClCore</span><span class="o">.</span><span class="n">to_device_static</span><span class="p">(</span> <span class="n">q_zeros</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_com_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="c1">#       make a dummie translation vector</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">ClCore</span><span class="o">.</span><span class="n">to_device_static</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_rot_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="c1">#       make a dummie rotation mat</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">ClCore</span><span class="o">.</span><span class="n">to_device_static</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_set_amp_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="c1">#       make output buffer; initialize as 0s</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">ClCore</span><span class="o">.</span><span class="n">to_device_static</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="p">)</span>
 
 <span class="c1">#   list of kernel args</span>
@@ -329,18 +331,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span> <span class="o">=</span> <span class="n">na</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_atom_buffer</span><span class="p">()</span>
 
-        <span class="c1">#self.r_buff = clcore.to_device(</span>
+        <span class="c1">#self.r_buff = clcore.ClCore.to_device_static(</span>
         <span class="c1">#    self.atom_vecs, dtype=np.float32, queue=self.queue)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span><span class="o">.</span><span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span></div>
 
     <span class="k">def</span> <span class="nf">_set_rand_rot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">ClCore</span><span class="o">.</span><span class="n">to_device_static</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># consider kwargs ?</span>
     
     <span class="k">def</span> <span class="nf">_set_com_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">ClCore</span><span class="o">.</span><span class="n">to_device_static</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span><span class="o">.</span><span class="n">data</span> 
 

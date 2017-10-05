@@ -12,6 +12,14 @@ bornagain.target.crystal module
     :undoc-members:
     :show-inheritance:
 
+bornagain.target.spgrp module
+-----------------------------
+
+.. automodule:: bornagain.target.spgrp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

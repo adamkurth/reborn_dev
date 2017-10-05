@@ -14,12 +14,6 @@ Using Anaconda and pip
 
 To keep the installation as painless as possible, you should probably use the `Anaconda <https://anaconda.org>`_ Python 2.7 distribution.  The dependencies below assume that `numpy` and other popular scientific modules are available.
 
-For manipulating crystals you need to install `spglib`:
-
-.. code-block:: bash
-
-    pip install spglib
-
 For running GPU simulations you need to install `pyopencl`:
 
 .. code-block:: bash

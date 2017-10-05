@@ -56,6 +56,7 @@
 <li><a class="reference internal" href="#">bornagain.target package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-bornagain.target.crystal">bornagain.target.crystal module</a></li>
+<li><a class="reference internal" href="#module-bornagain.target.spgrp">bornagain.target.spgrp module</a></li>
 <li><a class="reference internal" href="#module-bornagain.target">Module contents</a></li>
 </ul>
 </li>
@@ -173,16 +174,22 @@
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.target.crystal.hermannMauguinToNumber">
-<code class="descclassname">bornagain.target.crystal.</code><code class="descname">hermannMauguinToNumber</code><span class="sig-paren">(</span><em>hm</em>, <em>hall=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#hermannMauguinToNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.hermannMauguinToNumber" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is needed to convert the Hermann Mauguin space group specifications
-in PDB files to the space group number or the &#8220;Hall number&#8221; that is used by
-the spglib module.</p>
+<dt id="bornagain.target.crystal.get_symmetry_operators_from_space_group">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">get_symmetry_operators_from_space_group</code><span class="sig-paren">(</span><em>hm_symbol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#get_symmetry_operators_from_space_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.get_symmetry_operators_from_space_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
+translation and rotation operators.  These operators are in the crystal basis.
+As of now, this is a rather unreliable function.  My brain hurts badly after attempting
+to make sense of the ways in which space groups are specified...</p>
+<p>Input: A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)</p>
+<dl class="docutils">
+<dt>Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy</dt>
+<dd>arrays) and translation vectors (1x3 numpy arrays)</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.target.crystal.parsePDB">
-<code class="descclassname">bornagain.target.crystal.</code><code class="descname">parsePDB</code><span class="sig-paren">(</span><em>pdbFilePath</em>, <em>crystalStruct=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#parsePDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.parsePDB" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.parse_pdb">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">parse_pdb</code><span class="sig-paren">(</span><em>pdbFilePath</em>, <em>crystalStruct=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#parse_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.parse_pdb" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a structure object with PDB information.</p>
 </dd></dl>
 
@@ -200,14 +207,14 @@ x = cryst.Oinv.dot(r)
 Convert from q-space to h-space:
 h = cryst.O.T.dot(q)</p>
 <dl class="method">
-<dt id="bornagain.target.crystal.structure.loadPDB">
-<code class="descname">loadPDB</code><span class="sig-paren">(</span><em>pdbFilePath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.loadPDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.loadPDB" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.structure.load_pdb">
+<code class="descname">load_pdb</code><span class="sig-paren">(</span><em>pdbFilePath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.load_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.load_pdb" title="Permalink to this definition">¶</a></dt>
 <dd><p>Populate all the attributes from a PDB file.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.crystal.structure.setCell">
-<code class="descname">setCell</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>alpha</em>, <em>beta</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.setCell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.setCell" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.structure.set_cell">
+<code class="descname">set_cell</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>alpha</em>, <em>beta</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.set_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.set_cell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the unit cell and all quantities derived from the unit cell.</p>
 </dd></dl>
 
@@ -219,6 +226,9 @@ h = cryst.O.T.dot(q)</p>
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-bornagain.target.spgrp">
+<span id="bornagain-target-spgrp-module"></span><h2>bornagain.target.spgrp module<a class="headerlink" href="#module-bornagain.target.spgrp" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-bornagain.target">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bornagain.target" title="Permalink to this headline">¶</a></h2>

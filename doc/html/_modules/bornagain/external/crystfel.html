@@ -307,6 +307,9 @@
                 <span class="s1">&#39;rigidGroups&#39;</span><span class="p">:</span> <span class="n">rigidGroups</span><span class="p">,</span>
                 <span class="s1">&#39;rigidGroupCollections&#39;</span><span class="p">:</span> <span class="n">rigidGroupCollections</span><span class="p">,</span>
                 <span class="s1">&#39;badRegions&#39;</span><span class="p">:</span> <span class="n">badRegions</span><span class="p">}</span>
+    
+    
+    
     <span class="k">return</span> <span class="n">geomDict</span></div>
 
 
@@ -314,7 +317,7 @@
     <span class="sd">&quot;&quot;&quot; Convert a CrystFEL geometry dictionary to a PanelList object. &quot;&quot;&quot;</span>
 
     <span class="n">PanelList</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">PanelList</span><span class="p">()</span>
-    <span class="n">PanelList</span><span class="o">.</span><span class="n">Beam</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">PanelList</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
 
@@ -327,7 +330,8 @@
         <span class="n">Panel</span><span class="o">.</span><span class="n">nS</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">z</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;coffset&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">z</span> <span class="o">+=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;coffset&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;coffset&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">z</span> <span class="o">+=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;coffset&#39;</span><span class="p">]</span>
         <span class="n">Panel</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;corner_x&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;corner_y&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">])</span>
         <span class="n">Panel</span><span class="o">.</span><span class="n">pixel_size</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">]</span>
@@ -335,6 +339,17 @@
         <span class="n">PanelList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Panel</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">PanelList</span></div>
+
+
+<div class="viewcode-block" id="load_cheetah_data"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.load_cheetah_data">[docs]</a><span class="k">def</span> <span class="nf">load_cheetah_data</span><span class="p">(</span><span class="n">dataArray</span><span class="p">,</span><span class="n">panelList</span><span class="p">,</span><span class="n">geomDict</span><span class="p">):</span>
+    
+    <span class="n">fail</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
+        <span class="n">panelList</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">dataArray</span><span class="p">[</span>
+            <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+ 
+    <span class="k">return</span> <span class="n">fail</span></div>
 
 
 <div class="viewcode-block" id="load_cheetah_mask"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.load_cheetah_mask">[docs]</a><span class="k">def</span> <span class="nf">load_cheetah_mask</span><span class="p">(</span><span class="n">maskArray</span><span class="p">,</span> <span class="n">PanelList</span><span class="p">,</span> <span class="n">geomDict</span><span class="p">):</span>
@@ -550,7 +565,7 @@
     <span class="n">h</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="c1"># Initialize Beam information for this Panel array</span>
-    <span class="n">pa</span><span class="o">.</span><span class="n">Beam</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">pa</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 
     <span class="c1"># Now adjust Panel list according to global parameters, convert units, etc.</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
@@ -579,7 +594,7 @@
             <span class="n">p</span><span class="o">.</span><span class="n">detOffsetField</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># Cannot have offset value *and* field</span>
         <span class="k">if</span> <span class="n">global_photon_energy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="c1"># CrystFEL uses eV units</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">Beam</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1.2398e-6</span> <span class="o">/</span> <span class="n">global_photon_energy</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1.2398e-6</span> <span class="o">/</span> <span class="n">global_photon_energy</span>
             <span class="c1"># Cannot have both energy value *and* field</span>
             <span class="n">p</span><span class="o">.</span><span class="n">photonEnergyField</span> <span class="o">=</span> <span class="bp">None</span>
 
