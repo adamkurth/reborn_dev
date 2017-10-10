@@ -125,6 +125,7 @@ def error(message):
     sys.stderr.write("ERROR: %s\n" % message)
 
 
+
 # def axisAndAngleToMatrix(axis, angle):
 #     """Generate the rotation matrix from the axis-angle notation.
 #
@@ -226,7 +227,7 @@ def error(message):
 #         return np.std(self.getData())
 
 
-def random_rotation_matrix(deflection=1.0, randnums=None):
+def random_rotation(deflection=1.0, randnums=None):
     """
     Creates a random rotation matrix.
 
@@ -280,3 +281,57 @@ def rotation_about_axis(theta, u):
     return np.array([[cos(theta) + u[0]**2 * (1-cos(theta)), u[0] * u[1] * (1-cos(theta)) - u[2] * sin(theta), u[0] * u[2] * (1 - cos(theta)) + u[1] * sin(theta)],
                      [u[0] * u[1] * (1-cos(theta)) + u[2] * sin(theta), cos(theta) + u[1]**2 * (1-cos(theta)), u[1] * u[2] * (1 - cos(theta)) - u[0] * sin(theta)],
                      [u[0] * u[2] * (1-cos(theta)) - u[1] * sin(theta), u[1] * u[2] * (1-cos(theta)) + u[0] * sin(theta), cos(theta) + u[2]**2 * (1-cos(theta))]])
+
+
+def random_beam_vector(div_fwhm):
+
+    """
+    A random vector for emulating beam divergence.
+    Generates a random normal vector that is nominally along the [0,0,1] direction
+    but with a random rotation along the [1,0,0] axis with given FWHM (Gaussian
+    distributed and centered about zero) followed by a random rotation about the
+    [0,0,1] axis with uniform distribution in the interval [0,2*pi).
+
+    :param div_fwhm:
+    :return:
+    """
+
+    # Don't do anything if no divergence
+    B = np.array([0, 0, 1.0])
+    if div_fwhm == 0:
+        return B
+
+    # First rotate around the x axis with Gaussian prob. dist.
+    sig = div_fwhm/2.354820045
+    theta = np.random.normal(0,sig,[1])[0]
+    Rtheta = rotation_about_axis(theta,[1.0,0,0])
+    B = np.dot(Rtheta,B)
+
+    # Next rotate around z axis with uniform dist [0,2*pi)
+    phi = np.random.random(1)[0]*2*np.pi
+    Rphi = rotation_about_axis(phi,[0,0,1.0])
+    B = np.dot(Rphi,B)
+    B /= np.sqrt(np.sum(B**2))
+
+    return B
+
+def random_mosaic_rotation(mosaicity_fwhm):
+
+    """
+    Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.
+    We take the matrix product of three rotations, each of the same FWHM, about the three
+    orthogonal axis.  The order of this product is a random permutation.
+
+    :param mosaicity_fwhm:
+    :return:
+    """
+
+    if mosaicity_fwhm == 0:
+        return np.eye(3)
+
+    Rs = []
+    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [1.0, 0, 0]))
+    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 1.0, 0]))
+    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
+    rind = np.random.permutation([0, 1, 2])
+    return Rs[rind[0]].dot(Rs[rind[1]].dot(Rs[rind[2]]))
