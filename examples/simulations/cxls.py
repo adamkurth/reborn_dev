@@ -3,6 +3,7 @@
 import sys
 import time
 import numpy as np
+import h5py
 
 sys.path.append("../..")
 import bornagain as ba
@@ -11,24 +12,26 @@ import bornagain.simulate.clcore as core
 
 
 pdbFile = '../data/pdb/2LYZ-P1.pdb'  # Lysozyme
-n_monte_carlo_iterations = 10000
-n_pixels = 1000
-pixel_size = 100e-6
+n_monte_carlo_iterations = 10000 #50000
+n_pixels = 200
+pixel_size = 200e-6
 detector_distance = 0.100
 photon_energy = 12.0/keV
 wavelength = hc/photon_energy
 wavelength_fwhm = wavelength*0.05
-beam_divergence_fwhm = 0.005 # radians, full angle
+beam_divergence_fwhm = 0.0035 # radians, full angle
 beam_diameter = 20e-6
 transmission = 0.25
 I0 = transmission*1e8/(np.pi*(beam_diameter/2.0)**2)
-crystal_size = 20e-6
-mosaic_domain_size = 1e-6
+crystal_size = beam_diameter #8e-6
+mosaic_domain_size = 2e-6
 mosaicity_fwhm = 0.001
 
+# John gets 2 photons per integrated peak with |F| ~ 5000
+
 # R = np.eye(3)
-R = ba.utils.random_rotation()
-# R = ba.utils.rotation_about_axis(0.05,[1,0,0])
+# R = ba.utils.random_rotation()
+R = ba.utils.rotation_about_axis(0.05,[1,0,0])
 
 # Things we probably don't want to think about
 cl_group_size = 32
@@ -84,7 +87,8 @@ sys.stdout.write('%7.03f ms\n' % (tf*1e3))
 sys.stdout.write('Simulating lattice transform... ')
 abc = cryst.O.T.copy()
 # print(abc)
-S2_dev = clcore.to_device(shape=(p.nF*p.nS),dtype=clcore.real_t)
+S2 = np.zeros((p.nF,p.nS))
+S2_dev = clcore.to_device(S2,dtype=clcore.real_t)
 message = ''
 for n in np.arange(1,(n_monte_carlo_iterations+1)):
 
@@ -102,22 +106,28 @@ for n in np.arange(1,(n_monte_carlo_iterations+1)):
 sys.stdout.write('\n')
 
 # Average the lattice transforms over MC iterations
-S2 = S2_dev.get()/n_monte_carlo_iterations
+S2 = S2_dev.get().ravel()/n_monte_carlo_iterations
 # Convert into useful photon units
 I = I0*r_e**2*F2*S2*sa*P
 # Scale up according to mosaic domain
-I *= np.prod(n_cells_whole_crystal)/np.prod(n_cells_mosaic_domain)
-
+n_domains = np.prod(n_cells_whole_crystal)/np.prod(n_cells_mosaic_domain)
+print('domains',n_domains)
+I *= n_domains
 
 I = I.reshape((p.nS, p.nF))
 # imdisp = S2.reshape((p.nS, p.nF))
 I = np.random.poisson(I)
+print('Total photon counts: %g' % (np.sum(I)))
+print('Max solid angle: %g' % (np.max(p.solid_angle)))
+print('Min pixel intensity: %g photons' % (np.min(I)))
+print('Max pixel intensity: %g photons' % (np.min(I)))
 # I[I > (2**16-1)] = 2**16-1
 # print(np.max(I))
-imdisp = np.log10(I+1)
+imdisp = np.log10(I+1e-20)
+# print(np.max(imdisp))
 if qtview:
     img = pg.image(imdisp,autoLevels=False,levels=[0,2],
-             title='log10(I+1); %g mrad div; %g %% dE/E; ' % (beam_divergence_fwhm*1000, wavelength_fwhm/wavelength*100))
+              title='log10(I+1); %g mrad div; %g %% dE/E; ' % (beam_divergence_fwhm*1000, wavelength_fwhm/wavelength*100))
     if __name__ == '__main__':
         if sys.flags.interactive != 1 or not hasattr(QtCore, 'PYQT_VERSION'):
             pg.QtGui.QApplication.exec_()
@@ -128,5 +138,10 @@ elif view:
     import matplotlib.pyplot as plt
     plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
     plt.show()
+
+file_name = 'pattern.h5'
+f = h5py.File(file_name, 'w')
+f['/data'] = I.astype(np.uint16)
+f.close()
 
 print("Done!")
