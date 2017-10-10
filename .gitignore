@@ -10,3 +10,7 @@ temp
 .cache
 .metadata
 .*.csv
+_*
+._*
+.idea
+.adxv*
