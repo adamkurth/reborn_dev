@@ -36,7 +36,12 @@ class ClCore(object):
         
         # Setup the context
         if context is None:
-            self.context = cl.create_some_context()
+            try:
+                self.context = cl.create_some_context()
+            except:
+                platform = cl.get_platforms()
+                devices = platform[0].get_devices(device_type=cl.device_type.GPU)
+                self.context = cl.Context(devices=devices)
         else:
             self.context = context
         
@@ -308,11 +313,6 @@ class ClCore(object):
             R (numpy array [3,3]): Rotation matrix acting on q vectors.
             a (cl complex array [N]): Optional container for complex scattering 
               amplitudes.
-            context (pyopencl context): Optional pyopencl context (e.g. use 
-              cl.create_some_context() to create one).
-            queue (pyopencl context): Optional pyopencl queue (e.g use 
-              cl.CommandQueue(context) to create one).
-            group_size (int): Optional pyopencl group size.
 
         Returns:
             (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 

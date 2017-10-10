@@ -36,6 +36,12 @@
 #define PI2 6.28318530718f
 //#endif
 
+static int linear_congruential(int n)
+{
+// Random number using linear congruential and constants from Numerical Recipes
+    n = (1664525*n + 1013904223) % 4294967296;
+    return n;
+}
 
 static float4 rotate_vec(
     __constant float *R,
@@ -543,29 +549,33 @@ kernel void lattice_transform_intensities_pad(
     const int i = gi % nF;           /* Pixel coordinate i */
     const int j = gi/nF;             /* Pixel coordinate j */
 
-    // Each global index corresponds to a particular q-vector
-    float4 q;
-
     // Get the q vector
-    q = q_pad( i,j,w,T,F,S,B);
+    float4 q = q_pad( i,j,w,T,F,S,B);
 
     // Rotate the q vector
     q = rotate_vec(R, q);
 
+    // Compute lattice transform at this q vector
     float sn;
     float s;
+    float sns;
+    float x;
+    float n;
+    float4 a;
     float It = 1.0;
     for (int k=0; k<3; k++){
-        float4 v = (float4)(abc[k*3+0],abc[k*3+1],abc[k*3+2],0.0);
-        float x = dot(q,v) / 2.0;
-        float n = (float)N[k];
-        if (x == 0){
-            It *= native_powr(n,2);
-        } else {
+        a = (float4)(abc[k*3+0],abc[k*3+1],abc[k*3+2],0.0);
+        x = dot(q,a) / 2.0;
+        n = (float)N[k];
+        if (x != 0){
             // This does [ sin(Nx)/sin(x) ]^2
-            sn = native_sin(n*x);
-            s = native_sin(x);
-            It *= native_powr(sn/s,2);
+            sn = sin(n*x);
+            s = sin(x);
+            sns = sn/s;
+            It *= sns*sns;
+        } else {
+            // This handles potential divide by zero
+            It *= n*n;
         }
     }
 
@@ -577,7 +587,6 @@ kernel void lattice_transform_intensities_pad(
         }
     }
 }
-
 
 
 __kernel void qrf_default(
