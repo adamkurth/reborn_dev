@@ -6,6 +6,7 @@ likely also be removed.
 
 import sys
 import numpy as np
+from numpy import sin, cos
 
 from bornagain.simulate import refdata
 
@@ -267,3 +268,15 @@ def random_rotation_matrix(deflection=1.0, randnums=None):
 
     M = (np.outer(V, V) - np.eye(3)).dot(R)
     return M
+
+
+def rotation_about_axis(theta, u):
+
+    """
+    This needs to be tested.  It was taken from
+    https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python
+    """
+
+    return np.array([[cos(theta) + u[0]**2 * (1-cos(theta)), u[0] * u[1] * (1-cos(theta)) - u[2] * sin(theta), u[0] * u[2] * (1 - cos(theta)) + u[1] * sin(theta)],
+                     [u[0] * u[1] * (1-cos(theta)) + u[2] * sin(theta), cos(theta) + u[1]**2 * (1-cos(theta)), u[1] * u[2] * (1 - cos(theta)) - u[0] * sin(theta)],
+                     [u[0] * u[2] * (1-cos(theta)) - u[1] * sin(theta), u[1] * u[2] * (1-cos(theta)) + u[0] * sin(theta), cos(theta) + u[2]**2 * (1-cos(theta))]])
