@@ -153,13 +153,13 @@ class ClCore(object):
     def _load_phase_factor_qrf(self):
         self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
         self.phase_factor_qrf_cl.set_scalar_arg_dtypes(
-                    [None, None, None, None, None, self.int_t, self.int_t])
+                    [None, None, None, None, None, self.int_t, self.int_t, self.int_t])
     
     def _load_phase_factor_pad(self):
         self.phase_factor_pad_cl = self.programs.phase_factor_pad
         self.phase_factor_pad_cl.set_scalar_arg_dtypes(
              [None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t,
-              self.real_t, None, None, None, None])
+              self.real_t, None, None, None, None, self.int_t])
     
     def _load_phase_factor_mesh(self):
         self.phase_factor_mesh_cl = self.programs.phase_factor_mesh
@@ -278,8 +278,6 @@ class ClCore(object):
                                   np.ascontiguousarray(array.astype(dtype)))
 
 
-
-
     def get_group_size(self):
         """
         retrieve the currently set group_size
@@ -364,7 +362,7 @@ class ClCore(object):
         return amps
 
     
-    def phase_factor_qrf(self, q, r, f, R=None, a=None):
+    def phase_factor_qrf(self, q, r, f, R=None, a=None, add=False):
         '''
         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
 
@@ -385,7 +383,11 @@ class ClCore(object):
             R = np.eye(3, dtype=self.real_t)
         R16 = np.zeros([16], dtype=self.real_t)
         R16[0:9] = R.flatten().astype(self.real_t)
-    
+        if add:
+            add = 1
+        else:
+            add = 0
+
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
         q_dev = self.to_device(q, dtype=self.real_t)
@@ -401,14 +403,14 @@ class ClCore(object):
             self.phase_factor_qrf_cl(self.queue, (global_size,), 
                                      (self.group_size,), q_dev.data, r_dev.data, 
                                      f_dev.data, R16_dev.data, a_dev.data, n_atoms,
-                                     n_pixels)
+                                     n_pixels, add)
     
         if a is None:
             return a_dev.get()
         else:
             return a_dev
         
-    def phase_factor_pad(self, r, f, T, F, S, B, nF, nS, w, R=None, a=None):
+    def phase_factor_pad(self, r, f, T, F, S, B, nF, nS, w, R=None, a=None, add=False):
         '''
         This should simulate detector panels.
 
@@ -440,7 +442,11 @@ class ClCore(object):
     
         if R is None:
             R = np.eye(3, dtype=self.real_t)
-    
+        if add:
+            add = 1
+        else:
+            add = 0
+
         nF = self.int_t(nF)
         nS = self.int_t(nS)
         n_pixels = self.int_t(nF * nS)
@@ -458,14 +464,11 @@ class ClCore(object):
     
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * 
                              self.group_size)
-    
-        
-        print('global,group',global_size, self.group_size)
 
         self.phase_factor_pad_cl(self.queue, (global_size,), 
                                  (self.group_size,), r_dev.data,
                             f_dev.data, R_dev.data, a_dev.data, n_pixels, n_atoms,
-                            nF, nS, w, T_dev.data, F_dev.data, S_dev.data, B_dev.data)
+                            nF, nS, w, T_dev.data, F_dev.data, S_dev.data, B_dev.data, add)
     
         if a is None:
             return a_dev.get()

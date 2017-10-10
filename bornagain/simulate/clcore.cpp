@@ -189,7 +189,8 @@ kernel void phase_factor_qrf(
     __constant float *R,
     global float2 *a,
     const int n_atoms,
-    const int n_pixels)
+    const int n_pixels,
+    const int add)
 {
 
 // Calculate the the scattering amplitude according to a set of point
@@ -269,7 +270,11 @@ kernel void phase_factor_qrf(
         barrier(CLK_LOCAL_MEM_FENCE);
     }
     if (gi < n_pixels){
-        a[gi] = a_sum;
+        if (add == 1){
+            a[gi] += a_sum;
+        } else {
+            a[gi] = a_sum;
+        }
     }
 }
 
@@ -286,7 +291,8 @@ kernel void phase_factor_pad(
     __constant float *T,
     __constant float *F,
     __constant float *S,
-    __constant float *B)
+    __constant float *B,
+    const int add)
 {
 
 // Calculate the the scattering amplitude according to a set of point
@@ -365,8 +371,13 @@ kernel void phase_factor_pad(
     }
 
     if (gi < n_pixels ){
-        a[gi].x = re;
-        a[gi].y = im;
+        if (add == 1){
+            a[gi].x += re;
+            a[gi].y += im;
+        } else {
+            a[gi].x = re;
+            a[gi].y = im;
+        }
     }
 }
 
