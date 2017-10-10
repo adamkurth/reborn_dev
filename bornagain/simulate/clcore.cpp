@@ -589,6 +589,61 @@ kernel void lattice_transform_intensities_pad(
 }
 
 
+kernel void gaussian_lattice_transform_intensities_pad(
+    __constant float *abc,
+    __constant int *N,
+    __constant float *R,
+    global float *I,
+    const int n_pixels,
+    const int nF,
+    const int nS,
+    const float w,
+    __constant float *T,
+    __constant float *F,
+    __constant float *S,
+    __constant float *B,
+    const int add)
+{
+
+// TODO: add documentation Rick
+
+    const int gi = get_global_id(0); /* Global index */
+    const int i = gi % nF;           /* Pixel coordinate i */
+    const int j = gi/nF;             /* Pixel coordinate j */
+
+    // Get the q vector
+    float4 q = q_pad( i,j,w,T,F,S,B);
+
+    // Rotate the q vector
+    q = rotate_vec(R, q);
+
+    // Compute lattice transform at this q vector
+    float x;
+    float n;
+//    float d = 0.0;
+    float4 a;
+    float It = 1.0;
+    for (int k=0; k<3; k++){
+        n = (float) N[k];
+        a = (float4) (abc[k*3+0],abc[k*3+1],abc[k*3+2],0.0);
+        x = dot(q,a);
+        x = x - round(x/PI2)*PI2;
+//        d += x*x;
+        It *= n*n*exp(-n*n*x*x/(4*PI));
+    }
+//    It = sqrt(d);
+
+    if (gi < n_pixels ){
+        if (add == 1){
+            I[gi] += It;
+        } else {
+            I[gi] = It;
+        }
+    }
+}
+
+
+
 __kernel void qrf_default(
     __global float16 *q_vecs,
     __global float4 *r_vecs,

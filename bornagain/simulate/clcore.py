@@ -134,6 +134,7 @@ class ClCore(object):
         self._load_qrf_default()
         self._load_qrf_kam()
         self._load_lattice_transform_intensities_pad()
+        self._load_gaussian_lattice_transform_intensities_pad()
 
     def _build_openCL_programs(self):
         clcore_file = pkg_resources.resource_filename(
@@ -175,6 +176,13 @@ class ClCore(object):
               self.programs.lattice_transform_intensities_pad
         self.lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
              [None, None, None, None, self.int_t, self.int_t, self.int_t, 
+              self.real_t, None, None, None, None, self.int_t])
+
+    def _load_gaussian_lattice_transform_intensities_pad(self):
+        self.gaussian_lattice_transform_intensities_pad_cl = \
+              self.programs.gaussian_lattice_transform_intensities_pad
+        self.gaussian_lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
+             [None, None, None, None, self.int_t, self.int_t, self.int_t,
               self.real_t, None, None, None, None, self.int_t])
 
     def _load_mod_squared_complex_to_real(self):
@@ -618,6 +626,46 @@ class ClCore(object):
                             N_dev.data, R_dev.data, I_dev.data, n_pixels, 
                             nF, nS, w, T_dev.data, F_dev.data, S_dev.data, B_dev.data, add)
     
+        if I is None:
+            return I_dev.get()
+        else:
+            return I_dev
+
+
+    def gaussian_lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w,
+                                          R=None, I=None, add=False):
+        """
+        This is not documentation.  That is Rick's fault.
+        """
+
+        if R is None:
+            R = np.eye(3, dtype=self.real_t)
+
+        nF = self.int_t(nF)
+        nS = self.int_t(nS)
+        n_pixels = self.int_t(nF * nS)
+        if add is True:
+            add = 1
+        else:
+            add = 0
+        add = self.int_t(add)
+
+        abc_dev = self.to_device(abc, dtype=self.real_t)
+        N_dev = self.to_device(N, dtype=self.int_t)
+        R_dev = self.to_device(R, dtype=self.real_t)
+        T_dev = self.to_device(T, dtype=self.real_t)
+        F_dev = self.to_device(F, dtype=self.real_t)
+        S_dev = self.to_device(S, dtype=self.real_t)
+        B_dev = self.to_device(B, dtype=self.real_t)
+        I_dev = self.to_device(I, dtype=self.real_t, shape=(n_pixels))
+
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
+                             self.group_size)
+        self.gaussian_lattice_transform_intensities_pad_cl(self.queue, (global_size,),
+                                 (self.group_size,), abc_dev.data,
+                            N_dev.data, R_dev.data, I_dev.data, n_pixels,
+                            nF, nS, w, T_dev.data, F_dev.data, S_dev.data, B_dev.data, add)
+
         if I is None:
             return I_dev.get()
         else:
