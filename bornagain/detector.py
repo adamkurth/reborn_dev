@@ -287,7 +287,7 @@ class Panel(object):
             n = self.N
             V2 = np.sum(self.V**2, axis=-1)
             A = norm(np.cross(self.F, self.S))
-            self._sa = A / V2 * np.dot(v, n.T)
+            self._sa = A / V2 * np.dot(n,v.T)
 
         return self._sa
 
