@@ -296,9 +296,16 @@ class Panel(object):
         """ The scattering polarization factor. """
 
         if self._pf is None:
-            p = self.beam.P
+
+            p = self.beam.polarization_vectors[0]
             u = vec_norm(self.V)
-            self._pf = 1.0 - np.abs(u.dot(p))**2
+            self._pf = self.beam.polarization_weights[0]*(1.0 - np.abs(u.dot(p))**2)
+
+            p = self.beam.polarization_vectors[1]
+            u = vec_norm(self.V)
+            self._pf += self.beam.polarization_weights[1]*(1.0 - np.abs(u.dot(p))**2)
+
+            self._pf /= self.beam.polarization_weights[0] + self.beam.polarization_weights[1]
 
         return self._pf
 
