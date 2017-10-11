@@ -11,34 +11,31 @@ import bornagain as ba
 from bornagain.units import r_e, hc, keV
 import bornagain.simulate.clcore as core
 
-# Lysozyme at CXLS
+# Lysozyme from LCLS LO47 (Polly & Bushy) 
 pdbFile = '../data/pdb/2LYZ-P1.pdb'  # Lysozyme
-do_monte_carlo = True
-n_monte_carlo_iterations = 10000
+n_monte_carlo_iterations = 1000
 n_pixels = 1500
 pixel_size = 110e-6
 detector_distance = 156e-3
-photon_energy = 10.0 / keV
-#pulse_energy = 0.0024
+photon_energy = 9.480 / keV
+pulse_energy = 0.0024
 wavelength = hc / photon_energy
-wavelength_fwhm = wavelength * 0.03
-beam_diameter = 50e-6
-beam_divergence_fwhm = 0.0015  # radians, full angle
-transmission = 0.2
-n_photons = 1e8 #pulse_energy / photon_energy  # 1e12
+wavelength_fwhm = wavelength * 0.001
+beam_divergence_fwhm = 0.0001  # radians, full angle
+beam_diameter = 1.5e-6
+transmission = 0.6
+n_photons = pulse_energy / photon_energy  # 1e12
 I0 = transmission * n_photons / (np.pi * (beam_diameter / 2.0) ** 2)
 crystal_size = beam_diameter
 mosaic_domain_size = 200e-9
 mosaicity_fwhm = 0.0001
-results_dir = '/data/temp/cxls-lysozyme-01/'
+results_dir = '/data/temp/lcls-lysozyme-02/'
 write_hdf5 = True
 write_geom = True
 cromer_mann = False
 quiet = False
-random_rotation = False
+random_rotation = True
 approximate_lattice_transform = True
-rotation_axis = [1,0,0]
-rotation_angle = 0.1
 
 # John gets 2 photons per integrated peak with |F| ~ 5000
 
@@ -46,12 +43,6 @@ if not quiet:
     write = sys.stdout.write
 else:
     write = lambda x: x
-
-write('Beam divergence: %g mrad FWHM\n' % (beam_divergence_fwhm*1e3))
-write('Beam diameter: %g microns tophat\n' % (beam_diameter*1e6))
-write('Spectral width: %g %% FWHM dlambda/lambda\n' % (100*wavelength_fwhm/wavelength))
-write('Crystal size: %g microns\n' % (crystal_size*1e6))
-write('Crystal mosaicity: %g radian FWHM\n' % (mosaicity_fwhm))
 
 # Things we probably don't want to think about
 cl_group_size = 32
@@ -84,10 +75,7 @@ write('Setting up detector...\n')
 panel_list = ba.detector.PanelList()
 panel_list.simple_setup(n_pixels, n_pixels, pixel_size, detector_distance, wavelength)
 p = panel_list[0]
-q = p.Q
-qmag = p.Qmag
-mask = np.ones((p.nS*p.nF))
-# mask[qmag < (2*np.pi/1e-9)] = 0
+# q = p.Q
 sa = p.solid_angle
 P = p.polarization_factor
 
@@ -103,28 +91,26 @@ n_cells_mosaic_domain = np.ceil(mosaic_domain_size / np.array([cryst.a, cryst.b,
 
 # Setup function for lattice transform calculations
 if approximate_lattice_transform:
-    write('Using approximate (Gaussian) lattice transform\n')
     lattice_transform = clcore.gaussian_lattice_transform_intensities_pad
 else:
-    write('Using idealized (parallelepiped) lattice transform\n')
     lattice_transform = clcore.lattice_transform_intensities_pad
 
 if write_geom:
     geom_file = results_dir + 'geom.geom'
     write('Writing geometry file %s\n' % geom_file)
     fid = open(geom_file, 'w')
-    fid.write("photon_energy = %g\n" % (photon_energy * ba.units.eV))
-    fid.write("clen = %g\n" % detector_distance)
+    fid.write("photon_energy_ev = %g\n" % (photon_energy / ba.units.eV))
+    fid.write("len = %g\n" % detector_distance)
     fid.write("res = %g\n" % (1 / pixel_size))
-    fid.write("adu_per_eV = %g\n" % (1.0 / (photon_energy * ba.units.eV)))
+    fid.write("adu_per_ev = %g\n" % (1.0 / (photon_energy * ba.units.eV)))
     fid.write("0/min_ss = 0\n")
     fid.write("0/max_ss = %d\n" % (n_pixels - 1))
     fid.write("0/min_fs = 0\n")
     fid.write("0/max_fs = %d\n" % (n_pixels - 1))
     fid.write("0/corner_x = %g\n" % (-n_pixels / 2.0))
     fid.write("0/corner_y = %g\n" % (-n_pixels / 2.0))
-    fid.write("0/fs = x\n")
-    fid.write("0/ss = y\n")
+    fid.write("0/fs = x")
+    fid.write("0/ss = y")
     fid.close()
 
 # Allocate memory on GPU device
@@ -134,8 +120,7 @@ f_dev = clcore.to_device(f, dtype=clcore.complex_t)
 F_dev = clcore.to_device(np.zeros([p.nS*p.nF], dtype=clcore.complex_t))
 S2_dev = clcore.to_device(shape=(p.nF, p.nS), dtype=clcore.real_t)
 
-
-R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
+R = ba.utils.rotation_about_axis(0.05, [1, 0, 0])
 if random_rotation: R = ba.utils.random_rotation()
 
 if not cromer_mann:
@@ -167,41 +152,27 @@ tt = time.time()
 for n in np.arange(1, (n_monte_carlo_iterations + 1)):
 
     t = time.time()
-    if do_monte_carlo:
-        B = ba.utils.random_beam_vector(beam_divergence_fwhm)
-        w = np.random.normal(wavelength, wavelength_fwhm / 2.354820045, [1])[0]
-        Rm = ba.utils.random_mosaic_rotation(mosaicity_fwhm).dot(R)
-        T = p.T.copy() + p.F * (np.random.random([1]) - 0.5) + p.S * (np.random.random([1]) - 0.5)
-        lattice_transform(abc, n_cells_mosaic_domain, T, p.F, p.S, B, p.nF, p.nS, w, Rm, S2_dev, add=True)
-    else:
-        lattice_transform(abc, n_cells_mosaic_domain, p.T, p.F, p.S, p.beam.B, p.nF, p.nS, wavelength, R, S2_dev, add=True)
-        continue
-
+    B = ba.utils.random_beam_vector(beam_divergence_fwhm)
+    w = np.random.normal(wavelength, wavelength_fwhm / 2.354820045, [1])[0]
+    Rm = ba.utils.random_mosaic_rotation(mosaicity_fwhm).dot(R)
+    T = p.T.copy() + p.F * (np.random.random([1]) - 0.5) + p.S * (np.random.random([1]) - 0.5)
+    lattice_transform(abc, n_cells_mosaic_domain, T, p.F, p.S, B, p.nF, p.nS, w, Rm, S2_dev, add=True)
     tf = time.time() - t
-    if (n % 1000) == 0:
-        write('\b' * len(message))
-        message = '%3.0f%% (%5d; %7.03f ms)' % (n / float(n_monte_carlo_iterations) * 100, n, tf * 1e3)
-        write(message)
+    write('\b' * len(message))
+    message = '%3.0f%% (%5d; %7.03f ms)' % (n / float(n_monte_carlo_iterations) * 100, n, tf * 1e3)
+    write(message)
 write('\b' * len(message))
 write('%g s                \n' % (time.time()-tt))
 
 # Average the lattice transforms over MC iterations
-S2 = S2_dev.get().ravel() / n
+S2 = S2_dev.get().ravel() / n_monte_carlo_iterations
 # Convert into useful photon units
 I = I0 * r_e ** 2 * F2 * S2 * sa * P
 # Scale up according to mosaic domain
 n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
 I *= n_domains
-I *= mask
 I = I.reshape((p.nS, p.nF))
-I = np.random.poisson(I).astype(np.float32)
-
-hkl = cryst.O.dot(R).dot(q.T)/2.0/np.pi #.dot(cryst.Oinv)
-delta = hkl - np.round(hkl)
-delta = np.sqrt(np.sum(delta**2,axis=0))
-peak_mask = np.zeros((p.nF*p.nS))
-peak_mask[delta < 0.5] = 0.5
-# I += peak_mask.reshape((p.nS, p.nF))
+I = np.random.poisson(I)
 
 if write_hdf5:
     n_patterns = len(glob(results_dir + 'pattern-*.h5'))
@@ -210,16 +181,16 @@ if write_hdf5:
     fid = h5py.File(file_name, 'w')
     fid['/data/data'] = I.astype(np.float32)
     fid.close()
-#write('Max solid angle: %g\n' % (np.max(p.solid_angle)))
-write('Min pixel intensity: %g photons\n' % (np.min(I)))
-write('Max pixel intensity: %g photons\n' % (np.max(I)))
 write('Total photon counts: %g\n' % (np.sum(I)))
+write('Max solid angle: %g\n' % (np.max(p.solid_angle)))
+write('Min pixel intensity: %g photons\n' % (np.max(I)))
+write('Max pixel intensity: %g photons\n' % (np.min(I)))
 # print(np.max(I))
 imdisp = np.log10(I + 1e-20)
 # print(np.max(imdisp))
 if qtview:
-    img = pg.image(imdisp, autoLevels=False, levels=[-0.4,1],
-                   title='log10(I); %.1g mrad div; %.1g %% dE/E; ' % (
+    img = pg.image(imdisp, autoLevels=False, levels=[0, np.log10(500)],
+                   title='log10(I); %g mrad div; %g %% dE/E; ' % (
                    beam_divergence_fwhm * 1000, wavelength_fwhm / wavelength * 100))
     if __name__ == '__main__':
         if sys.flags.interactive != 1 or not hasattr(QtCore, 'PYQT_VERSION'):
