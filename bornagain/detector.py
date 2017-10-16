@@ -19,6 +19,103 @@ from utils import vec_norm, vec_mag, vec_check
 import source
 import units
 
+
+class PADGeometry(object):
+
+    """
+    This is a simplified version of the Panel class.  Hopefully it replaces Panel.  One main difference is that it does
+    not include any information about the source, which makes a lot more sense and removes several headaches that I
+    dealt with previously.  Another big difference is the emphasis on simplicity.  So far, there is no cache for
+    derived arrays, but maybe that will be added later (but only on an as-needed basis...).
+    As a result of simplifications, there are no checks; the programmer must think.
+    """
+
+    # These are the configurable parameters.  No defaults.  One must think.
+    n_fs = None
+    n_ss = None
+    fs_vec = None
+    ss_vec = None
+    t_vec = None
+
+    def simple_setup(self, n_pixels=1000, pixel_size=100e-6, distance=0.1):
+
+        """ Make this a square PAD with beam at center. """
+
+        self.set_n_fs(n_pixels)
+        self.set_n_ss(n_pixels)
+        self.set_fs_vec([pixel_size,0,0])
+        self.set_ss_vec([0,pixel_size,0])
+        self.set_t_vec([-pixel_size*(n_pixels/2.0-0.5), -pixel_size*(n_pixels/2.0-0.5), distance])
+
+    # The reason for these setters is that some assumptions are made about the shape of vectors used within bornagain.
+    # Please see the relevant documentation (if it exists; if not, ask Rick to create it).
+    def set_fs_vec(self, fs_vec):
+        self.fs_vec = vec_check(fs_vec)
+
+    def set_ss_vec(self, ss_vec):
+        self.ss_vec = vec_check(ss_vec)
+
+    def set_t_vec(self, t_vec):
+        self.t_vec = vec_check(t_vec)
+
+    def set_n_fs(self, n_fs):
+        self.n_fs = n_fs
+
+    def set_n_ss(self, n_ss):
+        self.n_ss = n_ss
+
+    def pixel_size(self):
+
+        """ Return pixel size assuming square pixels. """
+
+        return np.mean([vec_mag(self.fs_vec), vec_mag(self.ss_vec)])
+
+
+    def shape(self):
+
+        return (self.n_ss, self.n_fs)
+
+    def indices_to_vectors(self, j, i):
+
+        """ Convert pixel indices to translation vectors (i=fast scan, j=slow scan)."""
+
+        i = np.array(i)
+        j = np.array(j)
+        f = np.outer(i.ravel(), self.fs_vec)
+        s = np.outer(j.ravel(), self.ss_vec)
+        return vec_check(self.t_vec + f + s)
+
+    def position_vecs(self):
+
+        """ Vectors pointing to positions of pixels, from origin to center of pixels. """
+
+        i = np.arange(self.n_fs); j = np.arange(self.n_ss)
+        [i, j] = np.meshgrid(i, j)
+        i.ravel(); j.ravel()
+        return self.indices_to_vectors(j,i)
+
+    def norm_vec(self):
+
+        """ The vector that is normal to the PAD plane. """
+
+        return vec_norm(np.cross(self.fs_vec, self.ss_vec))
+
+    def ds_vecs(self, beam_vec=None):
+
+        """ Normalized scattering vectors s - s0 where s0 is the incident beam direction
+        and s is the outgoing vector for a given pixel.  This does **not** have
+        the 2*pi/lambda factor included."""
+
+        return vec_norm(self.position_vecs()) - vec_check(beam_vec)
+
+    def q_vecs(self, beam_vec=None, wavelength=None):
+
+        """ Conventional scattering vectors 2*pi/lambda (s - s0)"""
+
+        return (2*np.pi/wavelength)*self.ds_vecs(beam_vec=beam_vec)
+
+
+
 class Panel(object):
     """ Individual detector Panel: a 2D lattice of square pixels."""
 

@@ -4,19 +4,69 @@ import os
 import sys
 import time
 import numpy as np
+import argparse
 import h5py
 from glob import glob
 
-sys.path.append("../..")
+sys.path.append("..")  # This path setting won't be needed once bornagain is properly installed
 import bornagain as ba
 from bornagain.units import r_e, hc, keV
 import bornagain.simulate.clcore as core
 
-# Lysozyme at CXLS
-pdbFile = '../data/pdb/1jb0.pdb'
-# pdbFile = '../data/pdb/2LYZ-P1.pdb'
-do_monte_carlo = True
-n_monte_carlo_iterations = 1000
+
+########################################################################################################################
+# Command-line input.  Most defaults are set here, but are subject to change (so do not rely on them).
+########################################################################################################################
+
+p = argparse.ArgumentParser("""
+Monte Carlo simulations of crystal diffraction on a GPU.
+A more elaborate description of this program will follow...
+""")
+a = p.add_argument
+
+a('--pdb_file', type=str, nargs=1, default='../examples/data/pdb/2LYZ-P1.pdb',
+  help='PDB file (symmetry is **not** expanded)')
+
+a('--lattice_transform', type=str, nargs=1, default='gaussian',
+  help='Lattice transform model.  Options are parallelepiped or gaussian.')
+
+a('--iterations', type=int, nargs=1, default=1000,
+  help='Number of independent Monte Carlo iterations to average')
+
+a('--double_precision', action='store_true', default=False,
+  help='Use double precision if device allows.')
+
+a('--write_geom', action='store_true', default=False,
+  help='Write a crystfel geometry file.')
+
+a('--write_hdf5', action='store_true', default=False,
+  help='Write data to hdf5 file(s).')
+
+a('--mplview', action='store_true', default=False,
+  help='View the pattern with matplotlib')
+
+a('--qtview', action='store_true', default=False,
+  help='View the pattern with pyqtgraph')
+
+a('--skview', action='store_true', default=False,
+  help='View the pattern with skimage viewer')
+
+a = p.parse_args()
+
+
+########################################################################################################################
+# Now do something intelligent with the input.  Basic sanity checks, etc.
+########################################################################################################################
+
+# This needs to be thought through more carefully.  E.g. check if pdb file exists, send message if it doesn't, and so
+# on.
+pdb_file = a.pdb_file  # Really, we don't even need to copy these input arguments... just change variables below?
+n_monte_carlo_iterations = a.iterations
+lattice_transform_model = a.lattice_transform
+write_hdf5 = a.write_hdf5
+write_geom = a.write_geom
+
+do_monte_carlo = True # This should not be needed; set bandwidth etc. to zero of you don't want monte carlo...
 n_pixels = 1000
 pixel_size = 110e-6
 detector_distance = 100e-3
@@ -44,9 +94,11 @@ rotation_angle = 0.1
 add_noise = False
 overlay_wigner_cells = False
 mask_direct_beam = True
+mplview = a.mplview
+qtview =  a.qtview
+skview =  a.skview
 
-# John gets ~100 photons per integrated peak with Lysozyme |F| ~ 5000
-
+# Doesn't make sense if mosaic domain size is larger than the whole crystal...
 if mosaic_domain_size > crystal_size: mosaic_domain_size = crystal_size
 
 if not do_monte_carlo:
@@ -60,7 +112,7 @@ else:
 section = '=' * 70 + '\n'
 
 write(section)
-write('PDB file: %s\n' % (os.path.basename(pdbFile)))
+write('PDB file: %s\n' % (os.path.basename(pdb_file)))
 write('Photons per pulse: %g\n' % (n_photons))
 write('Photon energy: %g keV\n' % (photon_energy * keV))
 write('Beam divergence: %g mrad FWHM\n' % (beam_divergence_fwhm * 1e3))
@@ -75,30 +127,27 @@ write(section)
 cl_group_size = 32
 cl_double_precision = False
 
-# Some overrides at the command prompt:
-view = False
-qtview = False
-skview = False
-if 'view' in sys.argv:
+# Don't import nasty viewer libraries unless needed...:
+if mplview:
     import matplotlib.pyplot as plt
-
-    view = True
-if 'qtview' in sys.argv:
+if qtview:
     import pyqtgraph as pg
     pg.setConfigOptions(antialias=True)
-
-    qtview = True
-if 'skview' in sys.argv:
+if skview:
     from skimage.viewer import ImageViewer
 
-    skview = True
-if 'double' in sys.argv:
+if a.double_precision:
     cl_double_precision = True
-if 'approximate' in sys.argv:
+
+if lattice_transform_model == 'gaussian':
     approximate_lattice_transform = True
-if 'save' in sys.argv:
-    write_hdf5 = True
-    write_geom = True
+elif lattice_transform_model == 'parallelepiped':
+    approximate_lattice_transform = False
+else:
+    sys.stderr.write('Lattice transform model not recognized: %s\n' % (lattice_transform_model))
+    sys.stderr.write('The options are: gaussian or parallelepiped\n')
+    sys.exit(1)
+
 
 # Setup simulation engine
 write('Setting up simulation engine... ')
@@ -120,7 +169,7 @@ write('done\n')
 
 # Get atomic coordinates and scattering factors from pdb file
 write('Getting atomic coordinates and scattering factors... ')
-cryst = ba.target.crystal.structure(pdbFile)
+cryst = ba.target.crystal.structure(pdb_file)
 r = cryst.r
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 write('done\n')
@@ -244,58 +293,46 @@ F2mean = np.mean(F2.flat[direct_beam_mask > 0])
 Ncells = np.prod(n_cells_whole_crystal)
 darwin = I0 * r_e ** 2 * Ncells * F2mean * (wavelength ** 3 / cryst.V)
 
-write(section)
-write('Simulation results, excluding direct-beam [000] reflection:\n')
-write('Mean unit cell transform |F|^2: %g\n' % (F2mean))
-write('Min pixel intensity: %g photons\n' % (np.min(I_ideal)))
-write('Max pixel intensity: %g photons\n' % (np.max(I_ideal.flat[direct_beam_mask > 0])))
-write('Total photon counts: %g\n' % (np.sum(I_ideal.flat[direct_beam_mask > 0])))
-write(section)
-write("Prediction from Darwin's formula:\n")
-write('I0 = %g\n' % (I0))
-write('r_e^2 = %g\n' % (r_e ** 2))
-write('Ncells = %g\n' % (Ncells))
-write('<|F|^2> = %g\n' % (F2mean))
-write('lambda = %g\n' % (wavelength))
-write('Vcell = %g\n' % (cryst.V))
-write('------->>>>> I*re^2*<|F|^2>*(lambda/Vcell)^3 = %g <<<<<<-------\n' % (darwin))
-write(section)
 write("\n\nDone!\n\n")
 
 # The following is just for display purposes:
-if add_noise:
-    write('Displaying with noise\n')
-    I_display = I_noisy.copy()
-else:
-    write('Displaying **without** noise\n')
-    I_display = I_ideal.copy()
+# Most likely the display settings are wrong... difficult to guess at this...
+if qtview or mplview or skview:
 
-if overlay_wigner_cells:
-    hkl = cryst.O.dot(R).dot(q.T) / 2.0 / np.pi  # .dot(cryst.Oinv)
-    delta = hkl - np.round(hkl)
-    delta = np.sqrt(np.sum(delta ** 2, axis=0))
-    peak_mask = np.zeros((p.nF * p.nS))
-    peak_mask[delta < 0.5] = 1
-    I_display += peak_mask * 1e-2
+    if add_noise:
+        write('Displaying with noise\n')
+        I_display = I_noisy.copy()
+    else:
+        write('Displaying **without** noise\n')
+        I_display = I_ideal.copy()
 
-if mask_direct_beam:
-    write('Masking direct beam\n')
-    I_display *= direct_beam_mask
+    if overlay_wigner_cells:
+        hkl = cryst.O.dot(R).dot(q.T) / 2.0 / np.pi  # .dot(cryst.Oinv)
+        delta = hkl - np.round(hkl)
+        delta = np.sqrt(np.sum(delta ** 2, axis=0))
+        peak_mask = np.zeros((p.nF * p.nS))
+        peak_mask[delta < 0.5] = 1
+        I_display += peak_mask * 1e-2
 
-write('Taking log10 of simulated intensities\n')
-I_display = np.log10(I_display + 1e-20)
-I_display = I_display.reshape((p.nS, p.nF))
+    if mask_direct_beam:
+        write('Masking direct beam\n')
+        I_display *= direct_beam_mask
 
-if qtview:
-    img = pg.image(I_display, autoLevels=False, levels=[-0.4, np.log10(10)],
-                   title='log10(I); %.1f micron; %.2f mrad; %.1f%% BW; ' %
-                         (beam_diameter * 1e6, beam_divergence_fwhm * 1000, wavelength_fwhm / wavelength * 100))
-    if __name__ == '__main__':
-        if sys.flags.interactive != 1 or not hasattr(QtCore, 'PYQT_VERSION'):
-            pg.QtGui.QApplication.exec_()
-elif skview:
-    viewer = ImageViewer(I_display)
-    viewer.show()
-elif view:
-    plt.imshow(I_display, interpolation='nearest', cmap='gray', origin='lower')
-    plt.show()
+    write('Taking log10 of simulated intensities\n')
+    I_display = np.log10(I_display + 1e-20)
+    I_display = I_display.reshape((p.nS, p.nF))
+
+    if qtview:
+        img = pg.image(I_display, autoLevels=False, levels=[-0.4, np.log10(10)],
+                       title='log10(I); %.1f micron; %.2f mrad; %.1f%% BW; ' %
+                             (beam_diameter * 1e6, beam_divergence_fwhm * 1000, wavelength_fwhm / wavelength * 100))
+        if __name__ == '__main__':
+            if sys.flags.interactive != 1 or not hasattr(QtCore, 'PYQT_VERSION'):
+                pg.QtGui.QApplication.exec_()
+    elif skview:
+        viewer = ImageViewer(I_display)
+        viewer.show()
+    elif mplview:
+        plt.imshow(I_display, interpolation='nearest', cmap='gray', origin='lower')
+        plt.show()
+
