@@ -1,11 +1,11 @@
-bornagain.viewers package
-=========================
+bornagain\.viewers package
+==========================
 
 Submodules
 ----------
 
-bornagain.viewers.qtv module
-----------------------------
+bornagain\.viewers\.qtv module
+------------------------------
 
 .. automodule:: bornagain.viewers.qtv
     :members:

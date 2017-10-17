@@ -1,33 +1,31 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>bornagain.simulate.thorn &mdash; bornagain 0.0.1 documentation</title>
-    
+    <title>bornagain.simulate.thorn &#8212; bornagain 0.0.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
         VERSION:     '0.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -37,8 +35,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">bornagain 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -46,14 +44,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -70,26 +65,26 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pyopencl</span> <span class="kn">as</span> <span class="nn">cl</span>
-<span class="kn">import</span> <span class="nn">pyopencl.array</span> <span class="kn">as</span> <span class="nn">pycl_array</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyopencl</span> <span class="k">as</span> <span class="nn">cl</span>
+<span class="kn">import</span> <span class="nn">pyopencl.array</span> <span class="k">as</span> <span class="nn">pycl_array</span>
 
 
-<span class="kn">import</span> <span class="nn">bornagain</span> <span class="kn">as</span> <span class="nn">ba</span>
+<span class="kn">import</span> <span class="nn">bornagain</span> <span class="k">as</span> <span class="nn">ba</span>
 <span class="kn">import</span> <span class="nn">clcore</span>
 <span class="kn">import</span> <span class="nn">refdata</span>
 
 <span class="n">nextPow2</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">x</span><span class="p">))))</span>
 <span class="n">prevPow2</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">x</span><span class="p">))))</span>
 
-<div class="viewcode-block" id="make_q_vectors"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.make_q_vectors">[docs]</a><span class="k">def</span> <span class="nf">make_q_vectors</span><span class="p">(</span><span class="n">qmin</span><span class="p">,</span> <span class="n">qmax</span><span class="p">,</span> <span class="n">wavelen</span><span class="p">,</span> <span class="n">dq</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">dphi</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">pow2</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="make_q_vectors"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.make_q_vectors">[docs]</a><span class="k">def</span> <span class="nf">make_q_vectors</span><span class="p">(</span><span class="n">qmin</span><span class="p">,</span> <span class="n">qmax</span><span class="p">,</span> <span class="n">wavelen</span><span class="p">,</span> <span class="n">dq</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">dphi</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">pow2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="c1"># ~~~~~~~ your code goes here(below) ~~~~~~~~</span>
 
     <span class="n">Nphi</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">dphi</span><span class="p">)</span>
     <span class="n">Nq</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="p">(</span><span class="n">qmax</span> <span class="o">-</span> <span class="n">qmin</span><span class="p">)</span> <span class="o">/</span> <span class="n">dq</span><span class="p">)</span>
 
    
-    <span class="k">if</span> <span class="n">pow2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span> 
+    <span class="k">if</span> <span class="n">pow2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
         <span class="k">assert</span> <span class="p">(</span><span class="n">pow2</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;prev&#39;</span><span class="p">,</span><span class="s1">&#39;next&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">pow2</span> <span class="o">==</span> <span class="s1">&#39;prev&#39;</span><span class="p">:</span>
             <span class="n">Nphi</span> <span class="o">=</span> <span class="n">prevPow2</span><span class="p">(</span><span class="n">Nphi</span><span class="p">)</span>
@@ -114,17 +109,17 @@
 <span class="c1"># ~~~~~~ your code ends here ~~~~~~~~</span>
 
     <span class="n">qxyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">qx</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">qy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">qz</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span><span class="o">.</span><span class="n">T</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">simulating into </span><span class="si">%d</span><span class="s2"> q vectors.&quot;</span> <span class="o">%</span> <span class="n">qxyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">simulating into </span><span class="si">%d</span><span class="s2"> q vectors.&quot;</span> <span class="o">%</span> <span class="n">qxyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">img_sh</span><span class="p">,</span> <span class="n">qxyz</span></div>
 
 
 <div class="viewcode-block" id="ThornAgain"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain">[docs]</a><span class="k">class</span> <span class="nc">ThornAgain</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_vecs</span><span class="p">,</span> <span class="n">atom_vecs</span><span class="p">,</span> <span class="n">atomic_nums</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> 
-        <span class="n">group_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">cpu</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">sub_com</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_vecs</span><span class="p">,</span> <span class="n">atom_vecs</span><span class="p">,</span> <span class="n">atomic_nums</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> 
+        <span class="n">group_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">cpu</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sub_com</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         
         <span class="k">assert</span><span class="p">(</span> <span class="n">which</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">,</span><span class="s1">&#39;kam&#39;</span><span class="p">])</span>
        
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BORNAGAIN_CL_GROUPSIZE&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BORNAGAIN_CL_GROUPSIZE&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">=</span> <span class="n">group_size</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BORNAGAIN_CL_GROUPSIZE&#39;</span><span class="p">))</span>
@@ -163,9 +158,9 @@
 <span class="sd">        If the group size exceeds the max allowed group size, then make it</span>
 <span class="sd">        smaller (but print warning)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BORNAGAIN_CL_GROUPSIZE&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BORNAGAIN_CL_GROUPSIZE&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">group_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BORNAGAIN_CL_GROUPSIZE&#39;</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">group_size</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">group_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">group_size</span> <span class="o">=</span> <span class="mi">32</span>
         <span class="n">max_group_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">max_work_group_size</span>
         <span class="k">if</span> <span class="n">group_size</span> <span class="o">&gt;</span> <span class="n">max_group_size</span><span class="p">:</span>
@@ -178,7 +173,7 @@
     
 
     <span class="k">def</span> <span class="nf">_make_croman_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_nums</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_nums</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">form_facts_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nato</span><span class="p">)</span>  <span class="c1"># , dtype=np.int32)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Nspecies</span> <span class="o">=</span> <span class="mi">1</span>
@@ -201,11 +196,11 @@
         <span class="c1">#^ this assertion is so we can pass inputs to GPU as a float16, 3 q vectors and 13 atom species</span>
         <span class="c1"># where one is reserved to be a dummie </span>
 
-    <span class="k">def</span> <span class="nf">_setup_openCL</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plat_ind</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setup_openCL</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plat_ind</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">platforms</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">get_platforms</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">platforms</span><span class="p">)</span> <span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">plat_ind</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Provide a plat_ind to select compute platform&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">platforms</span><span class="p">)</span> <span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">plat_ind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Provide a plat_ind to select compute platform&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">platforms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">plat_ind</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span><span class="p">:</span>
@@ -216,26 +211,26 @@
         <span class="n">my_devices</span> <span class="o">=</span> <span class="n">platforms</span><span class="p">[</span><span class="n">plat_ind</span><span class="p">]</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span>
             <span class="n">device_type</span><span class="o">=</span><span class="n">device_type</span><span class="p">)</span>
     
-        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Using device:&quot;</span><span class="p">,</span><span class="n">my_devices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span> 
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Using device:&quot;</span><span class="p">,</span><span class="n">my_devices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span> 
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">my_devices</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;No devices selected&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No devices selected&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">Context</span><span class="p">(</span><span class="n">devices</span><span class="o">=</span><span class="n">my_devices</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">CommandQueue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="ThornAgain.load_program"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.load_program">[docs]</a>    <span class="k">def</span> <span class="nf">load_program</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">which</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">which</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_prg</span><span class="o">.</span><span class="n">qrf_default</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prg</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">(</span>
-                <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>  <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">])</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>  <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_prime_buffers_default</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">which</span><span class="o">==</span><span class="s1">&#39;kam&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_prg</span><span class="o">.</span><span class="n">qrf_kam</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prg</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">(</span>
-                <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">])</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_prime_buffers_kam</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_prime_buffers_kam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -271,7 +266,7 @@
 <span class="sd">        to make a 4-vector for openCL device&quot;&quot;&quot;</span>
 <span class="c1">#       combine atom vectors and atom IDs (species IDs)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
-            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">ClCore</span><span class="o">.</span><span class="n">to_device_static</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
     
@@ -314,14 +309,14 @@
                          <span class="bp">self</span><span class="o">.</span><span class="n">q_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                          <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span><span class="p">]</span>
 
-<div class="viewcode-block" id="ThornAgain.update_rbuff"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.update_rbuff">[docs]</a>    <span class="k">def</span> <span class="nf">update_rbuff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_atoms</span><span class="p">,</span> <span class="n">new_z</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ThornAgain.update_rbuff"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.update_rbuff">[docs]</a>    <span class="k">def</span> <span class="nf">update_rbuff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_atoms</span><span class="p">,</span> <span class="n">new_z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        new_atoms, float Nx3 of atoms</span>
 <span class="sd">        new_z, float Nx1 atomic numbers</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">na</span> <span class="o">=</span> <span class="n">new_atoms</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span> <span class="o">=</span>  <span class="n">new_atoms</span>
-        <span class="k">if</span> <span class="n">new_z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">new_z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">assert</span><span class="p">(</span> <span class="n">new_z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">na</span><span class="p">)</span>
             <span class="k">assert</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span> <span class="p">[</span><span class="n">z</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_id_lookup</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">new_z</span><span class="p">)]))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_id_lookup</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">new_z</span><span class="p">])</span>
@@ -346,7 +341,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span><span class="o">.</span><span class="n">data</span> 
 
-<div class="viewcode-block" id="ThornAgain.run_transient"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.run_transient">[docs]</a>    <span class="k">def</span> <span class="nf">run_transient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rand_rot</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ThornAgain.run_transient"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.run_transient">[docs]</a>    <span class="k">def</span> <span class="nf">run_transient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rand_rot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         
 <span class="c1">#       set the rotation</span>
         <span class="k">if</span> <span class="n">rand_rot</span><span class="p">:</span>
@@ -354,31 +349,31 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">force_rot_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">force_rot_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">force_rot_mat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_rand_rot</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">com</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">com</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span> <span class="o">=</span> <span class="n">com</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_com_vec</span><span class="p">()</span>
 
 <span class="c1">#       run the program</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prg</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ThornAgain.run"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rand_rot</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ThornAgain.run"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rand_rot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="c1">#       set the rotation</span>
         <span class="k">if</span> <span class="n">rand_rot</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">random_rotation_matrix</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">force_rot_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">force_rot_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">force_rot_mat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_rand_rot</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">com</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">com</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span> <span class="o">=</span> <span class="n">com</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_com_vec</span><span class="p">()</span>
     
@@ -416,15 +411,15 @@
     <span class="n">coors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span> <span class="p">(</span><span class="n">natom</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="p">)</span>
     <span class="n">atomZ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">natom</span><span class="p">)</span>
     <span class="n">D</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">SimpleDetector</span><span class="p">(</span><span class="n">n_pixels</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span> 
-    <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Simulating into </span><span class="si">%d</span><span class="s2"> pixels&quot;</span><span class="o">%</span><span class="n">D</span><span class="o">.</span><span class="n">Q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="n">ThornAgain</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="n">coors</span><span class="p">,</span> <span class="n">atomZ</span><span class="p">,</span> <span class="n">cpu</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Simulating into </span><span class="si">%d</span><span class="s2"> pixels&quot;</span><span class="o">%</span><span class="n">D</span><span class="o">.</span><span class="n">Q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">ThornAgain</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="n">coors</span><span class="p">,</span> <span class="n">atomZ</span><span class="p">,</span> <span class="n">cpu</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rand_rot</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">I</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">readout</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
     <span class="n">D</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
 
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Passed testing mode!&quot;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed testing mode!&quot;</span><span class="p">)</span></div>
 
-<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">test</span><span class="p">()</span>
 
 
@@ -445,13 +440,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">bornagain 0.0.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">bornagain 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2017, Richard A Kirian.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+        &#169; Copyright 2017, Richard A Kirian.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

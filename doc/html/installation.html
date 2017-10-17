@@ -1,34 +1,33 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Installation &mdash; bornagain 0.0.1 documentation</title>
-    
+    <title>Installation &#8212; bornagain 0.0.1 documentation</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
         VERSION:     '0.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain package" href="bornagain.html" />
     <link rel="prev" title="Overview" href="overview.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -44,7 +43,7 @@
         <li class="right" >
           <a href="overview.html" title="Overview"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -52,9 +51,10 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#pure-anaconda-python">Pure Anaconda Python</a></li>
 <li><a class="reference internal" href="#using-anaconda-and-pip">Using Anaconda and pip</a></li>
-<li><a class="reference internal" href="#case-studies-in-dependency-madness">Case studies in dependency madness</a></li>
-<li><a class="reference internal" href="#extra-dependencies-for-building-the-documentation">Extra dependencies for building the documentation</a></li>
+<li><a class="reference internal" href="#installation-on-scientific-linux-6">Installation on Scientific Linux 6</a></li>
+<li><a class="reference internal" href="#system-wide-installation">System-wide installation</a></li>
 </ul>
 </li>
 </ul>
@@ -68,21 +68,18 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/installation.txt"
+      <li><a href="_sources/installation.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -95,27 +92,39 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>So far there is no installation scripts.  We&#8217;re not at that stage yet.  For now, just add bornagain to your python path:</p>
+<p>So far there is no installation scripts.  We’re not at that stage yet.  For now, just add bornagain to your python path:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;../foo/bar&quot;</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;../foo/bar/bornagain&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+<div class="section" id="pure-anaconda-python">
+<h2>Pure Anaconda Python<a class="headerlink" href="#pure-anaconda-python" title="Permalink to this headline">¶</a></h2>
+<p>To keep the installation as painless as possible, you should probably use the <a class="reference external" href="https://anaconda.org">Anaconda</a> Python 2.7 distribution.  On a clean installation the following sometimes works:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>conda install h5py                     <span class="c1"># Optional for file writing</span>
+conda install <span class="nv">pyqt</span><span class="o">=</span><span class="m">4</span>                   <span class="c1"># Optional for viewing</span>
+conda install pyqtgraph                <span class="c1"># Optional for viewing</span>
+conda install -c conda-forge pyopencl  <span class="c1"># Optional for simulations</span>
+conda install sphinx                   <span class="c1"># Optional for building documentation</span>
+</pre></div>
+</div>
+<p>Notably, pyqtgraph seems not to work well with pyqt5, so you will need to force pyqt4 as in the above.  I’ve noticed a lot of dependency madness with Anaconda (cases in which installing one package breaks another) so it is probably most reasonable to create an environment for bornagain:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>conda create --name bornagain
+<span class="nb">source</span> activate bornagain
+</pre></div>
+</div>
+<p>The above will be fine if you wish to use bornagain in isolation.</p>
 </div>
 <div class="section" id="using-anaconda-and-pip">
 <h2>Using Anaconda and pip<a class="headerlink" href="#using-anaconda-and-pip" title="Permalink to this headline">¶</a></h2>
-<p>To keep the installation as painless as possible, you should probably use the <a class="reference external" href="https://anaconda.org">Anaconda</a> Python 2.7 distribution.  The dependencies below assume that <cite>numpy</cite> and other popular scientific modules are available.</p>
-<p>For running GPU simulations you need to install <cite>pyopencl</cite>:</p>
+<p>Another option is to use <cite>pip</cite>.  For example, the following has worked in the past:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>pip install pyopencl
+pip install pyqtgraph
 </pre></div>
 </div>
-<p>For displaying data you need to install <cite>pyqtgraph</cite>:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install pyqtgraph
-</pre></div>
 </div>
-<p>The above seems to work well on Apple computers, so far.</p>
-</div>
-<div class="section" id="case-studies-in-dependency-madness">
-<h2>Case studies in dependency madness<a class="headerlink" href="#case-studies-in-dependency-madness" title="Permalink to this headline">¶</a></h2>
-<p>Scientific Linux 6 (SL6) sucks.  Never use this Linux distribution.  It is supposed to be stable, but therefore has very old versions of many key libraries such as gcc.  To install <cite>pyopencl</cite> on SL6 I downloaded the pyopencl-2016.2.1 source, and then from within the directory I did the following:</p>
+<div class="section" id="installation-on-scientific-linux-6">
+<h2>Installation on Scientific Linux 6<a class="headerlink" href="#installation-on-scientific-linux-6" title="Permalink to this headline">¶</a></h2>
+<p>To install <cite>pyopencl</cite> on SL6 I found it necessary to download the pyopencl-2016.2.1 source, and then from within the directory I did something along these lines:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
 sudo yum install devtoolset-2
 scl <span class="nb">enable</span> devtoolset-2 bash
@@ -124,16 +133,9 @@ make install
 </pre></div>
 </div>
 </div>
-<div class="section" id="extra-dependencies-for-building-the-documentation">
-<h2>Extra dependencies for building the documentation<a class="headerlink" href="#extra-dependencies-for-building-the-documentation" title="Permalink to this headline">¶</a></h2>
-<p>This documentation is generated with <a class="reference external" href="http://www.sphinx-doc.org">Sphinx</a>. If you want to build the documentation for <cite>bornagain</cite>, then you need to install Sphinx:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install sphinx
-</pre></div>
-</div>
-<p>We also use the napoleon extension for converting Google-style docstrings:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install sphinxcontrib-napoleon
-</pre></div>
-</div>
+<div class="section" id="system-wide-installation">
+<h2>System-wide installation<a class="headerlink" href="#system-wide-installation" title="Permalink to this headline">¶</a></h2>
+<p>Currently, there are no install scripts that will put bornagain into your python installation.  There is no setup.py file and so on.  There are two reasons for this: (1) bornagain is totally experimental still, and (2) it actually makes a lot of sense to keep a local copy where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving code alongside results is good practice.</p>
 </div>
 </div>
 
@@ -158,12 +160,12 @@ make install
         <li class="right" >
           <a href="overview.html" title="Overview"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2017, Richard A Kirian.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+        &#169; Copyright 2017, Richard A Kirian.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

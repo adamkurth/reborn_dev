@@ -1,19 +1,19 @@
-bornagain.external package
-==========================
+bornagain\.external package
+===========================
 
 Submodules
 ----------
 
-bornagain.external.crystfel module
-----------------------------------
+bornagain\.external\.crystfel module
+------------------------------------
 
 .. automodule:: bornagain.external.crystfel
     :members:
     :undoc-members:
     :show-inheritance:
 
-bornagain.external.lcls module
-------------------------------
+bornagain\.external\.lcls module
+--------------------------------
 
 .. automodule:: bornagain.external.lcls
     :members:

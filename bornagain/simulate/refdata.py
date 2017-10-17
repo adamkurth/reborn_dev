@@ -34,12 +34,10 @@ def get_cromermann_parameters(atomic_numbers):
     Get cromer-mann parameters for each atom type
     
     Parameters
-    ----------
     atomic_numbers : ndarray, int
         A numpy array of the atomic numbers of each atom in the system.
         
     Returns
-    -------
     cromermann : dict
         The Cromer-Mann parameters for the system. The dictionary 
         key corresponds to the atomic number, and the parameters
@@ -66,7 +64,6 @@ def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
     types to 0, 1, 2, ... to point to their CM params.
     
     Parameters
-    ----------
     atomic_numbers : ndarray, int
         A numpy array of the atomic numbers of each atom in the system.
         
@@ -74,7 +71,6 @@ def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
         The maximium number of atom types allowable
     
     Returns
-    -------
     cromermann : c-array, float
         The Cromer-Mann parameters for the system. Positions [(0-8) * aid] are
         reserved for each atom type in the system (see `aid` below).

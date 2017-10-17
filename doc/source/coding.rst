@@ -19,7 +19,6 @@ Some things to consider before writing code:
 * Docstrings follow the `Google format <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/>`_.
 * Never create a function without a docstring.  At least note what the function does.
 
-
 Checking for PEP8 compliance
 ----------------------------
 
@@ -31,7 +30,7 @@ Use the `pep8` program to check for inconsistencies (install `pep8` with pip if 
     
 For simple errors like whitespace, you can use `autopep8`:
 
-.. code-block: bash
+.. code-block:: bash
 
     autopep8 -i -a filename.py
     
