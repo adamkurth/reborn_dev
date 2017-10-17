@@ -1,37 +1,52 @@
 Installation
 ============
 
-So far there is no installation scripts.  We're not at that stage yet.  For now, just add bornagain to your python path:
+System-wide installation
+------------------------
+
+Currently, there are no install that will automatically add bornagain to your python installation.  It makes a lot of sense to simply keep a local copy of bornagain where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving code alongside results is good practice.  You might need to add bornagain to your python path by doing something like this:
 
 .. code-block:: python
 
 	import sys
-	sys.path.append("../foo/bar")
+	sys.path.append("../example/path/to/bornagain")
 
+Pure Anaconda Python
+--------------------
+
+To keep the installation as painless as possible, you should probably use the `Anaconda <https://anaconda.org>`_ Python 2.7 distribution.  On a clean installation the following sometimes works:
+
+.. code-block:: bash
+
+	conda install h5py                     # Optional for file writing
+	conda install pyqt=4                   # Optional for viewing
+	conda install pyqtgraph                # Optional for viewing
+	conda install -c conda-forge pyopencl  # Optional for simulations
+	conda install sphinx                   # Optional for building documentation
+
+Notably, pyqtgraph seems not to work well with pyqt5, so you will need to force pyqt4 as in the above.  I've noticed a lot of dependency madness with Anaconda (cases in which installing one package breaks another) so it is probably most reasonable to create an environment for bornagain:
+
+.. code-block:: bash
+
+	conda create --name bornagain
+	source activate bornagain
+
+The above will be fine if you wish to use bornagain in isolation.  
 
 Using Anaconda and pip
 ----------------------
 
-To keep the installation as painless as possible, you should probably use the `Anaconda <https://anaconda.org>`_ Python 2.7 distribution.  The dependencies below assume that `numpy` and other popular scientific modules are available.
-
-For running GPU simulations you need to install `pyopencl`:
+Another option is to use `pip`.  For example, the following has worked in the past:
 
 .. code-block:: bash
 
     pip install pyopencl
-
-For displaying data you need to install `pyqtgraph`:
-
-.. code-block:: bash
-
     pip install pyqtgraph
-    
-The above seems to work well on Apple computers, so far.
 
-Case studies in dependency madness
+Installation on Scientific Linux 6
 ----------------------------------
 
-Scientific Linux 6 (SL6) sucks.  Never use this Linux distribution.  It is supposed to be stable, but therefore has very old versions of many key libraries such as gcc.  To install `pyopencl` on SL6 I downloaded the pyopencl-2016.2.1 source, and then from within the directory I did the following:
+To install `pyopencl` on SL6 I found it necessary to download the pyopencl-2016.2.1 source, and then from within the directory I did something along these lines:
 
 .. code-block:: bash
 
@@ -40,20 +55,4 @@ Scientific Linux 6 (SL6) sucks.  Never use this Linux distribution.  It is suppo
     scl enable devtoolset-2 bash
     ./configure.py --cl-inc-dir=/usr/local/cuda/include --cl-lib-dir=/usr/local/cuda/lib64
     make install
-    
-Extra dependencies for building the documentation
--------------------------------------------------
 
-This documentation is generated with `Sphinx <http://www.sphinx-doc.org>`_. If you want to build the documentation for `bornagain`, then you need to install Sphinx: 
-
-.. code-block:: bash
-
-    pip install sphinx
-    
-We also use the napoleon extension for converting Google-style docstrings:
-    
-.. code-block:: bash
-
-    pip install sphinxcontrib-napoleon
-    
-    

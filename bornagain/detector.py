@@ -1093,12 +1093,10 @@ class SimpleDetector(Panel):
         Given scattering amplitudes, this calculates the corresponding intensity values.
 
         Arguments
-            - amplitudes (complex np.ndarray)
-                scattering amplitudes same shape as `self.Q`
+            amplitudes (complex np.ndarray) : Scattering amplitudes same shape as `self.Q`
             
         Returns
-            - np.ndarray
-                Scattering intensities as a 2-D image.
+            np.ndarray : Scattering intensities as a 2-D image.
         """
         self.intens = (np.abs(amplitudes)**2).reshape(self.img_sh)
         return self.intens
@@ -1108,22 +1106,14 @@ class SimpleDetector(Panel):
         Get scattering intensities as a 2D image considering 
         finite scattered photons
 
-        Arguments
-            - amplitudes (complex np.ndarray)
-                scattering amplitudes same shape as `self.Q`.
-        
-            - qmin (float)
-                minimum q to generate intensities
-        
-            - qmax (float)
-                maximum q to generate intenities
-        
-            - flux (float)
-                forward beam flux in Photons per square centimeter
+        Arguments:
+            amplitudes (complex np.ndarray) : Scattering amplitudes same shape as `self.Q`.
+            qmin (float) : Minimum q to generate intensities
+            qmax (float) : Maximum q to generate intenities
+            flux (float) : Forward beam flux in Photons per square centimeter
 
-        Returns
-            - np.ndarray
-                Scattering intensities as a 2-D image.
+        Returns:
+            np.ndarray : Scattering intensities as a 2-D image.
         """
         self.intens = (np.abs(amplitudes)**2).reshape(self.img_sh)
         struct_fact = (np.abs(amplitudes)**2).astype(np.float64)

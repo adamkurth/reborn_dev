@@ -1,19 +1,19 @@
-bornagain\.target package
-=========================
+bornagain.target package
+========================
 
 Submodules
 ----------
 
-bornagain\.target\.crystal module
----------------------------------
+bornagain.target.crystal module
+-------------------------------
 
 .. automodule:: bornagain.target.crystal
     :members:
     :undoc-members:
     :show-inheritance:
 
-bornagain\.target\.spgrp module
--------------------------------
+bornagain.target.spgrp module
+-----------------------------
 
 .. automodule:: bornagain.target.spgrp
     :members:

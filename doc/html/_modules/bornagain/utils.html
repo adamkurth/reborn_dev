@@ -1,76 +1,145 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>bornagain.utils &#8212; bornagain 0.0.1 documentation</title>
-    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
-  </head>
-  <body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">bornagain 0.0.1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
-      </ul>
-    </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.utils &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="../../index.html" class="fa fa-home"> bornagain</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
       </div>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../overview.html#some-basics">Some basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../overview.html#detectors">Detectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../overview.html#simulation">Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#system-wide-installation">System-wide installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#pure-anaconda-python">Pure Anaconda Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#using-anaconda-and-pip">Using Anaconda and pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation.html#installation-on-scientific-linux-6">Installation on Scientific Linux 6</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../bornagain.html">bornagain package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../bornagain.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bornagain.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bornagain.html#module-bornagain.detector">bornagain.detector module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bornagain.html#module-bornagain.scatter">bornagain.scatter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bornagain.html#module-bornagain.source">bornagain.source module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bornagain.html#module-bornagain.units">bornagain.units module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bornagain.html#module-bornagain.utils">bornagain.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bornagain.html#module-bornagain">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../coding.html">Coding guidlines for developers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../coding.html#overview-of-bornagain">Overview of bornagain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../coding.html#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../coding.html#generation-of-documentation">Generation of documentation</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">bornagain</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>bornagain.utils</li>
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
             
   <h1>Source code for bornagain.utils</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Some useful utility functions for bornagain.  Utilities pertaining to unit</span>
 <span class="sd">conversions will be removed.  There are some old functions here that will</span>
 <span class="sd">likely also be removed.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
 
-<span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="k">import</span> <span class="n">refdata</span>
+<span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="kn">import</span> <span class="n">refdata</span>
 
 
 <div class="viewcode-block" id="amplitudes_with_cmans"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.amplitudes_with_cmans">[docs]</a><span class="k">def</span> <span class="nf">amplitudes_with_cmans</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">Z</span><span class="p">):</span>
@@ -86,11 +155,11 @@
     <span class="n">form_facts</span> <span class="o">=</span> <span class="n">refdata</span><span class="o">.</span><span class="n">get_cmann_form_factors</span><span class="p">(</span><span class="n">cman</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
     <span class="n">ff_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">form_facts</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">Z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="n">amps</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">T</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="n">amps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">amps</span><span class="p">)</span> <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+    <span class="n">amps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">amps</span><span class="p">)</span> <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
     <span class="n">amps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">amps</span> <span class="o">*</span> <span class="n">ff_mat</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">amps</span></div>
+    <span class="k">return</span> <span class="n">amps</span>
 
-
+</div>
 <div class="viewcode-block" id="amplitudes"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.amplitudes">[docs]</a><span class="k">def</span> <span class="nf">amplitudes</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    compute scattering amplitudes without form factors</span>
@@ -99,20 +168,20 @@
 <span class="sd">    r: 2D np.array of atom coors</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">amps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-    <span class="n">amps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">amps</span><span class="p">)</span>
+    <span class="n">amps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">amps</span><span class="p">)</span>
     <span class="n">amps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">amps</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">amps</span></div>
+    <span class="k">return</span> <span class="n">amps</span>
 
-
+</div>
 <div class="viewcode-block" id="sphericalize"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.sphericalize">[docs]</a><span class="k">def</span> <span class="nf">sphericalize</span><span class="p">(</span><span class="n">lattice</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;attempt to sphericalize a 2D lattice point array&quot;&quot;&quot;</span>
     <span class="n">center</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">rads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">lattice</span> <span class="o">-</span> <span class="n">center</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="n">max_rad</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lattice</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.</span>
-    <span class="k">return</span> <span class="n">lattice</span><span class="p">[</span><span class="n">rads</span> <span class="o">&lt;</span> <span class="n">max_rad</span><span class="p">]</span></div>
+    <span class="k">return</span> <span class="n">lattice</span><span class="p">[</span><span class="n">rads</span> <span class="o">&lt;</span> <span class="n">max_rad</span><span class="p">]</span>
 
-
-<div class="viewcode-block" id="vec_check"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_check">[docs]</a><span class="k">def</span> <span class="nf">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">hardcheck</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="vec_check"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_check">[docs]</a><span class="k">def</span> <span class="nf">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">hardcheck</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Check that a vector meets our assumption of an Nx3 numpy array.  This is</span>
 <span class="sd">helpful, for example, when we want to ensure that dot products and broadcasting</span>
@@ -133,13 +202,13 @@
 <span class="sd">return a modified numpy ndarray with the correct shape.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">hardcheck</span><span class="p">:</span>  <span class="c1"># Raise an error if the input isn&#39;t perfect</span>
+    <span class="k">if</span> <span class="n">hardcheck</span><span class="p">:</span>  <span class="c"># Raise an error if the input isn&#39;t perfect</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">vec</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -147,149 +216,149 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">vec</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">vec</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span>
-    <span class="k">if</span> <span class="o">~</span><span class="n">vec</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;C_CONTIGUOUS&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="o">~</span><span class="n">vec</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s">&#39;C_CONTIGUOUS&#39;</span><span class="p">]:</span>
         <span class="n">vec</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="n">vec</span></div>
+    <span class="k">return</span> <span class="n">vec</span>
 
-
+</div>
 <div class="viewcode-block" id="vec_norm"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_norm">[docs]</a><span class="k">def</span> <span class="nf">vec_norm</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
 
     <span class="n">v</span> <span class="o">=</span> <span class="n">V</span>
     <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;V must have one or two dimensions.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;V must have one or two dimensions.&quot;</span><span class="p">)</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">V</span> <span class="o">*</span> <span class="n">V</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
-
+</div>
 <div class="viewcode-block" id="vec_mag"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_mag">[docs]</a><span class="k">def</span> <span class="nf">vec_mag</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">V</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;V must have one or two dimensions.&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">V</span> <span class="o">*</span> <span class="n">V</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;V must have one or two dimensions.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">V</span> <span class="o">*</span> <span class="n">V</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 
-
+</div>
 <div class="viewcode-block" id="warn"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.warn">[docs]</a><span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Simple warning message &quot;&quot;&quot;</span>
 
-    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;WARNING: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span></div>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;WARNING: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span>
 
-
+</div>
 <div class="viewcode-block" id="error"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.error">[docs]</a><span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Simple error message (to be replaced later...) &quot;&quot;&quot;</span>
 
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ERROR: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span></div>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;ERROR: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span>
 
 
 
-<span class="c1"># def axisAndAngleToMatrix(axis, angle):</span>
-<span class="c1">#     &quot;&quot;&quot;Generate the rotation matrix from the axis-angle notation.</span>
-<span class="c1">#</span>
-<span class="c1">#     Conversion equations</span>
-<span class="c1">#     ====================</span>
-<span class="c1">#</span>
-<span class="c1">#     From Wikipedia (http://en.wikipedia.org/wiki/Rotation_matrix),</span>
-<span class="c1">#     the conversion is given by::</span>
-<span class="c1">#</span>
-<span class="c1">#         c = cos(angle); s = sin(angle); C = 1-c</span>
-<span class="c1">#         xs = x*s;   ys = y*s;   zs = z*s</span>
-<span class="c1">#         xC = x*C;   yC = y*C;   zC = z*C</span>
-<span class="c1">#         xyC = x*yC; yzC = y*zC; zxC = z*xC</span>
-<span class="c1">#         [ x*xC+c   xyC-zs   zxC+ys ]</span>
-<span class="c1">#         [ xyC+zs   y*yC+c   yzC-xs ]</span>
-<span class="c1">#         [ zxC-ys   yzC+xs   z*zC+c ]</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#     @param matrix:  The 3x3 rotation matrix to update.</span>
-<span class="c1">#     @type matrix:   3x3 numpy array</span>
-<span class="c1">#     @param axis:    The 3D rotation axis.</span>
-<span class="c1">#     @type axis:     numpy array, len 3</span>
-<span class="c1">#     @param angle:   The rotation angle.</span>
-<span class="c1">#     @type angle:    float</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#</span>
-<span class="c1">#     # Trig factors.</span>
-<span class="c1">#     ca = np.cos(angle)</span>
-<span class="c1">#     sa = np.sin(angle)</span>
-<span class="c1">#     C = 1 - ca</span>
-<span class="c1">#</span>
-<span class="c1">#     # Depack the axis.</span>
-<span class="c1">#     a = axis.ravel()</span>
-<span class="c1">#     x = a[0]</span>
-<span class="c1">#     y = a[1]</span>
-<span class="c1">#     z = a[2]</span>
-<span class="c1"># #     x, y, z = axis</span>
-<span class="c1">#</span>
-<span class="c1">#     # Multiplications (to remove duplicate calculations).</span>
-<span class="c1">#     xs = x * sa</span>
-<span class="c1">#     ys = y * sa</span>
-<span class="c1">#     zs = z * sa</span>
-<span class="c1">#     xC = x * C</span>
-<span class="c1">#     yC = y * C</span>
-<span class="c1">#     zC = z * C</span>
-<span class="c1">#     xyC = x * yC</span>
-<span class="c1">#     yzC = y * zC</span>
-<span class="c1">#     zxC = z * xC</span>
-<span class="c1">#</span>
-<span class="c1">#     matrix = np.zeros([3, 3])</span>
-<span class="c1">#</span>
-<span class="c1">#     # Update the rotation matrix.</span>
-<span class="c1">#     matrix[0, 0] = x * xC + ca</span>
-<span class="c1">#     matrix[0, 1] = xyC - zs</span>
-<span class="c1">#     matrix[0, 2] = zxC + ys</span>
-<span class="c1">#     matrix[1, 0] = xyC + zs</span>
-<span class="c1">#     matrix[1, 1] = y * yC + ca</span>
-<span class="c1">#     matrix[1, 2] = yzC - xs</span>
-<span class="c1">#     matrix[2, 0] = zxC - ys</span>
-<span class="c1">#     matrix[2, 1] = yzC + xs</span>
-<span class="c1">#     matrix[2, 2] = z * zC + ca</span>
-<span class="c1">#</span>
-<span class="c1">#     return matrix</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1"># class ScalarMonitor(object):</span>
-<span class="c1">#</span>
-<span class="c1">#     &quot;&quot;&quot; Class for monitoring a scalar for which we expect many observations.</span>
-<span class="c1">#         Array will grow as needed, and basic calculations can be done.&quot;&quot;&quot;</span>
-<span class="c1">#</span>
-<span class="c1">#     def __init__(self, size=1000):</span>
-<span class="c1">#</span>
-<span class="c1">#         self.idx = 0         # Current index of observation</span>
-<span class="c1">#         self.size = size     # Size of array</span>
-<span class="c1">#         self.data = np.zeros([size])  # Data array</span>
-<span class="c1">#         self.maxSize = 10e6  # Don&#39;t grow array larger than this</span>
-<span class="c1">#</span>
-<span class="c1">#     def append(self, value):</span>
-<span class="c1">#</span>
-<span class="c1">#         if (self.idx + 1) &gt; self.size:</span>
-<span class="c1">#             if (self.size * 2) &gt; self.maxSize:</span>
-<span class="c1">#                 print(&quot;Cannot grow array larger than %d&quot; % self.size * 2)</span>
-<span class="c1">#                 return None</span>
-<span class="c1">#             self.data = np.concatenate([self.data, np.zeros([self.size])])</span>
-<span class="c1">#             self.size = self.data.shape[0]</span>
-<span class="c1">#         self.data[self.idx] = value</span>
-<span class="c1">#         self.idx += 1</span>
-<span class="c1">#</span>
-<span class="c1">#     def getData(self):</span>
-<span class="c1">#</span>
-<span class="c1">#         return self.data[0:self.idx]</span>
-<span class="c1">#</span>
-<span class="c1">#     def getMean(self):</span>
-<span class="c1">#</span>
-<span class="c1">#         return np.mean(self.getData())</span>
-<span class="c1">#</span>
-<span class="c1">#     def getStd(self):</span>
-<span class="c1">#</span>
-<span class="c1">#         return np.std(self.getData())</span>
+<span class="c"># def axisAndAngleToMatrix(axis, angle):</span>
+<span class="c">#     &quot;&quot;&quot;Generate the rotation matrix from the axis-angle notation.</span>
+<span class="c">#</span>
+<span class="c">#     Conversion equations</span>
+<span class="c">#     ====================</span>
+<span class="c">#</span>
+<span class="c">#     From Wikipedia (http://en.wikipedia.org/wiki/Rotation_matrix),</span>
+<span class="c">#     the conversion is given by::</span>
+<span class="c">#</span>
+<span class="c">#         c = cos(angle); s = sin(angle); C = 1-c</span>
+<span class="c">#         xs = x*s;   ys = y*s;   zs = z*s</span>
+<span class="c">#         xC = x*C;   yC = y*C;   zC = z*C</span>
+<span class="c">#         xyC = x*yC; yzC = y*zC; zxC = z*xC</span>
+<span class="c">#         [ x*xC+c   xyC-zs   zxC+ys ]</span>
+<span class="c">#         [ xyC+zs   y*yC+c   yzC-xs ]</span>
+<span class="c">#         [ zxC-ys   yzC+xs   z*zC+c ]</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#     @param matrix:  The 3x3 rotation matrix to update.</span>
+<span class="c">#     @type matrix:   3x3 numpy array</span>
+<span class="c">#     @param axis:    The 3D rotation axis.</span>
+<span class="c">#     @type axis:     numpy array, len 3</span>
+<span class="c">#     @param angle:   The rotation angle.</span>
+<span class="c">#     @type angle:    float</span>
+<span class="c">#     &quot;&quot;&quot;</span>
+<span class="c">#</span>
+<span class="c">#     # Trig factors.</span>
+<span class="c">#     ca = np.cos(angle)</span>
+<span class="c">#     sa = np.sin(angle)</span>
+<span class="c">#     C = 1 - ca</span>
+<span class="c">#</span>
+<span class="c">#     # Depack the axis.</span>
+<span class="c">#     a = axis.ravel()</span>
+<span class="c">#     x = a[0]</span>
+<span class="c">#     y = a[1]</span>
+<span class="c">#     z = a[2]</span>
+<span class="c"># #     x, y, z = axis</span>
+<span class="c">#</span>
+<span class="c">#     # Multiplications (to remove duplicate calculations).</span>
+<span class="c">#     xs = x * sa</span>
+<span class="c">#     ys = y * sa</span>
+<span class="c">#     zs = z * sa</span>
+<span class="c">#     xC = x * C</span>
+<span class="c">#     yC = y * C</span>
+<span class="c">#     zC = z * C</span>
+<span class="c">#     xyC = x * yC</span>
+<span class="c">#     yzC = y * zC</span>
+<span class="c">#     zxC = z * xC</span>
+<span class="c">#</span>
+<span class="c">#     matrix = np.zeros([3, 3])</span>
+<span class="c">#</span>
+<span class="c">#     # Update the rotation matrix.</span>
+<span class="c">#     matrix[0, 0] = x * xC + ca</span>
+<span class="c">#     matrix[0, 1] = xyC - zs</span>
+<span class="c">#     matrix[0, 2] = zxC + ys</span>
+<span class="c">#     matrix[1, 0] = xyC + zs</span>
+<span class="c">#     matrix[1, 1] = y * yC + ca</span>
+<span class="c">#     matrix[1, 2] = yzC - xs</span>
+<span class="c">#     matrix[2, 0] = zxC - ys</span>
+<span class="c">#     matrix[2, 1] = yzC + xs</span>
+<span class="c">#     matrix[2, 2] = z * zC + ca</span>
+<span class="c">#</span>
+<span class="c">#     return matrix</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c"># class ScalarMonitor(object):</span>
+<span class="c">#</span>
+<span class="c">#     &quot;&quot;&quot; Class for monitoring a scalar for which we expect many observations.</span>
+<span class="c">#         Array will grow as needed, and basic calculations can be done.&quot;&quot;&quot;</span>
+<span class="c">#</span>
+<span class="c">#     def __init__(self, size=1000):</span>
+<span class="c">#</span>
+<span class="c">#         self.idx = 0         # Current index of observation</span>
+<span class="c">#         self.size = size     # Size of array</span>
+<span class="c">#         self.data = np.zeros([size])  # Data array</span>
+<span class="c">#         self.maxSize = 10e6  # Don&#39;t grow array larger than this</span>
+<span class="c">#</span>
+<span class="c">#     def append(self, value):</span>
+<span class="c">#</span>
+<span class="c">#         if (self.idx + 1) &gt; self.size:</span>
+<span class="c">#             if (self.size * 2) &gt; self.maxSize:</span>
+<span class="c">#                 print(&quot;Cannot grow array larger than %d&quot; % self.size * 2)</span>
+<span class="c">#                 return None</span>
+<span class="c">#             self.data = np.concatenate([self.data, np.zeros([self.size])])</span>
+<span class="c">#             self.size = self.data.shape[0]</span>
+<span class="c">#         self.data[self.idx] = value</span>
+<span class="c">#         self.idx += 1</span>
+<span class="c">#</span>
+<span class="c">#     def getData(self):</span>
+<span class="c">#</span>
+<span class="c">#         return self.data[0:self.idx]</span>
+<span class="c">#</span>
+<span class="c">#     def getMean(self):</span>
+<span class="c">#</span>
+<span class="c">#         return np.mean(self.getData())</span>
+<span class="c">#</span>
+<span class="c">#     def getStd(self):</span>
+<span class="c">#</span>
+<span class="c">#         return np.std(self.getData())</span>
 
-
-<div class="viewcode-block" id="random_rotation"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.random_rotation">[docs]</a><span class="k">def</span> <span class="nf">random_rotation</span><span class="p">(</span><span class="n">deflection</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">randnums</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="random_rotation"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.random_rotation">[docs]</a><span class="k">def</span> <span class="nf">random_rotation</span><span class="p">(</span><span class="n">deflection</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">randnums</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a random rotation matrix.</span>
 
@@ -297,23 +366,23 @@
 <span class="sd">    rotation. Small deflection =&gt; small perturbation.</span>
 <span class="sd">    randnums: 3 random numbers in the range [0, 1]. If `None`, they will be auto-generated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># from</span>
-    <span class="c1"># http://www.realtimerendering.com/resources/GraphicsGems/gemsiii/rand_rotation.c</span>
+    <span class="c"># from</span>
+    <span class="c"># http://www.realtimerendering.com/resources/GraphicsGems/gemsiii/rand_rotation.c</span>
 
-    <span class="k">if</span> <span class="n">randnums</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">randnums</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">randnums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,))</span>
 
     <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">randnums</span>
 
-    <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">deflection</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>  <span class="c1"># Rotation about the pole (Z).</span>
-    <span class="n">phi</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>  <span class="c1"># For direction of pole deflection.</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">deflection</span>  <span class="c1"># For magnitude of pole deflection.</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">deflection</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>  <span class="c"># Rotation about the pole (Z).</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>  <span class="c"># For direction of pole deflection.</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">deflection</span>  <span class="c"># For magnitude of pole deflection.</span>
 
-    <span class="c1"># Compute a vector V used for distributing points over the sphere</span>
-    <span class="c1"># via the reflection I - V Transpose(V).  This formulation of V</span>
-    <span class="c1"># will guarantee that if x[1] and x[2] are uniformly distributed,</span>
-    <span class="c1"># the reflected points will be uniform on the sphere.  Note that V</span>
-    <span class="c1"># has length sqrt(2) to eliminate the 2 in the Householder matrix.</span>
+    <span class="c"># Compute a vector V used for distributing points over the sphere</span>
+    <span class="c"># via the reflection I - V Transpose(V).  This formulation of V</span>
+    <span class="c"># will guarantee that if x[1] and x[2] are uniformly distributed,</span>
+    <span class="c"># the reflected points will be uniform on the sphere.  Note that V</span>
+    <span class="c"># has length sqrt(2) to eliminate the 2 in the Householder matrix.</span>
 
     <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
     <span class="n">V</span> <span class="o">=</span> <span class="p">(</span>
@@ -327,12 +396,12 @@
 
     <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(((</span><span class="n">ct</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="n">st</span><span class="p">,</span> <span class="n">ct</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
 
-    <span class="c1"># Construct the rotation matrix  ( V Transpose(V) - I ) R.</span>
+    <span class="c"># Construct the rotation matrix  ( V Transpose(V) - I ) R.</span>
 
     <span class="n">M</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">M</span></div>
+    <span class="k">return</span> <span class="n">M</span>
 
-
+</div>
 <div class="viewcode-block" id="rotation_about_axis"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.rotation_about_axis">[docs]</a><span class="k">def</span> <span class="nf">rotation_about_axis</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
@@ -342,9 +411,9 @@
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)),</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
                      <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)),</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
-                     <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))]])</span></div>
+                     <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))]])</span>
 
-
+</div>
 <div class="viewcode-block" id="random_beam_vector"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.random_beam_vector">[docs]</a><span class="k">def</span> <span class="nf">random_beam_vector</span><span class="p">(</span><span class="n">div_fwhm</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
@@ -358,25 +427,25 @@
 <span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Don&#39;t do anything if no divergence</span>
+    <span class="c"># Don&#39;t do anything if no divergence</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">div_fwhm</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">B</span>
 
-    <span class="c1"># First rotate around the x axis with Gaussian prob. dist.</span>
+    <span class="c"># First rotate around the x axis with Gaussian prob. dist.</span>
     <span class="n">sig</span> <span class="o">=</span> <span class="n">div_fwhm</span><span class="o">/</span><span class="mf">2.354820045</span>
     <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">sig</span><span class="p">,[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">Rtheta</span> <span class="o">=</span> <span class="n">rotation_about_axis</span><span class="p">(</span><span class="n">theta</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Rtheta</span><span class="p">,</span><span class="n">B</span><span class="p">)</span>
 
-    <span class="c1"># Next rotate around z axis with uniform dist [0,2*pi)</span>
+    <span class="c"># Next rotate around z axis with uniform dist [0,2*pi)</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
     <span class="n">Rphi</span> <span class="o">=</span> <span class="n">rotation_about_axis</span><span class="p">(</span><span class="n">phi</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">])</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Rphi</span><span class="p">,</span><span class="n">B</span><span class="p">)</span>
     <span class="n">B</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">B</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">B</span></div>
-
+    <span class="k">return</span> <span class="n">B</span>
+</div>
 <div class="viewcode-block" id="random_mosaic_rotation"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.random_mosaic_rotation">[docs]</a><span class="k">def</span> <span class="nf">random_mosaic_rotation</span><span class="p">(</span><span class="n">mosaicity_fwhm</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
@@ -400,26 +469,60 @@
 </pre></div>
 
           </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">bornagain 0.0.1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2017, Richard A Kirian.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

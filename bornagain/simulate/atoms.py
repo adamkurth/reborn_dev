@@ -80,21 +80,21 @@ Returns:
 @memoize
 def get_henke_data(atomic_number):
     """
-Load Henke scattering factor data from disk, cache for future retrieval. The
-Henke data was gathered from the Center for X-Ray Optics web page at the
-Lawrence Berkeley National Laboratory.  There is a publication with details
-(reference to be added).
+    Load Henke scattering factor data from disk, cache for future retrieval. The
+    Henke data was gathered from the Center for X-Ray Optics web page at the
+    Lawrence Berkeley National Laboratory.  There is a publication with details
+    (reference to be added).
 
-Arguments:
-    atomic_number (int): The atomic number of interest
+    Arguments:
+        atomic_number (int): You guessed it!
 
-Returns:
-    data (dictionary): A dictionary with the following fields 
-        'Atomic Number' -- Atomic number of the element
-        'Element Symbol' -- Standard element symbol (e.g. He)
-        'Photon Energy' -- A numpy array of photon energies (SI units)
-        'Scatter Factor' -- A numpy array of complex atomic scattering factors 
-        that correspond to the photon energies above.
+    Returns:
+        dict : A dictionary with the following fields
+            'Atomic Number' -- Atomic number of the element
+            'Element Symbol' -- Standard element symbol (e.g. He)
+            'Photon Energy' -- A numpy array of photon energies (SI units)
+            'Scatter Factor' -- A numpy array of complex atomic scattering factors that correspond to the photon
+            energies above.
     """
 
     sym = atomic_numbers_to_symbols(atomic_number)

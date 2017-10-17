@@ -1,93 +1,133 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Overview &#8212; bornagain 0.0.1 documentation</title>
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="installation.html" />
-    <link rel="prev" title="bornagain’s documentation" href="index.html" /> 
-  </head>
-  <body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="installation.html" title="Installation"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="bornagain’s documentation"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &#187;</li> 
-      </ul>
-    </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Overview</a><ul>
-<li><a class="reference internal" href="#some-basics">Some basics</a></li>
-<li><a class="reference internal" href="#detectors">Detectors</a></li>
-<li><a class="reference internal" href="#simulation">Simulation</a></li>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Overview &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
+        <link rel="next" title="Installation" href="installation.html"/>
+        <link rel="prev" title="bornagain’s documentation" href="index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> bornagain</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#some-basics">Some basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#detectors">Detectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simulation">Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#system-wide-installation">System-wide installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#pure-anaconda-python">Pure Anaconda Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#using-anaconda-and-pip">Using Anaconda and pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-on-scientific-linux-6">Installation on Scientific Linux 6</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.html">bornagain package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.detector">bornagain.detector module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.scatter">bornagain.scatter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.source">bornagain.source module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.units">bornagain.units module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.utils">bornagain.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="coding.html#overview-of-bornagain">Overview of bornagain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coding.html#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coding.html#generation-of-documentation">Generation of documentation</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">bornagain’s documentation</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="installation.html"
-                        title="next chapter">Installation</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/overview.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
+          
+        
       </div>
+      &nbsp;
+    </nav>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">bornagain</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Overview</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/overview.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
             
   <div class="section" id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
@@ -105,24 +145,24 @@
 <div class="section" id="detectors">
 <h2>Detectors<a class="headerlink" href="#detectors" title="Permalink to this headline">¶</a></h2>
 <p>There are a few detectors that we might want to work with.  So far we only deal with polar and rectangular type detectors.</p>
-<p>The most commond detector is known as the “pixel-array detector”, or “PAD”, in the bornagain package.  This type of detector is assumed to consist of a 2D grid of pixels.  This grid is described by the following vectors:</p>
+<p>The most commond detector is known as the &#8220;pixel-array detector&#8221;, or &#8220;PAD&#8221;, in the bornagain package.  This type of detector is assumed to consist of a 2D grid of pixels.  This grid is described by the following vectors:</p>
 <blockquote>
 <div><p><span class="math">\(\vec{T}\)</span> is the vector pointing from the origin to the corner detector pixel that is first in memory.</p>
-<p><span class="math">\(\vec{F}\)</span> is the vector that points along the “fast-scan” direction.  This is the distance and direction that points to the next pixel that is adjacent in physical space as well as in computer memory.  The length of this vector indicates the pixel size.</p>
+<p><span class="math">\(\vec{F}\)</span> is the vector that points along the &#8220;fast-scan&#8221; direction.  This is the distance and direction that points to the next pixel that is adjacent in physical space as well as in computer memory.  The length of this vector indicates the pixel size.</p>
 <p><span class="math">\(N_F\)</span> is the number of fast-scan pixels in the detector.</p>
-<p><span class="math">\(\vec{S}\)</span> is the vector that points along the “slow-scan” direction.  This is much like the <span class="math">\(\vec{F}\)</span> vector, but these pixels are only adjacent in physical space but not in computer memory.  In computer memory, adjacent pixels have a memory stride of length <span class="math">\(N_F\)</span>.</p>
+<p><span class="math">\(\vec{S}\)</span> is the vector that points along the &#8220;slow-scan&#8221; direction.  This is much like the <span class="math">\(\vec{F}\)</span> vector, but these pixels are only adjacent in physical space but not in computer memory.  In computer memory, adjacent pixels have a memory stride of length <span class="math">\(N_F\)</span>.</p>
 <p><span class="math">\(N_S\)</span> is the number of slow-scan pixels in the detector.</p>
 </div></blockquote>
 <p>Note that there are no angles involved in describing the physical position and orientation of a PAD.  That is because angles are confusing due to the many different conventions used by different books and software.  Since angles are not used in bornagain, we must specify the x-ray beam direction:</p>
 <blockquote>
-<div><span class="math">\(\hat{B}\)</span> is the unit vector pointing along the incident beam direction.  This of course only makes sense if the illumination is a plane wave, but sometimes we might take this to be the “nominal” beam direction.  The convention in bornagain is to take this vector along the (0,0,1) direction, but you need not adhere to this.  Most likely it is only important for display purposes.</div></blockquote>
+<div><span class="math">\(\hat{B}\)</span> is the unit vector pointing along the incident beam direction.  This of course only makes sense if the illumination is a plane wave, but sometimes we might take this to be the &#8220;nominal&#8221; beam direction.  The convention in bornagain is to take this vector along the (0,0,1) direction, but you need not adhere to this.  Most likely it is only important for display purposes.</div></blockquote>
 <p>We must know a bit more about the incident illumination:</p>
 <blockquote>
 <div><span class="math">\(\hat{U}\)</span> is the polarization vector for the x-ray beam.  This is appropriate for linearly polarized beams, and that is all that is handled by bornagain thus far.</div></blockquote>
 <dl class="docutils">
 <dt>With the above vectors specified, we may now generate the quantities that will be useful when doing diffraction analysis and simulations.  The vector pointing from the origin (where the target is located) to a detector pixel indexed by <span class="math">\(i\)</span> and <span class="math">\(j\)</span>, is</dt>
 <dd><span class="math">\(\vec{V}_{ij}=\vec{T}+i\vec{F}+j\vec{S}\)</span></dd>
-<dt>Easy, right?  Now let’s compute scattering vector for pixel <span class="math">\(i,j\)</span>:</dt>
+<dt>Easy, right?  Now let&#8217;s compute scattering vector for pixel <span class="math">\(i,j\)</span>:</dt>
 <dd><span class="math">\(\vec{Q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{V}_{ij} - \hat{B}\right)\)</span></dd>
 <dt>where <span class="math">\(\lambda\)</span> is the photon wavelength.  Next we can comput the scattering angle of a pixel:</dt>
 <dd><span class="math">\(\theta_{ij} = \arccos(\hat{V}_{ij}\cdot\hat{B})\)</span></dd>
@@ -143,31 +183,69 @@
 
 
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="bornagain’s documentation"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="installation.html" title="Installation"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="bornagain’s documentation"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2017, Richard A Kirian.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

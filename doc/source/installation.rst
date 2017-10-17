@@ -1,12 +1,15 @@
 Installation
 ============
 
-So far there is no installation scripts.  We're not at that stage yet.  For now, just add bornagain to your python path:
+System-wide installation
+------------------------
+
+Currently, there are no install that will automatically add bornagain to your python installation.  It makes a lot of sense to simply keep a local copy of bornagain where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving code alongside results is good practice.  You might need to add bornagain to your python path by doing something like this:
 
 .. code-block:: python
 
 	import sys
-	sys.path.append("../foo/bar/bornagain")
+	sys.path.append("../example/path/to/bornagain")
 
 Pure Anaconda Python
 --------------------
@@ -52,10 +55,4 @@ To install `pyopencl` on SL6 I found it necessary to download the pyopencl-2016.
     scl enable devtoolset-2 bash
     ./configure.py --cl-inc-dir=/usr/local/cuda/include --cl-lib-dir=/usr/local/cuda/lib64
     make install
- 
-
-System-wide installation
-------------------------
-
-Currently, there are no install scripts that will put bornagain into your python installation.  There is no setup.py file and so on.  There are two reasons for this: (1) bornagain is totally experimental still, and (2) it actually makes a lot of sense to keep a local copy where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving code alongside results is good practice.
 

@@ -33,15 +33,14 @@ def get_cromermann_parameters(atomic_numbers):
     Modified from tjlane/thor.git
     Get cromer-mann parameters for each atom type
     
-    Parameters
-    atomic_numbers : ndarray, int
-        A numpy array of the atomic numbers of each atom in the system.
+    Arguments:
+        atomic_numbers (ndarray, int) : A numpy array of the atomic numbers of each atom in the system.
         
-    Returns
-    cromermann : dict
-        The Cromer-Mann parameters for the system. The dictionary 
-        key corresponds to the atomic number, and the parameters
-        are listed in order as a_1,a_2,a_3,a_4,b_1,b_2,b_3,b_4,c
+    Returns:
+        cromermann (dict) :
+            The Cromer-Mann parameters for the system. The dictionary
+            key corresponds to the atomic number, and the parameters
+            are listed in order as a_1,a_2,a_3,a_4,b_1,b_2,b_3,b_4,c
     """
 
     atom_types = np.unique(atomic_numbers)
@@ -63,24 +62,27 @@ def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
     Get cromer-mann parameters for each atom type and renumber the atom 
     types to 0, 1, 2, ... to point to their CM params.
     
-    Parameters
-    atomic_numbers : ndarray, int
-        A numpy array of the atomic numbers of each atom in the system.
-        
-    max_num_atom_types : int
-        The maximium number of atom types allowable
+    Arguments:
+
+        atomic_numbers (ndarray, int) :
+            A numpy array of the atomic numbers of each atom in the system.
+
+        max_num_atom_types (int) :
+            The maximium number of atom types allowable
     
-    Returns
-    cromermann : c-array, float
-        The Cromer-Mann parameters for the system. Positions [(0-8) * aid] are
-        reserved for each atom type in the system (see `aid` below).
-        
-    aid : c-array, int
-        The indicies of the atomic id's of each atom in the system. This is an
-        arbitrary compressed index for use within the scattering code. Really
-        this is just a renumbering so that each atom type recieves an index
-        0, 1, 2, ... corresponding to the position of that atom's type in
-        the `cromermann` array.  
+    Returns:
+
+        cromermann (c-array, float) :
+            The Cromer-Mann parameters for the system. Positions [(0-8) * aid] are
+            reserved for each atom type in the system (see `aid` below).
+
+        aid (c-array, int) :
+            The indicies of the atomic ids of each atom in the system. This is an
+            arbitrary compressed index for use within the scattering code. Really
+            this is just a renumbering so that each atom type recieves an index
+            0, 1, 2, ... corresponding to the position of that atom's type in
+            the `cromermann` array.
+
     """
 
     atom_types = np.unique(atomic_numbers)

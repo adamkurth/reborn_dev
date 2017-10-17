@@ -1,98 +1,133 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>bornagain package &#8212; bornagain 0.0.1 documentation</title>
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.external package" href="bornagain.external.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
-  </head>
-  <body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="bornagain.external.html" title="bornagain.external package"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="installation.html" title="Installation"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &#187;</li> 
-      </ul>
-    </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">bornagain package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-bornagain.detector">bornagain.detector module</a></li>
-<li><a class="reference internal" href="#module-bornagain.scatter">bornagain.scatter module</a></li>
-<li><a class="reference internal" href="#module-bornagain.source">bornagain.source module</a></li>
-<li><a class="reference internal" href="#module-bornagain.units">bornagain.units module</a></li>
-<li><a class="reference internal" href="#module-bornagain.utils">bornagain.utils module</a></li>
-<li><a class="reference internal" href="#module-bornagain">Module contents</a></li>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain package &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
+        <link rel="next" title="bornagain.external package" href="bornagain.external.html"/>
+        <link rel="prev" title="Installation" href="installation.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> bornagain</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#some-basics">Some basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#detectors">Detectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#simulation">Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#system-wide-installation">System-wide installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#pure-anaconda-python">Pure Anaconda Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#using-anaconda-and-pip">Using Anaconda and pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-on-scientific-linux-6">Installation on Scientific Linux 6</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">bornagain package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bornagain.detector">bornagain.detector module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bornagain.scatter">bornagain.scatter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bornagain.source">bornagain.source module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bornagain.units">bornagain.units module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bornagain.utils">bornagain.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bornagain">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="coding.html#overview-of-bornagain">Overview of bornagain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coding.html#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coding.html#generation-of-documentation">Generation of documentation</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="installation.html"
-                        title="previous chapter">Installation</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="bornagain.external.html"
-                        title="next chapter">bornagain.external package</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/bornagain.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
+          
+        
       </div>
+      &nbsp;
+    </nav>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">bornagain</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>bornagain package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/bornagain.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
             
   <div class="section" id="bornagain-package">
 <h1>bornagain package<a class="headerlink" href="#bornagain-package" title="Permalink to this headline">¶</a></h1>
@@ -146,7 +181,7 @@ detectors (PADs).</p>
 <p>This is a simplified version of the Panel class.  Hopefully it replaces Panel.  One main difference is that it does
 not include any information about the source, which makes a lot more sense and removes several headaches that I
 dealt with previously.  Another big difference is the emphasis on simplicity.  So far, there is no cache for
-derived arrays, but maybe that will be added later (but only on an as-needed basis…).
+derived arrays, but maybe that will be added later (but only on an as-needed basis...).
 As a result of simplifications, there are no checks; the programmer must think.</p>
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.ds_vecs">
@@ -313,6 +348,12 @@ first pixel in memory.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="bornagain.detector.Panel.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print something useful when in interactive mode.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="bornagain.detector.Panel.check_data">
 <code class="descname">check_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#Panel.check_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.Panel.check_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check that a data array is consistent with panel shape.</p>
@@ -397,7 +438,7 @@ scan).</p>
 <dl class="attribute">
 <dt id="bornagain.detector.Panel.real_space_bounding_box">
 <code class="descname">real_space_bounding_box</code><a class="headerlink" href="#bornagain.detector.Panel.real_space_bounding_box" title="Permalink to this definition">¶</a></dt>
-<dd><p>Minimum and maximum values of the four corners.  Useful for 
+<dd><p>Minimum and maximum values of the four corners.  Useful for
 displays</p>
 </dd></dl>
 
@@ -469,6 +510,36 @@ displays</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="bornagain.detector.PanelList.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a Panel. Panels may be referenced by name or index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.__iter__">
+<code class="descname">__iter__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.__iter__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.__iter__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate through panels.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.__len__">
+<code class="descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.__len__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return length of Panel list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.__setitem__">
+<code class="descname">__setitem__</code><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.__setitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a Panel, check that it is the appropriate type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PanelList.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print something useful when in interactive mode.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="bornagain.detector.PanelList.append">
 <code class="descname">append</code><span class="sig-paren">(</span><em>p=None</em>, <em>name=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.append" title="Permalink to this definition">¶</a></dt>
 <dd><p>Append a Panel, check that it is of the correct type.</p>
@@ -478,7 +549,7 @@ displays</p>
 <dt id="bornagain.detector.PanelList.assemble_data">
 <code class="descname">assemble_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.assemble_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.assemble_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Project all intensity data along the Beam direction.  Nearest
-neighbor interpolation.  This is a crude way to display data…</p>
+neighbor interpolation.  This is a crude way to display data...</p>
 </dd></dl>
 
 <dl class="method">
@@ -527,7 +598,7 @@ internally.</p>
 <dl class="method">
 <dt id="bornagain.detector.PanelList.get_panel_index_by_name">
 <code class="descname">get_panel_index_by_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PanelList.get_panel_index_by_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PanelList.get_panel_index_by_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find the integer index of a Panel by it’s unique name</p>
+<dd><p>Find the integer index of a Panel by it&#8217;s unique name</p>
 </dd></dl>
 
 <dl class="method">
@@ -649,33 +720,21 @@ square detector</p>
 <li>After reading out amplitudes, one can display pixels using <a class="reference internal" href="#bornagain.detector.SimpleDetector.display" title="bornagain.detector.SimpleDetector.display"><code class="xref py py-func docutils literal"><span class="pre">display()</span></code></a></li>
 </ul>
 </div>
-<dl class="docutils">
-<dt>Arguments</dt>
-<dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>n_pixels (int)</dt>
-<dd>the number of pixels along one edge</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>pixsize (float)</dt>
-<dd>the edge length of the square pixels in meters</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>detdist (float)</dt>
-<dd>the distance from the interaction region to the point where 
-the forward beam intersects the detector (in meters)</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>wavelen (float)</dt>
-<dd>the wavelength of the photons (in Angstroms)</dd>
-</dl>
-</li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n_pixels (int)</strong> (<em>-</em>) &#8211; the number of pixels along one edge</li>
+<li><strong>pixsize (float)</strong> (<em>-</em>) &#8211; the edge length of the square pixels in meters</li>
+<li><strong>detdist (float)</strong> (<em>-</em>) &#8211; the distance from the interaction region to the point where
+the forward beam intersects the detector (in meters)</li>
+<li><strong>wavelen (float)</strong> (<em>-</em>) &#8211; the wavelength of the photons (in Angstroms)</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="bornagain.detector.SimpleDetector.display">
 <code class="descname">display</code><span class="sig-paren">(</span><em>use_log=True</em>, <em>vmax=None</em>, <em>pause=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimpleDetector.display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimpleDetector.display" title="Permalink to this definition">¶</a></dt>
@@ -683,99 +742,74 @@ the forward beam intersects the detector (in meters)</dd>
 to matplotlib.figure</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ul class="last simple">
-<li>Requires matplotlib.</li>
+<ul class="last">
+<li><p class="first">Requires matplotlib.</p>
+</li>
 <li><dl class="first docutils">
 <dt>Must first run <a class="reference internal" href="#bornagain.detector.SimpleDetector.readout" title="bornagain.detector.SimpleDetector.readout"><code class="xref py py-func docutils literal"><span class="pre">readout()</span></code></a> or <a class="reference internal" href="#bornagain.detector.SimpleDetector.readout_finite" title="bornagain.detector.SimpleDetector.readout_finite"><code class="xref py py-func docutils literal"><span class="pre">readout_finite()</span></code></a></dt>
-<dd>at least one time</dd>
+<dd><p class="first last">at least one time</p>
+</dd>
 </dl>
 </li>
 </ul>
 </div>
-<dl class="docutils">
-<dt>Arguments</dt>
-<dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>use_log (bool)</dt>
-<dd>whether to use log-scaling when displaying the intensity image.</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>vmax (float)</dt>
-<dd>colorbar scaling argument.</dd>
-</dl>
-</li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>use_log (bool)</strong> (<em>-</em>) &#8211; whether to use log-scaling when displaying the intensity image.</li>
+<li><strong>vmax (float)</strong> (<em>-</em>) &#8211; colorbar scaling argument.</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="bornagain.detector.SimpleDetector.readout">
 <code class="descname">readout</code><span class="sig-paren">(</span><em>amplitudes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimpleDetector.readout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimpleDetector.readout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given scattering amplitudes, this calculates the corresponding intensity values.</p>
-<dl class="docutils">
-<dt>Arguments</dt>
-<dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>amplitudes (complex np.ndarray)</dt>
-<dd>scattering amplitudes same shape as <cite>self.Q</cite></dd>
-</dl>
-</li>
-</ul>
-</dd>
-<dt>Returns</dt>
-<dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>np.ndarray</dt>
-<dd>Scattering intensities as a 2-D image.</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>amplitudes</strong> (<em>complex np.ndarray</em>) &#8211; Scattering amplitudes same shape as <cite>self.Q</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Scattering intensities as a 2-D image.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">np.ndarray</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="bornagain.detector.SimpleDetector.readout_finite">
 <code class="descname">readout_finite</code><span class="sig-paren">(</span><em>amplitudes</em>, <em>qmin</em>, <em>qmax</em>, <em>flux=1e+20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimpleDetector.readout_finite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimpleDetector.readout_finite" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get scattering intensities as a 2D image considering 
+<dd><p>Get scattering intensities as a 2D image considering
 finite scattered photons</p>
-<dl class="docutils">
-<dt>Arguments</dt>
-<dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>amplitudes (complex np.ndarray)</dt>
-<dd>scattering amplitudes same shape as <cite>self.Q</cite>.</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>qmin (float)</dt>
-<dd>minimum q to generate intensities</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>qmax (float)</dt>
-<dd>maximum q to generate intenities</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>flux (float)</dt>
-<dd>forward beam flux in Photons per square centimeter</dd>
-</dl>
-</li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>amplitudes</strong> (<em>complex np.ndarray</em>) &#8211; Scattering amplitudes same shape as <cite>self.Q</cite>.</li>
+<li><strong>qmin</strong> (<em>float</em>) &#8211; Minimum q to generate intensities</li>
+<li><strong>qmax</strong> (<em>float</em>) &#8211; Maximum q to generate intenities</li>
+<li><strong>flux</strong> (<em>float</em>) &#8211; Forward beam flux in Photons per square centimeter</li>
 </ul>
-</dd>
-<dt>Returns</dt>
-<dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>np.ndarray</dt>
-<dd>Scattering intensities as a 2-D image.</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Scattering intensities as a 2-D image.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -783,8 +817,8 @@ finite scattered photons</p>
 </div>
 <div class="section" id="module-bornagain.scatter">
 <span id="bornagain-scatter-module"></span><h2>bornagain.scatter module<a class="headerlink" href="#module-bornagain.scatter" title="Permalink to this headline">¶</a></h2>
-<p>Classes related to x-ray “scattering”, which usually is distinguished from
-“diffraction” because there are many objects in random orientations.  SAXS/WAXS
+<p>Classes related to x-ray &#8220;scattering&#8221;, which usually is distinguished from
+&#8220;diffraction&#8221; because there are many objects in random orientations.  SAXS/WAXS
 is the canonical example.</p>
 <dl class="class">
 <dt id="bornagain.scatter.RadialProfile">
@@ -834,7 +868,7 @@ likely also be removed.</p>
 <dt id="bornagain.utils.amplitudes">
 <code class="descclassname">bornagain.utils.</code><code class="descname">amplitudes</code><span class="sig-paren">(</span><em>q</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#amplitudes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.amplitudes" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute scattering amplitudes without form factors</p>
-<p>q: 2D np.array of q vectors 
+<p>q: 2D np.array of q vectors
 r: 2D np.array of atom coors</p>
 </dd></dl>
 
@@ -842,7 +876,7 @@ r: 2D np.array of atom coors</p>
 <dt id="bornagain.utils.amplitudes_with_cmans">
 <code class="descclassname">bornagain.utils.</code><code class="descname">amplitudes_with_cmans</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>Z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#amplitudes_with_cmans"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.amplitudes_with_cmans" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute scattering amplitudes</p>
-<p>q: 2D np.array of q vectors 
+<p>q: 2D np.array of q vectors
 r: 2D np.array of atom coors
 Z: 1D np.array of atomic numbers corresponding to r</p>
 </dd></dl>
@@ -850,7 +884,7 @@ Z: 1D np.array of atomic numbers corresponding to r</p>
 <dl class="function">
 <dt id="bornagain.utils.error">
 <code class="descclassname">bornagain.utils.</code><code class="descname">error</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple error message (to be replaced later…)</p>
+<dd><p>Simple error message (to be replaced later...)</p>
 </dd></dl>
 
 <dl class="function">
@@ -865,7 +899,7 @@ distributed and centered about zero) followed by a random rotation about the
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>div_fwhm</strong> – </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>div_fwhm</strong> &#8211; </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
@@ -883,7 +917,7 @@ orthogonal axis.  The order of this product is a random permutation.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mosaicity_fwhm</strong> – </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mosaicity_fwhm</strong> &#8211; </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
@@ -955,31 +989,69 @@ return a modified numpy ndarray with the correct shape.</p>
 
 
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="bornagain.external.html" class="btn btn-neutral float-right" title="bornagain.external package">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral" title="Installation"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="bornagain.external.html" title="bornagain.external package"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="installation.html" title="Installation"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2017, Richard A Kirian.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
