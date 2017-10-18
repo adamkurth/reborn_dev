@@ -384,15 +384,15 @@ class ClCore(object):
         f_dev = self.to_device(f, dtype=self.complex_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        for i in range(0, 10):
-            global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
-                                 * self.group_size)
+        # for i in range(0, 10):
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
+                             * self.group_size)
 
-            R16_dev = self.to_device(R16, dtype=self.real_t)
-            self.phase_factor_qrf_cl(self.queue, (global_size,),
-                                     (self.group_size,), q_dev.data, r_dev.data,
-                                     f_dev.data, R16_dev.data, a_dev.data, n_atoms,
-                                     n_pixels, add)
+        # R16_dev = self.to_device(R16, dtype=self.real_t)
+        self.phase_factor_qrf_cl(self.queue, (global_size,),
+                                 (self.group_size,), q_dev.data, r_dev.data,
+                                 f_dev.data, R16, a_dev.data, n_atoms,
+                                 n_pixels, add)
 
         if a is None:
             return a_dev.get()

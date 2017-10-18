@@ -90,7 +90,7 @@ if 1:
     print('Move to device memory: %7.03f ms' % (tf * 1e3))
     for i in range(0, n_trials):
         t = time.time()
-        clcore.phase_factor_qrf(q_dev, r_dev, f_dev, R, a_dev, False)
+        clcore.phase_factor_qrf(q_dev, r_dev, f_dev, None, a_dev, False)
         tf = time.time() - t
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf * 1e3, n_atoms, n_pixels))
