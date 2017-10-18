@@ -36,37 +36,20 @@
 #define PI2 6.28318530718f
 //#endif
 
+
 static int linear_congruential(int n)
 {
-// Random number using linear congruential and constants from Numerical Recipes
+// Experimental... random number using linear congruential and constants from Numerical Recipes
     n = (1664525*n + 1013904223) % 4294967296;
     return n;
 }
 
+
+// Rotate a vector
+
 static float4 rotate_vec(
-    __constant float *R,
-    const float4 v)
-// Rotate a 4-vector.
-// R is the rotation matrix
-// v is the input 4-vector
-// return is the rotated 4-vector
-{
-    float4 v_rot = (float4)(0.0,0.0,0.0,0.0);
-
-    v_rot.x = R[0]*v.x + R[1]*v.y + R[2]*v.z;
-    v_rot.y = R[3]*v.x + R[4]*v.y + R[5]*v.z;
-    v_rot.z = R[6]*v.x + R[7]*v.y + R[8]*v.z;
-    
-    return v_rot;
-}
-
-static float4 rotate_vec2(
     const float16 R,
     const float4 v)
-// Rotate a 4-vector.
-// R is the rotation matrix
-// v is the input 4-vector
-// return is the rotated 4-vector
 {
     float4 v_rot = (float4)(0.0,0.0,0.0,0.0);
 
@@ -78,70 +61,17 @@ static float4 rotate_vec2(
 }
 
 
+// Calculate the scattering vectors for a pixel-array detector
 
 static float4 q_pad(
-    const int i,
-    const int j,
-    const float w,
-    __constant float *T,
-    __constant float *F,
-    __constant float *S,
-    __constant float *B
-    )
-// Calculate the q vectors for a pixel-array detector
-//
-// Input:
-// i, j are the pixel indices
-// w is the photon wavelength
-// T is the translation vector from origin to center of corner pixel
-// F, S are the fast/slow-scan basis vectors (pointing alont rows/columns)
-//      the length of these vectors is the pixel size
-// B is the direction of the incident beam
-//
-// Output: A single q vector
-{
-    float4 q = (float4)(0.0f,0.0f,0.0f,0.0f);
-
-    float Vx,Vy,Vz,Vnorm;
-    
-    Vx = T[0] + i*F[0] + j*S[0];
-    Vy = T[1] + i*F[1] + j*S[1];
-    Vz = T[2] + i*F[2] + j*S[2];
-    Vnorm = sqrt(Vx*Vx + Vy*Vy + Vz*Vz);
-    Vx = Vx/Vnorm; 
-    Vy = Vy/Vnorm; 
-    Vz = Vz/Vnorm; 
-    
-    q.x = (Vx-B[0])*PI2/w;
-    q.y = (Vy-B[1])*PI2/w;
-    q.z = (Vz-B[2])*PI2/w;
-
-    return q;
-
-}
-
-
-static float4 q_pad2(
-    const int i,
-    const int j,
-    const float w,
-    const float4 T,
-    const float4 F,
-    const float4 S,
-    const float4 B
-    )
-// Calculate the q vectors for a pixel-array detector
-//
-// Input:
-// i, j are the pixel indices
-// w is the photon wavelength
-// T is the translation vector from origin to center of corner pixel
-// F, S are the fast/slow-scan basis vectors (pointing alont rows/columns)
-//      the length of these vectors is the pixel size
-// B is the direction of the incident beam
-//
-// Output: A single q vector
-{
+    const int i,     // Pixel fast-scan index
+    const int j,     // Pixel slow-scan index
+    const float w,   // Photon wavelength
+    const float4 T,  // Translation of detector
+    const float4 F,  // Fast-scan basis vector
+    const float4 S,  // Slow-scan basis vector
+    const float4 B   // Incident beam unit vector
+){
 
     float4 V = T + i*F + j*S;
     V /= sqrt(dot(V,V));
@@ -150,7 +80,6 @@ static float4 q_pad2(
     return q;
 
 }
-
 
 
 // Sum the amplitudes from a collection of atoms for a given scattering vector: SUM_i f_i * exp(i*q.r_i)
@@ -213,66 +142,6 @@ static float2 phase_factor(
 }
 
 
-
-
-
-
-
-
-//static float4 q_pad_mc(
-//    const int i,
-//    const int j,
-//    const float w,
-//    const float w_sig,
-//    const float div_sig,
-//    __constant float *T,
-//    __constant float *F,
-//    __constant float *S,
-//    __constant float *B,
-//    const float lc_x,
-//    const float lc_a,
-//    const float lc_c,
-//    const float lc_m
-//    )
-//// Calculate the q vectors for a pixel-array detector
-////
-//// Input:
-//// i, j are the pixel indices
-//// w is the photon wavelength
-//// T is the translation vector from origin to center of corner pixel
-//// F, S are the fast/slow-scan basis vectors (pointing alont rows/columns)
-////      the length of these vectors is the pixel size
-//// B is the direction of the incident beam
-////
-//// Output: A single q vector
-//{
-//    float4 q = (float4)(0.0f,0.0f,0.0f,0.0f);
-//
-//    // Random number from linear congruential recurrence relation
-//    lc_x1 = (lc_a*lc_x + lc_c) % m
-//    float del_w;
-//
-//    float Vx,Vy,Vz,Vnorm;
-//
-//    Vx = T[0] + i*F[0] + j*S[0];
-//    Vy = T[1] + i*F[1] + j*S[1];
-//    Vz = T[2] + i*F[2] + j*S[2];
-//    Vnorm = sqrt(Vx*Vx + Vy*Vy + Vz*Vz);
-//    Vx = Vx/Vnorm;
-//    Vy = Vy/Vnorm;
-//    Vz = Vz/Vnorm;
-//
-//
-//
-//    q.x = (Vx-B[0])*PI2/w;
-//    q.y = (Vy-B[1])*PI2/w;
-//    q.z = (Vz-B[2])*PI2/w;
-//
-//    return q;
-//
-//}
-
-
 kernel void get_group_size(
     global int *g){
     const int gi = get_global_id(0);
@@ -324,7 +193,7 @@ kernel void phase_factor_qrf(
         q4r = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
 
         // Rotate the scattering vector
-        q4r = rotate_vec2(R,q4r);
+        q4r = rotate_vec(R,q4r);
 
     } else { q4r = (float4)(0.0f,0.0f,0.0f,0.0f); }
 
@@ -372,10 +241,10 @@ kernel void phase_factor_pad(
     const int li = get_local_id(0);  /* Local group index */
 
     // Compute the scattering vector
-    float4 q4r = q_pad2(i,j,w,T,F,S,B);
+    float4 q4r = q_pad(i,j,w,T,F,S,B);
 
     // Rotate the scattering vector
-    q4r = rotate_vec2(R, q4r);
+    q4r = rotate_vec(R, q4r);
 
     // Sum over atomic scattering amplitudes
     float2 a_sum = (float2)(0.0f,0.0f);
@@ -449,7 +318,7 @@ kernel void buffer_mesh_lookup(
     const int gi = get_global_id(0);
 
     float4 q4r = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
-    q4r = rotate_vec2(R,q4r);
+    q4r = rotate_vec(R,q4r);
 
     // Floating point coordinates
     const float i_f = (q4r.x - q_min.x)/deltaQ.x;
@@ -497,33 +366,34 @@ kernel void buffer_mesh_lookup(
 }
 
 
-kernel void lattice_transform_intensities_pad(
-    const float16 abc,
-    const int4 N,
-    const float16 R,
-    global float *I,
-    const int n_pixels,
-    const int nF,
-    const int nS,
-    const float w,
-    const float4 T,
-    const float4 F,
-    const float4 S,
-    const float4 B,
-    const int add)
-{
+// Compute ideal lattice transform for parallelepiped crystal: PROD_i  [ sin(N_i x_i)/sin(x_i) ]^2
+// This variant internallly computes scattering vectors for a pixel-array detector
 
-// TODO: add documentation Rick
+kernel void lattice_transform_intensities_pad(
+    const float16 abc,   // Real-space lattice vectors a,b,c, each contiguous in memory
+    const int4 N,        // Number of unit cells along each axis
+    const float16 R,     // Rotation matrix
+    global float *I,     // Lattice transform intensities (output)
+    const int n_pixels,  // Number of pixels
+    const int nF,        // Refer to phase_factor_pad
+    const int nS,        // Refer to phase_factor_pad
+    const float w,       // Refer to phase_factor_pad
+    const float4 T,      // Refer to phase_factor_pad
+    const float4 F,      // Refer to phase_factor_pad
+    const float4 S,      // Refer to phase_factor_pad
+    const float4 B,      // Refer to phase_factor_pad
+    const int add        // Refer to phase_factor_pad
+){
 
     const int gi = get_global_id(0); /* Global index */
     const int i = gi % nF;           /* Pixel coordinate i */
     const int j = gi/nF;             /* Pixel coordinate j */
 
     // Get the q vector
-    float4 q4r = q_pad2( i,j,w,T,F,S,B);
+    float4 q4r = q_pad( i,j,w,T,F,S,B);
 
     // Rotate the q vector
-    q4r = rotate_vec2(R, q4r);
+    q4r = rotate_vec(R, q4r);
 
     // Compute lattice transform at this q vector
     float sn;
@@ -589,39 +459,36 @@ kernel void lattice_transform_intensities_pad(
     }
 }
 
+// Compute approximate gaussian-shaped lattice transform for a crystal: PROD_i  N_i^2 exp(- N_i^2 x_i^2 / 4pi)
+// This variant internallly computes scattering vectors for a pixel-array detector
 
 kernel void gaussian_lattice_transform_intensities_pad(
-    const float16 abc,
-    const int4 N,
-    const float16 R,
-    global float *I,
-    const int n_pixels,
-    const int nF,
-    const int nS,
-    const float w,
-    const float4 T,
-    const float4 F,
-    const float4 S,
-    const float4 B,
-    const int add)
-{
-
-// TODO: add documentation Rick
+    const float16 abc,   // Real-space lattice vectors a,b,c, each contiguous in memory
+    const int4 N,        // Number of unit cells along each axis
+    const float16 R,     // Rotation matrix
+    global float *I,     // Lattice transform intensities (output)
+    const int n_pixels,  // Number of pixels
+    const int nF,        // Refer to phase_factor_pad
+    const int nS,        // Refer to phase_factor_pad
+    const float w,       // Refer to phase_factor_pad
+    const float4 T,      // Refer to phase_factor_pad
+    const float4 F,      // Refer to phase_factor_pad
+    const float4 S,      // Refer to phase_factor_pad
+    const float4 B,      // Refer to phase_factor_pad
+    const int add        // Refer to phase_factor_pad
+){
 
     const int gi = get_global_id(0); /* Global index */
     const int i = gi % nF;           /* Pixel coordinate i */
     const int j = gi/nF;             /* Pixel coordinate j */
 
     // Get the q vector
-    float4 q4r = q_pad2( i,j,w,T,F,S,B);
+    float4 q4r = q_pad( i,j,w,T,F,S,B);
 
     // Rotate the q vector
-    q4r = rotate_vec2(R, q4r);
+    q4r = rotate_vec(R, q4r);
 
     // Compute lattice transform at this q vector
-    float sn;
-    float s;
-    float sns;
     float x;
     float n;
     float4 a;
@@ -656,7 +523,6 @@ kernel void gaussian_lattice_transform_intensities_pad(
         }
     }
 }
-
 
 
 __kernel void qrf_default(
@@ -665,7 +531,7 @@ __kernel void qrf_default(
     __constant float *R,
     __global float2 *A,
     const int n_atoms)
-// Derek will add documentation to this one.
+// TODO: Derek will add documentation to this one.
 {
 
     int q_idx = get_global_id(0);
@@ -738,7 +604,7 @@ __kernel void qrf_kam(
     __constant float *T,
     __global float2 *A,
     const int n_atoms)
-// Derek will add documentation to this one.
+// TODO: Derek will add documentation to this one.
 {
 
     int q_idx = get_global_id(0);
@@ -810,24 +676,3 @@ __kernel void qrf_kam(
     A[q_idx].x = Areal;
     A[q_idx].y = Aimag;
 }
-
-
-
-
-//__kernel void ideal_lattice_transform_intensity_qrf(
-//    __global float4 *q,
-//    __constant float *R,
-//    __constant float *U,
-//    __constant float *N,
-//    __global float *I,
-//    const int n_atoms)
-//// Calculate the lattice transform intensity for a parallelepiped crystal.
-////
-//// Input:
-//// q:
-//// U is the orthogonalization matrix defined in Rupp's textbook "Biomolecular
-//// Crystallography" as "O" (renamed to avoid confusion with zero).  The columns
-//// of this matrix are the a, b, and c lattice vectors.
-//{
-//
-//}

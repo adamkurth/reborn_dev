@@ -133,8 +133,7 @@ class ClCore(object):
         self._load_gaussian_lattice_transform_intensities_pad()
 
     def _build_openCL_programs(self):
-        clcore_file = pkg_resources.resource_filename(
-            'bornagain.simulate', 'clcore.cpp')
+        clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
         kern_str = open(clcore_file).read()
         if self.double_precision:
             kern_str = kern_str.replace("float", "double")
@@ -142,59 +141,51 @@ class ClCore(object):
         self.programs = cl.Program(self.context, kern_str).build(options=build_opts)
 
     def _load_get_group_size(self):
-        # Configure the python interface to the cl programs
         self.get_group_size_cl = self.programs.get_group_size
         self.get_group_size_cl.set_scalar_arg_dtypes([None])
 
     def _load_phase_factor_qrf(self):
         self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
-        self.phase_factor_qrf_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, None, self.int_t, self.int_t, self.int_t])
+        self.phase_factor_qrf_cl.set_scalar_arg_dtypes([None, None, None, None, None, self.int_t, self.int_t,
+                                                        self.int_t])
 
     def _load_phase_factor_pad(self):
         self.phase_factor_pad_cl = self.programs.phase_factor_pad
         self.phase_factor_pad_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t,
-             self.real_t, None, None, None, None, self.int_t])
+            [None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t,self.real_t, None, None, None,
+             None, self.int_t])
 
     def _load_phase_factor_mesh(self):
         self.phase_factor_mesh_cl = self.programs.phase_factor_mesh
-        self.phase_factor_mesh_cl.set_scalar_arg_dtypes(
-            [None, None, None, self.int_t, self.int_t, None, None, None])
+        self.phase_factor_mesh_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, self.int_t, None, None, None])
 
     def _load_buffer_mesh_lookup(self):
         self.buffer_mesh_lookup_cl = self.programs.buffer_mesh_lookup
-        self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes(
-            [None, None, None, self.int_t, None, None, None, None])
+        self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, None, None, None, None])
 
     def _load_lattice_transform_intensities_pad(self):
-        self.lattice_transform_intensities_pad_cl = \
-            self.programs.lattice_transform_intensities_pad
+        self.lattice_transform_intensities_pad_cl = self.programs.lattice_transform_intensities_pad
         self.lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, self.int_t, self.int_t, self.int_t,
-             self.real_t, None, None, None, None, self.int_t])
+            [None, None, None, None, self.int_t, self.int_t, self.int_t,self.real_t, None, None, None, None,
+             self.int_t])
 
     def _load_gaussian_lattice_transform_intensities_pad(self):
-        self.gaussian_lattice_transform_intensities_pad_cl = \
-            self.programs.gaussian_lattice_transform_intensities_pad
+        self.gaussian_lattice_transform_intensities_pad_cl = self.programs.gaussian_lattice_transform_intensities_pad
         self.gaussian_lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, self.int_t, self.int_t, self.int_t,
-             self.real_t, None, None, None, None, self.int_t])
+            [None, None, None, None, self.int_t, self.int_t, self.int_t,self.real_t, None, None, None, None,
+             self.int_t])
 
     def _load_mod_squared_complex_to_real(self):
         self.mod_squared_complex_to_real_cl = self.programs.mod_squared_complex_to_real
-        self.mod_squared_complex_to_real_cl.set_scalar_arg_dtypes(
-            [None, None, self.int_t])
+        self.mod_squared_complex_to_real_cl.set_scalar_arg_dtypes([None, None, self.int_t])
 
     def _load_qrf_default(self):
         self.qrf_default_cl = self.programs.qrf_default
-        self.qrf_default_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, self.int_t])
+        self.qrf_default_cl.set_scalar_arg_dtypes([None, None, None, None, self.int_t])
 
     def _load_qrf_kam(self):
         self.qrf_kam_cl = self.programs.qrf_kam
-        self.qrf_kam_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, None, self.int_t])
+        self.qrf_kam_cl.set_scalar_arg_dtypes([None, None, None, None, None, self.int_t])
 
     def vec4(self, x, dtype=None):
         """
@@ -215,7 +206,7 @@ class ClCore(object):
             dtype = self.real_t
         return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
 
-    def rot16(self, R, dtype=None):
+    def vec16(self, R, dtype=None):
         """
         The best way to pass in a rotation matrix is as a float16.  This is a helper function for preparing a numpy
         array so that it can be passed in as a float16.
@@ -256,6 +247,7 @@ class ClCore(object):
             pyopencl array
         """
 
+        # TODO: why does this method exist?  It is not used anywhere.
         if isinstance(array, cl.array.Array):
             return array
 
@@ -393,7 +385,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
-        R = self.rot16(R, dtype=self.real_t)
+        R = self.vec16(R, dtype=self.real_t)
 
         if add:
             add = 1
@@ -407,7 +399,6 @@ class ClCore(object):
         f_dev = self.to_device(f, dtype=self.complex_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        # for i in range(0, 10):
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
                              * self.group_size)
 
@@ -453,7 +444,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
-        R = self.rot16(R,dtype=self.real_t)
+        R = self.vec16(R,dtype=self.real_t)
         if add:
             add = 1
         else:
@@ -565,7 +556,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
-        R = self.rot16(R, dtype=self.real_t)
+        R = self.vec16(R, dtype=self.real_t)
 
         N = np.array(N, dtype=self.int_t)
         q_max = np.array(q_max, dtype=self.real_t)
@@ -628,7 +619,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
-        R = self.rot16(R, dtype=self.real_t)
+        R = self.vec16(R, dtype=self.real_t)
 
         nF = self.int_t(nF)
         nS = self.int_t(nS)
@@ -639,7 +630,7 @@ class ClCore(object):
             add = 0
         add = self.int_t(add)
 
-        abc = self.rot16(abc, dtype=self.real_t)
+        abc = self.vec16(abc, dtype=self.real_t)
         N = self.vec4(N, dtype=self.int_t)
         T = self.vec4(T, dtype=self.real_t)
         F = self.vec4(F, dtype=self.real_t)
@@ -685,7 +676,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
-        R = self.rot16(R, dtype=self.real_t)
+        R = self.vec16(R, dtype=self.real_t)
 
         nF = self.int_t(nF)
         nS = self.int_t(nS)
@@ -696,7 +687,7 @@ class ClCore(object):
             add = 0
         add = self.int_t(add)
 
-        abc = self.rot16(abc, dtype=self.real_t)
+        abc = self.vec16(abc, dtype=self.real_t)
         N = self.vec4(N, dtype=self.int_t)
         T = self.vec4(T, dtype=self.real_t)
         F = self.vec4(F, dtype=self.real_t)
