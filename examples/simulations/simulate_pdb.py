@@ -130,7 +130,7 @@ if 1:
         plt.show()
     print("")
 
-if 1:
+if 0:
 
     print("[clcore] Make a full 3D diffraction amplitude map...")
     res = 1e-10  # Resolution
@@ -139,7 +139,7 @@ if 1:
     N = 128  # Number of samples
     n_atoms = r.shape[0]
     n_pixels = N ** 3
-    for i in range(0, n_trials):
+    for i in range(0, 1):
         t = time.time()
         A = clcore.phase_factor_mesh(r, f, N, qmin, qmax)
         tf = time.time() - t
@@ -164,7 +164,7 @@ if 1:
     n_atoms = r.shape[0]
     n_pixels = N ** 3
     print("[clcore] First compute a 3D diffraction amplitude map...")
-    for i in range(0, n_trials):
+    for i in range(0, 1):
         t = time.time()
         A = clcore.phase_factor_mesh(r, f, N, qmin, qmax)
         tf = time.time() - t

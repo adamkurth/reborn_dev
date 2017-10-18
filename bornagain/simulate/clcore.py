@@ -452,7 +452,8 @@ class ClCore(object):
         '''
 
         if R is None:
-            R = np.eye(3, dtype=self.real_t)
+            R = np.eye(3)
+        R = self.rot16(R,dtype=self.real_t)
         if add:
             add = 1
         else:
@@ -464,12 +465,15 @@ class ClCore(object):
         n_atoms = self.int_t(r.shape[0])
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
-        R_dev = self.to_device(R, dtype=self.real_t)
 
-        T_dev = self.to_device(T, dtype=self.real_t)
-        F_dev = self.to_device(F, dtype=self.real_t)
-        S_dev = self.to_device(S, dtype=self.real_t)
-        B_dev = self.to_device(B, dtype=self.real_t)
+        T = self.vec4(T,dtype=self.real_t)
+        F = self.vec4(F, dtype=self.real_t)
+        S = self.vec4(S, dtype=self.real_t)
+        B = self.vec4(B, dtype=self.real_t)
+        # T_dev = self.to_device(T, dtype=self.real_t)
+        # F_dev = self.to_device(F, dtype=self.real_t)
+        # S_dev = self.to_device(S, dtype=self.real_t)
+        # B_dev = self.to_device(B, dtype=self.real_t)
 
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
@@ -478,8 +482,8 @@ class ClCore(object):
 
         self.phase_factor_pad_cl(self.queue, (global_size,),
                                  (self.group_size,), r_dev.data,
-                                 f_dev.data, R_dev.data, a_dev.data, n_pixels, n_atoms,
-                                 nF, nS, w, T_dev.data, F_dev.data, S_dev.data, B_dev.data, add)
+                                 f_dev.data, R, a_dev.data, n_pixels, n_atoms,
+                                 nF, nS, w, T, F, S, B, add)
 
         if a is None:
             return a_dev.get()

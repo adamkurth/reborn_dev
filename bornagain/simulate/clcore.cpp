@@ -121,6 +121,104 @@ static float4 q_pad(
 }
 
 
+static float4 q_pad2(
+    const int i,
+    const int j,
+    const float w,
+    const float4 T,
+    const float4 F,
+    const float4 S,
+    const float4 B
+    )
+// Calculate the q vectors for a pixel-array detector
+//
+// Input:
+// i, j are the pixel indices
+// w is the photon wavelength
+// T is the translation vector from origin to center of corner pixel
+// F, S are the fast/slow-scan basis vectors (pointing alont rows/columns)
+//      the length of these vectors is the pixel size
+// B is the direction of the incident beam
+//
+// Output: A single q vector
+{
+
+    float4 V = T + i*F + j*S;
+    V /= sqrt(dot(V,V));
+    float4 q = (V-B)*PI2/w;
+
+    return q;
+
+}
+
+
+
+// Sum the amplitudes from a collection of atoms: SUM f_i * exp(i*q.r)
+// ** There is one complication: we attempt to speed up the summation by making workers move atomic coordinates
+// and scattering factors to a local memory buffer in parallele, in hopes of faster computation (is it really faster?)
+
+static float2 phase_factor(
+    const float4 q,         // Scattering vector
+    global const float *r,  // Atomic coordinates
+    global const float2 *f, // Atomic scattering factors
+    const int n_atoms,      // Number of atoms
+    local float4 *rg,       // Local storage for chunk of atom positions          (local float4 rg[GROUP_SIZE];)
+    local float2 *fg,       // Local storage for chunk of atom scattering factors (local float2 fg[GROUP_SIZE];)
+    const int li            // Local index of this worker (i.e. group member ID)
+)
+{
+
+    int ai;
+    float ph, sinph, cosph;
+    float2 a_temp;
+    float2 a_sum = (float2)(0.0f,0.0f);
+
+    for (int g=0; g<n_atoms; g+=GROUP_SIZE){
+
+        // Here we will move a chunk of atoms to local memory.  Each worker in a
+        // group moves one atom.
+
+        ai = g+li; // Index of the global array of atoms that this worker will move in this particular iteration
+
+        if (ai < n_atoms ){
+            rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
+            fg[li] = f[ai];
+        } else {
+            rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
+            fg[li] = (float2)(0.0f,0.0f);
+        }
+
+        // Don't proceed until **all** members of the group have finished moving
+        // atom information into local memory.
+        barrier(CLK_LOCAL_MEM_FENCE);
+
+        // We use a local real and imaginary part to avoid floatint point overflow
+        a_temp = (float2)(0.0f,0.0f);
+
+        // Now sum up the amplitudes from this subset of atoms
+        for (int n=0; n < GROUP_SIZE; n++){
+            ph = -dot(q,rg[n]);
+            sinph = native_sin(ph);
+            cosph = native_cos(ph);
+            a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
+            a_temp.y += fg[n].x*sinph + fg[n].y*cosph;
+        }
+        a_sum += a_temp;
+
+        // Don't proceed until this subset of atoms are completed.
+        barrier(CLK_LOCAL_MEM_FENCE);
+    }
+
+    return a_sum;
+}
+
+
+
+
+
+
+
+
 //static float4 q_pad_mc(
 //    const int i,
 //    const int j,
@@ -201,41 +299,24 @@ kernel void mod_squared_complex_to_real(
 }
 
 
-//kernel void phase_factor_qrf(
-//    global const float *q,
-//    global const float *r,
-//    global const float2 *f,
-//    __constant float *R,
-//    global float2 *a,
-//    const int n_atoms,
-//    const int n_pixels,
-//    const int add)
-
 kernel void phase_factor_qrf(
-    global const float *q,
-    global const float *r,
-    global const float2 *f,
-    const float16 R,
-    global float2 *a,
-    const int n_atoms,
-    const int n_pixels,
-    const int add)
+    global const float *q,  // Scattering vectors
+    global const float *r,  // Atomic postion vectors
+    global const float2 *f, // Atomic scattering factors
+    const float16 R,        // Rotation matrix
+    global float2 *a,       // The summed scattering amplitudes (output)
+    const int n_atoms,      // Number of atoms
+    const int n_pixels,     // Number of pixels
+    const int add)          // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
 {
     const int gi = get_global_id(0); /* Global index */
     const int li = get_local_id(0);  /* Local group index */
 
-    float ph, sinph, cosph;
-
-    // Each global index corresponds to a particular q-vector.  Note that the
-    // global index could be larger than the number of pixels because it must be a
-    // multiple of the group size.  We must check if it is larger...
-    float2 a_sum = (float2)(0.0f,0.0f);
+//    float2 a_sum = (float2)(0.0f,0.0f);
     float4 q4r;
 
+    // Check that this pixel index is not out of bounds
     if (gi < n_pixels){
-
-        a_sum.x = a[gi].x;
-        a_sum.y = a[gi].y;
 
         // Move original q vector to private memory
         q4r = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
@@ -243,183 +324,47 @@ kernel void phase_factor_qrf(
         // Rotate the q vector
         q4r = rotate_vec2(R,q4r);
 
-    }
-    
+    } else { q4r = (float4)(0.0f,0.0f,0.0f,0.0f); }
+
+    // Sum over atomic scattering amplitudes
+    float2 a_sum = (float2)(0.0f,0.0f);
     local float4 rg[GROUP_SIZE];
     local float2 fg[GROUP_SIZE];
+    a_sum = phase_factor(q4r, r, f, n_atoms, rg, fg, li);
 
-    for (int g=0; g<n_atoms; g+=GROUP_SIZE){
-
-        // Here we will move a chunk of atoms to local memory.  Each worker in a
-        // group moves one atom.
-        int ai = g+li;
-
-        if (ai < n_atoms ){
-            rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
-            fg[li] = f[ai];
-        } else {
-            rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
-            fg[li] = (float2)(0.0f,0.0f);
-        }
-
-        // Don't proceed until **all** members of the group have finished moving
-        // atom information into local memory.
-        barrier(CLK_LOCAL_MEM_FENCE);
-
-        // We use a local real and imaginary part to avoid floatint point overflow
-        float2 a_temp = (float2)(0.0f,0.0f);
-
-        // Now sum up the amplitudes from this subset of atoms
-        for (int n=0; n < GROUP_SIZE; n++){
-            ph = -dot(q4r,rg[n]);
-            sinph = native_sin(ph);
-            cosph = native_cos(ph);
-            a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
-            a_temp.y += fg[n].x*sinph + fg[n].y*cosph;
-        }
-        a_sum += a_temp;
-
-        // Don't proceed until this subset of atoms are completed.
-        barrier(CLK_LOCAL_MEM_FENCE);
-    }
+    // Again, check that this pixel index is not out of bounds
     if (gi < n_pixels){
-        a[gi] = a_sum;
+        if ( add == 1 ){
+            a[gi] += a_sum;
+        } else {
+            a[gi] = a_sum;
+        }
     }
+
 }
 
-
-
-//kernel void phase_factor_qrf(
-//    global const float *q,
-//    global const float *r,
-//    global const float2 *f,
-//    __constant float *R,
-//    global float2 *a,
-//    const int n_atoms,
-//    const int n_pixels,
-//    const int add)
-//{
-//
-//// Calculate the the scattering amplitude according to a set of point
-//// scatterers:  A = sum{ f*exp(i r.q ) }.  This variant accepts as input a set
-//// of q vectors (computed as you wish), and then the atomic positions and
-//// scattering factors.  A rotation matrix acts on the q vectors.
-////
-//// Input:
-//// q: scattering vectors
-//// r: atomic coordinates
-//// f: scattering factors
-//// R: rotation matrix acting on q vectors
-//// a: scattering amplitudes
-//// n_atoms: number of atoms
-//// n_pixels: number of q vectors
-//
-//    const int gi = get_global_id(0); /* Global index */
-//    const int li = get_local_id(0);  /* Local group index */
-//
-//    float ph, sinph, cosph;
-//
-//    // Each global index corresponds to a particular q-vector.  Note that the
-//    // global index could be larger than the number of pixels because it must be a
-//    // multiple of the group size.  We must check if it is larger...
-//    float2 a_sum = (float2)(0.0f,0.0f);
-//    float4 qr;
-//    if (gi < n_pixels){
-//
-//        a_sum.x = a[gi].x;
-//        a_sum.y = a[gi].y;
-//
-//        // Move original q vector to private memory
-//        qr = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
-//
-//        // Rotate the q vector
-//        qr = rotate_vec(R, qr);
-//
-//    } else {
-//        // Dummy values; doesn't really matter what they are.
-//        qr = (float4)(0.0f,0.0f,0.0f,0.0f);
-//    }
-//    local float4 rg[GROUP_SIZE];
-//    local float2 fg[GROUP_SIZE];
-//
-//    for (int g=0; g<n_atoms; g+=GROUP_SIZE){
-//
-//        // Here we will move a chunk of atoms to local memory.  Each worker in a
-//        // group moves one atom.
-//        int ai = g+li;
-//
-//        if (ai < n_atoms ){
-//            rg[li] = (float4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f);
-//            fg[li] = f[ai];
-//        } else {
-//            rg[li] = (float4)(0.0f,0.0f,0.0f,0.0f);
-//            fg[li] = (float2)(0.0f,0.0f);
-//        }
-//
-//        // Don't proceed until **all** members of the group have finished moving
-//        // atom information into local memory.
-//        barrier(CLK_LOCAL_MEM_FENCE);
-//
-//        // We use a local real and imaginary part to avoid floatint point overflow
-//        float2 a_temp = (float2)(0.0f,0.0f);
-//
-//        // Now sum up the amplitudes from this subset of atoms
-//        for (int n=0; n < GROUP_SIZE; n++){
-//            ph = -dot(qr,rg[n]);
-//            sinph = native_sin(ph);
-//            cosph = native_cos(ph);
-//            a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
-//            a_temp.y += fg[n].x*sinph + fg[n].y*cosph;
-//        }
-//        a_sum += a_temp;
-//
-//        // Don't proceed until this subset of atoms are completed.
-//        barrier(CLK_LOCAL_MEM_FENCE);
-//    }
-//    if (gi < n_pixels){
-//        if (add == 1){
-//            a[gi] += a_sum;
-//        } else {
-//            a[gi] = a_sum;
-//        }
-//    }
-//}
-
-kernel void phase_factor_pad(
-    global const float *r,
-    global const float2 *f,
-    __constant float *R,
-    global float2 *a,
-    const int n_pixels,
-    const int n_atoms,
-    const int nF,
-    const int nS,
-    const float w,
-    __constant float *T,
-    __constant float *F,
-    __constant float *S,
-    __constant float *B,
-    const int add)
-{
 
 // Calculate the the scattering amplitude according to a set of point
 // scatterers:  A = sum{ f*exp(i r.q ) }.  This variant generates the q vectors
 // for a pixel-array detector on the fly.  The atomic positions and
 // scattering factors are specified.  A rotation matrix acts on the q vectors.
-//
-// Input:
-// r: atomic coordinates
-// f: complex atomic scattering factors
-// R: rotation matrix acting on the q vectors
-// a: output amplitudes
-// n_pixels: number of pixels
-// n_atoms: number of atoms
-// nF,nS: number of detector pixels in fast/slow-scan direction
-// w: photon wavelength
-// T: translation vector from origin to corner detector pixel
-// F,S: basis vectors pointing along fast/slow-scan directions (length is equal
-//    to the pixel size)
-// B: incident beam direction
+
+kernel void phase_factor_pad(
+    global const float *r,  // Atomic postion vectors
+    global const float2 *f, // Atomic scattering factors
+    const float16 R,        // Rotation matrix
+    global float2 *a,       // The summed scattering amplitudes (output)
+    const int n_pixels,     // Number of pixels
+    const int n_atoms,      // Number of atoms
+    const int nF,           // Number of fast-scan pixels
+    const int nS,           // Number of slow-scan pixels
+    const float w,          // Photon wavelength
+    const float4 T,         // Translation of detector
+    const float4 F,         // Fast-scan basis vector
+    const float4 S,         // Slow-scan basis vector
+    const float4 B,         // Incident beam unit vector
+    const int add)          // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
+{
 
     const int gi = get_global_id(0); /* Global index */
     const int i = gi % nF;          /* Pixel coordinate i */
@@ -431,11 +376,11 @@ kernel void phase_factor_pad(
     float im = 0;
 
     // Each global index corresponds to a particular q-vector
-    float4 q;
-    q = q_pad( i,j,w,T,F,S,B);
+    float4 q;// = (float4)(0.0f,0.0f,0.0f,0.0f);
+    q = q_pad2(i,j,w,T,F,S,B);
 
     // Rotate the q vector
-    q = rotate_vec(R, q);
+    q = rotate_vec2(R, q);
 
     local float4 rg[GROUP_SIZE];
     local float2 fg[GROUP_SIZE];
