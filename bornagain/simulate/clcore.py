@@ -135,9 +135,13 @@ class ClCore(object):
     def _build_openCL_programs(self):
         clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
         kern_str = open(clcore_file).read()
+        build_opts = []
         if self.double_precision:
-            kern_str = kern_str.replace("float", "double")
-        build_opts = ['-D', 'GROUP_SIZE=%d' % self.group_size]
+            build_opts.append('-D')
+            build_opts.append('CONFIG_USE_DOUBLE=1')
+            # kern_str = kern_str.replace("float", "double")
+        build_opts.append('-D')
+        build_opts.append('GROUP_SIZE=%d' % (self.group_size))
         self.programs = cl.Program(self.context, kern_str).build(options=build_opts)
 
     def _load_get_group_size(self):
