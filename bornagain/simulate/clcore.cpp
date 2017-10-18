@@ -440,17 +440,16 @@ kernel void buffer_mesh_lookup(
     int4 N,
     float4 deltaQ,
     float4 q_min,
-    __constant float *R)
+    const float16 R)
 // This is meant to be used in conjunction with phase_factor_mesh.  This is
 // an interpolation routine that uses the output of phase_factor_mesh as the
 // "lookup table".  It does trilinear interpolation.
 {
     const int gi = get_global_id(0);
 
-    const float4 q4 = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
-    float4 q4r;
+    float4 q4r = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
 
-    q4r = rotate_vec(R,q4);
+    q4r = rotate_vec2(R,q4r);
 
     // Floating point coordinates
     const float i_f = (q4r.x - q_min.x)/deltaQ.x;
