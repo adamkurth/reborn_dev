@@ -215,6 +215,29 @@ class ClCore(object):
             dtype = self.real_t
         return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
 
+    def rot16(self, R, dtype=None):
+        """
+        The best way to pass in a rotation matrix is as a float16.  This is a helper function for preparing a numpy
+        array so that it can be passed in as a float16.
+
+        Arguments:
+            - R, np.ndarray
+
+            - dtype, np.dtype
+                default is np.float32
+
+        Returns:
+            - numpy array of length 16
+        """
+
+        if dtype is None:
+            dtype = self.real_t
+        R16 = np.zeros([16], dtype=dtype)
+        R16[0:9] = R.flatten().astype(dtype)
+        return R16
+
+
+
     @staticmethod
     def to_device_static(array, dtype, queue):
         """
@@ -369,9 +392,9 @@ class ClCore(object):
         '''
 
         if R is None:
-            R = np.eye(3, dtype=self.real_t)
-        R16 = np.zeros([16], dtype=self.real_t)
-        R16[0:9] = R.flatten().astype(self.real_t)
+            R = np.eye(3)
+        R = self.rot16(R, dtype=self.real_t)
+
         if add:
             add = 1
         else:
@@ -388,10 +411,9 @@ class ClCore(object):
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
                              * self.group_size)
 
-        # R16_dev = self.to_device(R16, dtype=self.real_t)
         self.phase_factor_qrf_cl(self.queue, (global_size,),
                                  (self.group_size,), q_dev.data, r_dev.data,
-                                 f_dev.data, R16, a_dev.data, n_atoms,
+                                 f_dev.data, R, a_dev.data, n_atoms,
                                  n_pixels, add)
 
         if a is None:
