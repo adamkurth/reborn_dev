@@ -685,10 +685,10 @@ class ClCore(object):
         """
         Prepare special array data for cromermann simulation
 
-        Arguments
-            - q_vecs, np.ndarray
+        Arguments:
+            q_vecs (np.ndarray) :
                 Npixels x 3 array of cartesian pixels qx, qy, qz
-            - atomic_num, np.ndarray
+            atomic_num (np.ndarray) :
                 Natoms x 1 array of atomic numbers corresponding
                 to the atoms in the target
         """
