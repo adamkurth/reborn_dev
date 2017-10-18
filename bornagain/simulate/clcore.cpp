@@ -61,6 +61,26 @@ static float4 rotate_vec(
 }
 
 
+static float4 rotate_vec2(
+    const float16 *R,
+    const float4 v)
+// Rotate a 4-vector.
+// R is the rotation matrix
+// v is the input 4-vector
+// return is the rotated 4-vector
+{
+    float4 v_rot = (float4)(0.0,0.0,0.0,0.0);
+
+    v_rot.x = R->s0*v.x + R->s1*v.y + R->s2*v.z;
+    v_rot.y = R->s3*v.x + R->s4*v.y + R->s5*v.z;
+    v_rot.z = R->s6*v.x + R->s7*v.y + R->s8*v.z;
+
+    return v_rot;
+}
+
+
+
+
 static float4 q_pad(
     const int i,
     const int j,
@@ -278,7 +298,7 @@ kernel void phase_factor_qrf(
     global const float *q,
     global const float *r,
     global const float2 *f,
-    __constant float *R,
+    const float16 R,
     global float2 *a,
     const int n_atoms,
     const int n_pixels,
@@ -308,17 +328,24 @@ kernel void phase_factor_qrf(
     // global index could be larger than the number of pixels because it must be a
     // multiple of the group size.  We must check if it is larger...
     float2 a_sum = (float2)(0.0f,0.0f);
-    float4 qr;
+    float4 qr = (float4)(0.0f,0.0f,0.0f,0.0f);
+    float4 qt;
+//    float4 q4r = (float4)(0.0f,0.0f,0.0f,0.0f);
     if (gi < n_pixels){
 
         a_sum.x = a[gi].x;
         a_sum.y = a[gi].y;
 
         // Move original q vector to private memory
-        qr = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+        qt = (float4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
 
         // Rotate the q vector
-        qr = rotate_vec(R, qr);
+//        qr.x = R.s0*qt.x + R.s1*qt.y + R.s2*qt.z;
+//        qr.y = R.s3*qt.x + R.s4*qt.y + R.s5*qt.z;
+//        qr.z = R.s6*qt.x + R.s7*qt.y + R.s8*qt.z;
+
+        // Rotate the q vector
+        qr = rotate_vec2(&R, qt);
 
     } else {
         // Dummy values; doesn't really matter what they are.
