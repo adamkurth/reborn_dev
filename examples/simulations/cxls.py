@@ -13,8 +13,8 @@ from bornagain.units import r_e, hc, keV
 import bornagain.simulate.clcore as core
 
 # Lysozyme at CXLS
-pdbFile = '../data/pdb/1jb0.pdb'
-# pdbFile = '../data/pdb/2LYZ-P1.pdb'
+#pdbFile = '../data/pdb/1jb0.pdb'
+pdbFile = '../data/pdb/2LYZ-P1.pdb'
 do_monte_carlo = True
 n_monte_carlo_iterations = 1000
 n_pixels = 1000

@@ -470,10 +470,6 @@ class ClCore(object):
         F = self.vec4(F, dtype=self.real_t)
         S = self.vec4(S, dtype=self.real_t)
         B = self.vec4(B, dtype=self.real_t)
-        # T_dev = self.to_device(T, dtype=self.real_t)
-        # F_dev = self.to_device(F, dtype=self.real_t)
-        # S_dev = self.to_device(S, dtype=self.real_t)
-        # B_dev = self.to_device(B, dtype=self.real_t)
 
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
@@ -609,48 +605,8 @@ class ClCore(object):
     def lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w,
                                           R=None, I=None, add=False):
         """
-        This is not documentation.  That is Rick's fault.
-        """
-
-        if R is None:
-            R = np.eye(3, dtype=self.real_t)
-
-        nF = self.int_t(nF)
-        nS = self.int_t(nS)
-        n_pixels = self.int_t(nF * nS)
-        if add is True:
-            add = 1
-        else:
-            add = 0
-        add = self.int_t(add)
-
-        abc_dev = self.to_device(abc, dtype=self.real_t)
-        N_dev = self.to_device(N, dtype=self.int_t)
-        R_dev = self.to_device(R, dtype=self.real_t)
-        T_dev = self.to_device(T, dtype=self.real_t)
-        F_dev = self.to_device(F, dtype=self.real_t)
-        S_dev = self.to_device(S, dtype=self.real_t)
-        B_dev = self.to_device(B, dtype=self.real_t)
-        I_dev = self.to_device(I, dtype=self.real_t, shape=(n_pixels))
-
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
-                             self.group_size)
-        self.lattice_transform_intensities_pad_cl(self.queue, (global_size,),
-                                                  (self.group_size,), abc_dev.data,
-                                                  N_dev.data, R_dev.data, I_dev.data, n_pixels,
-                                                  nF, nS, w, T_dev.data, F_dev.data, S_dev.data, B_dev.data, add)
-
-        if I is None:
-            return I_dev.get()
-        else:
-            return I_dev
-
-    def gaussian_lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w,
-                                                   R=None, I=None, add=False):
-        """
-        Calculate crystal lattice transform intensities for a pixel-array detector.
-
-        Note that most of the input can be either :class:pyopencl.array.Array objects or :class:numpy.array objects.
+        Calculate crystal lattice transform intensities for a pixel-array detector.  This is the usual transform for
+        an idealized parallelepiped crystal (usually not very realistic...).
 
         Arguments:
             abc (numpy array) : A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.
@@ -671,7 +627,8 @@ class ClCore(object):
         """
 
         if R is None:
-            R = np.eye(3, dtype=self.real_t)
+            R = np.eye(3)
+        R = self.rot16(R, dtype=self.real_t)
 
         nF = self.int_t(nF)
         nS = self.int_t(nS)
@@ -682,22 +639,77 @@ class ClCore(object):
             add = 0
         add = self.int_t(add)
 
-        abc_dev = self.to_device(abc, dtype=self.real_t)
-        N_dev = self.to_device(N, dtype=self.int_t)
-        R_dev = self.to_device(R, dtype=self.real_t)
-        T_dev = self.to_device(T, dtype=self.real_t)
-        F_dev = self.to_device(F, dtype=self.real_t)
-        S_dev = self.to_device(S, dtype=self.real_t)
-        B_dev = self.to_device(B, dtype=self.real_t)
+        abc = self.rot16(abc, dtype=self.real_t)
+        N = self.vec4(N, dtype=self.int_t)
+        T = self.vec4(T, dtype=self.real_t)
+        F = self.vec4(F, dtype=self.real_t)
+        S = self.vec4(S, dtype=self.real_t)
+        B = self.vec4(B, dtype=self.real_t)
+        I_dev = self.to_device(I, dtype=self.real_t, shape=(n_pixels))
+
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
+                             self.group_size)
+        self.lattice_transform_intensities_pad_cl(self.queue, (global_size,),
+                                                  (self.group_size,), abc,
+                                                  N, R, I_dev.data, n_pixels,
+                                                  nF, nS, w, T, F, S, B, add)
+
+        if I is None:
+            return I_dev.get()
+        else:
+            return I_dev
+
+    def gaussian_lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w,
+                                                   R=None, I=None, add=False):
+        """
+        Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian approximation
+        to the lattice transform.
+
+        Arguments:
+            abc (numpy array) : A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.
+            N (numpy array)   : An array containing number of unit cells along each of three axes.
+            T (numpy array)   : Translation to center of corner pixel.
+            F (numpy array)   : Fast-scan basis vector.
+            S (numpy array)   : Slow-scan basis vector.
+            B (numpy array)   : Incident beam vector.
+            nF (int)          : Number of fast-scan pixels.
+            nS (int)          : Number of slow-scan pixels.
+            w (float)         : Wavelength.
+            R (numpy array)   : Rotation matrix acting on q vectors.
+            I (:class:pyopencl.array.Array) : OpenCL device array containing intensities.
+            add (bool)        : If true, the function will add to the input I buffer, else the buffer is overwritten.
+
+        Returns:
+            If I == None, then the output is a numpy array.  Otherwise, it is an opencl array.
+        """
+
+        if R is None:
+            R = np.eye(3)
+        R = self.rot16(R, dtype=self.real_t)
+
+        nF = self.int_t(nF)
+        nS = self.int_t(nS)
+        n_pixels = self.int_t(nF * nS)
+        if add is True:
+            add = 1
+        else:
+            add = 0
+        add = self.int_t(add)
+
+        abc = self.rot16(abc, dtype=self.real_t)
+        N = self.vec4(N, dtype=self.int_t)
+        T = self.vec4(T, dtype=self.real_t)
+        F = self.vec4(F, dtype=self.real_t)
+        S = self.vec4(S, dtype=self.real_t)
+        B = self.vec4(B, dtype=self.real_t)
         I_dev = self.to_device(I, dtype=self.real_t, shape=(n_pixels))
 
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
                              self.group_size)
         self.gaussian_lattice_transform_intensities_pad_cl(self.queue, (global_size,),
-                                                           (self.group_size,), abc_dev.data,
-                                                           N_dev.data, R_dev.data, I_dev.data, n_pixels,
-                                                           nF, nS, w, T_dev.data, F_dev.data, S_dev.data, B_dev.data,
-                                                           add)
+                                                  (self.group_size,), abc,
+                                                  N, R, I_dev.data, n_pixels,
+                                                  nF, nS, w, T, F, S, B, add)
 
         if I is None:
             return I_dev.get()

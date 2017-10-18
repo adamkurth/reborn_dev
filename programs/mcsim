@@ -61,7 +61,7 @@ a = p.parse_args()
 # This needs to be thought through more carefully.  E.g. check if pdb file exists, send message if it doesn't, and so
 # on.
 pdb_file = a.pdb_file  # Really, we don't even need to copy these input arguments... just change variables below?
-n_monte_carlo_iterations = a.iterations[0]
+n_monte_carlo_iterations = a.iterations
 lattice_transform_model = a.lattice_transform
 write_hdf5 = a.write_hdf5
 write_geom = a.write_geom
