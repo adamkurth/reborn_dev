@@ -59,13 +59,22 @@ a = p.parse_args()
 # Now do something intelligent with the input.  Basic sanity checks, etc.
 ########################################################################################################################
 
+def get_arg(arg):
+    # Annoyingly, I can't seem to predict if parse_args() members will be list objects; this function checks for that
+    # and returns the first list item as appropriate
+    if isinstance(arg, (list, tuple)): return arg[0]
+    return arg
+
 # This needs to be thought through more carefully.  E.g. check if pdb file exists, send message if it doesn't, and so
 # on.
-pdb_file = a.pdb_file  # Really, we don't even need to copy these input arguments... just change variables below?
-n_monte_carlo_iterations = a.iterations[0]
-lattice_transform_model = a.lattice_transform
-write_hdf5 = a.write_hdf5
-write_geom = a.write_geom
+pdb_file                      = get_arg(a.pdb_file)
+n_monte_carlo_iterations      = get_arg(a.iterations)
+lattice_transform_model       = get_arg(a.lattice_transform)
+write_hdf5                    = get_arg(a.write_hdf5)
+write_geom                    = get_arg(a.write_geom)
+mplview                       = get_arg(a.mplview)
+qtview                        = get_arg(a.qtview)
+skview                        = get_arg(a.skview)
 
 do_monte_carlo = True # This should not be needed; set bandwidth etc. to zero of you don't want monte carlo...
 n_pixels = 1000
@@ -84,8 +93,6 @@ crystal_size = beam_diameter
 mosaic_domain_size = 1000e-9
 mosaicity_fwhm = 0.0001
 results_dir = '/data/temp/cxls-lysozyme-02/'
-write_hdf5 = False
-write_geom = False
 cromer_mann = False
 quiet = False
 random_rotation = True
@@ -95,9 +102,7 @@ rotation_angle = 0.1
 add_noise = False
 overlay_wigner_cells = False
 mask_direct_beam = True
-mplview = a.mplview
-qtview =  a.qtview
-skview =  a.skview
+
 
 # Doesn't make sense if mosaic domain size is larger than the whole crystal...
 if mosaic_domain_size > crystal_size: mosaic_domain_size = crystal_size
