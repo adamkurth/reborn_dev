@@ -10,6 +10,7 @@ from glob import glob
 
 sys.path.append("..")  # This path setting won't be needed once bornagain is properly installed
 import bornagain as ba
+from bornagain.utils import vec_mag
 from bornagain.units import r_e, hc, keV
 import bornagain.simulate.clcore as core
 
@@ -61,7 +62,7 @@ a = p.parse_args()
 # This needs to be thought through more carefully.  E.g. check if pdb file exists, send message if it doesn't, and so
 # on.
 pdb_file = a.pdb_file  # Really, we don't even need to copy these input arguments... just change variables below?
-n_monte_carlo_iterations = a.iterations
+n_monte_carlo_iterations = a.iterations[0]
 lattice_transform_model = a.lattice_transform
 write_hdf5 = a.write_hdf5
 write_geom = a.write_geom
@@ -156,15 +157,19 @@ write('done\n')
 
 write('Will run %d Monte Carlo iterations\n' % (n_monte_carlo_iterations))
 
+# Setup source info
+beam_vec = np.array([0,0,1])
+polarization_vec = np.array([1,0,0])
+polarization_weight = 1.0 # Fraction of polarization in this vector
+
 # Setup detector geometry
 write('Configuring detector... ')
-panel_list = ba.detector.PanelList()
-panel_list.simple_setup(n_pixels, n_pixels, pixel_size, detector_distance, wavelength)
-p = panel_list[0]
-q = p.Q
-qmag = p.Qmag
-sa = p.solid_angle
-P = p.polarization_factor
+pad = ba.detector.PADGeometry()
+pad.simple_setup(n_pixels=n_pixels, pixel_size=pixel_size, distance=detector_distance)
+q = pad.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
+qmag = vec_mag(q)
+sa = pad.solid_angle()
+P = pad.polarization_factor(polarization_vec=polarization_vec,beam_vec=beam_vec,weight=polarization_weight)
 write('done\n')
 
 # Get atomic coordinates and scattering factors from pdb file
@@ -176,7 +181,7 @@ write('done\n')
 write('%d atoms per unit cell\n' % (len(f)))
 
 # Make a mask for the direct beam
-direct_beam_mask = np.ones((p.nS * p.nF))
+direct_beam_mask = np.ones((pad.n_ss * pad.n_fs))
 direct_beam_mask[qmag < (2 * np.pi / np.max(np.array([cryst.a, cryst.b, cryst.c])))] = 0
 
 # Determine number of unit cells in whole crystal and mosaic domains
@@ -209,12 +214,13 @@ if write_geom:
     fid.write("0/ss = y\n")
     fid.close()
 
+
 # Allocate memory on GPU device
 write('Allocating GPU device memory... ')
 r_dev = clcore.to_device(r, dtype=clcore.real_t)
 f_dev = clcore.to_device(f, dtype=clcore.complex_t)
-F_dev = clcore.to_device(np.zeros([p.nS * p.nF], dtype=clcore.complex_t))
-S2_dev = clcore.to_device(shape=(p.nF, p.nS), dtype=clcore.real_t)
+F_dev = clcore.to_device(np.zeros([pad.n_ss * pad.n_fs], dtype=clcore.complex_t))
+S2_dev = clcore.to_device(shape=(pad.n_fs, pad.n_ss), dtype=clcore.real_t)
 write('done\n')
 
 R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
@@ -223,7 +229,7 @@ if random_rotation: R = ba.utils.random_rotation()
 if not cromer_mann:
     write('Simulating molecular transform from Henke tables... ')
     t = time.time()
-    clcore.phase_factor_pad(r_dev, f_dev, p.T, p.F, p.S, p.beam.B, p.nF, p.nS, p.beam.wavelength, R, F_dev, add=False)
+    clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R, F_dev, add=False)
     F2 = np.abs(F_dev.get()) ** 2
     tf = time.time() - t
     write('%g s\n' % (tf))
@@ -240,7 +246,6 @@ else:
     write('%g s\n' % (tf))
 
 abc = cryst.O.T.copy()
-# S2 = np.zeros((p.nF, p.nS))
 S2_dev *= 0
 
 write('Simulating lattice transform... ')
@@ -254,13 +259,13 @@ for n in np.arange(1, (n_monte_carlo_iterations + 1)):
         B = ba.utils.random_beam_vector(beam_divergence_fwhm)
         w = np.random.normal(wavelength, wavelength_fwhm / 2.354820045, [1])[0]
         Rm = ba.utils.random_mosaic_rotation(mosaicity_fwhm).dot(R)
-        T = p.T.copy() + p.F * (np.random.random([1]) - 0.5) + p.S * (np.random.random([1]) - 0.5)
+        T = pad.t_vec.copy() + pad.fs_vec * (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
     else:
-        B = p.beam.B
-        w = p.beam.wavelength
+        B = beam_vec
+        w = wavelength
         Rm = R
-        T = p.T
-    lattice_transform(abc, n_cells_mosaic_domain, T, p.F, p.S, B, p.nF, p.nS, w, Rm, S2_dev, add=True)
+        T = pad.t_vec
+    lattice_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, S2_dev, add=True)
 
     tf = time.time() - t
     if (n % 1000) == 0:
@@ -285,8 +290,8 @@ if write_hdf5:
     file_name = results_dir + 'pattern-%06d.h5' % (n_patterns + 1)
     write('Writing file %s\n' % file_name)
     fid = h5py.File(file_name, 'w')
-    fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((p.nS, p.nF))
-    fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((p.nS, p.nF))
+    fid['/data/ideal'] = I_ideal.astype(npad.fs_vecloat32).reshape((pad.n_ss, pad.n_fs))
+    fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((pad.n_ss, pad.n_fs))
     fid.close()
 
 F2mean = np.mean(F2.flat[direct_beam_mask > 0])
@@ -309,8 +314,8 @@ if qtview or mplview or skview:
     if overlay_wigner_cells:
         hkl = cryst.O.dot(R).dot(q.T) / 2.0 / np.pi  # .dot(cryst.Oinv)
         delta = hkl - np.round(hkl)
-        delta = np.sqrt(np.sum(delta ** 2, axis=0))
-        peak_mask = np.zeros((p.nF * p.nS))
+        delta = npad.ss_vecqrt(npad.ss_vecum(delta ** 2, axis=0))
+        peak_mask = np.zeros((pad.n_fs * pad.n_ss))
         peak_mask[delta < 0.5] = 1
         I_display += peak_mask * 1e-2
 
@@ -320,7 +325,7 @@ if qtview or mplview or skview:
 
     write('Taking log10 of simulated intensities\n')
     I_display = np.log10(I_display + 1e-20)
-    I_display = I_display.reshape((p.nS, p.nF))
+    I_display = I_display.reshape((pad.n_ss, pad.n_fs))
 
     if qtview:
         img = pg.image(I_display, autoLevels=False, levels=[-0.4, np.log10(10)],

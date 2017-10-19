@@ -66,7 +66,7 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#some-basics">Some basics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#detectors">Detectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pixel-array-detectors">Pixel-Array Detectors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#simulation">Simulation</a></li>
 </ul>
 </li>
@@ -75,17 +75,6 @@
 <li class="toctree-l2"><a class="reference internal" href="installation.html#pure-anaconda-python">Pure Anaconda Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#using-anaconda-and-pip">Using Anaconda and pip</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#installation-on-scientific-linux-6">Installation on Scientific Linux 6</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="bornagain.html">bornagain package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.detector">bornagain.detector module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.scatter">bornagain.scatter module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.source">bornagain.source module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.units">bornagain.units module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.utils">bornagain.utils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a><ul>
@@ -135,45 +124,52 @@
 <div class="section" id="some-basics">
 <h2>Some basics<a class="headerlink" href="#some-basics" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>All units in bornagain are SI.  Angles are radians.  Exceptions are very rare.</li>
+<li>All units in bornagain are SI.  Angles are radians.  There are no known exceptions so far.</li>
 <li>All vectors should have a numpy shape of Nx3, in order to keep vector components close in memory.  We are quite strict about this.</li>
 <li>Detector panels are often segmented in real experiments.  The classes in the detector module are intended to help ease the burden of working with such detectors.</li>
 <li>Learn how to use iPython to explore the functionality of bornagain classes.</li>
 <li>If documentation is missing, tell someone (e.g. rkirian at asu dot edu).</li>
 </ul>
 </div>
-<div class="section" id="detectors">
-<h2>Detectors<a class="headerlink" href="#detectors" title="Permalink to this headline">¶</a></h2>
-<p>There are a few detectors that we might want to work with.  So far we only deal with polar and rectangular type detectors.</p>
-<p>The most commond detector is known as the &#8220;pixel-array detector&#8221;, or &#8220;PAD&#8221;, in the bornagain package.  This type of detector is assumed to consist of a 2D grid of pixels.  This grid is described by the following vectors:</p>
+<div class="section" id="pixel-array-detectors">
+<h2>Pixel-Array Detectors<a class="headerlink" href="#pixel-array-detectors" title="Permalink to this headline">¶</a></h2>
+<p>The most common detector we use is the &#8220;pixel-array detector&#8221;, abbeviated as &#8220;PAD&#8221; in the bornagain package.  This detector is like a CCD and is assumed to consist of an orthogonal 2D grid of pixels.  This grid is described by the following vectors:</p>
 <blockquote>
-<div><p><span class="math">\(\vec{T}\)</span> is the vector pointing from the origin to the corner detector pixel that is first in memory.</p>
-<p><span class="math">\(\vec{F}\)</span> is the vector that points along the &#8220;fast-scan&#8221; direction.  This is the distance and direction that points to the next pixel that is adjacent in physical space as well as in computer memory.  The length of this vector indicates the pixel size.</p>
+<div><p><span class="math">\(\vec{T}\)</span> is the vector pointing from the origin to the center of the corner detector pixel that is assumed to be the first in memory.</p>
+<p><span class="math">\(\vec{F}\)</span> is the vector that points along the &#8220;fast-scan&#8221; direction.  This is the distance and direction that points to the next pixel that is adjacent in physical space, as well as in computer memory.  The length of this vector indicates the pixel size.</p>
 <p><span class="math">\(N_F\)</span> is the number of fast-scan pixels in the detector.</p>
 <p><span class="math">\(\vec{S}\)</span> is the vector that points along the &#8220;slow-scan&#8221; direction.  This is much like the <span class="math">\(\vec{F}\)</span> vector, but these pixels are only adjacent in physical space but not in computer memory.  In computer memory, adjacent pixels have a memory stride of length <span class="math">\(N_F\)</span>.</p>
 <p><span class="math">\(N_S\)</span> is the number of slow-scan pixels in the detector.</p>
 </div></blockquote>
-<p>Note that there are no angles involved in describing the physical position and orientation of a PAD.  That is because angles are confusing due to the many different conventions used by different books and software.  Since angles are not used in bornagain, we must specify the x-ray beam direction:</p>
+<p>Note that there are no angles involved in describing the detector geometry.  That is because angles are confusing due to the many different conventions used by different reference books and software.  Also, importantly, rotation operations do not commute, which only adds to the confusion.</p>
+<p>The incident x-ray beam direction is not assumed in bornagain.  We must specify this vector:</p>
 <blockquote>
-<div><span class="math">\(\hat{B}\)</span> is the unit vector pointing along the incident beam direction.  This of course only makes sense if the illumination is a plane wave, but sometimes we might take this to be the &#8220;nominal&#8221; beam direction.  The convention in bornagain is to take this vector along the (0,0,1) direction, but you need not adhere to this.  Most likely it is only important for display purposes.</div></blockquote>
-<p>We must know a bit more about the incident illumination:</p>
+<div><span class="math">\(\hat{B}\)</span> is the unit vector pointing along the incident beam direction.  This of course only makes sense if the illumination is a plane wave, but we take this to be the &#8220;nominal&#8221; beam direction.  In some places bornagain might default to the (0,0,1) direction, but you need not adhere to this.  Most likely it is only important for display purposes.</div></blockquote>
+<p>In the case of free-electron lasers, beam polarization is important:</p>
 <blockquote>
-<div><span class="math">\(\hat{U}\)</span> is the polarization vector for the x-ray beam.  This is appropriate for linearly polarized beams, and that is all that is handled by bornagain thus far.</div></blockquote>
-<dl class="docutils">
-<dt>With the above vectors specified, we may now generate the quantities that will be useful when doing diffraction analysis and simulations.  The vector pointing from the origin (where the target is located) to a detector pixel indexed by <span class="math">\(i\)</span> and <span class="math">\(j\)</span>, is</dt>
-<dd><span class="math">\(\vec{V}_{ij}=\vec{T}+i\vec{F}+j\vec{S}\)</span></dd>
-<dt>Easy, right?  Now let&#8217;s compute scattering vector for pixel <span class="math">\(i,j\)</span>:</dt>
-<dd><span class="math">\(\vec{Q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{V}_{ij} - \hat{B}\right)\)</span></dd>
-<dt>where <span class="math">\(\lambda\)</span> is the photon wavelength.  Next we can comput the scattering angle of a pixel:</dt>
-<dd><span class="math">\(\theta_{ij} = \arccos(\hat{V}_{ij}\cdot\hat{B})\)</span></dd>
-<dt>For linearly polarized light, the polarization correction is</dt>
-<dd><span class="math">\(P_{ij} = 1 - |\hat{U}\cdot\hat{V}_{ij}|^2\)</span></dd>
-<dt>The solid angle of a pixel is approximately equal to</dt>
-<dd><span class="math">\(\Delta \Omega_{ij} \approx \frac{|\vec{F}\times\vec{S}|}{|V|^2}\hat{n}\cdot \hat{V}_{ij}\)</span></dd>
-<dt>where the vector normal to the PAD is</dt>
-<dd><span class="math">\(\hat{n} = \frac{\vec{F}\times\vec{S}}{|\vec{F}\times\vec{S}|}\)</span></dd>
-</dl>
-<p>In the bornagain detector and source modules, you will find a reasonably good correspondence between the quantities above and the members of the classes within the <a class="reference internal" href="bornagain.html#module-bornagain.detector" title="bornagain.detector"><code class="xref any py py-mod docutils literal"><span class="pre">detector</span></code></a> and <a class="reference internal" href="bornagain.html#module-bornagain.source" title="bornagain.source"><code class="xref any py py-mod docutils literal"><span class="pre">source</span></code></a> modules.</p>
+<div><span class="math">\(\hat{U}\)</span> is the polarization vector for the x-ray beam.  This single vector is appropriate for linearly polarized beams.  For beams that are not purely linearly polarized, one can sum the contributions from the two polarizations.  The polarization vector of the first component, along with the beam direction, specifies the second polarization vector.</div></blockquote>
+<p>With the above vectors specified, we may now generate the quantities that will be useful when doing diffraction analysis and simulations.  The vector pointing from the origin (where the target is located) to a detector pixel indexed by <span class="math">\(i\)</span> and <span class="math">\(j\)</span>, is</p>
+<blockquote>
+<div><span class="math">\(\vec{V}_{ij}=\vec{T}+i\vec{F}+j\vec{S}\)</span></div></blockquote>
+<p>Easy, right?  Now let&#8217;s compute the scattering vector for pixel <span class="math">\(i,j\)</span>:</p>
+<blockquote>
+<div><span class="math">\(\vec{Q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{V}_{ij} - \hat{B}\right)\)</span></div></blockquote>
+<p>where <span class="math">\(\lambda\)</span> is the photon wavelength.  Next we can compute the scattering angle of a pixel:</p>
+<blockquote>
+<div><span class="math">\(\theta_{ij} = \arccos(\hat{V}_{ij}\cdot\hat{B})\)</span></div></blockquote>
+<p>For linearly polarized light, the polarization correction is</p>
+<blockquote>
+<div><span class="math">\(P_{ij} = 1 - |\hat{U}\cdot\hat{V}_{ij}|^2\)</span></div></blockquote>
+<p>If the light is not linearly polarized, then the polarization factor is a weighted sum of the above component and this one:</p>
+<blockquote>
+<div><span class="math">\(P'_{ij} = 1 - |(\hat{B}\times\hat{U})\cdot\hat{V}_{ij}|^2\)</span></div></blockquote>
+<p>The solid angle of a pixel is approximately equal to</p>
+<blockquote>
+<div><span class="math">\(\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{F}\times\vec{S}|}{|V|^2}\hat{n}\cdot \hat{V}_{ij}\)</span></div></blockquote>
+<p>where the vector normal to the PAD is</p>
+<blockquote>
+<div><span class="math">\(\hat{n} = \frac{\vec{F}\times\vec{S}}{|\vec{F}\times\vec{S}|}\)</span></div></blockquote>
+<p>In the bornagain detector and source modules, you will find a reasonably good correspondence between the quantities above and the members of the classes within the <code class="xref any docutils literal"><span class="pre">detector</span></code> and <code class="xref any docutils literal"><span class="pre">source</span></code> modules.</p>
 </div>
 <div class="section" id="simulation">
 <h2>Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline">¶</a></h2>

@@ -31,8 +31,9 @@
 
   
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
+        <link rel="up" title="bornagain" href="modules.html"/>
         <link rel="next" title="bornagain.external package" href="bornagain.external.html"/>
-        <link rel="prev" title="Installation" href="installation.html"/> 
+        <link rel="prev" title="bornagain" href="modules.html"/> 
 
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
@@ -66,7 +67,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="overview.html#some-basics">Some basics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#detectors">Detectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#pixel-array-detectors">Pixel-Array Detectors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="overview.html#simulation">Simulation</a></li>
 </ul>
 </li>
@@ -86,6 +87,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-bornagain.units">bornagain.units module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-bornagain.utils">bornagain.utils module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-bornagain">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">bornagain package</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a><ul>
@@ -117,6 +122,8 @@
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="modules.html">bornagain</a> &raquo;</li>
       
     <li>bornagain package</li>
       <li class="wy-breadcrumbs-aside">
@@ -225,6 +232,12 @@ the 2*pi/lambda factor included.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="bornagain.detector.PADGeometry.polarization_factor">
+<code class="descname">polarization_factor</code><span class="sig-paren">(</span><em>polarization_vec=None</em>, <em>beam_vec=None</em>, <em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.polarization_factor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.polarization_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The scattering polarization factor.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="bornagain.detector.PADGeometry.position_vecs">
 <code class="descname">position_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.position_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.position_vecs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Vectors pointing to positions of pixels, from origin to center of pixels.</p>
@@ -270,6 +283,15 @@ the 2*pi/lambda factor included.</p>
 <dt id="bornagain.detector.PADGeometry.simple_setup">
 <code class="descname">simple_setup</code><span class="sig-paren">(</span><em>n_pixels=1000</em>, <em>pixel_size=0.0001</em>, <em>distance=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.simple_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.simple_setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make this a square PAD with beam at center.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PADGeometry.solid_angle">
+<code class="descname">solid_angle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.solid_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.solid_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:
+Area/R^2*cos(theta) .
+In terms of vectors the area is the cross product of basis vectors f X s, and tilt factor cos(theta) is the
+dot of the panel normal vector with the normal vector pointing from sample to pixel.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -996,7 +1018,7 @@ return a modified numpy ndarray with the correct shape.</p>
         <a href="bornagain.external.html" class="btn btn-neutral float-right" title="bornagain.external package">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="installation.html" class="btn btn-neutral" title="Installation"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral" title="bornagain"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

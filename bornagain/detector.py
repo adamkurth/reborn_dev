@@ -89,10 +89,12 @@ class PADGeometry(object):
 
         """ Vectors pointing to positions of pixels, from origin to center of pixels. """
 
-        i = np.arange(self.n_fs); j = np.arange(self.n_ss)
+        i = np.arange(self.n_fs);
+        j = np.arange(self.n_ss)
         [i, j] = np.meshgrid(i, j)
-        i.ravel(); j.ravel()
-        return self.indices_to_vectors(j,i)
+        i.ravel();
+        j.ravel()
+        return self.indices_to_vectors(j, i)
 
     def norm_vec(self):
 
@@ -113,6 +115,46 @@ class PADGeometry(object):
         """ Conventional scattering vectors 2*pi/lambda (s - s0)"""
 
         return (2*np.pi/wavelength)*self.ds_vecs(beam_vec=beam_vec)
+
+    def solid_angle(self):
+
+        """
+        Solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:
+        Area/R^2*cos(theta) .
+        In terms of vectors the area is the cross product of basis vectors f X s, and tilt factor cos(theta) is the
+        dot of the panel normal vector with the normal vector pointing from sample to pixel.
+        """
+
+        v = self.position_vecs()
+        n = self.norm_vec()
+
+        A = vec_mag(np.cross(self.fs_vec, self.ss_vec))  # Area of the pixel
+        R2 = vec_mag(v)**2                               # Distance to the pixel, squared
+        cs = np.dot(n, vec_norm(v).T)                    # Inclination factor: cos(theta)
+        sa = (A/R2)*cs                                   # Solid angle
+
+        return sa.ravel()
+
+    def polarization_factor(self, polarization_vec=None, beam_vec=None, weight=None):
+        """ The scattering polarization factor. """
+
+        v = vec_norm(self.position_vecs())
+        u = vec_norm(vec_check(polarization_vec))
+        b = vec_norm(vec_check(beam_vec))
+        up = np.cross(u,b)
+
+        if weight is None:
+            w1 = 1
+            w2 = 0
+        else:
+            w1 = weight
+            w2 = 1-weight
+
+        p1 = w1*(1-np.abs(np.dot(u, v.T))**2)
+        p2 = w2*(1-np.abs(np.dot(up,v.T))**2)
+        p = p1 + p2
+
+        return p.ravel()
 
 
 

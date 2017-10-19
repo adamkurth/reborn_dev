@@ -1,11 +1,9 @@
 bornagain's documentation
 =====================================
 
-The bornagain python module is meant to be used for the analysis and simulation of 
+The bornagain python package is meant to be used for the simulation and analysis of
 x-ray diffraction under the Born approximation.  It is not the first attempt to create
-such a module, hence the name "bornagain".
-
-Nothing is finished in bornagain so far.  But there is a decent class for handling diffraction patterns with multi-panel detectors.  And there is a fast gpu simulation core that is coming along.  We will eventually add a few file readers and viewers.
+such a package, hence the name.  So far, nothing is finished in bornagain...
 
 Contents
 ========
@@ -16,6 +14,7 @@ Contents
    overview
    installation
    bornagain
+   modules
    coding
 
 Indices and tables
