@@ -65,6 +65,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../overview.html#some-basics">Some basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../overview.html#x-ray-beams">X-ray beams</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../overview.html#pixel-array-detectors">Pixel-Array Detectors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../overview.html#simulation">Simulation</a></li>
 </ul>
@@ -270,9 +271,13 @@
     <span class="k">def</span> <span class="nf">_build_openCL_programs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">clcore_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s">&#39;clcore.cpp&#39;</span><span class="p">)</span>
         <span class="n">kern_str</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">clcore_file</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">build_opts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">double_precision</span><span class="p">:</span>
-            <span class="n">kern_str</span> <span class="o">=</span> <span class="n">kern_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;float&quot;</span><span class="p">,</span> <span class="s">&quot;double&quot;</span><span class="p">)</span>
-        <span class="n">build_opts</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;-D&#39;</span><span class="p">,</span> <span class="s">&#39;GROUP_SIZE=</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">]</span>
+            <span class="n">build_opts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;-D&#39;</span><span class="p">)</span>
+            <span class="n">build_opts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;CONFIG_USE_DOUBLE=1&#39;</span><span class="p">)</span>
+            <span class="c"># kern_str = kern_str.replace(&quot;float&quot;, &quot;double&quot;)</span>
+        <span class="n">build_opts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;-D&#39;</span><span class="p">)</span>
+        <span class="n">build_opts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;GROUP_SIZE=</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">programs</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">Program</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">kern_str</span><span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">build_opts</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_load_get_group_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

@@ -65,6 +65,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../overview.html#some-basics">Some basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../overview.html#x-ray-beams">X-ray beams</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../overview.html#pixel-array-detectors">Pixel-Array Detectors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../overview.html#simulation">Simulation</a></li>
 </ul>
@@ -224,10 +225,12 @@
 
         <span class="sd">&quot;&quot;&quot; Vectors pointing to positions of pixels, from origin to center of pixels. &quot;&quot;&quot;</span>
 
-        <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">);</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">);</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">)</span>
         <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
-        <span class="n">i</span><span class="o">.</span><span class="n">ravel</span><span class="p">();</span> <span class="n">j</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_to_vectors</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">i</span><span class="o">.</span><span class="n">ravel</span><span class="p">();</span>
+        <span class="n">j</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_to_vectors</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="PADGeometry.norm_vec"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.norm_vec">[docs]</a>    <span class="k">def</span> <span class="nf">norm_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -263,17 +266,18 @@
 
         <span class="n">A</span> <span class="o">=</span> <span class="n">vec_mag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">))</span>  <span class="c"># Area of the pixel</span>
         <span class="n">R2</span> <span class="o">=</span> <span class="n">vec_mag</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>                               <span class="c"># Distance to the pixel, squared</span>
-        <span class="n">cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">vec_norm</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>                       <span class="c"># Inclination factor: cos(theta)</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">vec_norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>                    <span class="c"># Inclination factor: cos(theta)</span>
         <span class="n">sa</span> <span class="o">=</span> <span class="p">(</span><span class="n">A</span><span class="o">/</span><span class="n">R2</span><span class="p">)</span><span class="o">*</span><span class="n">cs</span>                                   <span class="c"># Solid angle</span>
 
-        <span class="k">return</span> <span class="n">sa</span>
+        <span class="k">return</span> <span class="n">sa</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
 </div>
 <div class="viewcode-block" id="PADGeometry.polarization_factor"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.polarization_factor">[docs]</a>    <span class="k">def</span> <span class="nf">polarization_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polarization_vec</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; The scattering polarization factor. &quot;&quot;&quot;</span>
 
-        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">()</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">vec_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">())</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">vec_norm</span><span class="p">(</span><span class="n">vec_check</span><span class="p">(</span><span class="n">polarization_vec</span><span class="p">))</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">vec_norm</span><span class="p">(</span><span class="n">vec_check</span><span class="p">(</span><span class="n">beam_vec</span><span class="p">))</span>
+        <span class="n">up</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">w1</span> <span class="o">=</span> <span class="mi">1</span>
@@ -282,19 +286,11 @@
             <span class="n">w1</span> <span class="o">=</span> <span class="n">weight</span>
             <span class="n">w2</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">weight</span>
 
-        <span class="n">p</span> <span class="o">=</span> <span class="n">w1</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">()))</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">w1</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">w2</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">up</span><span class="p">,</span><span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">p1</span> <span class="o">+</span> <span class="n">p2</span>
 
-        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">polarization_vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">u</span> <span class="o">=</span> <span class="n">vec_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">polarization_weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-
-        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">polarization_vectors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">u</span> <span class="o">=</span> <span class="n">vec_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">polarization_weights</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pf</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">polarization_weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">polarization_weights</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">pf</span>
+        <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
 
 
 </div></div>
