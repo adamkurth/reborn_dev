@@ -31,11 +31,12 @@ class PADGeometry(object):
     """
 
     # These are the configurable parameters.  No defaults.  One must think.
-    n_fs = None
-    n_ss = None
-    fs_vec = None
-    ss_vec = None
-    t_vec = None
+
+    n_fs = None   #: The number of fast-scan pixels.
+    n_ss = None   #: The number of slow-scan pixels.
+    fs_vec = None #: The fast-scan basis vector.
+    ss_vec = None #: The slow-scan basis vector.
+    t_vec = None  #: The overall translation vector.
 
     def simple_setup(self, n_pixels=1000, pixel_size=100e-6, distance=0.1):
 
@@ -66,18 +67,32 @@ class PADGeometry(object):
 
     def pixel_size(self):
 
-        """ Return pixel size assuming square pixels. """
+        """ Return pixel size, assuming square pixels. """
 
         return np.mean([vec_mag(self.fs_vec), vec_mag(self.ss_vec)])
 
 
     def shape(self):
 
+        """ Return tuple corresponding to the numpy shape of this PAD. """
+
         return (self.n_ss, self.n_fs)
 
     def indices_to_vectors(self, j, i):
 
-        """ Convert pixel indices to translation vectors (i=fast scan, j=slow scan)."""
+        """
+        Convert pixel indices to translation vectors pointing from origin to position on panel.
+        The positions need not lie on the actual panel; this assums an infinite plane.
+
+        Arguments:
+            i (float) :
+                Fast-scan index.
+            j (float) :
+                Slow-scan index.
+
+        Returns:
+            Nx3 numpy array
+        """
 
         i = np.array(i)
         j = np.array(j)
@@ -87,9 +102,13 @@ class PADGeometry(object):
 
     def position_vecs(self):
 
-        """ Vectors pointing to positions of pixels, from origin to center of pixels. """
+        """
+        Compute vectors pointing from origin to pixel centers.
 
-        i = np.arange(self.n_fs);
+        Returns: Nx3 numpy array
+        """
+
+        i = np.arange(self.n_fs)
         j = np.arange(self.n_ss)
         [i, j] = np.meshgrid(i, j)
         i.ravel();
@@ -135,8 +154,21 @@ class PADGeometry(object):
 
         return sa.ravel()
 
-    def polarization_factor(self, polarization_vec=None, beam_vec=None, weight=None):
-        """ The scattering polarization factor. """
+    def polarization_factor(self, polarization_vec, beam_vec, weight=None):
+
+        r"""
+        The scattering polarization factors. :math:`\vec{v}`
+
+        Arguments:
+            polarization_vec (numpy array) :
+                First beam polarization vector (second is this one crossed with beam vector)
+            beam_vec (numpy array) :
+                Incident beam vector
+            weight (float) :
+                The weight of the first polarization component (second is one minus this weight)
+
+        Returns:  numpy array
+        """
 
         v = vec_norm(self.position_vecs())
         u = vec_norm(vec_check(polarization_vec))
@@ -156,6 +188,21 @@ class PADGeometry(object):
 
         return p.ravel()
 
+    def scattering_angles(self, beam_vec=None):
+
+        """
+        Scattering angles (i.e. half the Bragg angles).
+
+        Arguments:
+            beam_vec (numpy array) :
+                Incident beam vector.
+
+        Returns: numpy array
+        """
+
+        v = self.position_vecs()
+
+        return np.arccos(b, v.T)
 
 
 class Panel(object):
