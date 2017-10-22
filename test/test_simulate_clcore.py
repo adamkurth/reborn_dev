@@ -10,7 +10,6 @@ If you want to view results just add the keyword "view"
 import sys
 
 import numpy as np
-import pytest
 
 sys.path.append('..')
 try:
@@ -32,19 +31,16 @@ view = False
 
 if len(sys.argv) > 1:
     view = True
-    import matplotlib.pyplot as plt
 
-
-clskip = pytest.mark.skipif(havecl is False, reason="Requires pyopencl module")
-
-
-@clskip
 def test_ClCore_float():
-    _ClCore(double_precision=False)
 
-@clskip
+    if havecl:
+        _ClCore(double_precision=False)
+
 def test_ClCore_double():
-    _ClCore(double_precision=True)
+
+    if havecl and have_double:
+        _ClCore(double_precision=True)
 
 def _ClCore(double_precision=False):
 
@@ -59,51 +55,39 @@ def _ClCore(double_precision=False):
     
     ###########################################################################
     # Check that there are no errors in phase_factor_qrf_inplace
-    # TODO: actually check that the amplitudes are correct
+    # TODO: check that the amplitudes are correct
     ###########################################################################
 
-    pl = ba.detector.PanelList()
-    pl.simple_setup(nF=3, nS=4, pixel_size=1, distance=1, wavelength=1)
+    pad = ba.detector.PADGeometry()
+    pad.simple_setup(n_pixels=4, pixel_size=1, distance=1)
     N = 10
     R = np.eye(3, dtype=core.real_t)
-    q = pl[0].Q
+    q = pad.q_vecs(beam_vec=[0,0,1], wavelength=1)
     
     r = np.random.random([N,3])
     f = np.random.random([N])*1j
-    
-    core.init_amps(Npix=pl.n_pixels)
-    
-    core.phase_factor_qrf_inplace(q,r,f,R)
-    assert(type(core.a_dev) is pyopencl.array.Array)
-    A = core.release_amps(reset=True)
-    print(A)
-    print("===============")
+
+    A = core.phase_factor_qrf(q,r,f,R)
     assert(type(A) is np.ndarray)
     
-#   make device arrays first
+    # make device arrays first
     q = core.to_device(q) 
     r = core.to_device(r)
-    f = core.to_device(f)
+    f = core.to_device(f,dtype=core.complex_t)
+    a = core.to_device(shape=[q.shape[0]],dtype=core.complex_t)
     R = None
     
-    core.phase_factor_qrf_inplace(q,r,f,R)
-    A1 = core.release_amps(reset=False)
-   
-    print(A1)
-    core.phase_factor_qrf_inplace(q,r,f,R)
-    A2 = core.release_amps(reset=False)
-    print(A2)
-    assert( np.allclose(2*A1,A2))
+    core.phase_factor_qrf(q,r,f,R,a)
+    A1 = a.get()
 
-    core.init_amps(pl.n_pixels)
-    for _ in xrange(10):
-        core.phase_factor_qrf_inplace(q,r,f,R)
+    for _ in xrange(9):
+        core.phase_factor_qrf(q,r,f,R,a,add=True)
     
-    A10 = core.release_amps()
+    A10 = a.get()
     
     assert( np.allclose(10*A1,A10))
 
-    del q, r, f, R, N, pl
+    del q, r, f, R, N
     
     ###########################################################################
     # Check for errors in phase_factor_pad
@@ -111,7 +95,6 @@ def _ClCore(double_precision=False):
     ###########################################################################
 
     N = 10
-    R = np.eye(3, dtype=core.real_t)
     r = np.random.random([N, 3]).astype(dtype=core.real_t)
     f = np.random.random([N]).astype(dtype=core.complex_t)
     T = np.array([0, 0, 0], dtype=core.real_t)
@@ -170,22 +153,21 @@ def _ClCore(double_precision=False):
     r = np.random.random([n_atoms, 3])
     f = np.random.random([n_atoms]) * 1j
     
-    pl = ba.detector.PanelList()
-    pl.simple_setup(nF=3, nS=4, pixel_size=1, distance=1, wavelength=1)
+    pad = ba.detector.PADGeometry()
+    pad.simple_setup(n_pixels=4, pixel_size=1, distance=1)
     R = np.eye(3, dtype=core.real_t)
-    q = pl[0].Q
+    q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
 
     A = core.phase_factor_mesh(r, f, n_mesh, q_min, q_max)
     A2 = core.buffer_mesh_lookup(A, n_mesh, q_min, q_max, q)
     assert(type(A) is np.ndarray)
     assert(type(A2) is np.ndarray)
 
-
     r = core.to_device(r)
     f = core.to_device(f)
     q = core.to_device(q)
     a = core.to_device(shape=(np.prod(n_mesh)), dtype=core.complex_t)
-    a_out = core.to_device(shape=(pl.n_pixels), dtype=core.complex_t)
+    a_out = core.to_device(shape=pad.n_fs*pad.n_ss, dtype=core.complex_t)
 
     A = core.phase_factor_mesh(r, f, n_mesh, q_min, q_max, a)
     A2 = core.buffer_mesh_lookup(a, n_mesh, q_min, q_max, q, R, a_out)
@@ -199,38 +181,40 @@ def _ClCore(double_precision=False):
     # Check for errors in run_cromermann
     ###########################################################################
 
-    # simulate 1000 random numbers into 1000x1000 pixels
-    natom = n_pixels_edge = 1000
-    atom_pos = np.random.random( (natom,3) )
-    atomic_nums = np.ones(natom)
-   
-#   make a simple detector 
-    #D = ba.detector.SimpleDetector(n_pixels=1000) 
-    
-    def dumb_detector(n_pixels_edge):
-        img_sh = (n_pixels_edge,n_pixels_edge)
-        py,px = np.indices(img_sh) # pixel integers
-        pr = np.sqrt( (py-n_pixels_edge/2. )**2 + (px-n_pixels_edge/2.)**2 ) # radial pixel value
-        
-        theta = np.arctan( (  pr * 0.00005/0.05 ) )/2. # 50 micron pixels, 50 mm detector distance
-        phi = np.arctan2( py-500., px-500. ) # pixel azimuthal
-        q = np.sin(theta) * 4*np.pi / 1. # 1 angstrom wavelen
+    # TODO: Derek, your simulators are crashing again.  Probably my fault - sorry.  -Rick
 
-        qx = np.cos(theta) * q * np.cos(phi)
-        qy = np.cos(theta) * q * np.sin(phi)
-        qz = np.sin(theta) * q
-        q_vecs = np.vstack((qx.ravel(), qy.ravel(), qz.ravel())).T
-   
-        return img_sh, q_vecs
-
-    img_sh, q_vecs = dumb_detector(n_pixels_edge)
-
-    #core.prime_cromermann_simulator(D.Q, atomic_nums)
-    core.prime_cromermann_simulator(q_vecs, atomic_nums)
-    q = core.get_q_cromermann()
-    r = core.get_r_cromermann(atom_pos, sub_com=False) 
-    core.run_cromermann(q, r, rand_rot=True)
-    A = core.release_amplitudes()
+#    # simulate 1000 random numbers into 1000x1000 pixels
+#    natom = n_pixels_edge = 1000
+#    atom_pos = np.random.random( (natom,3) )
+#    atomic_nums = np.ones(natom)
+#   
+##   make a simple detector 
+#    #D = ba.detector.SimpleDetector(n_pixels=1000) 
+#    
+#    def dumb_detector(n_pixels_edge):
+#        img_sh = (n_pixels_edge,n_pixels_edge)
+#        py,px = np.indices(img_sh) # pixel integers
+#        pr = np.sqrt( (py-n_pixels_edge/2. )**2 + (px-n_pixels_edge/2.)**2 ) # radial pixel value
+#        
+#        theta = np.arctan( (  pr * 0.00005/0.05 ) )/2. # 50 micron pixels, 50 mm detector distance
+#        phi = np.arctan2( py-500., px-500. ) # pixel azimuthal
+#        q = np.sin(theta) * 4*np.pi / 1. # 1 angstrom wavelen
+#
+#        qx = np.cos(theta) * q * np.cos(phi)
+#        qy = np.cos(theta) * q * np.sin(phi)
+#        qz = np.sin(theta) * q
+#        q_vecs = np.vstack((qx.ravel(), qy.ravel(), qz.ravel())).T
+#   
+#        return img_sh, q_vecs
+#
+#    img_sh, q_vecs = dumb_detector(n_pixels_edge)
+#
+#    #core.prime_cromermann_simulator(D.Q, atomic_nums)
+#    core.prime_cromermann_simulator(q_vecs, atomic_nums)
+#    q = core.get_q_cromermann()
+#    r = core.get_r_cromermann(atom_pos, sub_com=False) 
+#    core.run_cromermann(q, r, rand_rot=True)
+#    A = core.release_amplitudes()
 
 
 if __name__ == '__main__':

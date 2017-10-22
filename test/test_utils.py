@@ -7,7 +7,7 @@ import bornagain as ba
 
 def test_random_rotation_matrix(main=False):
     
-    R = ba.utils.random_rotation_matrix()
+    R = ba.utils.random_rotation()
     d = np.linalg.det(R)
     
     if main:
@@ -21,4 +21,4 @@ def test_random_rotation_matrix(main=False):
 if __name__ == "__main__":
     
     main = True
-    test_random_rotation_matrix(main)
+    test_random_rotation(main)

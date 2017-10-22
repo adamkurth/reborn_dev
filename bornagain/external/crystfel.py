@@ -1,20 +1,25 @@
-import numpy as np
-from bornagain import detector
 import re
+
+import numpy as np
+
+from bornagain import detector
 
 
 def geom_to_dict(geom_file, raw_strings=False):
     """
-Convert a crystfel "geom" file into a sensible Python dictionary.  For
-details see:
-http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html.
+    Convert a crystfel "geom" file into a sensible Python dictionary.  For details see:
+    http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html.
 
-Input:
-geom_file: Path to the geometry file
-raw_strings: By default, this function will convert values to floats,
-integers, or bools, as appropriate. Set this option to "True"
-if you want to store the raw strings in the output
-dictionary.
+    Arguments:
+        geom_file (str) :
+            Path to the geometry file.
+        raw_strings (bool) :
+            By default, this function will convert values to floats, integers, or bools, as appropriate.
+            Set this option to "True" if you want to store the raw strings in the output dictionary.
+
+    Returns:
+        geom_dict (dict) :
+            Dictionary container filled with geom file information.
     """
 
     def interpret_vector_string(s):
@@ -27,7 +32,7 @@ dictionary.
             s = s.split(coord)
             for i in range(len(s)):
                 s[i] = s[i].strip()
-            if s[0] == '':   # CrystFEL allows simply "x" in place of "1x"
+            if s[0] == '':  # CrystFEL allows simply "x" in place of "1x"
                 s[0] = 1
             vals[coord] = float(s[0])
             s = s[1]
@@ -240,9 +245,7 @@ dictionary.
                 'rigidGroups': rigidGroups,
                 'rigidGroupCollections': rigidGroupCollections,
                 'badRegions': badRegions}
-    
-    
-    
+
     return geomDict
 
 
@@ -274,14 +277,13 @@ def geom_dict_to_panellist(geomDict):
     return PanelList
 
 
-def load_cheetah_data(dataArray,panelList,geomDict):
-    
+def load_cheetah_data(dataArray, panelList, geomDict):
     fail = False
 
     for p in geomDict['panels']:
         panelList[p['name']].data = dataArray[
-            p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)].copy()
- 
+                                    p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)].copy()
+
     return fail
 
 
@@ -292,9 +294,9 @@ def load_cheetah_mask(maskArray, PanelList, geomDict):
 
     for p in geomDict['panels']:
         PanelList[p['name']].mask = maskArray[
-            p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)].copy()
+                                    p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)].copy()
     PanelList._mask = None
- 
+
     return fail
 
 
@@ -305,7 +307,7 @@ def load_cheetah_dark(darkArray, PanelList, geomDict):
 
     for p in geomDict['panels']:
         PanelList[p['name']].dark = darkArray[
-            p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)]
+                                    p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)]
 
     return fail
 
@@ -323,7 +325,7 @@ def geom_to_panellist(geomFile=None, beamFile=None, PanelList=None):
             s = s.split(coord)
             for i in range(len(s)):
                 s[i] = s[i].strip()
-            if s[0] == '':   # CrystFEL allows simply "x" in place of "1x"
+            if s[0] == '':  # CrystFEL allows simply "x" in place of "1x"
                 s[0] = 1
             vals[coord] = float(s[0])
             s = s[1]

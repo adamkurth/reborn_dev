@@ -1,56 +1,94 @@
-"""
-Classes related to x-ray "scattering", which usually is distinguished from
-"diffraction" because there are many objects in random orientations.  SAXS/WAXS
-is the canonical example.
+r"""
+Classes related to x-ray "scattering", which loosely means diffraction from many objects in random orientations.
 """
 
 import numpy as np
 
 
 class RadialProfile(object):
+    r"""
+    Helper class to create radial profiles.
+    """
 
     def __init__(self):
 
-        self.nBins = None
+        self.n_bins = None
         self.bins = None
-        self.binSize = None
-        self.binIndices = None
+        self.bin_size = None
+        self.bin_indices = None
+        self.q_mags = None
         self.mask = None
         self.counts = None
-        self.qRange = None
+        self.q_range = None
+        self.counts_non_zero = None
 
-    def make_plan(self, PanelList, mask=None, nBins=100, qRange=None):
-        ''' Use PanelList as template to cache information for radial binning.
-        '''
+    def make_plan(self, q_mags, mask=None, n_bins=100, q_range=None):
+        r"""
+        Setup the binning indices for the creation of radial profiles.
 
-        self.Qmag = PanelList.Qmag.copy()
-        if qRange is None:
-            self.minQ = np.min(self.Qmag)
-            self.maxQ = np.max(self.Qmag)
-            self.qRange = np.array([self.minQ, self.maxQ])
+        Arguments:
+            q_mags (numpy array) :
+                Scattering vector magnitudes.
+            mask (numpy array) :
+                Pixel mask.  Should be ones and zeros, where one means "good" and zero means "bad".
+            n_bins (int) :
+                Number of bins.
+            q_range (list-like) :
+                The minimum and maximum of the scattering vector magnitudes.  The bin size will be equal to
+                (max_q - min_q) / n_bins
+        """
+
+        q_mags = q_mags.ravel()
+
+        if q_range is None:
+            min_q = np.min(q_mags)
+            max_q = np.max(q_mags)
+            q_range = np.array([min_q, max_q])
         else:
-            self.qRange = qRange.copy()
-            self.minQ = qRange[0]
-            self.maxQ = qRange[1]
+            q_range = q_range.copy()
+            min_q = q_range[0]
+            max_q = q_range[1]
 
-        self.nBins = nBins
-        self.binSize = (self.maxQ - self.minQ) / float(self.nBins)
-        self.bins = (np.arange(0, self.nBins) + 0.5) * self.binSize + self.minQ
-        self.binIndices = np.int64(np.floor((self.Qmag -self.minQ) / self.binSize))
-        self.binIndices[self.binIndices < 0] = 0
-        self.binIndices[self.binIndices >= nBins] = nBins - 1
+        bin_size = (max_q - min_q) / float(n_bins)
+        bins = (np.arange(0, n_bins) + 0.5) * bin_size + min_q
+        bin_indices = np.int64(np.floor((q_mags - min_q) / bin_size))
+        bin_indices[bin_indices < 0] = 0
+        bin_indices[bin_indices >= n_bins] = n_bins - 1
         if mask is None:
-            self.mask = np.ones([len(self.binIndices)])
+            mask = np.ones([len(bin_indices)])
         else:
-            self.mask = mask.copy()
-        self.counts = np.bincount(self.binIndices, self.mask, self.nBins)
-        self.countsNonZero = self.counts > 0
+            mask = mask.copy().ravel()
+        print(bin_indices.shape, mask.shape, n_bins)
+        counts = np.bincount(bin_indices, mask, n_bins)
+        counts_non_zero = counts > 0
 
-    def get_profile(self, data, PanelList=None, average=True):
+        self.n_bins = n_bins
+        self.bins = bins
+        self.bin_size = bin_size
+        self.bin_indices = bin_indices
+        self.q_mags = q_mags
+        self.mask = mask
+        self.counts = counts
+        self.q_range = q_range
+        self.counts_non_zero = counts_non_zero
 
-        profile = np.bincount(self.binIndices, data * self.mask, self.nBins)
+    def get_profile(self, data, average=True):
+        r"""
+        Create a radial profile for a particular dataframe.
+
+        Arguments:
+            data (numpy array) :
+                Intensity data.
+            average (bool) :
+                If true, divide the sum in each bin by the counts, else return the sum.  Default: True.
+
+        Returns:
+            profile (numpy array) :
+                The requested radial profile.
+        """
+
+        profile = np.bincount(self.bin_indices, data.ravel() * self.mask, self.n_bins)
         if average:
-            profile.flat[
-                self.countsNonZero] /= self.counts.flat[self.countsNonZero]
+            profile.flat[self.counts_non_zero] /= self.counts.flat[self.counts_non_zero]
 
         return profile
