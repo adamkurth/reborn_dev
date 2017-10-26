@@ -96,11 +96,13 @@ def place_spheres(Vf, sph_rad = 1., box_edge=None, Nspheres=1000, tol=0.01):
 #END COPY/PASTE 
 ###########
 
+# whether to use Henke or Cromer mann
+use_henke = True # if False, then use Cromer-mann version  
+
 n_molecules = 123
+
 photon_energy = 6.5 / keV
 wavelength = hc/photon_energy
-
-wavelength = 1.907*1e-10 # hard code 1.9 Angstrom  for now cause something fishy with units.. 
 beam_vec = np.array([0, 0, 1.0])
 
 # Single molecule atomic positions:
@@ -110,48 +112,64 @@ r -= r.mean(0) # mean sub, I dunno it matters or not , but for rotations maybe..
 # maximum distance spanned by the molecule:
 r_size = distance.pdist(r).max()
 n_atoms = r.shape[0]
-f = ba.simulate.atoms.get_scattering_factors([25]*r.shape[0], photon_energy)  # This number is irrelevant
 
 # Seems like this was showing partial detector (maybe one quadrant)?? Also maybe there was a unit-error 
 pad = ba.detector.PADGeometry()
 # where do these numbers come from -> was making the output weird.. not sure what we want here though
 #pad.simple_setup(n_pixels=100, pixel_size=100e-9, distance=1.0)
-
 # I changed to a more 100 micron pixel, 100 mm detdist and output looks reasonable
 pad.simple_setup(n_pixels=100, pixel_size=0.0001, distance=.100)
 q = pad.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
 
-
-# Place 100 molecules in a 10 nm box
-n_molecules = 100
+# Place molecules in a 10 nm box
 dimer_placer = Place(box_edge=10e-9, min_dist=r_size)
 for i in xrange( n_molecules):
     dimer_placer.insert()
 dimer_pos = dimer_placer.data
 
 ##### For one shot, jiggle molecule positions and orientations and phases
+if use_henke:
 #####rs = np.zeros((n_molecules*n_atoms,3))
 #####fs = np.zeros((n_molecules*n_atoms), dtype=clcore.complex_t)
-rs = []
-fs = []
-for n in xrange(n_molecules):
+    f = ba.simulate.atoms.get_scattering_factors([25]*r.shape[0], photon_energy)  # This number is irrelevant
+    rs = []
+    fs = []
+    for n in xrange(n_molecules):
 #   make the random phases, pass to run_crommer_mann function
-    phases = np.random.random( n_atoms ) * 2 * np.pi 
+        phases = np.random.random( n_atoms ) * 2 * np.pi 
+        
+        # Rotate one molecule
+        R = ba.utils.random_rotation()
+
+        rs.append(  np.dot( R, r.T).T + dimer_pos[n] )  # more readable with the appending for now, can change later..
+        fs.append( f * np.exp( 1j* phases))
+
+    rs = np.array( rs) # miliseconds slow down  
+    fs = np.array( fs) 
+
+# from phase factor simulation
+    clcore = ClCore(group_size=1)
+    A = clcore.phase_factor_pad(rs, fs, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength)
+    I = np.abs(A)**2  # As a practical limit, this intensity should reflect the fact that we get only one fluorescence
+                    # photon per atom
+
+else: # use cromer/mann
+##### alternatively, using this old code i wrote we dont have to make copies of molecule
+# init CLCORE
+    clcore = ClCore(group_size=1)
+    clcore.prime_cromermann_simulator(q, np.array([ 79.,79.]) ) # put in two bogus atomic numbers for Carbon
+    qcm = clcore.get_q_cromermann()
+    rcm = clcore.get_r_cromermann(r, sub_com=1)  # takes atom positions of single molecule
+    for n in xrange(n_molecules):
+#   make the random phases, pass to run_crommer_mann function
+        phases = np.random.random( n_atoms ) * 2 * np.pi 
 #   run cromermann
-    #clcore.run_cromermann(qcm, rcm, rand_rot=True, com=dimer_pos[n], rand_phase=phases)
-    
-    # Rotate one molecule
-    R = ba.utils.random_rotation()
+        clcore.run_cromermann(qcm, rcm, rand_rot=True, com=dimer_pos[n], rand_phase=phases)
+    A = clcore.release_amplitudes()
+    I = np.abs(A)**2 
 
-    rs.append(  np.dot( R, r.T).T + dimer_pos[n] )  # more readable with the appending for now, can change later..
-    fs.append( f * np.exp( 1j* phases))
-rs = np.array( rs) # miliseconds slow down  
-fs = np.array( fs) 
 
-clcore = ClCore(group_size=1)
-A = clcore.phase_factor_pad(rs, fs, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength)
-I = np.abs(A)**2  # As a practical limit, this intensity should reflect the fact that we get only one fluorescence
-                # photon per atom
+
 
 # Next: repeat many times, make lots of patterns, then take two-point correlations
 
@@ -164,7 +182,7 @@ I = np.abs(A)**2  # As a practical limit, this intensity should reflect the fact
 
 # Something is wrong with this output!
 # I think it had to do with angstrom, meters , somehing units-wise screwed up.. I changed to angstrom for now, can move back 
+
 imdisp = I.reshape(pad.shape())
-#imdisp = I.reshape(img_sh)
 plt.imshow(np.log10(imdisp+1e-5))
 plt.show()
