@@ -931,11 +931,71 @@ to matplotlib.figure</p>
 <p>Classes related to x-ray sources.</p>
 <dl class="class">
 <dt id="bornagain.source.Beam">
-<em class="property">class </em><code class="descclassname">bornagain.source.</code><code class="descname">Beam</code><a class="reference internal" href="_modules/bornagain/source.html#Beam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.source.Beam" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">bornagain.source.</code><code class="descname">Beam</code><span class="sig-paren">(</span><em>beam_vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/source.html#Beam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.source.Beam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="method">
-<dt id="bornagain.source.Beam.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/source.html#Beam.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.source.Beam.check" title="Permalink to this definition">¶</a></dt>
+<p>A minimal containor to gather x-ray beam properties.</p>
+<dl class="attribute">
+<dt id="bornagain.source.Beam.wavelength">
+<code class="descname">wavelength</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nominal photon wavelength</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.beam_vec">
+<code class="descname">beam_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.beam_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nominal direction of incident beam</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.polarization_vec">
+<code class="descname">polarization_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.polarization_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Direction of the first polarization vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.polarization_weight">
+<code class="descname">polarization_weight</code><em class="property"> = 1</em><a class="headerlink" href="#bornagain.source.Beam.polarization_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weight of the first polarization vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.photon_energy">
+<code class="descname">photon_energy</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.photon_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.spectral_width_fwhm">
+<code class="descname">spectral_width_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.spectral_width_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.pulse_energy">
+<code class="descname">pulse_energy</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.pulse_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.n_photons">
+<code class="descname">n_photons</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.n_photons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.beam_divergence_fwhm">
+<code class="descname">beam_divergence_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.beam_divergence_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.beam_diameter_fwhm">
+<code class="descname">beam_diameter_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.beam_diameter_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.fluence">
+<code class="descname">fluence</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.fluence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.fluence_jitter_fwhm">
+<code class="descname">fluence_jitter_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.fluence_jitter_fwhm" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

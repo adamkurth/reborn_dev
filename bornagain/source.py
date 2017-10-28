@@ -2,41 +2,24 @@
 Classes related to x-ray sources.
 """
 
-import numpy as np
-import utils
-
 
 class Beam(object):
+    r"""
+    A minimal containor to gather x-ray beam properties.
+    """
 
-    def __init__(self):
+    wavelength = None  #: Nominal photon wavelength
+    beam_vec = None  #: Nominal direction of incident beam
+    polarization_vec = None  #: Direction of the first polarization vector
+    polarization_weight = 1  #: Weight of the first polarization vector
+    photon_energy = 0  # This should be a function
+    spectral_width_fwhm = 0
+    pulse_energy = 0
+    n_photons = 0
+    beam_divergence_fwhm = 0
+    beam_diameter_fwhm = 0
+    fluence = 0
+    fluence_jitter_fwhm = 0
 
-        self.wavelength = None
-        self.B = np.array([0, 0, 1])
-        self.P = np.array([1, 0, 0])
-        self.polarization_vectors = [np.array([1.0, 0, 0]),np.array([0, 1.0, 0])]
-        self.polarization_weights = [1.0,0]
-        self.photon_energy = 0
-        self.spectral_width_fwhm = 0
-        self.pulse_energy = 0
-        self.n_photons = 0
-        self.divergence_fwhm = 0
-        self.beam_diameter_fwhm = 0
-        self.mean_fluence = 0
-        self.fluence_jitter_fwhm = 0
-
-    def __str__(self):
-
-        s = ""
-        if self.wavelength is not None:
-            s += "wavelength : %g\n" % self.wavelength
-        else:
-            s += "wavelength : None\n"
-        s += "B : [%g, %g, %g]\n" % (self.B[0], self.B[1], self.B[2])
-        return s
-
-    def check(self):
-
-        if self.wavelength <= 0:
-            utils.warn("Bad wavelength: %f" % self.wavelength)
-            return False
-        return True
+    def __init__(self, beam_vec):
+        pass

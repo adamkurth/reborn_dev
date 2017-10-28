@@ -40,19 +40,19 @@ class PADGeometry(object):
     def fs_vec(self):
         r""" Fast-scan basis vector. """
 
-        return self._fs_vec.copy()
+        return self._fs_vec
 
     @property
     def ss_vec(self):
         r""" Slow-scan basis vector. """
 
-        return self._ss_vec.copy()
+        return self._ss_vec
 
     @property
     def t_vec(self):
         r""" Translation vector pointing from origin to center of corner pixel, which is first in memory. """
 
-        return self._t_vec.copy()
+        return self._t_vec
 
     # The reason for these setters is that some assumptions are made about the shape of vectors used within bornagain.
     # TODO: Document assumptions made about vectors

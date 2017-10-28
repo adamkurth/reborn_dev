@@ -1,4 +1,4 @@
-fmt='autopep8 -i'
+fmt='autopep8'
 dir='bornagain'
 
-$fmt $dir/detector.py
+$fmt $dir
