@@ -58,7 +58,7 @@ class RadialProfile(object):
             mask = np.ones([len(bin_indices)])
         else:
             mask = mask.copy().ravel()
-        print(bin_indices.shape, mask.shape, n_bins)
+        # print(bin_indices.shape, mask.shape, n_bins)
         counts = np.bincount(bin_indices, mask, n_bins)
         counts_non_zero = counts > 0
 
