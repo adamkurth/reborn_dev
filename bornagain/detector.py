@@ -214,6 +214,58 @@ class PADGeometry(object):
         return np.arccos(vec_check(beam_vec), v.T)
 
 
+class PADAssembler(object):
+    r"""
+    Assemble PAD data into a fake single-panel PAD.  This is done in a lazy way.  The resulting image is not
+    centered in any way; the fake detector is a snug fit to the individual PADs.
+
+    A list of PADGeometry objects are required on initialization, as the first argument.  The data needed to
+    "interpolate" are cached, hence the need for a class.  The geometry cannot change; there is no update method.
+    """
+
+    def __init__(self, pad_list):
+        pixel_size = ba.utils.vec_mag(pad_list[0].fs_vec)
+        v = np.concatenate([p.position_vecs() for p in pad_list])
+        v -= np.min(v, axis=0)
+        v /= pixel_size
+        v = np.floor(v).astype(np.int)
+        m = np.max(v, axis=0)
+        a = np.zeros([m[0] + 1, m[1] + 1])
+        self.v = v
+        self.a = a
+
+    def assemble_data(self, data):
+        r"""
+        Given a contiguous block of data, create the fake single-panel PAD.
+
+        Arguments:
+            data (numpy array):
+                Image data
+
+        Returns:
+            assembled_data (numpy array):
+                Assembled PAD image
+        """
+        a = self.a
+        v = self.v
+        a[v[:, 0], v[:, 1]] = data
+        return a.copy()
+
+    def assemble_data_list(self, data_list):
+        r"""
+        Same as assemble_data() method, but accepts a list of individual panels in the form of a list.
+
+        Arguments:
+            data_list (list of numpy arrays):
+                Image data
+
+        Returns:
+            assembled_data (numpy array):
+                Assembled PAD image
+        """
+        self.assemble_data(np.ravel(data_list))
+
+
 class Panel(object):
     """ Individual detector Panel: a 2D lattice of square pixels."""
 
