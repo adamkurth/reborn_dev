@@ -275,3 +275,24 @@ def geom_dict_to_padgeometry(geomDict):
         pads.append(pad)
 
     return pads
+
+
+def split_image(data, geom_dict):
+    r"""
+    Split a 2D image into individual panels (useful for working with Cheetah output).
+
+    Arguments:
+        data (numpy array) :
+            Image data
+        geom_dict (dict) :
+            Geometry dictionary
+
+    Returns:
+        split_data (list) :
+            List of individual PAD panel data
+    """
+    split_data = []
+    for p in geom_dict['panels']:
+        split_data.append(data[p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)])
+
+    return split_data
