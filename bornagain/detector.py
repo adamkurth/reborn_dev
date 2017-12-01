@@ -224,7 +224,7 @@ class PADAssembler(object):
     """
 
     def __init__(self, pad_list):
-        pixel_size = ba.utils.vec_mag(pad_list[0].fs_vec)
+        pixel_size = vec_mag(pad_list[0].fs_vec)
         v = np.concatenate([p.position_vecs() for p in pad_list])
         v -= np.min(v, axis=0)
         v /= pixel_size
