@@ -14,8 +14,10 @@
         #define DOUBLE_SUPPORT_AVAILABLE
     #endif
 #endif
+
 // Note that dsfloat* (i.e. double/single) types will become either double or single as configured above
 // Please be mindful of this in the code below
+
 #if defined(DOUBLE_SUPPORT_AVAILABLE)
     typedef double dsfloat;
     typedef double2 dsfloat2;
@@ -613,7 +615,6 @@ __kernel void qrf_kam(
 
     dsfloat ff[16];
     
-
     // multiply trans vector by inverse rotation matrix  
     dsfloat Tx = R[0]*T[0] + R[3]*T[1] + R[6]*T[2];
     dsfloat Ty = R[1]*T[0] + R[4]*T[1] + R[7]*T[2];
