@@ -3,17 +3,16 @@ Classes for analyzing/simulating diffraction data contained in pixel array
 detectors (PADs).
 """
 
-
 import sys
 
 import numpy as np
 from numpy.linalg import norm
+
 try:
     import matplotlib
     import pylab as plt
 except ImportError:
     pass
-# from numpy.random import random, randn
 
 from utils import vec_norm, vec_mag, vec_check
 import source
@@ -21,8 +20,7 @@ import units
 
 
 class PADGeometry(object):
-
-    """
+    r"""
     This is a simplified version of the Panel class.  Hopefully it replaces Panel.  One main difference is that it does
     not include any information about the source, which makes a lot more sense and removes several headaches that I
     dealt with previously.  Another big difference is the emphasis on simplicity.  So far, there is no cache for
@@ -32,55 +30,66 @@ class PADGeometry(object):
 
     # These are the configurable parameters.  No defaults.  One must think.
 
-    n_fs = None   #: The number of fast-scan pixels.
-    n_ss = None   #: The number of slow-scan pixels.
-    fs_vec = None #: The fast-scan basis vector.
-    ss_vec = None #: The slow-scan basis vector.
-    t_vec = None  #: The overall translation vector.
+    n_fs = None  #: The number of fast-scan pixels.
+    n_ss = None  #: The number of slow-scan pixels.
+    _fs_vec = None  #: The fast-scan basis vector.
+    _ss_vec = None  #: The slow-scan basis vector.
+    _t_vec = None  #: The overall translation vector.
 
-    def simple_setup(self, n_pixels=1000, pixel_size=100e-6, distance=0.1):
+    @property
+    def fs_vec(self):
+        r""" Fast-scan basis vector. """
 
-        """ Make this a square PAD with beam at center. """
+        return self._fs_vec
 
-        self.set_n_fs(n_pixels)
-        self.set_n_ss(n_pixels)
-        self.set_fs_vec([pixel_size,0,0])
-        self.set_ss_vec([0,pixel_size,0])
-        self.set_t_vec([-pixel_size*(n_pixels/2.0-0.5), -pixel_size*(n_pixels/2.0-0.5), distance])
+    @property
+    def ss_vec(self):
+        r""" Slow-scan basis vector. """
+
+        return self._ss_vec
+
+    @property
+    def t_vec(self):
+        r""" Translation vector pointing from origin to center of corner pixel, which is first in memory. """
+
+        return self._t_vec
 
     # The reason for these setters is that some assumptions are made about the shape of vectors used within bornagain.
-    # Please see the relevant documentation (if it exists; if not, ask Rick to create it).
-    def set_fs_vec(self, fs_vec):
-        self.fs_vec = vec_check(fs_vec)
+    # TODO: Document assumptions made about vectors
 
-    def set_ss_vec(self, ss_vec):
-        self.ss_vec = vec_check(ss_vec)
+    @fs_vec.setter
+    def fs_vec(self, fs_vec):
+        self._fs_vec = vec_check(fs_vec)
 
-    def set_t_vec(self, t_vec):
-        self.t_vec = vec_check(t_vec)
+    @ss_vec.setter
+    def ss_vec(self, ss_vec):
+        self._ss_vec = vec_check(ss_vec)
 
-    def set_n_fs(self, n_fs):
-        self.n_fs = n_fs
+    @t_vec.setter
+    def t_vec(self, t_vec):
+        self._t_vec = vec_check(t_vec)
 
-    def set_n_ss(self, n_ss):
-        self.n_ss = n_ss
+    def simple_setup(self, n_pixels=1000, pixel_size=100e-6, distance=0.1):
+        r""" Make this a square PAD with beam at center. """
+
+        self.n_fs = n_pixels
+        self.n_ss = n_pixels
+        self.fs_vec = [pixel_size, 0, 0]
+        self.ss_vec = [0, pixel_size, 0]
+        self.t_vec = [-pixel_size * (n_pixels / 2.0 - 0.5), -pixel_size * (n_pixels / 2.0 - 0.5), distance]
 
     def pixel_size(self):
-
-        """ Return pixel size, assuming square pixels. """
+        r""" Return pixel size, assuming square pixels. """
 
         return np.mean([vec_mag(self.fs_vec), vec_mag(self.ss_vec)])
 
-
     def shape(self):
-
-        """ Return tuple corresponding to the numpy shape of this PAD. """
+        r""" Return tuple corresponding to the numpy shape of this PAD. """
 
         return (self.n_ss, self.n_fs)
 
     def indices_to_vectors(self, j, i):
-
-        """
+        r"""
         Convert pixel indices to translation vectors pointing from origin to position on panel.
         The positions need not lie on the actual panel; this assums an infinite plane.
 
@@ -101,8 +110,7 @@ class PADGeometry(object):
         return vec_check(self.t_vec + f + s)
 
     def position_vecs(self):
-
-        """
+        r"""
         Compute vectors pointing from origin to pixel centers.
 
         Returns: Nx3 numpy array
@@ -116,48 +124,50 @@ class PADGeometry(object):
         return self.indices_to_vectors(j, i)
 
     def norm_vec(self):
-
-        """ The vector that is normal to the PAD plane. """
+        r""" The vector that is normal to the PAD plane. """
 
         return vec_norm(np.cross(self.fs_vec, self.ss_vec))
 
     def ds_vecs(self, beam_vec=None):
-
-        """ Normalized scattering vectors s - s0 where s0 is the incident beam direction
+        r""" Normalized scattering vectors s - s0 where s0 is the incident beam direction
         and s is the outgoing vector for a given pixel.  This does **not** have
         the 2*pi/lambda factor included."""
 
         return vec_norm(self.position_vecs()) - vec_check(beam_vec)
 
     def q_vecs(self, beam_vec=None, wavelength=None):
+        r"""
+        Calculate scattering vectors:
 
-        """ Conventional scattering vectors 2*pi/lambda (s - s0)"""
+            :math:`\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)`
 
-        return (2*np.pi/wavelength)*self.ds_vecs(beam_vec=beam_vec)
-
-    def solid_angle(self):
-
+        Returns: numpy array
         """
-        Solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:
-        Area/R^2*cos(theta) .
-        In terms of vectors the area is the cross product of basis vectors f X s, and tilt factor cos(theta) is the
-        dot of the panel normal vector with the normal vector pointing from sample to pixel.
+
+        return (2 * np.pi / wavelength) * self.ds_vecs(beam_vec=beam_vec)
+
+    def solid_angles(self):
+        r"""
+        Calculate solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:
+
+            :math:`\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}`.
+
+        Returns: numpy array
         """
 
         v = self.position_vecs()
         n = self.norm_vec()
 
         A = vec_mag(np.cross(self.fs_vec, self.ss_vec))  # Area of the pixel
-        R2 = vec_mag(v)**2                               # Distance to the pixel, squared
-        cs = np.dot(n, vec_norm(v).T)                    # Inclination factor: cos(theta)
-        sa = (A/R2)*cs                                   # Solid angle
+        R2 = vec_mag(v) ** 2  # Distance to the pixel, squared
+        cs = np.dot(n, vec_norm(v).T)  # Inclination factor: cos(theta)
+        sa = (A / R2) * cs  # Solid angle
 
         return sa.ravel()
 
-    def polarization_factor(self, polarization_vec, beam_vec, weight=None):
-
+    def polarization_factors(self, polarization_vec, beam_vec, weight=None):
         r"""
-        The scattering polarization factors. :math:`\vec{v}`
+        The scattering polarization factors.
 
         Arguments:
             polarization_vec (numpy array) :
@@ -173,23 +183,22 @@ class PADGeometry(object):
         v = vec_norm(self.position_vecs())
         u = vec_norm(vec_check(polarization_vec))
         b = vec_norm(vec_check(beam_vec))
-        up = np.cross(u,b)
+        up = np.cross(u, b)
 
         if weight is None:
             w1 = 1
             w2 = 0
         else:
             w1 = weight
-            w2 = 1-weight
+            w2 = 1 - weight
 
-        p1 = w1*(1-np.abs(np.dot(u, v.T))**2)
-        p2 = w2*(1-np.abs(np.dot(up,v.T))**2)
+        p1 = w1 * (1 - np.abs(np.dot(u, v.T)) ** 2)
+        p2 = w2 * (1 - np.abs(np.dot(up, v.T)) ** 2)
         p = p1 + p2
 
         return p.ravel()
 
     def scattering_angles(self, beam_vec=None):
-
         """
         Scattering angles (i.e. half the Bragg angles).
 
@@ -202,7 +211,59 @@ class PADGeometry(object):
 
         v = self.position_vecs()
 
-        return np.arccos(b, v.T)
+        return np.arccos(vec_check(beam_vec), v.T)
+
+
+class PADAssembler(object):
+    r"""
+    Assemble PAD data into a fake single-panel PAD.  This is done in a lazy way.  The resulting image is not
+    centered in any way; the fake detector is a snug fit to the individual PADs.
+
+    A list of PADGeometry objects are required on initialization, as the first argument.  The data needed to
+    "interpolate" are cached, hence the need for a class.  The geometry cannot change; there is no update method.
+    """
+
+    def __init__(self, pad_list):
+        pixel_size = vec_mag(pad_list[0].fs_vec)
+        v = np.concatenate([p.position_vecs() for p in pad_list])
+        v -= np.min(v, axis=0)
+        v /= pixel_size
+        v = np.floor(v).astype(np.int)
+        m = np.max(v, axis=0)
+        a = np.zeros([m[0] + 1, m[1] + 1])
+        self.v = v
+        self.a = a
+
+    def assemble_data(self, data):
+        r"""
+        Given a contiguous block of data, create the fake single-panel PAD.
+
+        Arguments:
+            data (numpy array):
+                Image data
+
+        Returns:
+            assembled_data (numpy array):
+                Assembled PAD image
+        """
+        a = self.a
+        v = self.v
+        a[v[:, 0], v[:, 1]] = data
+        return a.copy()
+
+    def assemble_data_list(self, data_list):
+        r"""
+        Same as assemble_data() method, but accepts a list of individual panels in the form of a list.
+
+        Arguments:
+            data_list (list of numpy arrays):
+                Image data
+
+        Returns:
+            assembled_data (numpy array):
+                Assembled PAD image
+        """
+        self.assemble_data(np.ravel(data_list))
 
 
 class Panel(object):
@@ -428,25 +489,25 @@ class Panel(object):
 
         return vec_mag(self.Q)
 
-#     @property
-#     def mcQ(self):
-#         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
-#         incident beam direction for each pixel independently. """
-#
-#         i = np.arange(self.nF)
-#         j = np.arange(self.nS)
-#         [i, j] = np.meshgrid(i, j)
-#         i = i.ravel() + random(self.n_pixels) - 0.5
-#         j = j.ravel() + random(self.n_pixels) - 0.5
-#         F = np.outer(i, self.F)
-#         S = np.outer(j, self.S)
-#         V = self.T + F + S
-#         B = np.outer(np.ones(self.n_pixels), self.B) + \
-#             randn(self.n_pixels, 3) * self.beam.divergence
-#         K = vec_norm(V) - vec_norm(B)
-#         lam = self.beam.wavelength * \
-#             (1 + randn(self.n_pixels) * self.beam.spectralWidth)
-#         return 2 * np.pi * K / np.outer(lam, np.ones(3))
+    #     @property
+    #     def mcQ(self):
+    #         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
+    #         incident beam direction for each pixel independently. """
+    #
+    #         i = np.arange(self.nF)
+    #         j = np.arange(self.nS)
+    #         [i, j] = np.meshgrid(i, j)
+    #         i = i.ravel() + random(self.n_pixels) - 0.5
+    #         j = j.ravel() + random(self.n_pixels) - 0.5
+    #         F = np.outer(i, self.F)
+    #         S = np.outer(j, self.S)
+    #         V = self.T + F + S
+    #         B = np.outer(np.ones(self.n_pixels), self.B) + \
+    #             randn(self.n_pixels, 3) * self.beam.divergence
+    #         K = vec_norm(V) - vec_norm(B)
+    #         lam = self.beam.wavelength * \
+    #             (1 + randn(self.n_pixels) * self.beam.spectralWidth)
+    #         return 2 * np.pi * K / np.outer(lam, np.ones(3))
 
     @property
     def stol(self):
@@ -471,9 +532,9 @@ class Panel(object):
         if self._sa is None:
             v = vec_norm(self.V)
             n = self.N
-            V2 = np.sum(self.V**2, axis=-1)
+            V2 = np.sum(self.V ** 2, axis=-1)
             A = norm(np.cross(self.F, self.S))
-            self._sa = A / V2 * np.dot(n,v.T)
+            self._sa = A / V2 * np.dot(n, v.T)
 
         return self._sa
 
@@ -482,14 +543,13 @@ class Panel(object):
         """ The scattering polarization factor. """
 
         if self._pf is None:
-
             p = self.beam.polarization_vectors[0]
             u = vec_norm(self.V)
-            self._pf = self.beam.polarization_weights[0]*(1.0 - np.abs(u.dot(p))**2)
+            self._pf = self.beam.polarization_weights[0] * (1.0 - np.abs(u.dot(p)) ** 2)
 
             p = self.beam.polarization_vectors[1]
             u = vec_norm(self.V)
-            self._pf += self.beam.polarization_weights[1]*(1.0 - np.abs(u.dot(p))**2)
+            self._pf += self.beam.polarization_weights[1] * (1.0 - np.abs(u.dot(p)) ** 2)
 
             self._pf /= self.beam.polarization_weights[0] + self.beam.polarization_weights[1]
 
@@ -624,8 +684,8 @@ class Panel(object):
             if distance is None:
                 raise ValueError("Distance is unspecified")
             self.T = np.array([0, 0, distance]) \
-                - self.F * (self.nF / 2.0 - 0.5) \
-                - self.S * (self.nS / 2.0 - 0.5)
+                     - self.F * (self.nF / 2.0 - 0.5) \
+                     - self.S * (self.nS / 2.0 - 0.5)
         else:
             self.T = T
 
@@ -805,7 +865,6 @@ class PanelList(object):
         """ Concatenated pixel position."""
 
         if self._v is None:
-
             self._v = np.concatenate(
                 [p.V.reshape(np.product(p.V.shape) / 3, 3) for p in self])
 
@@ -816,7 +875,6 @@ class PanelList(object):
         """ Concatenated reciprocal-space vectors."""
 
         if self._k is None or self._k.shape[0] != self.n_pixels:
-
             self._k = np.concatenate(
                 [p.K.reshape(np.product(p.K.shape) / 3, 3) for p in self])
 
@@ -834,20 +892,19 @@ class PanelList(object):
 
         return vec_mag(self.Q)
 
-#     @property
-#     def mcQ(self):
-#         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
-#         incident Beam direction for each pixel independently. """
-#
-#         return np.concatenate(
-#             [p.mcQ.reshape(np.product(p.mcQ.shape) / 3, 3) for p in self])
+    #     @property
+    #     def mcQ(self):
+    #         """ Monte Carlo q vectors; add jitter to wavelength, pixel position,
+    #         incident Beam direction for each pixel independently. """
+    #
+    #         return np.concatenate(
+    #             [p.mcQ.reshape(np.product(p.mcQ.shape) / 3, 3) for p in self])
 
     @property
     def stol(self):
         """ sin(theta)/lambda, where theta is the half angle """
 
         if self.beam.wavelength is None:
-
             raise ValueError("No wavelength is defined.  Cannot compute stol.")
 
         return 0.5 * vec_mag(self.K) / self.wavelength
@@ -857,7 +914,6 @@ class PanelList(object):
         """ Concatenated intensity data."""
 
         if self._data is None:
-
             self._data = np.concatenate(
                 [p.data.reshape(np.product(p.data.shape)) for p in self])
 
@@ -885,7 +941,6 @@ class PanelList(object):
         """ Concatenated mask."""
 
         if self._mask is None:
-
             self._mask = np.concatenate(
                 [p.mask.reshape(np.product(p.mask.shape)) for p in self])
 
@@ -914,7 +969,6 @@ class PanelList(object):
         """ Concatenated dark."""
 
         if self._dark is None:
-
             self._dark = np.concatenate(
                 [p.dark.reshape(np.product(p.dark.shape)) for p in self])
 
@@ -966,7 +1020,6 @@ class PanelList(object):
         """ Concatenated solid angles."""
 
         if self._sa is None:
-
             self._sa = np.concatenate([
                 p.solid_angle.reshape(np.product(p.solid_angle.shape))
                 for p in self
@@ -979,7 +1032,6 @@ class PanelList(object):
         """ Concatenated polarization factors."""
 
         if self._pf is None:
-
             self._pf = np.concatenate([
                 p.polarization_factor.reshape(
                     np.product(p.polarization_factor.shape)) for p in self
@@ -1148,6 +1200,7 @@ class SimpleDetector(Panel):
             the wavelength of the photons (in Angstroms)
 
     """
+
     def __init__(self, n_pixels=1000, pixsize=0.00005, detdist=0.05, wavelen=1., *args, **kwargs):
 
         Panel.__init__(self, *args, **kwargs)
@@ -1158,22 +1211,22 @@ class SimpleDetector(Panel):
 
         self.fig = None
 
-#       make a single panel detector:
+        #       make a single panel detector:
         self.simple_setup(
             n_pixels,
             n_pixels,
             pixsize,
             detdist,
-            wavelen,)
+            wavelen, )
 
-#       shape of the 2D det panel (2D image)
+        #       shape of the 2D det panel (2D image)
         self.img_sh = (self.nS, self.nF)
-        self.center = map( lambda x: x/2., self.img_sh)
+        self.center = map(lambda x: x / 2., self.img_sh)
 
-        self.SOLID_ANG = np.cos( np.arcsin( self.Qmag*self.wavelength / 4 / np.pi) )**3
+        self.SOLID_ANG = np.cos(np.arcsin(self.Qmag * self.wavelength / 4 / np.pi)) ** 3
 
-        self.rad2q = lambda rad: 4 * np.pi * np.sin( .5 * np.arctan(rad * pixsize / detdist) ) / wavelen
-        self.q2rad = lambda q: np.tan( np.arcsin( q*wavelen / 4 / np.pi ) * 2) * detdist / pixsize
+        self.rad2q = lambda rad: 4 * np.pi * np.sin(.5 * np.arctan(rad * pixsize / detdist)) / wavelen
+        self.q2rad = lambda q: np.tan(np.arcsin(q * wavelen / 4 / np.pi) * 2) * detdist / pixsize
 
         self.intens = None
 
@@ -1187,7 +1240,7 @@ class SimpleDetector(Panel):
         Returns
             np.ndarray : Scattering intensities as a 2-D image.
         """
-        self.intens = (np.abs(amplitudes)**2).reshape(self.img_sh)
+        self.intens = (np.abs(amplitudes) ** 2).reshape(self.img_sh)
         return self.intens
 
     def readout_finite(self, amplitudes, qmin, qmax, flux=1e20):
@@ -1204,8 +1257,8 @@ class SimpleDetector(Panel):
         Returns:
             np.ndarray : Scattering intensities as a 2-D image.
         """
-        self.intens = (np.abs(amplitudes)**2).reshape(self.img_sh)
-        struct_fact = (np.abs(amplitudes)**2).astype(np.float64)
+        self.intens = (np.abs(amplitudes) ** 2).reshape(self.img_sh)
+        struct_fact = (np.abs(amplitudes) ** 2).astype(np.float64)
 
         if qmin < self.Qmag.min():
             qmin = self.Qmag.min()
@@ -1221,7 +1274,7 @@ class SimpleDetector(Panel):
             struct_fact[ihigh] = 0
 
         rad_electron = 2.82e-13  # cm
-        phot_per_pix = struct_fact * self.SOLID_ANG * flux * rad_electron**2
+        phot_per_pix = struct_fact * self.SOLID_ANG * flux * rad_electron ** 2
         total_phot = int(phot_per_pix.sum())
 
         pvals = struct_fact / struct_fact.sum()
@@ -1232,7 +1285,7 @@ class SimpleDetector(Panel):
 
         return self.intens
 
-    def display(self, use_log=True, vmax=None,pause=None, **kwargs):
+    def display(self, use_log=True, vmax=None, pause=None, **kwargs):
         """
         Displays a detector. Extra kwargs are passed
         to matplotlib.figure
@@ -1250,14 +1303,13 @@ class SimpleDetector(Panel):
                 colorbar scaling argument.
         """
 
-        
-        assert( self.intens is not None)
+        assert (self.intens is not None)
 
         if 'matplotlib' not in sys.modules:
             print("You need matplotlib to plot!")
             return
-        #plt = matplotlib.pylab
-        
+        # plt = matplotlib.pylab
+
         if self.fig is None:
             fig = plt.figure(**kwargs)
         else:
@@ -1277,7 +1329,7 @@ class SimpleDetector(Panel):
             cbar = fig.colorbar(ax_img)
             cbar.ax.set_ylabel('log(photon counts)', rotation=270, labelpad=12)
         else:
-            assert(vmax is not None)
+            assert (vmax is not None)
             ax_img = ax.imshow(
                 self.intens,
                 extent=extent,
@@ -1299,3 +1351,138 @@ class SimpleDetector(Panel):
         else:
             plt.draw()
             plt.pause(pause)
+
+class IcosphereGeometry():
+    """
+    Experimental class for a spherical detector that follows the "icosphere" geometry.
+    The Icosphere is generated by sub-dividing the vertices of an icosahedron.
+    The following blog was helpful:
+    http://sinestesia.co/blog/tutorials/python-icospheres/
+    The code is quite slow; needs to be vectorized with numpy...
+    """
+
+    n_subdivisions = 1
+    radius = 1
+
+    def __init__(self, n_subdivisions=1, radius=1):
+
+        self.n_subdivisions = n_subdivisions
+        self.radius = radius
+
+    def _vertex(self, x, y, z):
+        """ Return vertex coordinates fixed to the unit sphere """
+
+        length = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+
+        return [(i * self.radius) / length for i in (x, y, z)]
+
+    def _middle_point(self, point_1, point_2, verts, middle_point_cache):
+        """ Find a middle point and project to the unit sphere """
+
+        # We check if we have already cut this edge first
+        # to avoid duplicated verts
+        smaller_index = min(point_1, point_2)
+        greater_index = max(point_1, point_2)
+
+        key = '{0}-{1}'.format(smaller_index, greater_index)
+
+        if key in middle_point_cache:
+            return middle_point_cache[key]
+
+        # If it's not in cache, then we can cut it
+        vert_1 = verts[point_1]
+        vert_2 = verts[point_2]
+        middle = [sum(i) / 2 for i in zip(vert_1, vert_2)]
+
+        verts.append(self._vertex(*middle))
+
+        index = len(verts) - 1
+        middle_point_cache[key] = index
+
+        return index
+
+    def compute_vertices_and_faces(self):
+
+        # Make the base icosahedron
+
+        vertex = self._vertex
+        middle_point = self._middle_point
+        middle_point_cache = {}
+
+        # Golden ratio
+        PHI = (1 + np.sqrt(5)) / 2
+
+        verts = [
+            vertex(-1, PHI, 0),
+            vertex(1, PHI, 0),
+            vertex(-1, -PHI, 0),
+            vertex(1, -PHI, 0),
+
+            vertex(0, -1, PHI),
+            vertex(0, 1, PHI),
+            vertex(0, -1, -PHI),
+            vertex(0, 1, -PHI),
+
+            vertex(PHI, 0, -1),
+            vertex(PHI, 0, 1),
+            vertex(-PHI, 0, -1),
+            vertex(-PHI, 0, 1),
+        ]
+
+        faces = [
+            # 5 faces around point 0
+            [0, 11, 5],
+            [0, 5, 1],
+            [0, 1, 7],
+            [0, 7, 10],
+            [0, 10, 11],
+
+            # Adjacent faces
+            [1, 5, 9],
+            [5, 11, 4],
+            [11, 10, 2],
+            [10, 7, 6],
+            [7, 1, 8],
+
+            # 5 faces around 3
+            [3, 9, 4],
+            [3, 4, 2],
+            [3, 2, 6],
+            [3, 6, 8],
+            [3, 8, 9],
+
+            # Adjacent faces
+            [4, 9, 5],
+            [2, 4, 11],
+            [6, 2, 10],
+            [8, 6, 7],
+            [9, 8, 1],
+        ]
+
+        # -----------------------------------------------------------------------------
+        # Subdivisions
+
+        for i in range(self.n_subdivisions):
+            faces_subdiv = []
+
+            for tri in faces:
+                v1 = middle_point(tri[0], tri[1], verts, middle_point_cache)
+                v2 = middle_point(tri[1], tri[2], verts, middle_point_cache)
+                v3 = middle_point(tri[2], tri[0], verts, middle_point_cache)
+
+                faces_subdiv.append([tri[0], v1, v3])
+                faces_subdiv.append([tri[1], v2, v1])
+                faces_subdiv.append([tri[2], v3, v2])
+                faces_subdiv.append([v1, v2, v3])
+
+            faces = faces_subdiv
+
+        faces = np.array(faces)
+        verts = np.array(verts)
+        n_faces = faces.shape[0]
+
+        face_centers = np.zeros([n_faces, 3])
+        for i in range(0, n_faces):
+            face_centers[i, :] = (verts[faces[i, 0], :] + verts[faces[i, 1], :] + verts[faces[i, 2], :]) / 3
+
+        return verts, faces, face_centers

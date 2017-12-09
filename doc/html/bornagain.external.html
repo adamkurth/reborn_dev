@@ -149,64 +149,88 @@
 <dl class="function">
 <dt id="bornagain.external.crystfel.geom_to_dict">
 <code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geom_to_dict</code><span class="sig-paren">(</span><em>geom_file</em>, <em>raw_strings=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geom_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geom_to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a crystfel &#8220;geom&#8221; file into a sensible Python dictionary.  For
-details see:
+<dd><p>Convert a crystfel &#8220;geom&#8221; file into a sensible Python dictionary.  For details see:
 <a class="reference external" href="http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html">http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html</a>.</p>
-<p>Input:
-geom_file: Path to the geometry file
-raw_strings: By default, this function will convert values to floats,
-integers, or bools, as appropriate. Set this option to &#8220;True&#8221;
-if you want to store the raw strings in the output
-dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>geom_file</strong> (<em>str</em>) &#8211; Path to the geometry file.</li>
+<li><strong>raw_strings</strong> (<em>bool</em>) &#8211; By default, this function will convert values to floats, integers, or bools, as appropriate.
+Set this option to &#8220;True&#8221; if you want to store the raw strings in the output dictionary.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>geom_dict</strong> &#8211;</p>
+<p>Dictionary container filled with geom file information.</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.external.crystfel.geom_dict_to_panellist">
-<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geom_dict_to_panellist</code><span class="sig-paren">(</span><em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geom_dict_to_panellist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geom_dict_to_panellist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a CrystFEL geometry dictionary to a PanelList object.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.external.crystfel.load_cheetah_data">
-<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">load_cheetah_data</code><span class="sig-paren">(</span><em>dataArray</em>, <em>panelList</em>, <em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#load_cheetah_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.load_cheetah_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="bornagain.external.crystfel.load_cheetah_mask">
-<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">load_cheetah_mask</code><span class="sig-paren">(</span><em>maskArray</em>, <em>PanelList</em>, <em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#load_cheetah_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.load_cheetah_mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Populate Panel masks with cheetah mask array.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.external.crystfel.load_cheetah_dark">
-<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">load_cheetah_dark</code><span class="sig-paren">(</span><em>darkArray</em>, <em>PanelList</em>, <em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#load_cheetah_dark"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.load_cheetah_dark" title="Permalink to this definition">¶</a></dt>
-<dd><p>Populate Panel darks with cheetah dark array.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.external.crystfel.geom_to_panellist">
-<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geom_to_panellist</code><span class="sig-paren">(</span><em>geomFile=None</em>, <em>beamFile=None</em>, <em>PanelList=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geom_to_panellist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geom_to_panellist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a crystfel &#8220;geom&#8221; file into a Panel list</p>
+<dt id="bornagain.external.crystfel.geom_dict_to_padgeometry">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geom_dict_to_padgeometry</code><span class="sig-paren">(</span><em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geom_dict_to_padgeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geom_dict_to_padgeometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a CrystFEL geometry dictionary to a list of PADGeometry() instances.</p>
 </dd></dl>
 
 </div>
 <div class="section" id="module-bornagain.external.lcls">
 <span id="bornagain-external-lcls-module"></span><h2>bornagain.external.lcls module<a class="headerlink" href="#module-bornagain.external.lcls" title="Permalink to this headline">¶</a></h2>
+<p>Utilities to convert</p>
 <dl class="function">
-<dt id="bornagain.external.lcls.cspadReshapePsanaToCheetah">
-<code class="descclassname">bornagain.external.lcls.</code><code class="descname">cspadReshapePsanaToCheetah</code><span class="sig-paren">(</span><em>im</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#cspadReshapePsanaToCheetah"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.cspadReshapePsanaToCheetah" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transform psana cspad numpy array (32,185,388) array to Cheetah 2D
-array (1480, 1552).  This only works on standard CSPAD.  I&#8217;m not aware of
-a way to do this generically for any CSPAD such as the 2x2 without
-hard-coding.  Wish I knew how.</p>
+<dt id="bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">
+<code class="descclassname">bornagain.external.lcls.</code><code class="descname">reshape_psana_cspad_array_to_cheetah_array</code><span class="sig-paren">(</span><em>psana_array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#reshape_psana_cspad_array_to_cheetah_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform psana cspad numpy array of shape (32,185,388) into array to Cheetah array of shape (1480, 1552).
+Unfortunately, the Cheetah format requires a re-write of the data in memory, and one result of this re-write is that
+each detector panel is no longer stored contiguously in memory.  A second result is that newcomers will of course
+be very confused when they first encounter this undocumented aspect of Cheetah.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>psana_array</strong> (<em>numpy array</em>) &#8211; A numpy array of shape (32,185,388) produced by the psana module</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>cheetah_array</strong> &#8211;<p>A numpy array of shape (1480, 1552); same data as the psana array but mangled as done within Cheetah</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy array</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.external.lcls.cspadToPanelList">
-<code class="descclassname">bornagain.external.lcls.</code><code class="descname">cspadToPanelList</code><span class="sig-paren">(</span><em>dataIn</em>, <em>PanelList</em>, <em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#cspadToPanelList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.cspadToPanelList" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dump the psana cspad numpy array (32,185,388) into a PanelList object.
-This function assumes that a CrystFEL geometry file has been transformed
-into a CrystFEL geomDict dictionary.</p>
+<dt id="bornagain.external.lcls.cheetah_cspad_array_to_pad_list">
+<code class="descclassname">bornagain.external.lcls.</code><code class="descname">cheetah_cspad_array_to_pad_list</code><span class="sig-paren">(</span><em>psana_array</em>, <em>geom_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#cheetah_cspad_array_to_pad_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.cheetah_cspad_array_to_pad_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with
+data in the native psana format.  First you should create a crystfel geometry dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>psana_array</strong> (<em>numpy array</em>) &#8211; A numpy array of shape (32,185,388) produced by the psana module.</li>
+<li><strong>geom_dict</strong> (<em>dict</em>) &#8211; A CrystFEL geometry dictionary produced by external.crystfel.geom_to_dict() .</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>pad_list</strong> &#8211;</p>
+<p>A list containing data from each pixel array</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

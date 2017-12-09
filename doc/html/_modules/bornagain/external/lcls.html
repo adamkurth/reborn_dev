@@ -134,35 +134,62 @@
           <div role="main" class="document">
             
   <h1>Source code for bornagain.external.lcls</h1><div class="highlight"><pre>
+<span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">Utilities to convert</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="cspadReshapePsanaToCheetah"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.lcls.cspadReshapePsanaToCheetah">[docs]</a><span class="k">def</span> <span class="nf">cspadReshapePsanaToCheetah</span><span class="p">(</span><span class="n">im</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Transform psana cspad numpy array (32,185,388) array to Cheetah 2D</span>
-<span class="sd">    array (1480, 1552).  This only works on standard CSPAD.  I&#39;m not aware of</span>
-<span class="sd">    a way to do this generically for any CSPAD such as the 2x2 without</span>
-<span class="sd">    hard-coding.  Wish I knew how. &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="reshape_psana_cspad_array_to_cheetah_array"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">[docs]</a><span class="k">def</span> <span class="nf">reshape_psana_cspad_array_to_cheetah_array</span><span class="p">(</span><span class="n">psana_array</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Transform psana cspad numpy array of shape (32,185,388) into array to Cheetah array of shape (1480, 1552).</span>
+<span class="sd">    Unfortunately, the Cheetah format requires a re-write of the data in memory, and one result of this re-write is that</span>
+<span class="sd">    each detector panel is no longer stored contiguously in memory.  A second result is that newcomers will of course</span>
+<span class="sd">    be very confused when they first encounter this undocumented aspect of Cheetah.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        psana_array (numpy array) :</span>
+<span class="sd">            A numpy array of shape (32,185,388) produced by the psana module</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        cheetah_array (numpy array) :</span>
+<span class="sd">            A numpy array of shape (1480, 1552); same data as the psana array but mangled as done within Cheetah</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">imlist</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
         <span class="n">slist</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-            <span class="n">slist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+            <span class="n">slist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">psana_array</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
         <span class="n">imlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">slist</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">imlist</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">cheetah_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">imlist</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cheetah_array</span>
 
 </div>
-<div class="viewcode-block" id="cspadToPanelList"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.lcls.cspadToPanelList">[docs]</a><span class="k">def</span> <span class="nf">cspadToPanelList</span><span class="p">(</span><span class="n">dataIn</span><span class="p">,</span> <span class="n">PanelList</span><span class="p">,</span> <span class="n">geomDict</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Dump the psana cspad numpy array (32,185,388) into a PanelList object.</span>
-<span class="sd">    This function assumes that a CrystFEL geometry file has been transformed</span>
-<span class="sd">    into a CrystFEL geomDict dictionary. &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="cheetah_cspad_array_to_pad_list"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.lcls.cheetah_cspad_array_to_pad_list">[docs]</a><span class="k">def</span> <span class="nf">cheetah_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">psana_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with</span>
+<span class="sd">    data in the native psana format.  First you should create a crystfel geometry dictionary.</span>
 
-    <span class="n">im</span> <span class="o">=</span> <span class="n">cspadReshapePsanaToCheetah</span><span class="p">(</span><span class="n">dataIn</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s">&#39;panels&#39;</span><span class="p">]:</span>
-        <span class="n">PanelList</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span>
-            <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        psana_array (numpy array) :</span>
+<span class="sd">            A numpy array of shape (32,185,388) produced by the psana module.</span>
+<span class="sd">        geom_dict (dict) :</span>
+<span class="sd">            A CrystFEL geometry dictionary produced by external.crystfel.geom_to_dict() .</span>
 
-    <span class="k">return</span> <span class="n">PanelList</span></div>
+<span class="sd">    Returns:</span>
+<span class="sd">        pad_list (list) :</span>
+<span class="sd">            A list containing data from each pixel array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">cheetah_array</span> <span class="o">=</span> <span class="n">reshape_psana_cspad_array_to_cheetah_array</span><span class="p">(</span><span class="n">psana_array</span><span class="p">)</span>
+    <span class="n">pad_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="p">[</span><span class="s">&#39;panels&#39;</span><span class="p">]:</span>
+        <span class="n">pad_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cheetah_array</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
+
+    <span class="k">return</span> <span class="n">pad_list</span></div>
 </pre></div>
 
           </div>

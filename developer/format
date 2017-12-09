@@ -1,0 +1,4 @@
+fmt='autopep8'
+dir='bornagain'
+
+$fmt $dir

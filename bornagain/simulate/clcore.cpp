@@ -119,7 +119,7 @@ static dsfloat2 phase_factor(
         // atom information into local memory.
         barrier(CLK_LOCAL_MEM_FENCE);
 
-        // We use a local real and imaginary part to avoid floatint point overflow
+        // We use a local real and imaginary part to avoid floating point overflow
         a_temp = (dsfloat2)(0.0f,0.0f);
 
         // Now sum up the amplitudes from this subset of atoms

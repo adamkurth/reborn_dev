@@ -1,3 +1,0 @@
-Rick's attempt to create a python x-ray diffraction analysis platform.
-
-Many things won't work due to time-varying API...

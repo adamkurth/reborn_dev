@@ -205,20 +205,20 @@ As a result of simplifications, there are no checks; the programmer must think.<
 
 <dl class="attribute">
 <dt id="bornagain.detector.PADGeometry.fs_vec">
-<code class="descname">fs_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.detector.PADGeometry.fs_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>The fast-scan basis vector.</p>
+<code class="descname">fs_vec</code><a class="headerlink" href="#bornagain.detector.PADGeometry.fs_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fast-scan basis vector.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.detector.PADGeometry.ss_vec">
-<code class="descname">ss_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.detector.PADGeometry.ss_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>The slow-scan basis vector.</p>
+<code class="descname">ss_vec</code><a class="headerlink" href="#bornagain.detector.PADGeometry.ss_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slow-scan basis vector.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.detector.PADGeometry.t_vec">
-<code class="descname">t_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.detector.PADGeometry.t_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>The overall translation vector.</p>
+<code class="descname">t_vec</code><a class="headerlink" href="#bornagain.detector.PADGeometry.t_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translation vector pointing from origin to center of corner pixel, which is first in memory.</p>
 </dd></dl>
 
 <dl class="method">
@@ -226,31 +226,6 @@ As a result of simplifications, there are no checks; the programmer must think.<
 <code class="descname">simple_setup</code><span class="sig-paren">(</span><em>n_pixels=1000</em>, <em>pixel_size=0.0001</em>, <em>distance=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.simple_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.simple_setup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make this a square PAD with beam at center.</p>
 </dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.set_fs_vec">
-<code class="descname">set_fs_vec</code><span class="sig-paren">(</span><em>fs_vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.set_fs_vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.set_fs_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.set_ss_vec">
-<code class="descname">set_ss_vec</code><span class="sig-paren">(</span><em>ss_vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.set_ss_vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.set_ss_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.set_t_vec">
-<code class="descname">set_t_vec</code><span class="sig-paren">(</span><em>t_vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.set_t_vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.set_t_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.set_n_fs">
-<code class="descname">set_n_fs</code><span class="sig-paren">(</span><em>n_fs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.set_n_fs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.set_n_fs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.set_n_ss">
-<code class="descname">set_n_ss</code><span class="sig-paren">(</span><em>n_ss</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.set_n_ss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.set_n_ss" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.pixel_size">
@@ -310,22 +285,25 @@ the 2*pi/lambda factor included.</p>
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.q_vecs">
 <code class="descname">q_vecs</code><span class="sig-paren">(</span><em>beam_vec=None</em>, <em>wavelength=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.q_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.q_vecs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Conventional scattering vectors 2*pi/lambda (s - s0)</p>
+<dd><p>Calculate scattering vectors:</p>
+<blockquote>
+<div><span class="math">\(\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)\)</span></div></blockquote>
+<p>Returns: numpy array</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.detector.PADGeometry.solid_angle">
-<code class="descname">solid_angle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.solid_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.solid_angle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:
-Area/R^2*cos(theta) .
-In terms of vectors the area is the cross product of basis vectors f X s, and tilt factor cos(theta) is the
-dot of the panel normal vector with the normal vector pointing from sample to pixel.</p>
+<dt id="bornagain.detector.PADGeometry.solid_angles">
+<code class="descname">solid_angles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.solid_angles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.solid_angles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:</p>
+<blockquote>
+<div><span class="math">\(\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}\)</span>.</div></blockquote>
+<p>Returns: numpy array</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.detector.PADGeometry.polarization_factor">
-<code class="descname">polarization_factor</code><span class="sig-paren">(</span><em>polarization_vec</em>, <em>beam_vec</em>, <em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.polarization_factor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.polarization_factor" title="Permalink to this definition">¶</a></dt>
-<dd><p>The scattering polarization factors. <span class="math">\(\vec{v}\)</span></p>
+<dt id="bornagain.detector.PADGeometry.polarization_factors">
+<code class="descname">polarization_factors</code><span class="sig-paren">(</span><em>polarization_vec</em>, <em>beam_vec</em>, <em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.polarization_factors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.polarization_factors" title="Permalink to this definition">¶</a></dt>
+<dd><p>The scattering polarization factors.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -892,23 +870,58 @@ to matplotlib.figure</p>
 </div>
 <div class="section" id="module-bornagain.scatter">
 <span id="bornagain-scatter-module"></span><h2>bornagain.scatter module<a class="headerlink" href="#module-bornagain.scatter" title="Permalink to this headline">¶</a></h2>
-<p>Classes related to x-ray &#8220;scattering&#8221;, which usually is distinguished from
-&#8220;diffraction&#8221; because there are many objects in random orientations.  SAXS/WAXS
-is the canonical example.</p>
+<p>Classes related to x-ray &#8220;scattering&#8221;, which loosely means diffraction from many objects in random orientations.</p>
 <dl class="class">
 <dt id="bornagain.scatter.RadialProfile">
 <em class="property">class </em><code class="descclassname">bornagain.scatter.</code><code class="descname">RadialProfile</code><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Helper class to create radial profiles.</p>
 <dl class="method">
 <dt id="bornagain.scatter.RadialProfile.make_plan">
-<code class="descname">make_plan</code><span class="sig-paren">(</span><em>PanelList</em>, <em>mask=None</em>, <em>nBins=100</em>, <em>qRange=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile.make_plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile.make_plan" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use PanelList as template to cache information for radial binning.</p>
+<code class="descname">make_plan</code><span class="sig-paren">(</span><em>q_mags</em>, <em>mask=None</em>, <em>n_bins=100</em>, <em>q_range=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile.make_plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile.make_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup the binning indices for the creation of radial profiles.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q_mags</strong> (<em>numpy array</em>) &#8211; Scattering vector magnitudes.</li>
+<li><strong>mask</strong> (<em>numpy array</em>) &#8211; Pixel mask.  Should be ones and zeros, where one means &#8220;good&#8221; and zero means &#8220;bad&#8221;.</li>
+<li><strong>n_bins</strong> (<em>int</em>) &#8211; Number of bins.</li>
+<li><strong>q_range</strong> (<em>list-like</em>) &#8211; The minimum and maximum of the scattering vector magnitudes.  The bin size will be equal to
+(max_q - min_q) / n_bins</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="bornagain.scatter.RadialProfile.get_profile">
-<code class="descname">get_profile</code><span class="sig-paren">(</span><em>data</em>, <em>PanelList=None</em>, <em>average=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile.get_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile.get_profile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">get_profile</code><span class="sig-paren">(</span><em>data</em>, <em>average=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile.get_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile.get_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a radial profile for a particular dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>numpy array</em>) &#8211; Intensity data.</li>
+<li><strong>average</strong> (<em>bool</em>) &#8211; If true, divide the sum in each bin by the counts, else return the sum.  Default: True.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>profile</strong> &#8211;</p>
+<p>The requested radial profile.</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -918,11 +931,71 @@ is the canonical example.</p>
 <p>Classes related to x-ray sources.</p>
 <dl class="class">
 <dt id="bornagain.source.Beam">
-<em class="property">class </em><code class="descclassname">bornagain.source.</code><code class="descname">Beam</code><a class="reference internal" href="_modules/bornagain/source.html#Beam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.source.Beam" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">bornagain.source.</code><code class="descname">Beam</code><span class="sig-paren">(</span><em>beam_vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/source.html#Beam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.source.Beam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="method">
-<dt id="bornagain.source.Beam.check">
-<code class="descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/source.html#Beam.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.source.Beam.check" title="Permalink to this definition">¶</a></dt>
+<p>A minimal containor to gather x-ray beam properties.</p>
+<dl class="attribute">
+<dt id="bornagain.source.Beam.wavelength">
+<code class="descname">wavelength</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nominal photon wavelength</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.beam_vec">
+<code class="descname">beam_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.beam_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nominal direction of incident beam</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.polarization_vec">
+<code class="descname">polarization_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.polarization_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Direction of the first polarization vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.polarization_weight">
+<code class="descname">polarization_weight</code><em class="property"> = 1</em><a class="headerlink" href="#bornagain.source.Beam.polarization_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weight of the first polarization vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.photon_energy">
+<code class="descname">photon_energy</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.photon_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.spectral_width_fwhm">
+<code class="descname">spectral_width_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.spectral_width_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.pulse_energy">
+<code class="descname">pulse_energy</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.pulse_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.n_photons">
+<code class="descname">n_photons</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.n_photons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.beam_divergence_fwhm">
+<code class="descname">beam_divergence_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.beam_divergence_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.beam_diameter_fwhm">
+<code class="descname">beam_diameter_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.beam_diameter_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.fluence">
+<code class="descname">fluence</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.fluence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.fluence_jitter_fwhm">
+<code class="descname">fluence_jitter_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.fluence_jitter_fwhm" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

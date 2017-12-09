@@ -44,13 +44,82 @@ a('--write_hdf5', action='store_true', default=False,
   help='Write data to hdf5 file(s).')
 
 a('--mplview', action='store_true', default=False,
-  help='View the pattern with matplotlib')
+  help='View the pattern with matplotlib.')
 
 a('--qtview', action='store_true', default=False,
-  help='View the pattern with pyqtgraph')
+  help='View the pattern with pyqtgraph.')
 
 a('--skview', action='store_true', default=False,
-  help='View the pattern with skimage viewer')
+  help='View the pattern with skimage viewer.')
+
+a('--quiet', action='store_true', default=False,
+  help='Decreases printed output.')
+
+a('--add_noise', action='store_true', default=False,
+  help='Adds Poisson noise to the image.')
+
+a('--cromer_mann', action='store_true', default=False,
+  help='Cromer Mann')
+
+a('--wigner', action='store_true', default=False,
+  help='Overlay wigner cells')
+
+a('--no_rotation', action='store_false', default=True,
+  help='Removes random rotation of the crystal')
+
+a('--no_beam_mask', action='store_false', default=True,
+  help='Stops direct beam masking')
+
+a('--no_approx_transform', action='store_false', default=True,
+  help='Stops approximate lattice transform')
+
+a('--no_monte_carlo', action='store_false', default=True,
+  help='Stops Monte Carlo simulation')
+
+a('--beam_diameter', type=float, nargs=1, default=100e-6,
+  help='Beam diameter') 
+
+a('--beam_divergence', type=float, nargs=1, default=0.010,
+  help = 'Changes the beam divergence, input in radians')
+
+a('--detector_distance', type=float, nargs=1, default=100e-3,
+  help='Distance to the detector')
+
+a('--pixel_size', type=float, nargs=1, default = 110e-6,
+  help='Size of the pixels')
+
+a('--photon_energy', type=float, nargs=1, default=12.0,
+  help='Photon energy in keV')
+
+a('--wavelength_fwhm', type=float, nargs=1, default=0.02,
+  help='Spectral dispersion full-width, half-max value (%)')
+
+a('--n_pixels', type=float, nargs=1, default=1000, 
+  help='Number of pixels')
+
+a('--transmission', type=float, nargs=1, default=1.0,
+  help='Transmission coefficient')
+
+a('--n_photons', type=int, nargs=1, default=1e8,
+  help='Number of photons')
+
+a('--mosaic_domain', type=float, nargs=1, default=1000e-9,
+  help='Mosaic domain size')
+
+a('--mosaicity_fwhm', type=float, nargs=1, default=0.0001,
+  help='Mosaicity full-width, half-max value')
+
+a('--results_dir', type=str, nargs=1, default='/data/temp/cxls-lysozyme-02/',
+  help='Directory where the results are saved')
+
+a('--num_patterns', type=int, nargs=1, default=1,
+  help='Number of patterns to simulate')
+
+#a('--parameters', type=str, nargs=1, default='parameters.txt',
+#  help = 'Allows for the extraction of parameters from a .txt file provided its location')
+
+#a('--no_params', action = 'store_false', default=True, 
+#  help = 'Ignores the parameter file and uses default values or user specified values')
 
 a = p.parse_args()
 
@@ -67,41 +136,42 @@ def get_arg(arg):
 
 # This needs to be thought through more carefully.  E.g. check if pdb file exists, send message if it doesn't, and so
 # on.
-pdb_file                      = get_arg(a.pdb_file)
-n_monte_carlo_iterations      = get_arg(a.iterations)
-lattice_transform_model       = get_arg(a.lattice_transform)
-write_hdf5                    = get_arg(a.write_hdf5)
-write_geom                    = get_arg(a.write_geom)
-mplview                       = get_arg(a.mplview)
-qtview                        = get_arg(a.qtview)
-skview                        = get_arg(a.skview)
-
-do_monte_carlo = True # This should not be needed; set bandwidth etc. to zero of you don't want monte carlo...
-n_pixels = 1000
-pixel_size = 110e-6
-detector_distance = 100e-3
-photon_energy = 12.0 / keV
-# pulse_energy = 0.0024
-wavelength = hc / photon_energy
-wavelength_fwhm = wavelength * 0.02
-beam_diameter = 100e-6
-beam_divergence_fwhm = 0.010 * (8e-6 / beam_diameter)
-transmission = 1.0
-n_photons = 1e8  # pulse_energy / photon_energy  # 1e12
-I0 = transmission * n_photons / (np.pi * (beam_diameter / 2.0) ** 2)
-crystal_size = beam_diameter
-mosaic_domain_size = 1000e-9
-mosaicity_fwhm = 0.0001
-results_dir = '/data/temp/cxls-lysozyme-02/'
-cromer_mann = False
-quiet = False
-random_rotation = True
-approximate_lattice_transform = True
-rotation_axis = [1, 0, 0]
-rotation_angle = 0.1
-add_noise = False
-overlay_wigner_cells = False
-mask_direct_beam = True
+pdb_file                        = get_arg(a.pdb_file)
+n_monte_carlo_iterations        = get_arg(a.iterations)
+lattice_transform_model         = get_arg(a.lattice_transform)
+write_hdf5                      = get_arg(a.write_hdf5)
+write_geom                      = get_arg(a.write_geom)
+mplview                         = get_arg(a.mplview)
+qtview                          = get_arg(a.qtview)
+skview                          = get_arg(a.skview)
+quiet                           = get_arg(a.quiet)
+cromer_mann                     = get_arg(a.cromer_mann)
+random_rotation                 = get_arg(a.no_rotation)
+beam_diameter                   = get_arg(a.beam_diameter)
+detector_distance               = get_arg(a.detector_distance)
+pixel_size                      = get_arg(a.pixel_size)
+add_noise                       = get_arg(a.add_noise)
+photon_energy                   = get_arg(a.photon_energy) / keV
+n_pixels                        = get_arg(a.n_pixels)
+transmission                    = get_arg(a.transmission)
+n_photons                       = get_arg(a.n_photons) # pulse_energy / photon energy # 1e12
+mosaic_domain_size              = get_arg(a.mosaic_domain)
+mosaicity_fwhm                  = get_arg(a.mosaicity_fwhm)
+overlay_wigner_cells            = get_arg(a.wigner)
+results_dir                     = get_arg(a.results_dir)
+mask_direct_beam                = get_arg(a.no_beam_mask)
+approximate_lattice_transform   = get_arg(a.no_approx_transform)
+do_monte_carlo                  = get_arg(a.no_monte_carlo) # This should not be needed; set bandwidth etc. to zero of you don't want monte carlo...
+beam_divergence_fwhm            = get_arg(a.beam_divergence) * (8e-6 / beam_diameter)
+num_patterns                    = get_arg(a.num_patterns)
+wavelength                      = hc / photon_energy # pulse_energy = 0.0024
+wavelength_fwhm                 = wavelength * get_arg(a.wavelength_fwhm)
+I0                              = transmission * n_photons / (np.pi * (beam_diameter / 2.0) ** 2)
+crystal_size                    = beam_diameter
+rotation_axis                   = [1, 0, 0]
+rotation_angle                  = 0.1
+#parameters                      = get_arg(a.parameters)
+#no_params                       = get_arg(a.no_params)
 
 
 # Doesn't make sense if mosaic domain size is larger than the whole crystal...
@@ -173,8 +243,8 @@ pad = ba.detector.PADGeometry()
 pad.simple_setup(n_pixels=n_pixels, pixel_size=pixel_size, distance=detector_distance)
 q = pad.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
 qmag = vec_mag(q)
-sa = pad.solid_angle()
-P = pad.polarization_factor(polarization_vec=polarization_vec,beam_vec=beam_vec,weight=polarization_weight)
+sa = pad.solid_angles()
+P = pad.polarization_factors(polarization_vec=polarization_vec,beam_vec=beam_vec,weight=polarization_weight)
 write('done\n')
 
 # Get atomic coordinates and scattering factors from pdb file
@@ -228,80 +298,86 @@ F_dev = clcore.to_device(np.zeros([pad.n_ss * pad.n_fs], dtype=clcore.complex_t)
 S2_dev = clcore.to_device(shape=(pad.n_fs, pad.n_ss), dtype=clcore.real_t)
 write('done\n')
 
-R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
-if random_rotation: R = ba.utils.random_rotation()
-
-if not cromer_mann:
-    write('Simulating molecular transform from Henke tables... ')
-    t = time.time()
-    clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R, F_dev, add=False)
-    F2 = np.abs(F_dev.get()) ** 2
-    tf = time.time() - t
-    write('%g s\n' % (tf))
-else:
-    write('Simulating molecular transform with cromer mann... ')
-    t = time.time()
-    clcore.prime_cromermann_simulator(q.copy(), cryst.Z.copy())
-    q_cm = clcore.get_q_cromermann()
-    r_cm = clcore.get_r_cromermann(r.copy(), sub_com=False)
-    clcore.run_cromermann(q_cm, r_cm, rand_rot=False, force_rot_mat=R)
-    A = clcore.release_amplitudes()
-    F2 = np.abs(A) ** 2
-    tf = time.time() - t
-    write('%g s\n' % (tf))
-
-abc = cryst.O.T.copy()
-S2_dev *= 0
-
-write('Simulating lattice transform... ')
-time.sleep(0.001)
-message = ''
-tt = time.time()
-for n in np.arange(1, (n_monte_carlo_iterations + 1)):
-
-    t = time.time()
-    if do_monte_carlo:
-        B = ba.utils.random_beam_vector(beam_divergence_fwhm)
-        w = np.random.normal(wavelength, wavelength_fwhm / 2.354820045, [1])[0]
-        Rm = ba.utils.random_mosaic_rotation(mosaicity_fwhm).dot(R)
-        T = pad.t_vec.copy() + pad.fs_vec * (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
+for i in np.arange(1, (num_patterns + 1)):
+    R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
+    if random_rotation: R = ba.utils.random_rotation()
+    
+    if not cromer_mann:
+        write('Simulating molecular transform from Henke tables... ')
+        t = time.time()
+        clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R, F_dev, add=False)
+        F2 = np.abs(F_dev.get()) ** 2
+        tf = time.time() - t
+        write('%g s\n' % (tf))
     else:
-        B = beam_vec
-        w = wavelength
-        Rm = R
-        T = pad.t_vec
-    lattice_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, S2_dev, add=True)
-
-    tf = time.time() - t
-    if (n % 1000) == 0:
-        write('\b' * len(message))
-        message = '%3.0f%% (%5d; %7.03f ms)' % (n / float(n_monte_carlo_iterations) * 100, n, tf * 1e3)
-        write(message)
-write('\b' * len(message))
-write('%g s                \n' % (time.time() - tt))
-
-# Average the lattice transforms over MC iterations
-S2 = S2_dev.get().ravel() / n
-# Convert into useful photon units
-I = I0 * r_e ** 2 * F2 * S2 * sa * P
-# Scale up according to mosaic domain
-n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
-I_ideal = I.copy() * n_domains
-I_ideal = I_ideal.astype(np.float32)
-I_noisy = np.random.poisson(I_ideal).astype(np.float32)
-
-if write_hdf5:
-    n_patterns = len(glob(results_dir + 'pattern-*.h5'))
-    file_name = results_dir + 'pattern-%06d.h5' % (n_patterns + 1)
-    write('Writing file %s\n' % file_name)
-    fid = h5py.File(file_name, 'w')
-    fid['/data/ideal'] = I_ideal.astype(npad.fs_vecloat32).reshape((pad.n_ss, pad.n_fs))
-    fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((pad.n_ss, pad.n_fs))
-    fid.close()
-
-F2mean = np.mean(F2.flat[direct_beam_mask > 0])
-Ncells = np.prod(n_cells_whole_crystal)
-darwin = I0 * r_e ** 2 * Ncells * F2mean * (wavelength ** 3 / cryst.V)
+        write('Simulating molecular transform with cromer mann... ')
+        t = time.time()
+        clcore.prime_cromermann_simulator(q.copy(), cryst.Z.copy())
+        q_cm = clcore.get_q_cromermann()
+        r_cm = clcore.get_r_cromermann(r.copy(), sub_com=False)
+        clcore.run_cromermann(q_cm, r_cm, rand_rot=False, force_rot_mat=R)
+        A = clcore.release_amplitudes()
+        F2 = np.abs(A) ** 2
+        tf = time.time() - t
+        write('%g s\n' % (tf))
+    
+    abc = cryst.O.T.copy()
+    S2_dev *= 0
+    
+    write('Simulating lattice transform... ')
+    time.sleep(0.001)
+    message = ''
+    tt = time.time()
+    for n in np.arange(1, (n_monte_carlo_iterations + 1)):
+    
+        t = time.time()
+        if do_monte_carlo:
+            B = ba.utils.random_beam_vector(beam_divergence_fwhm)
+            if (wavelength_fwhm == 0):
+                w = wavelength
+            else:
+                w = np.random.normal(wavelength, wavelength_fwhm / 2.354820045, [1])[0]
+            Rm = ba.utils.random_mosaic_rotation(mosaicity_fwhm).dot(R)
+            T = pad.t_vec.copy() + pad.fs_vec * (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
+        else:
+            B = beam_vec
+            w = wavelength
+            Rm = R
+            T = pad.t_vec
+        lattice_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, S2_dev, add=True)
+    
+        tf = time.time() - t
+        if (n % 1000) == 0:
+            write('\b' * len(message))
+            message = '%3.0f%% (%5d; %7.03f ms)' % (n / float(n_monte_carlo_iterations) * 100, n, tf * 1e3)
+            write(message)
+    write('\b' * len(message))
+    write('%g s                \n' % (time.time() - tt))
+    
+    # Average the lattice transforms over MC iterations
+    S2 = S2_dev.get().ravel() / n
+    # Convert into useful photon units
+    I = I0 * r_e ** 2 * F2 * S2 * sa * P
+    # Scale up according to mosaic domain
+    n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
+    I_ideal = I.copy() * n_domains
+    I_ideal = I_ideal.astype(np.float32)
+    I_noisy = np.random.poisson(I_ideal).astype(np.float32)
+    
+    if write_hdf5:
+        n_patterns = len(glob(results_dir + 'pattern-*.h5'))
+        file_name = results_dir + 'pattern-%06d.h5' % (n_patterns + 1)
+        write('Writing file %s\n' % file_name)
+        fid = h5py.File(file_name, 'w')
+        fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
+        fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((pad.n_ss, pad.n_fs))
+        fid.close()
+    
+    F2mean = np.mean(F2.flat[direct_beam_mask > 0])
+    Ncells = np.prod(n_cells_whole_crystal)
+    darwin = I0 * r_e ** 2 * Ncells * F2mean * (wavelength ** 3 / cryst.V)
+    
+# End of pattern loop
 
 write("\n\nDone!\n\n")
 
@@ -345,4 +421,5 @@ if qtview or mplview or skview:
     elif mplview:
         plt.imshow(I_display, interpolation='nearest', cmap='gray', origin='lower')
         plt.show()
+
 

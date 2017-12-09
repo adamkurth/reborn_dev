@@ -138,44 +138,27 @@
 <span class="sd">Classes related to x-ray sources.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">utils</span>
-
 
 <div class="viewcode-block" id="Beam"><a class="viewcode-back" href="../../bornagain.html#bornagain.source.Beam">[docs]</a><span class="k">class</span> <span class="nc">Beam</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    A minimal containor to gather x-ray beam properties.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">wavelength</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c">#: Nominal photon wavelength</span>
+    <span class="n">beam_vec</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c">#: Nominal direction of incident beam</span>
+    <span class="n">polarization_vec</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c">#: Direction of the first polarization vector</span>
+    <span class="n">polarization_weight</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c">#: Weight of the first polarization vector</span>
+    <span class="n">photon_energy</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c"># This should be a function</span>
+    <span class="n">spectral_width_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">pulse_energy</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">n_photons</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">beam_divergence_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">beam_diameter_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">fluence</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">fluence_jitter_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">polarization_vectors</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">polarization_weights</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photon_energy</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectral_width_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pulse_energy</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_photons</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">divergence_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">beam_diameter_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mean_fluence</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fluence_jitter_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;wavelength : </span><span class="si">%g</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;wavelength : None</span><span class="se">\n</span><span class="s">&quot;</span>
-        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;B : [</span><span class="si">%g</span><span class="s">, </span><span class="si">%g</span><span class="s">, </span><span class="si">%g</span><span class="s">]</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">s</span>
-
-<div class="viewcode-block" id="Beam.check"><a class="viewcode-back" href="../../bornagain.html#bornagain.source.Beam.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">utils</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Bad wavelength: </span><span class="si">%f</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">False</span>
-        <span class="k">return</span> <span class="bp">True</span></div></div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 </pre></div>
 
           </div>
