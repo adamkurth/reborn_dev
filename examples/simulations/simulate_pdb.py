@@ -23,13 +23,16 @@ if 'rotate' in sys.argv: rotate = True
 clcore = core.ClCore(group_size=32, double_precision=double)
 
 # Create a detector
-pl = ba.detector.PanelList()
+pl = ba.detector.PADGeometry()
 nPixels = 1001
 pixelSize = 100e-6
 detectorDistance = 0.05
 wavelength = 1.5e-10
-pl.simple_setup(nPixels, nPixels + 1, pixelSize, detectorDistance, wavelength)
-q = pl[0].Q
+beam_vec = np.array([0, 0, 1])
+pl.simple_setup(n_pixels=nPixels, pixel_size=pixelSize, distance=detectorDistance)
+# pl.simple_setup(nPixels, nPixels + 1, pixelSize, detectorDistance, wavelength)
+# q = pl[0].Q
+q_vecs = pl.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
 
 # Load a crystal structure from pdb file
 pdbFile = '../data/pdb/2LYZ.pdb'  # Lysozyme
@@ -42,7 +45,7 @@ print('')
 r = cryst.r
 
 # Look up atomic scattering factors (they are complex numbers)
-f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / pl.beam.wavelength)
+f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 
 n_trials = 3
 show_all = show
@@ -57,7 +60,7 @@ else:
 if 1:
 
     print("[clcore] Access q vectors from memory (i.e. compute them on cpu first)")
-    q = pl.Q  # These are the scattering vectors, Nx3 array.
+    q = q_vecs  # These are the scattering vectors, Nx3 array.
 
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
@@ -68,7 +71,7 @@ if 1:
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf * 1e3, n_atoms, n_pixels))
     imdisp = np.abs(A) ** 2
-    imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
+    imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
     imdisp = np.log(imdisp + 0.1)
     if show_all and show:
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
@@ -95,7 +98,7 @@ if 1:
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf * 1e3, n_atoms, n_pixels))
     imdisp = np.abs(a_dev.get()) ** 2
-    imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
+    imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
     imdisp = np.log(imdisp + 0.1)
     if show_all and show:
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
@@ -110,18 +113,17 @@ if 1:
 if 1:
 
     print("[clcore] Compute q vectors on the fly.  Faster than accessing q's from memory?")
-    p = pl[0]  # p is the first panel in the PanelList (there is only one)
-    n_pixels = p.nF * p.nS
+    n_pixels = pl.n_fs * pl.n_ss
     n_atoms = r.shape[0]
     for i in range(0, n_trials):
         t = time.time()
         A = clcore.phase_factor_pad(
-            r, f, p.T, p.F, p.S, p.B, p.nF, p.nS, p.beam.wavelength, R)
+            r, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R)
         tf = time.time() - t
         print('phase_factor_pad: %7.03f ms (%d atoms; %d pixels)' %
               (tf * 1e3, n_atoms, n_pixels))
     imdisp = np.abs(A) ** 2
-    imdisp = imdisp.reshape((pl[0].nS, pl[0].nF))
+    imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
     imdisp = np.log(imdisp + 0.1)
     # Display pattern
     if show_all and show:
@@ -172,15 +174,15 @@ if 1:
               (tf * 1e3, n_atoms, n_pixels))
     print('')
 
-    pl = ba.detector.PanelList()
-    nPixels = 1000
-    pixelSize = 100e-6
-    detectorDistance = 0.05
-    wavelength = 1.5e-10
-    pl.simple_setup(nPixels, nPixels + 1, pixelSize, detectorDistance, wavelength)
-    q = pl[0].Q
-    n_atoms = 0
-    n_pixels = q.shape[0]
+    # pl = ba.detector.PanelList()
+    # nPixels = 1000
+    # pixelSize = 100e-6
+    # detectorDistance = 0.05
+    # wavelength = 1.5e-10
+    # pl.simple_setup(nPixels, nPixels + 1, pixelSize, detectorDistance, wavelength)
+    # q = pl[0].Q
+    # n_atoms = 0
+    # n_pixels = q.shape[0]
     print("[clcore] Now look up amplitudes for a set of q vectors, using the 3D map")
     for i in range(0, n_trials):
         t = time.time()
@@ -189,7 +191,7 @@ if 1:
         print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
               (tf * 1e3, n_atoms, n_pixels))
     if show_all and show:
-        imdisp = AA.reshape(pl[0].nS, pl[0].nF)
+        imdisp = AA.reshape(pl.n_ss, pl.n_fs)
         imdisp = np.abs(imdisp) ** 2
         imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
@@ -200,7 +202,7 @@ if 1:
     t = time.time()
     q_dev = clcore.to_device(q, dtype=clcore.real_t)
     a_map_dev = clcore.to_device(A, dtype=clcore.complex_t)
-    a_out_dev = clcore.to_device(dtype=clcore.complex_t, shape=(n_pixels))
+    a_out_dev = clcore.to_device(dtype=clcore.complex_t, shape=(pl.n_fs*pl.n_ss))
     tf = time.time() - t
     print('[clcore] As above, but first move arrays to device memory (%7.03f ms)' % (tf * 1e3))
     n_atoms = 0
@@ -212,7 +214,7 @@ if 1:
         print('buffer_mesh_lookup: %7.03f ms (%d atoms; %d pixels)' %
               (tf * 1e3, n_atoms, n_pixels))
     if show_all and show:
-        imdisp = a_out_dev.get().reshape(pl[0].nS, pl[0].nF)
+        imdisp = a_out_dev.get().reshape(pl.n_ss, pl.n_fs)
         imdisp = np.abs(imdisp) ** 2
         imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
@@ -242,7 +244,7 @@ if 1:
 #         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
 #               (tf*1e3,n_atoms,n_pixels))
 #     if show_all and show:
-#         imdisp = A.reshape(pl[0].nS,pl[0].nF)
+#         imdisp = A.reshape(pl.n_ss,pl.n_fs)
 #         imdisp = np.abs(imdisp)**2
 #         imdisp = np.log(imdisp + 0.1)
 #         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
