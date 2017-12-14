@@ -35,12 +35,12 @@ class ClCore(object):
 
         # Setup the context
         if context is None:
-            try:
-                self.context = cl.create_some_context()
-            except:
+            try: # Derek: cl.create_some_context() was forcing CPU on both my macs.. so I thought its best to try to force GPU first. this works well
                 platform = cl.get_platforms()
                 devices = platform[0].get_devices(device_type=cl.device_type.GPU)
                 self.context = cl.Context(devices=devices)
+            except:
+                self.context = cl.create_some_context()
         else:
             self.context = context
 
@@ -230,8 +230,6 @@ class ClCore(object):
         R16 = np.zeros([16], dtype=dtype)
         R16[0:9] = R.flatten().astype(dtype)
         return R16
-
-
 
     @staticmethod
     def to_device_static(array, dtype, queue):

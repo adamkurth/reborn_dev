@@ -47,7 +47,7 @@ r = cryst.r
 # Look up atomic scattering factors (they are complex numbers)
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 
-n_trials = 3
+n_trials = 30
 show_all = show
 # plt.ion()
 
@@ -58,8 +58,8 @@ else:
     R = np.eye(3)
 
 if 1:
-
     print("[clcore] Access q vectors from memory (i.e. compute them on cpu first)")
+    tstart = time.time()
     q = q_vecs  # These are the scattering vectors, Nx3 array.
 
     n_pixels = q.shape[0]
@@ -71,6 +71,13 @@ if 1:
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf * 1e3, n_atoms, n_pixels))
     imdisp = np.abs(A) ** 2
+    
+   
+    tstop = (time.time() - tstart) / n_trials
+    print("\n========= TOTAL TIME =======")
+    print('phase_factor_qrf: %7.03f ms per trial (%d atoms; %d pixels)' %
+        (tstop * 1e3, n_atoms, n_pixels))
+    print("============================\n")
     imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
     imdisp = np.log(imdisp + 0.1)
     if show_all and show:
@@ -82,6 +89,7 @@ if 1:
 if 1:
 
     print("[clcore] Compute q vectors on cpu, but load into GPU memory only once (at the beginning)")
+    tstart = time.time()
     t = time.time()
     n_pixels = q.shape[0]
     n_atoms = r.shape[0]
@@ -97,7 +105,20 @@ if 1:
         tf = time.time() - t
         print('phase_factor_qrf: %7.03f ms (%d atoms; %d pixels)' %
               (tf * 1e3, n_atoms, n_pixels))
+   
+    print("\n  ==================================")
+    print("  Getting amplitude back from device")
+    tt = time.time()
     imdisp = np.abs(a_dev.get()) ** 2
+    print("  --> took %7.03f ms"%( (time.time()-tt)*1e3))
+#   this above bit is what slows things down, seems non-intuitive, but this time required
+#   to copy back from device scales with n_trials
+    
+    tstop = (time.time() - tstart) / n_trials
+    print("\n========= TOTAL TIME =======")
+    print('phase_factor_qrf: %7.03f ms per trial (%d atoms; %d pixels)' %
+        (tstop * 1e3, n_atoms, n_pixels))
+    print("============================\n")
     imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
     imdisp = np.log(imdisp + 0.1)
     if show_all and show:
