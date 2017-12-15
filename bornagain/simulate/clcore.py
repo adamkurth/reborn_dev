@@ -408,6 +408,7 @@ class ClCore(object):
                                  (self.group_size,), q_dev.data, r_dev.data,
                                  f_dev.data, R, a_dev.data, n_atoms,
                                  n_pixels, add)
+        self.queue.finish()
 
         if a is None:
             return a_dev.get()
@@ -473,6 +474,7 @@ class ClCore(object):
                                  (self.group_size,), r_dev.data,
                                  f_dev.data, R, a_dev.data, n_pixels, n_atoms,
                                  nF, nS, w, T, F, S, B, add)
+        self.queue.finish()
 
         if a is None:
             return a_dev.get()
@@ -530,14 +532,14 @@ class ClCore(object):
                                   (self.group_size,), r_dev.data, f_dev.data,
                                   a_dev.data, n_pixels, n_atoms, N, deltaQ,
                                   q_min)
+        self.queue.finish()
 
         if a is None:
             return a_dev.get()
         else:
             return a_dev
 
-    def buffer_mesh_lookup(self, a_map, N, q_min, q_max, q, R=None,
-                           a_out=None):
+    def buffer_mesh_lookup(self, a_map, N, q_min, q_max, q, R=None, a=None):
         """
         This is supposed to lookup intensities from a 3d mesh of amplitudes.
 
@@ -550,7 +552,7 @@ class ClCore(object):
             q (Nx3 numpy array): q-space coordinates at which we want to interpolate
                the complex amplitudes in a_dev
             R (3x3 numpy array): Rotation matrix that will act on the q vectors
-            a_out: (clarray) The output array (optional)
+            a: (clarray) The output array (optional)
 
         Returns:
             numpy array of complex amplitudes
@@ -580,8 +582,7 @@ class ClCore(object):
         N = self.vec4(N, dtype=self.int_t)
         deltaQ = self.vec4(deltaQ, dtype=self.real_t)
         q_min = self.vec4(q_min, dtype=self.real_t)
-        a_out_dev = self.to_device(
-            a_out, dtype=self.complex_t, shape=(n_pixels))
+        a_out_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
                              * self.group_size)
@@ -589,8 +590,9 @@ class ClCore(object):
         self.buffer_mesh_lookup_cl(self.queue, (global_size,), (self.group_size,),
                                    a_map_dev.data, q_dev.data, a_out_dev.data,
                                    n_pixels, N, deltaQ, q_min, R)
+        self.queue.finish()
 
-        if a_out is None:
+        if a is None:
             return a_out_dev.get()
         else:
             return a_out_dev
@@ -646,6 +648,7 @@ class ClCore(object):
                                                   (self.group_size,), abc,
                                                   N, R, I_dev.data, n_pixels,
                                                   nF, nS, w, T, F, S, B, add)
+        self.queue.finish()
 
         if I is None:
             return I_dev.get()
@@ -703,6 +706,7 @@ class ClCore(object):
                                                   (self.group_size,), abc,
                                                   N, R, I_dev.data, n_pixels,
                                                   nF, nS, w, T, F, S, B, add)
+        self.queue.finish()
 
         if I is None:
             return I_dev.get()
