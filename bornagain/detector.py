@@ -119,7 +119,7 @@ class PADGeometry(object):
         i = np.arange(self.n_fs)
         j = np.arange(self.n_ss)
         [i, j] = np.meshgrid(i, j)
-        i.ravel();
+        i.ravel()
         j.ravel()
         return self.indices_to_vectors(j, i)
 
