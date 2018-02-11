@@ -895,7 +895,7 @@ class ClCore(object):
 
         #       set the rotation
         if rand_rot:
-            self.rot_mat = ba.utils.random_rotation_matrix().ravel().astype(self.real_t)
+            self.rot_mat = ba.utils.random_rotation().ravel().astype(self.real_t)
         elif force_rot_mat is not None:
             self.rot_mat = force_rot_mat.astype(self.real_t)
         else:
@@ -935,7 +935,6 @@ class ClCore(object):
         if reset:
             self._load_amp_buffer()
         return Amps
-
 
 def helpme():
     """
