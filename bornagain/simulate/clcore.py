@@ -150,8 +150,9 @@ class ClCore(object):
 
     def _load_phase_factor_qrf(self):
         self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
-        self.phase_factor_qrf_cl.set_scalar_arg_dtypes([None, None, None, None, None, self.int_t, self.int_t,
-                                                        self.int_t])
+        self.phase_factor_qrf_cl.set_scalar_arg_dtypes([None, 
+            None, None, None, None, 
+            self.int_t, self.int_t,self.int_t])
 
     def _load_phase_factor_pad(self):
         self.phase_factor_pad_cl = self.programs.phase_factor_pad
@@ -351,8 +352,12 @@ class ClCore(object):
                              * self.group_size)
 
         self.phase_factor_qrf_cl(self.queue, (global_size,),
-                                 (self.group_size,), q_dev.data, r_dev.data,
-                                 f_dev.data, R16_dev.data, self.a_dev.data, n_atoms,
+                                 (self.group_size,), q_dev.data, 
+                                 r_dev.data,
+                                 f_dev.data, 
+                                 R16_dev.data, 
+                                 self.a_dev.data, 
+                                 n_atoms,
                                  n_pixels)
 
     def next_multiple_groupsize(self, N):
@@ -842,22 +847,32 @@ class ClCore(object):
 
         self._A_buff_data = self.A_buff.data
 
-    def run_cromermann(self, q_buff_data, r_buff_data, rand_rot=False, force_rot_mat=None, com=None):
+    def run_cromermann(self, q_buff_data, r_buff_data, 
+        rand_rot=False, force_rot_mat=None, com=None):
         """
         Run the qrf kam simulator.
 
         Arguments
             q_buff_data (pyopenCL buffer data) :
-                should have shape NpixelsCLx16 where NpixelsCL is the first multiple of group_size greater than
-                Npixels. Use :func:`get_group_size` to check the currently set group_size. The data stored in
-                q[Npixels,:3] should be the q-vectors. The data stored in q[Npixels,3:Nspecies] should be the
-                q-dependent atomic form factors for up to Nspecies=13 atom species See :func:`prime_comermann_simulator`
-                for details regarding the form factor storage and atom species identifier
+                should have shape NpixelsCLx16 where 
+                NpixelsCL is the first multiple of group_size greater than
+                Npixels. 
+                Use :func:`get_group_size` to check the currently 
+                set group_size. The data stored in
+                q[Npixels,:3] should be the q-vectors. 
+                The data stored in q[Npixels,3:Nspecies] should be the
+                q-dependent atomic form factors for up to Nspecies=13 
+                atom species See :func:`prime_comermann_simulator`
+                for details regarding the form factor storage and atom 
+                species identifier
             
             r_buff_data (pyopenCL buffer data) :
-                Should have shape Natomsx4. The data stored in r_buff_data[:,:3] are the atomic positions in cartesian
-                (x,y,z).  The data stored in r_buff_data[:,3] are the atom species identifiers (0,1,..Nspecies-1)
-                mapping the atom species here to the form factor value in q_buff_data.
+                Should have shape Natomsx4. The data stored in 
+                r_buff_data[:,:3] are the atomic positions in cartesian
+                (x,y,z).  The data stored in r_buff_data[:,3] are 
+                the atom species identifiers (0,1,..Nspecies-1)
+                mapping the atom species here to the form factor value 
+                in q_buff_data.
             
             rand_rot (bool) :
                 Randomly rotate the molecule
@@ -869,10 +884,11 @@ class ClCore(object):
                 Offset the center of mass of the molecule
                 
         .. note::
-            For atom r_i the atom species identifier is sp_i = r_buff_data[r_i,3].
-            Then, for pixel q_i, the simulator can find the corresponding form factor in
-            q_buff_dat[q_i,3+sp_i]. I know it is confusing, but it's efficient.
-
+            For atom r_i the atom species identifier is sp_i = 
+            r_buff_data[r_i,3].
+            Then, for pixel q_i, the simulator can find the corresponding 
+            form factor in q_buff_dat[q_i,3+sp_i]. 
+            I know it is confusing, but it's efficient.
         """
 
         #       set the rotation
@@ -893,9 +909,10 @@ class ClCore(object):
         self._set_com_vec()
 
         #       run the program
-        self.qrf_kam_cl(self.queue, (int(self.Npix + self.Nextra_pix),), (self.group_size,),
-                        q_buff_data, r_buff_data, self.rot_buff.data,
-                        self.com_buff.data, self._A_buff_data, self.Nato)
+        self.qrf_kam_cl(self.queue, (int(self.Npix + self.Nextra_pix),), 
+            (self.group_size,), q_buff_data, r_buff_data, 
+            self.rot_buff.data, self.com_buff.data, 
+            self._A_buff_data, self.Nato)
 
     def _set_rand_rot(self):
         self.rot_buff = self.to_device(self.rot_mat, dtype=self.real_t)
