@@ -26,31 +26,31 @@ Convert from q-space to h-space:
 h = cryst.O.T.dot(q)
     '''
 
-    def __init__(self, pdbFilePath=None):
+    r = None  # Atomic coordinates (3xN array)
+    _x = None  # Fractional coordinates (3xN array)
+    O = None  # Orthogonalization matrix (3x3 array)
+    Oinv = None  # Inverse orthogonalization matrix (3x3 array)
+    A = None
+    Ainv = None
+    # Translation vector that goes with orthogonalization matrix (??)
+    T = None
+    elements = None  # Atomic element symbols
+    Z = None  # Atomic numbers
+    spaceGroupNumber = None  # Space group number in the Int. Tables
+    hermannMauguinSymbol = None  # Spacegroup Hermann Mauguin symbol
+    # (as it appears in a PDB file for example)
+    a = None  # Lattice constant
+    b = None  # Lattice constant
+    c = None  # Lattice constant
+    alpha = None  # Lattice angle
+    beta = None  # Lattice angle
+    gamma = None  # Lattice angle
+    V = None  # Unit cell volume
+    nAtoms = None  # Number of atoms
+    nMolecules = None  # Number of molecules per unit cell
+    symOps = None  # Symmetry operations for fractional coords
 
-        self.r = None     # Atomic coordinates (3xN array)
-        self._x = None    # Fractional coordinates (3xN array)
-        self.O = None     # Orthogonalization matrix (3x3 array)
-        self.Oinv = None  # Inverse orthogonalization matrix (3x3 array)
-        self.A = None
-        self.Ainv = None
-        # Translation vector that goes with orthogonalization matrix (??)
-        self.T = None
-        self.elements = None  # Atomic element symbols
-        self.Z = None     # Atomic numbers
-        self.spaceGroupNumber = None  # Space group number in the Int. Tables
-        self.hermannMauguinSymbol = None  # Spacegroup Hermann Mauguin symbol 
-                                    #(as it appears in a PDB file for example)
-        self.a = None     # Lattice constant
-        self.b = None     # Lattice constant
-        self.c = None     # Lattice constant
-        self.alpha = None  # Lattice angle
-        self.beta = None  # Lattice angle
-        self.gamma = None  # Lattice angle
-        self.V = None     # Unit cell volume
-        self.nAtoms = None  # Number of atoms
-        self.nMolecules = None  # Number of molecules per unit cell
-        self.symOps = None  # Symmetry operations for fractional coords
+    def __init__(self, pdbFilePath=None):
 
         if pdbFilePath is not None:
             self.load_pdb(pdbFilePath)
@@ -92,11 +92,19 @@ h = cryst.O.T.dot(q)
         self.Ainv = O.T.copy()
         self.V = V
 
+    def set_spacegroup(self, hermann_mauguin_symbol):
+
+        self.hermann_mauguin_symbol = hermann_mauguin_symbol
+        self.symRs, self.symTs = get_symmetry_operators_from_space_group(hermann_mauguin_symbol)
+        self.symRinvs = [np.linalg.inv(R) for R in self.symRs]
+        self.nMolecules = len(self.symTs)
+
+
     @property
     def x(self):
         ''' Fractional coordinates of atoms. '''
         if self._x is None:
-            self._x = self.Oinv.dot(self.r)
+            self._x = np.dot(self.Oinv, self.r.T).T
         return self._x
 
 
@@ -164,15 +172,14 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
 
     T = SCALE[:, 3]
 
-    cryst.hermann_mauguin_symbol = hermann_mauguin_symbol
+    cryst.cryst1 = cryst1
     cryst.r = utils.vec_check(r)
     cryst.T = utils.vec_check(T)
     cryst.elements = elements
     cryst.Z = atoms.atomic_symbols_to_numbers(elements)
     cryst.nAtoms = nAtoms
-    cryst.symRs, cryst.symTs = get_symmetry_operators_from_space_group(hermann_mauguin_symbol)
-    cryst.symRinvs = [np.linalg.inv(R) for R in cryst.symRs]
-    cryst.nMolecules = len(cryst.symTs)
+
+    cryst.set_spacegroup(hermann_mauguin_symbol)
     
     return cryst
 
@@ -197,14 +204,20 @@ Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3
     # into the spgrp module included in bornagain.
 
     # Simply iterate through all HM symbols until we find one that matches:
-    hm_symbol = hm_symbol.strip()
     symbol_found = False
-    for i in range(0,530):
-        if hm_symbol == spgrp._hmsym[i].strip():
+    if isinstance(hm_symbol, basestring):
+        hm_symbol = hm_symbol.strip()
+        for i in range(0, 530):
+            if hm_symbol == spgrp._hmsym[i].strip():
+                symbol_found = True
+                break
+    else:
+        i = hm_symbol
+        if i < 530:
             symbol_found = True
-            break
 
-    if not symbol_found: return None, None
+    if not symbol_found:
+        return None, None
 
     Rs = spgrp._spgrp_ops[i]["rotations"]
     Ts = [utils.vec_check(T) for T in spgrp._spgrp_ops[i]['translations']]

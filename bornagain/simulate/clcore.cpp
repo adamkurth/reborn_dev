@@ -88,10 +88,10 @@ static dsfloat2 phase_factor(
     const dsfloat4 q,         // Scattering vector
     global const dsfloat *r,  // Atomic coordinates
     global const dsfloat2 *f, // Atomic scattering factors
-    const int n_atoms,      // Number of atoms
+    const int n_atoms,        // Number of atoms
     local dsfloat4 *rg,       // Local storage for chunk of atom positions          (local dsfloat4 rg[GROUP_SIZE];)
     local dsfloat2 *fg,       // Local storage for chunk of atom scattering factors (local dsfloat2 fg[GROUP_SIZE];)
-    const int li            // Local index of this worker (i.e. group member ID)
+    const int li              // Local index of this worker (i.e. group member ID)
 )
 {
 
