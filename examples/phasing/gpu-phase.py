@@ -15,7 +15,7 @@ import bornagain as ba
 from bornagain.viewers import qtviews
 from bornagain.target import crystal, map
 
-Niter = 100  # Number of phase-retrieval iterations
+Niter = 500  # Number of phase-retrieval iterations
 
 if 0:  # Make a phony water molecule
 
@@ -38,7 +38,7 @@ if 0:  # Make a phony water molecule
     rho0 += sphere(0.1, [0.2, 0, 0])
     rho0 += sphere(0.1, [0, 0, 0.2])
 
-else:  # Load a pdb file
+else:  # Alternatively, load a pdb file
 
     pdbFile = '../data/pdb/1JB0.pdb'
     print('Loading pdb file (%s)' % pdbFile)
@@ -50,8 +50,8 @@ else:  # Load a pdb file
     f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 
     print('Setting up 3D mesh')
-    d = 0.2e-9  # Minimum resolution
-    s = 1  # Oversampling factor
+    d = 0.2e-9  # Minimum resolution in SI units (as always!)
+    s = 1  # Oversampling factor.  s = 1 means Bragg sampling
     mt = map.CrystalMeshTool(cryst, d, s)
     print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))
     h = mt.get_h_vecs()  # Miller indices (fractional)
@@ -59,15 +59,13 @@ else:  # Load a pdb file
     print('Creating density map directly from atoms')
     x = cryst.x
     rho0 = mt.place_atoms_in_map(cryst.x % mt.s, np.abs(f))
-    # F = fftn(rho0)
-    # I = np.abs(F)**2
-    # rho_cell = mt.zeros()
-    # for i in range(0, len(mt.get_sym_luts())):
-    #     rho_cell += mt.symmetry_transform(0, i, rho0)
+    # Make a full unit cell
+    rho_cell = 0
+    for i in range(0, len(mt.get_sym_luts())):
+        rho_cell += mt.symmetry_transform(0, i, rho0)
+    rho0 = rho_cell
 
     N = mt.N
-
-
 
 if 0:
     print("Showing intial density (volumetric)")
@@ -79,9 +77,9 @@ if 0:
     print("Showing initial density (slices)")
     qtviews.MapSlices(rho0)
 
-if 0:
+if 1:
     print("Showing initial density (projections)")
-    qtviews.MapProjection(rho0)
+    qtviews.MapProjection(rho0, axis=0)
 
 # Create the initial support
 S0 = np.zeros([N, N, N])
@@ -114,18 +112,21 @@ rho = ifftn(np.exp(phi) * sqrtI0)
 # Do phase retrieval
 t = time()
 for i in np.arange(0, Niter):
-    print(i)
+    print("Iteration #%d" % (i))
     rho = np.real(rho * S0)
     rho = ifftn(sqrtI0 * np.exp(1j * np.angle(fftn(rho))))
 delT = time() - t
 print('Total time (s): %g ; Time per iteration (s): %g' % (delT, delT / float(Niter)))
 
 if 1:
-    print("Showing reconstruction")
+    print("Showing reconstruction (volumetric)")
     view = qtviews.Volumetric3D()
     view.add_density(np.abs(rho))
     view.show()
     # plt.imshow(-np.sum(np.abs(rho), axis=0), cmap='gray', interpolation='none')
     # plt.show()
-    # qtviews.MapProjection(np.abs(rho))
+
+if 1:
+    print("Showing reconstruction (projections)")
+    qtviews.MapProjection(np.abs(rho), axis=0)
 
