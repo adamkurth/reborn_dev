@@ -3,6 +3,7 @@ from __future__ import division
 import numpy as np
 
 from bornagain.target import crystal
+from scipy.stats import binned_statistic_dd
 
 
 class CrystalMeshTool(object):
@@ -123,6 +124,15 @@ class CrystalMeshTool(object):
 
         N = self.N
         return np.zeros([N, N, N])
+
+    def place_atoms_in_map(self, x, f, data=None):
+
+        if data is None:
+            data = self.zeros()
+        a, _, _ = binned_statistic_dd(x, f, statistic='sum', bins=[self.N] * 3,
+                                      range=[[0, self.s], [0, self.s], [0, self.s]])
+        data += a
+        return data
 
 
 if __name__ == '__main__':
