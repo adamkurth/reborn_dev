@@ -102,7 +102,7 @@ class Volumetric3D(object):
         QtGui.QApplication.instance().exec_()
 
 
-def mapProjection(data, axis=None):
+def MapProjection(data, axis=None):
     ''' View a 3D density map as a projection along selected axes (which can be a list)'''
 
     if axis is not None:
@@ -125,7 +125,7 @@ def mapProjection(data, axis=None):
     QtGui.QApplication.instance().exec_()
 
 
-def mapSlices(data, axis=None, levels=None):
+def MapSlices(data, axis=None, levels=None):
     ''' View a 3D density map as a projection along selected axes (which can be a list)'''
 
     # This assumes we have a cube...

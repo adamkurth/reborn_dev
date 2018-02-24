@@ -6,12 +6,10 @@ import numpy as np
 from numpy.fft import fftn, ifftn, fftshift
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-# from scipy.stats import binned_statistic_dd
 
 sys.path.append("../..")
 import bornagain as ba
-from bornagain.viewers import qtviews
-from bornagain.viewers import joesviews
+from bornagain.viewers import qtviews, joesviews
 from bornagain.target import crystal, map
 import bornagain.simulate.clcore as core
 
@@ -64,7 +62,7 @@ if 1:  # Simulate amplitudes with clcore, then make 3D density map via FFT
     F = clcore.phase_factor_qrf(2 * np.pi * h, cryst.x, f)
     F = mt.reshape(F)
     I = np.abs(F) ** 2
-    rho = np.fft.ifftn(F)
+    rho = ifftn(F)
     rho = np.abs(rho)
 
     rho_cell = mt.zeros()
@@ -77,13 +75,13 @@ else:  # This is the direct way of making a density map from atoms and their str
     print('Creating density map directly from atoms')
     x = cryst.x
     rho = mt.place_atoms_in_map(cryst.x % mt.s, np.abs(f))
-    F = np.fft.fftn(rho)
+    F = fftn(rho)
     I = np.abs(F)**2
     rho_cell = mt.zeros()
     for i in range(0, len(mt.get_sym_luts())):
         rho_cell += mt.symmetry_transform(0, i, rho)
 
-rho_cell = np.fft.fftshift(rho_cell)
+rho_cell = fftshift(rho_cell)
 
 if 1:
 
@@ -103,7 +101,7 @@ if 1:
     fig = plt.figure()
 
     fig.add_subplot(2, 3, 1)
-    dispim = np.log10(np.fft.fftshift(I)[np.ceil(mt.N/2).astype(np.int), :, :] + 10)
+    dispim = np.log10(fftshift(I)[np.ceil(mt.N/2).astype(np.int), :, :] + 10)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
 
     fig.add_subplot(2, 3, 4)
@@ -111,7 +109,7 @@ if 1:
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
 
     fig.add_subplot(2, 3, 2)
-    dispim = np.log10(np.fft.fftshift(I)[:, np.ceil(mt.N/2).astype(np.int), :] + 10)
+    dispim = np.log10(fftshift(I)[:, np.ceil(mt.N/2).astype(np.int), :] + 10)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
 
     fig.add_subplot(2, 3, 5)
@@ -119,7 +117,7 @@ if 1:
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
 
     fig.add_subplot(2, 3, 3)
-    dispim = np.log10(np.fft.fftshift(I)[:, :, np.ceil(mt.N/2).astype(np.int)] + 10)
+    dispim = np.log10(fftshift(I)[:, :, np.ceil(mt.N/2).astype(np.int)] + 10)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
 
     fig.add_subplot(2, 3, 6)
