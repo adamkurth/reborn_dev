@@ -194,7 +194,7 @@
             <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">bin_indices</span><span class="p">)])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">bin_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
+        <span class="c"># print(bin_indices.shape, mask.shape, n_bins)</span>
         <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">bin_indices</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
         <span class="n">counts_non_zero</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">&gt;</span> <span class="mi">0</span>
 

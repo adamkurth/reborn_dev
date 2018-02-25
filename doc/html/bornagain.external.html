@@ -180,6 +180,32 @@ Set this option to &#8220;True&#8221; if you want to store the raw strings in th
 <dd><p>Convert a CrystFEL geometry dictionary to a list of PADGeometry() instances.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="bornagain.external.crystfel.split_image">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">split_image</code><span class="sig-paren">(</span><em>data</em>, <em>geom_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#split_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.split_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split a 2D image into individual panels (useful for working with Cheetah output).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>numpy array</em>) &#8211; Image data</li>
+<li><strong>geom_dict</strong> (<em>dict</em>) &#8211; Geometry dictionary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>split_data</strong> &#8211;</p>
+<p>List of individual PAD panel data</p>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-bornagain.external.lcls">
 <span id="bornagain-external-lcls-module"></span><h2>bornagain.external.lcls module<a class="headerlink" href="#module-bornagain.external.lcls" title="Permalink to this headline">¶</a></h2>

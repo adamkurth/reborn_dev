@@ -410,7 +410,28 @@
 
         <span class="n">pads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">pads</span></div>
+    <span class="k">return</span> <span class="n">pads</span>
+
+</div>
+<div class="viewcode-block" id="split_image"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.split_image">[docs]</a><span class="k">def</span> <span class="nf">split_image</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Split a 2D image into individual panels (useful for working with Cheetah output).</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        data (numpy array) :</span>
+<span class="sd">            Image data</span>
+<span class="sd">        geom_dict (dict) :</span>
+<span class="sd">            Geometry dictionary</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        split_data (list) :</span>
+<span class="sd">            List of individual PAD panel data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">split_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="p">[</span><span class="s">&#39;panels&#39;</span><span class="p">]:</span>
+        <span class="n">split_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
+
+    <span class="k">return</span> <span class="n">split_data</span></div>
 </pre></div>
 
           </div>

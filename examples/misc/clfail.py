@@ -1,6 +1,6 @@
 import pyopencl as cl
 import pyopencl.clmath as clmath
-import numpy as np
+import examples.numpy as np
 
 c = cl.create_some_context()
 q = cl.CommandQueue(c)

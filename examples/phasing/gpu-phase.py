@@ -50,7 +50,7 @@ else:  # Alternatively, load a pdb file
     f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 
     print('Setting up 3D mesh')
-    d = 0.2e-9  # Minimum resolution in SI units (as always!)
+    d = 0.5e-9  # Minimum resolution in SI units (as always!)
     s = 1  # Oversampling factor.  s = 1 means Bragg sampling
     mt = map.CrystalMeshTool(cryst, d, s)
     print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))

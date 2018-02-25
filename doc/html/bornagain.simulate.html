@@ -489,7 +489,7 @@ detector panel</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A numpy array of length nF*nS containing complex scattering</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">A</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="bornagain.target.html#bornagain.target.crystal.structure.A" title="bornagain.target.crystal.structure.A">A</a></p>
 </td>
 </tr>
 </tbody>
@@ -527,7 +527,7 @@ numpy array.  Optionally, this may be an opencl buffer.</p>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.buffer_mesh_lookup">
-<code class="descname">buffer_mesh_lookup</code><span class="sig-paren">(</span><em>a_map</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>q</em>, <em>R=None</em>, <em>a_out=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.buffer_mesh_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup" title="Permalink to this definition">¶</a></dt>
+<code class="descname">buffer_mesh_lookup</code><span class="sig-paren">(</span><em>a_map</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>q</em>, <em>R=None</em>, <em>a=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.buffer_mesh_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is supposed to lookup intensities from a 3d mesh of amplitudes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -542,7 +542,7 @@ the function phase_factor_mesh())</li>
 <li><strong>q</strong> (<em>Nx3 numpy array</em>) &#8211; q-space coordinates at which we want to interpolate
 the complex amplitudes in a_dev</li>
 <li><strong>R</strong> (<em>3x3 numpy array</em>) &#8211; Rotation matrix that will act on the q vectors</li>
-<li><strong>a_out</strong> &#8211; (clarray) The output array (optional)</li>
+<li><strong>a</strong> &#8211; (clarray) The output array (optional)</li>
 </ul>
 </td>
 </tr>
@@ -696,14 +696,23 @@ group_size that is greater than Npixels</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>q_buff_data</strong> (<em>pyopenCL buffer data</em>) &#8211; should have shape NpixelsCLx16 where NpixelsCL is the first multiple of group_size greater than
-Npixels. Use <a class="reference internal" href="#bornagain.simulate.clcore.ClCore.get_group_size" title="bornagain.simulate.clcore.ClCore.get_group_size"><code class="xref py py-func docutils literal"><span class="pre">get_group_size()</span></code></a> to check the currently set group_size. The data stored in
-q[Npixels,:3] should be the q-vectors. The data stored in q[Npixels,3:Nspecies] should be the
-q-dependent atomic form factors for up to Nspecies=13 atom species See <code class="xref py py-func docutils literal"><span class="pre">prime_comermann_simulator()</span></code>
-for details regarding the form factor storage and atom species identifier</li>
-<li><strong>r_buff_data</strong> (<em>pyopenCL buffer data</em>) &#8211; Should have shape Natomsx4. The data stored in r_buff_data[:,:3] are the atomic positions in cartesian
-(x,y,z).  The data stored in r_buff_data[:,3] are the atom species identifiers (0,1,..Nspecies-1)
-mapping the atom species here to the form factor value in q_buff_data.</li>
+<li><strong>q_buff_data</strong> (<em>pyopenCL buffer data</em>) &#8211; should have shape NpixelsCLx16 where
+NpixelsCL is the first multiple of group_size greater than
+Npixels.
+Use <a class="reference internal" href="#bornagain.simulate.clcore.ClCore.get_group_size" title="bornagain.simulate.clcore.ClCore.get_group_size"><code class="xref py py-func docutils literal"><span class="pre">get_group_size()</span></code></a> to check the currently
+set group_size. The data stored in
+q[Npixels,:3] should be the q-vectors.
+The data stored in q[Npixels,3:Nspecies] should be the
+q-dependent atomic form factors for up to Nspecies=13
+atom species See <code class="xref py py-func docutils literal"><span class="pre">prime_comermann_simulator()</span></code>
+for details regarding the form factor storage and atom
+species identifier</li>
+<li><strong>r_buff_data</strong> (<em>pyopenCL buffer data</em>) &#8211; Should have shape Natomsx4. The data stored in
+r_buff_data[:,:3] are the atomic positions in cartesian
+(x,y,z).  The data stored in r_buff_data[:,3] are
+the atom species identifiers (0,1,..Nspecies-1)
+mapping the atom species here to the form factor value
+in q_buff_data.</li>
 <li><strong>rand_rot</strong> (<em>bool</em>) &#8211; Randomly rotate the molecule</li>
 <li><strong>force_rand_rot</strong> (<em>np.ndarray</em>) &#8211; Supply a specific rotation matrix</li>
 <li><strong>com</strong> (<em>np.ndarray</em>) &#8211; Offset the center of mass of the molecule</li>
@@ -714,9 +723,11 @@ mapping the atom species here to the form factor value in q_buff_data.</li>
 </table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">For atom r_i the atom species identifier is sp_i = r_buff_data[r_i,3].
-Then, for pixel q_i, the simulator can find the corresponding form factor in
-q_buff_dat[q_i,3+sp_i]. I know it is confusing, but it&#8217;s efficient.</p>
+<p class="last">For atom r_i the atom species identifier is sp_i =
+r_buff_data[r_i,3].
+Then, for pixel q_i, the simulator can find the corresponding
+form factor in q_buff_dat[q_i,3+sp_i].
+I know it is confusing, but it&#8217;s efficient.</p>
 </div>
 </dd></dl>
 

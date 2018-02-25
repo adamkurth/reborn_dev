@@ -171,12 +171,12 @@
 
         <span class="c"># Setup the context</span>
         <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">create_some_context</span><span class="p">()</span>
-            <span class="k">except</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span> <span class="c"># Derek: cl.create_some_context() was forcing CPU on both my macs.. so I thought its best to try to force GPU first. this works well</span>
                 <span class="n">platform</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">get_platforms</span><span class="p">()</span>
                 <span class="n">devices</span> <span class="o">=</span> <span class="n">platform</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span><span class="n">device_type</span><span class="o">=</span><span class="n">cl</span><span class="o">.</span><span class="n">device_type</span><span class="o">.</span><span class="n">GPU</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">Context</span><span class="p">(</span><span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">create_some_context</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span>
 
@@ -286,8 +286,9 @@
 
     <span class="k">def</span> <span class="nf">_load_phase_factor_qrf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_qrf_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">phase_factor_qrf</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_qrf_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">([</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span>
-                                                        <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_qrf_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">([</span><span class="bp">None</span><span class="p">,</span> 
+            <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_load_phase_factor_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_pad_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">phase_factor_pad</span>
@@ -366,8 +367,6 @@
         <span class="n">R16</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">16</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">R16</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">R16</span>
-
-
 </div>
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="ClCore.to_device_static"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.to_device_static">[docs]</a>    <span class="k">def</span> <span class="nf">to_device_static</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">queue</span><span class="p">):</span>
@@ -487,8 +486,12 @@
                              <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_qrf_cl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">global_size</span><span class="p">,),</span>
-                                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">r_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-                                 <span class="n">f_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">R16_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+                                 <span class="n">r_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                                 <span class="n">f_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+                                 <span class="n">R16_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+                                 <span class="n">n_atoms</span><span class="p">,</span>
                                  <span class="n">n_pixels</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="ClCore.next_multiple_groupsize"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.next_multiple_groupsize">[docs]</a>    <span class="k">def</span> <span class="nf">next_multiple_groupsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
@@ -546,6 +549,7 @@
                                  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">r_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                                  <span class="n">f_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">a_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span>
                                  <span class="n">n_pixels</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">a_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -611,6 +615,7 @@
                                  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">r_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                                  <span class="n">f_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">a_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">n_pixels</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span>
                                  <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">a_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -668,14 +673,14 @@
                                   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">r_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">f_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                                   <span class="n">a_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">n_pixels</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">deltaQ</span><span class="p">,</span>
                                   <span class="n">q_min</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">a_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">a_dev</span>
 </div>
-<div class="viewcode-block" id="ClCore.buffer_mesh_lookup"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">buffer_mesh_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_map</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">q_min</span><span class="p">,</span> <span class="n">q_max</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                           <span class="n">a_out</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.buffer_mesh_lookup"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">buffer_mesh_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_map</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">q_min</span><span class="p">,</span> <span class="n">q_max</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is supposed to lookup intensities from a 3d mesh of amplitudes.</span>
 
@@ -688,7 +693,7 @@
 <span class="sd">            q (Nx3 numpy array): q-space coordinates at which we want to interpolate</span>
 <span class="sd">               the complex amplitudes in a_dev</span>
 <span class="sd">            R (3x3 numpy array): Rotation matrix that will act on the q vectors</span>
-<span class="sd">            a_out: (clarray) The output array (optional)</span>
+<span class="sd">            a: (clarray) The output array (optional)</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            numpy array of complex amplitudes</span>
@@ -718,8 +723,7 @@
         <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">)</span>
         <span class="n">deltaQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="n">deltaQ</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="n">q_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="n">q_min</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
-        <span class="n">a_out_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
-            <span class="n">a_out</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complex_t</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_pixels</span><span class="p">))</span>
+        <span class="n">a_out_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complex_t</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_pixels</span><span class="p">))</span>
 
         <span class="n">global_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_pixels</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">))</span>
                              <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
@@ -727,8 +731,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer_mesh_lookup_cl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">global_size</span><span class="p">,),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span>
                                    <span class="n">a_map_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">q_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">a_out_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                                    <span class="n">n_pixels</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">deltaQ</span><span class="p">,</span> <span class="n">q_min</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">a_out</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">a_out_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">a_out_dev</span>
@@ -784,6 +789,7 @@
                                                   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">abc</span><span class="p">,</span>
                                                   <span class="n">N</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">I_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">n_pixels</span><span class="p">,</span>
                                                   <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">I</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">I_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -841,6 +847,7 @@
                                                   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">abc</span><span class="p">,</span>
                                                   <span class="n">N</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">I_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">n_pixels</span><span class="p">,</span>
                                                   <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">I</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">I_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -978,22 +985,32 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_A_buff_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span><span class="o">.</span><span class="n">data</span>
 
-<div class="viewcode-block" id="ClCore.run_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.run_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">run_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span> <span class="n">rand_rot</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.run_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.run_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">run_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span> 
+        <span class="n">rand_rot</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the qrf kam simulator.</span>
 
 <span class="sd">        Arguments</span>
 <span class="sd">            q_buff_data (pyopenCL buffer data) :</span>
-<span class="sd">                should have shape NpixelsCLx16 where NpixelsCL is the first multiple of group_size greater than</span>
-<span class="sd">                Npixels. Use :func:`get_group_size` to check the currently set group_size. The data stored in</span>
-<span class="sd">                q[Npixels,:3] should be the q-vectors. The data stored in q[Npixels,3:Nspecies] should be the</span>
-<span class="sd">                q-dependent atomic form factors for up to Nspecies=13 atom species See :func:`prime_comermann_simulator`</span>
-<span class="sd">                for details regarding the form factor storage and atom species identifier</span>
+<span class="sd">                should have shape NpixelsCLx16 where </span>
+<span class="sd">                NpixelsCL is the first multiple of group_size greater than</span>
+<span class="sd">                Npixels. </span>
+<span class="sd">                Use :func:`get_group_size` to check the currently </span>
+<span class="sd">                set group_size. The data stored in</span>
+<span class="sd">                q[Npixels,:3] should be the q-vectors. </span>
+<span class="sd">                The data stored in q[Npixels,3:Nspecies] should be the</span>
+<span class="sd">                q-dependent atomic form factors for up to Nspecies=13 </span>
+<span class="sd">                atom species See :func:`prime_comermann_simulator`</span>
+<span class="sd">                for details regarding the form factor storage and atom </span>
+<span class="sd">                species identifier</span>
 <span class="sd">            </span>
 <span class="sd">            r_buff_data (pyopenCL buffer data) :</span>
-<span class="sd">                Should have shape Natomsx4. The data stored in r_buff_data[:,:3] are the atomic positions in cartesian</span>
-<span class="sd">                (x,y,z).  The data stored in r_buff_data[:,3] are the atom species identifiers (0,1,..Nspecies-1)</span>
-<span class="sd">                mapping the atom species here to the form factor value in q_buff_data.</span>
+<span class="sd">                Should have shape Natomsx4. The data stored in </span>
+<span class="sd">                r_buff_data[:,:3] are the atomic positions in cartesian</span>
+<span class="sd">                (x,y,z).  The data stored in r_buff_data[:,3] are </span>
+<span class="sd">                the atom species identifiers (0,1,..Nspecies-1)</span>
+<span class="sd">                mapping the atom species here to the form factor value </span>
+<span class="sd">                in q_buff_data.</span>
 <span class="sd">            </span>
 <span class="sd">            rand_rot (bool) :</span>
 <span class="sd">                Randomly rotate the molecule</span>
@@ -1005,15 +1022,16 @@
 <span class="sd">                Offset the center of mass of the molecule</span>
 <span class="sd">                </span>
 <span class="sd">        .. note::</span>
-<span class="sd">            For atom r_i the atom species identifier is sp_i = r_buff_data[r_i,3].</span>
-<span class="sd">            Then, for pixel q_i, the simulator can find the corresponding form factor in</span>
-<span class="sd">            q_buff_dat[q_i,3+sp_i]. I know it is confusing, but it&#39;s efficient.</span>
-
+<span class="sd">            For atom r_i the atom species identifier is sp_i = </span>
+<span class="sd">            r_buff_data[r_i,3].</span>
+<span class="sd">            Then, for pixel q_i, the simulator can find the corresponding </span>
+<span class="sd">            form factor in q_buff_dat[q_i,3+sp_i]. </span>
+<span class="sd">            I know it is confusing, but it&#39;s efficient.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c">#       set the rotation</span>
         <span class="k">if</span> <span class="n">rand_rot</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">random_rotation_matrix</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">random_rotation</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">force_rot_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span> <span class="o">=</span> <span class="n">force_rot_mat</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1029,9 +1047,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_com_vec</span><span class="p">()</span>
 
         <span class="c">#       run the program</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_kam_cl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">),),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span>
-                        <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_A_buff_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_kam_cl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">),),</span> 
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">_A_buff_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span><span class="p">)</span>
 </div>
     <span class="k">def</span> <span class="nf">_set_rand_rot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
@@ -1052,7 +1071,6 @@
         <span class="k">if</span> <span class="n">reset</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_load_amp_buffer</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">Amps</span>
-
 </div></div>
 <div class="viewcode-block" id="helpme"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.helpme">[docs]</a><span class="k">def</span> <span class="nf">helpme</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
