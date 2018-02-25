@@ -151,7 +151,6 @@ class CrystalMeshTool(object):
 
         """
 
-
         if self.sym_luts is None:
 
             sym_luts = []
@@ -191,6 +190,18 @@ class CrystalMeshTool(object):
         data_trans.flat[luts[j]] = data.flat[luts[i]]
 
         return data_trans
+
+    def shape(self):
+
+        r"""
+
+        For convenience, return the map shape [N,N,N]
+
+        Returns: numpy array
+
+        """
+
+        return np.array([self.N, self.N, self.N])
 
     def reshape(self, data):
 

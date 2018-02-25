@@ -27,7 +27,7 @@ wavelength = 1.5e-10
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 
 print('Setting up 3D mesh')
-d = 0.6e-9  # Minimum resolution in SI units (as always!)
+d = 0.8e-9  # Minimum resolution in SI units (as always!)
 s = 1  # Oversampling factor.  s = 1 means Bragg sampling
 mt = map.CrystalMeshTool(cryst, d, s)
 print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))
@@ -37,20 +37,27 @@ print('Creating density map directly from atoms')
 x = cryst.x
 rho0 = mt.place_atoms_in_map(cryst.x % mt.s, np.abs(f))
 
+J = 1
+K = []
 w = np.array([1])
+L = []
+Linv = []
+for j in range(0, J):
 
-Ljk = []
-Ljk_inv = []
-for i in range(0, len(mt.get_sym_luts())):
-    Ljk.append(lambda a: mt.symmetry_transform(0, i, a))
-    Ljk_inv.append(lambda a: mt.symmetry_transform(i, 0, a))
+    L.append([])
+    Linv.append([])
+    K.append(len(mt.get_sym_luts()))
+
+    for i in range(0, K[j]):
+
+        L[j].append(lambda a: mt.symmetry_transform(0, i, a))
+        Linv[j].append(lambda a: mt.symmetry_transform(i, 0, a))
+
 
 rho_cell = 0
-for i in range(0, len(mt.get_sym_luts())):
-    rho_cell += Ljk[i](rho0)
+for i in range(0, K[0]):
+    rho_cell += L[0][i](rho0)
 rho0 = rho_cell
-
-
 
 
 if 0:
@@ -95,10 +102,20 @@ beta = 0.9
 gamma_s = -1/beta
 gamma_m = 1/beta
 
+def symmetrize(rho):
+
+    n_molecules = len(mt.get_sym_luts())
+
+    rhosym = 0
+    for i in range(0, n_molecules):
+        rhosym += mt.symmetry_transform(0, i, rho)
+
+    return rhosym/n_molecules
+
 
 def PS(rho, S):
 
-    return np.real(rho*S)
+    return rho*S
 
 def PM(rho, sqrtI0):
 
@@ -140,11 +157,17 @@ for i in np.arange(0, Niter):
 
     if (i % 20) > 5:
         rho = DM(rho, S0, sqrtI0)
+        alg = 'DM'
     else:
         rho = ER(rho, S0, sqrtI0)
+        alg = 'ER'
+
+    # rho = symmetrize(rho)
 
     R = np.sum((rho-rho0)**2)/np.sum(rho0**2)
-    print("Iteration #%d (R: %.2g)" % (i, R))
+
+    print("Iteration #%d (%s; R: %.2g)" % (i, alg, R))
+
 delT = time() - t
 print('Total time (s): %g ; Time per iteration (s): %g' % (delT, delT / float(Niter)))
 
@@ -158,5 +181,5 @@ if 0:
 
 if 1:
     print("Showing reconstruction (projections)")
-    qtviews.MapProjection(np.abs(rho), axis=0)
+    qtviews.MapProjection(np.abs(rho), axis=[0,1])
 
