@@ -3,10 +3,8 @@ from __future__ import division
 import sys
 
 import numpy as np
-from numpy.fft import fftn, ifftn, fftshift
 
 sys.path.append("..")
-import bornagain as ba
 from bornagain.target import crystal, map
 
 
