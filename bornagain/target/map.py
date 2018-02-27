@@ -157,12 +157,11 @@ class CrystalMeshTool(object):
             x0 = self.get_x_vecs()
 
             for (R, T) in zip(self.cryst.symRs, self.cryst.symTs):
-                lut = np.dot(R, x0.T).T + T  # transform x vectors in 3D grid
-                lut /= self.dx               # switch from x to n vectors
-                lut = lut % self.N           # wrap around
-                lut = np.dot(self.w, lut.T)  # in p space
+                lut = np.dot(R, x0.T).T + T    # transform x vectors in 3D grid
+                lut = np.round(lut / self.dx)  # switch from x to n vectors
+                lut = lut % self.N             # wrap around
+                lut = np.dot(self.w, lut.T)    # in p space
                 sym_luts.append(lut.astype(np.int))
-
             self.sym_luts = sym_luts
 
         return self.sym_luts
