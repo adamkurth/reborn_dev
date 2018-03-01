@@ -2,7 +2,7 @@
 """
 refdata.py -- reference data and tables used in computations
 """
-from itertools import izip
+# from itertools import izip
 
 import numpy as np
 
@@ -51,7 +51,7 @@ def get_cromermann_parameters(atomic_numbers):
         try:
             cromermann[a] = np.array(cromer_mann_params[(a,0)], dtype=np.float32)
         except KeyError:
-            print 'Element number %d not in Cromer-Mann form factor parameter database' % a
+            print('Element number %d not in Cromer-Mann form factor parameter database' % a)
             raise RuntimeError('Could not get critical parameters for computation')
 
     return cromermann 
@@ -105,7 +105,7 @@ def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
         try:
             cromermann[ind:ind+9] = np.array(cromer_mann_params[(a,0)], dtype=np.float32)
         except KeyError as e:
-            print 'Element number %d not in Cromer-Mann form factor parameter database' % a
+            print('Element number %d not in Cromer-Mann form factor parameter database' % a)
             raise RuntimeError('Could not get critical parameters for computation')
         aid[ atomic_numbers == a ] = np.int32(i)
 

@@ -1,4 +1,4 @@
-import crystal
+from . import crystal
 from .crystal import Atoms, Molecule, Lattice
 
 r"""

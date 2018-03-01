@@ -232,7 +232,7 @@ Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3
 
     # Simply iterate through all HM symbols until we find one that matches:
     symbol_found = False
-    if isinstance(hm_symbol, basestring):
+    if isinstance(hm_symbol, str):
         hm_symbol = hm_symbol.strip()
         for i in range(0, 530):
             if hm_symbol == spgrp._hmsym[i].strip():

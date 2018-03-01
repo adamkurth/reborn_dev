@@ -14,9 +14,9 @@ try:
 except ImportError:
     pass
 
-from utils import vec_norm, vec_mag, vec_check
-import source
-import units
+from .utils import vec_norm, vec_mag, vec_check
+from . import source
+from . import units
 
 
 class PADGeometry(object):

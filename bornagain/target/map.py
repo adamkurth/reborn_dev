@@ -3,6 +3,7 @@ from __future__ import division
 import numpy as np
 
 from bornagain.target import crystal
+import scipy
 from scipy.stats import binned_statistic_dd
 
 

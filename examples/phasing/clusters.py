@@ -1,7 +1,7 @@
 import sys
 from time import time
 
-if 0:
+if 1:
     import afnumpy as np
     from afnumpy.fft import fftn, ifftn, fftshift
 else:
@@ -9,13 +9,14 @@ else:
     from numpy.fft import fftn, ifftn, fftshift
 
 import matplotlib.pyplot as plt
+import pyqtgraph as pg
 
 sys.path.append("../..")
 import bornagain as ba
 from bornagain.viewers import qtviews
 from bornagain.target import crystal, map
 
-Niter = 200  # Number of phase-retrieval iterations
+Niter = 100  # Number of phase-retrieval iterations
 
 pdbFile = '../data/pdb/1JB0.pdb'
 print('Loading pdb file (%s)' % pdbFile)
@@ -27,7 +28,7 @@ wavelength = 1.5e-10
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 
 print('Setting up 3D mesh')
-d = 0.8e-9  # Minimum resolution in SI units (as always!)
+d = 0.15e-9  # Minimum resolution in SI units (as always!)
 s = 1  # Oversampling factor.  s = 1 means Bragg sampling
 mt = map.CrystalMeshTool(cryst, d, s)
 print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))
@@ -89,13 +90,13 @@ if 0:
     qtviews.MapSlices(S0)
 
 # Create the "measured" intensities
+rho0 = np.array(rho0)
 I0 = np.abs(fftn(rho0)) ** 2
 sqrtI0 = np.sqrt(I0)
 
 if 0:
     print("Showing intensities (slices)")
     qtviews.MapSlices(np.log(fftshift(I0) + 1))
-
 
 
 beta = 0.9
@@ -111,7 +112,6 @@ def symmetrize(rho):
         rhosym += mt.symmetry_transform(0, i, rho)
 
     return rhosym/n_molecules
-
 
 def PS(rho, S):
 
@@ -152,6 +152,7 @@ phi = np.random.random([mt.N]*3) * 2 * np.pi
 rho = ifftn(np.exp(phi) * sqrtI0)
 
 # Do phase retrieval
+errors = np.zeros([Niter])
 t = time()
 for i in np.arange(0, Niter):
 
@@ -162,14 +163,20 @@ for i in np.arange(0, Niter):
         rho = ER(rho, S0, sqrtI0)
         alg = 'ER'
 
-    # rho = symmetrize(rho)
+    rho = symmetrize(rho)
 
     R = np.sum((rho-rho0)**2)/np.sum(rho0**2)
+    errors[i] = R
 
     print("Iteration #%d (%s; R: %.2g)" % (i, alg, R))
 
 delT = time() - t
 print('Total time (s): %g ; Time per iteration (s): %g' % (delT, delT / float(Niter)))
+
+if 1:
+    print("Showing reconstruction (image viewer)")
+    pg.image(np.abs(rho))
+    pg.show()
 
 if 0:
     print("Showing reconstruction (volumetric)")
@@ -179,7 +186,13 @@ if 0:
     # plt.imshow(-np.sum(np.abs(rho), axis=0), cmap='gray', interpolation='none')
     # plt.show()
 
-if 1:
+if 0:
     print("Showing reconstruction (projections)")
     qtviews.MapProjection(np.abs(rho), axis=[0,1])
+
+if 1:
+    plt.plot(np.log10(errors))
+    plt.xlabel('Iteration number')
+    plt.ylabel(r'$R = \frac{\sum (\rho_c-\rho_m)^2}{ \sum \rho_m^2 }$')
+    plt.show()
 
