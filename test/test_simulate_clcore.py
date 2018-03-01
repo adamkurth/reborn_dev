@@ -81,7 +81,7 @@ def _ClCore(double_precision=False):
     core.phase_factor_qrf(q,r,f,R,a)
     A1 = a.get()
 
-    for _ in xrange(9):
+    for _ in range(9):
         core.phase_factor_qrf(q,r,f,R,a,add=True)
     
     A10 = a.get()
