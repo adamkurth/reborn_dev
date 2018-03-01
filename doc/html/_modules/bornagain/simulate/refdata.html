@@ -13,8 +13,6 @@
 
   
   
-  
-  
 
   
 
@@ -32,9 +30,6 @@
   
 
   
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.0.1 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
@@ -45,7 +40,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -86,10 +80,7 @@
           
             
             
-              
-            
-            
-              <ul>
+                <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../bornagain.html">bornagain package</a></li>
@@ -107,10 +98,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">bornagain</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">bornagain</a>
       </nav>
 
 
@@ -123,36 +112,19 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
-        
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
-      <li>bornagain.simulate.refdata</li>
-    
-    
+      
+    <li>bornagain.simulate.refdata</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -165,7 +137,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1"># from itertools import izip</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <span class="c1"># ------------------------------------------------------------------------------</span>
 <span class="c1"># Helper functions for accessing REFERENCE TABLES</span>
@@ -185,8 +157,8 @@
             <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="n">izip</span><span class="p">(</span><span class="n">a_vals</span><span class="p">,</span> <span class="n">b_vals</span><span class="p">)],</span> <span class="mi">0</span><span class="p">)</span> 
         <span class="n">z_ff</span> <span class="o">+=</span> <span class="n">c</span>
 
-        <span class="n">form_facts</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_ff</span></div>
-    <span class="k">return</span> <span class="n">form_facts</span>   
+        <span class="n">form_facts</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_ff</span>
+    <span class="k">return</span> <span class="n">form_facts</span>   </div>
 
 
 <div class="viewcode-block" id="get_cromermann_parameters"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.refdata.get_cromermann_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">):</span> 
@@ -212,13 +184,13 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">cromermann</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cromer_mann_params</span><span class="p">[(</span><span class="n">a</span><span class="p">,</span><span class="mi">0</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Element number </span><span class="si">%d</span><span class="s1"> not in Cromer-Mann form factor parameter database&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Element number </span><span class="si">%d</span><span class="s1"> not in Cromer-Mann form factor parameter database&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Could not get critical parameters for computation&#39;</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="n">cromermann</span> 
+
+    <span class="k">return</span> <span class="n">cromermann</span> </div>
 
 
-<div class="viewcode-block" id="get_cromermann_parameters_legacy"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.refdata.get_cromermann_parameters_legacy">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters_legacy</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">max_num_atom_types</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_cromermann_parameters_legacy"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.refdata.get_cromermann_parameters_legacy">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters_legacy</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">max_num_atom_types</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get cromer-mann parameters for each atom type and renumber the atom </span>
 <span class="sd">    types to 0, 1, 2, ... to point to their CM params.</span>
@@ -266,11 +238,11 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">cromermann</span><span class="p">[</span><span class="n">ind</span><span class="p">:</span><span class="n">ind</span><span class="o">+</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cromer_mann_params</span><span class="p">[(</span><span class="n">a</span><span class="p">,</span><span class="mi">0</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Element number </span><span class="si">%d</span><span class="s1"> not in Cromer-Mann form factor parameter database&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Element number </span><span class="si">%d</span><span class="s1"> not in Cromer-Mann form factor parameter database&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Could not get critical parameters for computation&#39;</span><span class="p">)</span>
         <span class="n">aid</span><span class="p">[</span> <span class="n">atomic_numbers</span> <span class="o">==</span> <span class="n">a</span> <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="n">cromermann</span><span class="p">,</span> <span class="n">aid</span>
+
+    <span class="k">return</span> <span class="n">cromermann</span><span class="p">,</span> <span class="n">aid</span></div>
     
 
     
@@ -857,9 +829,6 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
           </div>
           <footer>
   
@@ -893,14 +862,13 @@
             VERSION:'0.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="../../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

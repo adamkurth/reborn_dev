@@ -13,8 +13,6 @@
 
   
   
-  
-  
 
   
 
@@ -32,9 +30,6 @@
   
 
   
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
         <link rel="next" title="bornagain package" href="bornagain.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
@@ -46,7 +41,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -87,12 +81,9 @@
           
             
             
-              
-            
-            
-              <ul class="current">
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#system-wide-installation">System-wide installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#python-3">Python 3</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#python-2">Python 2</a></li>
@@ -114,10 +105,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">bornagain</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">bornagain</a>
       </nav>
 
 
@@ -130,36 +119,19 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Installation</li>
-    
-    
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Installation</li>
       <li class="wy-breadcrumbs-aside">
         
-            
-            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+          
+            <a href="_sources/installation.txt" rel="nofollow"> View page source</a>
           
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -171,44 +143,50 @@
 <h2>System-wide installation<a class="headerlink" href="#system-wide-installation" title="Permalink to this headline">¶</a></h2>
 <p>Currently, there are no install that will automatically add bornagain to your python installation.  It makes a lot of sense to simply keep a local copy of bornagain where you are doing your analysis or simulations so that you can reproduce them in the future if need be, especially since bornagain continues to change often.  Archiving code alongside results is good practice anyways.</p>
 <p>If the bornagain directory is not in your working directory, you might need to add bornagain to your python path by doing something like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;../example/path/to/bornagain&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="python-3">
 <h2>Python 3<a class="headerlink" href="#python-3" title="Permalink to this headline">¶</a></h2>
-<p>There has been recent success with Python 3.6.4, installed via <a class="reference external" href="https://conda.io/miniconda.html">Miniconda</a>.  The following worked on a Mac computer:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install pytest
+<p>There has been recent success with Python 3.6.4, installed via <a class="reference external" href="https://conda.io/miniconda.html">Miniconda</a>.  The following has worked on both Mac and Linux computers:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>conda install ipython
+conda install pytest
+conda install sphinx
 conda install scipy
+conda install scikit-image
 conda install matplotlib
+conda install h5py
 conda install pyqtgraph
 conda install pyopengl
 conda install -c conda-forge pyopencl
-conda install ipython
-conda install h5py
-conda install sphinx
-conda install scikit-image
+conda install -c conda-forge pocl
 </pre></div>
 </div>
+<p>In order to check if the installation worked, run the following:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/bornagain/test
+pytest
+</pre></div>
+</div>
+<p>If you get a runtime error involving <code class="code docutils literal"><span class="pre">pyopencl.cffi_cl.LogicError:</span> <span class="pre">clGetPlatformIDs</span> <span class="pre">failed:</span></code> it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple as doing the following:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>cp /etc/OpenCL/vendors/nvidia.icd ~/miniconda3/etc/OpenCL/vendors
+</pre></div>
+</div>
+<p>For any further issues with pyopencl, there are some helpful notes <a class="reference external" href="https://documen.tician.de/pyopencl/misc.html">here</a>.</p>
 </div>
 <div class="section" id="python-2">
 <h2>Python 2<a class="headerlink" href="#python-2" title="Permalink to this headline">¶</a></h2>
-<p>There has been success with the <a class="reference external" href="https://anaconda.org">Anaconda</a> Python 2.7 distribution.  On a clean installation the following sometimes works:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install h5py                     <span class="c1"># Optional for file writing</span>
+<p>There was past success with the <a class="reference external" href="https://anaconda.org">Anaconda</a> Python 2.7 distribution.  The following usually works:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>conda install h5py                     <span class="c1"># Optional for file writing</span>
 conda install <span class="nv">pyqt</span><span class="o">=</span><span class="m">4</span>                   <span class="c1"># Optional for viewing</span>
 conda install pyqtgraph                <span class="c1"># Optional for viewing</span>
 conda install -c conda-forge pyopencl  <span class="c1"># Optional for simulations</span>
 conda install sphinx                   <span class="c1"># Optional for building documentation</span>
 </pre></div>
 </div>
-<p>Another option is to install packages with <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a>.  For example, the following has worked in the past:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pyopencl
-pip install pyqtgraph
-</pre></div>
-</div>
 <p>Notably, pyqtgraph seems not to work well with pyqt5, so you will need to force pyqt4 as in the above.  It is probably most reasonable to create an environment for bornagain:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create --name bornagain
+<div class="highlight-bash"><div class="highlight"><pre><span></span>conda create --name bornagain
 <span class="nb">source</span> activate bornagain
 </pre></div>
 </div>
@@ -217,7 +195,7 @@ pip install pyqtgraph
 <div class="section" id="installation-on-scientific-linux-6">
 <h2>Installation on Scientific Linux 6<a class="headerlink" href="#installation-on-scientific-linux-6" title="Permalink to this headline">¶</a></h2>
 <p>To install <cite>pyopencl</cite> on SL6 I found it necessary to download the pyopencl-2016.2.1 source, and then from within the directory I did something along these lines:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
 sudo yum install devtoolset-2
 scl <span class="nb">enable</span> devtoolset-2 bash
 ./configure.py --cl-inc-dir<span class="o">=</span>/usr/local/cuda/include --cl-lib-dir<span class="o">=</span>/usr/local/cuda/lib64
@@ -229,18 +207,15 @@ make install
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.html" class="btn btn-neutral float-right" title="bornagain package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.html" class="btn btn-neutral float-right" title="bornagain package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="overview.html" class="btn btn-neutral" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="overview.html" class="btn btn-neutral" title="Overview" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -274,14 +249,13 @@ make install
             VERSION:'0.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

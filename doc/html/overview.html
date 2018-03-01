@@ -13,8 +13,6 @@
 
   
   
-  
-  
 
   
 
@@ -32,9 +30,6 @@
   
 
   
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
         <link rel="next" title="Installation" href="installation.html"/>
         <link rel="prev" title="bornagain’s documentation" href="index.html"/> 
@@ -46,7 +41,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -87,11 +81,8 @@
           
             
             
-              
-            
-            
-              <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#some-basics">Some basics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-ray-beams">X-ray beams</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pixel-array-detectors">Pixel-Array Detectors</a></li>
@@ -114,10 +105,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">bornagain</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">bornagain</a>
       </nav>
 
 
@@ -130,36 +119,19 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Overview</li>
-    
-    
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Overview</li>
       <li class="wy-breadcrumbs-aside">
         
-            
-            <a href="_sources/overview.rst.txt" rel="nofollow"> View page source</a>
+          
+            <a href="_sources/overview.txt" rel="nofollow"> View page source</a>
           
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -176,25 +148,25 @@
 <li>The <a class="reference external" href="https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion">tab-completion feature</a> of <a class="reference external" href="https://ipython.org/">iPython</a> is one of the most efficient ways to explore the functionality of bornagain classes.</li>
 <li>The <a class="reference external" href="http://www.numpy.org/#">numpy</a> package is central to bornagain.  Note that in bornagain all arrays are assumed to be <a class="reference external" href="https://docs.scipy.org/doc/numpy-1.13.0/reference/internals.html">c-contiguous in memory</a>.  One consequence of this is that arrays of vectors are assumed to have a shape of (N,3) so that vector elements are neighbors in memory.  Similarly, we always assume that the right-most index of a 2D image is the one that specifies data that are closest in memory.</li>
 <li>All units in bornagain are SI.  Angles are radians.  There are no known exceptions so far.</li>
-<li>Refrain from using the terms “rows” and “columns” when speaking of images.  Unless you are referring to a specific display, those terms are confusing.</li>
-<li>Refrain from refering to “x”, “y”, or “z” coordinates.  There is no standard coordinate system in the diffraction world, and the bornagain makes no attempt to create one.</li>
+<li>Refrain from using the terms &#8220;rows&#8221; and &#8220;columns&#8221; when speaking of images.  Unless you are referring to a specific display, those terms are confusing.</li>
+<li>Refrain from refering to &#8220;x&#8221;, &#8220;y&#8221;, or &#8220;z&#8221; coordinates.  There is no standard coordinate system in the diffraction world, and the bornagain makes no attempt to create one.</li>
 <li>If documentation is missing or confusing, please fix it or tell someone (e.g. rkirian at asu dot edu).</li>
 </ul>
 </div>
 <div class="section" id="x-ray-beams">
 <h2>X-ray beams<a class="headerlink" href="#x-ray-beams" title="Permalink to this headline">¶</a></h2>
-<p>The bornagain package provides the <a class="reference internal" href="bornagain.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref any py py-class docutils literal notranslate"><span class="pre">source.Beam</span></code></a> class for describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of parameters that are needed to describe a beam are:</p>
+<p>The bornagain package provides the <a class="reference internal" href="bornagain.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref any py py-class docutils literal"><span class="pre">source.Beam</span></code></a> class for describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of parameters that are needed to describe a beam are:</p>
 <blockquote>
-<div><span class="math notranslate">\(\lambda\)</span> : the “nominal” wavelength of the beam</div></blockquote>
+<div><span class="math">\(\lambda\)</span> : the &#8220;nominal&#8221; wavelength of the beam</div></blockquote>
 <p>and</p>
 <blockquote>
-<div><span class="math notranslate">\(\hat{b}\)</span> : the unit vector pointing along the “nominal” incident beam direction.</div></blockquote>
-<p>Wavelength might be accompanied by a FWHM spread in photon energy <span class="math notranslate">\(\Delta E/E\)</span>, and the nominal beam direction might be accompanied by the beam divergence FWHM.  The bornagain package does not make a general assumption about the beam direction, but the [0,0,1] direction is most commonly used so far.</p>
+<div><span class="math">\(\hat{b}\)</span> : the unit vector pointing along the &#8220;nominal&#8221; incident beam direction.</div></blockquote>
+<p>Wavelength might be accompanied by a FWHM spread in photon energy <span class="math">\(\Delta E/E\)</span>, and the nominal beam direction might be accompanied by the beam divergence FWHM.  The bornagain package does not make a general assumption about the beam direction, but the [0,0,1] direction is most commonly used so far.</p>
 <p>Beam polarization can also be important:</p>
 <blockquote>
-<div><span class="math notranslate">\(\hat{u}\)</span> is the polarization vector for the x-ray beam.</div></blockquote>
-<p>This single vector is appropriate for linearly polarized beams.  For beams that are not purely linearly polarized, one can sum the contributions from each of the two polarizations.  The second polarization vector is of course <span class="math notranslate">\(\hat{u}\times\hat{b}\)</span> .</p>
-<p>Most of the above parameters can be specified by an instance of the <a class="reference internal" href="bornagain.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref any py py-class docutils literal notranslate"><span class="pre">source.Beam</span></code></a> class.  Derived quantities such as the polarization correction are tied to classes contained in the <a class="reference internal" href="bornagain.html#module-bornagain.detector" title="bornagain.detector"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">detector</span></code></a> module.</p>
+<div><span class="math">\(\hat{u}\)</span> is the polarization vector for the x-ray beam.</div></blockquote>
+<p>This single vector is appropriate for linearly polarized beams.  For beams that are not purely linearly polarized, one can sum the contributions from each of the two polarizations.  The second polarization vector is of course <span class="math">\(\hat{u}\times\hat{b}\)</span> .</p>
+<p>Most of the above parameters can be specified by an instance of the <a class="reference internal" href="bornagain.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref any py py-class docutils literal"><span class="pre">source.Beam</span></code></a> class.  Derived quantities such as the polarization correction are tied to classes contained in the <a class="reference internal" href="bornagain.html#module-bornagain.detector" title="bornagain.detector"><code class="xref any py py-mod docutils literal"><span class="pre">detector</span></code></a> module.</p>
 </div>
 <div class="section" id="pixel-array-detectors">
 <h2>Pixel-Array Detectors<a class="headerlink" href="#pixel-array-detectors" title="Permalink to this headline">¶</a></h2>
@@ -202,68 +174,65 @@
 <a class="reference internal image-reference" href="_images/pad.jpg"><img alt="Pixel-array detector schematic" src="_images/pad.jpg" style="width: 1062.4px; height: 493.6px;" /></a>
 <p class="caption"><span class="caption-text">Schematic of a Pixel-Array Detector.</span></p>
 </div>
-<p>The <a class="reference internal" href="bornagain.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> class contains the data and methods needed to deal with “pixel-array detectors”.  This detector is like a CCD and is assumed to consist of an orthogonal 2D grid of pixels.  The 2D grid is described by the following vectors:</p>
+<p>The <a class="reference internal" href="bornagain.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> class contains the data and methods needed to deal with &#8220;pixel-array detectors&#8221;.  This detector is like a CCD and is assumed to consist of an orthogonal 2D grid of pixels.  The 2D grid is described by the following vectors:</p>
 <blockquote>
-<div><p><span class="math notranslate">\(\vec{t}\)</span> is the vector pointing from the origin to the center of the corner detector pixel that is assumed to be the first in memory.</p>
-<p><span class="math notranslate">\(\vec{f}\)</span> is the vector that points along the “fast-scan” direction.  This is the distance and direction that points to the next pixel.</p>
+<div><p><span class="math">\(\vec{t}\)</span> is the vector pointing from the origin to the center of the corner detector pixel that is assumed to be the first in memory.</p>
+<p><span class="math">\(\vec{f}\)</span> is the vector that points along the &#8220;fast-scan&#8221; direction.  This is the distance and direction that points to the next pixel.</p>
 </div></blockquote>
 <p>that is adjacent in physical space, as well as in computer memory.  The length of this vector indicates the pixel size.</p>
 <blockquote>
-<div><p><span class="math notranslate">\(n_f\)</span> is the number of fast-scan pixels in the detector.</p>
-<p><span class="math notranslate">\(\vec{s}\)</span> is the vector that points along the “slow-scan” direction.  This is much like the <span class="math notranslate">\(\vec{f}\)</span> vector, but these pixels are only adjacent in physical space but not in computer memory.  In computer memory, adjacent pixels have a memory stride of length <span class="math notranslate">\(n_f\)</span>.</p>
-<p><span class="math notranslate">\(n_s\)</span> is the number of slow-scan pixels in the detector.</p>
+<div><p><span class="math">\(n_f\)</span> is the number of fast-scan pixels in the detector.</p>
+<p><span class="math">\(\vec{s}\)</span> is the vector that points along the &#8220;slow-scan&#8221; direction.  This is much like the <span class="math">\(\vec{f}\)</span> vector, but these pixels are only adjacent in physical space but not in computer memory.  In computer memory, adjacent pixels have a memory stride of length <span class="math">\(n_f\)</span>.</p>
+<p><span class="math">\(n_s\)</span> is the number of slow-scan pixels in the detector.</p>
 </div></blockquote>
 <p>Note that there are no angles involved in describing the detector geometry.  That is because angles are confusing due to the many different conventions used by different reference books and software.  Also, importantly, rotation operations do not commute, which only adds to the confusion.</p>
-<p>With the above vectors specified, we may now generate the quantities that will be useful when doing diffraction analysis and simulations.  The vector pointing from the origin (where the target is located) to a detector pixel indexed by <span class="math notranslate">\(i\)</span> and <span class="math notranslate">\(j\)</span>, is</p>
+<p>With the above vectors specified, we may now generate the quantities that will be useful when doing diffraction analysis and simulations.  The vector pointing from the origin (where the target is located) to a detector pixel indexed by <span class="math">\(i\)</span> and <span class="math">\(j\)</span>, is</p>
 <blockquote>
-<div><span class="math notranslate">\(\vec{v}_{ij}=\vec{t}+i\vec{f}+j\vec{s}\)</span></div></blockquote>
-<p>Now let’s compute the scattering vector for pixel <span class="math notranslate">\(i,j\)</span>:</p>
+<div><span class="math">\(\vec{v}_{ij}=\vec{t}+i\vec{f}+j\vec{s}\)</span></div></blockquote>
+<p>Now let&#8217;s compute the scattering vector for pixel <span class="math">\(i,j\)</span>:</p>
 <blockquote>
-<div><span class="math notranslate">\(\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)\)</span></div></blockquote>
-<p>where <span class="math notranslate">\(\lambda\)</span> is the photon wavelength.  Next we can compute the scattering angle of a pixel:</p>
+<div><span class="math">\(\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)\)</span></div></blockquote>
+<p>where <span class="math">\(\lambda\)</span> is the photon wavelength.  Next we can compute the scattering angle of a pixel:</p>
 <blockquote>
-<div><span class="math notranslate">\(\theta_{ij} = \arccos(\hat{v}_{ij}\cdot\hat{b})\)</span></div></blockquote>
+<div><span class="math">\(\theta_{ij} = \arccos(\hat{v}_{ij}\cdot\hat{b})\)</span></div></blockquote>
 <p>For linearly polarized light, the polarization correction is</p>
 <blockquote>
-<div><span class="math notranslate">\(P_{ij} = 1 - |\hat{u}\cdot\hat{v}_{ij}|^2\)</span></div></blockquote>
+<div><span class="math">\(P_{ij} = 1 - |\hat{u}\cdot\hat{v}_{ij}|^2\)</span></div></blockquote>
 <p>If the light is not linearly polarized, then the polarization factor is a weighted sum of the above component and this one:</p>
 <blockquote>
-<div><span class="math notranslate">\(P'_{ij} = 1 - |(\hat{b}\times\hat{u})\cdot\hat{v}_{ij}|^2\)</span></div></blockquote>
+<div><span class="math">\(P'_{ij} = 1 - |(\hat{b}\times\hat{u})\cdot\hat{v}_{ij}|^2\)</span></div></blockquote>
 <p>The solid angle of a pixel is approximately equal to</p>
 <blockquote>
-<div><span class="math notranslate">\(\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}\)</span></div></blockquote>
+<div><span class="math">\(\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}\)</span></div></blockquote>
 <p>where the vector normal to the PAD is</p>
 <blockquote>
-<div><span class="math notranslate">\(\hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}\)</span></div></blockquote>
-<p>The <a class="reference internal" href="bornagain.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> class can currently generate the above quantities for you.  More can be added if they are necessary.</p>
+<div><span class="math">\(\hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}\)</span></div></blockquote>
+<p>The <a class="reference internal" href="bornagain.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> class can currently generate the above quantities for you.  More can be added if they are necessary.</p>
 </div>
 <div class="section" id="simulation">
 <h2>Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline">¶</a></h2>
 <p>The most basic starting point for a diffraction pattern from a collection of atoms is:</p>
 <blockquote>
-<div><span class="math notranslate">\(I(\vec{q}) = I_0 r_e^2 |F(\vec{q})|^2 \Delta\Omega\)</span></div></blockquote>
+<div><span class="math">\(I(\vec{q}) = I_0 r_e^2 |F(\vec{q})|^2 \Delta\Omega\)</span></div></blockquote>
 <p>where the overall structure factor is</p>
 <blockquote>
-<div><span class="math notranslate">\(F(\vec{q}) = \sum_n f_n(q)e^{i\vec{q}\cdot\vec{r}_n}\)</span></div></blockquote>
-<p>and <span class="math notranslate">\(f_n(q)\)</span> is the wavelength-dependent scattering factor for atom <span class="math notranslate">\(n\)</span>.</p>
+<div><span class="math">\(F(\vec{q}) = \sum_n f_n(q)e^{i\vec{q}\cdot\vec{r}_n}\)</span></div></blockquote>
+<p>and <span class="math">\(f_n(q)\)</span> is the wavelength-dependent scattering factor for atom <span class="math">\(n\)</span>.</p>
 <p>More will follow from here.</p>
 </div>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="bornagain’s documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="bornagain’s documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -297,14 +266,13 @@
             VERSION:'0.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

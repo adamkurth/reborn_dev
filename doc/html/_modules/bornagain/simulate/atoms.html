@@ -13,8 +13,6 @@
 
   
   
-  
-  
 
   
 
@@ -32,9 +30,6 @@
   
 
   
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.0.1 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
@@ -45,7 +40,6 @@
 
 <body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -86,10 +80,7 @@
           
             
             
-              
-            
-            
-              <ul>
+                <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../bornagain.html">bornagain package</a></li>
@@ -107,10 +98,8 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">bornagain</a>
-        
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">bornagain</a>
       </nav>
 
 
@@ -123,46 +112,29 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
-        
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
-      <li>bornagain.simulate.atoms</li>
-    
-    
+      
+    <li>bornagain.simulate.atoms</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
   <h1>Source code for bornagain.simulate.atoms</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
 <span class="kn">import</span> <span class="nn">pkg_resources</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">units</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">bornagain</span> <span class="kn">import</span> <span class="n">units</span>
 
 <span class="n">atomic_symbols_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
     <span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/atomic_symbols.csv&#39;</span><span class="p">)</span>
@@ -189,8 +161,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">rv</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
             <span class="n">memo</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="n">rv</span>
-            <span class="k">return</span> <span class="n">rv</span></div>
-    <span class="k">return</span> <span class="n">wrapper</span>
+            <span class="k">return</span> <span class="n">rv</span>
+    <span class="k">return</span> <span class="n">wrapper</span></div>
 
 
 <div class="viewcode-block" id="atomic_symbols_to_numbers"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.atomic_symbols_to_numbers">[docs]</a><span class="k">def</span> <span class="nf">atomic_symbols_to_numbers</span><span class="p">(</span><span class="n">symbols</span><span class="p">):</span>
@@ -216,8 +188,8 @@
         <span class="c1">#print(symbols)</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">atomic_symbols</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">str_</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
         <span class="n">Z</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-</div>
-    <span class="k">return</span> <span class="n">Z</span>
+
+    <span class="k">return</span> <span class="n">Z</span></div>
 
 
 <div class="viewcode-block" id="atomic_numbers_to_symbols"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.atomic_numbers_to_symbols">[docs]</a><span class="k">def</span> <span class="nf">atomic_numbers_to_symbols</span><span class="p">(</span><span class="n">numbers</span><span class="p">):</span>
@@ -234,12 +206,12 @@
     <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">numbers</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">atomic_symbols</span><span class="p">[</span><span class="n">numbers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">symbols</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
-    <span class="k">return</span> <span class="n">symbols</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">symbols</span></div>
 
 
-<div class="viewcode-block" id="get_henke_data"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.get_henke_data">[docs]</a><span class="nd">@memoize</span>
-<span class="k">def</span> <span class="nf">get_henke_data</span><span class="p">(</span><span class="n">atomic_number</span><span class="p">):</span>
+<span class="nd">@memoize</span>
+<div class="viewcode-block" id="get_henke_data"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.get_henke_data">[docs]</a><span class="k">def</span> <span class="nf">get_henke_data</span><span class="p">(</span><span class="n">atomic_number</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load Henke scattering factor data from disk, cache for future retrieval. The</span>
 <span class="sd">    Henke data was gathered from the Center for X-Ray Optics web page at the</span>
@@ -265,9 +237,9 @@
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Atomic Number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">atomic_number</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Element Symbol&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sym</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Photon Energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">eV</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Scatter Factor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
-</div>
-    <span class="k">return</span> <span class="n">data</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Scatter Factor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
 
 
 <div class="viewcode-block" id="get_scattering_factors"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.get_scattering_factors">[docs]</a><span class="k">def</span> <span class="nf">get_scattering_factors</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">photon_energy</span><span class="p">):</span>
@@ -293,13 +265,10 @@
         <span class="n">fdat</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;Scatter Factor&#39;</span><span class="p">]</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">E</span> <span class="o">-</span> <span class="n">photon_energy</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Z</span> <span class="o">==</span> <span class="n">z</span><span class="p">)</span>
-        <span class="n">f</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdat</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span></div>
-    <span class="k">return</span> <span class="n">f</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdat</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">f</span></div>
 </pre></div>
 
-           </div>
-           <div class="articleComments">
-            
            </div>
           </div>
           <footer>
@@ -334,14 +303,13 @@
             VERSION:'0.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="../../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
