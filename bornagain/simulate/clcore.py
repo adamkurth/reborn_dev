@@ -17,7 +17,8 @@ import pyopencl as cl
 import pyopencl.array
 
 import bornagain as ba
-import refdata
+from bornagain.simulate import refdata
+# import refdata
 
 # from __builtin__ import None    # this is causing problems for some reason...
 

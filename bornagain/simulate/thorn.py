@@ -9,8 +9,7 @@ import pyopencl.array as pycl_array
 
 
 import bornagain as ba
-import clcore
-import refdata
+from bornagain.simulate import clcore, refdata
 
 nextPow2 = lambda x: int(2**(np.ceil(np.log2(x))))
 prevPow2 = lambda x: int(2**(np.floor(np.log2(x))))

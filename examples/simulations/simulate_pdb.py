@@ -7,11 +7,8 @@ import matplotlib.pyplot as plt
 sys.path.append("../..")
 import bornagain as ba
 import bornagain.target.crystal as crystal
+import bornagain.simulate.clcore as core
 
-try:
-    import bornagain.simulate.clcore as core
-except:
-    print('Cannot import clcore; check that pyopencl is installed')
 
 show = False  # Display the simulated patterns
 double = False  # Use double precision if available

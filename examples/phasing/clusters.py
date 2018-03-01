@@ -1,7 +1,7 @@
 import sys
 from time import time
 
-if 1:
+if 0:
     import afnumpy as np
     from afnumpy.fft import fftn, ifftn, fftshift
 else:
@@ -28,7 +28,7 @@ wavelength = 1.5e-10
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 
 print('Setting up 3D mesh')
-d = 0.15e-9  # Minimum resolution in SI units (as always!)
+d = 0.6e-9  # Minimum resolution in SI units (as always!)
 s = 1  # Oversampling factor.  s = 1 means Bragg sampling
 mt = map.CrystalMeshTool(cryst, d, s)
 print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))

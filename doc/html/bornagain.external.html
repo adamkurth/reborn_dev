@@ -5,6 +5,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>bornagain.external package &mdash; bornagain 0.0.1 documentation</title>
@@ -12,9 +13,10 @@
 
   
   
+  
+  
 
   
-  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
   
   
@@ -30,27 +32,47 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
         <link rel="up" title="bornagain package" href="bornagain.html"/>
         <link rel="next" title="bornagain.simulate package" href="bornagain.simulate.html"/>
         <link rel="prev" title="bornagain package" href="bornagain.html"/> 
 
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-nav-search">
-        
-          <a href="index.html" class="fa fa-home"> bornagain</a>
-        
-        
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -58,29 +80,33 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-      </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-        
           
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
+            
+            
+              
+            
+            
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#some-basics">Some basics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#x-ray-beams">X-ray beams</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#pixel-array-detectors">Pixel-Array Detectors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#simulation">Simulation</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#system-wide-installation">System-wide installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#pure-anaconda-python">Pure Anaconda Python</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#using-anaconda-and-pip">Using Anaconda and pip</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-on-scientific-linux-6">Installation on Scientific Linux 6</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">bornagain.external package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.external.crystfel">bornagain.external.crystfel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.external.lcls">bornagain.external.lcls module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.external">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.detector">bornagain.detector module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.scatter">bornagain.scatter module</a></li>
@@ -91,53 +117,89 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="coding.html#overview-of-bornagain">Overview of bornagain</a></li>
-<li class="toctree-l2"><a class="reference internal" href="coding.html#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="coding.html#generation-of-documentation">Generation of documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.detector">bornagain.detector module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.scatter">bornagain.scatter module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.source">bornagain.source module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.units">bornagain.units module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.utils">bornagain.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain">Module contents</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
 </ul>
 
+            
           
-        
+        </div>
       </div>
-      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">bornagain</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
       </nav>
 
 
       
       <div class="wy-nav-content">
         <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-          <li><a href="modules.html">bornagain</a> &raquo;</li>
-      
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
           <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
-      
-    <li>bornagain.external package</li>
+        
+      <li>bornagain.external package</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          <a href="_sources/bornagain.external.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/bornagain.external.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
-          <div role="main" class="document">
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="bornagain-external-package">
 <h1>bornagain.external package<a class="headerlink" href="#bornagain-external-package" title="Permalink to this headline">¶</a></h1>
@@ -149,25 +211,23 @@
 <dl class="function">
 <dt id="bornagain.external.crystfel.geom_to_dict">
 <code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geom_to_dict</code><span class="sig-paren">(</span><em>geom_file</em>, <em>raw_strings=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geom_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geom_to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a crystfel &#8220;geom&#8221; file into a sensible Python dictionary.  For details see:
+<dd><p>Convert a crystfel “geom” file into a sensible Python dictionary.  For details see:
 <a class="reference external" href="http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html">http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html</a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>geom_file</strong> (<em>str</em>) &#8211; Path to the geometry file.</li>
-<li><strong>raw_strings</strong> (<em>bool</em>) &#8211; By default, this function will convert values to floats, integers, or bools, as appropriate.
-Set this option to &#8220;True&#8221; if you want to store the raw strings in the output dictionary.</li>
+<li><strong>geom_file</strong> (<em>str</em>) – Path to the geometry file.</li>
+<li><strong>raw_strings</strong> (<em>bool</em>) – By default, this function will convert values to floats, integers, or bools, as appropriate.
+Set this option to “True” if you want to store the raw strings in the output dictionary.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>geom_dict</strong> &#8211;</p>
-<p>Dictionary container filled with geom file information.</p>
-</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dictionary container filled with geom file information.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">geom_dict (dict)</p>
 </td>
 </tr>
 </tbody>
@@ -189,17 +249,15 @@ Set this option to &#8220;True&#8221; if you want to store the raw strings in th
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>numpy array</em>) &#8211; Image data</li>
-<li><strong>geom_dict</strong> (<em>dict</em>) &#8211; Geometry dictionary</li>
+<li><strong>data</strong> (<em>numpy array</em>) – Image data</li>
+<li><strong>geom_dict</strong> (<em>dict</em>) – Geometry dictionary</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>split_data</strong> &#8211;</p>
-<p>List of individual PAD panel data</p>
-</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of individual PAD panel data</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">split_data (list)</p>
 </td>
 </tr>
 </tbody>
@@ -221,12 +279,11 @@ be very confused when they first encounter this undocumented aspect of Cheetah.<
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>psana_array</strong> (<em>numpy array</em>) &#8211; A numpy array of shape (32,185,388) produced by the psana module</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>psana_array</strong> (<em>numpy array</em>) – A numpy array of shape (32,185,388) produced by the psana module</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>cheetah_array</strong> &#8211;<p>A numpy array of shape (1480, 1552); same data as the psana array but mangled as done within Cheetah</p>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A numpy array of shape (1480, 1552); same data as the psana array but mangled as done within Cheetah</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy array</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">cheetah_array (numpy array)</td>
 </tr>
 </tbody>
 </table>
@@ -242,17 +299,15 @@ data in the native psana format.  First you should create a crystfel geometry di
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>psana_array</strong> (<em>numpy array</em>) &#8211; A numpy array of shape (32,185,388) produced by the psana module.</li>
-<li><strong>geom_dict</strong> (<em>dict</em>) &#8211; A CrystFEL geometry dictionary produced by external.crystfel.geom_to_dict() .</li>
+<li><strong>psana_array</strong> (<em>numpy array</em>) – A numpy array of shape (32,185,388) produced by the psana module.</li>
+<li><strong>geom_dict</strong> (<em>dict</em>) – A CrystFEL geometry dictionary produced by external.crystfel.geom_to_dict() .</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>pad_list</strong> &#8211;</p>
-<p>A list containing data from each pixel array</p>
-</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list containing data from each pixel array</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pad_list (list)</p>
 </td>
 </tr>
 </tbody>
@@ -265,20 +320,24 @@ data in the native psana format.  First you should create a crystfel geometry di
 <p>This module contains all sorts of tools for dealing with other software.
 Examples are CrystFEL, Cheetah and psana.  We sometimes need to deal with the
 configuration files from these software suites, methods for accessing/writing
-data, etc.  This should be kept to a minimum...</p>
+data, etc.  This should be kept to a minimum…</p>
 </div>
 </div>
 
 
+           </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.simulate.html" class="btn btn-neutral float-right" title="bornagain.simulate package">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.simulate.html" class="btn btn-neutral float-right" title="bornagain.simulate package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.html" class="btn btn-neutral" title="bornagain package"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.html" class="btn btn-neutral" title="bornagain package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -288,12 +347,13 @@ data, etc.  This should be kept to a minimum...</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2017, Richard A Kirian.
+
     </p>
   </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-  
 </footer>
+
         </div>
       </div>
 
@@ -311,13 +371,14 @@ data, etc.  This should be kept to a minimum...</p>
             VERSION:'0.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
