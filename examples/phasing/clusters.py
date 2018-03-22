@@ -18,6 +18,13 @@ from bornagain.target import crystal, map
 
 Niter = 100  # Number of phase-retrieval iterations
 
+hkl_file = '../data/crystfel/stream-13k-allruns.hkl'
+hkl = np.genfromtxt(hkl_file, skip_header=3, skip_footer=1, usecols=[0, 1, 2, 3])
+Idata = hkl[:, 3]
+hkl = hkl[:, 0:3]
+print(Idata.shape)
+print(hkl.shape)
+
 pdbFile = '../data/pdb/1JB0.pdb'
 print('Loading pdb file (%s)' % pdbFile)
 cryst = crystal.structure(pdbFile)
@@ -37,6 +44,8 @@ print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))
 print('Creating density map directly from atoms')
 x = cryst.x
 rho0 = mt.place_atoms_in_map(cryst.x % mt.s, np.abs(f))
+
+Idata = mt.place_intensities_in_map(hkl, Idata)
 
 J = 1
 K = []
@@ -174,9 +183,14 @@ delT = time() - t
 print('Total time (s): %g ; Time per iteration (s): %g' % (delT, delT / float(Niter)))
 
 if 1:
+    pg.image(Idata)
+
+if 1:
+    pg.image(fftshift(I0))
+
+if 0:
     print("Showing reconstruction (image viewer)")
     pg.image(np.abs(rho))
-    pg.show()
 
 if 0:
     print("Showing reconstruction (volumetric)")

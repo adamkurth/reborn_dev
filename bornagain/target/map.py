@@ -262,71 +262,29 @@ class CrystalMeshTool(object):
         Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
 
         """
+        mm = [0, self.s]
+        rng = [mm, mm, mm]
+        a, _, _ = binned_statistic_dd(x, f, statistic='sum', bins=[self.N] * 3, range=rng)
 
-        a, _, _ = binned_statistic_dd(x, f, statistic='sum', bins=[self.N] * 3,
-                                      range=[[0, self.s], [0, self.s], [0, self.s]])
         return a
 
+    def place_intensities_in_map(self, h, f):
 
-if __name__ == '__main__':
+        r"""
 
-    import numpy as np
+        This will take a list of Miller index vectors and intensities and place them in a 3D map.
 
-    from mpl_toolkits.mplot3d import Axes3D
-    import matplotlib.pyplot as plt
+        Args:
+            h (numpy array):  An Nx3 array of hkl vectors
+            f (numpy array):  An N-length array of intensities (must be real)
 
-    # Crystal information
-    sg = 'P 1'
-    a = 281.000e-10
-    b = 281.000e-10
-    c = 165.200e-10
-    alpha = 90.0 * np.pi / 180.0
-    beta  = 90.0 * np.pi / 180.0
-    gamma = 120.0 * np.pi / 180.0
-    cryst = crystal.structure()
-    cryst.set_cell(a, b, c, alpha, beta, gamma)
-    cryst.set_spacegroup(sg)
+        Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
 
-    # Desired properties of the map
-    d = 9e-9  # Minimum resolution
-    s = 2        # Oversampling factor
+        """
 
-    # Create a meshtool
-    mt = CrystalMeshTool(cryst, d, s)
+        hh = self.get_h_vecs()
+        mm = [np.min(hh)-0.5, np.max(hh)+0.5]
+        rng = [mm, mm, mm]
+        a, _, _ = binned_statistic_dd(h, f, statistic='mean', bins=[self.N] * 3, range=rng)
 
-    print(mt.N)
-
-    n = mt.get_n_vecs()
-    x = mt.get_x_vecs()
-    r = mt.get_r_vecs()
-    h = mt.get_h_vecs()
-    # print(h)
-
-    # Check for interpolation artifacts
-    # for (R, T) in zip(cryst.symRs, cryst.symTs):
-    #     print(R)
-    #     print(T)
-    #     xp = np.dot(R, x.T).T
-    #     xp = xp + T
-    #     xp = xp/mt.dx
-    #     xpp = xp - np.round(xp)
-    #     print(np.max(np.abs(xpp)))
-
-    v = h
-    v3 = mt.reshape3(v)
-
-    # sym_luts = mt.get_sym_luts()
-    # for lut in sym_luts:
-    #     print(lut)
-
-    # Display the mesh as a scatterplot
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(v[:, 0], v[:, 1], v[:, 2], c='k', marker='.', s=1)
-    ax.scatter(v3[0, 0, :, 0], v3[0, 0, :, 1], v3[0, 0, :, 2], c='r', marker='.', s=200, edgecolor='')
-    ax.scatter(v3[0, :, 0, 0], v3[0, :, 0, 1], v3[0, :, 0, 2], c='g', marker='.', s=200, edgecolor='')
-    ax.scatter(v3[:, 0, 0, 0], v3[:, 0, 0, 1], v3[:, 0, 0, 2], c='b', marker='.', s=200, edgecolor='')
-    ax.set_aspect('equal')
-    plt.show()
-
-    print('done!')
+        return a
