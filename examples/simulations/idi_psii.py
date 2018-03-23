@@ -23,11 +23,11 @@ import pyqtgraph as pg
 qtview = True
 
 # How many diffraction patterns to simulate
-n_patterns = 100
+n_patterns = 10000
 
 # Intensity of the fluoress
 add_noise = True
-photons_per_atom = 100
+photons_per_atom = 10
 
 # whether to use Henke or Cromer mann
 use_henke = True  # if False, then use Cromer-mann version
@@ -223,6 +223,7 @@ for pattern_num in range(0, n_patterns):
         else:
             R = np.eye(3)
         T = Ts[n, :]
+        r = np.array([[0, 0, 0], [5e-10, 0, 0]])
         rs.append(np.dot(R, r.T).T + T)
     rs = np.array(rs).reshape([n_molecules*n_atoms, 3])  # miliseconds slow down
 
