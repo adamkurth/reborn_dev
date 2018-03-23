@@ -1,13 +1,8 @@
-from functools import wraps
 import pkg_resources
 import numpy as np
-from bornagain import units
+from bornagain import units, utils
 
-# atomic_symbols_file = pkg_resources.resource_filename(
-#     'bornagain.simulate', 'data/atomic_symbols.csv')
-# atomic_symbols = np.loadtxt(
-#     atomic_symbols_file, usecols=(1,), dtype=np.str_, delimiter=',')
-# atomic_symbols = np.array([x.strip() for x in atomic_symbols])
+
 henke_data_path = pkg_resources.resource_filename(
     'bornagain.simulate', 'data/henke')
 
@@ -24,35 +19,15 @@ atomic_symbols = np.array(['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne',
        'Uut', 'Uuq', 'Uup', 'Uuh', 'Uus', 'Uuo'])
 
 
-def memoize(function):
-    """
-    This is a function decorator for caching results from a function, to avoid
-    excessive computation or reading from disk.  Search the web for more
-    details of how this works.
-    """
-
-    memo = {}
-
-    @wraps(function)
-    def wrapper(*args):
-        if args in memo:
-            return memo[args]
-        else:
-            rv = function(*args)
-            memo[args] = rv
-            return rv
-    return wrapper
-
-
 def atomic_symbols_to_numbers(symbols):
     """
-Convert atomic symbols (such as C, N, He, Be) to atomic numbers.
+    Convert atomic symbols (such as C, N, He, Be) to atomic numbers.
 
-Arguments:
-    symbols (string/list-like): Atomic symbol strings. Case insensitive.
+    Arguments:
+        symbols (string/list-like): Atomic symbol strings. Case insensitive.
 
-Returns:
-    numbers (numpy array): Atomic numbers.
+    Returns:
+        numbers (numpy array): Atomic numbers.
     """
 
     symbols = np.array(symbols)
@@ -64,7 +39,6 @@ Returns:
             Z[symbols == u] = w[0] + 1
             Z = Z.astype(np.int)
     else:
-        #print(symbols)
         w = np.nonzero(atomic_symbols == np.str_(symbols).capitalize())
         Z = w[0] + 1
 
@@ -73,13 +47,13 @@ Returns:
 
 def atomic_numbers_to_symbols(numbers):
     """
-Convert atomic numbers to atomic symbols (such as C, N, He, Ca)
+    Convert atomic numbers to atomic symbols (such as C, N, He, Ca)
 
-Arguments:
-    numbers (int/list-like): Atomic numbers
+    Arguments:
+        numbers (int/list-like): Atomic numbers
 
-Returns:
-    symbols (numpy string array): Atomic element symbols (such as H, He, Be)
+    Returns:
+        symbols (numpy string array): Atomic element symbols (such as H, He, Be)
     """
 
     numbers = np.array(numbers, dtype=np.int)
@@ -89,7 +63,7 @@ Returns:
     return symbols
 
 
-@memoize
+@utils.memoize
 def get_henke_data(atomic_number):
     """
     Load Henke scattering factor data from disk, cache for future retrieval. The
@@ -123,14 +97,14 @@ def get_henke_data(atomic_number):
 
 def get_scattering_factors(atomic_numbers, photon_energy):
     """
-Get complex atomic scattering factors.
+    Get complex atomic scattering factors.
 
-Arguments:
-    atomic_numbers (int/list-like): Atomic numbers.
-    photon_energy (float): Photon energy.
+    Arguments:
+        atomic_numbers (int/list-like): Atomic numbers.
+        photon_energy (float): Photon energy.
 
-Returns:
-    scattering_factors (complex/numpy array): Complex scattering factors.
+    Returns:
+        scattering_factors (complex/numpy array): Complex scattering factors.
     """
 
     # TODO: finish off this function, which should use get_henke_data()

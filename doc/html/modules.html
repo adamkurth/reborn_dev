@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,9 +32,12 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
         <link rel="next" title="Coding guidlines for developers" href="coding.html"/>
-        <link rel="prev" title="bornagain.viewers package" href="bornagain.viewers.html"/> 
+        <link rel="prev" title="bornagain.target package" href="bornagain.target.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -41,6 +46,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -81,11 +87,14 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.html">bornagain package</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">bornagain</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">bornagain</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html">bornagain package</a></li>
 </ul>
 </li>
@@ -102,8 +111,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">bornagain</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
       </nav>
 
 
@@ -116,19 +127,36 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>bornagain</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>bornagain</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/modules.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -152,6 +180,7 @@
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.atoms">bornagain.simulate.atoms module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.clcore">bornagain.simulate.clcore module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.refdata">bornagain.simulate.refdata module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.simutils">bornagain.simulate.simutils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.thorn">bornagain.simulate.thorn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate">Module contents</a></li>
 </ul>
@@ -162,14 +191,6 @@
 <li class="toctree-l4"><a class="reference internal" href="bornagain.target.html#module-bornagain.target.map">bornagain.target.map module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.target.html#module-bornagain.target.spgrp">bornagain.target.spgrp module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.target.html#module-bornagain.target">Module contents</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html#module-bornagain.viewers.joesviews">bornagain.viewers.joesviews module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html#module-bornagain.viewers.qtv">bornagain.viewers.qtv module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html#bornagain-viewers-qtviews-module">bornagain.viewers.qtviews module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html#module-bornagain.viewers">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -189,15 +210,18 @@
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="coding.html" class="btn btn-neutral float-right" title="Coding guidlines for developers" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="coding.html" class="btn btn-neutral float-right" title="Coding guidlines for developers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.viewers.html" class="btn btn-neutral" title="bornagain.viewers package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.target.html" class="btn btn-neutral" title="bornagain.target package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -231,13 +255,14 @@
             VERSION:'0.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -8,7 +8,7 @@ from numpy import sin, cos, sqrt
 
 from bornagain.target import spgrp
 from bornagain import utils
-from bornagain.simulate import atoms
+from bornagain.simulate import atoms, simutils
 
 
 class structure(object):
@@ -213,15 +213,15 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
 
 def get_symmetry_operators_from_space_group(hm_symbol):
     """
-For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
-translation and rotation operators.  These operators are in the crystal basis.
-As of now, this is a rather unreliable function.  My brain hurts badly after attempting
-to make sense of the ways in which space groups are specified...
+    For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
+    translation and rotation operators.  These operators are in the crystal basis.
+    As of now, this is a rather unreliable function.  My brain hurts badly after attempting
+    to make sense of the ways in which space groups are specified...
 
-Input: A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)
+    Input: A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)
 
-Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy
-        arrays) and translation vectors (1x3 numpy arrays)
+    Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy
+            arrays) and translation vectors (1x3 numpy arrays)
     """
 
     # First we try to find the "Hall number" corresponding to the Hermann-Mauguin symbol.
@@ -396,4 +396,4 @@ class Lattice:
 
 #       sphericalize the lattice..
         if spherical:
-            self.vecs = utils.sphericalize(self.vecs)
+            self.vecs = simutils.sphericalize(self.vecs)

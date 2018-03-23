@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.0.1 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
@@ -40,6 +45,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -80,7 +86,10 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../bornagain.html">bornagain package</a></li>
@@ -98,8 +107,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../../index.html">bornagain</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">bornagain</a>
+        
       </nav>
 
 
@@ -112,19 +123,36 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      
-    <li>bornagain.target.crystal</li>
+        
+      <li>bornagain.target.crystal</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -136,62 +164,62 @@
 <span class="sd">Basic utilities for dealing with crystalline objects.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sqrt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sqrt</span>
 
-<span class="kn">from</span> <span class="nn">bornagain.target</span> <span class="kn">import</span> <span class="n">spgrp</span>
-<span class="kn">from</span> <span class="nn">bornagain</span> <span class="kn">import</span> <span class="n">utils</span>
-<span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="kn">import</span> <span class="n">atoms</span>
+<span class="kn">from</span> <span class="nn">bornagain.target</span> <span class="k">import</span> <span class="n">spgrp</span>
+<span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="k">import</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">simutils</span>
 
 
 <div class="viewcode-block" id="structure"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.structure">[docs]</a><span class="k">class</span> <span class="nc">structure</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="sd">r&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A container class for stuff needed when dealing with crystal structures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">r</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Atomic coordinates (3xN array)</span>
-    <span class="n">_x</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Fractional coordinates (3xN array)</span>
-    <span class="n">O</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.</span>
-    <span class="n">Oinv</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Inverse orthogonalization matrix (3x3 array)</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: This is Oinv transpose (3x3 array).  Does the transform q = dot(A, h), with fractional Miller indices h.</span>
-    <span class="n">Ainv</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: A inverse</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Translation vector that goes with orthogonalization matrix (What is this used for???)</span>
-    <span class="n">elements</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Atomic element symbols</span>
-    <span class="n">Z</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Atomic numbers</span>
-    <span class="n">spaceGroupNumber</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Space group number in the Int. Tables</span>
-    <span class="n">hermannMauguinSymbol</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Lattice constant</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Lattice constant</span>
-    <span class="n">c</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Lattice constant</span>
-    <span class="n">alpha</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Lattice angle</span>
-    <span class="n">beta</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Lattice angle</span>
-    <span class="n">gamma</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Lattice angle</span>
-    <span class="n">V</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Unit cell volume</span>
-    <span class="n">nAtoms</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Number of atoms</span>
-    <span class="n">nMolecules</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Number of molecules per unit cell</span>
-    <span class="n">symOps</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Symmetry operations that are applied to fractional coordinates</span>
-    <span class="n">symRs</span> <span class="o">=</span> <span class="bp">None</span> <span class="c1">#: Symmetry 3x3 transformation matrices (in crystal basis)</span>
-    <span class="n">symTs</span> <span class="o">=</span> <span class="bp">None</span> <span class="c1">#: Symmetry translations (in crystal basis)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Atomic coordinates (3xN array)</span>
+    <span class="n">_x</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Fractional coordinates (3xN array)</span>
+    <span class="n">O</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.</span>
+    <span class="n">Oinv</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Inverse orthogonalization matrix (3x3 array)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: This is Oinv transpose (3x3 array).  Does the transform q = dot(A, h), with fractional Miller indices h.</span>
+    <span class="n">Ainv</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: A inverse</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Translation vector that goes with orthogonalization matrix (What is this used for???)</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Atomic element symbols</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Atomic numbers</span>
+    <span class="n">spaceGroupNumber</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Space group number in the Int. Tables</span>
+    <span class="n">hermannMauguinSymbol</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Lattice constant</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Lattice constant</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Lattice constant</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Lattice angle</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Lattice angle</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Lattice angle</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Unit cell volume</span>
+    <span class="n">nAtoms</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Number of atoms</span>
+    <span class="n">nMolecules</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Number of molecules per unit cell</span>
+    <span class="n">symOps</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Symmetry operations that are applied to fractional coordinates</span>
+    <span class="n">symRs</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Symmetry 3x3 transformation matrices (in crystal basis)</span>
+    <span class="n">symTs</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Symmetry translations (in crystal basis)</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdbFilePath</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdbFilePath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="n">pdbFilePath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pdbFilePath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">load_pdb</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">)</span>
 
 <div class="viewcode-block" id="structure.load_pdb"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.structure.load_pdb">[docs]</a>    <span class="k">def</span> <span class="nf">load_pdb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdbFilePath</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Populate the class with all the info from a PDB file.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            pdbFilePath: Path to the PDB file</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">parse_pdb</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+        <span class="n">parse_pdb</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="structure.set_cell"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.structure.set_cell">[docs]</a>    <span class="k">def</span> <span class="nf">set_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Set the unit cell lattice.</span>
 
@@ -231,12 +259,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">=</span> <span class="n">O</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span> <span class="o">=</span> <span class="n">Oinv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">Oinv</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Ainv</span> <span class="o">=</span> <span class="n">O</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">V</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ainv</span> <span class="o">=</span> <span class="n">O</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">V</span>
 
 <div class="viewcode-block" id="structure.set_spacegroup"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.structure.set_spacegroup">[docs]</a>    <span class="k">def</span> <span class="nf">set_spacegroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hermann_mauguin_symbol</span><span class="p">):</span>
 
-        <span class="sd">r&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Set the spacegroup of the crystal.  This produces a cache of the symmetry transformation operations.</span>
 
@@ -247,14 +275,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">hermann_mauguin_symbol</span> <span class="o">=</span> <span class="n">hermann_mauguin_symbol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symRs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">symTs</span> <span class="o">=</span> <span class="n">get_symmetry_operators_from_space_group</span><span class="p">(</span><span class="n">hermann_mauguin_symbol</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symRinvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">symRs</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nMolecules</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symTs</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symRinvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">symRs</span><span class="p">]</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nMolecules</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symTs</span><span class="p">)</span>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="sd">r&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Fractional coordinates of atoms.</span>
 
@@ -262,20 +290,20 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span>
 
 
-<div class="viewcode-block" id="parse_pdb"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.parse_pdb">[docs]</a><span class="k">def</span> <span class="nf">parse_pdb</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">,</span> <span class="n">crystalStruct</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_pdb"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.parse_pdb">[docs]</a><span class="k">def</span> <span class="nf">parse_pdb</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">,</span> <span class="n">crystalStruct</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-    <span class="sd">r&quot;&quot;&quot;Return a :class:`structure` object with PDB information. &quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a :class:`structure` object with PDB information. &quot;&quot;&quot;</span>
 
     <span class="n">maxAtoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e5</span><span class="p">)</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="n">maxAtoms</span><span class="p">])</span>
     <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">atomIndex</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">crystalStruct</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">crystalStruct</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cryst</span> <span class="o">=</span> <span class="n">structure</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">cryst</span> <span class="o">=</span> <span class="n">crystalStruct</span>
@@ -340,21 +368,21 @@
     <span class="n">cryst</span><span class="o">.</span><span class="n">nAtoms</span> <span class="o">=</span> <span class="n">nAtoms</span>
 
     <span class="n">cryst</span><span class="o">.</span><span class="n">set_spacegroup</span><span class="p">(</span><span class="n">hermann_mauguin_symbol</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">cryst</span></div>
+    </div>
+    <span class="k">return</span> <span class="n">cryst</span>
 
 
 <div class="viewcode-block" id="get_symmetry_operators_from_space_group"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.get_symmetry_operators_from_space_group">[docs]</a><span class="k">def</span> <span class="nf">get_symmetry_operators_from_space_group</span><span class="p">(</span><span class="n">hm_symbol</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of</span>
-<span class="sd">translation and rotation operators.  These operators are in the crystal basis.</span>
-<span class="sd">As of now, this is a rather unreliable function.  My brain hurts badly after attempting</span>
-<span class="sd">to make sense of the ways in which space groups are specified...</span>
+<span class="sd">    For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of</span>
+<span class="sd">    translation and rotation operators.  These operators are in the crystal basis.</span>
+<span class="sd">    As of now, this is a rather unreliable function.  My brain hurts badly after attempting</span>
+<span class="sd">    to make sense of the ways in which space groups are specified...</span>
 
-<span class="sd">Input: A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)</span>
+<span class="sd">    Input: A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)</span>
 
-<span class="sd">Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy</span>
-<span class="sd">        arrays) and translation vectors (1x3 numpy arrays)</span>
+<span class="sd">    Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy</span>
+<span class="sd">            arrays) and translation vectors (1x3 numpy arrays)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># First we try to find the &quot;Hall number&quot; corresponding to the Hermann-Mauguin symbol.</span>
@@ -364,29 +392,29 @@
     <span class="c1"># into the spgrp module included in bornagain.</span>
 
     <span class="c1"># Simply iterate through all HM symbols until we find one that matches:</span>
-    <span class="n">symbol_found</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">symbol_found</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hm_symbol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">hm_symbol</span> <span class="o">=</span> <span class="n">hm_symbol</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">530</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">hm_symbol</span> <span class="o">==</span> <span class="n">spgrp</span><span class="o">.</span><span class="n">_hmsym</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-                <span class="n">symbol_found</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">symbol_found</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">break</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">i</span> <span class="o">=</span> <span class="n">hm_symbol</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">530</span><span class="p">:</span>
-            <span class="n">symbol_found</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">symbol_found</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">symbol_found</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
     <span class="n">Rs</span> <span class="o">=</span> <span class="n">spgrp</span><span class="o">.</span><span class="n">_spgrp_ops</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;rotations&quot;</span><span class="p">]</span>
     <span class="n">Ts</span> <span class="o">=</span> <span class="p">[</span><span class="n">utils</span><span class="o">.</span><span class="n">vec_check</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">spgrp</span><span class="o">.</span><span class="n">_spgrp_ops</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;translations&#39;</span><span class="p">]]</span>
-
-    <span class="k">return</span> <span class="n">Rs</span><span class="p">,</span> <span class="n">Ts</span></div>
+</div>
+    <span class="k">return</span> <span class="n">Rs</span><span class="p">,</span> <span class="n">Ts</span>
 
 
 <div class="viewcode-block" id="Atoms"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Atoms">[docs]</a><span class="k">class</span> <span class="nc">Atoms</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">atomic_num</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">atomic_num</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
@@ -400,41 +428,41 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">coor</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">elem</span> <span class="o">=</span> <span class="n">elem</span>
-        <span class="k">if</span> <span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">xyz_format</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;S16&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">xyz_format</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elem</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">xyz_format</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
-    <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Atoms.aggregate"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Atoms.aggregate">[docs]</a>    <span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">atoms_list</span><span class="p">):</span>
+<div class="viewcode-block" id="Atoms.aggregate"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Atoms.aggregate">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">atoms_list</span><span class="p">):</span>
 
         <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">xyz</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">])</span>
 
-        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">]):</span>
             <span class="n">elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">elem</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">elem</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">Z</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">])</span>
-
-        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span></div>
+</div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Atoms.to_xyz"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Atoms.to_xyz">[docs]</a>    <span class="k">def</span> <span class="nf">to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz_format</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Cannot save to xyz because element strings were not provided...&quot;</span><span class="p">)</span></div>
+        <span class="k">else</span><span class="p">:</span></div>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cannot save to xyz because element strings were not provided...&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Atoms.set_elem"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Atoms.set_elem">[docs]</a>    <span class="k">def</span> <span class="nf">set_elem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;sets list of elements names for use in xyz format files&quot;&quot;&quot;</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;S16&#39;</span><span class="p">)</span>
-        <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elem</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">elem</span> <span class="o">=</span> <span class="n">elem</span></div></div>
+        <span class="k">assert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elem</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elem</span> <span class="o">=</span> <span class="n">elem</span>
 
 
 <div class="viewcode-block" id="Molecule"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Molecule">[docs]</a><span class="k">class</span> <span class="nc">Molecule</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">structure</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">structure</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">*</span> <span class="mf">1e10</span>  <span class="c1"># atom positions!</span>
 
@@ -448,16 +476,16 @@
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span>
 
 <div class="viewcode-block" id="Molecule.get_1d_coords"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Molecule.get_1d_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_1d_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seprate_xyz</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seprate_xyz</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
 
 <div class="viewcode-block" id="Molecule.get_1d_frac_coords"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Molecule.get_1d_frac_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_1d_frac_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_separate_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_fracs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_separate_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_fracs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
 
 <div class="viewcode-block" id="Molecule.mat_mult_many"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Molecule.mat_mult_many">[docs]</a>    <span class="k">def</span> <span class="nf">mat_mult_many</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">V</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; helper for applying matrix multiplications on many vectors&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij,kj-&gt;ki&#39;</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span></div>
+        <span class="sd">&quot;&quot;&quot; helper for applying matrix multiplications on many vectors&quot;&quot;&quot;</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;ij,kj-&gt;ki&#39;</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Molecule.shift"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Molecule.shift">[docs]</a>    <span class="k">def</span> <span class="nf">shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">monomer</span><span class="p">,</span> <span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">nc</span><span class="p">):</span>
         <span class="n">xyz_frac</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span><span class="o">*</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">monomer</span><span class="o">.</span><span class="n">xyz</span><span class="p">)</span>
@@ -471,8 +499,8 @@
         <span class="n">xyz_new</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
         <span class="n">xyz_new</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
         <span class="n">xyz_new</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
-        <span class="n">xyz_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span> <span class="n">xyz_new</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">xyz_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span></div>
+        <span class="n">xyz_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span> <span class="n">xyz_new</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">xyz_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Molecule.transform"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Molecule.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
@@ -481,16 +509,16 @@
         <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
         <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
         <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
-        <span class="n">xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span> <span class="n">xyz</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span></div>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span> <span class="n">xyz</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Molecule.get_monomers"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Molecule.get_monomers">[docs]</a>    <span class="k">def</span> <span class="nf">get_monomers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">monomers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">R</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symRs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">symTs</span><span class="p">):</span>
             <span class="n">transformed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_fracs</span><span class="p">)</span> <span class="o">+</span> <span class="n">T</span>
             <span class="n">transformed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mat_mult_many</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">,</span> <span class="n">transformed</span><span class="p">)</span>
-            <span class="n">monomers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Atoms</span><span class="p">(</span><span class="n">transformed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">monomers</span></div></div>
+            <span class="n">monomers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Atoms</span><span class="p">(</span><span class="n">transformed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">))</span></div></div>
+        <span class="k">return</span> <span class="n">monomers</span>
 
 
 <div class="viewcode-block" id="Lattice"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Lattice">[docs]</a><span class="k">class</span> <span class="nc">Lattice</span><span class="p">:</span>
@@ -519,19 +547,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">O</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">O</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Lattice.assemble"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Lattice.assemble">[docs]</a>    <span class="k">def</span> <span class="nf">assemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_unit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">spherical</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Lattice.assemble"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Lattice.assemble">[docs]</a>    <span class="k">def</span> <span class="nf">assemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_unit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">spherical</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="c1">#       lattice coordinates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">+</span> <span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">+</span> <span class="n">k</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span>
-                              <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)</span>
-                              <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)</span>
-                              <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)])</span>
+                              <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)])</span>
 
 <span class="c1">#       sphericalize the lattice..</span>
-        <span class="k">if</span> <span class="n">spherical</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">vecs</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sphericalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vecs</span><span class="p">)</span></div></div>
+        <span class="k">if</span> <span class="n">spherical</span><span class="p">:</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vecs</span> <span class="o">=</span> <span class="n">simutils</span><span class="o">.</span><span class="n">sphericalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vecs</span><span class="p">)</span>
 </pre></div>
 
+           </div>
+           <div class="articleComments">
+            
            </div>
           </div>
           <footer>
@@ -566,13 +597,14 @@
             VERSION:'0.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -9,7 +9,6 @@ Subpackages
     bornagain.external
     bornagain.simulate
     bornagain.target
-    bornagain.viewers
 
 Submodules
 ----------
