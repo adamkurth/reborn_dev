@@ -28,6 +28,8 @@ n_patterns = 100000
 add_noise = True
 photons_per_atom = 1
 
+
+
 # whether to use Henke or Cromer mann
 use_henke = True  # if False, then use Cromer-mann version
 
@@ -46,6 +48,8 @@ beam_vec = np.array([0, 0, 1.0]) # This shouldn't matter...
 # Single molecule atomic positions:
 r = np.array([[0, 0, 0],
               [5e-10, 0, 0]])
+
+
 r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
 
 # Settings for pixel-array detector
@@ -288,7 +292,6 @@ if qtview:
 
 # glw = pg.GraphicsLayoutWidget()
 # glw.addItem(vw)
-
 
 
 # if spherical_detector:

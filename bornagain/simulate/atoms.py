@@ -3,13 +3,25 @@ import pkg_resources
 import numpy as np
 from bornagain import units
 
-atomic_symbols_file = pkg_resources.resource_filename(
-    'bornagain.simulate', 'data/atomic_symbols.csv')
-atomic_symbols = np.loadtxt(
-    atomic_symbols_file, usecols=(1,), dtype=np.str_, delimiter=',')
-atomic_symbols = np.array([x.strip() for x in atomic_symbols])
+# atomic_symbols_file = pkg_resources.resource_filename(
+#     'bornagain.simulate', 'data/atomic_symbols.csv')
+# atomic_symbols = np.loadtxt(
+#     atomic_symbols_file, usecols=(1,), dtype=np.str_, delimiter=',')
+# atomic_symbols = np.array([x.strip() for x in atomic_symbols])
 henke_data_path = pkg_resources.resource_filename(
     'bornagain.simulate', 'data/henke')
+
+atomic_symbols = np.array(['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg',
+       'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
+       'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br',
+       'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd',
+       'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'La',
+       'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er',
+       'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au',
+       'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th',
+       'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 'Es', 'Fm', 'Md',
+       'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn',
+       'Uut', 'Uuq', 'Uup', 'Uuh', 'Uus', 'Uuo'])
 
 
 def memoize(function):

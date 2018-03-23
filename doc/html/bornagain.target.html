@@ -5,6 +5,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>bornagain.target package &mdash; bornagain 0.0.1 documentation</title>
@@ -14,7 +15,6 @@
   
 
   
-  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
   
   
@@ -36,7 +36,7 @@
         <link rel="prev" title="bornagain.simulate package" href="bornagain.simulate.html"/> 
 
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
@@ -46,11 +46,27 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-nav-search">
-        
-          <a href="index.html" class="fa fa-home"> bornagain</a>
-        
-        
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -58,29 +74,32 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-      </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-        
           
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#some-basics">Some basics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#x-ray-beams">X-ray beams</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#pixel-array-detectors">Pixel-Array Detectors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#simulation">Simulation</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#system-wide-installation">System-wide installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#pure-anaconda-python">Pure Anaconda Python</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#using-anaconda-and-pip">Using Anaconda and pip</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-on-scientific-linux-6">Installation on Scientific Linux 6</a></li>
-</ul>
-</li>
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">bornagain.target package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.crystal">bornagain.target.crystal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.map">bornagain.target.map module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.spgrp">bornagain.target.spgrp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.detector">bornagain.detector module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.scatter">bornagain.scatter module</a></li>
@@ -91,21 +110,32 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="">bornagain.target package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="coding.html#overview-of-bornagain">Overview of bornagain</a></li>
-<li class="toctree-l2"><a class="reference internal" href="coding.html#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="coding.html#generation-of-documentation">Generation of documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.detector">bornagain.detector module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.scatter">bornagain.scatter module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.source">bornagain.source module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.units">bornagain.units module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.utils">bornagain.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain">Module contents</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
 </ul>
 
+            
           
-        
+        </div>
       </div>
-      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -120,24 +150,31 @@
       
       <div class="wy-nav-content">
         <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
-      
-          <li><a href="modules.html">bornagain</a> &raquo;</li>
       
           <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
       
     <li>bornagain.target package</li>
       <li class="wy-breadcrumbs-aside">
         
-          <a href="_sources/bornagain.target.txt" rel="nofollow"> View page source</a>
+          
+            <a href="_sources/bornagain.target.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
   </ul>
   <hr/>
 </div>
-          <div role="main" class="document">
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="bornagain-target-package">
 <h1>bornagain.target package<a class="headerlink" href="#bornagain-target-package" title="Permalink to this headline">¶</a></h1>
@@ -151,31 +188,194 @@
 <dt id="bornagain.target.crystal.structure">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">structure</code><span class="sig-paren">(</span><em>pdbFilePath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Stuff needed to deal with an atomistic crystal structure.</p>
-<p>A note on coordinate transformations and the orthogonalization matrix
-O:
-Convert from fractional coordinates x to real-space coordinates r:
-r = cryst.O.dot(x)
-Convert from real-space coordinates r to fractional coordinates x:
-x = cryst.Oinv.dot(r)
-Convert from q-space to h-space:
-h = cryst.O.T.dot(q)</p>
+<p>A container class for stuff needed when dealing with crystal structures.</p>
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.r">
+<code class="descname">r</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Atomic coordinates (3xN array)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.O">
+<code class="descname">O</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.O" title="Permalink to this definition">¶</a></dt>
+<dd><p>Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.Oinv">
+<code class="descname">Oinv</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.Oinv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse orthogonalization matrix (3x3 array)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.A">
+<code class="descname">A</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.A" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is Oinv transpose (3x3 array).  Does the transform q = dot(A, h), with fractional Miller indices h.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.Ainv">
+<code class="descname">Ainv</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.Ainv" title="Permalink to this definition">¶</a></dt>
+<dd><p>A inverse</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.T">
+<code class="descname">T</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translation vector that goes with orthogonalization matrix (What is this used for???)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.elements">
+<code class="descname">elements</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Atomic element symbols</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.Z">
+<code class="descname">Z</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.Z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Atomic numbers</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.spaceGroupNumber">
+<code class="descname">spaceGroupNumber</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.spaceGroupNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Space group number in the Int. Tables</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.hermannMauguinSymbol">
+<code class="descname">hermannMauguinSymbol</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.hermannMauguinSymbol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.a">
+<code class="descname">a</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.a" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice constant</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.b">
+<code class="descname">b</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice constant</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.c">
+<code class="descname">c</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice constant</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.alpha">
+<code class="descname">alpha</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.alpha" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice angle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.beta">
+<code class="descname">beta</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.beta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice angle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.gamma">
+<code class="descname">gamma</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.gamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice angle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.V">
+<code class="descname">V</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.V" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unit cell volume</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.nAtoms">
+<code class="descname">nAtoms</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.nAtoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of atoms</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.nMolecules">
+<code class="descname">nMolecules</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.nMolecules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of molecules per unit cell</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.symOps">
+<code class="descname">symOps</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.symOps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Symmetry operations that are applied to fractional coordinates</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.symRs">
+<code class="descname">symRs</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.symRs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Symmetry 3x3 transformation matrices (in crystal basis)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.symTs">
+<code class="descname">symTs</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.structure.symTs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Symmetry translations (in crystal basis)</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="bornagain.target.crystal.structure.load_pdb">
 <code class="descname">load_pdb</code><span class="sig-paren">(</span><em>pdbFilePath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.load_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.load_pdb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Populate all the attributes from a PDB file.</p>
+<dd><p>Populate the class with all the info from a PDB file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pdbFilePath</strong> &#8211; Path to the PDB file</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="bornagain.target.crystal.structure.set_cell">
 <code class="descname">set_cell</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>alpha</em>, <em>beta</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.set_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.set_cell" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the unit cell and all quantities derived from the unit cell.</p>
+<dd><p>Set the unit cell lattice.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>a</strong> &#8211; Lattice constant</li>
+<li><strong>b</strong> &#8211; Lattice constant</li>
+<li><strong>c</strong> &#8211; Lattice constant</li>
+<li><strong>alpha</strong> &#8211; Lattice angle</li>
+<li><strong>beta</strong> &#8211; Lattice angle</li>
+<li><strong>gamma</strong> &#8211; Lattice angle</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.structure.set_spacegroup">
+<code class="descname">set_spacegroup</code><span class="sig-paren">(</span><em>hermann_mauguin_symbol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.set_spacegroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.set_spacegroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the spacegroup of the crystal.  This produces a cache of the symmetry transformation operations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>hermann_mauguin_symbol</strong> &#8211; This can be a string (like &#8216;P 63&#8217; or a number 1-530)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.target.crystal.structure.x">
 <code class="descname">x</code><a class="headerlink" href="#bornagain.target.crystal.structure.x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fractional coordinates of atoms.</p>
+<p>Returns: Nx3 numpy array</p>
 </dd></dl>
 
 </dd></dl>
@@ -183,7 +383,7 @@ h = cryst.O.T.dot(q)</p>
 <dl class="function">
 <dt id="bornagain.target.crystal.parse_pdb">
 <code class="descclassname">bornagain.target.crystal.</code><code class="descname">parse_pdb</code><span class="sig-paren">(</span><em>pdbFilePath</em>, <em>crystalStruct=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#parse_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.parse_pdb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a structure object with PDB information.</p>
+<dd><p>Return a <a class="reference internal" href="#bornagain.target.crystal.structure" title="bornagain.target.crystal.structure"><code class="xref py py-class docutils literal"><span class="pre">structure</span></code></a> object with PDB information.</p>
 </dd></dl>
 
 <dl class="function">
@@ -270,6 +470,237 @@ to make sense of the ways in which space groups are specified...</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-bornagain.target.map">
+<span id="bornagain-target-map-module"></span><h2>bornagain.target.map module<a class="headerlink" href="#module-bornagain.target.map" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="bornagain.target.map.CrystalMeshTool">
+<em class="property">class </em><code class="descclassname">bornagain.target.map.</code><code class="descname">CrystalMeshTool</code><span class="sig-paren">(</span><em>cryst</em>, <em>resolution</em>, <em>oversampling</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A helper class for working with 3D density maps.  Most importantly, it allows one to do spacegroup symmetry
+transformations.  Once provided information about a crystal (spacegroup, lattice), along with desired resolution and
+oversampling ratio, this tool intelligently chooses the shape of the map and creates lookup tables for the symmetry
+transformations.  It also produces the Fourier-space frequency samples that are helpful when connecting direct
+all-atom simulations with FFTs.  In general, the maps are cubic NxNxN array.  This class does not maintain the data
+array; it provides methods needed to work on the data arrays.</p>
+<p>Importantly, this class is focused on operations in the crystal basis, because the symmetry operations are most
+elegant in that basis.</p>
+<dl class="attribute">
+<dt id="bornagain.target.map.CrystalMeshTool.sym_luts">
+<code class="descname">sym_luts</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.sym_luts" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Cached lookup tables</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.map.CrystalMeshTool.cryst">
+<code class="descname">cryst</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.cryst" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>crystal.target class object used to initiate the map</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.map.CrystalMeshTool.s">
+<code class="descname">s</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.s" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Oversampling ratio</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.map.CrystalMeshTool.d">
+<code class="descname">d</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.d" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Length-3 array of &#8220;actual&#8221; resolutions (different from &#8220;requested&#8221; resolution)</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.map.CrystalMeshTool.dx">
+<code class="descname">dx</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.dx" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Crystal basis length increment</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.map.CrystalMeshTool.Nc">
+<code class="descname">Nc</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.Nc" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Number of samples along edge of unit cell</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.map.CrystalMeshTool.N">
+<code class="descname">N</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.N" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Number of samples along edge of whole map (includes oversampling)</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.map.CrystalMeshTool.P">
+<code class="descname">P</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.P" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Linear length fo map (=N^3)</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.map.CrystalMeshTool.w">
+<code class="descname">w</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.w" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>The stride vector (mostly for internal use)</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.get_n_vecs">
+<code class="descname">get_n_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.get_n_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.get_n_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:</p>
+<p>[[0,0,0],[0,0,1],[0,0,2], ... ,[N-1,N-1,N-1]]</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.get_x_vecs">
+<code class="descname">get_x_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.get_x_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.get_x_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an Nx3 array of vectors in the crystal basis.  If there were four samples per unit cell, the array looks a
+bit like this:</p>
+<p>[[0,0,0],[0,0,0.25],[0,0,0.5],[0,0,0.75],[0,0.25,0], ... ,[0.75,0.75,0.75]]</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.get_r_vecs">
+<code class="descname">get_r_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.get_r_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.get_r_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an Nx3 array of 3-vectors contain the Cartesian-basis vectors of each voxel in the map.  This is done
+by taking the crystal-basis position vectors x, and applying the orthogonalization matrix O to them.</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.get_h_vecs">
+<code class="descname">get_h_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.get_h_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.get_h_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This provides an Nx3 array of Fourier-space vectors &#8220;h&#8221;.  These coordinates can be understood as &#8220;fractional
+Miller indices&#8221; that coorespond to the density samples upon taking an FFT of the real-space map.  With atomic
+coordinates x (in the crystal basis) one can take the Fourier transform F(h) = sum_n f_n exp(i h*x)</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.get_sym_luts">
+<code class="descname">get_sym_luts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.get_sym_luts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.get_sym_luts" title="Permalink to this definition">¶</a></dt>
+<dd><p>This provides a list of &#8220;symmetry transform lookup tables&#8221;.  These are the linearized array indices. For a
+transformation that consists of an identity matrix along with zero translation, the lut is just an array
+p = [0,1,2,3,...,N^3-1].  Other transforms are like a &#8220;scrambling&#8221; of that ordering, such that a remapping of
+density samples is done with an operation like this: newmap.flat[p2] = oldmap.flat[p1].   Note that the luts are
+kept in memory for future use - beware of the memory requirement.</p>
+<p>Returns: list of numpy arrays</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.symmetry_transform">
+<code class="descname">symmetry_transform</code><span class="sig-paren">(</span><em>i</em>, <em>j</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.symmetry_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.symmetry_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>This applies symmetry transformations to a data array (i.e. density map).  The crystal spacegroup gives rise
+to Ns symmetry transformation operations (e.g. each operation consists of a rotation matrix paired with
+translation vector).  Of those Ns symmetry transformations, this function will take a map from the ith
+configuration to the jth configuration.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>i</strong> (<em>int</em>) &#8211; The &#8220;from&#8221; index; symmetry transforms are performed from this index to the j index</li>
+<li><strong>j</strong> (<em>int</em>) &#8211; The &#8220;to&#8221; index; symmetry transforms are performed from the i index to this index</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: A transformed data array (i.e. density map)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.shape">
+<code class="descname">shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>For convenience, return the map shape [N,N,N]</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.reshape">
+<code class="descname">reshape</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.reshape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.reshape" title="Permalink to this definition">¶</a></dt>
+<dd><p>For convenience, this will reshape a data array to the shape NxNxN.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; the data array</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: the same data array as the input, but with shape NxNxN</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.reshape3">
+<code class="descname">reshape3</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.reshape3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.reshape3" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; A data array of length 3*N^3 that consists of 3-vectors (one for each density voxel)</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: A re-shaped data array of shape NxNxNx3</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.zeros">
+<code class="descname">zeros</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.zeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>A convenience function: simply returns an array of zeros of shape NxNxN</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.place_atoms_in_map">
+<code class="descname">place_atoms_in_map</code><span class="sig-paren">(</span><em>x</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.place_atoms_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.place_atoms_in_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
+should be in the crystal basis, and the densities must be real (because the scipy function that we use does
+not allow for complex numbers...).  This is done in a lazy way - the density samples are placed in the nearest
+voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy...</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>numpy array</em>) &#8211; An Nx3 array of position vectors</li>
+<li><strong>f</strong> (<em>numpy array</em>) &#8211; An N-length array of densities (must be real)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: An NxNxN numpy array containing the sum of densities that were provided as input.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.map.CrystalMeshTool.place_intensities_in_map">
+<code class="descname">place_intensities_in_map</code><span class="sig-paren">(</span><em>h</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.place_intensities_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.place_intensities_in_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will take a list of Miller index vectors and intensities and place them in a 3D map.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>h</strong> (<em>numpy array</em>) &#8211; An Nx3 array of hkl vectors</li>
+<li><strong>f</strong> (<em>numpy array</em>) &#8211; An N-length array of intensities (must be real)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: An NxNxN numpy array containing the sum of densities that were provided as input.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-bornagain.target.spgrp">
 <span id="bornagain-target-spgrp-module"></span><h2>bornagain.target.spgrp module<a class="headerlink" href="#module-bornagain.target.spgrp" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -279,15 +710,16 @@ to make sense of the ways in which space groups are specified...</p>
 </div>
 
 
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.viewers.html" class="btn btn-neutral float-right" title="bornagain.viewers package">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.viewers.html" class="btn btn-neutral float-right" title="bornagain.viewers package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.simulate.html" class="btn btn-neutral" title="bornagain.simulate package"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.simulate.html" class="btn btn-neutral" title="bornagain.simulate package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -297,12 +729,13 @@ to make sense of the ways in which space groups are specified...</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2017, Richard A Kirian.
+
     </p>
   </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-  
 </footer>
+
         </div>
       </div>
 

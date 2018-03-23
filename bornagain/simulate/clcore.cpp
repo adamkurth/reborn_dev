@@ -14,8 +14,10 @@
         #define DOUBLE_SUPPORT_AVAILABLE
     #endif
 #endif
+
 // Note that dsfloat* (i.e. double/single) types will become either double or single as configured above
 // Please be mindful of this in the code below
+
 #if defined(DOUBLE_SUPPORT_AVAILABLE)
     typedef double dsfloat;
     typedef double2 dsfloat2;
@@ -86,10 +88,10 @@ static dsfloat2 phase_factor(
     const dsfloat4 q,         // Scattering vector
     global const dsfloat *r,  // Atomic coordinates
     global const dsfloat2 *f, // Atomic scattering factors
-    const int n_atoms,      // Number of atoms
+    const int n_atoms,        // Number of atoms
     local dsfloat4 *rg,       // Local storage for chunk of atom positions          (local dsfloat4 rg[GROUP_SIZE];)
     local dsfloat2 *fg,       // Local storage for chunk of atom scattering factors (local dsfloat2 fg[GROUP_SIZE];)
-    const int li            // Local index of this worker (i.e. group member ID)
+    const int li              // Local index of this worker (i.e. group member ID)
 )
 {
 
@@ -613,7 +615,6 @@ __kernel void qrf_kam(
 
     dsfloat ff[16];
     
-
     // multiply trans vector by inverse rotation matrix  
     dsfloat Tx = R[0]*T[0] + R[3]*T[1] + R[6]*T[2];
     dsfloat Ty = R[1]*T[0] + R[4]*T[1] + R[7]*T[2];

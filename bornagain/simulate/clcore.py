@@ -17,7 +17,8 @@ import pyopencl as cl
 import pyopencl.array
 
 import bornagain as ba
-import refdata
+from bornagain.simulate import refdata
+# import refdata
 
 # from __builtin__ import None    # this is causing problems for some reason...
 
@@ -150,8 +151,9 @@ class ClCore(object):
 
     def _load_phase_factor_qrf(self):
         self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
-        self.phase_factor_qrf_cl.set_scalar_arg_dtypes([None, None, None, None, None, self.int_t, self.int_t,
-                                                        self.int_t])
+        self.phase_factor_qrf_cl.set_scalar_arg_dtypes([None, 
+            None, None, None, None, 
+            self.int_t, self.int_t,self.int_t])
 
     def _load_phase_factor_pad(self):
         self.phase_factor_pad_cl = self.programs.phase_factor_pad
@@ -349,8 +351,12 @@ class ClCore(object):
                              * self.group_size)
 
         self.phase_factor_qrf_cl(self.queue, (global_size,),
-                                 (self.group_size,), q_dev.data, r_dev.data,
-                                 f_dev.data, R16_dev.data, self.a_dev.data, n_atoms,
+                                 (self.group_size,), q_dev.data, 
+                                 r_dev.data,
+                                 f_dev.data, 
+                                 R16_dev.data, 
+                                 self.a_dev.data, 
+                                 n_atoms,
                                  n_pixels)
 
     def next_multiple_groupsize(self, N):
@@ -408,6 +414,7 @@ class ClCore(object):
                                  (self.group_size,), q_dev.data, r_dev.data,
                                  f_dev.data, R, a_dev.data, n_atoms,
                                  n_pixels, add)
+        self.queue.finish()
 
         if a is None:
             return a_dev.get()
@@ -473,6 +480,7 @@ class ClCore(object):
                                  (self.group_size,), r_dev.data,
                                  f_dev.data, R, a_dev.data, n_pixels, n_atoms,
                                  nF, nS, w, T, F, S, B, add)
+        self.queue.finish()
 
         if a is None:
             return a_dev.get()
@@ -530,14 +538,14 @@ class ClCore(object):
                                   (self.group_size,), r_dev.data, f_dev.data,
                                   a_dev.data, n_pixels, n_atoms, N, deltaQ,
                                   q_min)
+        self.queue.finish()
 
         if a is None:
             return a_dev.get()
         else:
             return a_dev
 
-    def buffer_mesh_lookup(self, a_map, N, q_min, q_max, q, R=None,
-                           a_out=None):
+    def buffer_mesh_lookup(self, a_map, N, q_min, q_max, q, R=None, a=None):
         """
         This is supposed to lookup intensities from a 3d mesh of amplitudes.
 
@@ -550,7 +558,7 @@ class ClCore(object):
             q (Nx3 numpy array): q-space coordinates at which we want to interpolate
                the complex amplitudes in a_dev
             R (3x3 numpy array): Rotation matrix that will act on the q vectors
-            a_out: (clarray) The output array (optional)
+            a: (clarray) The output array (optional)
 
         Returns:
             numpy array of complex amplitudes
@@ -580,8 +588,7 @@ class ClCore(object):
         N = self.vec4(N, dtype=self.int_t)
         deltaQ = self.vec4(deltaQ, dtype=self.real_t)
         q_min = self.vec4(q_min, dtype=self.real_t)
-        a_out_dev = self.to_device(
-            a_out, dtype=self.complex_t, shape=(n_pixels))
+        a_out_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
                              * self.group_size)
@@ -589,8 +596,9 @@ class ClCore(object):
         self.buffer_mesh_lookup_cl(self.queue, (global_size,), (self.group_size,),
                                    a_map_dev.data, q_dev.data, a_out_dev.data,
                                    n_pixels, N, deltaQ, q_min, R)
+        self.queue.finish()
 
-        if a_out is None:
+        if a is None:
             return a_out_dev.get()
         else:
             return a_out_dev
@@ -646,6 +654,7 @@ class ClCore(object):
                                                   (self.group_size,), abc,
                                                   N, R, I_dev.data, n_pixels,
                                                   nF, nS, w, T, F, S, B, add)
+        self.queue.finish()
 
         if I is None:
             return I_dev.get()
@@ -703,6 +712,7 @@ class ClCore(object):
                                                   (self.group_size,), abc,
                                                   N, R, I_dev.data, n_pixels,
                                                   nF, nS, w, T, F, S, B, add)
+        self.queue.finish()
 
         if I is None:
             return I_dev.get()
@@ -840,22 +850,32 @@ class ClCore(object):
 
         self._A_buff_data = self.A_buff.data
 
-    def run_cromermann(self, q_buff_data, r_buff_data, rand_rot=False, force_rot_mat=None, com=None):
+    def run_cromermann(self, q_buff_data, r_buff_data, 
+        rand_rot=False, force_rot_mat=None, com=None):
         """
         Run the qrf kam simulator.
 
         Arguments
             q_buff_data (pyopenCL buffer data) :
-                should have shape NpixelsCLx16 where NpixelsCL is the first multiple of group_size greater than
-                Npixels. Use :func:`get_group_size` to check the currently set group_size. The data stored in
-                q[Npixels,:3] should be the q-vectors. The data stored in q[Npixels,3:Nspecies] should be the
-                q-dependent atomic form factors for up to Nspecies=13 atom species See :func:`prime_comermann_simulator`
-                for details regarding the form factor storage and atom species identifier
+                should have shape NpixelsCLx16 where 
+                NpixelsCL is the first multiple of group_size greater than
+                Npixels. 
+                Use :func:`get_group_size` to check the currently 
+                set group_size. The data stored in
+                q[Npixels,:3] should be the q-vectors. 
+                The data stored in q[Npixels,3:Nspecies] should be the
+                q-dependent atomic form factors for up to Nspecies=13 
+                atom species See :func:`prime_comermann_simulator`
+                for details regarding the form factor storage and atom 
+                species identifier
             
             r_buff_data (pyopenCL buffer data) :
-                Should have shape Natomsx4. The data stored in r_buff_data[:,:3] are the atomic positions in cartesian
-                (x,y,z).  The data stored in r_buff_data[:,3] are the atom species identifiers (0,1,..Nspecies-1)
-                mapping the atom species here to the form factor value in q_buff_data.
+                Should have shape Natomsx4. The data stored in 
+                r_buff_data[:,:3] are the atomic positions in cartesian
+                (x,y,z).  The data stored in r_buff_data[:,3] are 
+                the atom species identifiers (0,1,..Nspecies-1)
+                mapping the atom species here to the form factor value 
+                in q_buff_data.
             
             rand_rot (bool) :
                 Randomly rotate the molecule
@@ -867,15 +887,16 @@ class ClCore(object):
                 Offset the center of mass of the molecule
                 
         .. note::
-            For atom r_i the atom species identifier is sp_i = r_buff_data[r_i,3].
-            Then, for pixel q_i, the simulator can find the corresponding form factor in
-            q_buff_dat[q_i,3+sp_i]. I know it is confusing, but it's efficient.
-
+            For atom r_i the atom species identifier is sp_i = 
+            r_buff_data[r_i,3].
+            Then, for pixel q_i, the simulator can find the corresponding 
+            form factor in q_buff_dat[q_i,3+sp_i]. 
+            I know it is confusing, but it's efficient.
         """
 
         #       set the rotation
         if rand_rot:
-            self.rot_mat = ba.utils.random_rotation_matrix().ravel().astype(self.real_t)
+            self.rot_mat = ba.utils.random_rotation().ravel().astype(self.real_t)
         elif force_rot_mat is not None:
             self.rot_mat = force_rot_mat.astype(self.real_t)
         else:
@@ -891,9 +912,10 @@ class ClCore(object):
         self._set_com_vec()
 
         #       run the program
-        self.qrf_kam_cl(self.queue, (int(self.Npix + self.Nextra_pix),), (self.group_size,),
-                        q_buff_data, r_buff_data, self.rot_buff.data,
-                        self.com_buff.data, self._A_buff_data, self.Nato)
+        self.qrf_kam_cl(self.queue, (int(self.Npix + self.Nextra_pix),), 
+            (self.group_size,), q_buff_data, r_buff_data, 
+            self.rot_buff.data, self.com_buff.data, 
+            self._A_buff_data, self.Nato)
 
     def _set_rand_rot(self):
         self.rot_buff = self.to_device(self.rot_mat, dtype=self.real_t)
@@ -914,7 +936,6 @@ class ClCore(object):
         if reset:
             self._load_amp_buffer()
         return Amps
-
 
 def helpme():
     """

@@ -13,55 +13,64 @@ from bornagain.simulate import atoms
 
 class structure(object):
 
-    ''' 
-Stuff needed to deal with an atomistic crystal structure.
+    r"""
+    A container class for stuff needed when dealing with crystal structures.
+    """
 
-A note on coordinate transformations and the orthogonalization matrix
-O:
-Convert from fractional coordinates x to real-space coordinates r:
-r = cryst.O.dot(x)
-Convert from real-space coordinates r to fractional coordinates x:
-x = cryst.Oinv.dot(r)
-Convert from q-space to h-space:
-h = cryst.O.T.dot(q)
-    '''
+    r = None  #: Atomic coordinates (3xN array)
+    _x = None  #: Fractional coordinates (3xN array)
+    O = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
+    Oinv = None  #: Inverse orthogonalization matrix (3x3 array)
+    A = None  #: This is Oinv transpose (3x3 array).  Does the transform q = dot(A, h), with fractional Miller indices h.
+    Ainv = None  #: A inverse
+    T = None  #: Translation vector that goes with orthogonalization matrix (What is this used for???)
+    elements = None  #: Atomic element symbols
+    Z = None  #: Atomic numbers
+    spaceGroupNumber = None  #: Space group number in the Int. Tables
+    hermannMauguinSymbol = None  #: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)
+    a = None  #: Lattice constant
+    b = None  #: Lattice constant
+    c = None  #: Lattice constant
+    alpha = None  #: Lattice angle
+    beta = None  #: Lattice angle
+    gamma = None  #: Lattice angle
+    V = None  #: Unit cell volume
+    nAtoms = None  #: Number of atoms
+    nMolecules = None  #: Number of molecules per unit cell
+    symOps = None  #: Symmetry operations that are applied to fractional coordinates
+    symRs = None #: Symmetry 3x3 transformation matrices (in crystal basis)
+    symTs = None #: Symmetry translations (in crystal basis)
 
     def __init__(self, pdbFilePath=None):
-
-        self.r = None     # Atomic coordinates (3xN array)
-        self._x = None    # Fractional coordinates (3xN array)
-        self.O = None     # Orthogonalization matrix (3x3 array)
-        self.Oinv = None  # Inverse orthogonalization matrix (3x3 array)
-        self.A = None
-        self.Ainv = None
-        # Translation vector that goes with orthogonalization matrix (??)
-        self.T = None
-        self.elements = None  # Atomic element symbols
-        self.Z = None     # Atomic numbers
-        self.spaceGroupNumber = None  # Space group number in the Int. Tables
-        self.hermannMauguinSymbol = None  # Spacegroup Hermann Mauguin symbol 
-                                    #(as it appears in a PDB file for example)
-        self.a = None     # Lattice constant
-        self.b = None     # Lattice constant
-        self.c = None     # Lattice constant
-        self.alpha = None  # Lattice angle
-        self.beta = None  # Lattice angle
-        self.gamma = None  # Lattice angle
-        self.V = None     # Unit cell volume
-        self.nAtoms = None  # Number of atoms
-        self.nMolecules = None  # Number of molecules per unit cell
-        self.symOps = None  # Symmetry operations for fractional coords
 
         if pdbFilePath is not None:
             self.load_pdb(pdbFilePath)
 
     def load_pdb(self, pdbFilePath):
-        ''' Populate all the attributes from a PDB file. '''
+        r"""
+
+        Populate the class with all the info from a PDB file.
+
+        Args:
+            pdbFilePath: Path to the PDB file
+
+        """
         parse_pdb(pdbFilePath, self)
 
     def set_cell(self, a, b, c, alpha, beta, gamma):
-        ''' Set the unit cell and all quantities derived from the unit cell.
-        '''
+        r"""
+
+        Set the unit cell lattice.
+
+        Args:
+            a: Lattice constant
+            b: Lattice constant
+            c: Lattice constant
+            alpha: Lattice angle
+            beta:  Lattice angle
+            gamma: Lattice angle
+
+        """
 
         al = alpha
         be = beta
@@ -92,16 +101,42 @@ h = cryst.O.T.dot(q)
         self.Ainv = O.T.copy()
         self.V = V
 
+    def set_spacegroup(self, hermann_mauguin_symbol):
+
+        r"""
+
+        Set the spacegroup of the crystal.  This produces a cache of the symmetry transformation operations.
+
+        Args:
+            hermann_mauguin_symbol:  This can be a string (like 'P 63' or a number 1-530)
+
+        """
+
+        self.hermann_mauguin_symbol = hermann_mauguin_symbol
+        self.symRs, self.symTs = get_symmetry_operators_from_space_group(hermann_mauguin_symbol)
+        self.symRinvs = [np.linalg.inv(R) for R in self.symRs]
+        self.nMolecules = len(self.symTs)
+
+
     @property
     def x(self):
-        ''' Fractional coordinates of atoms. '''
+
+        r"""
+
+        Fractional coordinates of atoms.
+
+        Returns: Nx3 numpy array
+
+        """
+
         if self._x is None:
-            self._x = self.Oinv.dot(self.r)
+            self._x = np.dot(self.Oinv, self.r.T).T
         return self._x
 
 
 def parse_pdb(pdbFilePath, crystalStruct=None):
-    ''' Return a structure object with PDB information. '''
+
+    r"""Return a :class:`structure` object with PDB information. """
 
     maxAtoms = int(1e5)
     r = np.zeros([3, maxAtoms])
@@ -164,15 +199,14 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
 
     T = SCALE[:, 3]
 
-    cryst.hermann_mauguin_symbol = hermann_mauguin_symbol
+    cryst.cryst1 = cryst1
     cryst.r = utils.vec_check(r)
     cryst.T = utils.vec_check(T)
     cryst.elements = elements
     cryst.Z = atoms.atomic_symbols_to_numbers(elements)
     cryst.nAtoms = nAtoms
-    cryst.symRs, cryst.symTs = get_symmetry_operators_from_space_group(hermann_mauguin_symbol)
-    cryst.symRinvs = [np.linalg.inv(R) for R in cryst.symRs]
-    cryst.nMolecules = len(cryst.symTs)
+
+    cryst.set_spacegroup(hermann_mauguin_symbol)
     
     return cryst
 
@@ -197,14 +231,20 @@ Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3
     # into the spgrp module included in bornagain.
 
     # Simply iterate through all HM symbols until we find one that matches:
-    hm_symbol = hm_symbol.strip()
     symbol_found = False
-    for i in range(0,530):
-        if hm_symbol == spgrp._hmsym[i].strip():
+    if isinstance(hm_symbol, str):
+        hm_symbol = hm_symbol.strip()
+        for i in range(0, 530):
+            if hm_symbol == spgrp._hmsym[i].strip():
+                symbol_found = True
+                break
+    else:
+        i = hm_symbol
+        if i < 530:
             symbol_found = True
-            break
 
-    if not symbol_found: return None, None
+    if not symbol_found:
+        return None, None
 
     Rs = spgrp._spgrp_ops[i]["rotations"]
     Ts = [utils.vec_check(T) for T in spgrp._spgrp_ops[i]['translations']]
