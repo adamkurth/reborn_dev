@@ -47,7 +47,7 @@ r = cryst.r
 # Look up atomic scattering factors (they are complex numbers)
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 
-n_trials = 30
+n_trials = 3
 show_all = show
 # plt.ion()
 
