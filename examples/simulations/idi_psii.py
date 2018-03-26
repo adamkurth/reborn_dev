@@ -65,7 +65,7 @@ pixel_size = 0.0005
 detector_distance = .05
 
 # Settings for spherical detector
-spherical_detector = True
+spherical_detector = 1 #False# True
 n_subdivisions = 3
 radius = 1
 
@@ -172,6 +172,8 @@ class Place(cKDTree):
 r_size = distance.pdist(r).max()
 n_atoms = r.shape[0]
 
+
+
 if spherical_detector:
     print('Creating spherical detector...')
     ico = ba.detector.IcosphereGeometry(n_subdivisions=n_subdivisions, radius=radius)
@@ -211,7 +213,15 @@ for pattern_num in range(0, n_patterns):
 
     # Random positions for each molecule
     if do_translations:
-        Ts = np.random.random([n_molecules, 3])*box_size
+        #Ts = np.random.random([n_molecules, 3])*box_size
+        placer = Place( box_edge=box_size, min_dist=r_size)  # box_size and r_size need the same units... 
+#       insert all the molecules...
+        
+        for i_n in range( n_molecules):
+            if i_n %100 == 0:
+                print("placing %d / %d molecules in box" % ( i_n+1, n_molecules ) )
+            placer.insert()
+        Ts = placer.data # this is same units as r_size and box_size...
     else:
         Ts = np.zeros([n_molecules, 3])
 
@@ -248,9 +258,14 @@ print('Post-processing...')
 
 # I_sum /= n_patterns
 # II_sum /= n_patterns
-
 n_q = q.shape[0]
-qq = [np.subtract.outer(fcs[:, i], fcs[:, i]).ravel() for i in range(0, 3)]
+if spherical_detector:
+    print fcs.shape, n_q
+    qq = [np.subtract.outer(fcs[:, i], fcs[:, i]).ravel() for i in range(0, 3)]
+
+    #print qq
+    #print qq.shape
+exit()
 qq = 2*np.pi/wavelength*np.ravel(qq).reshape([3, n_q**2]).T.copy()
 q_mags = np.sqrt(np.sum(q**2, axis=1))
 max_q = 4*np.pi/wavelength
