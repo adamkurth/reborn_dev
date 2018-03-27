@@ -27,17 +27,17 @@ import pyqtgraph as pg
 qtview = True
 
 # How many diffraction patterns to simulate
-n_patterns = 2000
+n_patterns = 100
 
 # Intensity of the fluoress
 add_noise = True
-photons_per_atom = 10
+photons_per_atom = 1000
 
 # whether to use Henke or Cromer mann
 use_henke = True  # if False, then use Cromer-mann version
 
 # Information about the object
-n_molecules = 100
+n_molecules = 1
 box_size = 1000e-9
 do_rotations = True #False
 do_phases = True
@@ -45,13 +45,13 @@ do_translations = True
 
 
 # Settings for pixel-array detector
-n_pixels = 64
+n_pixels = 100
 pixel_size = 0.001 # meters, (small pixels that we will bin average later)
 detector_distance = .05 # meter
 #pix_size = 0.1 * sqrt( 2*rmax*rmax/(wavelength*wavelength) -1 ) / ( n_pixels/2.) # Im not sure if this works, but trying to guess the min pixel size needed for shannon sampling at the edge of the detector.. 
 
 # Settings for spherical detector
-spherical_detector = False
+spherical_detector = True
 n_subdivisions = 3
 radius = 1
 
@@ -71,6 +71,8 @@ is_manga = cryst.Z==25
 r = cryst.r[ is_manga]
 r = r[:4] # take the first monomer in assymetric unit, 
 r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
+# dimer test???
+#r = np.array([[0, 0, 0], [5e-10, 0, 0]])
 n_atoms = r.shape[0]
 
 # maximum distance spanned by the molecule:
@@ -175,8 +177,9 @@ for pattern_num in range(0, n_patterns):
         else:
             R = np.eye(3)
         T = Ts[n, :]
-        r = np.array([[0, 0, 0], [5e-10, 0, 0]])
+        
         rs.append(np.dot(R, r.T).T + T)
+    
     rs = np.array(rs).reshape([n_molecules*n_atoms, 3])  # miliseconds slow down
 
     # Compute intensities
@@ -197,7 +200,7 @@ for pattern_num in range(0, n_patterns):
     I_sum += I # summing the intensities
 
     #II_sum += np.multiply.outer(I, I).ravel() # here is summing the correlations of intensities.. 
-    print("computing correlation")
+    #print("computing correlation")
     II_sum += np.einsum( 'i,j->ij', I,I).ravel()
 #    or 
     #II_sum += (I[:,None]*I[None,:] ).ravel()
@@ -218,7 +221,7 @@ if spherical_detector:
     #qq = [np.subtract.outer(fcs[:, i], fcs[:, i]).ravel() for i in range(0, 3)]
     #qq = 2*np.pi/wavelength*np.ravel(qq).reshape([3, n_q**2]).T.copy()
     
-    qq = np.vstack( fcs[:,None] - fcs[None,:] ) * 2 * pi / wavelength
+    qq = np.vstack( fcs[:,None] - fcs[None,:] ) * 2 * np.pi / wavelength
     q_mags = np.sqrt(np.sum(q**2, axis=1))
     max_q = 4*np.pi/wavelength
 
