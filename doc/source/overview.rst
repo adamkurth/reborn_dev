@@ -7,12 +7,11 @@ Some basics
 -----------
 
 - You must first learn the basics of `Python <https://www.python.org/>`_, preferably including the basic principles of object-oriented programming.
-- It is assumed that you are using Python 2.7.  The bornagain package has not been tested with Python 3.X.
+- It is recommended that you use Python 3.6 or later.
 - The `tab-completion feature <https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion>`_ of `iPython <https://ipython.org/>`_ is one of the most efficient ways to explore the functionality of bornagain classes.
-- The `numpy <http://www.numpy.org/#>`_ package is central to bornagain.  Note that in bornagain all arrays are assumed to be `c-contiguous in memory <https://docs.scipy.org/doc/numpy-1.13.0/reference/internals.html>`_.  One consequence of this is that arrays of vectors are assumed to have a shape of (N,3) so that vector elements are neighbors in memory.  Similarly, we always assume that the right-most index of a 2D image is the one that specifies data that are closest in memory.
+- The `numpy <http://www.numpy.org/#>`_ package is central to bornagain.
 - All units in bornagain are SI.  Angles are radians.  There are no known exceptions so far.
-- Refrain from using the terms "rows" and "columns" when speaking of images.  Unless you are referring to a specific display, those terms are confusing.
-- Refrain from refering to "x", "y", or "z" coordinates.  There is no standard coordinate system in the diffraction world, and the bornagain makes no attempt to create one.
+- Everything is vectorized in bornagain.  Terms like "row", "column", "x", "y", or "z" have no official meaning.
 - If documentation is missing or confusing, please fix it or tell someone (e.g. rkirian at asu dot edu).
 
 X-ray beams

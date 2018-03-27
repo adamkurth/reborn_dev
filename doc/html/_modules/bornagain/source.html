@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
     <link rel="top" title="bornagain 0.0.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
@@ -40,6 +45,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -80,7 +86,10 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../bornagain.html">bornagain package</a></li>
@@ -98,8 +107,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">bornagain</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">bornagain</a>
+        
       </nav>
 
 
@@ -112,19 +123,36 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      
-    <li>bornagain.source</li>
+        
+      <li>bornagain.source</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -137,13 +165,13 @@
 
 
 <div class="viewcode-block" id="Beam"><a class="viewcode-back" href="../../bornagain.html#bornagain.source.Beam">[docs]</a><span class="k">class</span> <span class="nc">Beam</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A minimal containor to gather x-ray beam properties.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">wavelength</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Nominal photon wavelength</span>
-    <span class="n">beam_vec</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Nominal direction of incident beam</span>
-    <span class="n">polarization_vec</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1">#: Direction of the first polarization vector</span>
+    <span class="n">wavelength</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Nominal photon wavelength</span>
+    <span class="n">beam_vec</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Nominal direction of incident beam</span>
+    <span class="n">polarization_vec</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Direction of the first polarization vector</span>
     <span class="n">polarization_weight</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1">#: Weight of the first polarization vector</span>
     <span class="n">photon_energy</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># This should be a function</span>
     <span class="n">spectral_width_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
@@ -154,10 +182,13 @@
     <span class="n">fluence</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">fluence_jitter_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="p">):</span>
-        <span class="k">pass</span></div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="p">):</span></div>
+        <span class="k">pass</span>
 </pre></div>
 
+           </div>
+           <div class="articleComments">
+            
            </div>
           </div>
           <footer>
@@ -192,13 +223,14 @@
             VERSION:'0.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

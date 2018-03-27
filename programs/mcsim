@@ -41,7 +41,7 @@ a('--write_geom', action='store_true', default=False,
   help='Write a crystfel geometry file.')
 
 a('--write_hdf5', action='store_true', default=False,
-  help='Write data to hdf5 file(s).')
+  help='Write data to hdf5 files.')
 
 a('--mplview', action='store_true', default=False,
   help='View the pattern with matplotlib.')
@@ -92,7 +92,7 @@ a('--photon_energy', type=float, nargs=1, default=12.0,
   help='Photon energy in keV')
 
 a('--wavelength_fwhm', type=float, nargs=1, default=0.02,
-  help='Spectral dispersion full-width, half-max value (%)')
+  help='Spectral dispersion full-width, half-max value (%%)')
 
 a('--n_pixels', type=float, nargs=1, default=1000, 
   help='Number of pixels')

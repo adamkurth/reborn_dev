@@ -28,6 +28,14 @@ bornagain.simulate.refdata module
     :undoc-members:
     :show-inheritance:
 
+bornagain.simulate.simutils module
+----------------------------------
+
+.. automodule:: bornagain.simulate.simutils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 bornagain.simulate.thorn module
 -------------------------------
 
