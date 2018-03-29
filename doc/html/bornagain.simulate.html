@@ -103,6 +103,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.clcore">bornagain.simulate.clcore module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.refdata">bornagain.simulate.refdata module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.simutils">bornagain.simulate.simutils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.solutions">bornagain.simulate.solutions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.thorn">bornagain.simulate.thorn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate">Module contents</a></li>
 </ul>
@@ -211,14 +212,6 @@
 </div>
 <div class="section" id="module-bornagain.simulate.atoms">
 <span id="bornagain-simulate-atoms-module"></span><h2>bornagain.simulate.atoms module<a class="headerlink" href="#module-bornagain.simulate.atoms" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="bornagain.simulate.atoms.memoize">
-<code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">memoize</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#memoize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.memoize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is a function decorator for caching results from a function, to avoid
-excessive computation or reading from disk.  Search the web for more
-details of how this works.</p>
-</dd></dl>
-
 <dl class="function">
 <dt id="bornagain.simulate.atoms.atomic_symbols_to_numbers">
 <code class="descclassname">bornagain.simulate.atoms.</code><code class="descname">atomic_symbols_to_numbers</code><span class="sig-paren">(</span><em>symbols</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/atoms.html#atomic_symbols_to_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.atoms.atomic_symbols_to_numbers" title="Permalink to this definition">¶</a></dt>
@@ -912,6 +905,35 @@ the <cite>cromermann</cite> array.</p>
 <dt id="bornagain.simulate.simutils.sphericalize">
 <code class="descclassname">bornagain.simulate.simutils.</code><code class="descname">sphericalize</code><span class="sig-paren">(</span><em>lattice</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/simutils.html#sphericalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.simutils.sphericalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>attempt to sphericalize a 2D lattice point array</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bornagain.simulate.solutions">
+<span id="bornagain-simulate-solutions-module"></span><h2>bornagain.simulate.solutions module<a class="headerlink" href="#module-bornagain.simulate.solutions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="bornagain.simulate.solutions.load_data">
+<code class="descclassname">bornagain.simulate.solutions.</code><code class="descname">load_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/solutions.html#load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.solutions.load_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.solutions.get_water_profile">
+<code class="descclassname">bornagain.simulate.solutions.</code><code class="descname">get_water_profile</code><span class="sig-paren">(</span><em>q</em>, <em>temperature=30</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/solutions.html#get_water_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.solutions.get_water_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get water scattering profile from Greg Hura’s PhD thesis data.  Interpolates the data for given
+q-vector magnitudes and temperature.  Temperatures range from 1, 11, 25, 44, 55, 66, 77 degrees
+Celcius.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q</strong> – The momentum transfer vectors</li>
+<li><strong>temperature</strong> – Desired water temperature</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
 </dd></dl>
 
 </div>

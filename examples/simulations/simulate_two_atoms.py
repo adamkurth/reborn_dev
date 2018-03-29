@@ -8,33 +8,36 @@ sys.path.append("../..")
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
 
+sim = clcore.ClCore(group_size=32, double_precision=False)
+
 # Create a detector
-pl = ba.detector.PanelList()
-pl.simple_setup(1000,1000,100e-6,0.1,1.5e-10)
+pad = ba.detector.PADGeometry()
+pad.simple_setup(n_pixels=1000, pixel_size=100e-6, distance=0.05)
+
+beam_vec = [0, 0, 1]
 
 # Scattering vectors
-q = pl.Q
+q = pad.q_vecs(beam_vec=beam_vec, wavelength=1e-10)
 
 # Atomic coordinates
-N = 2
-r = np.zeros([N,3])
-r[1,0] = 20e-10
+r = np.zeros([2, 3])
+r[1, 0] = 20e-10
 
 # Scattering factors
-f = np.ones([N])
+f = np.ones([2])
 
 # Compute diffraction amplitudes
 t = time.time()
-A = clcore.phase_factor_qrf(q,r,f)
+A = sim.phase_factor_qrf(q, r, f)
 print(time.time() - t)
 
 # Display diffraction intensities
 I = np.abs(A)**2
 # Multiply by polarization factor
-I *= pl.polarization_factor
+I *= pad.polarization_factors(beam_vec=beam_vec, polarization_vec=[1, 0, 0])
 
-I = np.reshape(I,[1000,1000])
+I = np.reshape(I, pad.shape())
 
-plt.imshow(I,interpolation='nearest',cmap='gray',origin='lower')
+plt.imshow(I, interpolation='nearest', cmap='gray', origin='lower')
 plt.title('y: up, x: right, z: beam (towards you)')
 plt.show()

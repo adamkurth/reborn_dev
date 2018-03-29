@@ -20,6 +20,14 @@ bornagain.target.map module
     :undoc-members:
     :show-inheritance:
 
+bornagain.target.placer module
+------------------------------
+
+.. automodule:: bornagain.target.placer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 bornagain.target.spgrp module
 -----------------------------
 
