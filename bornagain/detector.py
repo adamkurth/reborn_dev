@@ -217,6 +217,10 @@ class PADGeometry(object):
 
         return np.arccos(vec_check(beam_vec), v.T)
 
+    def reshape(self, dat):
+
+        return dat.reshape(self.shape())
+
 
 class PADAssembler(object):
     r"""
