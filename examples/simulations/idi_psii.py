@@ -19,6 +19,7 @@ sys.path.append("../..")
 import bornagain as ba
 from bornagain.target import crystal, Place
 from bornagain.units import hc, keV
+from bornagain.utils import vec_norm
 from bornagain.simulate.clcore import ClCore
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
@@ -30,7 +31,7 @@ qtview = True
 n_patterns = 100
 
 # Intensity of the fluoress
-add_noise = True
+add_noise = False #True
 photons_per_atom = 1000
 
 # whether to use Henke or Cromer mann
@@ -51,7 +52,7 @@ detector_distance = .05 # meter
 #pix_size = 0.1 * sqrt( 2*rmax*rmax/(wavelength*wavelength) -1 ) / ( n_pixels/2.) # Im not sure if this works, but trying to guess the min pixel size needed for shannon sampling at the edge of the detector.. 
 
 # Settings for spherical detector
-spherical_detector = True
+spherical_detector = False #True
 n_subdivisions = 3
 radius = 1
 
@@ -60,7 +61,7 @@ radius = 1
 
 
 # Information about the emission
-photon_energy = 16.5 / keV
+photon_energy = 10.5 / keV
 wavelength = hc / photon_energy # in meters
 beam_vec = np.array([0, 0, 1.0]) # This shouldn't matter...
 
@@ -127,7 +128,7 @@ else:
     #   combine the qs into a single vector...
     q = np.vstack( ( q1,q2,q3) )
     k_vecs =np.vstack( (pad1.position_vecs(), pad2.position_vecs(), pad3.position_vecs()) )
-    k_vecs *= 2 * np.pi / wavelength
+    k_vecs = vec_norm( k_vecs) * 2 * np.pi / wavelength
     q12 = distance.cdist( k_vecs, k_vecs).ravel() # pair q distances
     nbins=512 # number of q bins
     qbins = np.linspace( q12.min(), q12.max(), nbins+1) # these are the histogram bins.. 
@@ -215,6 +216,8 @@ if not spherical_detector:
     qbin_sums = np.histogram( q12, bins=qbins , weights=II_sum)[0]
     plt.plot( 1e-10* ( qbins[:-1]*.5 + qbins[1:]*.5 ), qbin_sums / qbin_count) 
     plt.show()
+
+    np.save( 'idi', [ 1e-10* ( qbins[:-1]*.5 + qbins[1:]*.5 ), qbin_sums / qbin_count ]) 
 
 if spherical_detector:
 #   can use braodcasting here:

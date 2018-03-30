@@ -7,6 +7,8 @@ import sys
 import numpy as np
 from numpy import sin, cos
 
+# not sure where to seed
+np.random.seed()
 
 def vec_check(vec, hardcheck=False, dimension=3):
     """
@@ -195,7 +197,6 @@ def random_rotation(deflection=1.0, randnums=None):
     """
     # from
     # http://www.realtimerendering.com/resources/GraphicsGems/gemsiii/rand_rotation.c
-
     if randnums is None:
         randnums = np.random.uniform(size=(3,))
 
