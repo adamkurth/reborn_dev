@@ -36,6 +36,14 @@ bornagain.simulate.simutils module
     :undoc-members:
     :show-inheritance:
 
+bornagain.simulate.solutions module
+-----------------------------------
+
+.. automodule:: bornagain.simulate.solutions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 bornagain.simulate.thorn module
 -------------------------------
 

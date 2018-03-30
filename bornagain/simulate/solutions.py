@@ -12,26 +12,28 @@ def load_data():
     with open(file_name, 'r') as f:
         h = f.readline()
     h = h.split()[1:-1]
-    temperatures = np.array([float(v) for v in h])
+    temperatures = np.array([float(v) for v in h]) + 273.16
 
     d = np.loadtxt(file_name, skiprows=1)
     Q = d[:, 0]
     errors = d[:, -1]
     intensities = d[:, 1:-1]
 
-    return 1e10*Q/np.pi/2.0, intensities, temperatures
+    return 1e10*Q, intensities, temperatures
 
 
-def get_water_profile(q, temperature=30):
+def get_water_profile(q, temperature=298):
 
     """
     Get water scattering profile from Greg Hura's PhD thesis data.  Interpolates the data for given
     q-vector magnitudes and temperature.  Temperatures range from 1, 11, 25, 44, 55, 66, 77 degrees
-    Celcius.
+    Celcius.  Bornagain, of course, uses SI units, including for temperature.  To go from Celcius to Kelvin, add 273.16.
+    Note that this is the scattering factor F for a single water molecule.  The number density of water is approximately
+    n = 33.3679e27 / m^3 .
 
     Args:
-        q: The momentum transfer vectors
-        temperature: Desired water temperature
+        q: The momentum transfer vector magnitudes (i.e. 2 pi sin(theta/lambda)/wavelength )
+        temperature: Desired water temperature in Kelvin
 
     Returns:
 
@@ -58,25 +60,6 @@ def get_water_profile(q, temperature=30):
         dl = (temperature - Tl)/DT
         dr = (Tr - temperature)/DT
         Iavg = dr*I[:, i-1] + dl*I[:, i]
-        # print(Tl, Tr, dl, dr)
 
     II = np.interp(q, Q, Iavg)
     return II
-
-
-
-
-
-
-
-
-
-# for i in range(1,len(temperatures)):
-#     plt.plot(Q,np.log10(intensities[:,i]), label=('%2g $^\circ$C' % temperatures[i-1]))
-#
-# plt.legend()
-# plt.xlabel('Q')
-# plt.ylabel('Intensity')
-# plt.show()
-# print(temperatures)
-# print(Q)

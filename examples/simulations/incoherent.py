@@ -22,10 +22,10 @@ import pyqtgraph as pg
 qtview = True
 
 # How many diffraction patterns to simulate
-n_patterns = 100000
+n_patterns = 100
 
 # Intensity of the fluoress
-add_noise = True
+add_noise = False
 photons_per_atom = 1
 
 
@@ -34,7 +34,7 @@ photons_per_atom = 1
 use_henke = True  # if False, then use Cromer-mann version
 
 # Information about the object
-n_molecules = 10
+n_molecules = 1
 box_size = 10e-9
 do_rotations = False
 do_phases = True
@@ -269,7 +269,7 @@ III, _, _ = binned_statistic_dd(sample=qq, values=II_sum, bins=(n_bins_3d,)*3, r
 IIIc, _, _ = binned_statistic_dd(sample=qq, values=np.ones(II_sum.shape), bins=(n_bins_3d,)*3, range=[(-max_q, max_q)]*3, statistic='sum')
 mean_ = np.mean(I_sum/n_patterns)
 III = (III/IIIc - (mean_)**2)/mean_**2
-c = np.floor(n_bins_3d/2)
+c = np.floor(n_bins_3d/2).astype(np.int)
 min_ = np.min(III[np.isfinite(III)])
 III[~np.isfinite(III)] = min_
 III[c,c,c] = min_
@@ -278,13 +278,16 @@ if qtview:
     print('Displaying results...')
 
     im = pg.image(np.transpose(III, axes=(1, 0, 2)))
-    im.setCurrentIndex(np.floor(n_bins_3d/2))
+    im.setCurrentIndex(np.floor(n_bins_3d/2).astype(np.int))
 
     qa = pg.mkQApp()
     face_colors = np.ones([n_faces, 4])
     for i in range(0,3): face_colors[:, i] = (I / np.max(I))*0.95 + 0.05
     vw = gl.GLViewWidget()
     vw.show()
+    print(verts.shape)
+    print(faces.shape)
+    print(face_colors.shape)
     md = gl.MeshData(vertexes=verts, faces=faces, faceColors=face_colors)
     mi = gl.GLMeshItem(meshdata=md, smooth=False) #, edgeColor=np.array([0.1, 0.1, 0.1])*255, drawEdges=True)
     vw.addItem(mi)

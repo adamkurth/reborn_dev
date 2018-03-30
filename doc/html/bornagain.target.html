@@ -102,6 +102,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.crystal">bornagain.target.crystal module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.map">bornagain.target.map module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.placer">bornagain.target.placer module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.spgrp">bornagain.target.spgrp module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target">Module contents</a></li>
 </ul>
@@ -720,8 +721,37 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
 </dd></dl>
 
 </div>
+<div class="section" id="module-bornagain.target.placer">
+<span id="bornagain-target-placer-module"></span><h2>bornagain.target.placer module<a class="headerlink" href="#module-bornagain.target.placer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="bornagain.target.placer.Place">
+<em class="property">class </em><code class="descclassname">bornagain.target.placer.</code><code class="descname">Place</code><span class="sig-paren">(</span><em>box_edge</em>, <em>min_dist</em>, <em>max_try=10000</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/placer.html#Place"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.placer.Place" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.spatial.ckdtree.cKDTree</span></code></p>
+<dl class="method">
+<dt id="bornagain.target.placer.Place.insert">
+<code class="descname">insert</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/placer.html#Place.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.placer.Place.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds a new point to the box</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.placer.place_spheres">
+<code class="descclassname">bornagain.target.placer.</code><code class="descname">place_spheres</code><span class="sig-paren">(</span><em>Vf</em>, <em>sph_rad=1.0</em>, <em>box_edge=None</em>, <em>Nspheres=1000</em>, <em>tol=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/placer.html#place_spheres"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.placer.place_spheres" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Vf, float</dt>
+<dd>Fraction of sample volume occupied by spheres</dd>
+<dt>Nspheres, int</dt>
+<dd>how many spheres in the sample volume</dd>
+<dt>tol, float</dt>
+<dd>minimum distance the unit spheres can be to one another</dd>
+</dl>
+</dd></dl>
+
+</div>
 <div class="section" id="module-bornagain.target.spgrp">
 <span id="bornagain-target-spgrp-module"></span><h2>bornagain.target.spgrp module<a class="headerlink" href="#module-bornagain.target.spgrp" title="Permalink to this headline">¶</a></h2>
+<p>This module is a data container and should not be used externally.</p>
 </div>
 <div class="section" id="module-bornagain.target">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bornagain.target" title="Permalink to this headline">¶</a></h2>

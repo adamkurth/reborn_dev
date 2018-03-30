@@ -69,8 +69,12 @@ class PADGeometry(object):
     def t_vec(self, t_vec):
         self._t_vec = vec_check(t_vec)
 
-    def simple_setup(self, n_pixels=1000, pixel_size=100e-6, distance=0.1):
-        r""" Make this a square PAD with beam at center. """
+    def simple_setup(self, n_pixels = 1000, pixel_size = 100e-6, distance = 0.1):
+        r""" Make this a square PAD with beam at center.
+
+        Returns:
+            object:
+        """
 
         self.n_fs = n_pixels
         self.n_ss = n_pixels
@@ -212,6 +216,10 @@ class PADGeometry(object):
         v = self.position_vecs()
 
         return np.arccos(vec_check(beam_vec), v.T)
+
+    def reshape(self, dat):
+
+        return dat.reshape(self.shape())
 
 
 class PADAssembler(object):
