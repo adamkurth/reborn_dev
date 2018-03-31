@@ -150,6 +150,49 @@ class PADGeometry(object):
 
         return (2 * np.pi / wavelength) * self.ds_vecs(beam_vec=beam_vec)
 
+
+    def solid_angles2(self):
+        """
+        this should be sped up by vectorizing, but its more readable for now
+        and only has to be done once per PAD geometry... 
+        
+        Divide each pixel up into two triangles with vertices R1,R2,R3
+        and R2,R3,R4. Then use analytical form to find the solid angle of
+        each triangle. Sum them to get the solid angle of pixel.
+        """
+        k = self.position_vecs()
+        R1 = k-self.fs_vec*.5 - self.ss_vec*.5
+        R2 = k+self.fs_vec*.5 - self.ss_vec*.5
+        R3 = k-self.fs_vec*.5 + self.ss_vec*.5
+        R4 = k+self.fs_vec*.5 + self.ss_vec*.5
+        sa_1 = np.array( [self._comp_solid_ang(r1,r2,r3) 
+            for r1,r2,r3 in zip( R1,R2,R3) ])
+        sa_2 = np.array( [self._comp_solid_ang(r4,r2,r3) 
+            for r4,r2,r3 in zip( R4,R2,R3) ])
+        return sa_1 + sa_2
+
+    def _comp_solid_ang(self, r1,r2,r3):
+        """ 
+        compute solid angle of a triangle whose vertices are r1,r2,r3
+        Ref:thanks Jonas ...  
+        Van Oosterom, A. & Strackee, J. 
+        The Solid Angle of a Plane Triangle. Biomedical Engineering, 
+        IEEE Transactions on BME-30, 125-126 (1983).
+        """
+        numer = np.abs( np.dot( r1, np.cross(r2,r3) ) )
+        
+        r1_n = np.linalg.norm( r1)
+        r2_n = np.linalg.norm( r2)
+        r3_n = np.linalg.norm( r3)
+        denom =r1_n*r2_n*r2_n
+        denom += np.dot( r1,r2) * r3_n
+        denom += np.dot( r2,r3) * r1_n
+        denom += np.dot( r3,r1) * r2_n
+        s_ang = np.arctan2( numer, denom) * 2
+
+        return s_ang
+
+
     def solid_angles(self):
         r"""
         Calculate solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:
