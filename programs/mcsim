@@ -115,6 +115,9 @@ a('--results_dir', type=str, nargs=1, default='/data/temp/cxls-lysozyme-02/',
 a('--num_patterns', type=int, nargs=1, default=1,
   help='Number of patterns to simulate')
 
+a('--crystal_size', type=float, nargs=1, default=0.0,
+  help='Size of crystal in meters (default is beam diameter)')
+
 #a('--parameters', type=str, nargs=1, default='parameters.txt',
 #  help = 'Allows for the extraction of parameters from a .txt file provided its location')
 
@@ -167,7 +170,9 @@ num_patterns                    = get_arg(a.num_patterns)
 wavelength                      = hc / photon_energy # pulse_energy = 0.0024
 wavelength_fwhm                 = wavelength * get_arg(a.wavelength_fwhm)
 I0                              = transmission * n_photons / (np.pi * (beam_diameter / 2.0) ** 2)
-crystal_size                    = beam_diameter
+crystal_size                    = get_arg(a.crystal_size)
+if crystal_size == 0:
+    crystal_size = beam_diameter
 rotation_axis                   = [1, 0, 0]
 rotation_angle                  = 0.1
 #parameters                      = get_arg(a.parameters)
