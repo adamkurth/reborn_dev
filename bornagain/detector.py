@@ -37,6 +37,11 @@ class PADGeometry(object):
     _t_vec = None  #: The overall translation vector.
 
     @property
+    def n_pixels(self):
+
+        return self.n_fs*self.n_ss
+
+    @property
     def fs_vec(self):
         r""" Fast-scan basis vector. """
 
@@ -263,6 +268,32 @@ class PADGeometry(object):
     def reshape(self, dat):
 
         return dat.reshape(self.shape())
+
+
+def split_pad_data(pad_list=[], data=None):
+
+    r"""
+
+    Given a contiguous block of data, split it up into individual PAD panels
+
+    Args:
+        pad_list: A list of PADGeometry instances
+        data: A contiguous array with data values (total pixels to add up to sum of pixels in all PADs)
+
+    Returns:
+        A list of 2D PAD data arrays
+
+    """
+
+    data_list = []
+
+    offset = 0
+    for pad in pad_list:
+
+        data_list.append(pad.reshape(data[offset:(offset+pad.n_pixels)]))
+        offset += pad.n_pixels
+
+    return data_list
 
 
 class PADAssembler(object):
