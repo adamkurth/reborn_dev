@@ -345,7 +345,7 @@ class PADAssembler(object):
             assembled_data (numpy array):
                 Assembled PAD image
         """
-        self.assemble_data(np.ravel(data_list))
+        return self.assemble_data(np.ravel(data_list))
 
 
 class Panel(object):
