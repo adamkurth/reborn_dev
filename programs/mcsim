@@ -115,6 +115,13 @@ a('--results_dir', type=str, nargs=1, default='/data/temp/cxls-lysozyme-02/',
 a('--num_patterns', type=int, nargs=1, default=1,
   help='Number of patterns to simulate')
 
+a('--compression', type=str, nargs=1, default=None,
+  help='h5py compression, default None, can be lzf or gzip')
+a('--ideal_only', action='store_true', default=False,
+  help='only store the ideal scattering in output (not the noisy scattering)')
+a('--expand_symmetry', action='store_true', default=False,
+  help='expand the PDB coordinates according to crystal symmetry operators')
+
 #a('--parameters', type=str, nargs=1, default='parameters.txt',
 #  help = 'Allows for the extraction of parameters from a .txt file provided its location')
 
@@ -170,9 +177,14 @@ I0                              = transmission * n_photons / (np.pi * (beam_diam
 crystal_size                    = beam_diameter
 rotation_axis                   = [1, 0, 0]
 rotation_angle                  = 0.1
+compression =get_arg(a.compression)
+write_ideal_only = get_arg(a.ideal_only)
+expand_symm = get_arg( a.expand_symmetry)
 #parameters                      = get_arg(a.parameters)
 #no_params                       = get_arg(a.no_params)
 
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
 
 # Doesn't make sense if mosaic domain size is larger than the whole crystal...
 if mosaic_domain_size > crystal_size: mosaic_domain_size = crystal_size
@@ -249,14 +261,23 @@ write('done\n')
 
 # Get atomic coordinates and scattering factors from pdb file
 write('Getting atomic coordinates and scattering factors... ')
-cryst = ba.target.crystal.structure(pdb_file)
-r = cryst.r
-f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
+if expand_symm: 
+    cryst = ba.target.crystal.Molecule(pdb_file)
+    monomers = cryst.get_monomers()
+    all_atoms = ba.target.crystal.Atoms.aggregate(monomers)
+    r = all_atoms.xyz*1e-10
+    Z = all_atoms.Z
+else:
+    cryst = ba.target.crystal.structure(pdb_file)
+    r = cryst.r
+    Z = cryst.Z
+
+f = ba.simulate.atoms.get_scattering_factors(Z, ba.units.hc / wavelength)
 write('done\n')
 write('%d atoms per unit cell\n' % (len(f)))
 
 # Make a mask for the direct beam
-direct_beam_mask = np.ones((pad.n_ss * pad.n_fs))
+direct_beam_mask = np.ones((int(pad.n_ss * pad.n_fs)))
 direct_beam_mask[qmag < (2 * np.pi / np.max(np.array([cryst.a, cryst.b, cryst.c])))] = 0
 
 # Determine number of unit cells in whole crystal and mosaic domains
@@ -294,8 +315,8 @@ if write_geom:
 write('Allocating GPU device memory... ')
 r_dev = clcore.to_device(r, dtype=clcore.real_t)
 f_dev = clcore.to_device(f, dtype=clcore.complex_t)
-F_dev = clcore.to_device(np.zeros([pad.n_ss * pad.n_fs], dtype=clcore.complex_t))
-S2_dev = clcore.to_device(shape=(pad.n_fs, pad.n_ss), dtype=clcore.real_t)
+F_dev = clcore.to_device(np.zeros([int(pad.n_ss * pad.n_fs)], dtype=clcore.complex_t))
+S2_dev = clcore.to_device(shape=(int(pad.n_fs), int(pad.n_ss)), dtype=clcore.real_t)
 write('done\n')
 
 for i in np.arange(1, (num_patterns + 1)):
@@ -312,7 +333,8 @@ for i in np.arange(1, (num_patterns + 1)):
     else:
         write('Simulating molecular transform with cromer mann... ')
         t = time.time()
-        clcore.prime_cromermann_simulator(q.copy(), cryst.Z.copy())
+        clcore.prime_cromermann_simulator(q.copy(), Z.copy())
+        #clcore.prime_cromermann_simulator(q.copy(), cryst.Z.copy())
         q_cm = clcore.get_q_cromermann()
         r_cm = clcore.get_r_cromermann(r.copy(), sub_com=False)
         clcore.run_cromermann(q_cm, r_cm, rand_rot=False, force_rot_mat=R)
@@ -335,8 +357,10 @@ for i in np.arange(1, (num_patterns + 1)):
             B = ba.utils.random_beam_vector(beam_divergence_fwhm)
             if (wavelength_fwhm == 0):
                 w = wavelength
+                print(w*1e10)
             else:
                 w = np.random.normal(wavelength, wavelength_fwhm / 2.354820045, [1])[0]
+                print (w*1e10)
             Rm = ba.utils.random_mosaic_rotation(mosaicity_fwhm).dot(R)
             T = pad.t_vec.copy() + pad.fs_vec * (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
         else:
@@ -363,15 +387,29 @@ for i in np.arange(1, (num_patterns + 1)):
     I_ideal = I.copy() * n_domains
     I_ideal = I_ideal.astype(np.float32)
     I_noisy = np.random.poisson(I_ideal).astype(np.float32)
-    
+   
     if write_hdf5:
-        n_patterns = len(glob(results_dir + 'pattern-*.h5'))
-        file_name = results_dir + 'pattern-%06d.h5' % (n_patterns + 1)
+        n_patterns = len(glob( os.path.join(results_dir , 'pattern-*.h5')))
+        file_name = os.path.join( results_dir , 'pattern-%06d.h5' % (n_patterns + 1))
         write('Writing file %s\n' % file_name)
-        fid = h5py.File(file_name, 'w')
-        fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
-        fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((pad.n_ss, pad.n_fs))
-        fid.close()
+        with h5py.File( file_name,  'w') as fid:
+            sh = (int(pad.n_ss), int(pad.n_fs))
+            fid.create_dataset("data/ideal", 
+                data= I_ideal.astype(np.float32).reshape(sh),
+                compression=compression, shape=sh)
+            if not write_ideal_only:
+                fid.create_dataset("data/noisy", 
+                    data= I_noisy.astype(np.float32).reshape(sh),
+                    compression=compression, shape=sh)
+            fid.create_dataset("rotation_matrix", data=R)
+    #if write_hdf5:
+    #    n_patterns = len(glob( os.path.join(results_dir , 'pattern-*.h5')))
+    #    file_name = os.path.join( results_dir , 'pattern-%06d.h5' % (n_patterns + 1))
+    #    write('Writing file %s\n' % file_name)
+    #    fid = h5py.File(file_name, 'w')
+    #    fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((int(pad.n_ss), int(pad.n_fs)))
+    #    fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((int(pad.n_ss), int(pad.n_fs)))
+    #    fid.close()
     
     F2mean = np.mean(F2.flat[direct_beam_mask > 0])
     Ncells = np.prod(n_cells_whole_crystal)

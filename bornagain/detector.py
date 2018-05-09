@@ -757,8 +757,8 @@ class Panel(object):
         if pixel_size is None:
             raise ValueError("Pixel size is unspecified.")
 
-        self.nF = nF
-        self.nS = nS
+        self.nF = int(nF)
+        self.nS = int(nS)
         self.F = np.array([1, 0, 0]) * pixel_size
         self.S = np.array([0, 1, 0]) * pixel_size
 
