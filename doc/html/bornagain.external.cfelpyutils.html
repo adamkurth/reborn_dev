@@ -1,0 +1,592 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.external.cfelpyutils package &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
+        <link rel="up" title="bornagain.external package" href="bornagain.external.html"/>
+        <link rel="next" title="bornagain.external.pyqtgraph package" href="bornagain.external.pyqtgraph.html"/>
+        <link rel="prev" title="bornagain.external package" href="bornagain.external.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.external.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html#module-bornagain.external.crystfel">bornagain.external.crystfel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html#module-bornagain.external.lcls">bornagain.external.lcls module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html#module-bornagain.external">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.detector">bornagain.detector module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.scatter">bornagain.scatter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.source">bornagain.source module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.units">bornagain.units module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain.utils">bornagain.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.detector">bornagain.detector module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.scatter">bornagain.scatter module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.source">bornagain.source module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.units">bornagain.units module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain.utils">bornagain.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
+        
+          <li><a href="bornagain.external.html">bornagain.external package</a> &raquo;</li>
+        
+      <li>bornagain.external.cfelpyutils package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/bornagain.external.cfelpyutils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="bornagain-external-cfelpyutils-package">
+<h1>bornagain.external.cfelpyutils package<a class="headerlink" href="#bornagain-external-cfelpyutils-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bornagain.external.cfelpyutils.crystfel_utils">
+<span id="bornagain-external-cfelpyutils-crystfel-utils-module"></span><h2>bornagain.external.cfelpyutils.crystfel_utils module<a class="headerlink" href="#module-bornagain.external.cfelpyutils.crystfel_utils" title="Permalink to this headline">¶</a></h2>
+<p>Utilities for interoperability with data formats used in the CrystFEL
+software package.</p>
+<p>Exports:</p>
+<blockquote>
+<div><p>Functions:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>load_crystfel_geometry: a python reimplementation of the</dt>
+<dd>get_detector_geometry_2 function from CrystFEL.</dd>
+</dl>
+</div></blockquote>
+</div></blockquote>
+<dl class="function">
+<dt id="bornagain.external.cfelpyutils.crystfel_utils.load_crystfel_geometry">
+<code class="descclassname">bornagain.external.cfelpyutils.crystfel_utils.</code><code class="descname">load_crystfel_geometry</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/crystfel_utils.html#load_crystfel_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.crystfel_utils.load_crystfel_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a CrystFEL geometry file into a dictionary.</p>
+<p>Reimplementation of the get_detector_geometry_2 function from
+CrystFEL in python. Return a dictionary with the geometry
+information read from the file. Convert entries in the geometry
+file to keys in the returned dictionary. For a full documentation
+on the CrystFEL geometry format, see:</p>
+<p><a class="reference external" href="http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html">http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html</a></p>
+<p>The code of this function is synced with the code of the function
+‘get_detector_geometry_2’ in CrystFEL at commit
+41a8fa9819010fe8ddeb66676fee717f5226c7b8.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) – filename of the geometry file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary with the geometry information loaded from the
+file.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bornagain.external.cfelpyutils.geometry_utils">
+<span id="bornagain-external-cfelpyutils-geometry-utils-module"></span><h2>bornagain.external.cfelpyutils.geometry_utils module<a class="headerlink" href="#module-bornagain.external.cfelpyutils.geometry_utils" title="Permalink to this headline">¶</a></h2>
+<p>Utilities to load, manipulate and apply geometry information to
+detector pixel data.</p>
+<p>Exports:</p>
+<blockquote>
+<div><p>Functions:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>compute_pixel_maps: turn a CrystFEL geometry object into pixel</dt>
+<dd>maps.</dd>
+<dt>apply_pixel_maps: apply pixel maps to a data array. Return an</dt>
+<dd>array containing data with the geometry applied.</dd>
+<dt>compute_minimum_array_size: compute the minimum array size that</dt>
+<dd>is required to store data to which a geometry has been
+applied.</dd>
+<dt>adjust_pixel_maps_for_pyqtgraph: ajust pixel maps to be used in</dt>
+<dd>a PyQtGraph’s ImageView widget.</dd>
+</dl>
+</div></blockquote>
+</div></blockquote>
+<dl class="class">
+<dt id="bornagain.external.cfelpyutils.geometry_utils.PixelMaps">
+<em class="property">class </em><code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">PixelMaps</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>r</em><span class="sig-paren">)</span><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<p>Pixel maps storing data geometry.</p>
+<p>A namedtuple that stores the pixel maps describing the geometry of a
+dataset. The first two fields, named “x” and “y” respectively, store
+the pixel maps for the x coordinate and the y coordinate. The third
+field, named “r”, is instead a pixel map storing the distance of each
+pixel in the data array from the center of the reference system.</p>
+<dl class="attribute">
+<dt id="bornagain.external.cfelpyutils.geometry_utils.PixelMaps.r">
+<code class="descname">r</code><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps.r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.external.cfelpyutils.geometry_utils.PixelMaps.x">
+<code class="descname">x</code><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.external.cfelpyutils.geometry_utils.PixelMaps.y">
+<code class="descname">y</code><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.cfelpyutils.geometry_utils.compute_pixel_maps">
+<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">compute_pixel_maps</code><span class="sig-paren">(</span><em>geometry</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#compute_pixel_maps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.compute_pixel_maps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute pixel maps from a CrystFEL geometry object.</p>
+<p>Take as input a CrystFEL-style geometry object (A dictionary
+returned by the function load_crystfel_geometry function in the
+crystfel_utils module) and return a PixelMap tuple . The origin the
+reference system used by the pixel maps is set at the beam
+interaction point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry</strong> (<em>dict</em>) – A CrystFEL geometry object (A dictionary
+returned by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">cfelpyutils.crystfel_utils.load_crystfel_geometry</span></code>
+function).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A PixelMaps tuple.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps">PixelMaps</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.cfelpyutils.geometry_utils.apply_pixel_maps">
+<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">apply_pixel_maps</code><span class="sig-paren">(</span><em>data</em>, <em>pixel_maps</em>, <em>output_array=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#apply_pixel_maps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.apply_pixel_maps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply geometry to the input data.</p>
+<p>Apply the geometry (in pixel maps format) to the data. In other
+words, turn an array of detector pixel values into an array
+containing a representation of the physical layout of the detector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) – array containing the data on which the geometry
+will be applied.</li>
+<li><strong>pixel_maps</strong> (<a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps"><em>PixelMaps</em></a>) – a PixelMaps tuple.</li>
+<li><strong>output_array</strong> (<em>Optional</em><em>[</em><em>ndarray</em><em>]</em>) – a preallocated array (of
+dtype numpy.float32) to store the function output. If
+provided, this array will be filled by the function and
+and returned to the user. If not provided, the function
+will create a new array automatically and return it to the
+user. Defaults to None (No array provided).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a numpy.float32 array containing the data with the
+geometry applied (i.e.: a representation of the physical layout
+of the detector).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.cfelpyutils.geometry_utils.compute_minimum_array_size">
+<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">compute_minimum_array_size</code><span class="sig-paren">(</span><em>pixel_maps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#compute_minimum_array_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.compute_minimum_array_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the minimum array size storing data with applied geometry.</p>
+<p>Return the minimum size of an array that can store data on which
+the geometry information described by the pixel maps has been
+applied.</p>
+<p>The returned array shape is big enough to display all the input
+pixel values in the reference system of the physical detector. The
+array is also supposed to be centered at the center of the
+reference system of the detector (i.e: the beam interaction point).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>[</strong><strong>PixelMaps</strong><strong>]</strong> (<em>pixel_maps</em>) – a PixelMaps tuple.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a numpy-style shape tuple storing the minimum
+array size.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Tuple[int, int]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.cfelpyutils.geometry_utils.adjust_pixel_maps_for_pyqtgraph">
+<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">adjust_pixel_maps_for_pyqtgraph</code><span class="sig-paren">(</span><em>pixel_maps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#adjust_pixel_maps_for_pyqtgraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.adjust_pixel_maps_for_pyqtgraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjust pixel maps for visualization of the data in a pyqtgraph
+widget.</p>
+<p>The adjusted maps can be used for a Pyqtgraph ImageView widget.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pixel_maps</strong> (<a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps"><em>PixelMaps</em></a>) – a PixelMaps tuple.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>A Pixelmaps tuple containing the adjusted pixel</dt>
+<dd>maps. The first two fields, named “x” and “y” respectively,
+store the pixel maps for the x coordinate and the y
+coordinate. The third field (“r”) is just set to None.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps">PixelMaps</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bornagain.external.cfelpyutils.parameter_utils">
+<span id="bornagain-external-cfelpyutils-parameter-utils-module"></span><h2>bornagain.external.cfelpyutils.parameter_utils module<a class="headerlink" href="#module-bornagain.external.cfelpyutils.parameter_utils" title="Permalink to this headline">¶</a></h2>
+<p>Utilities for parsing command line options and configuration files.</p>
+<p>Exports:</p>
+<blockquote>
+<div><p>Functions:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>convert_parameters: convert a dictionary returned by the</dt>
+<dd>configparse module to a dictionary containing entries with
+the correct type.</dd>
+</dl>
+</div></blockquote>
+</div></blockquote>
+<dl class="function">
+<dt id="bornagain.external.cfelpyutils.parameter_utils.convert_parameters">
+<code class="descclassname">bornagain.external.cfelpyutils.parameter_utils.</code><code class="descname">convert_parameters</code><span class="sig-paren">(</span><em>config_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/parameter_utils.html#convert_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.parameter_utils.convert_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert strings in parameter dictionaries to the correct data type.</p>
+<p>Convert a dictionary return by the configparse module to a
+dictionar contaning the same parameters converted from string to
+their correct type (int, float, string, etc.)</p>
+<p>Try to convert each entry in the dictionary according to the
+following rules. The first rule that applies to the entry
+determines the type.</p>
+<ul>
+<li><p class="first">If the entry starts and ends with a single quote or double quote,
+leave it as a string.</p>
+</li>
+<li><p class="first">If the entry starts and ends with a square bracket, convert it to
+a list.</p>
+</li>
+<li><p class="first">If the entry starts and ends with a curly braces, convert it to a
+dictionary or a set.</p>
+</li>
+<li><p class="first">If the entry is the word None, without quotes, convert it to
+NoneType.</p>
+</li>
+<li><p class="first">If the entry is the word False, without quotes, convert it to a
+boolean False.</p>
+</li>
+<li><p class="first">If the entry is the word True, without quotes, convert it to a
+boolean True.</p>
+</li>
+<li><p class="first">If none of the previous options match the content of the entry,
+try to interpret the entry in order as:</p>
+<blockquote>
+<div><ul class="simple">
+<li>An integer number.</li>
+<li>A float number.</li>
+<li>A string.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">If all else fails, raise an exception.</p>
+</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>config</strong> (<em>Dict</em>) – a dictionary containing strings (the dictionary
+returned by Config Parser).</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dictionary with the same structure as the input
+dictionary, but with correct types assigned to each entry.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Dict</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code> – if an entry cannot be converted to any supported</li>
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">type.</span></code></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bornagain.external.cfelpyutils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bornagain.external.cfelpyutils" title="Permalink to this headline">¶</a></h2>
+<p>Utilities for CFEL software projects.</p>
+<p>This module provides utilities (functions, classes, etc.) used by many CFEL projects.</p>
+<p>It contains the following submodules (non of which are automatically imported):</p>
+<p>cfelfabio: utilities based on the fabio python module (a module that allows
+python to work with several file format used in x-ray imaging).</p>
+<p>cfelgeom: utilities for processing CrystFEL-style geometry files.</p>
+<p>cfelhdf5: utilities for processing HDF5 files (based on the h5py python module).</p>
+<p>cfeloptarg: utilities to parse command line arguments and parameter files.</p>
+<p>cfelpsana: utilities that expand the functionality of the psana python module.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="bornagain.external.pyqtgraph.html" class="btn btn-neutral float-right" title="bornagain.external.pyqtgraph package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bornagain.external.html" class="btn btn-neutral" title="bornagain.external package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

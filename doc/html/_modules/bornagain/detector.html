@@ -198,6 +198,11 @@
     <span class="n">_t_vec</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: The overall translation vector.</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">fs_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Fast-scan basis vector. &quot;&quot;&quot;</span>
 
@@ -240,18 +245,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span> <span class="o">=</span> <span class="n">n_pixels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span> <span class="o">=</span> <span class="n">n_pixels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span> <span class="o">=</span> <span class="p">[</span><span class="n">pixel_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">pixel_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span></div>
-        <span class="bp">self</span><span class="o">.</span><span class="n">t_vec</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">pixel_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_pixels</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">),</span> <span class="o">-</span><span class="n">pixel_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_pixels</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">distance</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">pixel_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_vec</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">pixel_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_pixels</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">),</span> <span class="o">-</span><span class="n">pixel_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_pixels</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">distance</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="PADGeometry.pixel_size"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.pixel_size">[docs]</a>    <span class="k">def</span> <span class="nf">pixel_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Return pixel size, assuming square pixels. &quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">vec_mag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">),</span> <span class="n">vec_mag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">)])</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">vec_mag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">),</span> <span class="n">vec_mag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">)])</span></div>
 
 <div class="viewcode-block" id="PADGeometry.shape"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.shape">[docs]</a>    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Return tuple corresponding to the numpy shape of this PAD. &quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADGeometry.indices_to_vectors"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.indices_to_vectors">[docs]</a>    <span class="k">def</span> <span class="nf">indices_to_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -271,8 +276,8 @@
         <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
         <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">)</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="n">vec_check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_vec</span> <span class="o">+</span> <span class="n">f</span> <span class="o">+</span> <span class="n">s</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">j</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vec_check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_vec</span> <span class="o">+</span> <span class="n">f</span> <span class="o">+</span> <span class="n">s</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADGeometry.position_vecs"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.position_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">position_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -285,20 +290,20 @@
         <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">)</span>
         <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
         <span class="n">i</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-        <span class="n">j</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_to_vectors</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">j</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_to_vectors</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADGeometry.norm_vec"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.norm_vec">[docs]</a>    <span class="k">def</span> <span class="nf">norm_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot; The vector that is normal to the PAD plane. &quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="n">vec_norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">vec_norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="PADGeometry.ds_vecs"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.ds_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">ds_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Normalized scattering vectors s - s0 where s0 is the incident beam direction</span>
 <span class="sd">        and s is the outgoing vector for a given pixel.  This does **not** have</span>
 <span class="sd">        the 2*pi/lambda factor included.&quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="n">vec_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">())</span> <span class="o">-</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">beam_vec</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vec_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">())</span> <span class="o">-</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">beam_vec</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADGeometry.q_vecs"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.q_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">q_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -308,8 +313,51 @@
 
 <span class="sd">        Returns: numpy array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">wavelength</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds_vecs</span><span class="p">(</span><span class="n">beam_vec</span><span class="o">=</span><span class="n">beam_vec</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">wavelength</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds_vecs</span><span class="p">(</span><span class="n">beam_vec</span><span class="o">=</span><span class="n">beam_vec</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PADGeometry.solid_angles2"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.solid_angles2">[docs]</a>    <span class="k">def</span> <span class="nf">solid_angles2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        this should be sped up by vectorizing, but its more readable for now</span>
+<span class="sd">        and only has to be done once per PAD geometry... </span>
+<span class="sd">        </span>
+<span class="sd">        Divide each pixel up into two triangles with vertices R1,R2,R3</span>
+<span class="sd">        and R2,R3,R4. Then use analytical form to find the solid angle of</span>
+<span class="sd">        each triangle. Sum them to get the solid angle of pixel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">()</span>
+        <span class="n">R1</span> <span class="o">=</span> <span class="n">k</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="o">*.</span><span class="mi">5</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="o">*.</span><span class="mi">5</span>
+        <span class="n">R2</span> <span class="o">=</span> <span class="n">k</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="o">*.</span><span class="mi">5</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="o">*.</span><span class="mi">5</span>
+        <span class="n">R3</span> <span class="o">=</span> <span class="n">k</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="o">*.</span><span class="mi">5</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="o">*.</span><span class="mi">5</span>
+        <span class="n">R4</span> <span class="o">=</span> <span class="n">k</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="o">*.</span><span class="mi">5</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="o">*.</span><span class="mi">5</span>
+        <span class="n">sa_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_comp_solid_ang</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">r3</span><span class="p">)</span> 
+            <span class="k">for</span> <span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">r3</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span> <span class="n">R1</span><span class="p">,</span><span class="n">R2</span><span class="p">,</span><span class="n">R3</span><span class="p">)</span> <span class="p">])</span>
+        <span class="n">sa_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_comp_solid_ang</span><span class="p">(</span><span class="n">r4</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">r3</span><span class="p">)</span> 
+            <span class="k">for</span> <span class="n">r4</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">r3</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span> <span class="n">R4</span><span class="p">,</span><span class="n">R2</span><span class="p">,</span><span class="n">R3</span><span class="p">)</span> <span class="p">])</span>
+        <span class="k">return</span> <span class="n">sa_1</span> <span class="o">+</span> <span class="n">sa_2</span></div>
+
+    <span class="k">def</span> <span class="nf">_comp_solid_ang</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">r3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        compute solid angle of a triangle whose vertices are r1,r2,r3</span>
+<span class="sd">        Ref:thanks Jonas ...  </span>
+<span class="sd">        Van Oosterom, A. &amp; Strackee, J. </span>
+<span class="sd">        The Solid Angle of a Plane Triangle. Biomedical Engineering, </span>
+<span class="sd">        IEEE Transactions on BME-30, 125-126 (1983).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">numer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span> <span class="n">r1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span><span class="n">r3</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+        
+        <span class="n">r1_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span> <span class="n">r1</span><span class="p">)</span>
+        <span class="n">r2_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span> <span class="n">r2</span><span class="p">)</span>
+        <span class="n">r3_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span> <span class="n">r3</span><span class="p">)</span>
+        <span class="n">denom</span> <span class="o">=</span><span class="n">r1_n</span><span class="o">*</span><span class="n">r2_n</span><span class="o">*</span><span class="n">r2_n</span>
+        <span class="n">denom</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span> <span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">)</span> <span class="o">*</span> <span class="n">r3_n</span>
+        <span class="n">denom</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span> <span class="n">r2</span><span class="p">,</span><span class="n">r3</span><span class="p">)</span> <span class="o">*</span> <span class="n">r1_n</span>
+        <span class="n">denom</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span> <span class="n">r3</span><span class="p">,</span><span class="n">r1</span><span class="p">)</span> <span class="o">*</span> <span class="n">r2_n</span>
+        <span class="n">s_ang</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span> <span class="n">numer</span><span class="p">,</span> <span class="n">denom</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+
+        <span class="k">return</span> <span class="n">s_ang</span>
+
 
 <div class="viewcode-block" id="PADGeometry.solid_angles"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.solid_angles">[docs]</a>    <span class="k">def</span> <span class="nf">solid_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -327,8 +375,8 @@
         <span class="n">R2</span> <span class="o">=</span> <span class="n">vec_mag</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># Distance to the pixel, squared</span>
         <span class="n">cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">vec_norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>  <span class="c1"># Inclination factor: cos(theta)</span>
         <span class="n">sa</span> <span class="o">=</span> <span class="p">(</span><span class="n">A</span> <span class="o">/</span> <span class="n">R2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cs</span>  <span class="c1"># Solid angle</span>
-</div>
-        <span class="k">return</span> <span class="n">sa</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">sa</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PADGeometry.polarization_factors"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.polarization_factors">[docs]</a>    <span class="k">def</span> <span class="nf">polarization_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polarization_vec</span><span class="p">,</span> <span class="n">beam_vec</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -360,8 +408,8 @@
         <span class="n">p1</span> <span class="o">=</span> <span class="n">w1</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">p2</span> <span class="o">=</span> <span class="n">w2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">up</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">p1</span> <span class="o">+</span> <span class="n">p2</span>
-</div>
-        <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PADGeometry.scattering_angles"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.scattering_angles">[docs]</a>    <span class="k">def</span> <span class="nf">scattering_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -375,8 +423,38 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">()</span>
-</div></div>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">vec_check</span><span class="p">(</span><span class="n">beam_vec</span><span class="p">),</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">vec_check</span><span class="p">(</span><span class="n">beam_vec</span><span class="p">),</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PADGeometry.reshape"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADGeometry.reshape">[docs]</a>    <span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dat</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="n">dat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="split_pad_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.split_pad_data">[docs]</a><span class="k">def</span> <span class="nf">split_pad_data</span><span class="p">(</span><span class="n">pad_list</span><span class="o">=</span><span class="p">[],</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Given a contiguous block of data, split it up into individual PAD panels</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pad_list: A list of PADGeometry instances</span>
+<span class="sd">        data: A contiguous array with data values (total pixels to add up to sum of pixels in all PADs)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of 2D PAD data arrays</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">pad</span> <span class="ow">in</span> <span class="n">pad_list</span><span class="p">:</span>
+
+        <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">offset</span><span class="p">:(</span><span class="n">offset</span><span class="o">+</span><span class="n">pad</span><span class="o">.</span><span class="n">n_pixels</span><span class="p">)]))</span>
+        <span class="n">offset</span> <span class="o">+=</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_pixels</span>
+
+    <span class="k">return</span> <span class="n">data_list</span></div>
 
 
 <div class="viewcode-block" id="PADAssembler"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADAssembler">[docs]</a><span class="k">class</span> <span class="nc">PADAssembler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -413,8 +491,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span>
         <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span>
-        <span class="n">a</span><span class="p">[</span><span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span></div>
-        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">a</span><span class="p">[</span><span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PADAssembler.assemble_data_list"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PADAssembler.assemble_data_list">[docs]</a>    <span class="k">def</span> <span class="nf">assemble_data_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_list</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -427,8 +505,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            assembled_data (numpy array):</span>
 <span class="sd">                Assembled PAD image</span>
-<span class="sd">        &quot;&quot;&quot;</span></div></div>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assemble_data</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">data_list</span><span class="p">))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">assemble_data</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">data_list</span><span class="p">))</span></div></div>
 
 
 <div class="viewcode-block" id="Panel"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel">[docs]</a><span class="k">class</span> <span class="nc">Panel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -475,23 +553,23 @@
 
 <div class="viewcode-block" id="Panel.shape"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.shape">[docs]</a>    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return expected shape of data arrays. &quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Panel.reshape"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.reshape">[docs]</a>    <span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Reshape array to panel shape. &quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Panel.ones"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.ones">[docs]</a>    <span class="k">def</span> <span class="nf">ones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return array of ones with shape (nS,nF). &quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Panel.zeros"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return array of zeros with shape (nS,nF). &quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Panel.check_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.check_data">[docs]</a>    <span class="k">def</span> <span class="nf">check_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Check that a data array is consistent with panel shape.&quot;&quot;&quot;</span>
@@ -501,8 +579,8 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Data array is not of correct type.  Must be&#39;</span>
                              <span class="s1">&#39; a numpy array of shape </span><span class="si">%d</span><span class="s1">x</span><span class="si">%d</span><span class="s1"> or length </span><span class="si">%d</span><span class="s1">&#39;</span>
-                             <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nS</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">))</span></div>
-        <span class="k">return</span> <span class="n">d</span>
+                             <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nS</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nF</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">d</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nF</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -760,8 +838,8 @@
 
         <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">F</span><span class="p">)</span>
         <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">)</span>
-        <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">F</span> <span class="o">+</span> <span class="n">S</span></div>
-        <span class="k">return</span> <span class="n">V</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">F</span> <span class="o">+</span> <span class="n">S</span>
+        <span class="k">return</span> <span class="n">V</span></div>
 
 <div class="viewcode-block" id="Panel.clear_geometry_cache"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.clear_geometry_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_geometry_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Clear out all derived geometry data.&quot;&quot;&quot;</span>
@@ -776,8 +854,8 @@
         <span class="c1"># Hash of the configured geometry parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gh</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">panellist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span></div>
-            <span class="bp">self</span><span class="o">.</span><span class="n">panellist</span><span class="o">.</span><span class="n">clear_geometry_cache</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">panellist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">panellist</span><span class="o">.</span><span class="n">clear_geometry_cache</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Panel.get_vertices"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.get_vertices">[docs]</a>    <span class="k">def</span> <span class="nf">get_vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Get Panel get_vertices; positions of corner pixels.&quot;&quot;&quot;</span>
@@ -797,13 +875,13 @@
         <span class="k">if</span> <span class="n">loop</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">j</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</div>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixels_to_vectors</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixels_to_vectors</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Panel.get_center"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.get_center">[docs]</a>    <span class="k">def</span> <span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Vector to center of Panel.&quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_vertices</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_vertices</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">real_space_bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -821,8 +899,8 @@
             <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_rsbb</span> <span class="o">=</span> <span class="n">r</span>
-</div>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rsbb</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rsbb</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Panel.simple_setup"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.Panel.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                      <span class="n">nF</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -840,8 +918,8 @@
         <span class="k">if</span> <span class="n">pixel_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Pixel size is unspecified.&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">nF</span> <span class="o">=</span> <span class="n">nF</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nS</span> <span class="o">=</span> <span class="n">nS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nF</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nF</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nS</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nS</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">pixel_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">pixel_size</span>
 
@@ -856,8 +934,8 @@
 
         <span class="k">if</span> <span class="n">wavelength</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">Beam</span><span class="p">()</span></div></div>
-            <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelength</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">Beam</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelength</span></div></div>
 
 
 <div class="viewcode-block" id="PanelList"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList">[docs]</a><span class="k">class</span> <span class="nc">PanelList</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -931,13 +1009,13 @@
 
 <div class="viewcode-block" id="PanelList.zeros"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return an array of zeros of length n_pixels.&quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pixels</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pixels</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="PanelList.ones"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.ones">[docs]</a>    <span class="k">def</span> <span class="nf">ones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return array of ones of length n_pixels.&quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pixels</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pixels</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="PanelList.get_panel_indices"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.get_panel_indices">[docs]</a>    <span class="k">def</span> <span class="nf">get_panel_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Get the indices of a panel for slicing a PanelList array &quot;&quot;&quot;</span>
@@ -954,33 +1032,33 @@
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">idx</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-</div>
-        <span class="k">return</span> <span class="p">[</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="PanelList.get_panel_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.get_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dat</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Slice a panel out of a concatentated array. &quot;&quot;&quot;</span>
 
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_panel_indices</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="n">dat</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_panel_indices</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dat</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span></div>
 
 <div class="viewcode-block" id="PanelList.put_panel_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.put_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">put_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">panel_dat</span><span class="p">,</span> <span class="n">panel_list_dat</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Put panel data into panellist array. &quot;&quot;&quot;</span>
 
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_panel_indices</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span></div>
-        <span class="n">panel_list_dat</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">panel_dat</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_panel_indices</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">panel_list_dat</span><span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">panel_dat</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PanelList.concatentate_panel_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.concatentate_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">concatentate_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datalist</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Make one contiguous array from a list of panel data arrays.&quot;&quot;&quot;</span>
-</div>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">flat</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datalist</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">flat</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datalist</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="PanelList.split_panel_data"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.split_panel_data">[docs]</a>    <span class="k">def</span> <span class="nf">split_panel_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datalist</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Make one contiguous array from a list of panel data arrays.&quot;&quot;&quot;</span>
 
         <span class="n">dl</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_panels</span><span class="p">):</span>
-            <span class="n">dl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_panel_data</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">datalist</span><span class="p">))</span></div>
-        <span class="k">return</span> <span class="n">dl</span>
+            <span class="n">dl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_panel_data</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">datalist</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">dl</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1008,8 +1086,8 @@
             <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_panels</span>
-</div>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PanelList.get_panel_index_by_name"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.get_panel_index_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_panel_index_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Find the integer index of a Panel by it&#39;s unique name &quot;&quot;&quot;</span>
@@ -1022,8 +1100,8 @@
             <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">i</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-</div>
-        <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">V</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1226,8 +1304,8 @@
             <span class="p">[</span><span class="n">rpix</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">rpix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rpix</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">rpix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
 
         <span class="n">adat</span><span class="p">[</span><span class="n">Vll</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">Vll</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span>
-</div>
-        <span class="k">return</span> <span class="n">adat</span>
+
+        <span class="k">return</span> <span class="n">adat</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">real_space_bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1278,8 +1356,8 @@
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">get_center</span><span class="p">()</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-</div>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PanelList.clear_geometry_cache"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.PanelList.clear_geometry_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_geometry_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Delete derived data relevant to geometry.  Normally used</span>
@@ -1290,8 +1368,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_pf</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sa</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rsbb</span> <span class="o">=</span> <span class="kc">None</span></div>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_gh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rsbb</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gh</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">geometry_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1336,8 +1414,8 @@
 
         <span class="n">p</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">()</span>
         <span class="n">p</span><span class="o">.</span><span class="n">simple_setup</span><span class="p">(</span><span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">pixel_size</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">beam</span></div></div>
-        <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">beam</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="SimpleDetector"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.SimpleDetector">[docs]</a><span class="k">class</span> <span class="nc">SimpleDetector</span><span class="p">(</span><span class="n">Panel</span><span class="p">):</span>
@@ -1405,8 +1483,8 @@
 <span class="sd">        Returns</span>
 <span class="sd">            np.ndarray : Scattering intensities as a 2-D image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_sh</span><span class="p">)</span></div>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_sh</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span></div>
 
 <div class="viewcode-block" id="SimpleDetector.readout_finite"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.SimpleDetector.readout_finite">[docs]</a>    <span class="k">def</span> <span class="nf">readout_finite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amplitudes</span><span class="p">,</span> <span class="n">qmin</span><span class="p">,</span> <span class="n">qmax</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="mf">1e20</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1447,8 +1525,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="n">total_phot</span><span class="p">,</span> <span class="n">pvals</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_sh</span><span class="p">)</span>
-</div>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span></div>
 
 <div class="viewcode-block" id="SimpleDetector.display"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.SimpleDetector.display">[docs]</a>    <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pause</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1514,8 +1592,8 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">pause</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div></div>
-            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">pause</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">pause</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="IcosphereGeometry"><a class="viewcode-back" href="../../bornagain.html#bornagain.detector.IcosphereGeometry">[docs]</a><span class="k">class</span> <span class="nc">IcosphereGeometry</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1649,8 +1727,8 @@
         <span class="n">face_centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_faces</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_faces</span><span class="p">):</span>
             <span class="n">face_centers</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">verts</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">verts</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">verts</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">:])</span> <span class="o">/</span> <span class="mi">3</span>
-</div></div>
-        <span class="k">return</span> <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">face_centers</span>
+
+        <span class="k">return</span> <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">face_centers</span></div></div>
 </pre></div>
 
            </div>

@@ -37,7 +37,7 @@
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
         <link rel="up" title="bornagain package" href="bornagain.html"/>
-        <link rel="next" title="bornagain.simulate package" href="bornagain.simulate.html"/>
+        <link rel="next" title="bornagain.external.cfelpyutils package" href="bornagain.external.cfelpyutils.html"/>
         <link rel="prev" title="bornagain package" href="bornagain.html"/> 
 
   
@@ -97,6 +97,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">bornagain.external package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.external.crystfel">bornagain.external.crystfel module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.external.lcls">bornagain.external.lcls module</a></li>
@@ -105,6 +106,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
@@ -122,6 +124,7 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">bornagain.external package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
@@ -203,41 +206,78 @@
             
   <div class="section" id="bornagain-external-package">
 <h1>bornagain.external package<a class="headerlink" href="#bornagain-external-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.external.cfelpyutils.html">bornagain.external.cfelpyutils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.external.cfelpyutils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.external.cfelpyutils.html#module-bornagain.external.cfelpyutils.crystfel_utils">bornagain.external.cfelpyutils.crystfel_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.external.cfelpyutils.html#module-bornagain.external.cfelpyutils.geometry_utils">bornagain.external.cfelpyutils.geometry_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.external.cfelpyutils.html#module-bornagain.external.cfelpyutils.parameter_utils">bornagain.external.cfelpyutils.parameter_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.external.cfelpyutils.html#module-bornagain.external.cfelpyutils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.external.pyqtgraph.html">bornagain.external.pyqtgraph package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.external.pyqtgraph.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.external.pyqtgraph.html#module-bornagain.external.pyqtgraph.extras">bornagain.external.pyqtgraph.extras module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.external.pyqtgraph.html#module-bornagain.external.pyqtgraph">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-bornagain.external.crystfel">
 <span id="bornagain-external-crystfel-module"></span><h2>bornagain.external.crystfel module<a class="headerlink" href="#module-bornagain.external.crystfel" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="bornagain.external.crystfel.geom_to_dict">
-<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geom_to_dict</code><span class="sig-paren">(</span><em>geom_file</em>, <em>raw_strings=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geom_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geom_to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a crystfel “geom” file into a sensible Python dictionary.  For details see:
-<a class="reference external" href="http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html">http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html</a>.</p>
+<dt id="bornagain.external.crystfel.geometry_file_to_dict">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geometry_file_to_dict</code><span class="sig-paren">(</span><em>geometry_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geometry_file_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geometry_file_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame
+Valerio if it’s broken :)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>geom_file</strong> (<em>str</em>) – Path to the geometry file.</li>
-<li><strong>raw_strings</strong> (<em>bool</em>) – By default, this function will convert values to floats, integers, or bools, as appropriate.
-Set this option to “True” if you want to store the raw strings in the output dictionary.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Dictionary container filled with geom file information.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">geom_dict (dict)</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry_file</strong> (<em>str</em>) – Path to geometry file</td>
 </tr>
 </tbody>
 </table>
+<p>Returns: Dict</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.external.crystfel.geom_dict_to_padgeometry">
-<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geom_dict_to_padgeometry</code><span class="sig-paren">(</span><em>geomDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geom_dict_to_padgeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geom_dict_to_padgeometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a CrystFEL geometry dictionary to a list of PADGeometry() instances.</p>
+<dt id="bornagain.external.crystfel.geometry_dict_to_pad_geometry_list">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geometry_dict_to_pad_geometry_list</code><span class="sig-paren">(</span><em>geometry_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geometry_dict_to_pad_geometry_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geometry_dict_to_pad_geometry_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a CrystFEL geometry dictionary, create a list of PADGeometry objects.  This will also append extra
+crystfel-specific items like fsx, max_fs, etc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry_file</strong> (<em>str</em>) – Path to geometry file</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: List of PADGeometry instances</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.crystfel.geometry_file_to_pad_geometry_list">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geometry_file_to_pad_geometry_list</code><span class="sig-paren">(</span><em>geometry_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geometry_file_to_pad_geometry_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geometry_file_to_pad_geometry_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a CrystFEL geometry file, create a list of PADGeometry objects.  This will also append extra
+crystfel-specific items like fsx, max_fs, etc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry_file</strong> (<em>str</em>) – Path to geometry file</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: List of PADGeometry instances</p>
 </dd></dl>
 
 <dl class="function">
@@ -334,7 +374,7 @@ data, etc.  This should be kept to a minimum…</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.simulate.html" class="btn btn-neutral float-right" title="bornagain.simulate package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.external.cfelpyutils.html" class="btn btn-neutral float-right" title="bornagain.external.cfelpyutils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="bornagain.html" class="btn btn-neutral" title="bornagain package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
