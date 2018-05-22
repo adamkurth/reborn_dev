@@ -2,10 +2,11 @@
 
 import sys
 import numpy as np
-import pyqtgraph as pg
+# import pyqtgraph as pg
 from PyQt5 import uic
 
 sys.path.append('..')
+import bornagain.external.pyqtgraph as pg
 from bornagain import detector
 from bornagain.simulate.clcore import ClCore
 from bornagain.simulate import atoms
@@ -35,6 +36,13 @@ I = np.abs(A)**2
 
 data_list = detector.split_pad_data(pads, I)
 
+im = data_list[0]
+mx = np.max(im)
+for i in np.arange(0, 9):
+    im[2**i, :] = mx
+    im[:, 2**i] = mx
+
+
 class PADGui(object):
 
     pad_geometry = []
@@ -50,15 +58,13 @@ class PADGui(object):
 
         self.app = pg.mkQApp()
         self.main_window = uic.loadUi('gwiz.ui')
-        # self.setup_app()
-        # self.setup_statusbar()
-        # self.setup_menubar()
-        # self.setup_layout()
-        self.setup_graphics_view()
+        self.viewbox = pg.ViewBox()
+        self.viewbox.setAspectLocked()
+        self.main_window.graphics_view.setCentralItem(self.viewbox)
         self.setup_pads()
-        # self.add_grid()
+        self.add_grid()
         # self.remove_grid()
-        # self.setup_histogram_tool()
+        self.setup_histogram_tool()
         # self.enable_geometry_adjustment()
         #
         # self.main_window.setWindowState(self.main_window.windowState() & ~pg.QtCore.Qt.WindowMinimized
@@ -68,63 +74,12 @@ class PADGui(object):
         # self.main_window.showMaximized()
 
 
-    #
-    # def setup_app(self):
-    #
-    #     if sys.platform == "darwin":
-    #         pg.QtGui.qt_mac_set_native_menubar(False)
-    #
-    #     # self.main_window = pg.QtGui.QMainWindow()
-    #     self.main_window.setWindowTitle('gwiz!')
-    #     self.main_window.resize(1200, 1200)
-
-
-    # def setup_statusbar(self):
-    #
-    #     self.statusbar = self.main_window.statusBar()
-
-
-    # def setup_menubar(self):
-    #
-    #     self.menubar = self.main_window.menuBar()
-    #     self.menubar = pg.QtGui.QMenuBar()
-    #     self.menubar.setNativeMenuBar(False)
-    #     self.main_window.setMenuBar(self.menubar)
-    #
-    #     self.filemenu = self.menubar.addMenu(' &Test1')
-    #
-    #     exitAction = pg.QtGui.QAction(pg.QtGui.QIcon('exit.png'), ' &Test2', self.main_window)
-    #     # exitAction.setShortcut('Ctrl+Q')
-    #     # exitAction.setStatusTip('Exit gwiz!')
-    #     exitAction.triggered.connect(self.app.quit)
-    #     self.filemenu.addAction(exitAction)
-
-    def setup_layout(self):
-
-        pass
-        # self.central_widget = pg.QtGui.QWidget()
-        # self.main_window.setCentralWidget(self.central_widget)
-        # self.layout = pg.QtGui.QGridLayout()
-        # self.central_widget.setLayout(self.layout)
-        # self.layout.setSpacing(0)
-        # self.layout.setMargin(0)
-        # self.layout.setMenuBar(self.menubar)
-
-
-    def setup_graphics_view(self):
-
-        # self.graphics_view = pg.GraphicsView()
-        self.viewbox = pg.ViewBox()
-        self.viewbox.setAspectLocked()
-        self.graphics_view.setCentralItem(self.viewbox)
-        # self.layout.addWidget(self.graphics_view, 0, 0)
-
-
     def setup_histogram_tool(self):
 
-        self.lut = bpg.MultiHistogramLUTWidget()
-        self.layout.addWidget(self.lut, 0, 1)
-        self.lut.setImageItems(self.images)
+        # self.lut = bpg.MultiHistogramLUTWidget()
+        self.main_window.histogram.setImageItems(self.images)
+        # self.viewbox2 = pg.ViewBox()
+        # self.main_window.graphics_view2.setCentralItem(self.lut)
 
 
     def setup_pads(self):
@@ -142,7 +97,8 @@ class PADGui(object):
             r.translatable = False
             r.rotateAllowed = False
             r.setPen(None)
-            im = pg.ImageItem(d) #, levels=self.overall_levels)
+            im = bpg.ImageItem(d) #, levels=self.overall_levels)
+            im.setAutoDownsample(2)
             im.setParentItem(r)
             self.viewbox.addItem(r)
             self.rois.append(r)
@@ -205,11 +161,6 @@ class PADGui(object):
         self.app.exec_()
 
 
-# app = pg.mkQApp()
-# main_window = uic.loadUi('gwiz.ui')
-# main_window.show()
-# app.exec_()
-
 padgui = PADGui(data=data_list, pad_geometry=pads)
-# # padgui.add_rings([100])
+padgui.add_rings([100])
 padgui.start()
