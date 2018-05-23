@@ -67,6 +67,9 @@ a('--wigner', action='store_true', default=False,
 a('--no_rotation', action='store_false', default=True,
   help='Removes random rotation of the crystal')
 
+a('--fix-rotation-sequence', action='store_true',
+  help='Fixes the sequence of random orientation matrices so that mcsim can be run several times under different conditions, maintaining the same set of matrices throughout')
+
 a('--no_beam_mask', action='store_false', default=True,
   help='Stops direct beam masking')
 
@@ -100,7 +103,7 @@ a('--n_pixels', type=float, nargs=1, default=1000,
 a('--transmission', type=float, nargs=1, default=1.0,
   help='Transmission coefficient')
 
-a('--n_photons', type=int, nargs=1, default=1e8,
+a('--n_photons', type=float, nargs=1, default=1e8,
   help='Number of photons')
 
 a('--mosaic_domain', type=float, nargs=1, default=1000e-9,
@@ -161,7 +164,7 @@ add_noise                       = get_arg(a.add_noise)
 photon_energy                   = get_arg(a.photon_energy) / keV
 n_pixels                        = get_arg(a.n_pixels)
 transmission                    = get_arg(a.transmission)
-n_photons                       = get_arg(a.n_photons) # pulse_energy / photon energy # 1e12
+n_photons                       = int(get_arg(a.n_photons)) # pulse_energy / photon energy # 1e12
 mosaic_domain_size              = get_arg(a.mosaic_domain)
 mosaicity_fwhm                  = get_arg(a.mosaicity_fwhm)
 overlay_wigner_cells            = get_arg(a.wigner)
@@ -180,6 +183,8 @@ rotation_angle                  = 0.1
 compression =get_arg(a.compression)
 write_ideal_only = get_arg(a.ideal_only)
 expand_symm = get_arg( a.expand_symmetry)
+fix_rot_seq = get_arg(a.fix_rotation_sequence)
+
 #parameters                      = get_arg(a.parameters)
 #no_params                       = get_arg(a.no_params)
 
@@ -200,6 +205,8 @@ else:
 section = '=' * 70 + '\n'
 
 write(section)
+if fix_rot_seq:
+    write("Fixing the rotation sequence based on random seed")
 write('PDB file: %s\n' % (os.path.basename(pdb_file)))
 write('Photons per pulse: %g\n' % (n_photons))
 write('Photon energy: %g keV\n' % (photon_energy * keV))
@@ -321,8 +328,10 @@ write('done\n')
 
 for i in np.arange(1, (num_patterns + 1)):
     R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
-    if random_rotation: R = ba.utils.random_rotation()
-    
+    if random_rotation: 
+        if fix_rot_seq:
+            np.random.seed(i)
+        R = ba.utils.random_rotation()
     if not cromer_mann:
         write('Simulating molecular transform from Henke tables... ')
         t = time.time()
@@ -357,10 +366,8 @@ for i in np.arange(1, (num_patterns + 1)):
             B = ba.utils.random_beam_vector(beam_divergence_fwhm)
             if (wavelength_fwhm == 0):
                 w = wavelength
-                print(w*1e10)
             else:
                 w = np.random.normal(wavelength, wavelength_fwhm / 2.354820045, [1])[0]
-                print (w*1e10)
             Rm = ba.utils.random_mosaic_rotation(mosaicity_fwhm).dot(R)
             T = pad.t_vec.copy() + pad.fs_vec * (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
         else:
@@ -402,14 +409,6 @@ for i in np.arange(1, (num_patterns + 1)):
                     data= I_noisy.astype(np.float32).reshape(sh),
                     compression=compression, shape=sh)
             fid.create_dataset("rotation_matrix", data=R)
-    #if write_hdf5:
-    #    n_patterns = len(glob( os.path.join(results_dir , 'pattern-*.h5')))
-    #    file_name = os.path.join( results_dir , 'pattern-%06d.h5' % (n_patterns + 1))
-    #    write('Writing file %s\n' % file_name)
-    #    fid = h5py.File(file_name, 'w')
-    #    fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((int(pad.n_ss), int(pad.n_fs)))
-    #    fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((int(pad.n_ss), int(pad.n_fs)))
-    #    fid.close()
     
     F2mean = np.mean(F2.flat[direct_beam_mask > 0])
     Ncells = np.prod(n_cells_whole_crystal)
