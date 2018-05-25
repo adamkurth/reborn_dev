@@ -119,14 +119,14 @@ a('--num_patterns', type=int, nargs=1, default=1,
 a('--crystal_size', type=float, nargs=1, default=0.0,
   help='Size of crystal in meters (default is beam diameter)')
 
-a('--water', type=bool, nargs=1, default=False,
-  help='Whether to do water scattering or not. Values are True or False. If true, --water_radius must also be specified.')
+a('--water', action='store_true', default=False,
+  help='Whether to do water scattering or not. If true, --water_radius must also be specified.')
 
 a('--water_radius', type=float, nargs=1, default=0.0,
   help='Radius of water jet in meters without crystal in it. Must be large enough to fully envelop crystal.')
 
 a('--temperature', type=float, nargs=1, default=298.16,
-  help='Temperature of water jet in Kelvin. Default is 298.18 K.')
+  help='Temperature of water jet in Kelvin. Default is 298.16 K.')
 
 #a('--parameters', type=str, nargs=1, default='parameters.txt',
 #  help = 'Allows for the extraction of parameters from a .txt file provided its location')
@@ -185,8 +185,6 @@ wavelength_fwhm                 = wavelength * get_arg(a.wavelength_fwhm)
 crystal_size                    = get_arg(a.crystal_size)
 if crystal_size == 0:
     crystal_size = beam_diameter
-elif crystal_size < beam_diameter:
-    n_photons *= (crystal_size/beam_diameter)**2
 I0                              = transmission * n_photons / (beam_diameter ** 2) # Square beam
 rotation_axis                   = [1, 0, 0]
 rotation_angle                  = 0.1
@@ -280,9 +278,11 @@ if(water):
                                                        (beam_diameter * np.sqrt(4*water_radius**2 - beam_diameter **2))/2) # Intersecting volume of orthogonal cylinder and rectangular prism.
     illuminated_water_volume = illuminated_volume_lone_jet - illuminated_crystal_volume
     n_water_molecules = illuminated_water_volume * water_number_density
-    F_water = solutions.get_water_profile(qmag, temperature=temperature)
+    F_water = solutions.get_water_profile(qmag/(2*np.pi), temperature=temperature) # Get water scattering intensity radial profile 
     F2_water = F_water**2 * n_water_molecules
     I_water = I0 * r_e**2 * P * sa * F2_water
+    if( 2*water_radius < beam_diameter):
+        I_water *= 2*water_radius/beam_diameter # Scale incident intensity according to area
     if(illuminated_water_volume <= 0):
         write('Warning: Water jet must completely envelop crystal.\n')
         water = False
@@ -403,6 +403,8 @@ for i in np.arange(1, (num_patterns + 1)):
     S2 = S2_dev.get().ravel() / n
     # Convert into useful photon units
     I = I0 * r_e ** 2 * F2 * S2 * sa * P
+    if(crystal_size < beam_diameter): # Correct for lower incident intensity
+        I *= (crystal_size/beam_diameter)**2
     # Scale up according to mosaic domain
     n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
     I_ideal = I.copy() * n_domains
