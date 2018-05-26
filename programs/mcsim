@@ -209,7 +209,6 @@ names = ['pdb_file', 'crystal_size', 'photon_energy', 'n_photons', 'n_monte_carl
 pseudo_dict = zip(names, values)
 dictionary  = dict(pseudo_dict)
 file_name = results_dir + 'config.txt'
-print(file_name)
 config = open(str(file_name), 'w+')
 for k, v in dictionary.items():
     if v != str(v):
