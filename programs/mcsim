@@ -128,6 +128,12 @@ a('--water_radius', type=float, nargs=1, default=0.0,
 a('--temperature', type=float, nargs=1, default=298.16,
   help='Temperature of water jet in Kelvin. Default is 298.16 K.')
 
+a('--flux', type=float, nargs=1, default=0,
+  help='Flux of icident beam in photons/s. Must also specify exposure. Replaces n_photons.')
+
+a('--exposure', type=float, nargs=1, default=0,
+  help='Exposure time in seconds. Must also specify flux. Replaces n_photons.')
+
 #a('--parameters', type=str, nargs=1, default='parameters.txt',
 #  help = 'Allows for the extraction of parameters from a .txt file provided its location')
 
@@ -180,11 +186,15 @@ num_patterns                    = get_arg(a.num_patterns)
 water                           = get_arg(a.water)
 water_radius                    = get_arg(a.water_radius)
 temperature                     = get_arg(a.temperature)
+flux                            = get_arg(a.flux)
+exposure                        = get_arg(a.exposure)
 wavelength                      = hc / photon_energy # pulse_energy = 0.0024
 wavelength_fwhm                 = wavelength * get_arg(a.wavelength_fwhm)
 crystal_size                    = get_arg(a.crystal_size)
 if crystal_size == 0:
     crystal_size = beam_diameter
+if(flux != 0):
+    n_photons = flux*exposure # Get number of photons from beam parameters
 I0                              = transmission * n_photons / (beam_diameter ** 2) # Square beam
 rotation_axis                   = [1, 0, 0]
 rotation_angle                  = 0.1
