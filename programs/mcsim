@@ -7,6 +7,7 @@ import numpy as np
 import argparse
 import h5py
 from glob import glob
+from scipy.special import erf
 
 sys.path.append("..")  # This path setting won't be needed once bornagain is properly installed
 import bornagain as ba
@@ -134,6 +135,8 @@ a('--flux', type=float, nargs=1, default=0,
 a('--exposure', type=float, nargs=1, default=0,
   help='Exposure time in seconds. Must also specify flux. Replaces n_photons.')
 
+a('--beam_spatial_profile', type=str, nargs=1, default='tophat',
+  help='Gaussian or tophat photon density for beam. If Gaussian, beam_diameter is assumed to be 3 sigmas.')
 #a('--parameters', type=str, nargs=1, default='parameters.txt',
 #  help = 'Allows for the extraction of parameters from a .txt file provided its location')
 
@@ -188,6 +191,7 @@ water_radius                    = get_arg(a.water_radius)
 temperature                     = get_arg(a.temperature)
 flux                            = get_arg(a.flux)
 exposure                        = get_arg(a.exposure)
+beam_spatial_profile            = get_arg(a.beam_spatial_profile)
 wavelength                      = hc / photon_energy # pulse_energy = 0.0024
 wavelength_fwhm                 = wavelength * get_arg(a.wavelength_fwhm)
 crystal_size                    = get_arg(a.crystal_size)
@@ -203,14 +207,14 @@ rotation_angle                  = 0.1
 
 # Creating text file with output parameters
 values = [pdb_file, crystal_size, photon_energy, flux, exposure, n_photons, n_monte_carlo_iterations, lattice_transform_model,
-          write_hdf5, write_geom, mplview, qtview, skview, quiet, cromer_mann, random_rotation, beam_diameter,
+          write_hdf5, write_geom, mplview, qtview, skview, quiet, cromer_mann, random_rotation, beam_diameter, beam_spatial_profile,
           detector_distance, pixel_size, add_noise, n_pixels, transmission, mosaic_domain_size, mosaicity_fwhm,
           overlay_wigner_cells, results_dir, mask_direct_beam, approximate_lattice_transform, do_monte_carlo,
           beam_divergence_fwhm, num_patterns, water, water_radius, temperature, wavelength, wavelength_fwhm,
           rotation_axis, rotation_angle]
 
 names = ['pdb_file', 'crystal_size', 'photon_energy', 'flux', 'exposure', 'n_photons', 'n_monte_carlo_iterations', 'lattice_transform_model',
-          'write_hdf5', 'write_geom', 'mplview', 'qtview', 'skview', 'quiet', 'cromer_mann', 'random_rotation', 'beam_diameter',
+          'write_hdf5', 'write_geom', 'mplview', 'qtview', 'skview', 'quiet', 'cromer_mann', 'random_rotation', 'beam_diameter', 'beam_spatial_profile',
           'detector_distance', 'pixel_size', 'add_noise', 'n_pixels', 'transmission', 'mosaic_domain_size', 'mosaicity_fwhm',
           'overlay_wigner_cells', 'results_dir', 'mask_direct_beam', 'approximate_lattice_transform', 'do_monte_carlo',
           'beam_divergence_fwhm', 'num_patterns', 'water', 'water_radius', 'temperature', 'wavelength', 'wavelength_fwhm',
@@ -437,7 +441,16 @@ for i in np.arange(1, (num_patterns + 1)):
     # Convert into useful photon units
     I = I0 * r_e ** 2 * F2 * S2 * sa * P
     if(crystal_size < beam_diameter): # Correct for lower incident intensity
-        I *= (crystal_size/beam_diameter)**2
+        if(beam_spatial_profile == 'gaussian'): # Approximate square beam+crystal as circular with same areas and multiply intensity by area under a radial Gaussian distribution 
+            sig = beam_diameter / 3.0 # Let beam_diameter be 3 sigmas
+            I *= erf(crystal_size/(sig * np.sqrt(2)))
+        elif(beam_spatial_profile == 'tophat'):
+            I *= (crystal_size/beam_diameter)**2
+        else:
+            sys.stderr.write('Beam spatial profile not recognized: %s\n' % (beam_spatial_profile))
+            sys.stderr.write('The options are: tophat or gaussian\n')
+            sys.exit(1)
+
     # Scale up according to mosaic domain
     n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
     I_ideal = I.copy() * n_domains
