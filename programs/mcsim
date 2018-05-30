@@ -12,6 +12,7 @@ from scipy.special import erf
 sys.path.append("..")  # This path setting won't be needed once bornagain is properly installed
 import bornagain as ba
 from bornagain.simulate import solutions
+from bornagain.simulate import simutils
 from bornagain.utils import vec_mag
 from bornagain.units import r_e, hc, keV
 import bornagain.simulate.clcore as core
@@ -306,22 +307,13 @@ write('done\n')
 if(water):
     write('Simulating water scattering... \n')
     water_number_density = 33.3679e27
-    illuminated_volume_lone_jet = np.pi*water_radius**2 * beam_diameter
-    illuminated_crystal_volume = crystal_size**3
-    if(crystal_size > beam_diameter): # Crystal larger than beam
-        illuminated_crystal_volume = crystal_size*beam_diameter**2
-    if(2*water_radius > beam_diameter): # Jet larger than beam
-        illuminated_volume_lone_jet = beam_diameter * (np.pi*water_radius**2 - water_radius**2 * np.arccos(beam_diameter / (2*water_radius) ) +
-                                                       (beam_diameter * np.sqrt(4*water_radius**2 - beam_diameter **2))/2) # Intersecting volume of orthogonal cylinder and rectangular prism.
-    illuminated_water_volume = illuminated_volume_lone_jet - illuminated_crystal_volume
+    illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
     n_water_molecules = illuminated_water_volume * water_number_density
     F_water = solutions.get_water_profile(qmag/(2*np.pi), temperature=temperature) # Get water scattering intensity radial profile
     F2_water = F_water**2 * n_water_molecules
     I_water = I0 * r_e**2 * P * sa * F2_water
-    if( 2*water_radius < beam_diameter):
-        I_water *= 2*water_radius/beam_diameter # Scale incident intensity according to area
     if(illuminated_water_volume <= 0):
-        write('Warning: Water jet must completely envelop crystal.\n')
+        write('Warning: No solvent was illuminated, water scattering not performed.\n')
         water = False
         I_water = 0
 
@@ -441,7 +433,7 @@ for i in np.arange(1, (num_patterns + 1)):
     # Convert into useful photon units
     I = I0 * r_e ** 2 * F2 * S2 * sa * P
     if(crystal_size < beam_diameter): # Correct for lower incident intensity
-        if(beam_spatial_profile == 'gaussian'): # Approximate square beam+crystal as circular with same areas and multiply intensity by area under a radial Gaussian distribution 
+        if(beam_spatial_profile == 'gaussian'): # Approximate square beam+crystal as circular with same areas and multiply intensity by area under a radial Gaussian distribution
             sig = beam_diameter / 3.0 # Let beam_diameter be 3 sigmas
             I *= erf(crystal_size/(sig * np.sqrt(2)))
         elif(beam_spatial_profile == 'tophat'):
