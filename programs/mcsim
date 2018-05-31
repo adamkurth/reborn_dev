@@ -489,7 +489,7 @@ for i in np.arange(1, (num_patterns + 1)):
         I_ideal += I_water
     I_ideal = I_ideal.astype(np.float32)
     I_noisy = np.random.poisson(I_ideal).astype(np.float32)
-   
+
     if write_hdf5:
         n_patterns = len(glob( os.path.join(results_dir , 'pattern-*.h5')))
         file_name = os.path.join( results_dir , 'pattern-%06d.h5' % (n_patterns + 1))
@@ -504,10 +504,10 @@ for i in np.arange(1, (num_patterns + 1)):
             fid.create_dataset("data/ideal", 
                 data= I_ideal.astype(np.float32).reshape(sh),
                 compression=compression, shape=sh)
-            if not write_ideal_only:
-                fid.create_dataset("data/noisy", 
-                    data= I_noisy.astype(np.float32).reshape(sh),
-                    compression=compression, shape=sh)
+            #if not write_ideal_only:
+            #    fid.create_dataset("data/noisy", 
+            #        data= I_noisy.astype(np.float32).reshape(sh),
+            #        compression=compression, shape=sh)
             fid.create_dataset("rotation_matrix", data=R)
     
     F2mean = np.mean(F2.flat[direct_beam_mask > 0])
