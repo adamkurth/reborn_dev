@@ -95,7 +95,7 @@ a('--photon_energy', type=float, nargs=1, default=12.0,
   help='Photon energy in keV')
 
 a('--wavelength_fwhm', type=float, nargs=1, default=0.02,
-  help='Spectral dispersion full-width, half-max value (%%)')
+  help='Spectral dispersion full-width, half-max value (dlambda/lambda)')
 
 a('--n_pixels', type=float, nargs=1, default=1000,
   help='Number of pixels')
