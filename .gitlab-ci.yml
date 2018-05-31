@@ -2,7 +2,7 @@ image: alpine
 
 pages:
   script:
-  - cp doc/html/ public/
+  - cp -r doc/html/ public/
   artifacts:
     paths:
     - public
