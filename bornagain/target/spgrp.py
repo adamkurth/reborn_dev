@@ -1,5 +1,9 @@
 # coding=utf-8
 
+"""
+This module is a data container and should not be used externally.
+"""
+
 from numpy import array
 
 # This module is auto-generated from tools/spgrp-autogen/spgrp-autogen.py.

@@ -159,16 +159,11 @@
            <div itemprop="articleBody">
             
   <h1>Source code for bornagain.simulate.atoms</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
-<span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span></span><span class="kn">import</span> <span class="nn">pkg_resources</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">units</span>
+<span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">units</span><span class="p">,</span> <span class="n">utils</span>
 
-<span class="c1"># atomic_symbols_file = pkg_resources.resource_filename(</span>
-<span class="c1">#     &#39;bornagain.simulate&#39;, &#39;data/atomic_symbols.csv&#39;)</span>
-<span class="c1"># atomic_symbols = np.loadtxt(</span>
-<span class="c1">#     atomic_symbols_file, usecols=(1,), dtype=np.str_, delimiter=&#39;,&#39;)</span>
-<span class="c1"># atomic_symbols = np.array([x.strip() for x in atomic_symbols])</span>
+
 <span class="n">henke_data_path</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
     <span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/henke&#39;</span><span class="p">)</span>
 
@@ -185,35 +180,15 @@
        <span class="s1">&#39;Uut&#39;</span><span class="p">,</span> <span class="s1">&#39;Uuq&#39;</span><span class="p">,</span> <span class="s1">&#39;Uup&#39;</span><span class="p">,</span> <span class="s1">&#39;Uuh&#39;</span><span class="p">,</span> <span class="s1">&#39;Uus&#39;</span><span class="p">,</span> <span class="s1">&#39;Uuo&#39;</span><span class="p">])</span>
 
 
-<div class="viewcode-block" id="memoize"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.memoize">[docs]</a><span class="k">def</span> <span class="nf">memoize</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is a function decorator for caching results from a function, to avoid</span>
-<span class="sd">    excessive computation or reading from disk.  Search the web for more</span>
-<span class="sd">    details of how this works.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">memo</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="nd">@wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">memo</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">memo</span><span class="p">[</span><span class="n">args</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rv</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-            <span class="n">memo</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="n">rv</span>
-            <span class="k">return</span> <span class="n">rv</span></div>
-    <span class="k">return</span> <span class="n">wrapper</span>
-
-
 <div class="viewcode-block" id="atomic_symbols_to_numbers"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.atomic_symbols_to_numbers">[docs]</a><span class="k">def</span> <span class="nf">atomic_symbols_to_numbers</span><span class="p">(</span><span class="n">symbols</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Convert atomic symbols (such as C, N, He, Be) to atomic numbers.</span>
+<span class="sd">    Convert atomic symbols (such as C, N, He, Be) to atomic numbers.</span>
 
-<span class="sd">Arguments:</span>
-<span class="sd">    symbols (string/list-like): Atomic symbol strings. Case insensitive.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        symbols (string/list-like): Atomic symbol strings. Case insensitive.</span>
 
-<span class="sd">Returns:</span>
-<span class="sd">    numbers (numpy array): Atomic numbers.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        numbers (numpy array): Atomic numbers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
@@ -225,32 +200,31 @@
             <span class="n">Z</span><span class="p">[</span><span class="n">symbols</span> <span class="o">==</span> <span class="n">u</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">Z</span> <span class="o">=</span> <span class="n">Z</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1">#print(symbols)</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">atomic_symbols</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">str_</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
         <span class="n">Z</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-</div>
-    <span class="k">return</span> <span class="n">Z</span>
+
+    <span class="k">return</span> <span class="n">Z</span></div>
 
 
 <div class="viewcode-block" id="atomic_numbers_to_symbols"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.atomic_numbers_to_symbols">[docs]</a><span class="k">def</span> <span class="nf">atomic_numbers_to_symbols</span><span class="p">(</span><span class="n">numbers</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Convert atomic numbers to atomic symbols (such as C, N, He, Ca)</span>
+<span class="sd">    Convert atomic numbers to atomic symbols (such as C, N, He, Ca)</span>
 
-<span class="sd">Arguments:</span>
-<span class="sd">    numbers (int/list-like): Atomic numbers</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        numbers (int/list-like): Atomic numbers</span>
 
-<span class="sd">Returns:</span>
-<span class="sd">    symbols (numpy string array): Atomic element symbols (such as H, He, Be)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        symbols (numpy string array): Atomic element symbols (such as H, He, Be)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">numbers</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">atomic_symbols</span><span class="p">[</span><span class="n">numbers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">symbols</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
-    <span class="k">return</span> <span class="n">symbols</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">symbols</span></div>
 
 
-<div class="viewcode-block" id="get_henke_data"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.get_henke_data">[docs]</a><span class="nd">@memoize</span>
+<div class="viewcode-block" id="get_henke_data"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.get_henke_data">[docs]</a><span class="nd">@utils</span><span class="o">.</span><span class="n">memoize</span>
 <span class="k">def</span> <span class="nf">get_henke_data</span><span class="p">(</span><span class="n">atomic_number</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load Henke scattering factor data from disk, cache for future retrieval. The</span>
@@ -278,20 +252,20 @@
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Element Symbol&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sym</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Photon Energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">eV</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Scatter Factor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">table</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
-</div>
-    <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
 
 
 <div class="viewcode-block" id="get_scattering_factors"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.get_scattering_factors">[docs]</a><span class="k">def</span> <span class="nf">get_scattering_factors</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">photon_energy</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Get complex atomic scattering factors.</span>
+<span class="sd">    Get complex atomic scattering factors.</span>
 
-<span class="sd">Arguments:</span>
-<span class="sd">    atomic_numbers (int/list-like): Atomic numbers.</span>
-<span class="sd">    photon_energy (float): Photon energy.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        atomic_numbers (int/list-like): Atomic numbers.</span>
+<span class="sd">        photon_energy (float): Photon energy.</span>
 
-<span class="sd">Returns:</span>
-<span class="sd">    scattering_factors (complex/numpy array): Complex scattering factors.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        scattering_factors (complex/numpy array): Complex scattering factors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># TODO: finish off this function, which should use get_henke_data()</span>
@@ -305,8 +279,8 @@
         <span class="n">fdat</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;Scatter Factor&#39;</span><span class="p">]</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">E</span> <span class="o">-</span> <span class="n">photon_energy</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
         <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Z</span> <span class="o">==</span> <span class="n">z</span><span class="p">)</span>
-        <span class="n">f</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdat</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span></div>
-    <span class="k">return</span> <span class="n">f</span>
+        <span class="n">f</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdat</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">f</span></div>
 </pre></div>
 
            </div>

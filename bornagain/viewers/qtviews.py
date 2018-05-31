@@ -3,6 +3,10 @@ import pyqtgraph             as pg
 import pyqtgraph.opengl      as gl
 from   pyqtgraph.Qt import QtCore, QtGui
 
+"""
+This is supposed to have various viewers that use pyqtgraph.  It's mostly useless right now.
+"""
+
 # Some default bright colors.  Might need to make this list longer in the future.
 colors = [pg.glColor([255, 0, 0]),
           pg.glColor([0, 255, 0]),
@@ -14,6 +18,8 @@ colors = [pg.glColor([255, 0, 0]),
           pg.glColor([255, 128, 128])]
 
 def bright_colors(i):
+
+    """ Some nice colors.  Only 8 available, which loops around as the input index increments."""
 
     return colors[i % len(colors)]
 

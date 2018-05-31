@@ -37,6 +37,11 @@ class PADGeometry(object):
     _t_vec = None  #: The overall translation vector.
 
     @property
+    def n_pixels(self):
+
+        return self.n_fs*self.n_ss
+
+    @property
     def fs_vec(self):
         r""" Fast-scan basis vector. """
 
@@ -69,8 +74,12 @@ class PADGeometry(object):
     def t_vec(self, t_vec):
         self._t_vec = vec_check(t_vec)
 
-    def simple_setup(self, n_pixels=1000, pixel_size=100e-6, distance=0.1):
-        r""" Make this a square PAD with beam at center. """
+    def simple_setup(self, n_pixels = 1000, pixel_size = 100e-6, distance = 0.1):
+        r""" Make this a square PAD with beam at center.
+
+        Returns:
+            object:
+        """
 
         self.n_fs = n_pixels
         self.n_ss = n_pixels
@@ -146,6 +155,49 @@ class PADGeometry(object):
 
         return (2 * np.pi / wavelength) * self.ds_vecs(beam_vec=beam_vec)
 
+
+    def solid_angles2(self):
+        """
+        this should be sped up by vectorizing, but its more readable for now
+        and only has to be done once per PAD geometry... 
+        
+        Divide each pixel up into two triangles with vertices R1,R2,R3
+        and R2,R3,R4. Then use analytical form to find the solid angle of
+        each triangle. Sum them to get the solid angle of pixel.
+        """
+        k = self.position_vecs()
+        R1 = k-self.fs_vec*.5 - self.ss_vec*.5
+        R2 = k+self.fs_vec*.5 - self.ss_vec*.5
+        R3 = k-self.fs_vec*.5 + self.ss_vec*.5
+        R4 = k+self.fs_vec*.5 + self.ss_vec*.5
+        sa_1 = np.array( [self._comp_solid_ang(r1,r2,r3) 
+            for r1,r2,r3 in zip( R1,R2,R3) ])
+        sa_2 = np.array( [self._comp_solid_ang(r4,r2,r3) 
+            for r4,r2,r3 in zip( R4,R2,R3) ])
+        return sa_1 + sa_2
+
+    def _comp_solid_ang(self, r1,r2,r3):
+        """ 
+        compute solid angle of a triangle whose vertices are r1,r2,r3
+        Ref:thanks Jonas ...  
+        Van Oosterom, A. & Strackee, J. 
+        The Solid Angle of a Plane Triangle. Biomedical Engineering, 
+        IEEE Transactions on BME-30, 125-126 (1983).
+        """
+        numer = np.abs( np.dot( r1, np.cross(r2,r3) ) )
+        
+        r1_n = np.linalg.norm( r1)
+        r2_n = np.linalg.norm( r2)
+        r3_n = np.linalg.norm( r3)
+        denom =r1_n*r2_n*r2_n
+        denom += np.dot( r1,r2) * r3_n
+        denom += np.dot( r2,r3) * r1_n
+        denom += np.dot( r3,r1) * r2_n
+        s_ang = np.arctan2( numer, denom) * 2
+
+        return s_ang
+
+
     def solid_angles(self):
         r"""
         Calculate solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:
@@ -213,6 +265,36 @@ class PADGeometry(object):
 
         return np.arccos(vec_check(beam_vec), v.T)
 
+    def reshape(self, dat):
+
+        return dat.reshape(self.shape())
+
+
+def split_pad_data(pad_list=[], data=None):
+
+    r"""
+
+    Given a contiguous block of data, split it up into individual PAD panels
+
+    Args:
+        pad_list: A list of PADGeometry instances
+        data: A contiguous array with data values (total pixels to add up to sum of pixels in all PADs)
+
+    Returns:
+        A list of 2D PAD data arrays
+
+    """
+
+    data_list = []
+
+    offset = 0
+    for pad in pad_list:
+
+        data_list.append(pad.reshape(data[offset:(offset+pad.n_pixels)]))
+        offset += pad.n_pixels
+
+    return data_list
+
 
 class PADAssembler(object):
     r"""
@@ -263,7 +345,7 @@ class PADAssembler(object):
             assembled_data (numpy array):
                 Assembled PAD image
         """
-        self.assemble_data(np.ravel(data_list))
+        return self.assemble_data(np.ravel(data_list))
 
 
 class Panel(object):
@@ -675,8 +757,8 @@ class Panel(object):
         if pixel_size is None:
             raise ValueError("Pixel size is unspecified.")
 
-        self.nF = nF
-        self.nS = nS
+        self.nF = int(nF)
+        self.nS = int(nS)
         self.F = np.array([1, 0, 0]) * pixel_size
         self.S = np.array([0, 1, 0]) * pixel_size
 

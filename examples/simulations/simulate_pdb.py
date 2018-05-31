@@ -56,6 +56,10 @@ n_atoms = r.shape[0]
 print('Getting scattering factors')
 f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 
+n_trials = 3
+show_all = show
+# plt.ion()
+
 print('Generate rotation matrix')
 if rotate:
     phi = 0.5
