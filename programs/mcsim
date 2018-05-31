@@ -335,7 +335,8 @@ for i in np.arange(1, (num_patterns + 1)):
     if not cromer_mann:
         write('Simulating molecular transform from Henke tables... ')
         t = time.time()
-        clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R, F_dev, add=False)
+        clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec, 
+            pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R, F_dev, add=False)
         F2 = np.abs(F_dev.get()) ** 2
         tf = time.time() - t
         write('%g s\n' % (tf))
@@ -347,7 +348,7 @@ for i in np.arange(1, (num_patterns + 1)):
         q_cm = clcore.get_q_cromermann()
         r_cm = clcore.get_r_cromermann(r.copy(), sub_com=False)
         clcore.run_cromermann(q_cm, r_cm, rand_rot=False, force_rot_mat=R)
-        A = clcore.release_amplitudes()
+        A = clcore.release_amplitudes(reset=True)
         F2 = np.abs(A) ** 2
         tf = time.time() - t
         write('%g s\n' % (tf))
@@ -375,6 +376,7 @@ for i in np.arange(1, (num_patterns + 1)):
             w = wavelength
             Rm = R
             T = pad.t_vec
+        
         lattice_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, S2_dev, add=True)
     
         tf = time.time() - t
