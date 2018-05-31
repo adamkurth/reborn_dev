@@ -21,7 +21,7 @@ def get_cmann_form_factors(cman, q):
         c = coefs[-1]
 #       make the form factors for each q for atomic number z
         z_ff = np.sum( [a * (expo_terms**b) 
-            for a,b in izip(a_vals, b_vals)], 0) 
+            for a,b in zip(a_vals, b_vals)], 0) 
         z_ff += c
 
         form_facts[z] = z_ff

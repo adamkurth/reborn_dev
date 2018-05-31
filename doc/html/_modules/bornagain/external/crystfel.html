@@ -163,279 +163,75 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">detector</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">detector</span>
+<span class="kn">from</span> <span class="nn">.cfelpyutils.crystfel_utils</span> <span class="k">import</span> <span class="n">load_crystfel_geometry</span>
 
 
-<div class="viewcode-block" id="geom_to_dict"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.geom_to_dict">[docs]</a><span class="k">def</span> <span class="nf">geom_to_dict</span><span class="p">(</span><span class="n">geom_file</span><span class="p">,</span> <span class="n">raw_strings</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert a crystfel &quot;geom&quot; file into a sensible Python dictionary.  For details see:</span>
-<span class="sd">    http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html.</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        geom_file (str) :</span>
-<span class="sd">            Path to the geometry file.</span>
-<span class="sd">        raw_strings (bool) :</span>
-<span class="sd">            By default, this function will convert values to floats, integers, or bools, as appropriate.</span>
-<span class="sd">            Set this option to &quot;True&quot; if you want to store the raw strings in the output dictionary.</span>
+<div class="viewcode-block" id="geometry_file_to_dict"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.geometry_file_to_dict">[docs]</a><span class="k">def</span> <span class="nf">geometry_file_to_dict</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">):</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        geom_dict (dict) :</span>
-<span class="sd">            Dictionary container filled with geom file information.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame</span>
+<span class="sd">    Valerio if it&#39;s broken :)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        geometry_file (str): Path to geometry file</span>
+
+<span class="sd">    Returns: Dict</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">interpret_vector_string</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Parse fast/slow scan vectors &quot;&quot;&quot;</span>
-
-        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="s2">&quot;xyz&quot;</span><span class="p">))</span>
-        <span class="n">vals</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)):</span>
-                <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>  <span class="c1"># CrystFEL allows simply &quot;x&quot; in place of &quot;1x&quot;</span>
-                <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">vals</span><span class="p">[</span><span class="n">coord</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="n">vec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;y&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;z&#39;</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">vec</span>
-
-    <span class="k">def</span> <span class="nf">seek_dictionary_by_name</span><span class="p">(</span><span class="n">dictionaryList</span><span class="p">,</span> <span class="n">dictionaryName</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; We will deal with lists of dictionaries.  Here is how we seek a</span>
-<span class="sd">        specific entry in the list by name &quot;&quot;&quot;</span>
-
-        <span class="n">theDictionary</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">dictionaryList</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">dictionaryName</span><span class="p">:</span>
-                <span class="n">theDictionary</span> <span class="o">=</span> <span class="n">item</span>
-        <span class="k">return</span> <span class="n">theDictionary</span>
-
-    <span class="k">def</span> <span class="nf">convert_types</span><span class="p">(</span><span class="n">mydict</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Convert dictionary entries into numeric types, as appropriate &quot;&quot;&quot;</span>
-
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mydict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="c1"># Convert floating point values</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;adu_per_eV&#39;</span><span class="p">,</span> <span class="s1">&#39;res&#39;</span><span class="p">,</span> <span class="s1">&#39;clen&#39;</span><span class="p">,</span> <span class="s1">&#39;coffset&#39;</span><span class="p">,</span> <span class="s1">&#39;corner_x&#39;</span><span class="p">,</span>
-                       <span class="s1">&#39;corner_y&#39;</span><span class="p">,</span> <span class="s1">&#39;max_adu&#39;</span><span class="p">,</span> <span class="s1">&#39;photon_energy&#39;</span><span class="p">,</span>
-                       <span class="s1">&#39;photon_energy_scale&#39;</span><span class="p">}:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-                    <span class="k">continue</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="k">continue</span>
-            <span class="c1"># Integers</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;min_fs&#39;</span><span class="p">,</span> <span class="s1">&#39;min_ss&#39;</span><span class="p">,</span> <span class="s1">&#39;max_fs&#39;</span><span class="p">,</span> <span class="s1">&#39;max_ss&#39;</span><span class="p">}:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-                    <span class="k">continue</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="k">continue</span>
-            <span class="c1"># Vectors</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;fs&#39;</span><span class="p">,</span> <span class="s1">&#39;ss&#39;</span><span class="p">}:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpret_vector_string</span><span class="p">(</span><span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-                    <span class="k">continue</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="k">continue</span>
-            <span class="c1"># Boolean</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;no_index&#39;</span><span class="p">}:</span>
-                <span class="k">if</span> <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span>
-                    <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">mydict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">continue</span>
-
-    <span class="c1"># These are the Panel keys allowed by crystfel</span>
-    <span class="n">panelKeys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;dim0&#39;</span><span class="p">,</span> <span class="s1">&#39;dim1&#39;</span><span class="p">,</span> <span class="s1">&#39;dim2&#39;</span><span class="p">,</span> <span class="s1">&#39;min_fs&#39;</span><span class="p">,</span> <span class="s1">&#39;min_ss&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;max_fs&#39;</span><span class="p">,</span> <span class="s1">&#39;max_ss&#39;</span><span class="p">,</span> <span class="s1">&#39;adu_per_eV&#39;</span><span class="p">,</span> <span class="s1">&#39;badrow_direction&#39;</span><span class="p">,</span> <span class="s1">&#39;res&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;clen&#39;</span><span class="p">,</span> <span class="s1">&#39;coffset&#39;</span><span class="p">,</span> <span class="s1">&#39;fs&#39;</span><span class="p">,</span> <span class="s1">&#39;ss&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;corner_x&#39;</span><span class="p">,</span> <span class="s1">&#39;corner_y&#39;</span><span class="p">,</span> <span class="s1">&#39;max_adu&#39;</span><span class="p">,</span> <span class="s1">&#39;no_index&#39;</span><span class="p">,</span> <span class="s1">&#39;mask&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;mask_file&#39;</span><span class="p">,</span> <span class="s1">&#39;saturation_map&#39;</span><span class="p">,</span> <span class="s1">&#39;saturation_map_file&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;mask_good&#39;</span><span class="p">,</span> <span class="s1">&#39;mask_bad&#39;</span><span class="p">,</span> <span class="s1">&#39;photon_energy&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;photon_energy_scale&#39;</span><span class="p">]</span>
-
-    <span class="c1"># Here is our template Panel dictionary.  Also for the global Panel</span>
-    <span class="c1"># dictionary, which fills in the undefined properties of panels.</span>
-    <span class="n">panelDictTemplate</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="c1"># Initialized with None for all keys</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">panelKeys</span><span class="p">:</span>
-        <span class="n">panelDictTemplate</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="c1"># These are the bad region keys allowed by crystfel</span>
-    <span class="n">badRegionKeys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;min_x&#39;</span><span class="p">,</span> <span class="s1">&#39;max_x&#39;</span><span class="p">,</span> <span class="s1">&#39;min_y&#39;</span><span class="p">,</span> <span class="s1">&#39;max_y&#39;</span><span class="p">,</span> <span class="s1">&#39;Panel&#39;</span><span class="p">]</span>
-
-    <span class="c1"># Initialize a template dictionary for bad regions.</span>
-    <span class="n">badRegionDictTemplate</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">badRegionKeys</span><span class="p">:</span>
-        <span class="n">badRegionDictTemplate</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="c1"># Initialize a template dictionary for rigid groups</span>
-    <span class="n">rigidGroupDictTemplate</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;panels&#39;</span><span class="p">:</span> <span class="p">[]}</span>
-
-    <span class="c1"># Initialize a template dictionary for rigid group collections</span>
-    <span class="n">rigidGroupCollectionDictTemplate</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;groups&#39;</span><span class="p">:</span> <span class="p">[]}</span>
-
-    <span class="c1"># Initialize the lists we will populate as we scan the file</span>
-    <span class="n">globals_</span> <span class="o">=</span> <span class="n">panelDictTemplate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">panels</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">rigidGroups</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">rigidGroupCollections</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">badRegions</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Now begin scanning the file</span>
-
-    <span class="k">if</span> <span class="n">geom_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No geometry file specified&quot;</span><span class="p">)</span>
-
-    <span class="n">h</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">geom_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">originalline</span> <span class="ow">in</span> <span class="n">h</span><span class="p">:</span>
-
-        <span class="c1"># Avoid any issues with whitespace</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="n">originalline</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-        <span class="c1"># Skip empty lines</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># Skip comment lines</span>
-        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;;&#39;</span><span class="p">:</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># Remove trailing comments</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-        <span class="c1"># Search for appropriate lines.  Firstly, we must have an &quot;=&quot; character</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># Split key/values</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-        <span class="c1"># Check for global key</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">panelDictTemplate</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-            <span class="n">globals_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># Check for rigid group collection</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^rigid_group_collection&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">thisDict</span> <span class="o">=</span> <span class="n">seek_dictionary_by_name</span><span class="p">(</span><span class="n">rigidGroupCollections</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">thisDict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">thisDict</span> <span class="o">=</span> <span class="n">rigidGroupCollectionDictTemplate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
-                <span class="n">rigidGroupCollections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thisDict</span><span class="p">)</span>
-            <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;groups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)])</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># Check for rigid group</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^rigid_group&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">thisDict</span> <span class="o">=</span> <span class="n">seek_dictionary_by_name</span><span class="p">(</span><span class="n">rigidGroups</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">thisDict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">thisDict</span> <span class="o">=</span> <span class="n">rigidGroupDictTemplate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
-                <span class="n">rigidGroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thisDict</span><span class="p">)</span>
-            <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">([</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)])</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># Check for bad region</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^bad&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">thisDict</span> <span class="o">=</span> <span class="n">seek_dictionary_by_name</span><span class="p">(</span><span class="n">badRegions</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">thisDict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">thisDict</span> <span class="o">=</span> <span class="n">badRegionDictTemplate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
-                <span class="n">badRegions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thisDict</span><span class="p">)</span>
-            <span class="n">thisDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># If not any of the above types, check if it is a Panel-specific</span>
-        <span class="c1"># specification</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cannot interpret string </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">originalline</span><span class="p">)</span>
-            <span class="k">continue</span>
-
-        <span class="c1"># Split name from key/value pairs</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">panelKeys</span><span class="p">):</span>
-            <span class="n">thisDict</span> <span class="o">=</span> <span class="n">seek_dictionary_by_name</span><span class="p">(</span><span class="n">panels</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">thisDict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">thisDict</span> <span class="o">=</span> <span class="n">panelDictTemplate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">thisDict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
-                <span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thisDict</span><span class="p">)</span>
-            <span class="n">thisDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="k">continue</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cannot interpret: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">originalline</span><span class="p">)</span>
-
-    <span class="c1"># Convert strings to numeric types as appropriate</span>
-    <span class="k">if</span> <span class="n">raw_strings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">panels</span><span class="p">:</span>
-            <span class="n">convert_types</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-        <span class="n">convert_types</span><span class="p">(</span><span class="n">globals_</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">badRegion</span> <span class="ow">in</span> <span class="n">badRegions</span><span class="p">:</span>
-            <span class="n">convert_types</span><span class="p">(</span><span class="n">badRegion</span><span class="p">)</span>
-
-    <span class="c1"># Populate the missing values in each Panel with global values</span>
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">panels</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">panelKeys</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">p</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">globals_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-
-    <span class="c1"># Now package up the results and return</span>
-    <span class="n">geomDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;globals_&#39;</span><span class="p">:</span> <span class="n">globals_</span><span class="p">,</span>
-                <span class="s1">&#39;panels&#39;</span><span class="p">:</span> <span class="n">panels</span><span class="p">,</span>
-                <span class="s1">&#39;rigidGroups&#39;</span><span class="p">:</span> <span class="n">rigidGroups</span><span class="p">,</span>
-                <span class="s1">&#39;rigidGroupCollections&#39;</span><span class="p">:</span> <span class="n">rigidGroupCollections</span><span class="p">,</span>
-                <span class="s1">&#39;badRegions&#39;</span><span class="p">:</span> <span class="n">badRegions</span><span class="p">}</span>
-</div>
-    <span class="k">return</span> <span class="n">geomDict</span>
+    <span class="k">return</span> <span class="n">load_crystfel_geometry</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="geom_dict_to_padgeometry"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.geom_dict_to_padgeometry">[docs]</a><span class="k">def</span> <span class="nf">geom_dict_to_padgeometry</span><span class="p">(</span><span class="n">geomDict</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Convert a CrystFEL geometry dictionary to a list of PADGeometry() instances. &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="geometry_dict_to_pad_geometry_list"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.geometry_dict_to_pad_geometry_list">[docs]</a><span class="k">def</span> <span class="nf">geometry_dict_to_pad_geometry_list</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">):</span>
 
-    <span class="c1"># TODO: Test and document this function</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a CrystFEL geometry dictionary, create a list of PADGeometry objects.  This will also append extra</span>
+<span class="sd">    crystfel-specific items like fsx, max_fs, etc.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        geometry_file (str): Path to geometry file</span>
+
+<span class="sd">    Returns: List of PADGeometry instances</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">geom</span> <span class="o">=</span> <span class="n">geometry_dict</span>
 
     <span class="n">pads</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geomDict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
-
+    <span class="k">for</span> <span class="n">panel_name</span> <span class="ow">in</span> <span class="n">geometry_dict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">pad</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">PADGeometry</span><span class="p">()</span>
-
-        <span class="n">pad</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
-        <span class="n">pad</span><span class="o">.</span><span class="n">fs_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">]</span>
-        <span class="n">pad</span><span class="o">.</span><span class="n">ss_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;ss&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">]</span>
+        <span class="n">pad</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">panel_name</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">][</span><span class="n">panel_name</span><span class="p">]</span>
+        <span class="n">pix</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">]</span>
+        <span class="n">pad</span><span class="o">.</span><span class="n">fs_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;fsx&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;fsy&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;fsz&#39;</span><span class="p">]])</span> <span class="o">*</span> <span class="n">pix</span>
         <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">pad</span><span class="o">.</span><span class="n">ss_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;ssx&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;ssy&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;ssz&#39;</span><span class="p">]])</span> <span class="o">*</span> <span class="n">pix</span>
         <span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;coffset&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;coffset&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">z</span> <span class="o">+=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;coffset&#39;</span><span class="p">]</span>
-        <span class="n">pad</span><span class="o">.</span><span class="n">t_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;corner_x&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;corner_y&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;res&#39;</span><span class="p">],</span> <span class="n">z</span><span class="p">])</span>
-        <span class="n">pad</span><span class="o">.</span><span class="n">adu_per_ev</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;adu_per_eV&#39;</span><span class="p">]</span>
-
+        <span class="n">pad</span><span class="o">.</span><span class="n">t_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;cnx&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">pix</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;cny&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">pix</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;clen&#39;</span><span class="p">]])</span>
         <span class="n">pads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="n">pads</span>
+
+    <span class="k">return</span> <span class="n">pads</span></div>
+
+
+<div class="viewcode-block" id="geometry_file_to_pad_geometry_list"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.geometry_file_to_pad_geometry_list">[docs]</a><span class="k">def</span> <span class="nf">geometry_file_to_pad_geometry_list</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a CrystFEL geometry file, create a list of PADGeometry objects.  This will also append extra</span>
+<span class="sd">    crystfel-specific items like fsx, max_fs, etc.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        geometry_file (str): Path to geometry file</span>
+
+<span class="sd">    Returns: List of PADGeometry instances</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">geometry_dict</span> <span class="o">=</span> <span class="n">geometry_file_to_dict</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">)</span>
+    <span class="n">pad_list</span> <span class="o">=</span> <span class="n">geometry_dict_to_pad_geometry_list</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pad_list</span></div>
 
 
 <div class="viewcode-block" id="split_image"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.crystfel.split_image">[docs]</a><span class="k">def</span> <span class="nf">split_image</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
@@ -455,8 +251,8 @@
     <span class="n">split_data</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
         <span class="n">split_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
-</div>
-    <span class="k">return</span> <span class="n">split_data</span>
+
+    <span class="k">return</span> <span class="n">split_data</span></div>
 </pre></div>
 
            </div>

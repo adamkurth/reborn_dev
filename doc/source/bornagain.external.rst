@@ -1,6 +1,14 @@
 bornagain.external package
 ==========================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    bornagain.external.cfelpyutils
+    bornagain.external.pyqtgraph
+
 Submodules
 ----------
 

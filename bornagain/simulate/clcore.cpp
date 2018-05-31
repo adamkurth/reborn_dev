@@ -495,7 +495,7 @@ kernel void gaussian_lattice_transform_intensities_pad(
     // First crystal axis (this could be put in a loop over three axes...)
     n = (dsfloat)N.x;
     a = (dsfloat4)(abc.s0,abc.s1,abc.s2,0.0);
-    x = dot(q4r,a); 
+    x = dot(q4r,a);
     x = x - round(x/PI2)*PI2;
     It *= n*n*exp(-n*n*x*x/(4*PI));
 

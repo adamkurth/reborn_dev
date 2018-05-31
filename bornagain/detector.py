@@ -37,6 +37,11 @@ class PADGeometry(object):
     _t_vec = None  #: The overall translation vector.
 
     @property
+    def n_pixels(self):
+
+        return self.n_fs*self.n_ss
+
+    @property
     def fs_vec(self):
         r""" Fast-scan basis vector. """
 
@@ -265,6 +270,32 @@ class PADGeometry(object):
         return dat.reshape(self.shape())
 
 
+def split_pad_data(pad_list=[], data=None):
+
+    r"""
+
+    Given a contiguous block of data, split it up into individual PAD panels
+
+    Args:
+        pad_list: A list of PADGeometry instances
+        data: A contiguous array with data values (total pixels to add up to sum of pixels in all PADs)
+
+    Returns:
+        A list of 2D PAD data arrays
+
+    """
+
+    data_list = []
+
+    offset = 0
+    for pad in pad_list:
+
+        data_list.append(pad.reshape(data[offset:(offset+pad.n_pixels)]))
+        offset += pad.n_pixels
+
+    return data_list
+
+
 class PADAssembler(object):
     r"""
     Assemble PAD data into a fake single-panel PAD.  This is done in a lazy way.  The resulting image is not
@@ -314,7 +345,7 @@ class PADAssembler(object):
             assembled_data (numpy array):
                 Assembled PAD image
         """
-        self.assemble_data(np.ravel(data_list))
+        return self.assemble_data(np.ravel(data_list))
 
 
 class Panel(object):
@@ -726,8 +757,8 @@ class Panel(object):
         if pixel_size is None:
             raise ValueError("Pixel size is unspecified.")
 
-        self.nF = nF
-        self.nS = nS
+        self.nF = int(nF)
+        self.nS = int(nS)
         self.F = np.array([1, 0, 0]) * pixel_size
         self.S = np.array([0, 1, 0]) * pixel_size
 
