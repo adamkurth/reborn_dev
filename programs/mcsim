@@ -70,6 +70,9 @@ a('--wigner', action='store_true', default=False,
 a('--no_rotation', action='store_false', default=True,
   help='Removes random rotation of the crystal')
 
+a('--fix-rotation-sequence', action='store_true',
+  help='Fixes the sequence of random orientation matrices so that mcsim can be run several times under different conditions, maintaining the same set of matrices throughout')
+
 a('--no_beam_mask', action='store_false', default=True,
   help='Stops direct beam masking')
 
@@ -103,7 +106,7 @@ a('--n_pixels', type=float, nargs=1, default=1000,
 a('--transmission', type=float, nargs=1, default=1.0,
   help='Transmission coefficient')
 
-a('--n_photons', type=int, nargs=1, default=1e8,
+a('--n_photons', type=float, nargs=1, default=1e8,
   help='Number of photons')
 
 a('--mosaic_domain', type=float, nargs=1, default=1000e-9,
@@ -118,7 +121,6 @@ a('--results_dir', type=str, nargs=1, default='/data/temp/cxls-lysozyme-02/',
 a('--num_patterns', type=int, nargs=1, default=1,
   help='Number of patterns to simulate')
 
-<<<<<<< HEAD
 a('--crystal_size', type=float, nargs=1, default=0.0,
   help='Size of crystal in meters (default is beam diameter)')
 
@@ -142,8 +144,10 @@ a('--beam_spatial_profile', type=str, nargs=1, default='tophat',
 
 a('--compression', type=str, nargs=1, default=None,
   help='h5py compression, default None, can be lzf or gzip')
+
 a('--ideal_only', action='store_true', default=False,
   help='only store the ideal scattering in output (not the noisy scattering)')
+
 a('--expand_symmetry', action='store_true', default=False,
   help='expand the PDB coordinates according to crystal symmetry operators')
 
@@ -186,7 +190,7 @@ add_noise                       = get_arg(a.add_noise)
 photon_energy                   = get_arg(a.photon_energy) / keV
 n_pixels                        = get_arg(a.n_pixels)
 transmission                    = get_arg(a.transmission)
-n_photons                       = get_arg(a.n_photons) # pulse_energy / photon energy # 1e12
+n_photons                       = int(get_arg(a.n_photons)) # pulse_energy / photon energy # 1e12
 mosaic_domain_size              = get_arg(a.mosaic_domain)
 mosaicity_fwhm                  = get_arg(a.mosaicity_fwhm)
 overlay_wigner_cells            = get_arg(a.wigner)
@@ -215,6 +219,8 @@ rotation_angle                  = 0.1
 compression =get_arg(a.compression)
 write_ideal_only = get_arg(a.ideal_only)
 expand_symm = get_arg( a.expand_symmetry)
+fix_rot_seq = get_arg(a.fix_rotation_sequence)
+
 #parameters                      = get_arg(a.parameters)
 #no_params                       = get_arg(a.no_params)
 
@@ -259,6 +265,8 @@ else:
 section = '=' * 70 + '\n'
 
 write(section)
+if fix_rot_seq:
+    write("Fixing the rotation sequence based on random seed")
 write('PDB file: %s\n' % (os.path.basename(pdb_file)))
 write('Photons per pulse: %g\n' % (n_photons))
 write('Photon energy: %g keV\n' % (photon_energy * keV))
@@ -400,10 +408,15 @@ for i in np.arange(1, (num_patterns + 1)):
     R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
     if random_rotation: R = ba.utils.random_rotation()
 
+    if random_rotation: 
+        if fix_rot_seq:
+            np.random.seed(i)
+        R = ba.utils.random_rotation()
     if not cromer_mann:
         write('Simulating molecular transform from Henke tables... ')
         t = time.time()
-        clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R, F_dev, add=False)
+        clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec, 
+            pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R, F_dev, add=False)
         F2 = np.abs(F_dev.get()) ** 2
         tf = time.time() - t
         write('%g s\n' % (tf))
@@ -415,7 +428,7 @@ for i in np.arange(1, (num_patterns + 1)):
         q_cm = clcore.get_q_cromermann()
         r_cm = clcore.get_r_cromermann(r.copy(), sub_com=False)
         clcore.run_cromermann(q_cm, r_cm, rand_rot=False, force_rot_mat=R)
-        A = clcore.release_amplitudes()
+        A = clcore.release_amplitudes(reset=True)
         F2 = np.abs(A) ** 2
         tf = time.time() - t
         write('%g s\n' % (tf))
@@ -434,10 +447,8 @@ for i in np.arange(1, (num_patterns + 1)):
             B = ba.utils.random_beam_vector(beam_divergence_fwhm)
             if (wavelength_fwhm == 0):
                 w = wavelength
-                print(w*1e10)
             else:
                 w = np.random.normal(wavelength, wavelength_fwhm / 2.354820045, [1])[0]
-                print (w*1e10)
             Rm = ba.utils.random_mosaic_rotation(mosaicity_fwhm).dot(R)
             T = pad.t_vec.copy() + pad.fs_vec * (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
         else:
@@ -445,6 +456,7 @@ for i in np.arange(1, (num_patterns + 1)):
             w = wavelength
             Rm = R
             T = pad.t_vec
+        
         lattice_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, S2_dev, add=True)
 
         tf = time.time() - t
@@ -497,14 +509,6 @@ for i in np.arange(1, (num_patterns + 1)):
                     data= I_noisy.astype(np.float32).reshape(sh),
                     compression=compression, shape=sh)
             fid.create_dataset("rotation_matrix", data=R)
-    #if write_hdf5:
-    #    n_patterns = len(glob( os.path.join(results_dir , 'pattern-*.h5')))
-    #    file_name = os.path.join( results_dir , 'pattern-%06d.h5' % (n_patterns + 1))
-    #    write('Writing file %s\n' % file_name)
-    #    fid = h5py.File(file_name, 'w')
-    #    fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((int(pad.n_ss), int(pad.n_fs)))
-    #    fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((int(pad.n_ss), int(pad.n_fs)))
-    #    fid.close()
     
     F2mean = np.mean(F2.flat[direct_beam_mask > 0])
     Ncells = np.prod(n_cells_whole_crystal)
