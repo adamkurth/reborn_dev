@@ -207,8 +207,8 @@
 <span class="c1"># ~~~~~~ your code ends here ~~~~~~~~</span>
 
     <span class="n">qxyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">qx</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">qy</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">qz</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span><span class="o">.</span><span class="n">T</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">simulating into </span><span class="si">%d</span><span class="s2"> q vectors.&quot;</span> <span class="o">%</span> <span class="n">qxyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
-    <span class="k">return</span> <span class="n">img_sh</span><span class="p">,</span> <span class="n">qxyz</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">simulating into </span><span class="si">%d</span><span class="s2"> q vectors.&quot;</span> <span class="o">%</span> <span class="n">qxyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">img_sh</span><span class="p">,</span> <span class="n">qxyz</span></div>
 
 
 <div class="viewcode-block" id="ThornAgain"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain">[docs]</a><span class="k">class</span> <span class="nc">ThornAgain</span><span class="p">:</span>
@@ -265,8 +265,8 @@
             <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Changing group size from </span><span class="si">%d</span><span class="s1"> to </span><span class="si">%d</span><span class="s1">.</span><span class="se">\n</span><span class="s1">&#39;</span>
                      <span class="s1">&#39;Set BORNAGAIN_CL_GROUPSIZE=</span><span class="si">%d</span><span class="s1"> to avoid this error.</span><span class="se">\n</span><span class="s1">&#39;</span> 
                      <span class="o">%</span> <span class="p">(</span><span class="n">group_size</span><span class="p">,</span> <span class="n">max_group_size</span><span class="p">,</span> <span class="n">max_group_size</span><span class="p">))</span>
-            <span class="n">group_size</span> <span class="o">=</span> <span class="n">max_group_size</span></div>
-        <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">=</span> <span class="n">group_size</span>
+            <span class="n">group_size</span> <span class="o">=</span> <span class="n">max_group_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">=</span> <span class="n">group_size</span></div>
         
     
 
@@ -328,8 +328,8 @@
         <span class="k">elif</span> <span class="n">which</span><span class="o">==</span><span class="s1">&#39;kam&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_prg</span><span class="o">.</span><span class="n">qrf_kam</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prg</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">(</span>
-                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">])</span></div>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_prime_buffers_kam</span><span class="p">()</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prime_buffers_kam</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_prime_buffers_kam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; get all the data onto the GPU&quot;&quot;&quot;</span>
@@ -426,8 +426,8 @@
 
         <span class="c1">#self.r_buff = clcore.ClCore.to_device_static(</span>
         <span class="c1">#    self.atom_vecs, dtype=np.float32, queue=self.queue)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span><span class="o">.</span><span class="n">data</span></div>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span><span class="o">.</span><span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span></div>
 
     <span class="k">def</span> <span class="nf">_set_rand_rot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">ClCore</span><span class="o">.</span><span class="n">to_device_static</span><span class="p">(</span>
@@ -456,8 +456,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span> <span class="o">=</span> <span class="n">com</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_com_vec</span><span class="p">()</span>
 
-<span class="c1">#       run the program</span></div>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prg</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">)</span>
+<span class="c1">#       run the program</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prg</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ThornAgain.run"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rand_rot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="c1">#       set the rotation</span>
@@ -479,8 +479,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">prg</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">)</span>
 
         <span class="n">Amps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">release_amplitudes</span><span class="p">()</span> 
-</div>
-        <span class="k">return</span> <span class="n">Amps</span>
+
+        <span class="k">return</span> <span class="n">Amps</span></div>
         
 <div class="viewcode-block" id="ThornAgain.release_amplitudes"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.ThornAgain.release_amplitudes">[docs]</a>    <span class="k">def</span> <span class="nf">release_amplitudes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">Amps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="p">[:</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">]</span>
@@ -490,8 +490,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span><span class="o">.</span><span class="n">data</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prg_args</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span><span class="o">.</span><span class="n">data</span>
-</div>
-        <span class="k">return</span> <span class="n">Amps</span>
+
+        <span class="k">return</span> <span class="n">Amps</span></div>
 
     <span class="k">def</span> <span class="nf">_load_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">clcore_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
@@ -501,8 +501,8 @@
             <span class="n">kern_src</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         
         <span class="n">build_opts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;-D&#39;</span><span class="p">,</span> <span class="s1">&#39;GROUP_SIZE=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">]</span>
-        </div>
-        <span class="bp">self</span><span class="o">.</span><span class="n">all_prg</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">Program</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">kern_src</span><span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">build_opts</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_prg</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">Program</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">kern_src</span><span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">build_opts</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="test"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.thorn.test">[docs]</a><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
     <span class="n">natom</span> <span class="o">=</span> <span class="mi">1000</span>
@@ -514,8 +514,8 @@
     <span class="n">A</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">rand_rot</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">I</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">readout</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
     <span class="n">D</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
-</div>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed testing mode!&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed testing mode!&quot;</span><span class="p">)</span></div>
 
 <span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">test</span><span class="p">()</span>

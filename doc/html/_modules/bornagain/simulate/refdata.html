@@ -182,11 +182,11 @@
         <span class="n">c</span> <span class="o">=</span> <span class="n">coefs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 <span class="c1">#       make the form factors for each q for atomic number z</span>
         <span class="n">z_ff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="p">[</span><span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">expo_terms</span><span class="o">**</span><span class="n">b</span><span class="p">)</span> 
-            <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="n">izip</span><span class="p">(</span><span class="n">a_vals</span><span class="p">,</span> <span class="n">b_vals</span><span class="p">)],</span> <span class="mi">0</span><span class="p">)</span> 
+            <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a_vals</span><span class="p">,</span> <span class="n">b_vals</span><span class="p">)],</span> <span class="mi">0</span><span class="p">)</span> 
         <span class="n">z_ff</span> <span class="o">+=</span> <span class="n">c</span>
 
-        <span class="n">form_facts</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_ff</span></div>
-    <span class="k">return</span> <span class="n">form_facts</span>   
+        <span class="n">form_facts</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_ff</span>
+    <span class="k">return</span> <span class="n">form_facts</span>   </div>
 
 
 <div class="viewcode-block" id="get_cromermann_parameters"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.refdata.get_cromermann_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">):</span> 
@@ -214,8 +214,8 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Element number </span><span class="si">%d</span><span class="s1"> not in Cromer-Mann form factor parameter database&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Could not get critical parameters for computation&#39;</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="n">cromermann</span> 
+
+    <span class="k">return</span> <span class="n">cromermann</span> </div>
 
 
 <div class="viewcode-block" id="get_cromermann_parameters_legacy"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.refdata.get_cromermann_parameters_legacy">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters_legacy</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">max_num_atom_types</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -269,8 +269,8 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Element number </span><span class="si">%d</span><span class="s1"> not in Cromer-Mann form factor parameter database&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Could not get critical parameters for computation&#39;</span><span class="p">)</span>
         <span class="n">aid</span><span class="p">[</span> <span class="n">atomic_numbers</span> <span class="o">==</span> <span class="n">a</span> <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="n">cromermann</span><span class="p">,</span> <span class="n">aid</span>
+
+    <span class="k">return</span> <span class="n">cromermann</span><span class="p">,</span> <span class="n">aid</span></div>
     
 
     

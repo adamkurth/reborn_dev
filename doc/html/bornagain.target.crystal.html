@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bornagain.target.crystal module &mdash; bornagain 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bornagain.target.crystal.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bornagain.target.crystal">
+<span id="bornagain-target-crystal-module"></span><h1>bornagain.target.crystal module<a class="headerlink" href="#module-bornagain.target.crystal" title="Permalink to this headline">¶</a></h1>
+<p>Basic utilities for dealing with crystalline objects.</p>
+<dl class="class">
+<dt id="bornagain.target.crystal.Atoms">
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">Atoms</code><span class="sig-paren">(</span><em>xyz</em>, <em>atomic_num</em>, <em>elem=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Atoms" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="classmethod">
+<dt id="bornagain.target.crystal.Atoms.aggregate">
+<em class="property">classmethod </em><code class="descname">aggregate</code><span class="sig-paren">(</span><em>atoms_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Atoms.aggregate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Atoms.aggregate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.Atoms.set_elem">
+<code class="descname">set_elem</code><span class="sig-paren">(</span><em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Atoms.set_elem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Atoms.set_elem" title="Permalink to this definition">¶</a></dt>
+<dd><p>sets list of elements names for use in xyz format files</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.Atoms.to_xyz">
+<code class="descname">to_xyz</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Atoms.to_xyz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Atoms.to_xyz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.target.crystal.Lattice">
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">Lattice</code><span class="sig-paren">(</span><em>a=281.0</em>, <em>b=281.0</em>, <em>c=165.2</em>, <em>alpha=90.0</em>, <em>beta=90.0</em>, <em>gamma=120.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Lattice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Lattice" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="bornagain.target.crystal.Lattice.assemble">
+<code class="descname">assemble</code><span class="sig-paren">(</span><em>n_unit=10</em>, <em>spherical=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Lattice.assemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Lattice.assemble" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.target.crystal.Molecule">
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">Molecule</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bornagain.target.crystal.structure" title="bornagain.target.crystal.structure"><code class="xref py py-class docutils literal"><span class="pre">bornagain.target.crystal.structure</span></code></a></p>
+<dl class="method">
+<dt id="bornagain.target.crystal.Molecule.get_1d_coords">
+<code class="descname">get_1d_coords</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule.get_1d_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule.get_1d_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.Molecule.get_1d_frac_coords">
+<code class="descname">get_1d_frac_coords</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule.get_1d_frac_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule.get_1d_frac_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.Molecule.get_monomers">
+<code class="descname">get_monomers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule.get_monomers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule.get_monomers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.Molecule.mat_mult_many">
+<code class="descname">mat_mult_many</code><span class="sig-paren">(</span><em>M</em>, <em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule.mat_mult_many"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule.mat_mult_many" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for applying matrix multiplications on many vectors</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.Molecule.shift">
+<code class="descname">shift</code><span class="sig-paren">(</span><em>monomer</em>, <em>na</em>, <em>nb</em>, <em>nc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule.shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule.shift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.Molecule.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>x,y,z are fractional coordinates</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.hermannMauguinToNumber">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">hermannMauguinToNumber</code><span class="sig-paren">(</span><em>hm</em>, <em>hall=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#hermannMauguinToNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.hermannMauguinToNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is needed to convert the Hermann Mauguin space group specifications
+in PDB files to the space group number or the &#8220;Hall number&#8221; that is used by
+the spglib module.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.parsePDB">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">parsePDB</code><span class="sig-paren">(</span><em>pdbFilePath</em>, <em>crystalStruct=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#parsePDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.parsePDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a structure object with PDB information.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.target.crystal.structure">
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">structure</code><span class="sig-paren">(</span><em>pdbFilePath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Stuff needed to deal with an atomistic crystal structure.</p>
+<p>A note on coordinate transformations and the orthogonalization matrix
+O:
+Convert from fractional coordinates x to real-space coordinates r:
+r = cryst.O.dot(x)
+Convert from real-space coordinates r to fractional coordinates x:
+x = cryst.Oinv.dot(r)
+Convert from q-space to h-space:
+h = cryst.O.T.dot(q)</p>
+<dl class="method">
+<dt id="bornagain.target.crystal.structure.loadPDB">
+<code class="descname">loadPDB</code><span class="sig-paren">(</span><em>pdbFilePath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.loadPDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.loadPDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate all the attributes from a PDB file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.structure.setCell">
+<code class="descname">setCell</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>alpha</em>, <em>beta</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.setCell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.setCell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the unit cell and all quantities derived from the unit cell.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.x">
+<code class="descname">x</code><a class="headerlink" href="#bornagain.target.crystal.structure.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fractional coordinates of atoms.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bornagain 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2017, Richard A Kirian.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>
