@@ -100,6 +100,9 @@ a('--photon_energy', type=float, nargs=1, default=12.0,
 a('--wavelength_fwhm', type=float, nargs=1, default=0.02,
   help='Spectral dispersion full-width, half-max value (dlambda/lambda)')
 
+a('--photon_energy_fwhm', type=float, nargs=1, default=0,
+  help='Photon energy bandwidth full-width, half-max value (dE/E).')
+
 a('--n_pixels', type=float, nargs=1, default=1000,
   help='Number of pixels')
 
@@ -206,8 +209,12 @@ temperature                     = get_arg(a.temperature)
 flux                            = get_arg(a.flux)
 exposure                        = get_arg(a.exposure)
 beam_spatial_profile            = get_arg(a.beam_spatial_profile)
+photon_energy_fwhm              = get_arg(a.photon_energy_fwhm)
 wavelength                      = hc / photon_energy # pulse_energy = 0.0024
-wavelength_fwhm                 = wavelength * get_arg(a.wavelength_fwhm)
+if photon_energy_fwhm != 0:
+    wavelength_fwhm = (wavelength**2 * photon_energy_fwhm * photon_energy) / float(hc)
+else:
+    wavelength_fwhm                 = wavelength * get_arg(a.wavelength_fwhm)
 crystal_size                    = get_arg(a.crystal_size)
 if crystal_size == 0:
     crystal_size = beam_diameter
@@ -328,7 +335,7 @@ write('done\n')
 
 # Do water scattering
 if(water):
-    write('Simulating water scattering... \n')
+    write('Simulating water scattering... ')
     water_number_density = 33.3679e27
     illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
     n_water_molecules = illuminated_water_volume * water_number_density
@@ -336,9 +343,11 @@ if(water):
     F2_water = F_water**2 * n_water_molecules
     I_water = I0 * r_e**2 * P * sa * F2_water
     if(illuminated_water_volume <= 0):
-        write('Warning: No solvent was illuminated, water scattering not performed.\n')
+        write('\nWarning: No solvent was illuminated, water scattering not performed.\n')
         water = False
         I_water = 0
+    else:
+        write('done\n')
 
 # Get atomic coordinates and scattering factors from pdb file
 write('Getting atomic coordinates and scattering factors... ')
