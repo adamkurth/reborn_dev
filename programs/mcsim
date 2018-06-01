@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import numpy as np
-import argparse
+import configargparse
 import h5py
 from glob import glob
 from scipy.special import erf
@@ -22,11 +22,14 @@ import bornagain.simulate.clcore as core
 # Command-line input.  Most defaults are set here, but are subject to change (so do not rely on them).
 ########################################################################################################################
 
-p = argparse.ArgumentParser("""
+p = configargparse.ArgParser("""
 Monte Carlo simulations of crystal diffraction on a GPU.
 A more elaborate description of this program will follow...
 """)
-a = p.add_argument
+a = p.add
+
+a('--config', is_config_file=True,
+  help='Config file path, absolute path not relative path')
 
 a('--pdb_file', type=str, nargs=1, default='../examples/data/pdb/2LYZ-P1.pdb',
   help='PDB file (symmetry is **not** expanded)')
@@ -241,7 +244,7 @@ names = ['pdb_file', 'crystal_size', 'photon_energy', 'flux', 'exposure', 'n_pho
 
 pseudo_dict = zip(names, values)
 dictionary  = dict(pseudo_dict)
-file_name = results_dir + 'config.txt'
+file_name = results_dir + 'used_params.txt'
 config = open(str(file_name), 'w+')
 for k, v in dictionary.items():
     if v != str(v):
@@ -342,7 +345,7 @@ if(water):
 
 # Get atomic coordinates and scattering factors from pdb file
 write('Getting atomic coordinates and scattering factors... ')
-if expand_symm: 
+if expand_symm:
     cryst = ba.target.crystal.Molecule(pdb_file)
     monomers = cryst.get_monomers()
     all_atoms = ba.target.crystal.Atoms.aggregate(monomers)
@@ -408,14 +411,14 @@ for i in np.arange(1, (num_patterns + 1)):
     R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
     if random_rotation: R = ba.utils.random_rotation()
 
-    if random_rotation: 
+    if random_rotation:
         if fix_rot_seq:
             np.random.seed(i)
         R = ba.utils.random_rotation()
     if not cromer_mann:
         write('Simulating molecular transform from Henke tables... ')
         t = time.time()
-        clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec, 
+        clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec,
             pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R, F_dev, add=False)
         F2 = np.abs(F_dev.get()) ** 2
         tf = time.time() - t
@@ -456,7 +459,7 @@ for i in np.arange(1, (num_patterns + 1)):
             w = wavelength
             Rm = R
             T = pad.t_vec
-        
+
         lattice_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, S2_dev, add=True)
 
         tf = time.time() - t
@@ -501,15 +504,15 @@ for i in np.arange(1, (num_patterns + 1)):
 
         with h5py.File( file_name,  'w') as fid:
             sh = (int(pad.n_ss), int(pad.n_fs))
-            fid.create_dataset("data/ideal", 
+            fid.create_dataset("data/ideal",
                 data= I_ideal.astype(np.float32).reshape(sh),
                 compression=compression, shape=sh)
             #if not write_ideal_only:
-            #    fid.create_dataset("data/noisy", 
+            #    fid.create_dataset("data/noisy",
             #        data= I_noisy.astype(np.float32).reshape(sh),
             #        compression=compression, shape=sh)
             fid.create_dataset("rotation_matrix", data=R)
-    
+
     F2mean = np.mean(F2.flat[direct_beam_mask > 0])
     Ncells = np.prod(n_cells_whole_crystal)
     darwin = I0 * r_e ** 2 * Ncells * F2mean * (wavelength ** 3 / cryst.V)
