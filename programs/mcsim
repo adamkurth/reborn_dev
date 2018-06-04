@@ -339,7 +339,7 @@ if(water):
     water_number_density = 33.3679e27
     illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
     n_water_molecules = illuminated_water_volume * water_number_density
-    F_water = solutions.get_water_profile(qmag/(2*np.pi), temperature=temperature) # Get water scattering intensity radial profile
+    F_water = solutions.get_water_profile(qmag, temperature=temperature) # Get water scattering intensity radial profile
     F2_water = F_water**2 * n_water_molecules
     I_water = I0 * r_e**2 * P * sa * F2_water
     if(illuminated_water_volume <= 0):
