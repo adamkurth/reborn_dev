@@ -40,49 +40,49 @@ a('--lattice_transform', type=str, nargs=1, default='gaussian',
 a('--iterations', type=int, nargs=1, default=1000,
   help='Number of independent Monte Carlo iterations to average')
 
-a('--double_precision', action='store_true', default=False,
+a('--double_precision', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='Use double precision if device allows.')
 
-a('--write_geom', action='store_true', default=False,
+a('--write_geom', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='Write a crystfel geometry file.')
 
-a('--write_hdf5', action='store_true', default=False,
+a('--write_hdf5', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='Write data to hdf5 files.')
 
-a('--mplview', action='store_true', default=False,
+a('--mplview', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='View the pattern with matplotlib.')
 
-a('--qtview', action='store_true', default=False,
+a('--qtview', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='View the pattern with pyqtgraph.')
 
-a('--skview', action='store_true', default=False,
+a('--skview', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='View the pattern with skimage viewer.')
 
-a('--quiet', action='store_true', default=False,
+a('--quiet', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='Decreases printed output.')
 
-a('--add_noise', action='store_true', default=False,
+a('--add_noise', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='Adds Poisson noise to the image.')
 
-a('--cromer_mann', action='store_true', default=False,
+a('--cromer_mann', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='Cromer Mann')
 
-a('--wigner', action='store_true', default=False,
+a('--wigner', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='Overlay wigner cells')
 
-a('--no_rotation', action='store_false', default=True,
+a('--no_rotation', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=True,
   help='Removes random rotation of the crystal')
 
-a('--fix-rotation-sequence', action='store_true',
+a('--fix-rotation-sequence', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1,
   help='Fixes the sequence of random orientation matrices so that mcsim can be run several times under different conditions, maintaining the same set of matrices throughout')
 
-a('--no_beam_mask', action='store_false', default=True,
+a('--no_beam_mask', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=True,
   help='Stops direct beam masking')
 
-a('--no_approx_transform', action='store_false', default=True,
+a('--no_approx_transform', type=bool, nargs=1, default=True,
   help='Stops approximate lattice transform')
 
-a('--no_monte_carlo', action='store_false', default=True,
+a('--no_monte_carlo',type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=True,
   help='Stops Monte Carlo simulation')
 
 a('--beam_diameter', type=float, nargs=1, default=100e-6,
@@ -112,7 +112,7 @@ a('--transmission', type=float, nargs=1, default=1.0,
 a('--n_photons', type=float, nargs=1, default=1e8,
   help='Number of photons')
 
-a('--mosaic_domain', type=float, nargs=1, default=1000e-9,
+a('--mosaic_domain_size', type=float, nargs=1, default=1000e-9,
   help='Mosaic domain size')
 
 a('--mosaicity_fwhm', type=float, nargs=1, default=0.0001,
@@ -127,7 +127,7 @@ a('--num_patterns', type=int, nargs=1, default=1,
 a('--crystal_size', type=float, nargs=1, default=0.0,
   help='Size of crystal in meters (default is beam diameter)')
 
-a('--water', action='store_true', default=False,
+a('--water', type=bool, nargs=1, default=False,
   help='Whether to do water scattering or not. If true, --water_radius must also be specified.')
 
 a('--water_radius', type=float, nargs=1, default=0.0,
@@ -148,10 +148,10 @@ a('--beam_spatial_profile', type=str, nargs=1, default='tophat',
 a('--compression', type=str, nargs=1, default=None,
   help='h5py compression, default None, can be lzf or gzip')
 
-a('--ideal_only', action='store_true', default=False,
+a('--ideal_only', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='only store the ideal scattering in output (not the noisy scattering)')
 
-a('--expand_symmetry', action='store_true', default=False,
+a('--expand_symmetry', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='expand the PDB coordinates according to crystal symmetry operators')
 
 a = p.parse_args()
@@ -173,6 +173,7 @@ pdb_file                        = get_arg(a.pdb_file)
 n_monte_carlo_iterations        = get_arg(a.iterations)
 lattice_transform_model         = get_arg(a.lattice_transform)
 write_hdf5                      = get_arg(a.write_hdf5)
+print(write_hdf5)
 write_geom                      = get_arg(a.write_geom)
 mplview                         = get_arg(a.mplview)
 qtview                          = get_arg(a.qtview)
@@ -188,7 +189,7 @@ photon_energy                   = get_arg(a.photon_energy) / keV
 n_pixels                        = get_arg(a.n_pixels)
 transmission                    = get_arg(a.transmission)
 n_photons                       = int(get_arg(a.n_photons)) # pulse_energy / photon energy # 1e12
-mosaic_domain_size              = get_arg(a.mosaic_domain)
+mosaic_domain_size              = get_arg(a.mosaic_domain_size)
 mosaicity_fwhm                  = get_arg(a.mosaicity_fwhm)
 overlay_wigner_cells            = get_arg(a.wigner)
 results_dir                     = get_arg(a.results_dir)
@@ -222,28 +223,26 @@ fix_rot_seq = get_arg(a.fix_rotation_sequence)
 #no_params                       = get_arg(a.no_params)
 
 # Creating text file with output parameters
-values = [pdb_file, crystal_size, photon_energy, flux, exposure, n_photons, n_monte_carlo_iterations, lattice_transform_model,
+values = [pdb_file, crystal_size, photon_energy*keV, flux, exposure, n_photons, n_monte_carlo_iterations, lattice_transform_model,
           write_hdf5, write_geom, mplview, qtview, skview, quiet, cromer_mann, random_rotation, beam_diameter, beam_spatial_profile,
           detector_distance, pixel_size, add_noise, n_pixels, transmission, mosaic_domain_size, mosaicity_fwhm,
           overlay_wigner_cells, results_dir, mask_direct_beam, approximate_lattice_transform, do_monte_carlo,
-          beam_divergence_fwhm, num_patterns, water, water_radius, temperature, wavelength, wavelength_fwhm,
-          rotation_axis, rotation_angle]
+          beam_divergence_fwhm, num_patterns, water, water_radius, temperature, wavelength, wavelength_fwhm]
 
-names = ['pdb_file', 'crystal_size', 'photon_energy', 'flux', 'exposure', 'n_photons', 'n_monte_carlo_iterations', 'lattice_transform_model',
-          'write_hdf5', 'write_geom', 'mplview', 'qtview', 'skview', 'quiet', 'cromer_mann', 'random_rotation', 'beam_diameter', 'beam_spatial_profile',
+names = ['pdb_file', 'crystal_size', 'photon_energy', 'flux', 'exposure', 'n_photons', 'iterations', 'lattice_transform',
+          'write_hdf5', 'write_geom', 'mplview', 'qtview', 'skview', 'quiet', 'cromer_mann', 'no_rotation', 'beam_diameter', 'beam_spatial_profile',
           'detector_distance', 'pixel_size', 'add_noise', 'n_pixels', 'transmission', 'mosaic_domain_size', 'mosaicity_fwhm',
-          'overlay_wigner_cells', 'results_dir', 'mask_direct_beam', 'approximate_lattice_transform', 'do_monte_carlo',
-          'beam_divergence_fwhm', 'num_patterns', 'water', 'water_radius', 'temperature', 'wavelength', 'wavelength_fwhm',
-          'rotation_axis', 'rotation_angle']
+          'wigner', 'results_dir', 'no_beam_mask', 'no_approx_transform', 'no_monte_carlo',
+          'beam_divergenc', 'num_patterns', 'water', 'water_radius', 'temperature', 'wavelength', 'wavelength_fwhm']
 
 pseudo_dict = zip(names, values)
 dictionary  = dict(pseudo_dict)
 file_name = results_dir + 'used_params.txt'
-config = open(str(file_name), 'w+')
+used_params = open(str(file_name), 'w+')
 for k, v in dictionary.items():
     if v != str(v):
         v = str(v)
-    config.write(k + ' = ' + v + '\n')
+    used_params.write(k + '=' + v + '\n')
 
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
@@ -355,6 +354,7 @@ write('done\n')
 write('%d atoms per unit cell\n' % (len(f)))
 
 # Make a mask for the direct beam
+
 direct_beam_mask = np.ones((int(pad.n_ss * pad.n_fs)))
 direct_beam_mask[qmag < (2 * np.pi / np.max(np.array([cryst.a, cryst.b, cryst.c])))] = 0
 
