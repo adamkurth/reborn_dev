@@ -234,16 +234,20 @@ values = [pdb_file, crystal_size, photon_energy*keV, flux, exposure, n_photons, 
           write_hdf5, write_geom, mplview, qtview, skview, quiet, cromer_mann, random_rotation, beam_diameter, beam_spatial_profile,
           detector_distance, pixel_size, add_noise, n_pixels, transmission, mosaic_domain_size, mosaicity_fwhm,
           overlay_wigner_cells, results_dir, mask_direct_beam, approximate_lattice_transform, do_monte_carlo,
-          beam_divergence_fwhm, num_patterns, water, water_radius, temperature, wavelength, wavelength_fwhm]
+          beam_divergence_fwhm, num_patterns, water, water_radius, temperature, wavelength]
 
 names = ['pdb_file', 'crystal_size', 'photon_energy', 'flux', 'exposure', 'n_photons', 'iterations', 'lattice_transform',
           'write_hdf5', 'write_geom', 'mplview', 'qtview', 'skview', 'quiet', 'cromer_mann', 'no_rotation', 'beam_diameter', 'beam_spatial_profile',
           'detector_distance', 'pixel_size', 'add_noise', 'n_pixels', 'transmission', 'mosaic_domain_size', 'mosaicity_fwhm',
           'wigner', 'results_dir', 'no_beam_mask', 'no_approx_transform', 'no_monte_carlo',
-          'beam_divergenc', 'num_patterns', 'water', 'water_radius', 'temperature', 'wavelength', 'wavelength_fwhm']
+          'beam_divergenc', 'num_patterns', 'water', 'water_radius', 'temperature', 'wavelength']
 
 pseudo_dict = zip(names, values)
 dictionary  = dict(pseudo_dict)
+if photon_energy_fwhm != -1:
+    dictionary['photon_energy_fwhm']=photon_energy_fwhm
+else:
+    dictionary['wavelength_fwhm']=wavelength_fwhm/wavelength
 file_name = results_dir + 'used_params.txt'
 used_params = open(str(file_name), 'w+')
 for k, v in dictionary.items():
