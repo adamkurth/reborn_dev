@@ -479,7 +479,7 @@ for i in np.arange(1, (num_patterns + 1)):
     # Average the lattice transforms over MC iterations
     S2 = S2_dev.get().ravel() / n
     # Convert into useful photon units
-    I =100000000* I0 * r_e ** 2 * F2 * S2 *  sa * P 
+    I = I0 * r_e ** 2 * F2 * S2 *  sa * P 
     if(crystal_size < beam_diameter): # Correct for lower incident intensity
         if(beam_spatial_profile == 'gaussian'): # Approximate square beam+crystal as circular with same areas and multiply intensity by area under a radial Gaussian distribution
             sig = beam_diameter / 3.0 # Let beam_diameter be 3 sigmas
