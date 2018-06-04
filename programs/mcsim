@@ -232,7 +232,7 @@ fix_rot_seq = get_arg(a.fix_rotation_sequence)
 # Creating text file with output parameters
 values = [pdb_file, crystal_size, photon_energy*keV, flux, exposure, n_photons, n_monte_carlo_iterations, lattice_transform_model,
           write_hdf5, write_geom, mplview, qtview, skview, quiet, cromer_mann, random_rotation, beam_diameter, beam_spatial_profile,
-          detector_distance, pixel_size, add_noise, n_pixels, transmission, mosaic_domain_size, mosaicity_fwhm,
+          detector_distance, pixel_size, add_noise, int(n_pixels), transmission, mosaic_domain_size, mosaicity_fwhm,
           overlay_wigner_cells, results_dir, mask_direct_beam, approximate_lattice_transform, do_monte_carlo,
           beam_divergence_fwhm/(8e-6/beam_diameter), num_patterns, water, water_radius, temperature, wavelength]
 
