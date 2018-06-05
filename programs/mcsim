@@ -133,9 +133,6 @@ a('--crystal_size_fwhm', type=float, nargs=1, default=0.0,
 a('--write_crystal_sizes', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
   help='Write text file of crystal sizes per pattern.')
 
-a('--water', type=bool, nargs=1, default=False,
-  help='Whether to do water scattering or not. If true, --water_radius must also be specified.')
-
 a('--water_radius', type=float, nargs=1, default=0.0,
   help='Radius of water jet in meters without crystal in it. Must be large enough to fully envelop crystal.')
 
@@ -179,7 +176,6 @@ pdb_file                        = get_arg(a.pdb_file)
 n_monte_carlo_iterations        = get_arg(a.iterations)
 shape_transform_model           = get_arg(a.shape_transform)
 write_hdf5                      = get_arg(a.write_hdf5)
-print(write_hdf5)
 write_geom                      = get_arg(a.write_geom)
 mplview                         = get_arg(a.mplview)
 qtview                          = get_arg(a.qtview)
@@ -204,7 +200,6 @@ approximate_shape_transform     = get_arg(a.shape_transform)
 do_monte_carlo                  = get_arg(a.no_monte_carlo) # This should not be needed; set bandwidth etc. to zero of you don't want monte carlo...
 beam_divergence_fwhm            = get_arg(a.beam_divergence) * (8e-6 / beam_diameter)
 num_patterns                    = get_arg(a.num_patterns)
-water                           = get_arg(a.water)
 water_radius                    = get_arg(a.water_radius)
 temperature                     = get_arg(a.temperature)
 flux                            = get_arg(a.flux)
@@ -231,21 +226,56 @@ write_ideal_only = get_arg(a.ideal_only)
 expand_symm = get_arg( a.expand_symmetry)
 fix_rot_seq = get_arg(a.fix_rotation_sequence)
 
-#parameters                      = get_arg(a.parameters)
-#no_params                       = get_arg(a.no_params)
+if mplview==qtview and mplview==True or mplview==skview and mplview==True or qtview==skview and qtview==True:
+    sys.exit('ERROR: Only one viewer can be used. Please choose either mplview, qtview, or skview')
+
+if flux!=0 and exposure==0 or flux==0 and exposure!=0:
+    sys.exit('ERROR: flux and exposure must be used together, both values must be non-zero.')
+
+if temperature<0 or n_monte_carlo_iterations<0 or beam_diameter<0 or detector_distance<0 or pixel_size<0 or \
+    n_pixels<0 or mosaic_domain_size<0 or mosaicity_fwhm<0 or beam_divergence_fwhm<0 or photon_energy<0 or \
+    n_photons<0 or num_patterns<0 or water_radius<0 or flux<0 or exposure<0:
+    sys.exit('ERROR: one or more of you parameters is an invalid negative value')
+
+if n_monte_carlo_iterations < 1:
+    sys.exit('ERROR: iterations must be an integer larger than zero')
+
+if beam_diameter==0:
+    sys.exit('ERROR: beam diameter must be greater than zero')
+
+if detector_distance==0:
+    sys.exit('ERROR: detector distance must be greater than zero')
+
+if pixel_size==0:
+    sys.exit('ERROR: pixel_size must be greater than zero')
+
+if n_pixels==0:
+    sys.exit('ERROR: n_pixels must be greater than zero')
+
+if mosaic_domain_size==0:
+    sys.exit('ERROR: mosaic_domain_size must be greater than zero')
+
+if photon_energy==0:
+    sys.exit('ERROR: photon_energy must be greater than zero')
+
+if num_patterns==0:
+    sys.exit('ERROR: num_patterns must be greater than zero') 
+
+if flux==0 and exposure==0 and n_photons==0:
+    sys.exit('ERROR: either n_photons or flux must be greater than zero')
 
 # Creating text file with output parameters
-values = [pdb_file, crystal_size, crystal_size_fwhm, write_crystal_sizes, photon_energy*keV, flux, exposure, n_photons, n_monte_carlo_iterations, shape_transform_model,
-          write_hdf5, write_geom, mplview, qtview, skview, quiet, cromer_mann, random_rotation, beam_diameter, beam_spatial_profile,
+values = [pdb_file, crystal_size, photon_energy*keV, n_monte_carlo_iterations, lattice_transform_model,
+          write_hdf5, write_geom, quiet, cromer_mann, random_rotation, beam_diameter, beam_spatial_profile,
           detector_distance, pixel_size, add_noise, int(n_pixels), transmission, mosaic_domain_size, mosaicity_fwhm,
-          overlay_wigner_cells, results_dir, mask_direct_beam, do_monte_carlo,
-          beam_divergence_fwhm/(8e-6/beam_diameter), num_patterns, water, water_radius, temperature, wavelength]
+          overlay_wigner_cells, results_dir, mask_direct_beam, approximate_lattice_transform, do_monte_carlo,
+          beam_divergence_fwhm/(8e-6/beam_diameter), num_patterns, water_radius, temperature, wavelength]
 
-names = ['pdb_file', 'crystal_size', 'crystal_size_fwhm', 'write_crystal_sizes', 'photon_energy', 'flux', 'exposure', 'n_photons', 'iterations', 'shape_transform',
-          'write_hdf5', 'write_geom', 'mplview', 'qtview', 'skview', 'quiet', 'cromer_mann', 'no_rotation', 'beam_diameter', 'beam_spatial_profile',
+names = ['pdb_file', 'crystal_size', 'photon_energy', 'iterations', 'lattice_transform',
+          'write_hdf5', 'write_geom', 'quiet', 'cromer_mann', 'no_rotation', 'beam_diameter', 'beam_spatial_profile',
           'detector_distance', 'pixel_size', 'add_noise', 'n_pixels', 'transmission', 'mosaic_domain_size', 'mosaicity_fwhm',
-          'wigner', 'results_dir', 'no_beam_mask', 'no_monte_carlo',
-          'beam_divergence', 'num_patterns', 'water', 'water_radius', 'temperature', 'wavelength']
+          'wigner', 'results_dir', 'no_beam_mask', 'no_approx_transform', 'no_monte_carlo',
+          'beam_divergence', 'num_patterns', 'water_radius', 'temperature', 'wavelength']
 
 pseudo_dict = zip(names, values)
 dictionary  = dict(pseudo_dict)
@@ -253,6 +283,17 @@ if photon_energy_fwhm != -1:
     dictionary['photon_energy_fwhm']=photon_energy_fwhm
 else:
     dictionary['wavelength_fwhm']=wavelength_fwhm/wavelength
+if mplview:
+    dictionary['mplview']=mplview
+if qtview:
+    dictionary['qtview']=qtview
+if skview:
+    dictionary['skview']=skview
+if flux!=0:
+    dictionary['flux']=flux
+    dictionary['exposure']=exposure
+if flux==0:
+    dictionary['n_photons']=n_photons
 file_name = results_dir + 'used_params.txt'
 used_params = open(str(file_name), 'w+')
 for k, v in dictionary.items():
@@ -337,7 +378,7 @@ P = pad.polarization_factors(polarization_vec=polarization_vec,beam_vec=beam_vec
 write('done\n')
 
 # Do water scattering
-if(water):
+if water_radius!=0:
     write('Simulating water scattering... ')
     water_number_density = 33.3679e27
     illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
@@ -347,7 +388,6 @@ if(water):
     I_water = I0 * r_e**2 * P * sa * F2_water
     if(illuminated_water_volume <= 0):
         write('\nWarning: No solvent was illuminated, water scattering not performed.\n')
-        water = False
         I_water = 0
     else:
         write('done\n')
@@ -509,7 +549,7 @@ for i in np.arange(1, (num_patterns + 1)):
     # Scale up according to mosaic domain
     n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
     I_ideal = I.copy() * n_domains
-    if(water):
+    if(water_radius != 0):
         I_ideal += I_water
     I_ideal = I_ideal.astype(np.float32)
     I_noisy = np.random.poisson(I_ideal).astype(np.float32)
