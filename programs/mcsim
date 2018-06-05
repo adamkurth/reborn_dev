@@ -34,8 +34,8 @@ a('--config', is_config_file=True,
 a('--pdb_file', type=str, nargs=1, default='../examples/data/pdb/2LYZ-P1.pdb',
   help='PDB file (symmetry is **not** expanded)')
 
-a('--lattice_transform', type=str, nargs=1, default='gaussian',
-  help='Lattice transform model.  Options are parallelepiped or gaussian.')
+a('-shape_transform', type=str, nargs=1, default='gaussian',
+  help='Crystal shape transform model.  Options are parallelepiped or gaussian.')
 
 a('--iterations', type=int, nargs=1, default=1000,
   help='Number of independent Monte Carlo iterations to average')
@@ -78,9 +78,6 @@ a('--fix-rotation-sequence', type=lambda s: s.lower() in ['true', 't', 'yes', '1
 
 a('--no_beam_mask', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=True,
   help='Stops direct beam masking')
-
-a('--no_approx_transform', type=bool, nargs=1, default=True,
-  help='Stops approximate lattice transform')
 
 a('--no_monte_carlo',type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=True,
   help='Stops Monte Carlo simulation')
@@ -174,7 +171,7 @@ def get_arg(arg):
 # on.
 pdb_file                        = get_arg(a.pdb_file)
 n_monte_carlo_iterations        = get_arg(a.iterations)
-lattice_transform_model         = get_arg(a.lattice_transform)
+shape_transform_model         = get_arg(a.shape_transform)
 write_hdf5                      = get_arg(a.write_hdf5)
 print(write_hdf5)
 write_geom                      = get_arg(a.write_geom)
@@ -197,7 +194,7 @@ mosaicity_fwhm                  = get_arg(a.mosaicity_fwhm)
 overlay_wigner_cells            = get_arg(a.wigner)
 results_dir                     = get_arg(a.results_dir)
 mask_direct_beam                = get_arg(a.no_beam_mask)
-approximate_lattice_transform   = get_arg(a.no_approx_transform)
+approximate_shape_transform   = get_arg(a.shape_transform)
 do_monte_carlo                  = get_arg(a.no_monte_carlo) # This should not be needed; set bandwidth etc. to zero of you don't want monte carlo...
 beam_divergence_fwhm            = get_arg(a.beam_divergence) * (8e-6 / beam_diameter)
 num_patterns                    = get_arg(a.num_patterns)
@@ -230,16 +227,16 @@ fix_rot_seq = get_arg(a.fix_rotation_sequence)
 #no_params                       = get_arg(a.no_params)
 
 # Creating text file with output parameters
-values = [pdb_file, crystal_size, photon_energy*keV, flux, exposure, n_photons, n_monte_carlo_iterations, lattice_transform_model,
+values = [pdb_file, crystal_size, photon_energy*keV, flux, exposure, n_photons, n_monte_carlo_iterations, shape_transform_model,
           write_hdf5, write_geom, mplview, qtview, skview, quiet, cromer_mann, random_rotation, beam_diameter, beam_spatial_profile,
           detector_distance, pixel_size, add_noise, int(n_pixels), transmission, mosaic_domain_size, mosaicity_fwhm,
-          overlay_wigner_cells, results_dir, mask_direct_beam, approximate_lattice_transform, do_monte_carlo,
+          overlay_wigner_cells, results_dir, mask_direct_beam, do_monte_carlo,
           beam_divergence_fwhm/(8e-6/beam_diameter), num_patterns, water, water_radius, temperature, wavelength]
 
-names = ['pdb_file', 'crystal_size', 'photon_energy', 'flux', 'exposure', 'n_photons', 'iterations', 'lattice_transform',
+names = ['pdb_file', 'crystal_size', 'photon_energy', 'flux', 'exposure', 'n_photons', 'iterations', 'shape_transform',
           'write_hdf5', 'write_geom', 'mplview', 'qtview', 'skview', 'quiet', 'cromer_mann', 'no_rotation', 'beam_diameter', 'beam_spatial_profile',
           'detector_distance', 'pixel_size', 'add_noise', 'n_pixels', 'transmission', 'mosaic_domain_size', 'mosaicity_fwhm',
-          'wigner', 'results_dir', 'no_beam_mask', 'no_approx_transform', 'no_monte_carlo',
+          'wigner', 'results_dir', 'no_beam_mask', 'no_monte_carlo',
           'beam_divergence', 'num_patterns', 'water', 'water_radius', 'temperature', 'wavelength']
 
 pseudo_dict = zip(names, values)
@@ -301,12 +298,12 @@ if skview:
 if a.double_precision:
     cl_double_precision = True
 
-if lattice_transform_model == 'gaussian':
-    approximate_lattice_transform = True
-elif lattice_transform_model == 'parallelepiped':
-    approximate_lattice_transform = False
+if shape_transform_model == 'gaussian':
+    approximate_shape_transform = True
+elif shape_transform_model == 'parallelepiped':
+    approximate_shape_transform = False
 else:
-    sys.stderr.write('Lattice transform model not recognized: %s\n' % (lattice_transform_model))
+    sys.stderr.write('Crystal shape transform model not recognized: %s\n' % (shape_transform_model))
     sys.stderr.write('The options are: gaussian or parallelepiped\n')
     sys.exit(1)
 
@@ -379,13 +376,13 @@ if(crystal_size > beam_diameter):
 if(mosaic_domain_size > beam_diameter):
     n_cells_mosaic_domain = np.ceil(np.array([beam_diameter, beam_diameter, mosaic_domain_size]) / np.array([cryst.a, cryst.b, cryst.c]))
 
-# Setup function for lattice transform calculations
-if approximate_lattice_transform:
-    write('Using approximate (Gaussian) lattice transform\n')
-    lattice_transform = clcore.gaussian_lattice_transform_intensities_pad
+# Setup function for shape transform calculations
+if approximate_shape_transform:
+    write('Using approximate (Gaussian) shape transform\n')
+    shape_transform = clcore.gaussian_lattice_transform_intensities_pad
 else:
-    write('Using idealized (parallelepiped) lattice transform\n')
-    lattice_transform = clcore.lattice_transform_intensities_pad
+    write('Using idealized (parallelepiped) shape transform\n')
+    shape_transform = clcore.lattice_transform_intensities_pad
 
 if write_geom:
     geom_file = results_dir + 'geom.geom'
@@ -446,7 +443,7 @@ for i in np.arange(1, (num_patterns + 1)):
     abc = cryst.O.T.copy()
     S2_dev *= 0
 
-    write('Simulating lattice transform... ')
+    write('Simulating shape transform... ')
     time.sleep(0.001)
     message = ''
     tt = time.time()
@@ -467,7 +464,7 @@ for i in np.arange(1, (num_patterns + 1)):
             Rm = R
             T = pad.t_vec
 
-        lattice_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, S2_dev, add=True)
+        shape_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, S2_dev, add=True)
 
         tf = time.time() - t
         if (n % 1000) == 0:
@@ -477,7 +474,7 @@ for i in np.arange(1, (num_patterns + 1)):
     write('\b' * len(message))
     write('%g s                \n' % (time.time() - tt))
 
-    # Average the lattice transforms over MC iterations
+    # Average the shape transforms over MC iterations
     S2 = S2_dev.get().ravel() / n
     # Convert into useful photon units
     I = I0 * r_e ** 2 * F2 * S2 *  sa * P 
