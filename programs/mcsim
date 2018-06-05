@@ -127,6 +127,12 @@ a('--num_patterns', type=int, nargs=1, default=1,
 a('--crystal_size', type=float, nargs=1, default=0.0,
   help='Size of crystal in meters (default is beam diameter)')
 
+a('--crystal_size_fwhm', type=float, nargs=1, default=0.0,
+  help='FWHM of crystal size distribution (dside/side)')
+
+a('--write_crystal_sizes', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='Write text file of crystal sizes per pattern.')
+
 a('--water', type=bool, nargs=1, default=False,
   help='Whether to do water scattering or not. If true, --water_radius must also be specified.')
 
@@ -207,12 +213,14 @@ beam_spatial_profile            = get_arg(a.beam_spatial_profile)
 photon_energy_fwhm              = get_arg(a.photon_energy_fwhm)
 wavelength                      = hc / photon_energy # pulse_energy = 0.0024
 if photon_energy_fwhm != -1:
-    wavelength_fwhm = (wavelength**2 * photon_energy_fwhm * photon_energy) / float(hc)
+    wavelength_fwhm             = (wavelength**2 * photon_energy_fwhm * photon_energy) / float(hc)
 else:
-    wavelength_fwhm                 = wavelength * get_arg(a.wavelength_fwhm)
+    wavelength_fwhm             = wavelength * get_arg(a.wavelength_fwhm)
 crystal_size                    = get_arg(a.crystal_size)
 if crystal_size == 0:
     crystal_size = beam_diameter
+crystal_size_fwhm               = crystal_size * get_arg(a.crystal_size_fwhm)
+write_crystal_sizes             = get_arg(a.write_crystal_sizes)
 if(flux != 0):
     n_photons = flux*exposure # Get number of photons from beam parameters
 I0                              = transmission * n_photons / (beam_diameter ** 2) # Square beam
@@ -227,13 +235,13 @@ fix_rot_seq = get_arg(a.fix_rotation_sequence)
 #no_params                       = get_arg(a.no_params)
 
 # Creating text file with output parameters
-values = [pdb_file, crystal_size, photon_energy*keV, flux, exposure, n_photons, n_monte_carlo_iterations, shape_transform_model,
+values = [pdb_file, crystal_size, crystal_size_fwhm, write_crystal_sizes, photon_energy*keV, flux, exposure, n_photons, n_monte_carlo_iterations, shape_transform_model,
           write_hdf5, write_geom, mplview, qtview, skview, quiet, cromer_mann, random_rotation, beam_diameter, beam_spatial_profile,
           detector_distance, pixel_size, add_noise, int(n_pixels), transmission, mosaic_domain_size, mosaicity_fwhm,
           overlay_wigner_cells, results_dir, mask_direct_beam, do_monte_carlo,
           beam_divergence_fwhm/(8e-6/beam_diameter), num_patterns, water, water_radius, temperature, wavelength]
 
-names = ['pdb_file', 'crystal_size', 'photon_energy', 'flux', 'exposure', 'n_photons', 'iterations', 'shape_transform',
+names = ['pdb_file', 'crystal_size', 'crystal_size_fwhm', 'write_crystal_sizes', 'photon_energy', 'flux', 'exposure', 'n_photons', 'iterations', 'shape_transform',
           'write_hdf5', 'write_geom', 'mplview', 'qtview', 'skview', 'quiet', 'cromer_mann', 'no_rotation', 'beam_diameter', 'beam_spatial_profile',
           'detector_distance', 'pixel_size', 'add_noise', 'n_pixels', 'transmission', 'mosaic_domain_size', 'mosaicity_fwhm',
           'wigner', 'results_dir', 'no_beam_mask', 'no_monte_carlo',
@@ -255,8 +263,6 @@ for k, v in dictionary.items():
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
-# Doesn't make sense if mosaic domain size is larger than the whole crystal...
-if mosaic_domain_size > crystal_size: mosaic_domain_size = crystal_size
 
 if not do_monte_carlo:
     n_monte_carlo_iterations = 1
@@ -368,13 +374,6 @@ write('%d atoms per unit cell\n' % (len(f)))
 direct_beam_mask = np.ones((int(pad.n_ss * pad.n_fs)))
 direct_beam_mask[qmag < (2 * np.pi / np.max(np.array([cryst.a, cryst.b, cryst.c])))] = 0
 
-# Determine number of unit cells in whole crystal and mosaic domains
-n_cells_whole_crystal = np.ceil(crystal_size / np.array([cryst.a, cryst.b, cryst.c]))
-n_cells_mosaic_domain = np.ceil(mosaic_domain_size / np.array([cryst.a, cryst.b, cryst.c]))
-if(crystal_size > beam_diameter):
-    n_cells_whole_crystal = np.ceil(np.array([beam_diameter, beam_diameter, crystal_size]) / np.array([cryst.a, cryst.b, cryst.c]))
-if(mosaic_domain_size > beam_diameter):
-    n_cells_mosaic_domain = np.ceil(np.array([beam_diameter, beam_diameter, mosaic_domain_size]) / np.array([cryst.a, cryst.b, cryst.c]))
 
 # Setup function for shape transform calculations
 if approximate_shape_transform:
@@ -411,7 +410,25 @@ F_dev = clcore.to_device(np.zeros([int(pad.n_ss * pad.n_fs)], dtype=clcore.compl
 S2_dev = clcore.to_device(shape=(int(pad.n_fs), int(pad.n_ss)), dtype=clcore.real_t)
 write('done\n')
 
+crystal_size_original = crystal_size
+mosaic_domain_size_original = mosaic_domain_size
+
 for i in np.arange(1, (num_patterns + 1)):
+    #TODO: Vary crystal and mosaic domain size according to Gaussian
+    if(crystal_size_fwhm != 0):
+        crystal_size = np.random.normal(crystal_size_original, crystal_size_fwhm / 2.354820045)
+
+        # Doesn't make sense if mosaic domain size is larger than the whole crystal...
+        if mosaic_domain_size > crystal_size: mosaic_domain_size = crystal_size
+
+        # Determine number of unit cells in whole crystal and mosaic domains
+        n_cells_whole_crystal = np.ceil(crystal_size / np.array([cryst.a, cryst.b, cryst.c]))
+        n_cells_mosaic_domain = np.ceil(mosaic_domain_size / np.array([cryst.a, cryst.b, cryst.c]))
+        if(crystal_size > beam_diameter):
+            n_cells_whole_crystal = np.ceil(np.array([beam_diameter, beam_diameter, crystal_size]) / np.array([cryst.a, cryst.b, cryst.c]))
+        if(mosaic_domain_size > beam_diameter):
+            n_cells_mosaic_domain = np.ceil(np.array([beam_diameter, beam_diameter, mosaic_domain_size]) / np.array([cryst.a, cryst.b, cryst.c]))
+
     R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
     if random_rotation: R = ba.utils.random_rotation()
 
