@@ -3,11 +3,10 @@
 """
 TODO:
 
-1. Add the ability to write a text file pairing crystal sizes to patterns
-2. Add the ability to vary mosaic domain size
-3. Make sure options on input and output config files are up to date with new added options.
-4. Add LCP scattering.
-5. Look into numerical overflow problem resulting in diffraction spots less than background
+1. Add the ability to vary mosaic domain size
+2. Make sure options on input and output config files are up to date with new added options.
+3. Add LCP scattering.
+4. Look into numerical overflow problem resulting in diffraction spots less than background
 
 """
 
@@ -28,7 +27,6 @@ from bornagain.utils import vec_mag
 from bornagain.units import r_e, hc, keV
 import bornagain.simulate.clcore as core
 
-t0 = time.time()
 ########################################################################################################################
 # Command-line input.  Most defaults are set here, but are subject to change (so do not rely on them).
 ########################################################################################################################
@@ -454,6 +452,11 @@ write('done\n')
 crystal_size_original = crystal_size
 mosaic_domain_size_original = mosaic_domain_size
 
+if write_crystal_sizes: # Put before pattern loop
+    file_name = os.path.join( results_dir, 'crystal_sizes' )
+    cryst_size_file = open(file_name, 'w+')
+    cryst_size_file.write('Crystal size (meters) : Pattern file\n')
+
 for i in np.arange(1, (num_patterns + 1)):
     mosaic_domain_size = mosaic_domain_size_original
     if(crystal_size_fwhm != 0):
@@ -589,11 +592,16 @@ for i in np.arange(1, (num_patterns + 1)):
             #        compression=compression, shape=sh)
             fid.create_dataset("rotation_matrix", data=R)
 
+    if write_crystal_sizes:
+        cryst_size_file.write('%g:pattern-%06d.h5\n' % (crystal_size , (n_patterns + 1)))
+
     F2mean = np.mean(F2.flat[direct_beam_mask > 0])
     Ncells = np.prod(n_cells_whole_crystal)
     darwin = I0 * r_e ** 2 * Ncells * F2mean * (wavelength ** 3 / cryst.V)
 
 # End of pattern loop
+if write_crystal_sizes:
+    cryst_size_file.close()
 
 write("\n\nDone!\n\n")
 
@@ -637,5 +645,3 @@ if qtview or mplview or skview:
     elif mplview:
         plt.imshow(I_display, interpolation='nearest', cmap='gray', origin='lower')
         plt.show()
-t0f = time.time() - t0
-write('Whole program took %s seconds.' % t0f)
