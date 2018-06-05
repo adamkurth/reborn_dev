@@ -495,23 +495,23 @@ kernel void gaussian_lattice_transform_intensities_pad(
     // First crystal axis (this could be put in a loop over three axes...)
     n = (dsfloat)N.x;
     a = (dsfloat4)(abc.s0,abc.s1,abc.s2,0.0);
-    x = dot(q4r,a);
+    x = dot(q4r,a)/2.0;
     x = x - round(x/PI2)*PI2;
-    It *= n*n*exp(-n*n*x*x/(4*PI));
+    It *= n*n*exp(-n*n*x*x/PI);
 
     // Second crystal axis
     n = (dsfloat)N.y;
     a = (dsfloat4)(abc.s3,abc.s4,abc.s5,0.0);
-    x = dot(q4r,a);
+    x = dot(q4r,a)/2.0;
     x = x - round(x/PI2)*PI2;
-    It *= n*n*exp(-n*n*x*x/(4*PI));
+    It *= n*n*exp(-n*n*x*x/PI);
 
     // Third crystal axis
     n = (dsfloat)N.z;
     a = (dsfloat4)(abc.s6,abc.s7,abc.s8,0.0);
-    x = dot(q4r,a);
+    x = dot(q4r,a)/2.0;
     x = x - round(x/PI2)*PI2;
-    It *= n*n*exp(-n*n*x*x/(4*PI));
+    It *= n*n*exp(-n*n*x*x/PI);
 
     if (gi < n_pixels ){
         if (add == 1){
