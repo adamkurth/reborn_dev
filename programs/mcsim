@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+"""
+TODO:
+
+1. Add the ability to write a text file pairing crystal sizes to patterns
+2. Add the ability to vary mosaic domain size
+3. Make sure options on input and output config files are up to date with new added options.
+4. Add LCP scattering.
+5. Look into numerical overflow problem resulting in diffraction spots less than background
+
+"""
+
 import os
 import sys
 import time
@@ -17,7 +28,7 @@ from bornagain.utils import vec_mag
 from bornagain.units import r_e, hc, keV
 import bornagain.simulate.clcore as core
 
-
+t0 = time.time()
 ########################################################################################################################
 # Command-line input.  Most defaults are set here, but are subject to change (so do not rely on them).
 ########################################################################################################################
@@ -221,10 +232,10 @@ if(flux != 0):
 I0                              = transmission * n_photons / (beam_diameter ** 2) # Square beam
 rotation_axis                   = [1, 0, 0]
 rotation_angle                  = 0.1
-compression =get_arg(a.compression)
-write_ideal_only = get_arg(a.ideal_only)
-expand_symm = get_arg( a.expand_symmetry)
-fix_rot_seq = get_arg(a.fix_rotation_sequence)
+compression                     = get_arg(a.compression)
+write_ideal_only                = get_arg(a.ideal_only)
+expand_symm                     = get_arg( a.expand_symmetry)
+fix_rot_seq                     = get_arg(a.fix_rotation_sequence)
 
 if mplview==qtview and mplview==True or mplview==skview and mplview==True or qtview==skview and qtview==True:
     sys.exit('ERROR: Only one viewer can be used. Please choose either mplview, qtview, or skview')
@@ -265,16 +276,16 @@ if flux==0 and exposure==0 and n_photons==0:
     sys.exit('ERROR: either n_photons or flux must be greater than zero')
 
 # Creating text file with output parameters
-values = [pdb_file, crystal_size, photon_energy*keV, n_monte_carlo_iterations, lattice_transform_model,
+values = [pdb_file, crystal_size, photon_energy*keV, n_monte_carlo_iterations, shape_transform_model,
           write_hdf5, write_geom, quiet, cromer_mann, random_rotation, beam_diameter, beam_spatial_profile,
           detector_distance, pixel_size, add_noise, int(n_pixels), transmission, mosaic_domain_size, mosaicity_fwhm,
-          overlay_wigner_cells, results_dir, mask_direct_beam, approximate_lattice_transform, do_monte_carlo,
+          overlay_wigner_cells, results_dir, mask_direct_beam, do_monte_carlo,
           beam_divergence_fwhm/(8e-6/beam_diameter), num_patterns, water_radius, temperature, wavelength]
 
 names = ['pdb_file', 'crystal_size', 'photon_energy', 'iterations', 'lattice_transform',
           'write_hdf5', 'write_geom', 'quiet', 'cromer_mann', 'no_rotation', 'beam_diameter', 'beam_spatial_profile',
           'detector_distance', 'pixel_size', 'add_noise', 'n_pixels', 'transmission', 'mosaic_domain_size', 'mosaicity_fwhm',
-          'wigner', 'results_dir', 'no_beam_mask', 'no_approx_transform', 'no_monte_carlo',
+          'wigner', 'results_dir', 'no_beam_mask', 'no_monte_carlo',
           'beam_divergence', 'num_patterns', 'water_radius', 'temperature', 'wavelength']
 
 pseudo_dict = zip(names, values)
@@ -377,21 +388,6 @@ sa = pad.solid_angles()
 P = pad.polarization_factors(polarization_vec=polarization_vec,beam_vec=beam_vec,weight=polarization_weight)
 write('done\n')
 
-# Do water scattering
-if water_radius!=0:
-    write('Simulating water scattering... ')
-    water_number_density = 33.3679e27
-    illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
-    n_water_molecules = illuminated_water_volume * water_number_density
-    F_water = solutions.get_water_profile(qmag, temperature=temperature) # Get water scattering intensity radial profile
-    F2_water = F_water**2 * n_water_molecules
-    I_water = I0 * r_e**2 * P * sa * F2_water
-    if(illuminated_water_volume <= 0):
-        write('\nWarning: No solvent was illuminated, water scattering not performed.\n')
-        I_water = 0
-    else:
-        write('done\n')
-
 # Get atomic coordinates and scattering factors from pdb file
 write('Getting atomic coordinates and scattering factors... ')
 if expand_symm:
@@ -409,11 +405,17 @@ f = ba.simulate.atoms.get_scattering_factors(Z, ba.units.hc / wavelength)
 write('done\n')
 write('%d atoms per unit cell\n' % (len(f)))
 
-# Make a mask for the direct beam
+# Determine number of unit cells in whole crystal and mosaic domains
+n_cells_whole_crystal = np.ceil(crystal_size / np.array([cryst.a, cryst.b, cryst.c]))
+n_cells_mosaic_domain = np.ceil(mosaic_domain_size / np.array([cryst.a, cryst.b, cryst.c]))
+if(crystal_size > beam_diameter):
+    n_cells_whole_crystal = np.ceil(np.array([beam_diameter, beam_diameter, crystal_size]) / np.array([cryst.a, cryst.b, cryst.c]))
+if(mosaic_domain_size > beam_diameter):
+    n_cells_mosaic_domain = np.ceil(np.array([beam_diameter, beam_diameter, mosaic_domain_size]) / np.array([cryst.a, cryst.b, cryst.c]))
 
+# Make a mask for the direct beam
 direct_beam_mask = np.ones((int(pad.n_ss * pad.n_fs)))
 direct_beam_mask[qmag < (2 * np.pi / np.max(np.array([cryst.a, cryst.b, cryst.c])))] = 0
-
 
 # Setup function for shape transform calculations
 if approximate_shape_transform:
@@ -441,7 +443,6 @@ if write_geom:
     fid.write("0/ss = y\n")
     fid.close()
 
-
 # Allocate memory on GPU device
 write('Allocating GPU device memory... ')
 r_dev = clcore.to_device(r, dtype=clcore.real_t)
@@ -454,7 +455,7 @@ crystal_size_original = crystal_size
 mosaic_domain_size_original = mosaic_domain_size
 
 for i in np.arange(1, (num_patterns + 1)):
-    #TODO: Vary crystal and mosaic domain size according to Gaussian
+    mosaic_domain_size = mosaic_domain_size_original
     if(crystal_size_fwhm != 0):
         crystal_size = np.random.normal(crystal_size_original, crystal_size_fwhm / 2.354820045)
 
@@ -468,6 +469,20 @@ for i in np.arange(1, (num_patterns + 1)):
             n_cells_whole_crystal = np.ceil(np.array([beam_diameter, beam_diameter, crystal_size]) / np.array([cryst.a, cryst.b, cryst.c]))
         if(mosaic_domain_size > beam_diameter):
             n_cells_mosaic_domain = np.ceil(np.array([beam_diameter, beam_diameter, mosaic_domain_size]) / np.array([cryst.a, cryst.b, cryst.c]))
+    # Do water scattering
+    if water_radius!=0:
+        write('Simulating water scattering... ')
+        water_number_density = 33.3679e27
+        illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
+        n_water_molecules = illuminated_water_volume * water_number_density
+        F_water = solutions.get_water_profile(qmag, temperature=temperature) # Get water scattering intensity radial profile
+        F2_water = F_water**2 * n_water_molecules
+        I_water = I0 * r_e**2 * P * sa * F2_water
+        if(illuminated_water_volume <= 0):
+            write('\nWarning: No solvent was illuminated, water scattering not performed.\n')
+            I_water = 0
+        else:
+            write('done\n')
 
     R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
     if random_rotation: R = ba.utils.random_rotation()
@@ -622,3 +637,5 @@ if qtview or mplview or skview:
     elif mplview:
         plt.imshow(I_display, interpolation='nearest', cmap='gray', origin='lower')
         plt.show()
+t0f = time.time() - t0
+write('Whole program took %s seconds.' % t0f)
