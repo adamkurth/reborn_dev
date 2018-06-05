@@ -3,10 +3,10 @@
 """
 TODO:
 
-1. Add the ability to vary mosaic domain size
-2. Make sure options on input and output config files are up to date with new added options.
-3. Add LCP scattering.
-4. Look into numerical overflow problem resulting in diffraction spots less than background
+1. Make sure options on input and output config files are up to date with new added options.
+2. Add LCP scattering.
+3. Look into numerical overflow problem resulting in diffraction spots less than background
+4. Incorporate mosaicity into shape transform instead of MC style
 
 """
 
@@ -124,6 +124,9 @@ a('--n_photons', type=float, nargs=1, default=1e8,
 a('--mosaic_domain_size', type=float, nargs=1, default=1000e-9,
   help='Mosaic domain size')
 
+a('--mosaic_domain_size_fwhm', type=float, nargs=1, default=0.0,
+  help='FWHM of mosaic domain size distribution (dside/side)')
+
 a('--mosaicity_fwhm', type=float, nargs=1, default=0.0001,
   help='Mosaicity full-width, half-max value')
 
@@ -140,7 +143,7 @@ a('--crystal_size_fwhm', type=float, nargs=1, default=0.0,
   help='FWHM of crystal size distribution (dside/side)')
 
 a('--write_crystal_sizes', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
-  help='Write text file of crystal sizes per pattern.')
+  help='Write text file of crystal and mosaic domain sizes per pattern.')
 
 a('--water_radius', type=float, nargs=1, default=0.0,
   help='Radius of water jet in meters without crystal in it. Must be large enough to fully envelop crystal.')
@@ -201,6 +204,7 @@ n_pixels                        = get_arg(a.n_pixels)
 transmission                    = get_arg(a.transmission)
 n_photons                       = int(get_arg(a.n_photons)) # pulse_energy / photon energy # 1e12
 mosaic_domain_size              = get_arg(a.mosaic_domain_size)
+mosaic_domain_size_fwhm         = mosaic_domain_size * get_arg(a.mosaic_domain_size_fwhm)
 mosaicity_fwhm                  = get_arg(a.mosaicity_fwhm)
 overlay_wigner_cells            = get_arg(a.wigner)
 results_dir                     = get_arg(a.results_dir)
@@ -455,10 +459,11 @@ mosaic_domain_size_original = mosaic_domain_size
 if write_crystal_sizes: # Put before pattern loop
     file_name = os.path.join( results_dir, 'crystal_sizes' )
     cryst_size_file = open(file_name, 'w+')
-    cryst_size_file.write('Crystal size (meters) : Pattern file\n')
+    cryst_size_file.write('Crystal size (meters) : Mosaic domain size (meters) : Pattern file\n')
 
 for i in np.arange(1, (num_patterns + 1)):
-    mosaic_domain_size = mosaic_domain_size_original
+    if(mosaic_domain_size_fwhm != 0):
+        mosaic_domain_size = np.random.normal(mosaic_domain_size_original, mosaic_domain_size_fwhm / 2.354820045)
     if(crystal_size_fwhm != 0):
         crystal_size = np.random.normal(crystal_size_original, crystal_size_fwhm / 2.354820045)
 
@@ -593,7 +598,7 @@ for i in np.arange(1, (num_patterns + 1)):
             fid.create_dataset("rotation_matrix", data=R)
 
     if write_crystal_sizes:
-        cryst_size_file.write('%g:pattern-%06d.h5\n' % (crystal_size , (n_patterns + 1)))
+        cryst_size_file.write('%g:%g:pattern-%06d.h5\n' % (crystal_size, mosaic_domain_size, (n_patterns + 1)))
 
     F2mean = np.mean(F2.flat[direct_beam_mask > 0])
     Ncells = np.prod(n_cells_whole_crystal)
