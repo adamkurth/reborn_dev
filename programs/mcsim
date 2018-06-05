@@ -34,7 +34,7 @@ a('--config', is_config_file=True,
 a('--pdb_file', type=str, nargs=1, default='../examples/data/pdb/2LYZ-P1.pdb',
   help='PDB file (symmetry is **not** expanded)')
 
-a('-shape_transform', type=str, nargs=1, default='gaussian',
+a('--shape_transform', type=str, nargs=1, default='gaussian',
   help='Crystal shape transform model.  Options are parallelepiped or gaussian.')
 
 a('--iterations', type=int, nargs=1, default=1000,
@@ -171,7 +171,7 @@ def get_arg(arg):
 # on.
 pdb_file                        = get_arg(a.pdb_file)
 n_monte_carlo_iterations        = get_arg(a.iterations)
-shape_transform_model         = get_arg(a.shape_transform)
+shape_transform_model           = get_arg(a.shape_transform)
 write_hdf5                      = get_arg(a.write_hdf5)
 print(write_hdf5)
 write_geom                      = get_arg(a.write_geom)
@@ -194,7 +194,7 @@ mosaicity_fwhm                  = get_arg(a.mosaicity_fwhm)
 overlay_wigner_cells            = get_arg(a.wigner)
 results_dir                     = get_arg(a.results_dir)
 mask_direct_beam                = get_arg(a.no_beam_mask)
-approximate_shape_transform   = get_arg(a.shape_transform)
+approximate_shape_transform     = get_arg(a.shape_transform)
 do_monte_carlo                  = get_arg(a.no_monte_carlo) # This should not be needed; set bandwidth etc. to zero of you don't want monte carlo...
 beam_divergence_fwhm            = get_arg(a.beam_divergence) * (8e-6 / beam_diameter)
 num_patterns                    = get_arg(a.num_patterns)
