@@ -82,7 +82,7 @@ a('--wigner', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, de
 a('--no_rotation', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=True,
   help='Removes random rotation of the crystal')
 
-a('--fix-rotation-sequence', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1,
+a('--fix_rotation_sequence', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1,
   help='Fixes the sequence of random orientation matrices so that mcsim can be run several times under different conditions, maintaining the same set of matrices throughout')
 
 a('--no_beam_mask', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=True,
@@ -277,18 +277,25 @@ if num_patterns==0:
 if flux==0 and exposure==0 and n_photons==0:
     sys.exit('ERROR: either n_photons or flux must be greater than zero')
 
+if photon_energy_fwhm != -1 and get_arg(a.wavelength_fwhm) != 0.02:
+    sys.exit('ERROR: photon_energy_fwhm and wavelength_fwhm cannot both be specified, please specify just one')
+
 # Creating text file with output parameters
 values = [pdb_file, crystal_size, photon_energy*keV, n_monte_carlo_iterations, shape_transform_model,
           write_hdf5, write_geom, quiet, cromer_mann, random_rotation, beam_diameter, beam_spatial_profile,
           detector_distance, pixel_size, add_noise, int(n_pixels), transmission, mosaic_domain_size, mosaicity_fwhm,
           overlay_wigner_cells, results_dir, mask_direct_beam, do_monte_carlo,
-          beam_divergence_fwhm/(8e-6/beam_diameter), num_patterns, water_radius, temperature, wavelength]
+          beam_divergence_fwhm/(8e-6/beam_diameter), num_patterns, water_radius, temperature, wavelength,
+          shape_transform_model, fix_rot_seq, mosaic_domain_size_fwhm/mosaic_domain_size, crystal_size_fwhm/crystal_size,
+          write_crystal_sizes, expand_symm]
 
 names = ['pdb_file', 'crystal_size', 'photon_energy', 'iterations', 'lattice_transform',
           'write_hdf5', 'write_geom', 'quiet', 'cromer_mann', 'no_rotation', 'beam_diameter', 'beam_spatial_profile',
           'detector_distance', 'pixel_size', 'add_noise', 'n_pixels', 'transmission', 'mosaic_domain_size', 'mosaicity_fwhm',
           'wigner', 'results_dir', 'no_beam_mask', 'no_monte_carlo',
-          'beam_divergence', 'num_patterns', 'water_radius', 'temperature', 'wavelength']
+          'beam_divergence', 'num_patterns', 'water_radius', 'temperature', 'wavelength'
+          'shape_transform','fix_rotation_sequence', 'mosaic_domain_size_fwhm','crystal_size_fwhm',
+          'write_crystal_sizes', 'expand_symmetry']
 
 pseudo_dict = zip(names, values)
 dictionary  = dict(pseudo_dict)
