@@ -276,10 +276,7 @@ if flux==0 and exposure==0 and n_photons==0:
 
 if photon_energy_fwhm != -1 and wavelength_fwhm != 0.02:
     sys.exit('ERROR: photon_energy_fwhm and wavelength_fwhm cannot both be specified, please specify just one')
-print(photon_energy)
-print(photon_energy_fwhm)
-print(wavelength)
-print(wavelength_fwhm)
+
 # Get true FWHM value for wavelength
 if photon_energy_fwhm != -1:
     wavelength_fwhm  = (wavelength**2 * photon_energy_fwhm * photon_energy) / float(hc)
