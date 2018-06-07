@@ -487,6 +487,11 @@ for i in np.arange(1, (num_patterns + 1)):
             n_cells_whole_crystal = np.ceil(np.array([beam_diameter, beam_diameter, crystal_size]) / np.array([cryst.a, cryst.b, cryst.c]))
         if(mosaic_domain_size > beam_diameter):
             n_cells_mosaic_domain = np.ceil(np.array([beam_diameter, beam_diameter, mosaic_domain_size]) / np.array([cryst.a, cryst.b, cryst.c]))
+
+    # In case mosaic domain varied to be larger than fixed size crystal
+    if mosaic_domain_size > crystal_size:
+        mosaic_domain_size = crystal_size
+
     # Do water scattering
     if water_radius!=0:
         write('Simulating water scattering... ')
