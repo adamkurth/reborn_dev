@@ -104,9 +104,12 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
 
     if beam_spatial_profile != 'tophat' and beam_spatial_profile != 'gaussian':
         sys.exit('ERROR: beam_spatial_profile must be either gaussian or tophat')
+    
+    if not os.path.isfile(pdb_file):
+        sys.exit('ERROR: pdb file does not exist')
 
-    # TODO: Check if pdb_file exists
-    # TODO: Check that compression format is valid
+    if not (compression == None or compression == 'lzf' or compression == 'gzip'):
+        sys.exit('ERROR: compression format must be either lzf or gzip')
 
     # Creating text file with output parameters
     values = [detector_distance, pixel_size, n_pixels, beam_diameter, photon_energy * keV, n_photons, transmission, mosaicity_fwhm,
@@ -409,4 +412,3 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         cryst_size_file.close()
 
     write("\n\nDone!\n\n")
-
