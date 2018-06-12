@@ -34,10 +34,11 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
           water_radius=0.0, temperature=298.16, \
           n_monte_carlo_iterations=1000, num_patterns=1, random_rotation=True, \
           approximate_shape_transform=True, cromer_mann=False, expand_symm=False, \
-          fix_rot_sequence=False, overlay_wigner_cells=False, mask_direct_beam=False, \
+          fix_rot_seq=False, overlay_wigner_cells=False, mask_direct_beam=False, \
           pdb_file='../../examples/data/pdb/2LYZ-P1.pdb', \
           write_hdf5=True, write_geom=True, write_crystal_sizes=True, \
-          write_ideal_only=False, results_dir='/data/temp/', quiet=False, compression=None, cl_double_precision=False):
+          write_ideal_only=False, results_dir='/data/temp/', \
+          quiet=False, compression=None, cl_double_precision=False):
     """
     TODO: Write docstring.
     """
@@ -111,14 +112,14 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     values = [detector_distance, pixel_size, n_pixels, beam_diameter, photon_energy * keV, n_photons, transmission, mosaicity_fwhm,
               beam_divergence_fwhm, beam_spatial_profile, photon_energy_fwhm, crystal_size, crystal_size_fwhm / crystal_size, mosaic_domain_size,
               mosaic_domain_size_fwhm / mosaic_domain_size, water_radius, temperature, n_monte_carlo_iterations, num_patterns, random_rotation, 
-              approximate_shape_transform, cromer_mann, expand_symm, fix_rot_sequence, overlay_wigner_cells, mask_direct_beam,
+              approximate_shape_transform, cromer_mann, expand_symm, fix_rot_seq, overlay_wigner_cells, mask_direct_beam,
               pdb_file, write_hdf5, write_geom, write_crystal_sizes, write_ideal_only, results_dir, quiet, compression, cl_double_precision]
 
     names  = ['detector_distance', 'pixel_size', 'n_pixels', 'beam_diameter', 'photon_energy', 'n_photons', 'transmission',
               'mosaicity_fwhm', 'beam_divergence_fwhm', 'beam_spatial_profile', 'photon_energy_fwhm', 'crystal_size', 'crystal_size_fwhm',
               'mosaic_domain_size', 'mosaic_domain_size_fwhm', 'water_radius', 'temperature', 'n_monte_carlo_iterations', 'num_patterns',
               'random_rotation', 'approximate_shape_transform', 'cromer_mann', 'expand_symm', 'fix_rot_sequence', 'overlay_wigner_cells', 'mask_direct_beam',
-              'pdb_file', 'write_hdf5', 'write_geom', 'write_crystal_sizes', 'write_ideal_only', 'results_dir', 'quiet', 'compression', 'cl_double_precision'):
+              'pdb_file', 'write_hdf5', 'write_geom', 'write_crystal_sizes', 'write_ideal_only', 'results_dir', 'quiet', 'compression', 'cl_double_precision']
 
 
     pseudo_dict = zip(names, values)
@@ -326,7 +327,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         for n in np.arange(1, (n_monte_carlo_iterations + 1)):
 
             t = time.time()
-            if do_monte_carlo:
+            if (wavelength_fwhm > 0 or mosaicity_fwhm > 0 or beam_divergence_fwhm > 0):
                 B = ba.utils.random_beam_vector(beam_divergence_fwhm)
                 if (wavelength_fwhm == 0):
                     w = wavelength
@@ -377,7 +378,8 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
             fid = h5py.File(file_name, 'w')
             fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
             fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((pad.n_ss, pad.n_fs))
-            fid['/data/water'] = I_water.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
+            if(water_radius > 0):
+                fid['/data/water'] = I_water.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
             fid.close()
 
             with h5py.File( file_name,  'w') as fid:
@@ -389,9 +391,10 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
                     fid.create_dataset("data/noisy",
                         data= I_noisy.astype(np.float32).reshape(sh),
                         compression=compression, shape=sh)
-                fid.create_dataset('data/water',
-                    data=I_water.astype(np.float32).reshape(sh),
-                    compression=compression, shape=sh)
+                if water_radius > 0:
+                    fid.create_dataset('data/water',
+                        data=I_water.astype(np.float32).reshape(sh),
+                        compression=compression, shape=sh)
                 fid.create_dataset("rotation_matrix", data=R)
 
         if write_crystal_sizes:
@@ -406,3 +409,4 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         cryst_size_file.close()
 
     write("\n\nDone!\n\n")
+
