@@ -28,17 +28,17 @@ import pyqtgraph as pg
 qtview = True
 
 # How many diffraction patterns to simulate
-n_patterns = 100
+n_patterns = 500000
 
 # Intensity of the fluoress
-add_noise = False #True
+add_noise = False
 photons_per_atom = 1000
 
 # whether to use Henke or Cromer mann
 use_henke = True  # if False, then use Cromer-mann version
 
 # Information about the object
-n_molecules = 1
+n_molecules = 10
 box_size = 1000e-9
 do_rotations = True #False
 do_phases = True
@@ -63,6 +63,9 @@ radius = 1
 # Information about the emission
 photon_energy = 10.5 / keV
 wavelength = hc / photon_energy # in meters
+print(wavelength)
+exit()
+
 beam_vec = np.array([0, 0, 1.0]) # This shouldn't matter...
 
 # Atomic positions of Mn atoms:
@@ -75,7 +78,6 @@ r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe.
 # dimer test???
 #r = np.array([[0, 0, 0], [5e-10, 0, 0]])
 n_atoms = r.shape[0]
-
 # maximum distance spanned by the molecule:
 r_size = distance.pdist(r).max()
 
@@ -131,19 +133,20 @@ else:
     k_vecs = vec_norm( k_vecs) * 2 * np.pi / wavelength
     q12 = distance.cdist( k_vecs, k_vecs).ravel() # pair q distances
     nbins=512 # number of q bins
+    #np.save("k_vecs", k_vecs)
     qbins = np.linspace( q12.min(), q12.max(), nbins+1) # these are the histogram bins.. 
     print("The pads cover the range %.4f to %.4f inverse angstrom"%(q12.min()*1e-10, q12.max()*1e-10))
-    plt.hist( qbins*1e-10, bins=qbins*1e-10)
-    plt.xlabel("inverse angstrom")
-    plt.ylabel("bin count")
-    plt.show()
+    #plt.hist( qbins*1e-10, bins=qbins*1e-10)
+    #plt.xlabel("inverse angstrom")
+    #plt.ylabel("bin count")
+    #plt.show()
 n_q = q.shape[0]
 
 print("Simulating intensities for %d pixels in the %s detector.." %(n_q, detect_type))
 I_sum = np.zeros( n_q, dtype=np.float64) # store the intensities
 II_sum = np.zeros( n_q*n_q, dtype=np.float64)  # stores the correlations of intensities
 
-clcore = ClCore(group_size=1)
+clcore = ClCore(group_size=1,double_precision=True)
 q_dev = clcore.to_device(q)
 seconds = 0
 t0 = t=  time()
@@ -187,6 +190,8 @@ for pattern_num in range(0, n_patterns):
     A = clcore.phase_factor_qrf(q_dev, rs, fs)
     I = np.abs(A) ** 2
 
+    np.save("5-10mol_pattern%d"%pattern_num,I)
+
     dt = time()-t
     # print(time(), t0, np.floor(dt), seconds)
     if np.floor(dt) >= 3:
@@ -195,17 +200,22 @@ for pattern_num in range(0, n_patterns):
                          (pattern_num, n_patterns, 100*pattern_num/float(n_patterns),
                           pattern_num/(time() - t0)))
 
-    I *= photons_per_atom * n_atoms * n_molecules / np.sum(I.ravel())
-    if add_noise: I = np.random.poisson(I)
+###    I *= photons_per_atom * n_atoms * n_molecules / np.sum(I.ravel())
+###    if add_noise: I = np.random.poisson(I)
 
-    I_sum += I # summing the intensities
+###    I_sum += I # summing the intensities
 
     #II_sum += np.multiply.outer(I, I).ravel() # here is summing the correlations of intensities.. 
     #print("computing correlation")
-    II_sum += np.einsum( 'i,j->ij', I,I).ravel()
+    
+###    II_sum += np.einsum( 'i,j->ij', I,I).ravel()
+
+
 #    or 
     #II_sum += (I[:,None]*I[None,:] ).ravel()
 #   prob best to do this on te GPU, it might be the bottleneck.. 
+
+exit()
 
 print('Post-processing...')
 
@@ -214,10 +224,10 @@ if not spherical_detector:
     print("computing distance matrix for all pairs of k1,k2")
     qbin_count = np.histogram( q12, bins=qbins )[0]
     qbin_sums = np.histogram( q12, bins=qbins , weights=II_sum)[0]
-    plt.plot( 1e-10* ( qbins[:-1]*.5 + qbins[1:]*.5 ), qbin_sums / qbin_count) 
-    plt.show()
+    #plt.plot( 1e-10* ( qbins[:-1]*.5 + qbins[1:]*.5 ), qbin_sums / qbin_count) 
+    #plt.show()
 
-    np.save( 'idi', [ 1e-10* ( qbins[:-1]*.5 + qbins[1:]*.5 ), qbin_sums / qbin_count ]) 
+    np.save( 'idi_test', [ 1e-10* ( qbins[:-1]*.5 + qbins[1:]*.5 ), qbin_sums / qbin_count ]) 
 
 if spherical_detector:
 #   can use braodcasting here:
