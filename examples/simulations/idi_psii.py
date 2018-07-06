@@ -28,7 +28,8 @@ import pyqtgraph as pg
 qtview = True
 
 # How many diffraction patterns to simulate
-n_patterns = 500000
+n_patterns = 5000
+#n_patterns = 500000
 
 # Intensity of the fluoress
 add_noise = False
@@ -64,7 +65,6 @@ radius = 1
 photon_energy = 10.5 / keV
 wavelength = hc / photon_energy # in meters
 print(wavelength)
-exit()
 
 beam_vec = np.array([0, 0, 1.0]) # This shouldn't matter...
 
@@ -133,7 +133,7 @@ else:
     k_vecs = vec_norm( k_vecs) * 2 * np.pi / wavelength
     q12 = distance.cdist( k_vecs, k_vecs).ravel() # pair q distances
     nbins=512 # number of q bins
-    #np.save("k_vecs", k_vecs)
+    np.save("k_vecs", k_vecs)
     qbins = np.linspace( q12.min(), q12.max(), nbins+1) # these are the histogram bins.. 
     print("The pads cover the range %.4f to %.4f inverse angstrom"%(q12.min()*1e-10, q12.max()*1e-10))
     #plt.hist( qbins*1e-10, bins=qbins*1e-10)
@@ -141,7 +141,6 @@ else:
     #plt.ylabel("bin count")
     #plt.show()
 n_q = q.shape[0]
-
 print("Simulating intensities for %d pixels in the %s detector.." %(n_q, detect_type))
 I_sum = np.zeros( n_q, dtype=np.float64) # store the intensities
 II_sum = np.zeros( n_q*n_q, dtype=np.float64)  # stores the correlations of intensities
