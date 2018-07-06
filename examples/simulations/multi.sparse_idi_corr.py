@@ -22,8 +22,8 @@ phot_per_mol = 4
 file_stride = 100
 Nmol = 10
 qmax = 12 # inverse angstrom
-print_stride=100
-Nmodes = 1
+print_stride = 100
+Nmodes = 4
 Npixels = k_vecs.shape[0]
 #~~~~~~~~~~~~
 
@@ -82,7 +82,7 @@ def main( files_per_mode, jid, out_pre):
     print("JID %d: Saved np binary files %s.npy and %s.npy " %(jid, Nshots_file, Waxs_file))
     return Nshots_file, Waxs_file 
 
-files_per_mode = np.array_split( fnames[:max_files], len(fnames[:max_files])/Nmodes  )
+files_per_mode = fnames[:max_files]
 files_split = np.array_split( files_per_mode, n_jobs)
 
 results = Parallel( n_jobs=n_jobs)( delayed(main) ( files_split[jid], jid, out_pre) \
@@ -107,6 +107,5 @@ with h5py.File( out_pre+".h5py", 'w') as h5:
         waxs_dset.append( waxs_norm / waxs_norm[0])
     h5.create_dataset("waxs", data=waxs_dset)
     h5.create_dataset("nshots", data=n_dset)
-
 
 
