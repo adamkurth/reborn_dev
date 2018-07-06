@@ -23,13 +23,13 @@ from bornagain.utils import vec_norm
 from bornagain.simulate.clcore import ClCore
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
-
+import h5py
 # Viewing choices
 qtview = True
 
 # How many diffraction patterns to simulate
-n_patterns = 500000
-
+n_patterns =3000000
+Num_modes = 4
 # Intensity of the fluoress
 add_noise = False
 photons_per_atom = 1000
@@ -64,7 +64,6 @@ radius = 1
 photon_energy = 10.5 / keV
 wavelength = hc / photon_energy # in meters
 print(wavelength)
-exit()
 
 beam_vec = np.array([0, 0, 1.0]) # This shouldn't matter...
 
@@ -150,14 +149,10 @@ clcore = ClCore(group_size=1,double_precision=True)
 q_dev = clcore.to_device(q)
 seconds = 0
 t0 = t=  time()
+
 for pattern_num in range(0, n_patterns):
 
     # Random phases for each atom
-    if do_phases:
-        phases = np.random.random(n_atoms * n_molecules) * 2 * np.pi
-    else:
-        phases = np.zeros([n_atoms * n_molecules])
-    fs = np.exp(1j * phases)
 
     # Random positions for each molecule
     if do_translations:
@@ -187,11 +182,18 @@ for pattern_num in range(0, n_patterns):
     rs = np.array(rs).reshape([n_molecules*n_atoms, 3])  # miliseconds slow down
 
     # Compute intensities
-    A = clcore.phase_factor_qrf(q_dev, rs, fs)
-    I = np.abs(A) ** 2
-
-    np.save("5-10mol_pattern%d"%pattern_num,I)
-
+    I = []
+    for _ in range( Num_modes):
+        if do_phases:
+            phases = np.random.random(n_atoms * n_molecules) * 2 * np.pi
+        else:
+            phases = np.zeros([n_atoms * n_molecules])
+        fs = np.exp(1j * phases)
+        A = clcore.phase_factor_qrf(q_dev, rs, fs)
+        I_mode = np.abs(A) ** 2
+        I.append( I_mode)
+    np.save("6-10mol_4mode/6-10mol_4mode_pattern%d"%pattern_num,I)
+    #dset[pattern_num] = I
     dt = time()-t
     # print(time(), t0, np.floor(dt), seconds)
     if np.floor(dt) >= 3:
