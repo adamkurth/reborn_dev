@@ -6,17 +6,17 @@ import glob
 
 #~~~~~~~~~~~~~~~~~~~~~~~~
 # definitions 
-n_jobs = 8
-fnames = glob.glob("6-10mol_4mode/6-10mol_4mode_pattern*.npy")
+n_jobs = 3
+fnames = glob.glob("5-10mol/5-10mol_pattern*.npy")
 print("Found %d files"% len(fnames))
 k_vecs = np.load("k_vecs.npy")
 #norm_factor = None
 norm_factor = np.load("norm_factor.npy")
 # output file names:
-out_pre = "modes/6-10mol_4modes"
+out_pre = "1modes"
 
 # params
-max_files = 490000
+max_files = 2500
 Nq = 512
 phot_per_mol = 4
 file_stride = 100
@@ -60,14 +60,11 @@ def main( files_per_mode, jid, out_pre):
     Nshots_file = "%s.Nshots"%out_pre
     temp_waxs, temp_Nshots = [],[]
     waxs = np.zeros(Nq)
-    for i,f in enumerate(files_per_mode):
+    for i,fs in enumerate(files_per_mode):
         J = np.zeros( Npixels)
-        Is = np.load(f)
-        if len(Is.shape) > 1:
-            for I in Is:
-                J += np.random.multinomial( phot_per_mol*Nmol / len(Is) , I / I.sum() )
-        else:
-            J += np.random.multinomial( phot_per_mol*Nmol  , Is / Is.sum() )
+        for f in fs:
+            I = np.load(f).astype(np.float64)
+            J += np.random.multinomial( phot_per_mol*Nmol / Nmodes , I / I.sum() )
         h = sparse_idi(J)
         waxs += h
         
