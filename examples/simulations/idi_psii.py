@@ -59,7 +59,6 @@ photons_per_atom = 1
 # whether to use Henke or Cromer mann
 use_henke = True  # if False, then use Cromer-mann version
 
-
 # Information about the object
 n_molecules = 10
 box_size = 1000e-9
@@ -77,15 +76,12 @@ spherical_detector = False #True
 n_subdivisions = 3
 radius = 1
 
-
 ####################################
-
 
 # Information about the emission
 photon_energy = 10.5 / keV
 wavelength = hc / photon_energy # in meters
 beam_vec = np.array([0, 0, 1.0]) # This shouldn't matter...
-
 
 # Atomic positions of Mn atoms:
 pdb_file = '../data/pdb/3wu2.pdb'
@@ -149,6 +145,9 @@ else:
     if save_kvecs is not None:
         np.save(os.path.join( outdir, save_kvecs), k_vecs)
     print("The pads cover the range %.4f to %.4f inverse angstrom"%(q12.min()*1e-10, q12.max()*1e-10))
+    print("Making solid angles...")
+    sangs = np.hstack( [pad1.solid_angles2() , pad2.solid_angles2(), pad3.solid_angles2()] )
+    SA_frac = sangs.sum() / 4 / np.pi
 
 Npix = k_vecs.shape[0]
 
@@ -229,7 +228,8 @@ for pattern_num in range(0, n_patterns):
         I = np.abs(A) ** 2
         if I.dtype==np.float32:
             I = I.astype(np.float64)
-        J += np.random.multinomial( photons_per_atom * total_atoms / Num_modes , I / I.sum() )
+        N_photons_measured =  int( SA_frac * photons_per_atom * total_atoms / Num_modes)
+        J += np.random.multinomial( N_photons_measured , I / I.sum() )
     
     h = sparse_idi(J)
     waxs += h
