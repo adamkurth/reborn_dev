@@ -29,7 +29,7 @@ import h5py
 qtview = True
 
 # save info
-outdir = "1-10mol_4modes"
+outdir = "1-10mol_1modes"
 if not os.path.exists(outdir):
     os.makedirs( outdir)
 file_stride = 500
@@ -37,7 +37,7 @@ save_kvecs = "k_vecs"
 save_normfactor="norm_factor"
 
 # output file names:
-out_pre = "1-10mol_4modes"
+out_pre = "1-10mol_1modes_150k"
 Waxs_file = os.path.join( outdir, "%s.Waxs"%out_pre)
 Nshots_file = os.path.join( outdir, "%s.Nshots"%out_pre)
 
@@ -50,8 +50,8 @@ qmax_waxs = 12 # inverse angstrom
 Nq_waxs = 512
 
 # How many diffraction patterns to simulate
-n_patterns = 2000
-Num_modes = 4
+n_patterns = 150000
+Num_modes = 1
 
 # Intensity of the fluoress
 photons_per_atom = 1
