@@ -216,7 +216,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     # Setup function for shape transform calculations
     if approximate_shape_transform:
         write('Using approximate (Gaussian) shape transform\n')
-        shape_transform = clcore.gaussian_lattice_transform_intensities_pad
+        shape_transform = clcore.mosaic_gaussian_lattice_transform_intensities_pad
     else:
         write('Using idealized (parallelepiped) shape transform\n')
         shape_transform = clcore.lattice_transform_intensities_pad
@@ -319,93 +319,74 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
             F2 = np.abs(A) ** 2
             tf = time.time() - t
             write('%g s\n' % (tf))
-
         abc = cryst.O.T.copy()
         S2_dev *= 0
 
         write('Simulating shape transform... ')
         time.sleep(0.001)
-        message = ''
         tt = time.time()
-        for n in np.arange(1, (n_monte_carlo_iterations + 1)):
+        t = time.time()
 
-            t = time.time()
-            if (wavelength_fwhm > 0 or mosaicity_fwhm > 0 or beam_divergence_fwhm > 0):
-                B = ba.utils.random_beam_vector(beam_divergence_fwhm)
-                if (wavelength_fwhm == 0):
-                    w = wavelength
-                else:
-                    w = np.random.normal(wavelength, wavelength_fwhm / 2.354820045, [1])[0]
-                Rm = ba.utils.random_mosaic_rotation(mosaicity_fwhm).dot(R)
-                T = pad.t_vec.copy() + pad.fs_vec * (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
-            else:
-                B = beam_vec
-                w = wavelength
-                Rm = R
-                T = pad.t_vec
+        B = beam_vec
+        w = wavelength
+        Rm = R
+        T = pad.t_vec
 
-            shape_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, S2_dev, add=True)
+        shape_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, n_monte_carlo_iterations, w, mosaicity_fwhm, beam_divergence_fwhm, wavelength_fwhm, Rm, S2_dev, add=True)
+        tf = time.time() - t
+    write('%g s                \n' % (time.time() - tt))
 
-            tf = time.time() - t
-            if (n % 1000) == 0:
-                write('\b' * len(message))
-                message = '%3.0f%% (%5d; %7.03f ms)' % (n / float(n_monte_carlo_iterations) * 100, n, tf * 1e3)
-                write(message)
-        write('\b' * len(message))
-        write('%g s                \n' % (time.time() - tt))
+    S2 = S2_dev.get().ravel()
+    # Convert into useful photon units
+    I = I0 * r_e ** 2 * F2 * S2 *  sa * P 
+    if(crystal_size < beam_diameter): # Correct for lower incident intensity
+        if(beam_spatial_profile == 'gaussian'):
+            sig = beam_diameter / 3.0 # Let beam_diameter be 3 sigmas
+            I *= erf(crystal_size/(sig * np.sqrt(2)))
+        else:
+            I *= (crystal_size/beam_diameter)**2
 
-        # Average the shape transforms over MC iterations
-        S2 = S2_dev.get().ravel() / n
-        # Convert into useful photon units
-        I = I0 * r_e ** 2 * F2 * S2 *  sa * P 
-        if(crystal_size < beam_diameter): # Correct for lower incident intensity
-            if(beam_spatial_profile == 'gaussian'):
-                sig = beam_diameter / 3.0 # Let beam_diameter be 3 sigmas
-                I *= erf(crystal_size/(sig * np.sqrt(2)))
-            else:
-                I *= (crystal_size/beam_diameter)**2
+    # Scale up according to mosaic domain
+    n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
+    I_ideal = I.copy() * n_domains
 
-        # Scale up according to mosaic domain
-        n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
-        I_ideal = I.copy() * n_domains
+    if(water_radius != 0):
+        I_ideal += I_water
+    I_ideal = I_ideal.astype(np.float32)
+    I_noisy = np.random.poisson(I_ideal).astype(np.float32)
 
-        if(water_radius != 0):
-            I_ideal += I_water
-        I_ideal = I_ideal.astype(np.float32)
-        I_noisy = np.random.poisson(I_ideal).astype(np.float32)
+    if write_hdf5:
+        n_patterns = len(glob( os.path.join(results_dir , 'pattern-*.h5')))
+        file_name = os.path.join( results_dir , 'pattern-%06d.h5' % (n_patterns + 1))
+        write('Writing file %s\n' % file_name)
+        fid = h5py.File(file_name, 'w')
+        fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
+        fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((pad.n_ss, pad.n_fs))
+        if(water_radius > 0):
+            fid['/data/water'] = I_water.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
+        fid.close()
 
-        if write_hdf5:
-            n_patterns = len(glob( os.path.join(results_dir , 'pattern-*.h5')))
-            file_name = os.path.join( results_dir , 'pattern-%06d.h5' % (n_patterns + 1))
-            write('Writing file %s\n' % file_name)
-            fid = h5py.File(file_name, 'w')
-            fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
-            fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((pad.n_ss, pad.n_fs))
-            if(water_radius > 0):
-                fid['/data/water'] = I_water.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
-            fid.close()
-
-            with h5py.File( file_name,  'w') as fid:
-                sh = (int(pad.n_ss), int(pad.n_fs))
-                fid.create_dataset("data/ideal",
-                    data= I_ideal.astype(np.float32).reshape(sh),
+        with h5py.File( file_name,  'w') as fid:
+            sh = (int(pad.n_ss), int(pad.n_fs))
+            fid.create_dataset("data/ideal",
+                data= I_ideal.astype(np.float32).reshape(sh),
+                compression=compression, shape=sh)
+            if not write_ideal_only:
+                fid.create_dataset("data/noisy",
+                    data= I_noisy.astype(np.float32).reshape(sh),
                     compression=compression, shape=sh)
-                if not write_ideal_only:
-                    fid.create_dataset("data/noisy",
-                        data= I_noisy.astype(np.float32).reshape(sh),
-                        compression=compression, shape=sh)
-                if water_radius > 0:
-                    fid.create_dataset('data/water',
-                        data=I_water.astype(np.float32).reshape(sh),
-                        compression=compression, shape=sh)
-                fid.create_dataset("rotation_matrix", data=R)
+            if water_radius > 0:
+                fid.create_dataset('data/water',
+                    data=I_water.astype(np.float32).reshape(sh),
+                    compression=compression, shape=sh)
+            fid.create_dataset("rotation_matrix", data=R)
 
-        if write_crystal_sizes:
-            cryst_size_file.write('%g:%g:pattern-%06d.h5\n' % (crystal_size, mosaic_domain_size, (n_patterns + 1)))
+    if write_crystal_sizes:
+        cryst_size_file.write('%g:%g:pattern-%06d.h5\n' % (crystal_size, mosaic_domain_size, (n_patterns + 1)))
 
-        # F2mean = np.mean(F2.flat[direct_beam_mask > 0])
-        # Ncells = np.prod(n_cells_whole_crystal)
-        # darwin = I0 * r_e ** 2 * Ncells * F2mean * (wavelength ** 3 / cryst.V)
+    # F2mean = np.mean(F2.flat[direct_beam_mask > 0])
+    # Ncells = np.prod(n_cells_whole_crystal)
+    # darwin = I0 * r_e ** 2 * Ncells * F2mean * (wavelength ** 3 / cryst.V)
 
     # End of pattern loop
     if write_crystal_sizes:

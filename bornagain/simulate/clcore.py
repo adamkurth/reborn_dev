@@ -132,6 +132,7 @@ class ClCore(object):
         self._load_qrf_kam()
         self._load_lattice_transform_intensities_pad()
         self._load_gaussian_lattice_transform_intensities_pad()
+        self._load_mosaic_gaussian_lattice_transform_intensities_pad()
 
     def _build_openCL_programs(self):
         clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
@@ -180,6 +181,11 @@ class ClCore(object):
         self.gaussian_lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
             [None, None, None, None, self.int_t, self.int_t, self.int_t,self.real_t, None, None, None, None,
              self.int_t])
+
+    def _load_mosaic_gaussian_lattice_transform_intensities_pad(self):
+        self.mosaic_gaussian_lattice_transform_intensities_pad_cl = self.programs.mosaic_gaussian_lattice_transform_intensities_pad
+        self.mosaic_gaussian_lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
+            [None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t, self.real_t, self.real_t, self.real_t, self.real_t, None, None, None, None, self.int_t])
 
     def _load_mod_squared_complex_to_real(self):
         self.mod_squared_complex_to_real_cl = self.programs.mod_squared_complex_to_real
@@ -712,6 +718,76 @@ class ClCore(object):
                                                   (self.group_size,), abc,
                                                   N, R, I_dev.data, n_pixels,
                                                   nF, nS, w, T, F, S, B, add)
+        self.queue.finish()
+
+        if I is None:
+            return I_dev.get()
+        else:
+            return I_dev
+
+    def mosaic_gaussian_lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, n_iterations, w,
+mosaicity, div_fwhm, lam_fwhm, 
+R=None, I=None, add=False):
+        """
+        Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian approximation
+        to the lattice transform convoluted with a gaussian PDF to do mosaicity.
+
+        Arguments:
+            abc (numpy array) : A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.
+            N (numpy array)   : An array containing number of unit cells along each of three axes.
+            T (numpy array)   : Translation to center of corner pixel.
+            F (numpy array)   : Fast-scan basis vector.
+            S (numpy array)   : Slow-scan basis vector.
+            B (numpy array)   : Incident beam vector.
+            nF (int)          : Number of fast-scan pixels.
+            nS (int)          : Number of slow-scan pixels.
+            n_iterations (int): Number of Monte Carlo iterations.
+            w (float)         : Wavelength (meters).
+            mosaicity (float) : Mosaicity FWHM (radians).
+            div_fwhm (float)  : Divergence FWHM (radians).
+            lam_fwhm (float)  : Spectral dispersion FWHM (meters).
+            R (numpy array)   : Rotation matrix acting on q vectors.
+            I (:class:pyopencl.array.Array) : OpenCL device array containing intensities.
+            add (bool)        : If true, the function will add to the input I buffer, else the buffer is overwritten.
+
+        Returns:
+            If I == None, then the output is a numpy array.  Otherwise, it is an opencl array.
+        """
+        if R is None:
+            R = np.eye(3)
+        R = self.vec16(R, dtype=self.real_t)
+
+        nF = self.int_t(nF)
+        nS = self.int_t(nS)
+        n_pixels = self.int_t(nF * nS)
+        n_iterations = self.int_t(n_iterations)
+        if add is True:
+            add = 1
+        else:
+            add = 0
+        add = self.int_t(add)
+
+        w = self.real_t(w)
+        mosaicity = self.real_t(mosaicity)
+        div_fwhm = self.real_t(div_fwhm)
+        lam_fwhm = self.real_t(lam_fwhm)
+
+        abc = self.vec16(abc, dtype=self.real_t)
+        N = self.vec4(N, dtype=self.int_t)
+        T = self.vec4(T, dtype=self.real_t)
+        F = self.vec4(F, dtype=self.real_t)
+        S = self.vec4(S, dtype=self.real_t)
+        B = self.vec4(B, dtype=self.real_t)
+        I_dev = self.to_device(I, dtype=self.real_t, shape=(n_pixels))
+
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
+                             self.group_size)
+
+        self.mosaic_gaussian_lattice_transform_intensities_pad_cl(self.queue, (global_size,),
+(self.group_size,), abc,
+N, R, I_dev.data, n_pixels,
+nF, nS, n_iterations, w, mosaicity, div_fwhm,
+lam_fwhm, T, F, S, B, add)
         self.queue.finish()
 
         if I is None:
