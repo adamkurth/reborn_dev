@@ -29,7 +29,7 @@ import h5py
 qtview = True
 
 # save info
-outdir = "1-1mol_1modes_25unit"
+outdir = "idi_000"
 if not os.path.exists(outdir):
     os.makedirs( outdir)
 file_stride = 500
@@ -37,39 +37,40 @@ save_kvecs = "k_vecs_xtal"
 save_normfactor="norm_factor_xtal"
 print_stride=100
 # output file names:
-out_pre = "1-1mol_1modes_25unit"
+out_pre = "2-1mol_1modes_25x25x25unit"
 Waxs_file = os.path.join( outdir, "%s.Waxs"%out_pre)
 Nshots_file = os.path.join( outdir, "%s.Nshots"%out_pre)
 
 norm_factor = None
-#norm_factor = np.load("norm_factor.npy")
+#norm_factor = np.load("1-10mol_1modes_25x25x25unit/norm_factor_xtal.npy")
 # this norm factor should correspond to your k_vecs, set as None to create, but it takes some time... 
 
 #output waxs pattern
-qmax_waxs = 12 # inverse angstrom
+qmax_waxs = 0.5 # inverse angstrom
 Nq_waxs = 512
 
 # How many diffraction patterns to simulate
-n_patterns = 2000
+n_patterns = 20000
 Num_modes = 1
 
 # Intensity of the fluoress
-photons_per_atom = 1
+photons_per_atom = 10000
+n_unit_cell = 25
 
 # whether to use Henke or Cromer mann
 use_henke = True  # if False, then use Cromer-mann version
 
 # Information about the object
 n_molecules = 1
-box_size = 1000e-9
+box_size = 10000e-9
 do_rotations = True #False
 do_phases = True
 do_translations = True
 
 # Settings for pixel-array detector
-n_pixels_per_dim = 100 # along a row
-pixel_size = 0.001 # meters, (small pixels that we will bin average later)
-detector_distance = .4 # meter
+n_pixels_per_dim = 175 # along a row
+pixel_size = 0.0001 # meters, (small pixels that we will bin average later)
+detector_distance = .2 # meter
 
 # Settings for spherical detector
 spherical_detector = False #True
@@ -89,14 +90,14 @@ cryst = crystal.Molecule(pdb_file)
 is_manga = cryst.Z==25
 r = cryst.r[ is_manga]
 r = r[:4] # take the first monomer in assymetric unit, 
-cryst.lat.assemble(n_unit=5)
+cryst.lat.assemble(n_unit=n_unit_cell)
 lattice = cryst.lat.vecs*1e-10
 r = np.vstack([ r+l for l in lattice])
 r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
 
 n_atoms = r.shape[0]
 # maximum distance spanned by the molecule:
-r_size = distance.pdist(r).max()
+r_size = cryst.a * n_unit_cell * np.sqrt(3) #distance.pdist(r).max()
 
 print('Will simulate %d patterns' % (n_patterns))
 
@@ -129,14 +130,15 @@ else:
     k_vecs = pad.position_vecs()
     k_vecs = vec_norm( k_vecs) * 2 * np.pi / wavelength
     
-    q12 = distance.cdist( k_vecs, k_vecs).ravel() # pair q distances
+    q12_max = distance.euclidean( k_vecs[0], k_vecs[-1]  )
+    q12_min = distance.euclidean( k_vecs[0], k_vecs[1])
     if save_kvecs is not None:
         np.save(os.path.join( outdir, save_kvecs), k_vecs)
-    print("The pads cover the range %.4f to %.4f inverse angstrom"%(q12.min()*1e-10, q12.max()*1e-10))
+    print("The pads cover the range %.4f to %.4f inverse angstrom"%(q12_min*1e-10, q12_max*1e-10))
     print("Making solid angles...")
     sangs = pad.solid_angles2()
     SA_frac = sangs.sum() / 4 / np.pi
-
+    print SA_frac
 Npix = k_vecs.shape[0]
 
 print("Simulating intensities for %d pixels in the %s detector.." %(Npix, detect_type))
@@ -146,7 +148,7 @@ q_dev = clcore.to_device(q)
 seconds = 0
 t0 = t=  time()
 
-qbins = np.linspace( 0, qmax_waxs * 1e10, Nq_waxs+1)
+qbins = np.linspace( 0, qmax_waxs*1e10 ,  Nq_waxs+1)
 if norm_factor is None:
     # make normalization factor
     # doing it this way to save on RAM
@@ -218,15 +220,17 @@ for pattern_num in range(0, n_patterns):
             I = I.astype(np.float64)
         N_photons_measured =  int( SA_frac * photons_per_atom * total_atoms / Num_modes)
         J += np.random.multinomial( N_photons_measured , I / I.sum() )
-    
+   
+    plt.imshow( J.reshape( pad_sh),  ) 
+    plt.show()
     h = sparse_idi(J)
     waxs += h
     
     if pattern_num % file_stride == 0:
         waxs_norm = waxs / norm_factor
-        temp_waxs.append(waxs_norm / waxs_norm[0] )
+        temp_waxs.append(waxs_norm) # / waxs_norm[0] )
         temp_Nshots.append(pattern_num)
-        np.save( os.path.join( outdir, "temp_waxs_%d"%pattern_num) , waxs_norm / waxs_norm[0])
+        np.save( os.path.join( outdir, "temp_waxs_%d"%pattern_num) , waxs_norm ) # / waxs_norm[0])
         np.save( os.path.join( outdir, "temp_Nshots_%d"%pattern_num) , pattern_num)
     
     dt = time()-t
@@ -238,9 +242,9 @@ for pattern_num in range(0, n_patterns):
 
 # last save point:
 waxs_norm = waxs / norm_factor
-temp_waxs.append(waxs_norm / waxs_norm[0] )
+temp_waxs.append(waxs_norm) # / waxs_norm[0] )
 temp_Nshots.append(pattern_num)
-np.save( os.path.join( outdir, "temp_waxs_%d"%pattern_num) , waxs_norm / waxs_norm[0])
+np.save( os.path.join( outdir, "temp_waxs_%d"%pattern_num) , waxs_norm) # / waxs_norm[0])
 np.save( os.path.join( outdir, "temp_Nshots_%d"%pattern_num) , pattern_num)
 
 np.save(Nshots_file, temp_Nshots)
