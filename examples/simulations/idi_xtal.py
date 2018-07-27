@@ -55,12 +55,12 @@ save_kvecs = "k_vecs_xtal"
 save_normfactor="norm_factor_xtal"
 print_stride=100
 # output file names:
-out_pre = "29-infinite_ps2_mor"
+out_pre = "33-infinite_ps2_mor"
 Waxs_file = os.path.join( outdir, "%s.Waxs"%out_pre)
 Nshots_file = os.path.join( outdir, "%s.Nshots"%out_pre)
 
 finite_photons = 0 #True #False
-dilute_limit = True
+dilute_limit = False #True
 
 norm_factor =  None  #None #:x 1.#   None
 #norm_factor = np.load( os.path.join( outdir , save_normfactor+".npy")) #"1-10mol_1modes_25x25x25unit/norm_factor_xtal.npy")
@@ -173,7 +173,10 @@ q_dev = clcore.to_device(q)
 seconds = 0
 t0 = t=  time()
 
+clcore.init_amps( Npix)
+
 qbins = np.linspace( 0, qmax_waxs*1e10,  Nq_waxs+1)
+
 
 if norm_factor is None:
     # make normalization factor
@@ -187,7 +190,7 @@ if norm_factor is None:
         C = Counter( kdigs.ravel() )
         counts = np.array( [ C[i_] for i_ in xrange( Nq_waxs)] )
 
-        norm_factor += counts 
+        norm_factor += counts
         if ik%print_stride==0:
             print ( "Making norm factor: %d pixels remain..."\
                 % ( len(k_vecs) - ik))
@@ -195,7 +198,6 @@ if norm_factor is None:
     if save_normfactor:
         np.save( os.path.join( outdir, save_normfactor ), \
             norm_factor)
-
 
 def sparse_idi(J, k_vecs=k_vecs, 
         qbins=qbins, Nq_waxs=Nq_waxs):
@@ -214,12 +216,11 @@ def sparse_idi(J, k_vecs=k_vecs,
 
     H = np.bincount( digs[good], minlength=Nq_waxs , 
         weights=weights[good])
+
     return H
 
 temp_waxs, temp_Nshots = [],[]
-
 waxs = np.zeros(Nq_waxs)
-
 
 def sample_I( I, SA_frac, photons_per_atom, 
             total_atoms, Num_modes  ):
@@ -232,8 +233,6 @@ def sample_I( I, SA_frac, photons_per_atom,
     J = np.random.multinomial( N_photons_measured , I / I.sum() )
 
     return J
-
-
 
 for pattern_num in range(0, n_patterns):
 
@@ -273,7 +272,11 @@ for pattern_num in range(0, n_patterns):
         fs = np.exp(1j * phases)
         if dilute_limit:
             for r_mol in rs:
-                A = clcore.phase_factor_qrf(q_dev, r_mol, fs)
+                #A = clcore.phase_factor_qrf(q_dev, r_mol, fs) #, q_is_qdev=True)
+                clcore.phase_factor_qrf_chunk(q_dev, r_mol, fs, Nchunk=10, q_is_qdev=True)
+                #clcore.phase_factor_qrf_inplace(q_dev, r_mol, fs, q_is_qdev=True)
+                A = clcore.release_amps( reset=True)
+                
                 I_mol = np.abs(A) ** 2
                 if finite_photons:
                     J += sample(I_mol, SA_frac, 
@@ -283,8 +286,11 @@ for pattern_num in range(0, n_patterns):
                     J_inf += I_mol
 
         else: 
-            r_all = np.array(rs).reshape([n_molecules*n_atoms, 3])  
-            A = clcore.phase_factor_qrf(q_dev, r_all, fs)
+            for r_mol in rs:
+                clcore.phase_factor_qrf_inplace(q_dev, r_mol, fs , q_is_qdev=True)
+                #clcore.phase_factor_qrf_chunk(q_dev, r_mol, fs ,Nchunk=10, q_is_qdev=True)
+            
+            A = clcore.release_amps(reset=True)
             I = np.abs(A) ** 2
             if finite_photons:
                 J += sample_I(I, SA_frac, 

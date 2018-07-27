@@ -400,11 +400,11 @@ class Lattice:
 
         """
         #       lattice coordinates
-        if len( n_unit)==3:
+        try:
             n_unit_a, n_unit_b, n_unit_c = n_unit
-        else:
-            assert( len( n_unit)==1) 
+        except TypeError:
             n_unit_a = n_unit_b = n_unit_c = n_unit
+          
         self.vecs = np.array([i * self.a + j * self.b + k * self.c
                               for i in xrange(n_unit_a)
                               for j in xrange(n_unit_b)

@@ -318,7 +318,60 @@ class ClCore(object):
         self.mod_squared_complex_to_real_cl(self.queue, (global_size,),
                                             (self.group_size,), A.data, I.data, n)
 
-    def phase_factor_qrf_inplace(self, q, r, f, R=None):
+
+    def phase_factor_qrf_chunk(self, q, r, f, Nchunk, q_is_qdev=False):
+        '''
+        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
+
+        Arguments:
+            q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
+            r (numpy/cl float array [M,3]): Atomic coordinates.
+            f (numpy/cl complex array [M]): Complex scattering factors.
+            Nchunk, number of chunks to split up atoms.. 
+            a (cl complex array [N]): Optional container for complex scattering 
+              amplitudes.
+
+        Returns:
+            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
+              if there are input cl arrays.
+        '''
+        # this is an inplace method, so we add amplitudes 
+        add=self.int_t(1) # inplace 
+        
+        #if R is None:
+        R = np.eye(3, dtype=self.real_t)
+        R = self.vec16(R, dtype=self.real_t)
+        
+        n_pixels = self.int_t(q.shape[0])
+        
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
+                             * self.group_size)
+        
+        if not q_is_qdev:
+            q_dev = self.to_device(q, dtype=self.real_t)
+        else:
+            q_dev = q
+
+        n_atoms = self.int_t(r.shape[0])
+        
+        r_split = np.array_split( np.arange( n_atoms), Nchunk)
+        for r_rng in r_split:
+            r_chunk = r[r_rng]
+            f_chunk = f[r_rng]
+            r_dev = self.to_device(r_chunk, dtype=self.real_t)
+            f_dev = self.to_device(f_chunk, dtype=self.complex_t)
+            
+            self.phase_factor_qrf_cl(self.queue, (global_size,),
+                                     (self.group_size,), q_dev.data, 
+                                     r_dev.data,
+                                     f_dev.data, 
+                                     R, 
+                                     self.a_dev.data, 
+                                     n_atoms,
+                                     n_pixels, add)
+
+    
+    def phase_factor_qrf_inplace(self, q, r, f, R=None, q_is_qdev=False):
         '''
         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
 
@@ -337,27 +390,31 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3, dtype=self.real_t)
-        R16 = np.zeros(16, dtype=self.real_t)
-        R16[0:9] = R.ravel()
+        R = self.vec16(R, dtype=self.real_t)
 
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
-        q_dev = self.to_device(q, dtype=self.real_t)
+        if not q_is_qdev:
+            q_dev = self.to_device(q, dtype=self.real_t)
+        else:
+            q_dev = q
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
-        R16_dev = self.to_device(R16, dtype=self.real_t)
+        #R16_dev = self.to_device(R16, dtype=self.real_t)
 
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
                              * self.group_size)
 
+        add=self.int_t(1) # inplace always adds...
         self.phase_factor_qrf_cl(self.queue, (global_size,),
                                  (self.group_size,), q_dev.data, 
                                  r_dev.data,
                                  f_dev.data, 
-                                 R16_dev.data, 
+                                 R, 
                                  self.a_dev.data, 
                                  n_atoms,
-                                 n_pixels)
+                                 n_pixels, add)
+
 
     def next_multiple_groupsize(self, N):
         if N % self.group_size > 0:
@@ -381,8 +438,8 @@ class ClCore(object):
         Arguments:
             q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
             r (numpy/cl float array [M,3]): Atomic coordinates.
-            f (numpy/cl complex array [M]): Complex scattering factors.
             R (numpy array [3,3]): Rotation matrix acting on q vectors.
+            f (numpy/cl complex array [M]): Complex scattering factors.
             a (cl complex array [N]): Optional container for complex scattering 
               amplitudes.
 
@@ -719,7 +776,8 @@ class ClCore(object):
         else:
             return I_dev
 
-    def prime_cromermann_simulator(self, q_vecs, atomic_nums=None):
+
+    def prime_cromermann_simulator(self, q_vecs, atomic_nums=None, incoherent=False):
         """
         Prepare special array data for cromermann simulation
 
@@ -729,17 +787,22 @@ class ClCore(object):
             atomic_num (np.ndarray) :
                 Natoms x 1 array of atomic numbers corresponding
                 to the atoms in the target
+            incoherent bool:
+                Whether to make form factors random
         """
 
         self.q_vecs = q_vecs
 
         self.Npix = self.int_t(q_vecs.shape[0])
 
-        #       allow these to overflow
+        # allow these to overflow
         self.Nextra_pix = self.int_t(self.group_size - self.Npix % self.group_size)
 
         if atomic_nums is None:
-            self.form_facts_arr = np.ones((self.Npix + self.Nextra_pix, 1), dtype=self.real_t)
+            if not incoherent:
+                self.form_facts_arr = np.ones((self.Npix + self.Nextra_pix, 1), dtype=self.real_t)
+            else:
+                self.form_facts_arr = 2*np.pi * np.random.random((self.Npix + self.Nextra_pix, 1)).astype( dtype=self.real_t)
             self.atomIDs = None
             self.Nspecies = 1
             self._load_amp_buffer()
@@ -810,6 +873,7 @@ class ClCore(object):
 
         self.r_buff = self.to_device(self.r_vecs, dtype=self.real_t)
 
+
     def get_q_cromermann(self):
         """ 
         combine form factors and q-vectors and load onto a CL buffer
@@ -851,7 +915,7 @@ class ClCore(object):
         self._A_buff_data = self.A_buff.data
 
     def run_cromermann(self, q_buff_data, r_buff_data, 
-        rand_rot=False, force_rot_mat=None, com=None):
+                    rand_rot=False, force_rot_mat=None, com=None):
         """
         Run the qrf kam simulator.
 
@@ -912,7 +976,7 @@ class ClCore(object):
         self._set_com_vec()
 
         #       run the program
-        self.qrf_kam_cl(self.queue, (int(self.Npix + self.Nextra_pix),), 
+        self.qrf_kam_cl( self.queue, (int(self.Npix + self.Nextra_pix),), 
             (self.group_size,), q_buff_data, r_buff_data, 
             self.rot_buff.data, self.com_buff.data, 
             self._A_buff_data, self.Nato)
@@ -1073,7 +1137,7 @@ def test():
 
     #   now test the cromermann simulation
     print("Testing cromermann")
-    core.prime_cromermann_simulator(D.Q, None)
+    core.prime_cromermann_simulator( D.Q, None)
     q = core.get_q_cromermann()
 
     t = time.time()

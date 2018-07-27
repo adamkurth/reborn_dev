@@ -169,6 +169,9 @@ kernel void mod_squared_complex_to_real(
 // Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
 // This variant allows for an arbitrary collection of scattering vectors
 
+
+
+
 kernel void phase_factor_qrf(
     global const dsfloat *q,  // Scattering vectors
     global const dsfloat *r,  // Atomic postion vectors
