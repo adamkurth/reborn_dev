@@ -287,8 +287,8 @@ for pattern_num in range(0, n_patterns):
 
         else: 
             for r_mol in rs:
-                clcore.phase_factor_qrf_inplace(q_dev, r_mol, fs , q_is_qdev=True)
-                #clcore.phase_factor_qrf_chunk(q_dev, r_mol, fs ,Nchunk=10, q_is_qdev=True)
+                #clcore.phase_factor_qrf_inplace(q_dev, r_mol, fs , q_is_qdev=True)
+                clcore.phase_factor_qrf_chunk(q_dev, r_mol, fs ,Nchunk=10, q_is_qdev=True)
             
             A = clcore.release_amps(reset=True)
             I = np.abs(A) ** 2
