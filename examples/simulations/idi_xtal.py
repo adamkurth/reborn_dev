@@ -63,169 +63,9 @@ def blockshaped(arr, nrows, ncols):
                .reshape(-1, nrows, ncols))
 
 
-# Viewing choices
-qtview = True
 
-# save info
-outdir = "idi_000"
-if not os.path.exists(outdir):
-    os.makedirs( outdir)
-file_stride = 100
-save_kvecs = "k_vecs_xtal"
-save_normfactor="norm_factor_xtal"
-print_stride=100
-# output file names:
-out_pre = "33-infinite_ps2_mor"
-Waxs_file = os.path.join( outdir, "%s.Waxs"%out_pre)
-Nshots_file = os.path.join( outdir, "%s.Nshots"%out_pre)
-
-finite_photons = 0 #True #False
-dilute_limit = True
-
-norm_factor =  None  #None #:x 1.#   None
-norm_factor = np.load( os.path.join( outdir , save_normfactor+".npy")) #"1-10mol_1modes_25x25x25unit/norm_factor_xtal.npy")
-# this norm factor should correspond to your k_vecs, set as None to create, but it takes some time... 
-
-#output waxs pattern
-qmax_waxs = 0.04 #1. # inverse angstrom
-Nq_waxs = 128
-
-# How many diffraction patterns to simulate
-n_patterns =100 # 12000
-Num_modes = 1
-
-# Intensity of the fluoress
-photons_per_atom = 1 #00000000
-n_unit_cell = 4
-
-# whether to use Henke or Cromer mann
-use_henke = True  # if False, then use Cromer-mann version
-
-# Information about the object
-n_molecules =  1# 10
-box_size = 1000e-9
-#box_size = 1000000000e-9
-do_rotations = True #False
-do_phases = True
-do_translations = True
-
-# Settings for pixel-array detector
-n_pixels_per_dim = 128 # along a row
-pixel_size = 0.00005 # meters, (small pixels that we will bin average later)
-detector_distance = .1 # meter
-block_size = 10,10
-
-# Settings for spherical detector
-spherical_detector = False #True
-n_subdivisions = 3
-radius = 1
-
-####################################
-
-# Information about the emission
-photon_energy = 10.5 / keV
-wavelength = hc / photon_energy # in meters
-beam_vec = np.array([0, 0, 1.0]) # This shouldn't matter...
-
-# Atomic positions of Mn atoms:
-pdb_file = '../data/pdb/3wu2.pdb'
-cryst = crystal.Molecule(pdb_file)
-is_manga = cryst.Z==25
-r = cryst.r[ is_manga]
-r = r[:4] # take the first monomer in assymetric unit, 
-cryst.lat.assemble(n_unit=n_unit_cell)
-lattice = cryst.lat.vecs*1e-10
-r = np.vstack([ r+l for l in lattice])
-r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
-
-#r = np.load( 'xtal_zinc_3x3x3.npy' )*1e-10
-#r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
-
-# maximum distance spanned by the molecule:
-#r_size = 5 * 25e-10 * np.sqrt(3)  
-#_size = cryst.a * n_unit_cell * np.sqrt(3) #distance.pdist(r).max()
-
-
-n_atoms = r.shape[0]
-print('Will simulate %d patterns' % (n_patterns))
-
-if spherical_detector:
-    detect_type = "SPHERE"
-    print('Creating spherical detector...')
-    ico = ba.detector.IcosphereGeometry(n_subdivisions=n_subdivisions, radius=radius)
-    verts, faces, fcs = ico.compute_vertices_and_faces()
-    n_faces = faces.shape[0]
-    q = (2 * np.pi / wavelength) * fcs #(fcs - beam_vec)
-    print('%d pixels' % (q.shape[0]))
-else:
-    detect_type='BOX'
-    n = n_pixels_per_dim # shortcut
-    p = pixel_size # shortcut
-    
-    pad = ba.detector.PADGeometry()
-    pad.n_fs = n
-    pad.n_ss = n
-    pad.fs_vec = [p,0,0]
-    pad.ss_vec = [0,p,0]
-    pad.t_vec = [ (-n*p+p)*.5 , (-n*p+p)*.5, detector_distance]
-    
-    q = pad.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
-    pad_sh= pad.shape()
-    print("Made the pad")
-    print(pad_sh)
-    #   combine the qs into a single vector...
-    
-    k_vecs = pad.position_vecs()
-    k_vecs = vec_norm( k_vecs) * 2 * np.pi / wavelength
-    
-    q12_max = distance.euclidean( k_vecs[0], k_vecs[-1]  )
-    q12_min = distance.euclidean( k_vecs[0], k_vecs[1])
-    if save_kvecs is not None:
-        np.save(os.path.join( outdir, save_kvecs), k_vecs)
-    print("The pads cover the range %.4f to %.4f \
-        inverse angstrom"%(q12_min*1e-10, q12_max*1e-10))
-    print("Making solid angles...")
-    sangs = np.abs(pad.solid_angles() )
-    SA_frac = sangs.sum() / 4 / np.pi
-    print ("solid angle fraction : %f" %SA_frac)
-
-Npix = k_vecs.shape[0]
-print("Simulating intensities for %d pixels \
-    in the %s detector.." %(Npix, detect_type))
-
-clcore = ClCore(group_size=1, double_precision=True)
-q_dev = clcore.to_device(q)
-seconds = 0
-t0 = t=  time()
-
-clcore.init_amps( Npix)
-
-qbins = np.linspace( 0, qmax_waxs*1e10,  Nq_waxs+1)
-
-
-if norm_factor is None:
-    # make normalization factor
-    # doing it this way to save on RAM
-    norm_factor = np.zeros( Nq_waxs)
-
-    for ik, kval in enumerate(k_vecs):
-        kdists = distance.cdist( [kval], k_vecs )
-        kdigs = np.digitize( kdists, qbins) -1
-       
-        C = Counter( kdigs.ravel() )
-        counts = np.array( [ C[i_] for i_ in xrange( Nq_waxs)] )
-
-        norm_factor += counts
-        if ik%print_stride==0:
-            print ( "Making norm factor: %d pixels remain..."\
-                % ( len(k_vecs) - ik))
-
-    if save_normfactor:
-        np.save( os.path.join( outdir, save_normfactor ), \
-            norm_factor)
-
-def sparse_idi(J, k_vecs=k_vecs, 
-        qbins=qbins, Nq_waxs=Nq_waxs):
+def sparse_idi(J, k_vecs, 
+        qbins, Nq_waxs):
     
     idx = np.where(J)[0]
     dists =  distance.cdist( 
@@ -316,10 +156,184 @@ def sparse_idi_gpu( J, k_vecs, qbins, Nq_waxs,  context, queue):
 
     return np.sum(corrs,axis=0)
 
+############################################################
+# MAIN STARTS HERE
+############################################################
+
+
+
+
+# Viewing choices
+qtview = True
 
 # get GPU stuff
 if gpu:
     context, queue = get_context_queue()
+
+# save info
+outdir = "idi_000"
+if not os.path.exists(outdir):
+    os.makedirs( outdir)
+file_stride = 100
+save_kvecs = "k_vecs_xtal"
+save_normfactor="norm_factor_xtal"
+print_stride=100
+# output file names:
+out_pre = "33-infinite_ps2_mor"
+Waxs_file = os.path.join( outdir, "%s.Waxs"%out_pre)
+Nshots_file = os.path.join( outdir, "%s.Nshots"%out_pre)
+
+finite_photons = 0 #True #False
+dilute_limit = True
+
+norm_factor =  None  #None #:x 1.#   None
+#norm_factor = np.load( os.path.join( outdir , save_normfactor+".npy")) #"1-10mol_1modes_25x25x25unit/norm_factor_xtal.npy")
+# this norm factor should correspond to your k_vecs, set as None to create, but it takes some time... 
+
+#output waxs pattern
+qmax_waxs = 0.7 #1. # inverse angstrom
+Nq_waxs = 64
+
+# How many diffraction patterns to simulate
+n_patterns =100 # 12000
+Num_modes = 1
+
+# Intensity of the fluoress
+photons_per_atom = 1 #00000000
+n_unit_cell = 4
+
+# whether to use Henke or Cromer mann
+use_henke = True  # if False, then use Cromer-mann version
+
+# Information about the object
+n_molecules =  1# 10
+box_size = 1000e-9
+#box_size = 1000000000e-9
+do_rotations = True #False
+do_phases = True
+do_translations = True
+
+# Settings for pixel-array detector
+n_pixels_per_dim = 128 # along a row
+pixel_size = 0.00005 # meters, (small pixels that we will bin average later)
+detector_distance = .1 # meter
+block_size = 10,10
+
+# Settings for spherical detector
+spherical_detector = False #True
+n_subdivisions = 3
+radius = 1
+
+####################################
+
+# Information about the emission
+photon_energy = 10.5 / keV
+wavelength = hc / photon_energy # in meters
+beam_vec = np.array([0, 0, 1.0]) # This shouldn't matter...
+
+# Atomic positions of Mn atoms:
+pdb_file = '../data/pdb/3wu2.pdb'
+cryst = crystal.Molecule(pdb_file)
+is_manga = cryst.Z==25
+r = cryst.r[ is_manga]
+r = r[:4] # take the first monomer in assymetric unit, 
+cryst.lat.assemble(n_unit=n_unit_cell)
+lattice = cryst.lat.vecs*1e-10
+r = np.vstack([ r+l for l in lattice])
+r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
+
+r = np.load( 'xtal_zinc_3x3x3.npy' )*1e-10
+r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
+
+# maximum distance spanned by the molecule:
+r_size = 5 * 25e-10 * np.sqrt(3)  
+#r_size = cryst.a * n_unit_cell * np.sqrt(3) #distance.pdist(r).max()
+
+
+n_atoms = r.shape[0]
+print('Will simulate %d patterns' % (n_patterns))
+
+if spherical_detector:
+    detect_type = "SPHERE"
+    print('Creating spherical detector...')
+    ico = ba.detector.IcosphereGeometry(n_subdivisions=n_subdivisions, radius=radius)
+    verts, faces, fcs = ico.compute_vertices_and_faces()
+    n_faces = faces.shape[0]
+    q = (2 * np.pi / wavelength) * fcs #(fcs - beam_vec)
+    print('%d pixels' % (q.shape[0]))
+else:
+    detect_type='BOX'
+    n = n_pixels_per_dim # shortcut
+    p = pixel_size # shortcut
+    
+    pad = ba.detector.PADGeometry()
+    pad.n_fs = n
+    pad.n_ss = n
+    pad.fs_vec = [p,0,0]
+    pad.ss_vec = [0,p,0]
+    pad.t_vec = [ (-n*p+p)*.5 , (-n*p+p)*.5, detector_distance]
+    
+    q = pad.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
+    pad_sh= pad.shape()
+    print("Made the pad")
+    print(pad_sh)
+    #   combine the qs into a single vector...
+    
+    k_vecs = pad.position_vecs()
+    k_vecs = vec_norm( k_vecs) * 2 * np.pi / wavelength
+    
+    q12_max = distance.euclidean( k_vecs[0], k_vecs[-1]  )
+    q12_min = distance.euclidean( k_vecs[0], k_vecs[1])
+    if save_kvecs is not None:
+        np.save(os.path.join( outdir, save_kvecs), k_vecs)
+    print("The pads cover the range %.4f to %.4f \
+        inverse angstrom"%(q12_min*1e-10, q12_max*1e-10))
+    print("Making solid angles...")
+    sangs = np.abs(pad.solid_angles() )
+    SA_frac = sangs.sum() / 4 / np.pi
+    print ("solid angle fraction : %f" %SA_frac)
+
+Npix = k_vecs.shape[0]
+print("Simulating intensities for %d pixels \
+    in the %s detector.." %(Npix, detect_type))
+
+clcore = ClCore(group_size=1, double_precision=True)
+q_dev = clcore.to_device(q)
+seconds = 0
+t0 = t=  time()
+
+clcore.init_amps( Npix)
+
+qbins = np.linspace( 0, qmax_waxs*1e10,  Nq_waxs+1)
+
+
+if norm_factor is None:
+    
+    # make normalization factor
+    if gpu:
+         norm_factor = sparse_idi_gpu(np.ones( k_vecs.shape[0]), k_vecs, qbins, Nq_waxs, context, queue)
+    
+    else:
+        # doing it this way to save on RAM
+        norm_factor = np.zeros( Nq_waxs)
+
+        for ik, kval in enumerate(k_vecs):
+            kdists = distance.cdist( [kval], k_vecs )
+            kdigs = np.digitize( kdists, qbins) -1
+           
+            C = Counter( kdigs.ravel() )
+            counts = np.array( [ C[i_] for i_ in xrange( Nq_waxs)] )
+
+            norm_factor += counts
+            if ik%print_stride==0:
+                print ( "Making norm factor: %d pixels remain..."\
+                    % ( len(k_vecs) - ik))
+
+    if save_normfactor:
+        np.save( os.path.join( outdir, save_normfactor ), \
+            norm_factor)
+
+
 
 
 temp_waxs, temp_Nshots = [],[]
@@ -405,13 +419,6 @@ for pattern_num in range(0, n_patterns):
             else:
                 J_inf += I
         
-        #if I.dtype==np.float32:
-        #    I = I.astype(np.float64)
-        #N_photons_measured =  int( SA_frac * \
-        #        photons_per_atom * total_atoms / Num_modes)
-        #J += np.random.multinomial( N_photons_measured , I / I.sum() )
-        #if not finite_photons:
-        #    J_inf += I
 
     print("Correlating")
     if finite_photons:
