@@ -27,6 +27,26 @@ import pyqtgraph.opengl as gl
 import pyqtgraph as pg
 import h5py
 
+import pyopencl as cl
+import pyopencl.array as clarray
+
+gpu = True
+
+
+def get_context_queue():
+#   list the platforms
+    platforms = cl.get_platforms()
+    print("Found platforms (will use first listed):", platforms)
+#   select the gpu
+    my_gpu = platforms[0].get_devices(
+        device_type=cl.device_type.GPU)
+    assert( my_gpu)
+    print("Found GPU(s):", my_gpu)
+#   create the context for the gpu, and the corresponding queue
+    context = cl.Context(devices=my_gpu)
+    queue = cl.CommandQueue(context)
+    return context, queue
+
 
 def blockshaped(arr, nrows, ncols):
     """
@@ -60,15 +80,15 @@ Waxs_file = os.path.join( outdir, "%s.Waxs"%out_pre)
 Nshots_file = os.path.join( outdir, "%s.Nshots"%out_pre)
 
 finite_photons = 0 #True #False
-dilute_limit = False #True
+dilute_limit = True
 
 norm_factor =  None  #None #:x 1.#   None
-#norm_factor = np.load( os.path.join( outdir , save_normfactor+".npy")) #"1-10mol_1modes_25x25x25unit/norm_factor_xtal.npy")
+norm_factor = np.load( os.path.join( outdir , save_normfactor+".npy")) #"1-10mol_1modes_25x25x25unit/norm_factor_xtal.npy")
 # this norm factor should correspond to your k_vecs, set as None to create, but it takes some time... 
 
 #output waxs pattern
 qmax_waxs = 0.04 #1. # inverse angstrom
-Nq_waxs = 32
+Nq_waxs = 128
 
 # How many diffraction patterns to simulate
 n_patterns =100 # 12000
@@ -82,7 +102,7 @@ n_unit_cell = 4
 use_henke = True  # if False, then use Cromer-mann version
 
 # Information about the object
-n_molecules =  10
+n_molecules =  1# 10
 box_size = 1000e-9
 #box_size = 1000000000e-9
 do_rotations = True #False
@@ -90,7 +110,7 @@ do_phases = True
 do_translations = True
 
 # Settings for pixel-array detector
-n_pixels_per_dim = 45 # along a row
+n_pixels_per_dim = 128 # along a row
 pixel_size = 0.00005 # meters, (small pixels that we will bin average later)
 detector_distance = .1 # meter
 block_size = 10,10
@@ -118,10 +138,15 @@ lattice = cryst.lat.vecs*1e-10
 r = np.vstack([ r+l for l in lattice])
 r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
 
-n_atoms = r.shape[0]
-# maximum distance spanned by the molecule:
-r_size = cryst.a * n_unit_cell * np.sqrt(3) #distance.pdist(r).max()
+#r = np.load( 'xtal_zinc_3x3x3.npy' )*1e-10
+#r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
 
+# maximum distance spanned by the molecule:
+#r_size = 5 * 25e-10 * np.sqrt(3)  
+#_size = cryst.a * n_unit_cell * np.sqrt(3) #distance.pdist(r).max()
+
+
+n_atoms = r.shape[0]
 print('Will simulate %d patterns' % (n_patterns))
 
 if spherical_detector:
@@ -219,6 +244,84 @@ def sparse_idi(J, k_vecs=k_vecs,
 
     return H
 
+
+def sparse_idi_gpu( J, k_vecs, qbins, Nq_waxs,  context, queue):
+
+    idx = np.where( J)[0]
+    k_nonzero = k_vecs [ idx]
+    J_nonzero = J [ idx]
+    
+    corrs = np.ascontiguousarray(np.zeros( (k_nonzero.shape[0], Nq_waxs), dtype=np.float32) )
+    
+    dq = qbins[1] - qbins[0]
+    qmin = qbins.min()
+
+    kernel = """ 
+    __kernel void idi_corr(__global float* I_vecs,
+                            __global float* k_vecs,
+                             __global float* corrs,
+                             int Nq, float dq, float qmin, int Nk){
+    //  this is the unique ID of each worker, and each worker will be loading a single k vec
+        
+        int g_i = get_global_id(0);
+        float I, I2, kx,ky,kz,kx2,ky2,kz2, q, dx, dy, dz;
+        int bin;
+        float _null;
+    //  we pass 1D arrays to openCL, in row-major order
+        
+        I = I_vecs[g_i];
+        
+        kx = k_vecs[g_i*3];
+        ky = k_vecs[g_i*3+1];
+        kz = k_vecs[g_i*3+2];
+
+        for(int i =0; i < Nk; i++){
+            I2 = I_vecs[i];
+            kx2 = k_vecs[i*3];
+            ky2 = k_vecs[i*3+1];
+            kz2 = k_vecs[i*3+2];
+            dx=kx-kx2;
+            dy=ky-ky2;
+            dz=kz-kz2;
+            q = sqrt( dx*dx+ dy*dy+ dz*dz); 
+            bin = floor( (q - qmin ) / dq ) ; 
+            if (bin < Nq)
+                corrs[g_i*Nq + bin] += I*I2;
+            else
+                corrs[g_i*Nq + bin] += I*0;
+        }
+    }
+    """
+    #   setup opencl, compile bugs will show up here
+    program = cl.Program(context, kernel).build()
+
+#   move host arrays to GPU device, note forcing q_vecs and atom_vecs to be contiguous , ampsR and ampsI are already contiguous
+    J_dev = clarray.to_device(queue, np.ascontiguousarray(J_nonzero.astype(np.float32)))
+    k_dev = clarray.to_device(queue, np.ascontiguousarray(k_nonzero.astype(np.float32)))
+    corrs_dev = clarray.to_device(queue, corrs)
+
+#   specify scalar args (just tell openCL which kernel args are scalar)
+    program.idi_corr.set_scalar_arg_dtypes(
+            [None, None, None,np.int32, np.float32, np.float32, np.int32])
+#   run the kernel
+#   note there are 3 pre-arguments to our kernel, these are the queue, 
+#   the total number of workers, and the desired worker-group size. 
+#   Leaving worker-group size as None lets openCL decide a value (I think)
+    program.idi_corr(queue, (k_nonzero.shape[0],), None, J_dev.data, k_dev.data,
+        corrs_dev.data,  np.int32(Nq_waxs), np.float32( dq), np.float32( qmin), np.int32( k_nonzero.shape[0])   )
+
+#   transfer data from device back to host
+#    you can try to optimize enqueue_copy by passing different flags 
+    cl.enqueue_copy(queue, corrs, corrs_dev.data)
+
+    return np.sum(corrs,axis=0)
+
+
+# get GPU stuff
+if gpu:
+    context, queue = get_context_queue()
+
+
 temp_waxs, temp_Nshots = [],[]
 waxs = np.zeros(Nq_waxs)
 
@@ -263,19 +366,16 @@ for pattern_num in range(0, n_patterns):
         J_inf = np.zeros( Npix)
     
     for _ in range( Num_modes):
-        if do_phases:
-            phases = np.random.random(n_atoms \
-                * n_molecules) * 2 * np.pi
-        else:
-            phases = np.zeros([n_atoms * \
-                n_molecules])
-        fs = np.exp(1j * phases)
+        print("SImulating intensities")
         if dilute_limit:
             for r_mol in rs:
-                #A = clcore.phase_factor_qrf(q_dev, r_mol, fs) #, q_is_qdev=True)
-                clcore.phase_factor_qrf_chunk(q_dev, r_mol, fs, Nchunk=10, q_is_qdev=True)
+                phases = np.random.random(len(r_mol)) * 2 * np.pi
+                fs = np.exp(1j * phases)
+                        
+                A = clcore.phase_factor_qrf(q_dev, r_mol, fs) #, q_is_qdev=True)
+                #clcore.phase_factor_qrf_chunk(q_dev, r_mol, fs, Nchunk=2, q_is_qdev=True)
                 #clcore.phase_factor_qrf_inplace(q_dev, r_mol, fs, q_is_qdev=True)
-                A = clcore.release_amps( reset=True)
+                #A = clcore.release_amps( reset=True)
                 
                 I_mol = np.abs(A) ** 2
                 if finite_photons:
@@ -286,11 +386,17 @@ for pattern_num in range(0, n_patterns):
                     J_inf += I_mol
 
         else: 
-            for r_mol in rs:
+            #for r_mol in rs:
+                #A = clcore.phase_factor_qrf(q_dev, r_mol, fs) #, q_is_qdev=True)
                 #clcore.phase_factor_qrf_inplace(q_dev, r_mol, fs , q_is_qdev=True)
-                clcore.phase_factor_qrf_chunk(q_dev, r_mol, fs ,Nchunk=10, q_is_qdev=True)
+                #clcore.phase_factor_qrf_chunk(q_dev, r_mol, fs ,Nchunk=10, q_is_qdev=True)
             
-            A = clcore.release_amps(reset=True)
+            r_all = np.vstack( rs)
+            phases = np.random.random(len(r_all)) * 2 * np.pi
+            fs = np.exp(1j * phases)
+            A = clcore.phase_factor_qrf(q_dev, r_mol, fs) #, q_is_qdev=True)
+            
+            #A = clcore.release_amps(reset=True)
             I = np.abs(A) ** 2
             if finite_photons:
                 J += sample_I(I, SA_frac, 
@@ -307,10 +413,17 @@ for pattern_num in range(0, n_patterns):
         #if not finite_photons:
         #    J_inf += I
 
+    print("Correlating")
     if finite_photons:
-        h = sparse_idi(J)
+        if gpu:
+            h = sparse_idi_gpu(J, k_vecs, qbins, Nq_waxs, context, queue)
+        else:
+            h = sparse_idi(J, k_vecs, qbins, Nq_waxs)#, context, queue)
     else:
-        h = sparse_idi(J_inf)
+        if gpu:
+            h = sparse_idi_gpu(J_inf, k_vecs, qbins, Nq_waxs, context, queue)
+        else:
+            h = sparse_idi(J_inf, k_vecs, qbins, Nq_waxs) #, context, queue)
     
     waxs += h
 
