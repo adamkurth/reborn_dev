@@ -171,7 +171,7 @@ if gpu:
     context, queue = get_context_queue()
 
 # save info
-outdir = "idi_000"
+outdir = "idi_zinc"
 if not os.path.exists(outdir):
     os.makedirs( outdir)
 file_stride = 100
@@ -179,23 +179,23 @@ save_kvecs = "k_vecs_xtal"
 save_normfactor="norm_factor_xtal"
 print_stride=100
 # output file names:
-out_pre = "33-infinite_ps2_mor"
+out_pre = "42-infinite_ps2_mor"
 Waxs_file = os.path.join( outdir, "%s.Waxs"%out_pre)
 Nshots_file = os.path.join( outdir, "%s.Nshots"%out_pre)
 
-finite_photons = 0 #True #False
+finite_photons = 1#True #False
 dilute_limit = True
 
-norm_factor =  None  #None #:x 1.#   None
-#norm_factor = np.load( os.path.join( outdir , save_normfactor+".npy")) #"1-10mol_1modes_25x25x25unit/norm_factor_xtal.npy")
+norm_factor =  None  # None #:x 1.#   None
+# norm_factor = np.load( os.path.join( outdir , save_normfactor+".npy")) #"1-10mol_1modes_25x25x25unit/norm_factor_xtal.npy")
 # this norm factor should correspond to your k_vecs, set as None to create, but it takes some time... 
 
 #output waxs pattern
-qmax_waxs = 0.7 #1. # inverse angstrom
-Nq_waxs = 64
+qmax_waxs = 1. #1. # inverse angstrom
+Nq_waxs = 128
 
 # How many diffraction patterns to simulate
-n_patterns =100 # 12000
+n_patterns = 1000 # 12000
 Num_modes = 1
 
 # Intensity of the fluoress
@@ -206,7 +206,7 @@ n_unit_cell = 4
 use_henke = True  # if False, then use Cromer-mann version
 
 # Information about the object
-n_molecules =  1# 10
+n_molecules =1  #1# 10
 box_size = 1000e-9
 #box_size = 1000000000e-9
 do_rotations = True #False
@@ -215,7 +215,7 @@ do_translations = True
 
 # Settings for pixel-array detector
 n_pixels_per_dim = 128 # along a row
-pixel_size = 0.00005 # meters, (small pixels that we will bin average later)
+pixel_size = 0.0001 # meters, (small pixels that we will bin average later)
 detector_distance = .1 # meter
 block_size = 10,10
 
@@ -242,13 +242,12 @@ lattice = cryst.lat.vecs*1e-10
 r = np.vstack([ r+l for l in lattice])
 r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
 
-r = np.load( 'xtal_zinc_3x3x3.npy' )*1e-10
+r = np.load( 'xtal_zinc_8x8x8.npy' )*1e-10
 r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
 
 # maximum distance spanned by the molecule:
 r_size = 5 * 25e-10 * np.sqrt(3)  
 #r_size = cryst.a * n_unit_cell * np.sqrt(3) #distance.pdist(r).max()
-
 
 n_atoms = r.shape[0]
 print('Will simulate %d patterns' % (n_patterns))
@@ -393,7 +392,7 @@ for pattern_num in range(0, n_patterns):
                 
                 I_mol = np.abs(A) ** 2
                 if finite_photons:
-                    J += sample(I_mol, SA_frac, 
+                    J += sample_I(I_mol, SA_frac, 
                         photons_per_atom, 
                         total_atoms, Num_modes)
                 else:
@@ -431,7 +430,10 @@ for pattern_num in range(0, n_patterns):
             h = sparse_idi_gpu(J_inf, k_vecs, qbins, Nq_waxs, context, queue)
         else:
             h = sparse_idi(J_inf, k_vecs, qbins, Nq_waxs) #, context, queue)
-    
+   
+    #plt.imshow( J.reshape( pad_sh))
+    #plt.show()
+
     waxs += h
 
     if pattern_num % file_stride == 0:
