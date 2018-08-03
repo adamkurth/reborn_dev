@@ -215,7 +215,7 @@ class PADGeometry(object):
         cs = np.dot(n, vec_norm(v).T)  # Inclination factor: cos(theta)
         sa = (A / R2) * cs  # Solid angle
 
-        return sa.ravel()
+        return np.abs(sa.ravel() )
 
     def polarization_factors(self, polarization_vec, beam_vec, weight=None):
         r"""
