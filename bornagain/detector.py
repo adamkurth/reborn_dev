@@ -7,6 +7,7 @@ import sys
 
 import numpy as np
 from numpy.linalg import norm
+import h5py
 
 try:
     import matplotlib
@@ -73,6 +74,23 @@ class PADGeometry(object):
     @t_vec.setter
     def t_vec(self, t_vec):
         self._t_vec = vec_check(t_vec)
+
+
+    def save( self, save_fname):
+        """Saves an hdf5 file with class attributes for later use"""
+        with h5py.File(save_fname, "w") as h:
+            for name, data in vars( self).items():
+                h.create_dataset(name,data=data)
+
+    @classmethod
+    def load(cls, fname):
+        """ load a PAD object from fname"""
+        pad = cls()
+        with h5py.File( fname, "r") as h:
+            for name in h.keys():
+                data = h[name].value
+                setattr(pad, name, data)
+        return pad
 
     def simple_setup(self, n_pixels = 1000, pixel_size = 100e-6, distance = 0.1):
         r""" Make this a square PAD with beam at center.
