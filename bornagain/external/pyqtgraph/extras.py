@@ -3,6 +3,17 @@ import numpy as np
 import pyqtgraph as pg
 
 
+def keep_open():
+
+    """
+
+    Simple helper that keeps qtgraph window open when you run a script from the terminal.
+
+    """
+
+    pg.QtGui.QApplication.instance().exec_()
+
+
 class MultiHistogramLUTWidget(pg.GraphicsView):
 
     """
@@ -22,7 +33,6 @@ class MultiHistogramLUTWidget(pg.GraphicsView):
 
     def __getattr__(self, attr):
         return getattr(self.item, attr)
-
 
 
 class MultiHistogramLUTItem(pg.HistogramLUTItem):
