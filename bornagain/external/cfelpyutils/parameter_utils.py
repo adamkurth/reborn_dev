@@ -13,17 +13,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with cfelpyutils.  If not, see <http://www.gnu.org/licenses/>.
 """
-Utilities for parsing command line options and configuration files.
+Parameter parsing utilities.
 
-Exports:
-
-    Functions:
-
-        convert_parameters: convert a dictionary returned by the
-            configparse module to a dictionary containing entries with
-            the correct type.
+This module contains the implementation of functions that are used to
+parse and manipulate options and parameters, as extracted by the
+python :obj:`configparse` module.
 """
-
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
@@ -44,9 +39,9 @@ def convert_parameters(config_dict):
     """
     Convert strings in parameter dictionaries to the correct data type.
 
-    Convert a dictionary return by the configparse module to a
-    dictionar contaning the same parameters converted from string to
-    their correct type (int, float, string, etc.)
+    Convert a dictionary extracted by the configparse module to a
+    dictionary contaning the same parameters converted from strings to
+    correct types (int, float, string, etc.)
 
     Try to convert each entry in the dictionary according to the
     following rules. The first rule that applies to the entry
@@ -75,8 +70,9 @@ def convert_parameters(config_dict):
 
     Args:
 
-        config (Dict): a dictionary containing strings (the dictionary
-            returned by Config Parser).
+        config (Dict[str]): a dictionary containing the parameters from
+            a configuration file as extracted by the
+            :obj:`configparser` module).
 
     Returns:
 
@@ -86,21 +82,13 @@ def convert_parameters(config_dict):
     Raises:
 
         RuntimeError: if an entry cannot be converted to any supported
-        type.
+            type.
     """
 
     monitor_params = {}
 
-    # Iterate over the sections in the dictionary (first level in the
-    # configuration file). Add the section to the dictionary that will
-    # be returned.
     for section in config_dict.keys():
         monitor_params[section] = {}
-
-        # Iterate then over the content of the section (second level in
-        # the configuration file). Get each option in turn and perform
-        # all the checks. If all checks fail, call the parsing_error
-        # function.
         for option in config_dict[section].keys():
             recovered_option = config_dict[section][option]
             if (
