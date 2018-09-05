@@ -11,17 +11,31 @@ import numpy as np
 # ------------------------------------------------------------------------------
 
 def get_cmann_form_factors(cman, q):
+    """
+    cman is a dict of {atomic_number : array of cman parameters}
+
+    q is either  a Nq x 3 , or a 1x3 vector of reciprocal space points, magnitudes respectively
+    """
 
     form_facts = {}
-    q_mag_squared = np.sum( q**2 ,1) # magnitude of momentum transfer squared
+    
+    q = np.array(q)
+     
+    if len(q.shape) == 1:
+        q_mag_squared = q**2
+    
+    elif len( q.shape)==2:
+        q_mag_squared = np.sum( q**2 ,1) # magnitude of momentum transfer squared
+    
     expo_terms = np.exp( -q_mag_squared / (16 * np.pi*np.pi) )
+
     for z, coefs in cman.iteritems():
         a_vals = coefs[:4]
         b_vals = coefs[4:8]
         c = coefs[-1]
 #       make the form factors for each q for atomic number z
         z_ff = np.sum( [a * (expo_terms**b) 
-            for a,b in izip(a_vals, b_vals)], 0) 
+            for a,b in zip(a_vals, b_vals)], 0) 
         z_ff += c
 
         form_facts[z] = z_ff

@@ -38,7 +38,7 @@
     <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
         <link rel="up" title="bornagain package" href="bornagain.html"/>
         <link rel="next" title="bornagain.target package" href="bornagain.target.html"/>
-        <link rel="prev" title="bornagain.external package" href="bornagain.external.html"/> 
+        <link rel="prev" title="bornagain.external.pyqtgraph package" href="bornagain.external.pyqtgraph.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -109,6 +109,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
@@ -126,6 +127,7 @@
 <li class="toctree-l4"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">bornagain.simulate package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
@@ -917,17 +919,19 @@ the <cite>cromermann</cite> array.</p>
 
 <dl class="function">
 <dt id="bornagain.simulate.solutions.get_water_profile">
-<code class="descclassname">bornagain.simulate.solutions.</code><code class="descname">get_water_profile</code><span class="sig-paren">(</span><em>q</em>, <em>temperature=30</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/solutions.html#get_water_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.solutions.get_water_profile" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.simulate.solutions.</code><code class="descname">get_water_profile</code><span class="sig-paren">(</span><em>q</em>, <em>temperature=298</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/solutions.html#get_water_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.solutions.get_water_profile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get water scattering profile from Greg Hura’s PhD thesis data.  Interpolates the data for given
 q-vector magnitudes and temperature.  Temperatures range from 1, 11, 25, 44, 55, 66, 77 degrees
-Celcius.</p>
+Celcius.  Bornagain, of course, uses SI units, including for temperature.  To go from Celcius to Kelvin, add 273.16.
+Note that this is the scattering factor F for a single water molecule.  The number density of water is approximately
+n = 33.3679e27 / m^3 .</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>q</strong> – The momentum transfer vectors</li>
-<li><strong>temperature</strong> – Desired water temperature</li>
+<li><strong>q</strong> – The momentum transfer vector magnitudes (i.e. 2 pi sin(theta/lambda)/wavelength )</li>
+<li><strong>temperature</strong> – Desired water temperature in Kelvin</li>
 </ul>
 </td>
 </tr>
@@ -1020,7 +1024,7 @@ new_z, float Nx1 atomic numbers</p>
         <a href="bornagain.target.html" class="btn btn-neutral float-right" title="bornagain.target package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.external.html" class="btn btn-neutral" title="bornagain.external package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.external.pyqtgraph.html" class="btn btn-neutral" title="bornagain.external.pyqtgraph package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

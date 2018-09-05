@@ -189,8 +189,8 @@
             <span class="n">slist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">psana_array</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
         <span class="n">imlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">slist</span><span class="p">))</span>
     <span class="n">cheetah_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">imlist</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="n">cheetah_array</span>
+
+    <span class="k">return</span> <span class="n">cheetah_array</span></div>
 
 
 <div class="viewcode-block" id="cheetah_cspad_array_to_pad_list"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.lcls.cheetah_cspad_array_to_pad_list">[docs]</a><span class="k">def</span> <span class="nf">cheetah_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">psana_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
@@ -213,8 +213,8 @@
     <span class="n">pad_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
         <span class="n">pad_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cheetah_array</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
-</div>
-    <span class="k">return</span> <span class="n">pad_list</span>
+
+    <span class="k">return</span> <span class="n">pad_list</span></div>
 </pre></div>
 
            </div>

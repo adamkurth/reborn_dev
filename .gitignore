@@ -10,8 +10,8 @@ temp
 .cache
 .metadata
 .*.csv
-_*
 ._*
 .idea
 .adxv*
 .pytest_cache
+__pycache__

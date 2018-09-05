@@ -1,6 +1,6 @@
 from __future__ import division
 
-
+import os
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -23,42 +23,60 @@ from bornagain.utils import vec_norm
 from bornagain.simulate.clcore import ClCore
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
+import h5py
 
 # Viewing choices
 qtview = True
 
+# save info
+outdir = "1-10mol_1modes"
+if not os.path.exists(outdir):
+    os.makedirs( outdir)
+file_stride = 500
+save_kvecs = "k_vecs"
+save_normfactor="norm_factor"
+
+# output file names:
+out_pre = "1-10mol_1modes_150k"
+Waxs_file = os.path.join( outdir, "%s.Waxs"%out_pre)
+Nshots_file = os.path.join( outdir, "%s.Nshots"%out_pre)
+
+norm_factor = None
+norm_factor = np.load("norm_factor.npy")
+# this norm factor should correspond to your k_vecs, set as None to create, but it takes some time... 
+
+#output waxs pattern
+qmax_waxs = 12 # inverse angstrom
+Nq_waxs = 512
+
 # How many diffraction patterns to simulate
-n_patterns = 100
+n_patterns = 150000
+Num_modes = 1
 
 # Intensity of the fluoress
-add_noise = False #True
-photons_per_atom = 1000
+photons_per_atom = 1
 
 # whether to use Henke or Cromer mann
 use_henke = True  # if False, then use Cromer-mann version
 
 # Information about the object
-n_molecules = 1
+n_molecules = 10
 box_size = 1000e-9
 do_rotations = True #False
 do_phases = True
 do_translations = True
 
-
 # Settings for pixel-array detector
-n_pixels = 100
+n_pixels_per_dim = 100 # along a row
 pixel_size = 0.001 # meters, (small pixels that we will bin average later)
 detector_distance = .05 # meter
-#pix_size = 0.1 * sqrt( 2*rmax*rmax/(wavelength*wavelength) -1 ) / ( n_pixels/2.) # Im not sure if this works, but trying to guess the min pixel size needed for shannon sampling at the edge of the detector.. 
 
 # Settings for spherical detector
 spherical_detector = False #True
 n_subdivisions = 3
 radius = 1
 
-
 ####################################
-
 
 # Information about the emission
 photon_energy = 10.5 / keV
@@ -72,10 +90,7 @@ is_manga = cryst.Z==25
 r = cryst.r[ is_manga]
 r = r[:4] # take the first monomer in assymetric unit, 
 r -= r.mean(0)  # mean sub, I dunno it matters or not , but for rotations maybe...
-# dimer test???
-#r = np.array([[0, 0, 0], [5e-10, 0, 0]])
 n_atoms = r.shape[0]
-
 # maximum distance spanned by the molecule:
 r_size = distance.pdist(r).max()
 
@@ -91,7 +106,7 @@ if spherical_detector:
     print('%d pixels' % (q.shape[0]))
 else:
     detect_type='BOX'
-    n = n_pixels # shortcut
+    n = n_pixels_per_dim # shortcut
     p = pixel_size # shortcut
     
     pad1 = ba.detector.PADGeometry()
@@ -100,14 +115,12 @@ else:
     pad1.fs_vec = [0,0,p]
     pad1.ss_vec = [0,p,0]
     pad1.t_vec = [ -detector_distance,  (-n*p+p)*.5 , (-n*p+p)*.5  ]
-    #pad.simple_setup(n_pixels=n_pixels, pixel_size=pixel_size, distance=detector_distance)
     pad2 = ba.detector.PADGeometry()
     pad2.n_fs = n
     pad2.n_ss = n
     pad2.fs_vec = [0,0,p]
     pad2.ss_vec = [0,p,0]
     pad2.t_vec = [ detector_distance,  (-n*p+p)*.5 , (-n*p+p)*.5  ]
-    #pad.simple_setup(n_pixels=n_pixels, pixel_size=pixel_size, distance=detector_distance)
     
     pad3 = ba.detector.PADGeometry()
     pad3.n_fs = n
@@ -116,7 +129,6 @@ else:
     pad3.ss_vec = [0,p,0]
     pad3.t_vec = [ (-n*p+p)*.5 , (-n*p+p)*.5, detector_distance]
     
-    #pad.simple_setup(n_pixels=n_pixels, pixel_size=pixel_size, distance=detector_distance)
     
     q1 = pad1.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
     q2 = pad2.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
@@ -130,31 +142,50 @@ else:
     k_vecs =np.vstack( (pad1.position_vecs(), pad2.position_vecs(), pad3.position_vecs()) )
     k_vecs = vec_norm( k_vecs) * 2 * np.pi / wavelength
     q12 = distance.cdist( k_vecs, k_vecs).ravel() # pair q distances
-    nbins=512 # number of q bins
-    qbins = np.linspace( q12.min(), q12.max(), nbins+1) # these are the histogram bins.. 
+    if save_kvecs is not None:
+        np.save(os.path.join( outdir, save_kvecs), k_vecs)
     print("The pads cover the range %.4f to %.4f inverse angstrom"%(q12.min()*1e-10, q12.max()*1e-10))
-    plt.hist( qbins*1e-10, bins=qbins*1e-10)
-    plt.xlabel("inverse angstrom")
-    plt.ylabel("bin count")
-    plt.show()
-n_q = q.shape[0]
+    print("Making solid angles...")
+    sangs = np.hstack( [pad1.solid_angles2() , pad2.solid_angles2(), pad3.solid_angles2()] )
+    SA_frac = sangs.sum() / 4 / np.pi
 
-print("Simulating intensities for %d pixels in the %s detector.." %(n_q, detect_type))
-I_sum = np.zeros( n_q, dtype=np.float64) # store the intensities
-II_sum = np.zeros( n_q*n_q, dtype=np.float64)  # stores the correlations of intensities
+Npix = k_vecs.shape[0]
 
-clcore = ClCore(group_size=1)
+print("Simulating intensities for %d pixels in the %s detector.." %(Npix, detect_type))
+
+clcore = ClCore(group_size=1,double_precision=True)
 q_dev = clcore.to_device(q)
 seconds = 0
 t0 = t=  time()
-for pattern_num in range(0, n_patterns):
 
-    # Random phases for each atom
-    if do_phases:
-        phases = np.random.random(n_atoms * n_molecules) * 2 * np.pi
-    else:
-        phases = np.zeros([n_atoms * n_molecules])
-    fs = np.exp(1j * phases)
+qbins = np.linspace( 0, qmax_waxs * 1e10, Nq_waxs+1)
+if norm_factor is None:
+    # make normalization factor
+    # doing it this way to save on RAM
+    norm_factor = np.zeros( Nq_waxs)
+    for ik,kval in enumerate(k):
+        kdists = distance.cdist( [kval], k )
+        kdigs = np.digitize( kdists, qbins)-1
+        norm_factor += np.bincount( kdigs.ravel(), minlength=Nq_waxs)
+        if ik%print_stride==0:
+            print ( "Making norm factor: %d pixels remain..."% ( len(k) - ik))
+    
+    if save_normfactor:
+        np.save( os.path.join( outdir, save_normfactor ), norm_factor)
+
+def sparse_idi(J):
+    idx = np.where(J)[0]
+    dists =  distance.cdist( k_vecs[idx], k_vecs[idx] )
+    digs = np.digitize(dists, qbins) - 1
+    Js = J[idx]
+    weights = np.outer( Js, Js ) 
+    H = np.bincount( digs.ravel(), minlength=Nq_waxs , weights=weights.ravel())
+    return H
+
+temp_waxs, temp_Nshots = [],[]
+waxs = np.zeros(Nq_waxs)
+
+for pattern_num in range(0, n_patterns):
 
     # Random positions for each molecule
     if do_translations:
@@ -182,75 +213,49 @@ for pattern_num in range(0, n_patterns):
         rs.append(np.dot(R, r.T).T + T)
     
     rs = np.array(rs).reshape([n_molecules*n_atoms, 3])  # miliseconds slow down
+    total_atoms = rs.shape[0]
 
     # Compute intensities
-    A = clcore.phase_factor_qrf(q_dev, rs, fs)
-    I = np.abs(A) ** 2
+    J = np.zeros( Npix)
 
+    for _ in range( Num_modes):
+        if do_phases:
+            phases = np.random.random(n_atoms * n_molecules) * 2 * np.pi
+        else:
+            phases = np.zeros([n_atoms * n_molecules])
+        fs = np.exp(1j * phases)
+        A = clcore.phase_factor_qrf(q_dev, rs, fs)
+        I = np.abs(A) ** 2
+        if I.dtype==np.float32:
+            I = I.astype(np.float64)
+        N_photons_measured =  int( SA_frac * photons_per_atom * total_atoms / Num_modes)
+        J += np.random.multinomial( N_photons_measured , I / I.sum() )
+    
+    h = sparse_idi(J)
+    waxs += h
+    
+    if pattern_num % file_stride == 0:
+        waxs_norm = waxs / norm_factor
+        temp_waxs.append(waxs_norm / waxs_norm[0] )
+        temp_Nshots.append(pattern_num)
+        np.save( os.path.join( outdir, "temp_waxs_%d"%pattern_num) , waxs_norm / waxs_norm[0])
+        np.save( os.path.join( outdir, "temp_Nshots_%d"%pattern_num) , pattern_num)
+    
     dt = time()-t
-    # print(time(), t0, np.floor(dt), seconds)
     if np.floor(dt) >= 3:
         t = time()
         sys.stdout.write('Pattern %6d of %6d ; %3.0f%% ; %3.3g patterns/second\n' %
                          (pattern_num, n_patterns, 100*pattern_num/float(n_patterns),
                           pattern_num/(time() - t0)))
 
-    I *= photons_per_atom * n_atoms * n_molecules / np.sum(I.ravel())
-    if add_noise: I = np.random.poisson(I)
+# last save point:
+waxs_norm = waxs / norm_factor
+temp_waxs.append(waxs_norm / waxs_norm[0] )
+temp_Nshots.append(pattern_num)
+np.save( os.path.join( outdir, "temp_waxs_%d"%pattern_num) , waxs_norm / waxs_norm[0])
+np.save( os.path.join( outdir, "temp_Nshots_%d"%pattern_num) , pattern_num)
 
-    I_sum += I # summing the intensities
-
-    #II_sum += np.multiply.outer(I, I).ravel() # here is summing the correlations of intensities.. 
-    #print("computing correlation")
-    II_sum += np.einsum( 'i,j->ij', I,I).ravel()
-#    or 
-    #II_sum += (I[:,None]*I[None,:] ).ravel()
-#   prob best to do this on te GPU, it might be the bottleneck.. 
-
-print('Post-processing...')
-
-if not spherical_detector:
-#   make magnitude of k1-k2 vectors for binning
-    print("computing distance matrix for all pairs of k1,k2")
-    qbin_count = np.histogram( q12, bins=qbins )[0]
-    qbin_sums = np.histogram( q12, bins=qbins , weights=II_sum)[0]
-    plt.plot( 1e-10* ( qbins[:-1]*.5 + qbins[1:]*.5 ), qbin_sums / qbin_count) 
-    plt.show()
-
-    np.save( 'idi', [ 1e-10* ( qbins[:-1]*.5 + qbins[1:]*.5 ), qbin_sums / qbin_count ]) 
-
-if spherical_detector:
-#   can use braodcasting here:
-    #qq = [np.subtract.outer(fcs[:, i], fcs[:, i]).ravel() for i in range(0, 3)]
-    #qq = 2*np.pi/wavelength*np.ravel(qq).reshape([3, n_q**2]).T.copy()
-    
-    qq = np.vstack( fcs[:,None] - fcs[None,:] ) * 2 * np.pi / wavelength
-    q_mags = np.sqrt(np.sum(q**2, axis=1))
-    max_q = 4*np.pi/wavelength
-
-    n_bins_3d = 51
-    III, _, _ = binned_statistic_dd(sample=qq, values=II_sum, bins=(n_bins_3d,)*3, range=[(-max_q, max_q)]*3, statistic='sum')
-    IIIc, _, _ = binned_statistic_dd(sample=qq, values=np.ones(II_sum.shape), bins=(n_bins_3d,)*3, range=[(-max_q, max_q)]*3, statistic='sum')
-    mean_ = np.mean(I_sum/n_patterns)
-    III = (III/IIIc - (mean_)**2)/mean_**2
-    c = np.floor(n_bins_3d/2).astype(np.int)
-    min_ = np.min(III[np.isfinite(III)])
-    III[~np.isfinite(III)] = min_
-    III[c, c, c] = min_
-
-    if qtview:
-        print('Displaying results...')
-
-        im = pg.image(np.transpose(III, axes=(1, 0, 2)))
-        im.setCurrentIndex(np.floor(n_bins_3d/2).astype(np.int))
-
-        qa = pg.mkQApp()
-        face_colors = np.ones([n_faces, 4])
-        for i in range(0,3): face_colors[:, i] = (I / np.max(I))*0.95 + 0.05
-        vw = gl.GLViewWidget()
-        vw.show()
-        md = gl.MeshData(vertexes=verts, faces=faces, faceColors=face_colors)
-        mi = gl.GLMeshItem(meshdata=md, smooth=False) #, edgeColor=np.array([0.1, 0.1, 0.1])*255, drawEdges=True)
-        vw.addItem(mi)
-        qa.exec_()
+np.save(Nshots_file, temp_Nshots)
+np.save(Waxs_file, temp_waxs)
+print("Saved np binary files %s.npy and %s.npy " %(Nshots_file, Waxs_file))
 

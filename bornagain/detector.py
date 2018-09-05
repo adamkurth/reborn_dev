@@ -7,6 +7,7 @@ import sys
 
 import numpy as np
 from numpy.linalg import norm
+import h5py
 
 try:
     import matplotlib
@@ -73,6 +74,23 @@ class PADGeometry(object):
     @t_vec.setter
     def t_vec(self, t_vec):
         self._t_vec = vec_check(t_vec)
+
+
+    def save( self, save_fname):
+        """Saves an hdf5 file with class attributes for later use"""
+        with h5py.File(save_fname, "w") as h:
+            for name, data in vars( self).items():
+                h.create_dataset(name,data=data)
+
+    @classmethod
+    def load(cls, fname):
+        """ load a PAD object from fname"""
+        pad = cls()
+        with h5py.File( fname, "r") as h:
+            for name in h.keys():
+                data = h[name].value
+                setattr(pad, name, data)
+        return pad
 
     def simple_setup(self, n_pixels = 1000, pixel_size = 100e-6, distance = 0.1):
         r""" Make this a square PAD with beam at center.
@@ -215,7 +233,7 @@ class PADGeometry(object):
         cs = np.dot(n, vec_norm(v).T)  # Inclination factor: cos(theta)
         sa = (A / R2) * cs  # Solid angle
 
-        return sa.ravel()
+        return np.abs(sa.ravel() )
 
     def polarization_factors(self, polarization_vec, beam_vec, weight=None):
         r"""
@@ -757,8 +775,8 @@ class Panel(object):
         if pixel_size is None:
             raise ValueError("Pixel size is unspecified.")
 
-        self.nF = nF
-        self.nS = nS
+        self.nF = int(nF)
+        self.nS = int(nS)
         self.F = np.array([1, 0, 0]) * pixel_size
         self.S = np.array([0, 1, 0]) * pixel_size
 

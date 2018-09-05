@@ -12,14 +12,6 @@ bornagain.viewers.joesviews module
     :undoc-members:
     :show-inheritance:
 
-bornagain.viewers.qtv module
-----------------------------
-
-.. automodule:: bornagain.viewers.qtv
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 bornagain.viewers.qtviews module
 --------------------------------
 

@@ -387,12 +387,28 @@ class Lattice:
         self.Oinv = np.linalg.inv(self.O)
 
     def assemble(self, n_unit=10, spherical=False):
+        """
+        Assembles the lattice vecors (unit cell origins) based
+        on the lattice constants provided.
+        n_unit, int or 3-tuple of ints
+            Number of unit cells along each crystal axis(default is square)
+            If n_unit is a 3-tuple (n_unit_a, n_unit_b, n_unit_c) then the 
+            crystal can be rectangular
+        spherical, bool
+            Whether to apply a spherical boundary to the crystal after it
+            is created.
 
+        """
         #       lattice coordinates
+        try:
+            n_unit_a, n_unit_b, n_unit_c = n_unit
+        except TypeError:
+            n_unit_a = n_unit_b = n_unit_c = n_unit
+          
         self.vecs = np.array([i * self.a + j * self.b + k * self.c
-                              for i in xrange(n_unit)
-                              for j in xrange(n_unit)
-                              for k in xrange(n_unit)])
+                              for i in xrange(n_unit_a)
+                              for j in xrange(n_unit_b)
+                              for k in xrange(n_unit_c)])
 
 #       sphericalize the lattice..
         if spherical:

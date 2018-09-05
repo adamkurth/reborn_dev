@@ -138,6 +138,19 @@ class CrystalMeshTool(object):
         h.flat[f] = h.flat[f] - self.Nc
         return h
 
+    def get_q_vecs(self):
+
+        r"""
+
+		This provides an Nx3 array of momentum-transfer vectors (with the usual 2 pi factor).
+
+		Returns: numpy array
+
+		"""
+
+        return 2*np.pi*np.dot(self.cryst.A, self.get_h_vecs().T).T
+
+
     def get_sym_luts(self):
 
         r"""

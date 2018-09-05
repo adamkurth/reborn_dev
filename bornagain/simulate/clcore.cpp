@@ -169,6 +169,9 @@ kernel void mod_squared_complex_to_real(
 // Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
 // This variant allows for an arbitrary collection of scattering vectors
 
+
+
+
 kernel void phase_factor_qrf(
     global const dsfloat *q,  // Scattering vectors
     global const dsfloat *r,  // Atomic postion vectors
@@ -495,21 +498,21 @@ kernel void gaussian_lattice_transform_intensities_pad(
     // First crystal axis (this could be put in a loop over three axes...)
     n = (dsfloat)N.x;
     a = (dsfloat4)(abc.s0,abc.s1,abc.s2,0.0);
-    x = dot(q4r,a) / 2.0;
+    x = dot(q4r,a);
     x = x - round(x/PI2)*PI2;
     It *= n*n*exp(-n*n*x*x/(4*PI));
 
     // Second crystal axis
     n = (dsfloat)N.y;
     a = (dsfloat4)(abc.s3,abc.s4,abc.s5,0.0);
-    x = dot(q4r,a) / 2.0;
+    x = dot(q4r,a);
     x = x - round(x/PI2)*PI2;
     It *= n*n*exp(-n*n*x*x/(4*PI));
 
     // Third crystal axis
     n = (dsfloat)N.z;
     a = (dsfloat4)(abc.s6,abc.s7,abc.s8,0.0);
-    x = dot(q4r,a) / 2.0;
+    x = dot(q4r,a);
     x = x - round(x/PI2)*PI2;
     It *= n*n*exp(-n*n*x*x/(4*PI));
 
