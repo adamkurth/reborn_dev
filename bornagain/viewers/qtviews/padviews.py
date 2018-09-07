@@ -1,8 +1,11 @@
 import numpy as np
 from PyQt5 import uic
+import pkg_resources
 
 import pyqtgraph as pg
 import bornagain.external.pyqtgraph as bpg
+
+padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
 
 class PADView(object):
 
@@ -18,7 +21,7 @@ class PADView(object):
         self.data = data
 
         self.app = pg.mkQApp()
-        self.main_window = uic.loadUi('gwiz.ui')
+        self.main_window = uic.loadUi(padviewui)
         self.viewbox = pg.ViewBox()
         self.viewbox.setAspectLocked()
         self.main_window.graphics_view.setCentralItem(self.viewbox)
@@ -88,12 +91,17 @@ class PADView(object):
                 roi.removeHandle(handle)
 
 
-    def add_rings(self, radii=[]):
+    def add_rings(self, radii=[], pens=None):
 
         # TODO: does not work
 
-        for r in radii:
-            circ = pg.CircleROI(pos=[-r*0.5, -r*0.5], size=r)
+        n = len(radii)
+
+        if pens is None:
+            pens = [pg.glColor([255, 255, 255])]*n
+
+        for i in range(0, n):
+            circ = pg.CircleROI(pos=[-radii[i]*0.5, -radii[i]*0.5], size=radii[i], pen=pens[i])
             circ.translatable = False
             circ.removable = True
             # circ.removeHandle(circ.handles[0])

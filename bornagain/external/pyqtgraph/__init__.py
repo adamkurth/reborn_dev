@@ -18,4 +18,4 @@ ImageItem - got rid of the flicker due to undersampling of the image when zoomed
 """
 
 from .extras import *
-from .ImageItem import *
+from .mods import *

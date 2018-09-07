@@ -17,11 +17,22 @@ colors = [pg.glColor([255, 0, 0]),
           pg.glColor([255, 255, 255]),
           pg.glColor([255, 128, 128])]
 
+pens = [pg.mkPen([255, 0, 0]),
+        pg.mkPen([0, 255, 0]),
+        pg.mkPen([0, 0, 255]),
+        pg.mkPen([255, 255, 0]),
+        pg.mkPen([0, 255, 255]),
+        pg.mkPen([255, 0, 255]),
+        pg.mkPen([255, 255, 255]),
+        pg.mkPen([255, 128, 128])]
+
 def bright_colors(i):
 
     """ Some nice colors.  Only 8 available, which loops around as the input index increments."""
 
     return colors[i % len(colors)]
+
+
 
 class Volumetric3D(object):
     ''' View a 3D density map '''
