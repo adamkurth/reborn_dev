@@ -3,14 +3,13 @@ from __future__ import division
 import sys
 
 import numpy as np
-from numpy.fft import fftn, ifftn, fftshift
+from numpy.fft import ifftn, fftshift
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 sys.path.append("../..")
 import bornagain as ba
-from bornagain.viewers import qtviews, joesviews
-from bornagain.target import crystal, map
+from bornagain.viewers.qtviews import qtviews
+from bornagain.target import crystal, density
 import bornagain.simulate.clcore as core
 
 
@@ -36,7 +35,7 @@ f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 print('Setting up 3D mesh')
 d = 0.5e-9  # Minimum resolution
 s = 2       # Oversampling factor
-mt = map.CrystalMeshTool(cryst, d, s)
+mt = density.CrystalMeshTool(cryst, d, s)
 print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))
 h = mt.get_h_vecs()  # Miller indices (fractional)
 

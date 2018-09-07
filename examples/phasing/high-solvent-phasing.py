@@ -3,18 +3,17 @@ from time import time
 
 if 0:
     import afnumpy as np
-    from afnumpy.fft import fftn, ifftn, fftshift
+    from afnumpy.fft import fftn, ifftn
 else:
     import numpy as np
-    from numpy.fft import fftn, ifftn, fftshift
+    from numpy.fft import fftn, ifftn
 
 import matplotlib.pyplot as plt
-import pyqtgraph as pg
 
 sys.path.append("../..")
 import bornagain as ba
-from bornagain.viewers import qtviews
-from bornagain.target import crystal, map
+from bornagain.viewers.qtviews import qtviews
+from bornagain.target import crystal, density
 
 Niter = 100  # Number of phase-retrieval iterations
 
@@ -30,7 +29,7 @@ f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 print('Setting up 3D mesh')
 d = 0.6e-9  # Minimum resolution in SI units (as always!)
 s = 1  # Oversampling factor.  s = 1 means Bragg sampling
-mt = map.CrystalMeshTool(cryst, d, s)
+mt = density.CrystalMeshTool(cryst, d, s)
 n_molecules = len(mt.get_sym_luts())
 print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))
 # h = mt.get_h_vecs()  # Miller indices (fractional)
