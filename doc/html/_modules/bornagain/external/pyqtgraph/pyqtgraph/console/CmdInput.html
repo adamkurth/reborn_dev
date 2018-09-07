@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../../../search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../../../../index.html"/>
+        <link rel="up" title="bornagain.external.pyqtgraph.pyqtgraph" href="../../pyqtgraph.html"/> 
+
+  
+  <script src="../../../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../../../index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../bornagain.html">bornagain package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../pyqtgraph.html">bornagain.external.pyqtgraph.pyqtgraph</a> &raquo;</li>
+        
+      <li>bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">..Qt</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">..python2_3</span> <span class="k">import</span> <span class="n">asUnicode</span>
+
+<div class="viewcode-block" id="CmdInput"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput.html#bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput.CmdInput">[docs]</a><span class="k">class</span> <span class="nc">CmdInput</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">):</span>
+    
+    <span class="n">sigExecuteCmd</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1">#self.lastCmd = None</span>
+        <span class="c1">#self.setMultiline(False)</span>
+    
+<div class="viewcode-block" id="CmdInput.keyPressEvent"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput.html#bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput.CmdInput.keyPressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="c1">#print &quot;press:&quot;, ev.key(), QtCore.Qt.Key_Up, QtCore.Qt.Key_Down, QtCore.Qt.Key_Enter</span>
+        <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setHistory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">ev</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setHistory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">ev</span><span class="o">.</span><span class="n">key</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Return</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">execCmd</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="o">.</span><span class="n">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">asUnicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">())</span></div>
+        
+<div class="viewcode-block" id="CmdInput.execCmd"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput.html#bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput.CmdInput.execCmd">[docs]</a>    <span class="k">def</span> <span class="nf">execCmd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">asUnicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cmd</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)</span>
+        <span class="c1">#self.lastCmd = cmd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setHistory</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigExecuteCmd</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="CmdInput.setHistory"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput.html#bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput.CmdInput.setHistory">[docs]</a>    <span class="k">def</span> <span class="nf">setHistory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">num</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">])</span></div></div>
+        
+    <span class="c1">#def setMultiline(self, m):</span>
+        <span class="c1">#height = QtGui.QFontMetrics(self.font()).lineSpacing()</span>
+        <span class="c1">#if m:</span>
+            <span class="c1">#self.setFixedHeight(height*5)</span>
+        <span class="c1">#else:</span>
+            <span class="c1">#self.setFixedHeight(height+15)</span>
+            <span class="c1">#self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)</span>
+            <span class="c1">#self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)</span>
+            
+       
+    <span class="c1">#def sizeHint(self):</span>
+        <span class="c1">#hint = QtGui.QPlainTextEdit.sizeHint(self)</span>
+        <span class="c1">#height = QtGui.QFontMetrics(self.font()).lineSpacing()</span>
+        <span class="c1">#hint.setHeight(height)</span>
+        <span class="c1">#return hint</span>
+
+        
+        
+        
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

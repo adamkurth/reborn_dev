@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.widgets.RawImageWidget module
+====================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.RawImageWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.widgets.PlotWidget module
+================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.PlotWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:

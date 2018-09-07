@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsWindows module
+=============================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsWindows
+    :members:
+    :undoc-members:
+    :show-inheritance:

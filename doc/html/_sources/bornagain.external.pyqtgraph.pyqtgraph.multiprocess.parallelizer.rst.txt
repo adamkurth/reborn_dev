@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.multiprocess.parallelizer module
+=======================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.multiprocess.parallelizer
+    :members:
+    :undoc-members:
+    :show-inheritance:

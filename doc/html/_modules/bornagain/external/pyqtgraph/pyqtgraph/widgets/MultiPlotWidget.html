@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../../../search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../../../../index.html"/>
+        <link rel="up" title="bornagain.external.pyqtgraph.pyqtgraph" href="../../pyqtgraph.html"/> 
+
+  
+  <script src="../../../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../../../index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../bornagain.html">bornagain package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../pyqtgraph.html">bornagain.external.pyqtgraph.pyqtgraph</a> &raquo;</li>
+        
+      <li>bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">MultiPlotWidget.py -  Convenience class--GraphicsView widget displaying a MultiPlotItem</span>
+<span class="sd">Copyright 2010  Luke Campagnola</span>
+<span class="sd">Distributed under MIT/X11 license. See license.txt for more infomation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">..Qt</span> <span class="k">import</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">.GraphicsView</span> <span class="k">import</span> <span class="n">GraphicsView</span>
+<span class="kn">from</span> <span class="nn">..graphicsItems</span> <span class="k">import</span> <span class="n">MultiPlotItem</span> <span class="k">as</span> <span class="n">MultiPlotItem</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MultiPlotWidget&#39;</span><span class="p">]</span>
+<div class="viewcode-block" id="MultiPlotWidget"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.html#bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.MultiPlotWidget">[docs]</a><span class="k">class</span> <span class="nc">MultiPlotWidget</span><span class="p">(</span><span class="n">GraphicsView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Widget implementing a graphicsView with a single MultiPlotItem inside.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minPlotHeight</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mPlotItem</span> <span class="o">=</span> <span class="n">MultiPlotItem</span><span class="o">.</span><span class="n">MultiPlotItem</span><span class="p">()</span>
+        <span class="n">GraphicsView</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableMouse</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCentralItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mPlotItem</span><span class="p">)</span>
+        <span class="c1">## Explicitly wrap methods from mPlotItem</span>
+        <span class="c1">#for m in [&#39;setData&#39;]:</span>
+            <span class="c1">#setattr(self, m, getattr(self.mPlotItem, m))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setVerticalScrollBarPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ScrollBarAsNeeded</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalScrollBarPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ScrollBarAsNeeded</span><span class="p">)</span>
+                
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>  <span class="c1">## implicitly wrap methods from plotItem</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mPlotItem</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mPlotItem</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s1">&#39;__call__&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">m</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MultiPlotWidget.setMinimumPlotHeight"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.html#bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.MultiPlotWidget.setMinimumPlotHeight">[docs]</a>    <span class="k">def</span> <span class="nf">setMinimumPlotHeight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">min</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the minimum height for each sub-plot displayed. </span>
+<span class="sd">        </span>
+<span class="sd">        If the total height of all plots is greater than the height of the </span>
+<span class="sd">        widget, then a scroll bar will appear to provide access to the entire</span>
+<span class="sd">        set of plots.</span>
+<span class="sd">        </span>
+<span class="sd">        Added in version 0.9.9</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minPlotHeight</span> <span class="o">=</span> <span class="nb">min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MultiPlotWidget.widgetGroupInterface"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.html#bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.MultiPlotWidget.widgetGroupInterface">[docs]</a>    <span class="k">def</span> <span class="nf">widgetGroupInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">MultiPlotWidget</span><span class="o">.</span><span class="n">saveState</span><span class="p">,</span> <span class="n">MultiPlotWidget</span><span class="o">.</span><span class="n">restoreState</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MultiPlotWidget.saveState"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.html#bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.MultiPlotWidget.saveState">[docs]</a>    <span class="k">def</span> <span class="nf">saveState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span></div>
+        <span class="c1">#return self.plotItem.saveState()</span>
+        
+<div class="viewcode-block" id="MultiPlotWidget.restoreState"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.html#bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.MultiPlotWidget.restoreState">[docs]</a>    <span class="k">def</span> <span class="nf">restoreState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+        <span class="c1">#return self.plotItem.restoreState(state)</span>
+
+<div class="viewcode-block" id="MultiPlotWidget.close"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.html#bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.MultiPlotWidget.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mPlotItem</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mPlotItem</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">GraphicsView</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MultiPlotWidget.setRange"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.html#bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.MultiPlotWidget.setRange">[docs]</a>    <span class="k">def</span> <span class="nf">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">GraphicsView</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span>
+            <span class="n">minHeight</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mPlotItem</span><span class="o">.</span><span class="n">plots</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">minPlotHeight</span>
+            <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">minHeight</span><span class="p">:</span>
+                <span class="n">r</span><span class="o">.</span><span class="n">setHeight</span><span class="p">(</span><span class="n">minHeight</span><span class="p">)</span>
+                <span class="n">r</span><span class="o">.</span><span class="n">setWidth</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">width</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">verticalScrollBar</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">centralWidget</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MultiPlotWidget.resizeEvent"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.html#bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget.MultiPlotWidget.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoPixelRange</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">range</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+        <span class="n">MultiPlotWidget</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">disableAutoPixel</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1">## we do this because some subclasses like to redefine setRange in an incompatible way.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateMatrix</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

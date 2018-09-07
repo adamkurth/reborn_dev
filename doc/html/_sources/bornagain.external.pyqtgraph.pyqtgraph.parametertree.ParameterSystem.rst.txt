@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.parametertree.ParameterSystem module
+===========================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.parametertree.ParameterSystem
+    :members:
+    :undoc-members:
+    :show-inheritance:

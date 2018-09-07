@@ -1,0 +1,44 @@
+bornagain.external.pyqtgraph.pyqtgraph.widgets package
+======================================================
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.BusyCursor
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.CheckTable
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.ColorButton
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.ColorMapWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.ComboBox
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.DataFilterWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.DataTreeWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.FeedbackButton
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.FileDialog
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.GradientWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.GraphicsLayoutWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.GraphicsView
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.HistogramLUTWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.JoystickButton
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.LayoutWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.MatplotlibWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.MultiPlotWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.PathButton
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.PlotWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.ProgressDialog
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.RawImageWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.RemoteGraphicsView
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.ScatterPlotWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.SpinBox
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.TableWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.TreeWidget
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.ValueLabel
+   bornagain.external.pyqtgraph.pyqtgraph.widgets.VerticalLabel
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets
+    :members:
+    :undoc-members:
+    :show-inheritance:

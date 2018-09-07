@@ -101,7 +101,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">bornagain.target package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.crystal">bornagain.target.crystal module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.map">bornagain.target.map module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.density">bornagain.target.density module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.placer">bornagain.target.placer module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target.spgrp">bornagain.target.spgrp module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.target">Module contents</a></li>
@@ -350,6 +350,11 @@
 <dd><p>Symmetry translations (in crystal basis)</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="bornagain.target.crystal.structure.n_molecules">
+<code class="descname">n_molecules</code><a class="headerlink" href="#bornagain.target.crystal.structure.n_molecules" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="bornagain.target.crystal.structure.load_pdb">
 <code class="descname">load_pdb</code><span class="sig-paren">(</span><em>pdbFilePath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure.load_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure.load_pdb" title="Permalink to this definition">¶</a></dt>
@@ -496,16 +501,28 @@ to make sense of the ways in which space groups are specified…</p>
 <dl class="method">
 <dt id="bornagain.target.crystal.Lattice.assemble">
 <code class="descname">assemble</code><span class="sig-paren">(</span><em>n_unit=10</em>, <em>spherical=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Lattice.assemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Lattice.assemble" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Assembles the lattice vecors (unit cell origins) based
+on the lattice constants provided.
+n_unit, int or 3-tuple of ints</p>
+<blockquote>
+<div>Number of unit cells along each crystal axis(default is square)
+If n_unit is a 3-tuple (n_unit_a, n_unit_b, n_unit_c) then the
+crystal can be rectangular</div></blockquote>
+<dl class="docutils">
+<dt>spherical, bool</dt>
+<dd>Whether to apply a spherical boundary to the crystal after it
+is created.</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 </div>
-<div class="section" id="module-bornagain.target.map">
-<span id="bornagain-target-map-module"></span><h2>bornagain.target.map module<a class="headerlink" href="#module-bornagain.target.map" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-bornagain.target.density">
+<span id="bornagain-target-density-module"></span><h2>bornagain.target.density module<a class="headerlink" href="#module-bornagain.target.density" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="bornagain.target.map.CrystalMeshTool">
-<em class="property">class </em><code class="descclassname">bornagain.target.map.</code><code class="descname">CrystalMeshTool</code><span class="sig-paren">(</span><em>cryst</em>, <em>resolution</em>, <em>oversampling</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool">
+<em class="property">class </em><code class="descclassname">bornagain.target.density.</code><code class="descname">CrystalMeshTool</code><span class="sig-paren">(</span><em>cryst</em>, <em>resolution</em>, <em>oversampling</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A helper class for working with 3D density maps.  Most importantly, it allows one to do spacegroup symmetry
 transformations.  Once provided information about a crystal (spacegroup, lattice), along with desired resolution and
@@ -516,70 +533,70 @@ array; it provides methods needed to work on the data arrays.</p>
 <p>Importantly, this class is focused on operations in the crystal basis, because the symmetry operations are most
 elegant in that basis.</p>
 <dl class="attribute">
-<dt id="bornagain.target.map.CrystalMeshTool.sym_luts">
-<code class="descname">sym_luts</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.sym_luts" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.sym_luts">
+<code class="descname">sym_luts</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.sym_luts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cached lookup tables</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.map.CrystalMeshTool.cryst">
-<code class="descname">cryst</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.cryst" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.cryst">
+<code class="descname">cryst</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.cryst" title="Permalink to this definition">¶</a></dt>
 <dd><p>crystal.target class object used to initiate the map</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.map.CrystalMeshTool.s">
-<code class="descname">s</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.s" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.s">
+<code class="descname">s</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.s" title="Permalink to this definition">¶</a></dt>
 <dd><p>Oversampling ratio</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.map.CrystalMeshTool.d">
-<code class="descname">d</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.d" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.d">
+<code class="descname">d</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Length-3 array of “actual” resolutions (different from “requested” resolution)</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.map.CrystalMeshTool.dx">
-<code class="descname">dx</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.dx" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.dx">
+<code class="descname">dx</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.dx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crystal basis length increment</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.map.CrystalMeshTool.Nc">
-<code class="descname">Nc</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.Nc" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.Nc">
+<code class="descname">Nc</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.Nc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of samples along edge of unit cell</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.map.CrystalMeshTool.N">
-<code class="descname">N</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.N" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.N">
+<code class="descname">N</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.N" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of samples along edge of whole map (includes oversampling)</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.map.CrystalMeshTool.P">
-<code class="descname">P</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.P" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.P">
+<code class="descname">P</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.P" title="Permalink to this definition">¶</a></dt>
 <dd><p>Linear length fo map (=N^3)</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.map.CrystalMeshTool.w">
-<code class="descname">w</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.w" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.w">
+<code class="descname">w</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.w" title="Permalink to this definition">¶</a></dt>
 <dd><p>The stride vector (mostly for internal use)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.get_n_vecs">
-<code class="descname">get_n_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.get_n_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.get_n_vecs" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.get_n_vecs">
+<code class="descname">get_n_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.get_n_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.get_n_vecs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:</p>
 <p>[[0,0,0],[0,0,1],[0,0,2], … ,[N-1,N-1,N-1]]</p>
 <p>Returns: numpy array</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.get_x_vecs">
-<code class="descname">get_x_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.get_x_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.get_x_vecs" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.get_x_vecs">
+<code class="descname">get_x_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.get_x_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.get_x_vecs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an Nx3 array of vectors in the crystal basis.  If there were four samples per unit cell, the array looks a
 bit like this:</p>
 <p>[[0,0,0],[0,0,0.25],[0,0,0.5],[0,0,0.75],[0,0.25,0], … ,[0.75,0.75,0.75]]</p>
@@ -587,16 +604,16 @@ bit like this:</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.get_r_vecs">
-<code class="descname">get_r_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.get_r_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.get_r_vecs" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.get_r_vecs">
+<code class="descname">get_r_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.get_r_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.get_r_vecs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates an Nx3 array of 3-vectors contain the Cartesian-basis vectors of each voxel in the map.  This is done
 by taking the crystal-basis position vectors x, and applying the orthogonalization matrix O to them.</p>
 <p>Returns: numpy array</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.get_h_vecs">
-<code class="descname">get_h_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.get_h_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.get_h_vecs" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.get_h_vecs">
+<code class="descname">get_h_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.get_h_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.get_h_vecs" title="Permalink to this definition">¶</a></dt>
 <dd><p>This provides an Nx3 array of Fourier-space vectors “h”.  These coordinates can be understood as “fractional
 Miller indices” that coorespond to the density samples upon taking an FFT of the real-space map.  With atomic
 coordinates x (in the crystal basis) one can take the Fourier transform F(h) = sum_n f_n exp(i h*x)</p>
@@ -604,8 +621,15 @@ coordinates x (in the crystal basis) one can take the Fourier transform F(h) = s
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.get_sym_luts">
-<code class="descname">get_sym_luts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.get_sym_luts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.get_sym_luts" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.get_q_vecs">
+<code class="descname">get_q_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.get_q_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.get_q_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This provides an Nx3 array of momentum-transfer vectors (with the usual 2 pi factor).</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.density.CrystalMeshTool.get_sym_luts">
+<code class="descname">get_sym_luts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.get_sym_luts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.get_sym_luts" title="Permalink to this definition">¶</a></dt>
 <dd><p>This provides a list of “symmetry transform lookup tables”.  These are the linearized array indices. For a
 transformation that consists of an identity matrix along with zero translation, the lut is just an array
 p = [0,1,2,3,…,N^3-1].  Other transforms are like a “scrambling” of that ordering, such that a remapping of
@@ -615,8 +639,8 @@ kept in memory for future use - beware of the memory requirement.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.symmetry_transform">
-<code class="descname">symmetry_transform</code><span class="sig-paren">(</span><em>i</em>, <em>j</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.symmetry_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.symmetry_transform" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.symmetry_transform">
+<code class="descname">symmetry_transform</code><span class="sig-paren">(</span><em>i</em>, <em>j</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.symmetry_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.symmetry_transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>This applies symmetry transformations to a data array (i.e. density map).  The crystal spacegroup gives rise
 to Ns symmetry transformation operations (e.g. each operation consists of a rotation matrix paired with
 translation vector).  Of those Ns symmetry transformations, this function will take a map from the ith
@@ -637,15 +661,15 @@ configuration to the jth configuration.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.shape">
-<code class="descname">shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.shape" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.shape">
+<code class="descname">shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>For convenience, return the map shape [N,N,N]</p>
 <p>Returns: numpy array</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.reshape">
-<code class="descname">reshape</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.reshape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.reshape" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.reshape">
+<code class="descname">reshape</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.reshape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.reshape" title="Permalink to this definition">¶</a></dt>
 <dd><p>For convenience, this will reshape a data array to the shape NxNxN.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -659,8 +683,8 @@ configuration to the jth configuration.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.reshape3">
-<code class="descname">reshape3</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.reshape3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.reshape3" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.reshape3">
+<code class="descname">reshape3</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.reshape3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.reshape3" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -673,15 +697,15 @@ configuration to the jth configuration.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.zeros">
-<code class="descname">zeros</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.zeros" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.zeros">
+<code class="descname">zeros</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.zeros" title="Permalink to this definition">¶</a></dt>
 <dd><p>A convenience function: simply returns an array of zeros of shape NxNxN</p>
 <p>Returns: numpy array</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.place_atoms_in_map">
-<code class="descname">place_atoms_in_map</code><span class="sig-paren">(</span><em>x</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.place_atoms_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.place_atoms_in_map" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.place_atoms_in_map">
+<code class="descname">place_atoms_in_map</code><span class="sig-paren">(</span><em>x</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.place_atoms_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.place_atoms_in_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
 should be in the crystal basis, and the densities must be real (because the scipy function that we use does
 not allow for complex numbers…).  This is done in a lazy way - the density samples are placed in the nearest
@@ -702,8 +726,8 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.map.CrystalMeshTool.place_intensities_in_map">
-<code class="descname">place_intensities_in_map</code><span class="sig-paren">(</span><em>h</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/map.html#CrystalMeshTool.place_intensities_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.map.CrystalMeshTool.place_intensities_in_map" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalMeshTool.place_intensities_in_map">
+<code class="descname">place_intensities_in_map</code><span class="sig-paren">(</span><em>h</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.place_intensities_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.place_intensities_in_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will take a list of Miller index vectors and intensities and place them in a 3D map.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

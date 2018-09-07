@@ -1,0 +1,338 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../../../search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../../../../index.html"/>
+        <link rel="up" title="bornagain.external.pyqtgraph.pyqtgraph" href="../../pyqtgraph.html"/> 
+
+  
+  <script src="../../../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../../../index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../bornagain.html">bornagain package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../pyqtgraph.html">bornagain.external.pyqtgraph.pyqtgraph</a> &raquo;</li>
+        
+      <li>bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">..Qt</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">..widgets.GraphicsView</span> <span class="k">import</span> <span class="n">GraphicsView</span>
+<span class="kn">from</span> <span class="nn">..GraphicsScene</span> <span class="k">import</span> <span class="n">GraphicsScene</span>
+<span class="kn">from</span> <span class="nn">..graphicsItems.ViewBox</span> <span class="k">import</span> <span class="n">ViewBox</span>
+
+<span class="c1">#class FlowchartGraphicsView(QtGui.QGraphicsView):</span>
+<div class="viewcode-block" id="FlowchartGraphicsView"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView.html#bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView.FlowchartGraphicsView">[docs]</a><span class="k">class</span> <span class="nc">FlowchartGraphicsView</span><span class="p">(</span><span class="n">GraphicsView</span><span class="p">):</span>
+    
+    <span class="n">sigHoverOver</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">sigClicked</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="c1">#QtGui.QGraphicsView.__init__(self, *args)</span>
+        <span class="n">GraphicsView</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">useOpenGL</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1">#self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(255,255,255)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vb</span> <span class="o">=</span> <span class="n">FlowchartViewBox</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">lockAspect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">invertY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCentralItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vb</span><span class="p">)</span>
+        <span class="c1">#self.scene().addItem(self.vb)</span>
+        <span class="c1">#self.setMouseTracking(True)</span>
+        <span class="c1">#self.lastPos = None</span>
+        <span class="c1">#self.setTransformationAnchor(self.AnchorViewCenter)</span>
+        <span class="c1">#self.setRenderHints(QtGui.QPainter.Antialiasing)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)</span>
+        <span class="c1">#self.setRubberBandSelectionMode(QtCore.Qt.ContainsItemBoundingRect)</span>
+    
+<div class="viewcode-block" id="FlowchartGraphicsView.viewBox"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView.html#bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView.FlowchartGraphicsView.viewBox">[docs]</a>    <span class="k">def</span> <span class="nf">viewBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vb</span></div></div>
+    
+    
+    <span class="c1">#def mousePressEvent(self, ev):</span>
+        <span class="c1">#self.moved = False</span>
+        <span class="c1">#self.lastPos = ev.pos()</span>
+        <span class="c1">#return QtGui.QGraphicsView.mousePressEvent(self, ev)</span>
+
+    <span class="c1">#def mouseMoveEvent(self, ev):</span>
+        <span class="c1">#self.moved = True</span>
+        <span class="c1">#callSuper = False</span>
+        <span class="c1">#if ev.buttons() &amp;  QtCore.Qt.RightButton:</span>
+            <span class="c1">#if self.lastPos is not None:</span>
+                <span class="c1">#dif = ev.pos() - self.lastPos</span>
+                <span class="c1">#self.scale(1.01**-dif.y(), 1.01**-dif.y())</span>
+        <span class="c1">#elif ev.buttons() &amp; QtCore.Qt.MidButton:</span>
+            <span class="c1">#if self.lastPos is not None:</span>
+                <span class="c1">#dif = ev.pos() - self.lastPos</span>
+                <span class="c1">#self.translate(dif.x(), -dif.y())</span>
+        <span class="c1">#else:</span>
+            <span class="c1">##self.emit(QtCore.SIGNAL(&#39;hoverOver&#39;), self.items(ev.pos()))</span>
+            <span class="c1">#self.sigHoverOver.emit(self.items(ev.pos()))</span>
+            <span class="c1">#callSuper = True</span>
+        <span class="c1">#self.lastPos = ev.pos()</span>
+        
+        <span class="c1">#if callSuper:</span>
+            <span class="c1">#QtGui.QGraphicsView.mouseMoveEvent(self, ev)</span>
+            
+    <span class="c1">#def mouseReleaseEvent(self, ev):</span>
+        <span class="c1">#if not self.moved:</span>
+            <span class="c1">##self.emit(QtCore.SIGNAL(&#39;clicked&#39;), ev)</span>
+            <span class="c1">#self.sigClicked.emit(ev)</span>
+        <span class="c1">#return QtGui.QGraphicsView.mouseReleaseEvent(self, ev)</span>
+        
+<div class="viewcode-block" id="FlowchartViewBox"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView.html#bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView.FlowchartViewBox">[docs]</a><span class="k">class</span> <span class="nc">FlowchartViewBox</span><span class="p">(</span><span class="n">ViewBox</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">ViewBox</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">widget</span>
+        <span class="c1">#self.menu = None</span>
+        <span class="c1">#self._subMenus = None ## need a place to store the menus otherwise they dissappear (even though they&#39;ve been added to other menus) ((yes, it doesn&#39;t make sense))</span>
+        
+        
+        
+        
+<div class="viewcode-block" id="FlowchartViewBox.getMenu"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView.html#bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView.FlowchartViewBox.getMenu">[docs]</a>    <span class="k">def</span> <span class="nf">getMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="c1">## called by ViewBox to create a new context menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fc_menu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subMenus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getContextMenus</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">menu</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subMenus</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fc_menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="n">menu</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fc_menu</span></div>
+    
+<div class="viewcode-block" id="FlowchartViewBox.getContextMenus"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView.html#bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView.FlowchartViewBox.getContextMenus">[docs]</a>    <span class="k">def</span> <span class="nf">getContextMenus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="c1">## called by scene to add menus on to someone else&#39;s context menu</span>
+        <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">buildMenu</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">scenePos</span><span class="p">())</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">setTitle</span><span class="p">(</span><span class="s2">&quot;Add node&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">menu</span><span class="p">,</span> <span class="n">ViewBox</span><span class="o">.</span><span class="n">getMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">)]</span></div></div>
+
+    
+    
+        
+        
+        
+        
+        
+
+
+<span class="c1">##class FlowchartGraphicsScene(QtGui.QGraphicsScene):</span>
+<span class="c1">#class FlowchartGraphicsScene(GraphicsScene):</span>
+    
+    <span class="c1">#sigContextMenuEvent = QtCore.Signal(object)</span>
+    
+    <span class="c1">#def __init__(self, *args):</span>
+        <span class="c1">##QtGui.QGraphicsScene.__init__(self, *args)</span>
+        <span class="c1">#GraphicsScene.__init__(self, *args)</span>
+        
+    <span class="c1">#def mouseClickEvent(self, ev):</span>
+        <span class="c1">##QtGui.QGraphicsScene.contextMenuEvent(self, ev)</span>
+        <span class="c1">#if not ev.button() in [QtCore.Qt.RightButton]:</span>
+            <span class="c1">#self.sigContextMenuEvent.emit(ev)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

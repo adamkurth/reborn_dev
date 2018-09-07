@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.LegendItem module
+======================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.LegendItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

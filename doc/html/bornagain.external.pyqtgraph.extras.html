@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.external.pyqtgraph.extras module &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
+        <link rel="up" title="bornagain.external.pyqtgraph package" href="bornagain.external.pyqtgraph.html"/>
+        <link rel="next" title="bornagain.external.crystfel module" href="bornagain.external.crystfel.html"/>
+        <link rel="prev" title="bornagain.external.pyqtgraph.ImageItem module" href="bornagain.external.pyqtgraph.ImageItem.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.external.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html#module-bornagain.external">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.html#module-bornagain">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#module-bornagain">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
+        
+          <li><a href="bornagain.external.html">bornagain.external package</a> &raquo;</li>
+        
+          <li><a href="bornagain.external.pyqtgraph.html">bornagain.external.pyqtgraph package</a> &raquo;</li>
+        
+      <li>bornagain.external.pyqtgraph.extras module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/bornagain.external.pyqtgraph.extras.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-bornagain.external.pyqtgraph.extras">
+<span id="bornagain-external-pyqtgraph-extras-module"></span><h1>bornagain.external.pyqtgraph.extras module<a class="headerlink" href="#module-bornagain.external.pyqtgraph.extras" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="bornagain.external.pyqtgraph.extras.keep_open">
+<code class="descclassname">bornagain.external.pyqtgraph.extras.</code><code class="descname">keep_open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#keep_open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.keep_open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple helper that keeps qtgraph window open when you run a script from the terminal.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget">
+<em class="property">class </em><code class="descclassname">bornagain.external.pyqtgraph.extras.</code><code class="descname">MultiHistogramLUTWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>*args</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.widgets.GraphicsView.GraphicsView</span></code></p>
+<p>This is the equivalent of HistogramLUTWidget, but wraps MultiHistogramLUTWidget.</p>
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget.sizeHint">
+<code class="descname">sizeHint</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; QSize<a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTWidget.sizeHint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget.sizeHint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem">
+<em class="property">class </em><code class="descclassname">bornagain.external.pyqtgraph.extras.</code><code class="descname">MultiHistogramLUTItem</code><span class="sig-paren">(</span><em>image=None</em>, <em>fillHistogram=True</em>, <em>rgbHistogram=False</em>, <em>levelMode='mono'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.graphicsItems.HistogramLUTItem.HistogramLUTItem</span></code></p>
+<p>This is an extension to the HistogramLUTItem that allows control over multiple images. The main feature is the
+addition of the setImageItems() method.</p>
+<p>This is a graphicsWidget which provides controls for adjusting the display of an image.</p>
+<p>Includes:</p>
+<ul class="simple">
+<li>Image histogram</li>
+<li>Movable region over histogram to select black/white levels</li>
+<li>Gradient editor to define color lookup table for single-channel images</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>image</strong> (<a class="reference internal" href="bornagain.external.pyqtgraph.ImageItem.html#bornagain.external.pyqtgraph.ImageItem.ImageItem" title="bornagain.external.pyqtgraph.ImageItem.ImageItem"><em>ImageItem</em></a><em> or </em><em>None</em>) – If <em>image</em> is provided, then the control will be automatically linked to
+the image and changes to the control will be immediately reflected in
+the image’s appearance.</li>
+<li><strong>fillHistogram</strong> (<em>bool</em>) – By default, the histogram is rendered with a fill.
+For performance, set <em>fillHistogram</em> = False.</li>
+<li><strong>rgbHistogram</strong> (<em>bool</em>) – Sets whether the histogram is computed once over all channels of the
+image, or once per channel.</li>
+<li><strong>levelMode</strong> (<em>'mono'</em><em> or </em><em>'rgba'</em>) – If ‘mono’, then only a single set of black/whilte level lines is drawn,
+and the levels apply to all channels in the image. If ‘rgba’, then one
+set of levels is drawn for each channel.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems">
+<code class="descname">setImageItems</code><span class="sig-paren">(</span><em>imgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTItem.setImageItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set an ImageItem to have its levels and LUT automatically controlled
+by this HistogramLUTItem.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.gradientChanged">
+<code class="descname">gradientChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTItem.gradientChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.gradientChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanged">
+<code class="descname">regionChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTItem.regionChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanging">
+<code class="descname">regionChanging</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTItem.regionChanging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanging" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setLevelMode">
+<code class="descname">setLevelMode</code><span class="sig-paren">(</span><em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTItem.setLevelMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setLevelMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the method of controlling the image levels offered to the user.
+Options are ‘mono’ or ‘rgba’.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="bornagain.external.crystfel.html" class="btn btn-neutral float-right" title="bornagain.external.crystfel module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bornagain.external.pyqtgraph.ImageItem.html" class="btn btn-neutral" title="bornagain.external.pyqtgraph.ImageItem module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

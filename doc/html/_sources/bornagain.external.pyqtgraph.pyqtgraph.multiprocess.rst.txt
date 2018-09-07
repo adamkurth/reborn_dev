@@ -1,0 +1,20 @@
+bornagain.external.pyqtgraph.pyqtgraph.multiprocess package
+===========================================================
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.multiprocess.bootstrap
+   bornagain.external.pyqtgraph.pyqtgraph.multiprocess.parallelizer
+   bornagain.external.pyqtgraph.pyqtgraph.multiprocess.processes
+   bornagain.external.pyqtgraph.pyqtgraph.multiprocess.remoteproxy
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.multiprocess
+    :members:
+    :undoc-members:
+    :show-inheritance:

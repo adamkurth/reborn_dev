@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.canvas.TransformGuiTemplate\_pyqt5 module
+================================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.canvas.TransformGuiTemplate_pyqt5
+    :members:
+    :undoc-members:
+    :show-inheritance:

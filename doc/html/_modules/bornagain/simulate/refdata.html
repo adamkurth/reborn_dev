@@ -172,10 +172,24 @@
 <span class="c1"># ------------------------------------------------------------------------------</span>
 
 <div class="viewcode-block" id="get_cmann_form_factors"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.refdata.get_cmann_form_factors">[docs]</a><span class="k">def</span> <span class="nf">get_cmann_form_factors</span><span class="p">(</span><span class="n">cman</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    cman is a dict of {atomic_number : array of cman parameters}</span>
+
+<span class="sd">    q is either  a Nq x 3 , or a 1x3 vector of reciprocal space points, magnitudes respectively</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">form_facts</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">q_mag_squared</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># magnitude of momentum transfer squared</span>
+    
+    <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+     
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">q_mag_squared</span> <span class="o">=</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span>
+    
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">q_mag_squared</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># magnitude of momentum transfer squared</span>
+    
     <span class="n">expo_terms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="n">q_mag_squared</span> <span class="o">/</span> <span class="p">(</span><span class="mi">16</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="p">)</span>
+
     <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">coefs</span> <span class="ow">in</span> <span class="n">cman</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
         <span class="n">a_vals</span> <span class="o">=</span> <span class="n">coefs</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
         <span class="n">b_vals</span> <span class="o">=</span> <span class="n">coefs</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span>

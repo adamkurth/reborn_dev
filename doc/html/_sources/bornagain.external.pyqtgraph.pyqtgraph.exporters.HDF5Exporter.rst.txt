@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.exporters.HDF5Exporter module
+====================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.exporters.HDF5Exporter
+    :members:
+    :undoc-members:
+    :show-inheritance:

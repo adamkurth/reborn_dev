@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem.plotConfigTemplate\_pyqt5 module
+==============================================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem.plotConfigTemplate_pyqt5
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,57 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems package
+============================================================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem
+    bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ArrowItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.AxisItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.BarGraphItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ButtonItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.CurvePoint
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ErrorBarItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.FillBetweenItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GradientEditorItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GradientLegend
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GraphItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GraphicsItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GraphicsLayout
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GraphicsObject
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GraphicsWidget
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GraphicsWidgetAnchor
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GridItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.HistogramLUTItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ImageItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.IsocurveItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ItemGroup
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.LabelItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.LegendItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.LinearRegionItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.MultiPlotItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotCurveItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotDataItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ROI
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ScaleBar
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ScatterPlotItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.TextItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.UIGraphicsItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.VTickGroup
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems
+    :members:
+    :undoc-members:
+    :show-inheritance:

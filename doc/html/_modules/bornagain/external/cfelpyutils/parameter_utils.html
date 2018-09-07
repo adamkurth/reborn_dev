@@ -1,0 +1,383 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.external.cfelpyutils.parameter_utils &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bornagain.html">bornagain package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>bornagain.external.cfelpyutils.parameter_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bornagain.external.cfelpyutils.parameter_utils</h1><div class="highlight"><pre>
+<span></span><span class="c1">#    This file is part of cfelpyutils.</span>
+<span class="c1">#</span>
+<span class="c1">#    cfelpyutils is free software: you can redistribute it and/or modify</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1">#    (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1">#    cfelpyutils is distributed in the hope that it will be useful,</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1">#    GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License</span>
+<span class="c1">#    along with cfelpyutils.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Parameter parsing utilities.</span>
+
+<span class="sd">This module contains the implementation of functions that are used to</span>
+<span class="sd">parse and manipulate options and parameters, as extracted by the</span>
+<span class="sd">python :obj:`configparse` module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span>
+                        <span class="n">unicode_literals</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">ast</span>
+
+
+<span class="k">def</span> <span class="nf">_parsing_error</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">option</span><span class="p">):</span>
+    <span class="c1"># Raise an exception after a parsing error.</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+        <span class="s2">&quot;Error parsing parameter </span><span class="si">{0}</span><span class="s2"> in section [</span><span class="si">{1}</span><span class="s2">]. Make sure that the &quot;</span>
+        <span class="s2">&quot;syntax is correct: list elements must be separated by commas and &quot;</span>
+        <span class="s2">&quot;dict entries must contain the colon symbol. Strings must be quoted, &quot;</span>
+        <span class="s2">&quot;even in lists and dicts.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="convert_parameters"><a class="viewcode-back" href="../../../../bornagain.external.cfelpyutils.html#bornagain.external.cfelpyutils.parameter_utils.convert_parameters">[docs]</a><span class="k">def</span> <span class="nf">convert_parameters</span><span class="p">(</span><span class="n">config_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert strings in parameter dictionaries to the correct data type.</span>
+
+<span class="sd">    Convert a dictionary extracted by the configparse module to a</span>
+<span class="sd">    dictionary contaning the same parameters converted from strings to</span>
+<span class="sd">    correct types (int, float, string, etc.)</span>
+
+<span class="sd">    Try to convert each entry in the dictionary according to the</span>
+<span class="sd">    following rules. The first rule that applies to the entry</span>
+<span class="sd">    determines the type.</span>
+
+<span class="sd">    - If the entry starts and ends with a single quote or double quote,</span>
+<span class="sd">      leave it as a string.</span>
+<span class="sd">    - If the entry starts and ends with a square bracket, convert it to</span>
+<span class="sd">      a list.</span>
+<span class="sd">    - If the entry starts and ends with a curly braces, convert it to a</span>
+<span class="sd">      dictionary or a set.</span>
+<span class="sd">    - If the entry is the word None, without quotes, convert it to</span>
+<span class="sd">      NoneType.</span>
+<span class="sd">    - If the entry is the word False, without quotes, convert it to a</span>
+<span class="sd">      boolean False.</span>
+<span class="sd">    - If the entry is the word True, without quotes, convert it to a</span>
+<span class="sd">      boolean True.</span>
+<span class="sd">    - If none of the previous options match the content of the entry,</span>
+<span class="sd">      try to interpret the entry in order as:</span>
+
+<span class="sd">        - An integer number.</span>
+<span class="sd">        - A float number.</span>
+<span class="sd">        - A string.</span>
+
+<span class="sd">    - If all else fails, raise an exception.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        config (Dict[str]): a dictionary containing the parameters from</span>
+<span class="sd">            a configuration file as extracted by the</span>
+<span class="sd">            :obj:`configparser` module).</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        Dict: dictionary with the same structure as the input</span>
+<span class="sd">        dictionary, but with correct types assigned to each entry.</span>
+
+<span class="sd">    Raises:</span>
+
+<span class="sd">        RuntimeError: if an entry cannot be converted to any supported</span>
+<span class="sd">            type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">monitor_params</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">config_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">monitor_params</span><span class="p">[</span><span class="n">section</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">config_dict</span><span class="p">[</span><span class="n">section</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">recovered_option</span> <span class="o">=</span> <span class="n">config_dict</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">option</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">recovered_option</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="ow">and</span>
+                    <span class="n">recovered_option</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">monitor_params</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">recovered_option</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">recovered_option</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span> <span class="ow">and</span>
+                    <span class="n">recovered_option</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">monitor_params</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">recovered_option</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">recovered_option</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span> <span class="ow">and</span>
+                    <span class="n">recovered_option</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">monitor_params</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span>
+                        <span class="n">recovered_option</span>
+                    <span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">SyntaxError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                    <span class="n">_parsing_error</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">recovered_option</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">)</span> <span class="ow">and</span>
+                    <span class="n">recovered_option</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">monitor_params</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span>
+                        <span class="n">recovered_option</span>
+                    <span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">SyntaxError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                    <span class="n">_parsing_error</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">recovered_option</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                <span class="n">monitor_params</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">recovered_option</span> <span class="o">==</span> <span class="s1">&#39;False&#39;</span><span class="p">:</span>
+                <span class="n">monitor_params</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">recovered_option</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">:</span>
+                <span class="n">monitor_params</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">continue</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">monitor_params</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">recovered_option</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">monitor_params</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                        <span class="n">recovered_option</span>
+                    <span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">_parsing_error</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">monitor_params</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

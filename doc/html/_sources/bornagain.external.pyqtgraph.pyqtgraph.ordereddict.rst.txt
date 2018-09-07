@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.ordereddict module
+=========================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.ordereddict
+    :members:
+    :undoc-members:
+    :show-inheritance:

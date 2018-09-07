@@ -1,0 +1,7 @@
+bornagain.simulate.thorn module
+===============================
+
+.. automodule:: bornagain.simulate.thorn
+    :members:
+    :undoc-members:
+    :show-inheritance:

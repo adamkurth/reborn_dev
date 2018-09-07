@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.ViewBox module
+===========================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.ViewBox
+    :members:
+    :undoc-members:
+    :show-inheritance:

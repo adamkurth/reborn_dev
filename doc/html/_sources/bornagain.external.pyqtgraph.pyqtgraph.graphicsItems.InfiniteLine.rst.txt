@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine module
+========================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine
+    :members:
+    :undoc-members:
+    :show-inheritance:

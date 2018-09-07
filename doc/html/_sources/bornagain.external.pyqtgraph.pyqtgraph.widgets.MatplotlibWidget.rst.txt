@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.widgets.MatplotlibWidget module
+======================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.MatplotlibWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+bornagain.target.placer module
+==============================
+
+.. automodule:: bornagain.target.placer
+    :members:
+    :undoc-members:
+    :show-inheritance:

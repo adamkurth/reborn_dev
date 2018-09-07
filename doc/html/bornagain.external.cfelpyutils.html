@@ -213,18 +213,10 @@
 </div>
 <div class="section" id="module-bornagain.external.cfelpyutils.crystfel_utils">
 <span id="bornagain-external-cfelpyutils-crystfel-utils-module"></span><h2>bornagain.external.cfelpyutils.crystfel_utils module<a class="headerlink" href="#module-bornagain.external.cfelpyutils.crystfel_utils" title="Permalink to this headline">¶</a></h2>
-<p>Utilities for interoperability with data formats used in the CrystFEL
-software package.</p>
-<p>Exports:</p>
-<blockquote>
-<div><p>Functions:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>load_crystfel_geometry: a python reimplementation of the</dt>
-<dd>get_detector_geometry_2 function from CrystFEL.</dd>
-</dl>
-</div></blockquote>
-</div></blockquote>
+<p>CryystFEL utilities.</p>
+<p>This module contains the python implementation of some functions from
+the
+<a class="reference external" href="http://www.desy.de/~twhite/crystfel/">CrystFEL software package</a>.</p>
 <dl class="function">
 <dt id="bornagain.external.cfelpyutils.crystfel_utils.load_crystfel_geometry">
 <code class="descclassname">bornagain.external.cfelpyutils.crystfel_utils.</code><code class="descname">load_crystfel_geometry</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/crystfel_utils.html#load_crystfel_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.crystfel_utils.load_crystfel_geometry" title="Permalink to this definition">¶</a></dt>
@@ -233,11 +225,9 @@ software package.</p>
 CrystFEL in python. Return a dictionary with the geometry
 information read from the file. Convert entries in the geometry
 file to keys in the returned dictionary. For a full documentation
-on the CrystFEL geometry format, see:</p>
-<p><a class="reference external" href="http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html">http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html</a></p>
-<p>The code of this function is synced with the code of the function
-‘get_detector_geometry_2’ in CrystFEL at commit
-41a8fa9819010fe8ddeb66676fee717f5226c7b8.</p>
+of the CrystFEL geometry format, see <a class="reference external" href="http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html">CrystFEL’s geometry man page</a>. The code of this function is synced with the code of the
+function ‘get_detector_geometry_2’ in CrystFEL at commit
+41a8fa9819010.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -256,34 +246,17 @@ file.</td>
 </div>
 <div class="section" id="module-bornagain.external.cfelpyutils.geometry_utils">
 <span id="bornagain-external-cfelpyutils-geometry-utils-module"></span><h2>bornagain.external.cfelpyutils.geometry_utils module<a class="headerlink" href="#module-bornagain.external.cfelpyutils.geometry_utils" title="Permalink to this headline">¶</a></h2>
-<p>Utilities to load, manipulate and apply geometry information to
-detector pixel data.</p>
-<p>Exports:</p>
-<blockquote>
-<div><p>Functions:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>compute_pixel_maps: turn a CrystFEL geometry object into pixel</dt>
-<dd>maps.</dd>
-<dt>apply_pixel_maps: apply pixel maps to a data array. Return an</dt>
-<dd>array containing data with the geometry applied.</dd>
-<dt>compute_minimum_array_size: compute the minimum array size that</dt>
-<dd>is required to store data to which a geometry has been
-applied.</dd>
-<dt>adjust_pixel_maps_for_pyqtgraph: ajust pixel maps to be used in</dt>
-<dd>a PyQtGraph’s ImageView widget.</dd>
-</dl>
-</div></blockquote>
-</div></blockquote>
+<p>Geometry utilities.</p>
+<p>This module contains the implementation of several functions used to
+manipulate geometry information.</p>
 <dl class="class">
 <dt id="bornagain.external.cfelpyutils.geometry_utils.PixelMaps">
 <em class="property">class </em><code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">PixelMaps</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>r</em><span class="sig-paren">)</span><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-<p>Pixel maps storing data geometry.</p>
-<p>A namedtuple that stores the pixel maps describing the geometry of a
-dataset. The first two fields, named “x” and “y” respectively, store
-the pixel maps for the x coordinate and the y coordinate. The third
-field, named “r”, is instead a pixel map storing the distance of each
+<p>Pixel maps storing geometry information.</p>
+<p>The first two fields, named “x” and “y” respectively, store the pixel
+maps for the x coordinate and the y coordinate. The third field,
+named “r”, is instead a pixel map storing the distance of each
 pixel in the data array from the center of the reference system.</p>
 <dl class="attribute">
 <dt id="bornagain.external.cfelpyutils.geometry_utils.PixelMaps.r">
@@ -306,24 +279,25 @@ pixel in the data array from the center of the reference system.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.external.cfelpyutils.geometry_utils.compute_pixel_maps">
-<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">compute_pixel_maps</code><span class="sig-paren">(</span><em>geometry</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#compute_pixel_maps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.compute_pixel_maps" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.external.cfelpyutils.geometry_utils.compute_pix_maps">
+<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">compute_pix_maps</code><span class="sig-paren">(</span><em>geometry</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#compute_pix_maps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.compute_pix_maps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute pixel maps from a CrystFEL geometry object.</p>
 <p>Take as input a CrystFEL-style geometry object (A dictionary
 returned by the function load_crystfel_geometry function in the
-crystfel_utils module) and return a PixelMap tuple . The origin the
-reference system used by the pixel maps is set at the beam
-interaction point.</p>
+crystfel_utils module) and return a <a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PixelMaps</span></code></a> tuple . The
+origin the reference system used by the pixel maps is set at the
+beam interaction point.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry</strong> (<em>dict</em>) – A CrystFEL geometry object (A dictionary
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry</strong> (<em>Dict</em>) – A CrystFEL geometry object (A dictionary
 returned by the
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">cfelpyutils.crystfel_utils.load_crystfel_geometry</span></code>
 function).</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A PixelMaps tuple.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PixelMaps</span></code></a> tuple storing the pixel maps
+(numpy.ndarrays of float).</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps">PixelMaps</a></td>
 </tr>
@@ -332,45 +306,9 @@ function).</td>
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.external.cfelpyutils.geometry_utils.apply_pixel_maps">
-<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">apply_pixel_maps</code><span class="sig-paren">(</span><em>data</em>, <em>pixel_maps</em>, <em>output_array=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#apply_pixel_maps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.apply_pixel_maps" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply geometry to the input data.</p>
-<p>Apply the geometry (in pixel maps format) to the data. In other
-words, turn an array of detector pixel values into an array
-containing a representation of the physical layout of the detector.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>ndarray</em>) – array containing the data on which the geometry
-will be applied.</li>
-<li><strong>pixel_maps</strong> (<a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps"><em>PixelMaps</em></a>) – a PixelMaps tuple.</li>
-<li><strong>output_array</strong> (<em>Optional</em><em>[</em><em>ndarray</em><em>]</em>) – a preallocated array (of
-dtype numpy.float32) to store the function output. If
-provided, this array will be filled by the function and
-and returned to the user. If not provided, the function
-will create a new array automatically and return it to the
-user. Defaults to None (No array provided).</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a numpy.float32 array containing the data with the
-geometry applied (i.e.: a representation of the physical layout
-of the detector).</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.external.cfelpyutils.geometry_utils.compute_minimum_array_size">
-<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">compute_minimum_array_size</code><span class="sig-paren">(</span><em>pixel_maps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#compute_minimum_array_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.compute_minimum_array_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the minimum array size storing data with applied geometry.</p>
+<dt id="bornagain.external.cfelpyutils.geometry_utils.compute_min_array_size">
+<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">compute_min_array_size</code><span class="sig-paren">(</span><em>pixel_maps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#compute_min_array_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.compute_min_array_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the minimum size of an array stroing the applied geometry.</p>
 <p>Return the minimum size of an array that can store data on which
 the geometry information described by the pixel maps has been
 applied.</p>
@@ -382,7 +320,7 @@ reference system of the detector (i.e: the beam interaction point).</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>[</strong><strong>PixelMaps</strong><strong>]</strong> (<em>pixel_maps</em>) – a PixelMaps tuple.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pixel_maps</strong> (<a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps"><em>PixelMaps</em></a>) – a <a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PixelMaps</span></code></a> tuple.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a numpy-style shape tuple storing the minimum
 array size.</td>
@@ -394,24 +332,25 @@ array size.</td>
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.external.cfelpyutils.geometry_utils.adjust_pixel_maps_for_pyqtgraph">
-<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">adjust_pixel_maps_for_pyqtgraph</code><span class="sig-paren">(</span><em>pixel_maps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#adjust_pixel_maps_for_pyqtgraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.adjust_pixel_maps_for_pyqtgraph" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adjust pixel maps for visualization of the data in a pyqtgraph
-widget.</p>
-<p>The adjusted maps can be used for a Pyqtgraph ImageView widget.</p>
+<dt id="bornagain.external.cfelpyutils.geometry_utils.compute_visualization_pix_maps">
+<code class="descclassname">bornagain.external.cfelpyutils.geometry_utils.</code><code class="descname">compute_visualization_pix_maps</code><span class="sig-paren">(</span><em>geometry</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/geometry_utils.html#compute_visualization_pix_maps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.geometry_utils.compute_visualization_pix_maps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute pixel maps for visualization of the data.</p>
+<p>The pixel maps can be used for to display the data in a Pyqtgraph
+ImageView widget.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pixel_maps</strong> (<a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps"><em>PixelMaps</em></a>) – a PixelMaps tuple.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry</strong> (<em>Dict</em>) – A CrystFEL geometry object (A dictionary
+returned by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">cfelpyutils.crystfel_utils.load_crystfel_geometry</span></code>
+function).</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
-<dt>A Pixelmaps tuple containing the adjusted pixel</dt>
-<dd>maps. The first two fields, named “x” and “y” respectively,
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A PixelMaps tuple containing the adjusted pixel
+maps. The first two fields, named “x” and “y” respectively,
 store the pixel maps for the x coordinate and the y
-coordinate. The third field (“r”) is just set to None.</dd>
-</dl>
-</td>
+coordinates (as ndarrays of type int). The third field
+(“r”) is just set to None.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#bornagain.external.cfelpyutils.geometry_utils.PixelMaps" title="bornagain.external.cfelpyutils.geometry_utils.PixelMaps">PixelMaps</a></td>
 </tr>
@@ -422,25 +361,17 @@ coordinate. The third field (“r”) is just set to None.</dd>
 </div>
 <div class="section" id="module-bornagain.external.cfelpyutils.parameter_utils">
 <span id="bornagain-external-cfelpyutils-parameter-utils-module"></span><h2>bornagain.external.cfelpyutils.parameter_utils module<a class="headerlink" href="#module-bornagain.external.cfelpyutils.parameter_utils" title="Permalink to this headline">¶</a></h2>
-<p>Utilities for parsing command line options and configuration files.</p>
-<p>Exports:</p>
-<blockquote>
-<div><p>Functions:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>convert_parameters: convert a dictionary returned by the</dt>
-<dd>configparse module to a dictionary containing entries with
-the correct type.</dd>
-</dl>
-</div></blockquote>
-</div></blockquote>
+<p>Parameter parsing utilities.</p>
+<p>This module contains the implementation of functions that are used to
+parse and manipulate options and parameters, as extracted by the
+python <code class="xref py py-obj docutils literal notranslate"><span class="pre">configparse</span></code> module.</p>
 <dl class="function">
 <dt id="bornagain.external.cfelpyutils.parameter_utils.convert_parameters">
 <code class="descclassname">bornagain.external.cfelpyutils.parameter_utils.</code><code class="descname">convert_parameters</code><span class="sig-paren">(</span><em>config_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/parameter_utils.html#convert_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.parameter_utils.convert_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert strings in parameter dictionaries to the correct data type.</p>
-<p>Convert a dictionary return by the configparse module to a
-dictionar contaning the same parameters converted from string to
-their correct type (int, float, string, etc.)</p>
+<p>Convert a dictionary extracted by the configparse module to a
+dictionary contaning the same parameters converted from strings to
+correct types (int, float, string, etc.)</p>
 <p>Try to convert each entry in the dictionary according to the
 following rules. The first rule that applies to the entry
 determines the type.</p>
@@ -480,22 +411,17 @@ try to interpret the entry in order as:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>config</strong> (<em>Dict</em>) – a dictionary containing strings (the dictionary
-returned by Config Parser).</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>Dict</em><em>[</em><em>str</em><em>]</em>) – a dictionary containing the parameters from
+a configuration file as extracted by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">configparser</span></code> module).</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dictionary with the same structure as the input
-dictionary, but with correct types assigned to each entry.</p>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary with the same structure as the input
+dictionary, but with correct types assigned to each entry.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Dict</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Dict</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code> – if an entry cannot be converted to any supported</li>
-<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">type.</span></code></li>
-</ul>
-</td>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code> – if an entry cannot be converted to any supported
+type.</td>
 </tr>
 </tbody>
 </table>
@@ -504,15 +430,6 @@ dictionary, but with correct types assigned to each entry.</p>
 </div>
 <div class="section" id="module-bornagain.external.cfelpyutils">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bornagain.external.cfelpyutils" title="Permalink to this headline">¶</a></h2>
-<p>Utilities for CFEL software projects.</p>
-<p>This module provides utilities (functions, classes, etc.) used by many CFEL projects.</p>
-<p>It contains the following submodules (non of which are automatically imported):</p>
-<p>cfelfabio: utilities based on the fabio python module (a module that allows
-python to work with several file format used in x-ray imaging).</p>
-<p>cfelgeom: utilities for processing CrystFEL-style geometry files.</p>
-<p>cfelhdf5: utilities for processing HDF5 files (based on the h5py python module).</p>
-<p>cfeloptarg: utilities to parse command line arguments and parameter files.</p>
-<p>cfelpsana: utilities that expand the functionality of the psana python module.</p>
 </div>
 </div>
 

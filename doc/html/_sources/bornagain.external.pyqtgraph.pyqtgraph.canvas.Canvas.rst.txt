@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.canvas.Canvas module
+===========================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.canvas.Canvas
+    :members:
+    :undoc-members:
+    :show-inheritance:

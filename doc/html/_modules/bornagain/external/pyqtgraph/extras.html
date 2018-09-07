@@ -1,0 +1,663 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.external.pyqtgraph.extras &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bornagain.html">bornagain package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>bornagain.external.pyqtgraph.extras</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bornagain.external.pyqtgraph.extras</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">weakref</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+
+
+<div class="viewcode-block" id="keep_open"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.keep_open">[docs]</a><span class="k">def</span> <span class="nf">keep_open</span><span class="p">():</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Simple helper that keeps qtgraph window open when you run a script from the terminal.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pg</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MultiHistogramLUTWidget"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget">[docs]</a><span class="k">class</span> <span class="nc">MultiHistogramLUTWidget</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">GraphicsView</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the equivalent of HistogramLUTWidget, but wraps MultiHistogramLUTWidget.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="n">background</span> <span class="o">=</span> <span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">)</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">GraphicsView</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">useOpenGL</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="n">background</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">MultiHistogramLUTItem</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCentralItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">,</span> <span class="n">pg</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">95</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MultiHistogramLUTWidget.sizeHint"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pg</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">115</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MultiHistogramLUTItem"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem">[docs]</a><span class="k">class</span> <span class="nc">MultiHistogramLUTItem</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">HistogramLUTItem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is an extension to the HistogramLUTItem that allows control over multiple images. The main feature is the</span>
+<span class="sd">    addition of the setImageItems() method.</span>
+
+<span class="sd">    This is a graphicsWidget which provides controls for adjusting the display of an image.</span>
+
+<span class="sd">    Includes:</span>
+
+<span class="sd">    - Image histogram</span>
+<span class="sd">    - Movable region over histogram to select black/white levels</span>
+<span class="sd">    - Gradient editor to define color lookup table for single-channel images</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image : ImageItem or None</span>
+<span class="sd">        If *image* is provided, then the control will be automatically linked to</span>
+<span class="sd">        the image and changes to the control will be immediately reflected in</span>
+<span class="sd">        the image&#39;s appearance.</span>
+<span class="sd">    fillHistogram : bool</span>
+<span class="sd">        By default, the histogram is rendered with a fill.</span>
+<span class="sd">        For performance, set *fillHistogram* = False.</span>
+<span class="sd">    rgbHistogram : bool</span>
+<span class="sd">        Sets whether the histogram is computed once over all channels of the</span>
+<span class="sd">        image, or once per channel.</span>
+<span class="sd">    levelMode : &#39;mono&#39; or &#39;rgba&#39;</span>
+<span class="sd">        If &#39;mono&#39;, then only a single set of black/whilte level lines is drawn,</span>
+<span class="sd">        and the levels apply to all channels in the image. If &#39;rgba&#39;, then one</span>
+<span class="sd">        set of levels is drawn for each channel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># sigLookupTableChanged = QtCore.Signal(object)</span>
+    <span class="c1"># sigLevelsChanged = QtCore.Signal(object)</span>
+    <span class="c1"># sigLevelChangeFinished = QtCore.Signal(object)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fillHistogram</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rgbHistogram</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">levelMode</span><span class="o">=</span><span class="s1">&#39;mono&#39;</span><span class="p">):</span>
+
+        <span class="n">pg</span><span class="o">.</span><span class="n">HistogramLUTItem</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># GraphicsWidget.__init__(self)</span>
+        <span class="c1"># self.lut = None</span>
+        <span class="c1"># self.imageItem = lambda: None  # fake a dead weakref</span>
+        <span class="c1"># self.levelMode = levelMode</span>
+        <span class="c1"># self.rgbHistogram = rgbHistogram</span>
+        <span class="c1">#</span>
+        <span class="c1"># self.layout = QtGui.QGraphicsGridLayout()</span>
+        <span class="c1"># self.setLayout(self.layout)</span>
+        <span class="c1"># self.layout.setContentsMargins(1, 1, 1, 1)</span>
+        <span class="c1"># self.layout.setSpacing(0)</span>
+        <span class="c1"># self.vb = ViewBox(parent=self)</span>
+        <span class="c1"># self.vb.setMaximumWidth(152)</span>
+        <span class="c1"># self.vb.setMinimumWidth(45)</span>
+        <span class="c1"># self.vb.setMouseEnabled(x=False, y=True)</span>
+        <span class="c1"># self.gradient = GradientEditorItem()</span>
+        <span class="c1"># self.gradient.setOrientation(&#39;right&#39;)</span>
+        <span class="c1"># self.gradient.loadPreset(&#39;grey&#39;)</span>
+        <span class="c1"># self.regions = [</span>
+        <span class="c1">#     LinearRegionItem([0, 1], &#39;horizontal&#39;, swapMode=&#39;block&#39;),</span>
+        <span class="c1">#     LinearRegionItem([0, 1], &#39;horizontal&#39;, swapMode=&#39;block&#39;, pen=&#39;r&#39;,</span>
+        <span class="c1">#                      brush=fn.mkBrush((255, 50, 50, 50)), span=(0., 1 / 3.)),</span>
+        <span class="c1">#     LinearRegionItem([0, 1], &#39;horizontal&#39;, swapMode=&#39;block&#39;, pen=&#39;g&#39;,</span>
+        <span class="c1">#                      brush=fn.mkBrush((50, 255, 50, 50)), span=(1 / 3., 2 / 3.)),</span>
+        <span class="c1">#     LinearRegionItem([0, 1], &#39;horizontal&#39;, swapMode=&#39;block&#39;, pen=&#39;b&#39;,</span>
+        <span class="c1">#                      brush=fn.mkBrush((50, 50, 255, 80)), span=(2 / 3., 1.)),</span>
+        <span class="c1">#     LinearRegionItem([0, 1], &#39;horizontal&#39;, swapMode=&#39;block&#39;, pen=&#39;w&#39;,</span>
+        <span class="c1">#                      brush=fn.mkBrush((255, 255, 255, 50)), span=(2 / 3., 1.))]</span>
+        <span class="c1"># for region in self.regions:</span>
+        <span class="c1">#     region.setZValue(1000)</span>
+        <span class="c1">#     self.vb.addItem(region)</span>
+        <span class="c1">#     region.lines[0].addMarker(&#39;&lt;|&#39;, 0.5)</span>
+        <span class="c1">#     region.lines[1].addMarker(&#39;|&gt;&#39;, 0.5)</span>
+        <span class="c1">#     region.sigRegionChanged.connect(self.regionChanging)</span>
+        <span class="c1">#     region.sigRegionChangeFinished.connect(self.regionChanged)</span>
+        <span class="c1">#</span>
+        <span class="c1"># self.region = self.regions[0]  # for backward compatibility.</span>
+        <span class="c1">#</span>
+        <span class="c1"># self.axis = AxisItem(&#39;left&#39;, linkView=self.vb, maxTickLength=-10, parent=self)</span>
+        <span class="c1"># self.layout.addItem(self.axis, 0, 0)</span>
+        <span class="c1"># self.layout.addItem(self.vb, 0, 1)</span>
+        <span class="c1"># self.layout.addItem(self.gradient, 0, 2)</span>
+        <span class="c1"># self.range = None</span>
+        <span class="c1"># self.gradient.setFlag(self.gradient.ItemStacksBehindParent)</span>
+        <span class="c1"># self.vb.setFlag(self.gradient.ItemStacksBehindParent)</span>
+        <span class="c1">#</span>
+        <span class="c1"># self.gradient.sigGradientChanged.connect(self.gradientChanged)</span>
+        <span class="c1"># self.vb.sigRangeChanged.connect(self.viewRangeChanged)</span>
+        <span class="c1"># add = QtGui.QPainter.CompositionMode_Plus</span>
+        <span class="c1"># self.plots = [</span>
+        <span class="c1">#     PlotCurveItem(pen=(200, 200, 200, 100)),  # mono</span>
+        <span class="c1">#     PlotCurveItem(pen=(255, 0, 0, 100), compositionMode=add),  # r</span>
+        <span class="c1">#     PlotCurveItem(pen=(0, 255, 0, 100), compositionMode=add),  # g</span>
+        <span class="c1">#     PlotCurveItem(pen=(0, 0, 255, 100), compositionMode=add),  # b</span>
+        <span class="c1">#     PlotCurveItem(pen=(200, 200, 200, 100), compositionMode=add),  # a</span>
+        <span class="c1"># ]</span>
+        <span class="c1">#</span>
+        <span class="c1"># self.plot = self.plots[0]  # for backward compatibility.</span>
+        <span class="c1"># for plot in self.plots:</span>
+        <span class="c1">#     plot.rotate(90)</span>
+        <span class="c1">#     self.vb.addItem(plot)</span>
+        <span class="c1">#</span>
+        <span class="c1"># self.fillHistogram(fillHistogram)</span>
+        <span class="c1"># self._showRegions()</span>
+        <span class="c1">#</span>
+        <span class="c1"># self.vb.addItem(self.plot)</span>
+        <span class="c1"># self.autoHistogramRange()</span>
+        <span class="c1">#</span>
+        <span class="c1"># if image is not None:</span>
+        <span class="c1">#     self.setImageItem(image)</span>
+
+    <span class="c1"># def fillHistogram(self, fill=True, level=0.0, color=(100, 100, 200)):</span>
+    <span class="c1">#     colors = [color, (255, 0, 0, 50), (0, 255, 0, 50), (0, 0, 255, 50), (255, 255, 255, 50)]</span>
+    <span class="c1">#     for i, plot in enumerate(self.plots):</span>
+    <span class="c1">#         if fill:</span>
+    <span class="c1">#             plot.setFillLevel(level)</span>
+    <span class="c1">#             plot.setBrush(colors[i])</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             plot.setFillLevel(None)</span>
+
+    <span class="c1"># def paint(self, p, *args):</span>
+    <span class="c1">#     if self.levelMode != &#39;mono&#39;:</span>
+    <span class="c1">#         return</span>
+    <span class="c1">#</span>
+    <span class="c1">#     pen = self.region.lines[0].pen</span>
+    <span class="c1">#     rgn = self.getLevels()</span>
+    <span class="c1">#     p1 = self.vb.mapFromViewToItem(self, Point(self.vb.viewRect().center().x(), rgn[0]))</span>
+    <span class="c1">#     p2 = self.vb.mapFromViewToItem(self, Point(self.vb.viewRect().center().x(), rgn[1]))</span>
+    <span class="c1">#     gradRect = self.gradient.mapRectToParent(self.gradient.gradRect.rect())</span>
+    <span class="c1">#     for pen in [fn.mkPen((0, 0, 0, 100), width=3), pen]:</span>
+    <span class="c1">#         p.setPen(pen)</span>
+    <span class="c1">#         p.drawLine(p1 + Point(0, 5), gradRect.bottomLeft())</span>
+    <span class="c1">#         p.drawLine(p2 - Point(0, 5), gradRect.topLeft())</span>
+    <span class="c1">#         p.drawLine(gradRect.topLeft(), gradRect.topRight())</span>
+    <span class="c1">#         p.drawLine(gradRect.bottomLeft(), gradRect.bottomRight())</span>
+
+    <span class="c1"># def setHistogramRange(self, mn, mx, padding=0.1):</span>
+    <span class="c1">#     &quot;&quot;&quot;Set the Y range on the histogram plot. This disables auto-scaling.&quot;&quot;&quot;</span>
+    <span class="c1">#     self.vb.enableAutoRange(self.vb.YAxis, False)</span>
+    <span class="c1">#     self.vb.setYRange(mn, mx, padding)</span>
+
+    <span class="c1"># def autoHistogramRange(self):</span>
+    <span class="c1">#     &quot;&quot;&quot;Enable auto-scaling on the histogram plot.&quot;&quot;&quot;</span>
+    <span class="c1">#     self.vb.enableAutoRange(self.vb.XYAxes)</span>
+
+    <span class="c1"># def setImageItem(self, img):</span>
+    <span class="c1">#     &quot;&quot;&quot;Set an ImageItem to have its levels and LUT automatically controlled</span>
+    <span class="c1">#     by this HistogramLUTItem.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     self.imageItem = weakref.ref(img)</span>
+    <span class="c1">#     img.sigImageChanged.connect(self.imageChanged)</span>
+    <span class="c1">#     img.setLookupTable(self.getLookupTable)  ## send function pointer, not the result</span>
+    <span class="c1">#     self.regionChanged()</span>
+    <span class="c1">#     self.imageChanged(autoLevel=True)</span>
+
+<div class="viewcode-block" id="MultiHistogramLUTItem.setImageItems"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems">[docs]</a>    <span class="k">def</span> <span class="nf">setImageItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imgs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set an ImageItem to have its levels and LUT automatically controlled</span>
+<span class="sd">        by this HistogramLUTItem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">sigImageChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imageChanged</span><span class="p">)</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">setLookupTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLookupTable</span><span class="p">)</span>  <span class="c1">## send function pointer, not the result</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># print(&#39;imgs[0].image&#39;, imgs[0].image)</span>
+        <span class="n">phonyarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">([</span><span class="n">im</span><span class="o">.</span><span class="n">image</span> <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">])</span>
+        <span class="n">phonyarray</span> <span class="o">=</span> <span class="n">phonyarray</span><span class="p">[</span><span class="mi">0</span><span class="p">:(</span><span class="nb">len</span><span class="p">(</span><span class="n">phonyarray</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">phonyarray</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">))]</span>
+        <span class="n">phonyarray</span> <span class="o">=</span> <span class="n">phonyarray</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">phonyarray</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)])</span>
+        <span class="c1"># print(&#39;phonyarray&#39;, phonyarray)</span>
+
+        <span class="c1"># print(phonyarray)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imageItemStrong</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">ImageItem</span><span class="p">(</span><span class="n">phonyarray</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imageItemStrong</span><span class="p">)</span>  <span class="c1"># TODO: fix this up</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regionChanged</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imageChanged</span><span class="p">(</span><span class="n">autoLevel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+    <span class="c1"># def viewRangeChanged(self):</span>
+    <span class="c1">#     self.update()</span>
+
+    <span class="c1"># def gradientChanged(self):</span>
+    <span class="c1">#     if self.imageItem() is not None:</span>
+    <span class="c1">#         if self.gradient.isLookupTrivial():</span>
+    <span class="c1">#             self.imageItem().setLookupTable(None)  # lambda x: x.astype(np.uint8))</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             self.imageItem().setLookupTable(self.getLookupTable)  ## send function pointer, not the result</span>
+    <span class="c1">#</span>
+    <span class="c1">#     self.lut = None</span>
+    <span class="c1">#     self.sigLookupTableChanged.emit(self)</span>
+
+<div class="viewcode-block" id="MultiHistogramLUTItem.gradientChanged"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.gradientChanged">[docs]</a>    <span class="k">def</span> <span class="nf">gradientChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient</span><span class="o">.</span><span class="n">isLookupTrivial</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
+                    <span class="n">im</span><span class="o">.</span><span class="n">setLookupTable</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># lambda x: x.astype(np.uint8))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
+                    <span class="n">im</span><span class="o">.</span><span class="n">setLookupTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLookupTable</span><span class="p">)</span>  <span class="c1">## send function pointer, not the result</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lut</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigLookupTableChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="c1"># def getLookupTable(self, img=None, n=None, alpha=None):</span>
+    <span class="c1">#     &quot;&quot;&quot;Return a lookup table from the color gradient defined by this</span>
+    <span class="c1">#     HistogramLUTItem.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     if self.levelMode is not &#39;mono&#39;:</span>
+    <span class="c1">#         return None</span>
+    <span class="c1">#     if n is None:</span>
+    <span class="c1">#         if img.dtype == np.uint8:</span>
+    <span class="c1">#             n = 256</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             n = 512</span>
+    <span class="c1">#     if self.lut is None:</span>
+    <span class="c1">#         self.lut = self.gradient.getLookupTable(n, alpha=alpha)</span>
+    <span class="c1">#     return self.lut</span>
+
+<div class="viewcode-block" id="MultiHistogramLUTItem.regionChanged"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">regionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># print(&#39;regionChanged&#39;)</span>
+            <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
+                <span class="n">im</span><span class="o">.</span><span class="n">setLevels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLevels</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigLevelChangeFinished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MultiHistogramLUTItem.regionChanging"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanging">[docs]</a>    <span class="k">def</span> <span class="nf">regionChanging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># print(&#39;regionChanging&#39;)</span>
+            <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
+                <span class="n">im</span><span class="o">.</span><span class="n">setLevels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLevels</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigLevelsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+
+    <span class="c1"># def imageChanged(self, autoLevel=False, autoRange=False):</span>
+    <span class="c1">#     if self.imageItem() is None:</span>
+    <span class="c1">#         return</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if self.levelMode == &#39;mono&#39;:</span>
+    <span class="c1">#         for plt in self.plots[1:]:</span>
+    <span class="c1">#             plt.setVisible(False)</span>
+    <span class="c1">#         self.plots[0].setVisible(True)</span>
+    <span class="c1">#         # plot one histogram for all image data</span>
+    <span class="c1">#         profiler = debug.Profiler()</span>
+    <span class="c1">#         h = self.imageItem().getHistogram()</span>
+    <span class="c1">#         profiler(&#39;get histogram&#39;)</span>
+    <span class="c1">#         if h[0] is None:</span>
+    <span class="c1">#             return</span>
+    <span class="c1">#         self.plot.setData(*h)</span>
+    <span class="c1">#         profiler(&#39;set plot&#39;)</span>
+    <span class="c1">#         if autoLevel:</span>
+    <span class="c1">#             mn = h[0][0]</span>
+    <span class="c1">#             mx = h[0][-1]</span>
+    <span class="c1">#             self.region.setRegion([mn, mx])</span>
+    <span class="c1">#             profiler(&#39;set region&#39;)</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             mn, mx = self.imageItem().levels</span>
+    <span class="c1">#             self.region.setRegion([mn, mx])</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         # plot one histogram for each channel</span>
+    <span class="c1">#         self.plots[0].setVisible(False)</span>
+    <span class="c1">#         ch = self.imageItem().getHistogram(perChannel=True)</span>
+    <span class="c1">#         if ch[0] is None:</span>
+    <span class="c1">#             return</span>
+    <span class="c1">#         for i in range(1, 5):</span>
+    <span class="c1">#             if len(ch) &gt;= i:</span>
+    <span class="c1">#                 h = ch[i - 1]</span>
+    <span class="c1">#                 self.plots[i].setVisible(True)</span>
+    <span class="c1">#                 self.plots[i].setData(*h)</span>
+    <span class="c1">#                 if autoLevel:</span>
+    <span class="c1">#                     mn = h[0][0]</span>
+    <span class="c1">#                     mx = h[0][-1]</span>
+    <span class="c1">#                     self.region[i].setRegion([mn, mx])</span>
+    <span class="c1">#             else:</span>
+    <span class="c1">#                 # hide channels not present in image data</span>
+    <span class="c1">#                 self.plots[i].setVisible(False)</span>
+    <span class="c1">#         # make sure we are displaying the correct number of channels</span>
+    <span class="c1">#         self._showRegions()</span>
+
+    <span class="c1"># def getLevels(self):</span>
+    <span class="c1">#     &quot;&quot;&quot;Return the min and max levels.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     For rgba mode, this returns a list of the levels for each channel.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     if self.levelMode == &#39;mono&#39;:</span>
+    <span class="c1">#         return self.region.getRegion()</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         nch = self.imageItem().channels()</span>
+    <span class="c1">#         if nch is None:</span>
+    <span class="c1">#             nch = 3</span>
+    <span class="c1">#         return [r.getRegion() for r in self.regions[1:nch + 1]]</span>
+
+    <span class="c1"># def setLevels(self, min=None, max=None, rgba=None):</span>
+    <span class="c1">#     &quot;&quot;&quot;Set the min/max (bright and dark) levels.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     Arguments may be *min* and *max* for single-channel data, or</span>
+    <span class="c1">#     *rgba* = [(rmin, rmax), ...] for multi-channel data.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     if self.levelMode == &#39;mono&#39;:</span>
+    <span class="c1">#         if min is None:</span>
+    <span class="c1">#             min, max = rgba[0]</span>
+    <span class="c1">#         assert None not in (min, max)</span>
+    <span class="c1">#         self.region.setRegion((min, max))</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         if rgba is None:</span>
+    <span class="c1">#             raise TypeError(&quot;Must specify rgba argument when levelMode != &#39;mono&#39;.&quot;)</span>
+    <span class="c1">#         for i, levels in enumerate(rgba):</span>
+    <span class="c1">#             self.regions[i + 1].setRegion(levels)</span>
+
+    <span class="c1"># def setLevelMode(self, mode):</span>
+    <span class="c1">#     &quot;&quot;&quot; Set the method of controlling the image levels offered to the user.</span>
+    <span class="c1">#     Options are &#39;mono&#39; or &#39;rgba&#39;.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     assert mode in (&#39;mono&#39;, &#39;rgba&#39;)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if mode == self.levelMode:</span>
+    <span class="c1">#         return</span>
+    <span class="c1">#</span>
+    <span class="c1">#     oldLevels = self.getLevels()</span>
+    <span class="c1">#     self.levelMode = mode</span>
+    <span class="c1">#     self._showRegions()</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # do our best to preserve old levels</span>
+    <span class="c1">#     if mode == &#39;mono&#39;:</span>
+    <span class="c1">#         levels = np.array(oldLevels).mean(axis=0)</span>
+    <span class="c1">#         self.setLevels(*levels)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         levels = [oldLevels] * 4</span>
+    <span class="c1">#         self.setLevels(rgba=levels)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # force this because calling self.setLevels might not set the imageItem</span>
+    <span class="c1">#     # levels if there was no change to the region item</span>
+    <span class="c1">#     self.imageItem().setLevels(self.getLevels())</span>
+    <span class="c1">#</span>
+    <span class="c1">#     self.imageChanged()</span>
+    <span class="c1">#     self.update()</span>
+
+<div class="viewcode-block" id="MultiHistogramLUTItem.setLevelMode"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setLevelMode">[docs]</a>    <span class="k">def</span> <span class="nf">setLevelMode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the method of controlling the image levels offered to the user.</span>
+<span class="sd">        Options are &#39;mono&#39; or &#39;rgba&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;mono&#39;</span><span class="p">,</span> <span class="s1">&#39;rgba&#39;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;setLevelMode&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">levelMode</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">oldLevels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLevels</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">levelMode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_showRegions</span><span class="p">()</span>
+
+        <span class="c1"># do our best to preserve old levels</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;mono&#39;</span><span class="p">:</span>
+            <span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">oldLevels</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setLevels</span><span class="p">(</span><span class="o">*</span><span class="n">levels</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="n">oldLevels</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setLevels</span><span class="p">(</span><span class="n">rgba</span><span class="o">=</span><span class="n">levels</span><span class="p">)</span>
+
+        <span class="c1"># force this because calling self.setLevels might not set the imageItem</span>
+        <span class="c1"># levels if there was no change to the region item</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span><span class="o">.</span><span class="n">setLevels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLevels</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
+            <span class="n">im</span><span class="o">.</span><span class="n">setLevels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLevels</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">imageChanged</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div></div>
+
+    <span class="c1"># def _showRegions(self):</span>
+    <span class="c1">#     for i in range(len(self.regions)):</span>
+    <span class="c1">#         self.regions[i].setVisible(False)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if self.levelMode == &#39;rgba&#39;:</span>
+    <span class="c1">#         imax = 4</span>
+    <span class="c1">#         if self.imageItem() is not None:</span>
+    <span class="c1">#             # Only show rgb channels if connected image lacks alpha.</span>
+    <span class="c1">#             nch = self.imageItem().channels() # FIXME: check this</span>
+    <span class="c1">#             if nch is None:</span>
+    <span class="c1">#                 nch = 3</span>
+    <span class="c1">#         xdif = 1.0 / nch</span>
+    <span class="c1">#         for i in range(1, nch + 1):</span>
+    <span class="c1">#             self.regions[i].setVisible(True)</span>
+    <span class="c1">#             self.regions[i].setSpan((i - 1) * xdif, i * xdif)</span>
+    <span class="c1">#         self.gradient.hide()</span>
+    <span class="c1">#     elif self.levelMode == &#39;mono&#39;:</span>
+    <span class="c1">#         self.regions[0].setVisible(True)</span>
+    <span class="c1">#         self.gradient.show()</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         raise ValueError(&quot;Unknown level mode %r&quot; % self.levelMode)</span>
+
+    <span class="c1"># def saveState(self):</span>
+    <span class="c1">#     return {</span>
+    <span class="c1">#         &#39;gradient&#39;: self.gradient.saveState(),</span>
+    <span class="c1">#         &#39;levels&#39;: self.getLevels(),</span>
+    <span class="c1">#         &#39;mode&#39;: self.levelMode,</span>
+    <span class="c1">#     }</span>
+    <span class="c1">#</span>
+    <span class="c1"># def restoreState(self, state):</span>
+    <span class="c1">#     self.setLevelMode(state[&#39;mode&#39;])</span>
+    <span class="c1">#     self.gradient.restoreState(state[&#39;gradient&#39;])</span>
+    <span class="c1">#     self.setLevels(*state[&#39;levels&#39;])</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

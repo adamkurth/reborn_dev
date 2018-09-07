@@ -1,0 +1,35 @@
+bornagain.external.pyqtgraph.pyqtgraph.flowchart package
+========================================================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bornagain.external.pyqtgraph.pyqtgraph.flowchart.library
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.Flowchart
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartCtrlTemplate_pyqt
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartCtrlTemplate_pyqt5
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartCtrlTemplate_pyside
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartGraphicsView
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartTemplate_pyqt
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartTemplate_pyqt5
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartTemplate_pyside
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.Node
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.NodeLibrary
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.Terminal
+   bornagain.external.pyqtgraph.pyqtgraph.flowchart.eq
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.flowchart
+    :members:
+    :undoc-members:
+    :show-inheritance:

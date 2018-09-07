@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.GraphicsScene module
+=========================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.GraphicsScene
+    :members:
+    :undoc-members:
+    :show-inheritance:

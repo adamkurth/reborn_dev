@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.SRTTransform3D module
+============================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.SRTTransform3D
+    :members:
+    :undoc-members:
+    :show-inheritance:

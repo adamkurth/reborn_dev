@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLLinePlotItem module
+=========================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLLinePlotItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

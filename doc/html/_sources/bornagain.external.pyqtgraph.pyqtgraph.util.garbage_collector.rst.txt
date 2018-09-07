@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.util.garbage\_collector module
+=====================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.util.garbage_collector
+    :members:
+    :undoc-members:
+    :show-inheritance:

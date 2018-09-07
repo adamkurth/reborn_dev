@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.widgets.GradientWidget module
+====================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.GradientWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:

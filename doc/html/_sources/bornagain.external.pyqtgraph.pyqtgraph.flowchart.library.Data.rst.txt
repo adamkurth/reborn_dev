@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.flowchart.library.Data module
+====================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.flowchart.library.Data
+    :members:
+    :undoc-members:
+    :show-inheritance:

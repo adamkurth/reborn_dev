@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.flowchart.library.Display module
+=======================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.flowchart.library.Display
+    :members:
+    :undoc-members:
+    :show-inheritance:

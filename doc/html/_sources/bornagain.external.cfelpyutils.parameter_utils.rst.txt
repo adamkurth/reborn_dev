@@ -1,0 +1,7 @@
+bornagain.external.cfelpyutils.parameter\_utils module
+======================================================
+
+.. automodule:: bornagain.external.cfelpyutils.parameter_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,631 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../../../search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../../../../index.html"/>
+        <link rel="up" title="bornagain.external.pyqtgraph.pyqtgraph" href="../../pyqtgraph.html"/> 
+
+  
+  <script src="../../../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../../../index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../bornagain.html">bornagain package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../pyqtgraph.html">bornagain.external.pyqtgraph.pyqtgraph</a> &raquo;</li>
+        
+      <li>bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders</h1><div class="highlight"><pre>
+<span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">OpenGL</span> <span class="k">import</span> <span class="n">NullFunctionError</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">OpenGL.error</span> <span class="k">import</span> <span class="n">NullFunctionError</span>
+<span class="kn">from</span> <span class="nn">OpenGL.GL</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">OpenGL.GL</span> <span class="k">import</span> <span class="n">shaders</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="c1">## For centralizing and managing vertex/fragment shader programs.</span>
+
+<div class="viewcode-block" id="initShaders"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.initShaders">[docs]</a><span class="k">def</span> <span class="nf">initShaders</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">Shaders</span>
+    <span class="n">Shaders</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">ShaderProgram</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[]),</span>
+        
+        <span class="c1">## increases fragment alpha as the normal turns orthogonal to the view</span>
+        <span class="c1">## this is useful for viewing shells that enclose a volume (such as isosurfaces)</span>
+        <span class="n">ShaderProgram</span><span class="p">(</span><span class="s1">&#39;balloon&#39;</span><span class="p">,</span> <span class="p">[</span>
+            <span class="n">VertexShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec3 normal;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    // compute here for use in fragment shader</span>
+<span class="s2">                    normal = normalize(gl_NormalMatrix * gl_Normal);</span>
+<span class="s2">                    gl_FrontColor = gl_Color;</span>
+<span class="s2">                    gl_BackColor = gl_Color;</span>
+<span class="s2">                    gl_Position = ftransform();</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">),</span>
+            <span class="n">FragmentShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec3 normal;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    vec4 color = gl_Color;</span>
+<span class="s2">                    color.w = min(color.w + 2.0 * color.w * pow(normal.x*normal.x + normal.y*normal.y, 5.0), 1.0);</span>
+<span class="s2">                    gl_FragColor = color;</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="p">]),</span>
+        
+        <span class="c1">## colors fragments based on face normals relative to view</span>
+        <span class="c1">## This means that the colors will change depending on how the view is rotated</span>
+        <span class="n">ShaderProgram</span><span class="p">(</span><span class="s1">&#39;viewNormalColor&#39;</span><span class="p">,</span> <span class="p">[</span>   
+            <span class="n">VertexShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec3 normal;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    // compute here for use in fragment shader</span>
+<span class="s2">                    normal = normalize(gl_NormalMatrix * gl_Normal);</span>
+<span class="s2">                    gl_FrontColor = gl_Color;</span>
+<span class="s2">                    gl_BackColor = gl_Color;</span>
+<span class="s2">                    gl_Position = ftransform();</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">),</span>
+            <span class="n">FragmentShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec3 normal;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    vec4 color = gl_Color;</span>
+<span class="s2">                    color.x = (normal.x + 1.0) * 0.5;</span>
+<span class="s2">                    color.y = (normal.y + 1.0) * 0.5;</span>
+<span class="s2">                    color.z = (normal.z + 1.0) * 0.5;</span>
+<span class="s2">                    gl_FragColor = color;</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="p">]),</span>
+        
+        <span class="c1">## colors fragments based on absolute face normals.</span>
+        <span class="n">ShaderProgram</span><span class="p">(</span><span class="s1">&#39;normalColor&#39;</span><span class="p">,</span> <span class="p">[</span>   
+            <span class="n">VertexShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec3 normal;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    // compute here for use in fragment shader</span>
+<span class="s2">                    normal = normalize(gl_Normal);</span>
+<span class="s2">                    gl_FrontColor = gl_Color;</span>
+<span class="s2">                    gl_BackColor = gl_Color;</span>
+<span class="s2">                    gl_Position = ftransform();</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">),</span>
+            <span class="n">FragmentShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec3 normal;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    vec4 color = gl_Color;</span>
+<span class="s2">                    color.x = (normal.x + 1.0) * 0.5;</span>
+<span class="s2">                    color.y = (normal.y + 1.0) * 0.5;</span>
+<span class="s2">                    color.z = (normal.z + 1.0) * 0.5;</span>
+<span class="s2">                    gl_FragColor = color;</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="p">]),</span>
+        
+        <span class="c1">## very simple simulation of lighting. </span>
+        <span class="c1">## The light source position is always relative to the camera.</span>
+        <span class="n">ShaderProgram</span><span class="p">(</span><span class="s1">&#39;shaded&#39;</span><span class="p">,</span> <span class="p">[</span>   
+            <span class="n">VertexShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec3 normal;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    // compute here for use in fragment shader</span>
+<span class="s2">                    normal = normalize(gl_NormalMatrix * gl_Normal);</span>
+<span class="s2">                    gl_FrontColor = gl_Color;</span>
+<span class="s2">                    gl_BackColor = gl_Color;</span>
+<span class="s2">                    gl_Position = ftransform();</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">),</span>
+            <span class="n">FragmentShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec3 normal;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    float p = dot(normal, normalize(vec3(1.0, -1.0, -1.0)));</span>
+<span class="s2">                    p = p &lt; 0. ? 0. : p * 0.8;</span>
+<span class="s2">                    vec4 color = gl_Color;</span>
+<span class="s2">                    color.x = color.x * (0.2 + p);</span>
+<span class="s2">                    color.y = color.y * (0.2 + p);</span>
+<span class="s2">                    color.z = color.z * (0.2 + p);</span>
+<span class="s2">                    gl_FragColor = color;</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="p">]),</span>
+        
+        <span class="c1">## colors get brighter near edges of object</span>
+        <span class="n">ShaderProgram</span><span class="p">(</span><span class="s1">&#39;edgeHilight&#39;</span><span class="p">,</span> <span class="p">[</span>   
+            <span class="n">VertexShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec3 normal;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    // compute here for use in fragment shader</span>
+<span class="s2">                    normal = normalize(gl_NormalMatrix * gl_Normal);</span>
+<span class="s2">                    gl_FrontColor = gl_Color;</span>
+<span class="s2">                    gl_BackColor = gl_Color;</span>
+<span class="s2">                    gl_Position = ftransform();</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">),</span>
+            <span class="n">FragmentShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec3 normal;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    vec4 color = gl_Color;</span>
+<span class="s2">                    float s = pow(normal.x*normal.x + normal.y*normal.y, 2.0);</span>
+<span class="s2">                    color.x = color.x + s * (1.0-color.x);</span>
+<span class="s2">                    color.y = color.y + s * (1.0-color.y);</span>
+<span class="s2">                    color.z = color.z + s * (1.0-color.z);</span>
+<span class="s2">                    gl_FragColor = color;</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="p">]),</span>
+        
+        <span class="c1">## colors fragments by z-value.</span>
+        <span class="c1">## This is useful for coloring surface plots by height.</span>
+        <span class="c1">## This shader uses a uniform called &quot;colorMap&quot; to determine how to map the colors:</span>
+        <span class="c1">##    red   = pow(z * colorMap[0] + colorMap[1], colorMap[2])</span>
+        <span class="c1">##    green = pow(z * colorMap[3] + colorMap[4], colorMap[5])</span>
+        <span class="c1">##    blue  = pow(z * colorMap[6] + colorMap[7], colorMap[8])</span>
+        <span class="c1">## (set the values like this: shader[&#39;uniformMap&#39;] = array([...])</span>
+        <span class="n">ShaderProgram</span><span class="p">(</span><span class="s1">&#39;heightColor&#39;</span><span class="p">,</span> <span class="p">[</span>
+            <span class="n">VertexShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                varying vec4 pos;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    gl_FrontColor = gl_Color;</span>
+<span class="s2">                    gl_BackColor = gl_Color;</span>
+<span class="s2">                    pos = gl_Vertex;</span>
+<span class="s2">                    gl_Position = ftransform();</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">),</span>
+            <span class="n">FragmentShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                uniform float colorMap[9];</span>
+<span class="s2">                varying vec4 pos;</span>
+<span class="s2">                //out vec4 gl_FragColor;   // only needed for later glsl versions</span>
+<span class="s2">                //in vec4 gl_Color;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    vec4 color = gl_Color;</span>
+<span class="s2">                    color.x = colorMap[0] * (pos.z + colorMap[1]);</span>
+<span class="s2">                    if (colorMap[2] != 1.0)</span>
+<span class="s2">                        color.x = pow(color.x, colorMap[2]);</span>
+<span class="s2">                    color.x = color.x &lt; 0. ? 0. : (color.x &gt; 1. ? 1. : color.x);</span>
+<span class="s2">                    </span>
+<span class="s2">                    color.y = colorMap[3] * (pos.z + colorMap[4]);</span>
+<span class="s2">                    if (colorMap[5] != 1.0)</span>
+<span class="s2">                        color.y = pow(color.y, colorMap[5]);</span>
+<span class="s2">                    color.y = color.y &lt; 0. ? 0. : (color.y &gt; 1. ? 1. : color.y);</span>
+<span class="s2">                    </span>
+<span class="s2">                    color.z = colorMap[6] * (pos.z + colorMap[7]);</span>
+<span class="s2">                    if (colorMap[8] != 1.0)</span>
+<span class="s2">                        color.z = pow(color.z, colorMap[8]);</span>
+<span class="s2">                    color.z = color.z &lt; 0. ? 0. : (color.z &gt; 1. ? 1. : color.z);</span>
+<span class="s2">                    </span>
+<span class="s2">                    color.w = 1.0;</span>
+<span class="s2">                    gl_FragColor = color;</span>
+<span class="s2">                }</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">),</span>
+        <span class="p">],</span> <span class="n">uniforms</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;colorMap&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]}),</span>
+        <span class="n">ShaderProgram</span><span class="p">(</span><span class="s1">&#39;pointSprite&#39;</span><span class="p">,</span> <span class="p">[</span>   <span class="c1">## allows specifying point size using normal.x</span>
+            <span class="c1">## See:</span>
+            <span class="c1">##</span>
+            <span class="c1">##  http://stackoverflow.com/questions/9609423/applying-part-of-a-texture-sprite-sheet-texture-map-to-a-point-sprite-in-ios</span>
+            <span class="c1">##  http://stackoverflow.com/questions/3497068/textured-points-in-opengl-es-2-0</span>
+            <span class="c1">##</span>
+            <span class="c1">##</span>
+            <span class="n">VertexShader</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                void main() {</span>
+<span class="s2">                    gl_FrontColor=gl_Color;</span>
+<span class="s2">                    gl_PointSize = gl_Normal.x;</span>
+<span class="s2">                    gl_Position = ftransform();</span>
+<span class="s2">                } </span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">),</span>
+            <span class="c1">#FragmentShader(&quot;&quot;&quot;</span>
+                <span class="c1">##version 120</span>
+                <span class="c1">#uniform sampler2D texture;</span>
+                <span class="c1">#void main ( )</span>
+                <span class="c1">#{</span>
+                    <span class="c1">#gl_FragColor = texture2D(texture, gl_PointCoord) * gl_Color;</span>
+                <span class="c1">#}</span>
+            <span class="c1">#&quot;&quot;&quot;)</span>
+        <span class="p">]),</span>
+    <span class="p">]</span></div>
+
+
+<span class="n">CompiledShaderPrograms</span> <span class="o">=</span> <span class="p">{}</span>
+    
+<div class="viewcode-block" id="getShaderProgram"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.getShaderProgram">[docs]</a><span class="k">def</span> <span class="nf">getShaderProgram</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">ShaderProgram</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Shader"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.Shader">[docs]</a><span class="k">class</span> <span class="nc">Shader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shaderType</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shaderType</span> <span class="o">=</span> <span class="n">shaderType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compiled</span> <span class="o">=</span> <span class="kc">None</span>
+        
+<div class="viewcode-block" id="Shader.shader"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.Shader.shader">[docs]</a>    <span class="k">def</span> <span class="nf">shader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compiled</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">compiled</span> <span class="o">=</span> <span class="n">shaders</span><span class="o">.</span><span class="n">compileShader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shaderType</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">NullFunctionError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;This OpenGL implementation does not support shader programs; many OpenGL features in pyqtgraph will not work.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="c1">## Format compile errors a bit more nicely</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">err</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">typ</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">args</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">err</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Shader compile failure&#39;</span><span class="p">):</span>
+                        <span class="k">raise</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf_8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">err</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">msgs</span> <span class="o">=</span> <span class="n">err</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+                    <span class="n">err</span> <span class="o">=</span> <span class="n">err</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="n">msgs</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;b</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">msgs</span><span class="p">)</span>
+                    <span class="n">msgs</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">$&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">msgs</span><span class="p">)</span>
+                    <span class="n">msgs</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">n&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="n">msgs</span><span class="p">)</span>
+                    <span class="n">msgs</span> <span class="o">=</span> <span class="n">msgs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">errNums</span> <span class="o">=</span> <span class="p">[()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">msg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">msgs</span><span class="p">):</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(\d+\:)?\d+\((\d+)\)&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="n">errNums</span><span class="p">[</span><span class="n">line</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">errNums</span><span class="p">[</span><span class="n">line</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),)</span>
+                            <span class="c1">#code[line-1] = &#39;%d\t%s&#39; % (i+1, code[line-1])</span>
+                        <span class="n">err</span> <span class="o">=</span> <span class="n">err</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                    <span class="n">errNums</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">errNums</span><span class="p">]</span>
+                    <span class="n">maxlen</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">errNums</span><span class="p">))</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="p">[</span><span class="n">errNums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="p">(</span><span class="n">maxlen</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">errNums</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">+</span> <span class="n">line</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">code</span><span class="p">)]</span>
+                    <span class="n">err</span> <span class="o">=</span> <span class="n">err</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compiled</span></div></div>
+
+<div class="viewcode-block" id="VertexShader"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.VertexShader">[docs]</a><span class="k">class</span> <span class="nc">VertexShader</span><span class="p">(</span><span class="n">Shader</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+        <span class="n">Shader</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">GL_VERTEX_SHADER</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="FragmentShader"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.FragmentShader">[docs]</a><span class="k">class</span> <span class="nc">FragmentShader</span><span class="p">(</span><span class="n">Shader</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+        <span class="n">Shader</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">GL_FRAGMENT_SHADER</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span></div>
+        
+        
+        
+
+<div class="viewcode-block" id="ShaderProgram"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.ShaderProgram">[docs]</a><span class="k">class</span> <span class="nc">ShaderProgram</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">shaders</span><span class="p">,</span> <span class="n">uniforms</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">ShaderProgram</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shaders</span> <span class="o">=</span> <span class="n">shaders</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prog</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blockData</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uniformData</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1">## parse extra options from the shader definition</span>
+        <span class="k">if</span> <span class="n">uniforms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">uniforms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        
+<div class="viewcode-block" id="ShaderProgram.setBlockData"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.ShaderProgram.setBlockData">[docs]</a>    <span class="k">def</span> <span class="nf">setBlockData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blockName</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">blockData</span><span class="p">[</span><span class="n">blockName</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blockData</span><span class="p">[</span><span class="n">blockName</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="ShaderProgram.setUniformData"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.ShaderProgram.setUniformData">[docs]</a>    <span class="k">def</span> <span class="nf">setUniformData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uniformName</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniformData</span><span class="p">[</span><span class="n">uniformName</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uniformData</span><span class="p">[</span><span class="n">uniformName</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span></div>
+            
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUniformData</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUniformData</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ShaderProgram.program"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.ShaderProgram.program">[docs]</a>    <span class="k">def</span> <span class="nf">program</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prog</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">compiled</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">shader</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shaders</span><span class="p">]</span>  <span class="c1">## compile all shaders</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">prog</span> <span class="o">=</span> <span class="n">shaders</span><span class="o">.</span><span class="n">compileProgram</span><span class="p">(</span><span class="o">*</span><span class="n">compiled</span><span class="p">)</span>  <span class="c1">## compile program</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">prog</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prog</span></div>
+        
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shaders</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">()</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">glUseProgram</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">())</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1">## load uniform values into program</span>
+                <span class="k">for</span> <span class="n">uniformName</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniformData</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">uniformName</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">loc</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Could not find uniform variable &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">uniformName</span><span class="p">)</span>
+                    <span class="n">glUniform1fv</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span>
+                    
+                <span class="c1">### bind buffer data to program blocks</span>
+                <span class="c1">#if len(self.blockData) &gt; 0:</span>
+                    <span class="c1">#bindPoint = 1</span>
+                    <span class="c1">#for blockName, data in self.blockData.items():</span>
+                        <span class="c1">### Program should have a uniform block declared:</span>
+                        <span class="c1">### </span>
+                        <span class="c1">### layout (std140) uniform blockName {</span>
+                        <span class="c1">###     vec4 diffuse;</span>
+                        <span class="c1">### };</span>
+                        
+                        <span class="c1">### pick any-old binding point. (there are a limited number of these per-program</span>
+                        <span class="c1">#bindPoint = 1</span>
+                        
+                        <span class="c1">### get the block index for a uniform variable in the shader</span>
+                        <span class="c1">#blockIndex = glGetUniformBlockIndex(self.program(), blockName)</span>
+                        
+                        <span class="c1">### give the shader block a binding point</span>
+                        <span class="c1">#glUniformBlockBinding(self.program(), blockIndex, bindPoint)</span>
+                        
+                        <span class="c1">### create a buffer</span>
+                        <span class="c1">#buf = glGenBuffers(1)</span>
+                        <span class="c1">#glBindBuffer(GL_UNIFORM_BUFFER, buf)</span>
+                        <span class="c1">#glBufferData(GL_UNIFORM_BUFFER, size, data, GL_DYNAMIC_DRAW)</span>
+                        <span class="c1">### also possible to use glBufferSubData to fill parts of the buffer</span>
+                        
+                        <span class="c1">### bind buffer to the same binding point</span>
+                        <span class="c1">#glBindBufferBase(GL_UNIFORM_BUFFER, bindPoint, buf)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">glUseProgram</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">raise</span>
+                    
+            
+        
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shaders</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">glUseProgram</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="ShaderProgram.uniform"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.ShaderProgram.uniform">[docs]</a>    <span class="k">def</span> <span class="nf">uniform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the location integer for a uniform variable in this program&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">glGetUniformLocation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">(),</span> <span class="n">name</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf_8&#39;</span><span class="p">))</span></div></div>
+
+    <span class="c1">#def uniformBlockInfo(self, blockName):</span>
+        <span class="c1">#blockIndex = glGetUniformBlockIndex(self.program(), blockName)</span>
+        <span class="c1">#count = glGetActiveUniformBlockiv(self.program(), blockIndex, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS)</span>
+        <span class="c1">#indices = []</span>
+        <span class="c1">#for i in range(count):</span>
+            <span class="c1">#indices.append(glGetActiveUniformBlockiv(self.program(), blockIndex, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES))</span>
+        
+<div class="viewcode-block" id="HeightColorShader"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.html#bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders.HeightColorShader">[docs]</a><span class="k">class</span> <span class="nc">HeightColorShader</span><span class="p">(</span><span class="n">ShaderProgram</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">## Program should have a uniform block declared:</span>
+        <span class="c1">## </span>
+        <span class="c1">## layout (std140) uniform blockName {</span>
+        <span class="c1">##     vec4 diffuse;</span>
+        <span class="c1">##     vec4 ambient;</span>
+        <span class="c1">## };</span>
+        
+        <span class="c1">## pick any-old binding point. (there are a limited number of these per-program</span>
+        <span class="n">bindPoint</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="c1">## get the block index for a uniform variable in the shader</span>
+        <span class="n">blockIndex</span> <span class="o">=</span> <span class="n">glGetUniformBlockIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">(),</span> <span class="s2">&quot;blockName&quot;</span><span class="p">)</span>
+        
+        <span class="c1">## give the shader block a binding point</span>
+        <span class="n">glUniformBlockBinding</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">(),</span> <span class="n">blockIndex</span><span class="p">,</span> <span class="n">bindPoint</span><span class="p">)</span>
+        
+        <span class="c1">## create a buffer</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">glGenBuffers</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">glBindBuffer</span><span class="p">(</span><span class="n">GL_UNIFORM_BUFFER</span><span class="p">,</span> <span class="n">buf</span><span class="p">)</span>
+        <span class="n">glBufferData</span><span class="p">(</span><span class="n">GL_UNIFORM_BUFFER</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">GL_DYNAMIC_DRAW</span><span class="p">)</span>
+        <span class="c1">## also possible to use glBufferSubData to fill parts of the buffer</span>
+        
+        <span class="c1">## bind buffer to the same binding point</span>
+        <span class="n">glBindBufferBase</span><span class="p">(</span><span class="n">GL_UNIFORM_BUFFER</span><span class="p">,</span> <span class="n">bindPoint</span><span class="p">,</span> <span class="n">buf</span><span class="p">)</span></div>
+        
+<span class="n">initShaders</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

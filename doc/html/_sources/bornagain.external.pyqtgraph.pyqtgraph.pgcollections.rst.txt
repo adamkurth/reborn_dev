@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.pgcollections module
+===========================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.pgcollections
+    :members:
+    :undoc-members:
+    :show-inheritance:

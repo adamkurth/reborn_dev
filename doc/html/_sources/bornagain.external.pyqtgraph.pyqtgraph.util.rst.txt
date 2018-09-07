@@ -1,0 +1,28 @@
+bornagain.external.pyqtgraph.pyqtgraph.util package
+===================================================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bornagain.external.pyqtgraph.pyqtgraph.util.colorama
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.util.cprint
+   bornagain.external.pyqtgraph.pyqtgraph.util.garbage_collector
+   bornagain.external.pyqtgraph.pyqtgraph.util.lru_cache
+   bornagain.external.pyqtgraph.pyqtgraph.util.mutex
+   bornagain.external.pyqtgraph.pyqtgraph.util.pil_fix
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.util
+    :members:
+    :undoc-members:
+    :show-inheritance:

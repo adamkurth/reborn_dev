@@ -211,8 +211,324 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-bornagain.external.pyqtgraph.ImageItem">
+<span id="bornagain-external-pyqtgraph-imageitem-module"></span><h2>bornagain.external.pyqtgraph.ImageItem module<a class="headerlink" href="#module-bornagain.external.pyqtgraph.ImageItem" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem">
+<em class="property">class </em><code class="descclassname">bornagain.external.pyqtgraph.ImageItem.</code><code class="descname">ImageItem</code><span class="sig-paren">(</span><em>image=None</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.graphicsItems.GraphicsObject.GraphicsObject</span></code></p>
+<p><strong>Bases:</strong> <code class="xref py py-class docutils literal notranslate"><span class="pre">GraphicsObject</span></code></p>
+<p>GraphicsObject displaying an image. Optimized for rapid update (ie video display).
+This item displays either a 2D numpy array (height, width) or
+a 3D array (height, width, RGBa). This array is optionally scaled (see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">setLevels</span></code>) and/or colored
+with a lookup table (see <code class="xref py py-func docutils literal notranslate"><span class="pre">setLookupTable</span></code>)
+before being displayed.</p>
+<p>ImageItem is frequently used in conjunction with
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramLUTItem</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramLUTWidget</span></code> to provide a GUI
+for controlling the levels and lookup table used to display the image.</p>
+<dl class="attribute">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.sigImageChanged">
+<code class="descname">sigImageChanged</code><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.sigImageChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.sigRemoveRequested">
+<code class="descname">sigRemoveRequested</code><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.sigRemoveRequested" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setCompositionMode">
+<code class="descname">setCompositionMode</code><span class="sig-paren">(</span><em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setCompositionMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setCompositionMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the composition mode of the item (see QPainter::CompositionMode
+in the Qt documentation). This is useful when overlaying multiple ImageItems.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="42%" />
+<col width="58%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Most common arguments:</strong></td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>QtGui.QPainter.CompositionMode_SourceOver</td>
+<td>Default; image replaces the background if it
+is opaque. Otherwise, it uses the alpha channel to blend
+the image with the background.</td>
+</tr>
+<tr class="row-odd"><td>QtGui.QPainter.CompositionMode_Overlay</td>
+<td>The image color is mixed with the background color to
+reflect the lightness or darkness of the background.</td>
+</tr>
+<tr class="row-even"><td>QtGui.QPainter.CompositionMode_Plus</td>
+<td>Both the alpha and color of the image and background pixels
+are added together.</td>
+</tr>
+<tr class="row-odd"><td>QtGui.QPainter.CompositionMode_Multiply</td>
+<td>The output is the image color multiplied by the background.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setBorder">
+<code class="descname">setBorder</code><span class="sig-paren">(</span><em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setBorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setBorder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.width">
+<code class="descname">width</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.width"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.width" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.height">
+<code class="descname">height</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.height"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.height" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.boundingRect">
+<code class="descname">boundingRect</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; QRectF<a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.boundingRect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setLevels">
+<code class="descname">setLevels</code><span class="sig-paren">(</span><em>levels</em>, <em>update=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setLevels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setLevels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set image scaling levels. Can be one of:</p>
+<ul class="simple">
+<li>[blackLevel, whiteLevel]</li>
+<li>[[minRed, maxRed], [minGreen, maxGreen], [minBlue, maxBlue]]</li>
+</ul>
+<p>Only the first format is compatible with lookup tables. See <code class="xref py py-func docutils literal notranslate"><span class="pre">makeARGB</span></code>
+for more details on how levels are applied.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.getLevels">
+<code class="descname">getLevels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.getLevels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.getLevels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setLookupTable">
+<code class="descname">setLookupTable</code><span class="sig-paren">(</span><em>lut</em>, <em>update=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setLookupTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setLookupTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the lookup table (numpy array) to use for this image. (see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">makeARGB</span></code> for more information on how this is used).
+Optionally, lut can be a callable that accepts the current image as an
+argument and returns the lookup table to use.</p>
+<p>Ordinarily, this table is supplied by a <code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramLUTItem</span></code>
+or <code class="xref py py-class docutils literal notranslate"><span class="pre">GradientEditorItem</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setAutoDownsample">
+<code class="descname">setAutoDownsample</code><span class="sig-paren">(</span><em>ads</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setAutoDownsample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setAutoDownsample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the automatic downsampling mode for this ImageItem.</p>
+<p>Added in version 0.9.9</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setOpts">
+<code class="descname">setOpts</code><span class="sig-paren">(</span><em>update=True</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setOpts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setOpts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setRect">
+<code class="descname">setRect</code><span class="sig-paren">(</span><em>rect</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setRect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale and translate the image to fit within rect (must be a QRect or QRectF).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setImage">
+<code class="descname">setImage</code><span class="sig-paren">(</span><em>image=None</em>, <em>autoLevels=None</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the image displayed by this item. For more information on how the image
+is processed before displaying, see <code class="xref py py-func docutils literal notranslate"><span class="pre">makeARGB</span></code></p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="82%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Arguments:</strong></td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>image</td>
+<td>(numpy array) Specifies the image data. May be 2D (width, height) or
+3D (width, height, RGBa). The array dtype must be integer or floating
+point of any bit depth. For 3D arrays, the third dimension must
+be of length 3 (RGB) or 4 (RGBA).</td>
+</tr>
+<tr class="row-odd"><td>autoLevels</td>
+<td>(bool) If True, this forces the image to automatically select
+levels based on the maximum and minimum values in the data.
+By default, this argument is true unless the levels argument is
+given.</td>
+</tr>
+<tr class="row-even"><td>lut</td>
+<td>(numpy array) The color lookup table to use when displaying the image.
+See <code class="xref py py-func docutils literal notranslate"><span class="pre">setLookupTable</span></code>.</td>
+</tr>
+<tr class="row-odd"><td>levels</td>
+<td>(min, max) The minimum and maximum values to use when rescaling the image
+data. By default, this will be set to the minimum and maximum values
+in the image. If the image array has dtype uint8, no rescaling is necessary.</td>
+</tr>
+<tr class="row-even"><td>opacity</td>
+<td>(float 0.0-1.0)</td>
+</tr>
+<tr class="row-odd"><td>compositionMode</td>
+<td>see <code class="xref py py-func docutils literal notranslate"><span class="pre">setCompositionMode</span></code></td>
+</tr>
+<tr class="row-even"><td>border</td>
+<td>Sets the pen used when drawing the image border. Default is None.</td>
+</tr>
+<tr class="row-odd"><td>autoDownsample</td>
+<td>(bool) If True, the image is automatically downsampled to match the
+screen resolution. This improves performance for large images and
+reduces aliasing.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.updateImage">
+<code class="descname">updateImage</code><span class="sig-paren">(</span><em>*args</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.updateImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.updateImage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.render">
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.render"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.render" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.paint">
+<code class="descname">paint</code><span class="sig-paren">(</span><em>self</em>, <em>QPainter</em>, <em>QStyleOptionGraphicsItem</em>, <em>widget: QWidget = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.paint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>fileName</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save this image to file. Note that this saves the visible image (after scale/color changes), not the original data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.getHistogram">
+<code class="descname">getHistogram</code><span class="sig-paren">(</span><em>bins='auto'</em>, <em>step='auto'</em>, <em>targetImageSize=200</em>, <em>targetHistogramSize=500</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.getHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.getHistogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns x and y arrays containing the histogram values for the current image.
+For an explanation of the return format, see numpy.histogram().</p>
+<p>The <em>step</em> argument causes pixels to be skipped when computing the histogram to save time.
+If <em>step</em> is ‘auto’, then a step is chosen such that the analyzed data has
+dimensions roughly <em>targetImageSize</em> for each axis.</p>
+<p>The <em>bins</em> argument and any extra keyword arguments are passed to
+np.histogram(). If <em>bins</em> is ‘auto’, then a bin number is automatically
+chosen based on the image characteristics:</p>
+<ul class="simple">
+<li>Integer images will have approximately <em>targetHistogramSize</em> bins,
+with each bin having an integer width.</li>
+<li>All other types will have <em>targetHistogramSize</em> bins.</li>
+</ul>
+<p>This method is also used when automatically computing levels.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setPxMode">
+<code class="descname">setPxMode</code><span class="sig-paren">(</span><em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setPxMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setPxMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set whether the item ignores transformations and draws directly to screen pixels.
+If True, the item will not inherit any scale or rotation transformations from its
+parent items, but its position will be transformed as usual.
+(see GraphicsItem::ItemIgnoresTransformations in the Qt documentation)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setScaledMode">
+<code class="descname">setScaledMode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setScaledMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setScaledMode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.getPixmap">
+<code class="descname">getPixmap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.getPixmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.getPixmap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.pixelSize">
+<code class="descname">pixelSize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.pixelSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.pixelSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>return scene-size of a single pixel in the image</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.viewTransformChanged">
+<code class="descname">viewTransformChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.viewTransformChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.viewTransformChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called whenever the transformation matrix of the view has changed.
+(eg, the view range has changed or the view was resized)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.mouseDragEvent">
+<code class="descname">mouseDragEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.mouseDragEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.mouseDragEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.mouseClickEvent">
+<code class="descname">mouseClickEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.mouseClickEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.mouseClickEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.raiseContextMenu">
+<code class="descname">raiseContextMenu</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.raiseContextMenu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.raiseContextMenu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.getMenu">
+<code class="descname">getMenu</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.getMenu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.getMenu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.hoverEvent">
+<code class="descname">hoverEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.hoverEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.hoverEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.tabletEvent">
+<code class="descname">tabletEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.tabletEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.tabletEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.drawAt">
+<code class="descname">drawAt</code><span class="sig-paren">(</span><em>pos</em>, <em>ev=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.drawAt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.drawAt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.setDrawKernel">
+<code class="descname">setDrawKernel</code><span class="sig-paren">(</span><em>kernel=None</em>, <em>mask=None</em>, <em>center=(0</em>, <em>0)</em>, <em>mode='set'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.setDrawKernel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.setDrawKernel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.removeClicked">
+<code class="descname">removeClicked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.removeClicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.removeClicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.pyqtgraph.ImageItem.ImageItem.emitRemoveRequested">
+<code class="descname">emitRemoveRequested</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/ImageItem.html#ImageItem.emitRemoveRequested"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem.emitRemoveRequested" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-bornagain.external.pyqtgraph.extras">
 <span id="bornagain-external-pyqtgraph-extras-module"></span><h2>bornagain.external.pyqtgraph.extras module<a class="headerlink" href="#module-bornagain.external.pyqtgraph.extras" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="bornagain.external.pyqtgraph.extras.keep_open">
+<code class="descclassname">bornagain.external.pyqtgraph.extras.</code><code class="descname">keep_open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#keep_open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.keep_open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple helper that keeps qtgraph window open when you run a script from the terminal.</p>
+</dd></dl>
+
 <dl class="class">
 <dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget">
 <em class="property">class </em><code class="descclassname">bornagain.external.pyqtgraph.extras.</code><code class="descname">MultiHistogramLUTWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>*args</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget" title="Permalink to this definition">¶</a></dt>
@@ -243,7 +559,7 @@ addition of the setImageItems() method.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>image</strong> (<em>ImageItem</em><em> or </em><em>None</em>) – If <em>image</em> is provided, then the control will be automatically linked to
+<li><strong>image</strong> (<a class="reference internal" href="#bornagain.external.pyqtgraph.ImageItem.ImageItem" title="bornagain.external.pyqtgraph.ImageItem.ImageItem"><em>ImageItem</em></a><em> or </em><em>None</em>) – If <em>image</em> is provided, then the control will be automatically linked to
 the image and changes to the control will be immediately reflected in
 the image’s appearance.</li>
 <li><strong>fillHistogram</strong> (<em>bool</em>) – By default, the histogram is rendered with a fill.
@@ -292,7 +608,16 @@ Options are ‘mono’ or ‘rgba’.</p>
 </div>
 <div class="section" id="module-bornagain.external.pyqtgraph">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bornagain.external.pyqtgraph" title="Permalink to this headline">¶</a></h2>
-<p>Some extra utilities for pyqtgraph.  Mostly wrappers for existing classes, with additional features.</p>
+<p>This contains the entire pyqtgraph module along with a few extra functions.</p>
+<p>The pyqtgraph module was cloned from here:
+<a class="reference external" href="https://github.com/pyqtgraph/pyqtgraph-core">https://github.com/pyqtgraph/pyqtgraph-core</a></p>
+<p>Here are the extra utilities:</p>
+<p>keep_open    Keeps a window open (e.g. when window vanishes upon exiting script)</p>
+<p>Utilities for operating on the colormap of multiple images at once
+MultiHistogramLUTWidget
+MultiHistogramLUTItem</p>
+<p>Here are the bugfixes:
+ImageItem - got rid of the flicker due to undersampling of the image when zoomed out.</p>
 </div>
 </div>
 

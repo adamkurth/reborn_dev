@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.util.colorama.win32 module
+=================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.util.colorama.win32
+    :members:
+    :undoc-members:
+    :show-inheritance:

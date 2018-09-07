@@ -207,6 +207,10 @@
         <span class="k">if</span> <span class="n">pdbFilePath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">load_pdb</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nMolecules</span>
+
 <div class="viewcode-block" id="structure.load_pdb"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.structure.load_pdb">[docs]</a>    <span class="k">def</span> <span class="nf">load_pdb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdbFilePath</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -548,12 +552,28 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Oinv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">O</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Lattice.assemble"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.crystal.Lattice.assemble">[docs]</a>    <span class="k">def</span> <span class="nf">assemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_unit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">spherical</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assembles the lattice vecors (unit cell origins) based</span>
+<span class="sd">        on the lattice constants provided.</span>
+<span class="sd">        n_unit, int or 3-tuple of ints</span>
+<span class="sd">            Number of unit cells along each crystal axis(default is square)</span>
+<span class="sd">            If n_unit is a 3-tuple (n_unit_a, n_unit_b, n_unit_c) then the </span>
+<span class="sd">            crystal can be rectangular</span>
+<span class="sd">        spherical, bool</span>
+<span class="sd">            Whether to apply a spherical boundary to the crystal after it</span>
+<span class="sd">            is created.</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#       lattice coordinates</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">n_unit_a</span><span class="p">,</span> <span class="n">n_unit_b</span><span class="p">,</span> <span class="n">n_unit_c</span> <span class="o">=</span> <span class="n">n_unit</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">n_unit_a</span> <span class="o">=</span> <span class="n">n_unit_b</span> <span class="o">=</span> <span class="n">n_unit_c</span> <span class="o">=</span> <span class="n">n_unit</span>
+          
         <span class="bp">self</span><span class="o">.</span><span class="n">vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">+</span> <span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">+</span> <span class="n">k</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span>
-                              <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)</span>
-                              <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)</span>
-                              <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">n_unit</span><span class="p">)])</span>
+                              <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">n_unit_a</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">n_unit_b</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">n_unit_c</span><span class="p">)])</span>
 
 <span class="c1">#       sphericalize the lattice..</span>
         <span class="k">if</span> <span class="n">spherical</span><span class="p">:</span>

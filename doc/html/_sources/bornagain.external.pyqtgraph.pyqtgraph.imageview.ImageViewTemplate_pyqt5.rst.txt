@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.imageview.ImageViewTemplate\_pyqt5 module
+================================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.imageview.ImageViewTemplate_pyqt5
+    :members:
+    :undoc-members:
+    :show-inheritance:

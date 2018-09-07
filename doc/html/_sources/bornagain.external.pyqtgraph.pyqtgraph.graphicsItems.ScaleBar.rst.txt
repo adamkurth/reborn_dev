@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ScaleBar module
+====================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ScaleBar
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,28 @@
+bornagain.external.pyqtgraph.pyqtgraph.opengl package
+=====================================================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bornagain.external.pyqtgraph.pyqtgraph.opengl.items
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.opengl.GLGraphicsItem
+   bornagain.external.pyqtgraph.pyqtgraph.opengl.GLViewWidget
+   bornagain.external.pyqtgraph.pyqtgraph.opengl.MeshData
+   bornagain.external.pyqtgraph.pyqtgraph.opengl.glInfo
+   bornagain.external.pyqtgraph.pyqtgraph.opengl.shaders
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl
+    :members:
+    :undoc-members:
+    :show-inheritance:

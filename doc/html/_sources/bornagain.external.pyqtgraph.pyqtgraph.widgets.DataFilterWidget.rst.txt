@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.widgets.DataFilterWidget module
+======================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.DataFilterWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:

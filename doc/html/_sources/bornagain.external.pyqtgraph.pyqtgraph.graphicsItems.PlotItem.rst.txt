@@ -1,0 +1,20 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem package
+=====================================================================
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem.PlotItem
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem.plotConfigTemplate_pyqt
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem.plotConfigTemplate_pyqt5
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem.plotConfigTemplate_pyside
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

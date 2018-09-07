@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.Vector module
+====================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.Vector
+    :members:
+    :undoc-members:
+    :show-inheritance:

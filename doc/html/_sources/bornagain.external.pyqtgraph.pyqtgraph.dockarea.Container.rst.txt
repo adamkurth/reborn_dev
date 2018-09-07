@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.dockarea.Container module
+================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.dockarea.Container
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.exporters.SVGExporter module
+===================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.exporters.SVGExporter
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.mouseEvents module
+=======================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.mouseEvents
+    :members:
+    :undoc-members:
+    :show-inheritance:

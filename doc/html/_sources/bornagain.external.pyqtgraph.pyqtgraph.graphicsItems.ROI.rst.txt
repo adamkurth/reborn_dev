@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ROI module
+===============================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ROI
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.widgets.ScatterPlotWidget module
+=======================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.ScatterPlotWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:

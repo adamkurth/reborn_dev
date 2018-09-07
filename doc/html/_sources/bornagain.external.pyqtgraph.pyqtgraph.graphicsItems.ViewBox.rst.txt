@@ -1,0 +1,21 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox package
+====================================================================
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.ViewBox
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.ViewBoxMenu
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.axisCtrlTemplate_pyqt
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.axisCtrlTemplate_pyqt5
+   bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.axisCtrlTemplate_pyside
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox
+    :members:
+    :undoc-members:
+    :show-inheritance:

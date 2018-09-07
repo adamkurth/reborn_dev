@@ -101,6 +101,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.atoms">bornagain.simulate.atoms module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.clcore">bornagain.simulate.clcore module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.examples">bornagain.simulate.examples module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.refdata">bornagain.simulate.refdata module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.simutils">bornagain.simulate.simutils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-bornagain.simulate.solutions">bornagain.simulate.solutions module</a></li>
@@ -443,8 +444,41 @@ simple task.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk">
+<code class="descname">phase_factor_qrf_chunk</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f</em>, <em>Nchunk</em>, <em>q_is_qdev=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_qrf_chunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><em>N</em><em>,</em><em>3</em><em>]</em>) – Scattering vectors (2pi/lambda).</li>
+<li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em>) – Atomic coordinates.</li>
+<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em>) – Complex scattering factors.</li>
+<li><strong>number of chunks to split up atoms..</strong> (<em>Nchunk</em><em>,</em>) – </li>
+<li><strong>a</strong> (<em>cl complex array</em><em> [</em><em>N</em><em>]</em>) – Optional container for complex scattering
+amplitudes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>Diffraction amplitudes.  Will be a cl array</dt>
+<dd><p class="first last">if there are input cl arrays.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [N])</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.phase_factor_qrf_inplace">
-<code class="descname">phase_factor_qrf_inplace</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f</em>, <em>R=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_qrf_inplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_qrf_inplace" title="Permalink to this definition">¶</a></dt>
+<code class="descname">phase_factor_qrf_inplace</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f</em>, <em>R=None</em>, <em>q_is_qdev=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_qrf_inplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_qrf_inplace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -501,8 +535,8 @@ amplitudes.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><em>N</em><em>,</em><em>3</em><em>]</em>) – Scattering vectors (2pi/lambda).</li>
 <li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em>) – Atomic coordinates.</li>
-<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em>) – Complex scattering factors.</li>
 <li><strong>R</strong> (<em>numpy array</em><em> [</em><em>3</em><em>,</em><em>3</em><em>]</em>) – Rotation matrix acting on q vectors.</li>
+<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em>) – Complex scattering factors.</li>
 <li><strong>a</strong> (<em>cl complex array</em><em> [</em><em>N</em><em>]</em>) – Optional container for complex scattering
 amplitudes.</li>
 </ul>
@@ -691,7 +725,7 @@ to the lattice transform.</p>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.prime_cromermann_simulator">
-<code class="descname">prime_cromermann_simulator</code><span class="sig-paren">(</span><em>q_vecs</em>, <em>atomic_nums=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.prime_cromermann_simulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.prime_cromermann_simulator" title="Permalink to this definition">¶</a></dt>
+<code class="descname">prime_cromermann_simulator</code><span class="sig-paren">(</span><em>q_vecs</em>, <em>atomic_nums=None</em>, <em>incoherent=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.prime_cromermann_simulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.prime_cromermann_simulator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare special array data for cromermann simulation</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -701,6 +735,7 @@ to the lattice transform.</p>
 <li><strong>q_vecs</strong> (<em>np.ndarray</em>) – Npixels x 3 array of cartesian pixels qx, qy, qz</li>
 <li><strong>atomic_num</strong> (<em>np.ndarray</em>) – Natoms x 1 array of atomic numbers corresponding
 to the atoms in the target</li>
+<li><strong>bool</strong> (<em>incoherent</em>) – Whether to make form factors random</li>
 </ul>
 </td>
 </tr>
@@ -834,13 +869,23 @@ available for running simulations.</p>
 <dd></dd></dl>
 
 </div>
+<div class="section" id="module-bornagain.simulate.examples">
+<span id="bornagain-simulate-examples-module"></span><h2>bornagain.simulate.examples module<a class="headerlink" href="#module-bornagain.simulate.examples" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="bornagain.simulate.examples.lysozyme_molecule">
+<code class="descclassname">bornagain.simulate.examples.</code><code class="descname">lysozyme_molecule</code><span class="sig-paren">(</span><em>pads=None</em>, <em>wavelength=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#lysozyme_molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.lysozyme_molecule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
 <div class="section" id="module-bornagain.simulate.refdata">
 <span id="bornagain-simulate-refdata-module"></span><h2>bornagain.simulate.refdata module<a class="headerlink" href="#module-bornagain.simulate.refdata" title="Permalink to this headline">¶</a></h2>
 <p>refdata.py – reference data and tables used in computations</p>
 <dl class="function">
 <dt id="bornagain.simulate.refdata.get_cmann_form_factors">
 <code class="descclassname">bornagain.simulate.refdata.</code><code class="descname">get_cmann_form_factors</code><span class="sig-paren">(</span><em>cman</em>, <em>q</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/refdata.html#get_cmann_form_factors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.refdata.get_cmann_form_factors" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>cman is a dict of {atomic_number : array of cman parameters}</p>
+<p>q is either  a Nq x 3 , or a 1x3 vector of reciprocal space points, magnitudes respectively</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="bornagain.simulate.refdata.get_cromermann_parameters">
@@ -907,6 +952,85 @@ the <cite>cromermann</cite> array.</p>
 <dt id="bornagain.simulate.simutils.sphericalize">
 <code class="descclassname">bornagain.simulate.simutils.</code><code class="descname">sphericalize</code><span class="sig-paren">(</span><em>lattice</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/simutils.html#sphericalize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.simutils.sphericalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>attempt to sphericalize a 2D lattice point array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.simutils.area_beam">
+<code class="descclassname">bornagain.simulate.simutils.</code><code class="descname">area_beam</code><span class="sig-paren">(</span><em>lb</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/simutils.html#area_beam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.simutils.area_beam" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the cross sectional area of illuminated
+solvent assuming no crystal is present. if the beam side length
+is greater than 2r it reutrns the cross-sectional area of the jet.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lb</strong> (<em>the side length of the beam</em>) – </li>
+<li><strong>r</strong> (<em>the radius of the jet</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float value of the cross sectional area of illuminated jet</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.simutils.area_crys">
+<code class="descclassname">bornagain.simulate.simutils.</code><code class="descname">area_crys</code><span class="sig-paren">(</span><em>lc</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/simutils.html#area_crys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.simutils.area_crys" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function finds the exposed cross-sectional area of solvent
+from a cubic crystal and cylindrical jet. If the crystal is larger
+than the beam it returns zero. Its mainly used in the function
+“volume_solvent.”</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lc</strong> (<em>the side length of the crystal</em>) – </li>
+<li><strong>r</strong> (<em>the radius of the jet</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">a float value for the cross-sectional area of illuminated solvent</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.simutils.volume_solvent">
+<code class="descclassname">bornagain.simulate.simutils.</code><code class="descname">volume_solvent</code><span class="sig-paren">(</span><em>lb</em>, <em>lc</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/simutils.html#volume_solvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.simutils.volume_solvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the volume of illuminated solvent assuming
+a “square” beam, a cubic crystal and a cylindrical jet of solvent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lb</strong> (<em>The side length of the square beam</em>) – </li>
+<li><strong>lc</strong> (<em>The side length of the cubuc crystal</em>) – </li>
+<li><strong>r</strong> (<em>The radius of the solvent jet</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float value of the volume of illuminated solvent</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

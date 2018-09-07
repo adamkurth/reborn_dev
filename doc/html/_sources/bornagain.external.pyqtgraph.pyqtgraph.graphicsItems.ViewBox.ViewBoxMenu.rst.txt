@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.ViewBoxMenu module
+===============================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.ViewBoxMenu
+    :members:
+    :undoc-members:
+    :show-inheritance:

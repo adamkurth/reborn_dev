@@ -1,0 +1,22 @@
+bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene package
+============================================================
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.GraphicsScene
+   bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.exportDialog
+   bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.exportDialogTemplate_pyqt
+   bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.exportDialogTemplate_pyqt5
+   bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.exportDialogTemplate_pyside
+   bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.mouseEvents
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene
+    :members:
+    :undoc-members:
+    :show-inheritance:

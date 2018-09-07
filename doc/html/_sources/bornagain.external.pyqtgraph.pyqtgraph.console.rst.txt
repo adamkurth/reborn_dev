@@ -1,0 +1,21 @@
+bornagain.external.pyqtgraph.pyqtgraph.console package
+======================================================
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput
+   bornagain.external.pyqtgraph.pyqtgraph.console.Console
+   bornagain.external.pyqtgraph.pyqtgraph.console.template_pyqt
+   bornagain.external.pyqtgraph.pyqtgraph.console.template_pyqt5
+   bornagain.external.pyqtgraph.pyqtgraph.console.template_pyside
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.console
+    :members:
+    :undoc-members:
+    :show-inheritance:

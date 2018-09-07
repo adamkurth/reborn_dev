@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.target.placer &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bornagain.html">bornagain package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>bornagain.target.placer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bornagain.target.placer</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="k">import</span> <span class="n">distance</span><span class="p">,</span> <span class="n">cKDTree</span>
+
+
+<div class="viewcode-block" id="Place"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.placer.Place">[docs]</a><span class="k">class</span> <span class="nc">Place</span><span class="p">(</span><span class="n">cKDTree</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box_edge</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">,</span> <span class="n">max_try</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Place points into a box of edge length box_edge, and don&#39;t let any two points</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ==========</span>
+<span class="sd">        get with    t0 = time()in min_dist from one another.</span>
+
+<span class="sd">        box_edge, float</span>
+<span class="sd">            side length of the box to place spheres into</span>
+<span class="sd">        min_dist, float</span>
+<span class="sd">            minimum distance between two points in the box</span>
+<span class="sd">        max_try, int</span>
+<span class="sd">            number of times to try placing a new point such </span>
+<span class="sd">            that is does not overlap</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">()</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">box_edge</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">cKDTree</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span> <span class="o">=</span> <span class="n">min_dist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">box_edge</span> <span class="o">=</span> <span class="n">box_edge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_try</span> <span class="o">=</span> <span class="n">max_try</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">too_dense</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="Place.insert"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.placer.Place.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;adds a new point to the box&quot;&quot;&quot;</span>
+        <span class="n">new_pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_edge</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">n_try</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># @dermen - why is the inequality comparing with inf?</span>
+        <span class="n">is_overlapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">new_pt</span><span class="p">,</span> <span class="n">distance_upper_bound</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span><span class="p">)[</span>
+                             <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>  <span class="c1"># query for a nearest neighbor</span>
+        <span class="k">while</span> <span class="n">is_overlapping</span><span class="p">:</span>
+            <span class="n">new_pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_edge</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">is_overlapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">new_pt</span><span class="p">,</span> <span class="n">distance_upper_bound</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="n">n_try</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">n_try</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_try</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Getting too tight in here!&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">too_dense</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">new_pt</span><span class="p">))</span>  <span class="c1"># combine new pt and old pts</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Place</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># re-initialize the parent class with new data</span></div></div>
+
+
+<div class="viewcode-block" id="place_spheres"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.placer.place_spheres">[docs]</a><span class="k">def</span> <span class="nf">place_spheres</span><span class="p">(</span><span class="n">Vf</span><span class="p">,</span> <span class="n">sph_rad</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">box_edge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Nspheres</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vf, float</span>
+<span class="sd">        Fraction of sample volume occupied by spheres</span>
+<span class="sd">    Nspheres, int</span>
+<span class="sd">        how many spheres in the sample volume</span>
+<span class="sd">    tol, float</span>
+<span class="sd">        minimum distance the unit spheres can be to one another</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#   volume of a unit sphere</span>
+    <span class="n">sph_vol</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">sph_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
+
+    <span class="k">if</span> <span class="n">box_edge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1">#       then we let Nspheres be a free</span>
+        <span class="n">box_vol</span> <span class="o">=</span> <span class="n">box_edge</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="n">Nspheres</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">box_vol</span> <span class="o">*</span> <span class="n">Vf</span><span class="p">)</span> <span class="o">/</span> <span class="n">sph_vol</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1">#       then Nspheres determines the size of the box</span>
+        <span class="n">box_vol</span> <span class="o">=</span> <span class="n">sph_vol</span> <span class="o">*</span> <span class="n">Nspheres</span> <span class="o">/</span> <span class="n">Vf</span>
+        <span class="n">box_edge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">box_vol</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)</span>
+
+    <span class="n">min_dist</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sph_rad</span> <span class="o">+</span> <span class="n">tol</span>  <span class="c1"># diameter plus tol,</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Placing </span><span class="si">%d</span><span class="s2"> spheres into a box of side length </span><span class="si">%.4f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Nspheres</span><span class="p">,</span> <span class="n">box_edge</span><span class="p">))</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Place</span><span class="p">(</span><span class="n">box_edge</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">)</span>  <span class="c1"># init the Placer</span>
+    <span class="k">while</span> <span class="n">p</span><span class="o">.</span><span class="n">n</span> <span class="o">&lt;</span> <span class="n">Nspheres</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">insert</span><span class="p">()</span>  <span class="c1"># insert pt!</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">too_dense</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">breaking insert loop with </span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2"> spheres&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">Nspheres</span><span class="p">))</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">data</span></div>
+
+
+
+
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

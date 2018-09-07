@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.exporters.CSVExporter module
+===================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.exporters.CSVExporter
+    :members:
+    :undoc-members:
+    :show-inheritance:

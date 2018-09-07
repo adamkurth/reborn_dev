@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.widgets.CheckTable module
+================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.CheckTable
+    :members:
+    :undoc-members:
+    :show-inheritance:

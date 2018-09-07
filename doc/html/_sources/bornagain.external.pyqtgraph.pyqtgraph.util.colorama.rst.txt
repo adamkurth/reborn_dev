@@ -1,0 +1,18 @@
+bornagain.external.pyqtgraph.pyqtgraph.util.colorama package
+============================================================
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.util.colorama.win32
+   bornagain.external.pyqtgraph.pyqtgraph.util.colorama.winterm
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.util.colorama
+    :members:
+    :undoc-members:
+    :show-inheritance:

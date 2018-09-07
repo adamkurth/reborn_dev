@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GraphicsItem module
+========================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GraphicsItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

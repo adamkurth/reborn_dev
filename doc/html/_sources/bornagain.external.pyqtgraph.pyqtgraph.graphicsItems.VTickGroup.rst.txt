@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.VTickGroup module
+======================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.VTickGroup
+    :members:
+    :undoc-members:
+    :show-inheritance:

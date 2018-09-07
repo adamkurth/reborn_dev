@@ -1,0 +1,471 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../../../search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../../../../index.html"/>
+        <link rel="up" title="bornagain.external.pyqtgraph.pyqtgraph" href="../../pyqtgraph.html"/> 
+
+  
+  <script src="../../../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../../../index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../bornagain.html">bornagain package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../pyqtgraph.html">bornagain.external.pyqtgraph.pyqtgraph</a> &raquo;</li>
+        
+      <li>bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">..Qt</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">..Point</span> <span class="k">import</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="nn">.GraphicsObject</span> <span class="k">import</span> <span class="n">GraphicsObject</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">fn</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">weakref</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;InfiniteLine&#39;</span><span class="p">]</span>
+<div class="viewcode-block" id="InfiniteLine"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine">[docs]</a><span class="k">class</span> <span class="nc">InfiniteLine</span><span class="p">(</span><span class="n">GraphicsObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    **Bases:** :class:`GraphicsObject &lt;pyqtgraph.GraphicsObject&gt;`</span>
+<span class="sd">    </span>
+<span class="sd">    Displays a line of infinite length.</span>
+<span class="sd">    This line may be dragged to indicate a position in data coordinates.</span>
+<span class="sd">    </span>
+<span class="sd">    =============================== ===================================================</span>
+<span class="sd">    **Signals:**</span>
+<span class="sd">    sigDragged(self)</span>
+<span class="sd">    sigPositionChangeFinished(self)</span>
+<span class="sd">    sigPositionChanged(self)</span>
+<span class="sd">    =============================== ===================================================</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">sigDragged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">sigPositionChangeFinished</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">sigPositionChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        =============== ==================================================================</span>
+<span class="sd">        **Arguments:**</span>
+<span class="sd">        pos             Position of the line. This can be a QPointF or a single value for</span>
+<span class="sd">                        vertical/horizontal lines.</span>
+<span class="sd">        angle           Angle of line in degrees. 0 is horizontal, 90 is vertical.</span>
+<span class="sd">        pen             Pen to use when drawing line. Can be any arguments that are valid</span>
+<span class="sd">                        for :func:`mkPen &lt;pyqtgraph.mkPen&gt;`. Default pen is transparent</span>
+<span class="sd">                        yellow.</span>
+<span class="sd">        movable         If True, the line can be dragged to a new position by the user.</span>
+<span class="sd">        bounds          Optional [min, max] bounding values. Bounds are only valid if the</span>
+<span class="sd">                        line is vertical or horizontal.</span>
+<span class="sd">        =============== ==================================================================</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">GraphicsObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>              <span class="c1">## allowed value boundaries for orthogonal lines</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moving</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMovable</span><span class="p">(</span><span class="n">movable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseHovering</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAngle</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pen</span> <span class="o">=</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setHoverPen</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pen</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentPen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pen</span>
+      
+<div class="viewcode-block" id="InfiniteLine.setMovable"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.setMovable">[docs]</a>    <span class="k">def</span> <span class="nf">setMovable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set whether the line is movable by the user.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">movable</span> <span class="o">=</span> <span class="n">m</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptHoverEvents</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></div>
+      
+<div class="viewcode-block" id="InfiniteLine.setBounds"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.setBounds">[docs]</a>    <span class="k">def</span> <span class="nf">setBounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the (minimum, maximum) allowable values when dragging.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">())</span></div>
+        
+<div class="viewcode-block" id="InfiniteLine.setPen"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.setPen">[docs]</a>    <span class="k">def</span> <span class="nf">setPen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the pen for drawing the line. Allowable arguments are any that are valid </span>
+<span class="sd">        for :func:`mkPen &lt;pyqtgraph.mkPen&gt;`.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pen</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseHovering</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentPen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pen</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="InfiniteLine.setHoverPen"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.setHoverPen">[docs]</a>    <span class="k">def</span> <span class="nf">setHoverPen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the pen for drawing the line while the mouse hovers over it. </span>
+<span class="sd">        Allowable arguments are any that are valid </span>
+<span class="sd">        for :func:`mkPen &lt;pyqtgraph.mkPen&gt;`.</span>
+<span class="sd">        </span>
+<span class="sd">        If the line is not movable, then hovering is also disabled.</span>
+<span class="sd">        </span>
+<span class="sd">        Added in version 0.9.9.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hoverPen</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseHovering</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentPen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hoverPen</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="InfiniteLine.setAngle"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.setAngle">[docs]</a>    <span class="k">def</span> <span class="nf">setAngle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes angle argument in degrees.</span>
+<span class="sd">        0 is horizontal; 90 is vertical.</span>
+<span class="sd">        </span>
+<span class="sd">        Note that the use of value() and setValue() changes if the line is </span>
+<span class="sd">        not vertical or horizontal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="p">((</span><span class="n">angle</span><span class="o">+</span><span class="mi">45</span><span class="p">)</span> <span class="o">%</span> <span class="mi">180</span><span class="p">)</span> <span class="o">-</span> <span class="mi">45</span>   <span class="c1">##  -45 &lt;= angle &lt; 135</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetTransform</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="InfiniteLine.setPos"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.setPos">[docs]</a>    <span class="k">def</span> <span class="nf">setPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]:</span>
+            <span class="n">newPos</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span><span class="p">):</span>
+            <span class="n">newPos</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">()]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>
+                <span class="n">newPos</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">newPos</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">pos</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Must specify 2D coordinate for non-orthogonal lines.&quot;</span><span class="p">)</span>
+            
+        <span class="c1">## check bounds (only works for orthogonal lines)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>    
+                <span class="n">newPos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">newPos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">newPos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">newPos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">newPos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">newPos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">newPos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">newPos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxRange</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">!=</span> <span class="n">newPos</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">newPos</span>
+            <span class="n">GraphicsObject</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sigPositionChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InfiniteLine.getXPos"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.getXPos">[docs]</a>    <span class="k">def</span> <span class="nf">getXPos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+        
+<div class="viewcode-block" id="InfiniteLine.getYPos"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.getYPos">[docs]</a>    <span class="k">def</span> <span class="nf">getYPos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+        
+<div class="viewcode-block" id="InfiniteLine.getPos"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.getPos">[docs]</a>    <span class="k">def</span> <span class="nf">getPos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span></div>
+
+<div class="viewcode-block" id="InfiniteLine.value"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the value of the line. Will be a single number for horizontal and </span>
+<span class="sd">        vertical lines, and a list of [x,y] values for diagonal lines.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="o">%</span><span class="mi">180</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getYPos</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="o">%</span><span class="mi">180</span> <span class="o">==</span> <span class="mi">90</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getXPos</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPos</span><span class="p">()</span></div>
+                
+<div class="viewcode-block" id="InfiniteLine.setValue"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the position of the line. If line is horizontal or vertical, v can be </span>
+<span class="sd">        a single value. Otherwise, a 2D coordinate must be specified (list, tuple and </span>
+<span class="sd">        QPointF are all acceptable).&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
+
+    <span class="c1">## broken in 4.7</span>
+    <span class="c1">#def itemChange(self, change, val):</span>
+        <span class="c1">#if change in [self.ItemScenePositionHasChanged, self.ItemSceneHasChanged]:</span>
+            <span class="c1">#self.updateLine()</span>
+            <span class="c1">#print &quot;update&quot;, change</span>
+            <span class="c1">#print self.getBoundingParents()</span>
+        <span class="c1">#else:</span>
+            <span class="c1">#print &quot;ignore&quot;, change</span>
+        <span class="c1">#return GraphicsObject.itemChange(self, change, val)</span>
+                
+<div class="viewcode-block" id="InfiniteLine.boundingRect"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.boundingRect">[docs]</a>    <span class="k">def</span> <span class="nf">boundingRect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#br = UIGraphicsItem.boundingRect(self)</span>
+        <span class="n">br</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewRect</span><span class="p">()</span>
+        <span class="c1">## add a 4-pixel radius around the line for mouse interaction.</span>
+        
+        <span class="n">px</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixelLength</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">ortho</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1">## get pixel length orthogonal to the line</span>
+        <span class="k">if</span> <span class="n">px</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">px</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pen</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hoverPen</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">px</span>
+        <span class="n">br</span><span class="o">.</span><span class="n">setBottom</span><span class="p">(</span><span class="o">-</span><span class="n">w</span><span class="p">)</span>
+        <span class="n">br</span><span class="o">.</span><span class="n">setTop</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">br</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="InfiniteLine.paint"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">br</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentPen</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">drawLine</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">br</span><span class="o">.</span><span class="n">right</span><span class="p">(),</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="n">br</span><span class="o">.</span><span class="n">left</span><span class="p">(),</span> <span class="mi">0</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="InfiniteLine.dataBounds"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.dataBounds">[docs]</a>    <span class="k">def</span> <span class="nf">dataBounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">orthoRange</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>   <span class="c1">## x axis should never be auto-scaled</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InfiniteLine.mouseDragEvent"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.mouseDragEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">movable</span> <span class="ow">and</span> <span class="n">ev</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">isStart</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moving</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cursorOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapToParent</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">startPosition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">moving</span><span class="p">:</span>
+                <span class="k">return</span>
+                
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cursorOffset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapToParent</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">pos</span><span class="p">()))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sigDragged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">isFinish</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moving</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sigPositionChangeFinished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="InfiniteLine.mouseClickEvent"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.mouseClickEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">moving</span> <span class="ow">and</span> <span class="n">ev</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startPosition</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moving</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sigDragged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sigPositionChangeFinished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InfiniteLine.hoverEvent"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.hoverEvent">[docs]</a>    <span class="k">def</span> <span class="nf">hoverEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ev</span><span class="o">.</span><span class="n">isExit</span><span class="p">())</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">movable</span> <span class="ow">and</span> <span class="n">ev</span><span class="o">.</span><span class="n">acceptDrags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMouseHover</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMouseHover</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InfiniteLine.setMouseHover"><a class="viewcode-back" href="../../../../../../bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.html#bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.InfiniteLine.InfiniteLine.setMouseHover">[docs]</a>    <span class="k">def</span> <span class="nf">setMouseHover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hover</span><span class="p">):</span>
+        <span class="c1">## Inform the item that the mouse is (not) hovering over it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouseHovering</span> <span class="o">==</span> <span class="n">hover</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseHovering</span> <span class="o">=</span> <span class="n">hover</span>
+        <span class="k">if</span> <span class="n">hover</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentPen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hoverPen</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentPen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pen</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

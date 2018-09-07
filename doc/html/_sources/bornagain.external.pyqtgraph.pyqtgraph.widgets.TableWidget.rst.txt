@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.widgets.TableWidget module
+=================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.TableWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:

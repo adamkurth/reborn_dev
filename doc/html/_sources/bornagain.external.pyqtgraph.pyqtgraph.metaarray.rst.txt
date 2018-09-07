@@ -1,0 +1,17 @@
+bornagain.external.pyqtgraph.pyqtgraph.metaarray package
+========================================================
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.metaarray.MetaArray
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.metaarray
+    :members:
+    :undoc-members:
+    :show-inheritance:

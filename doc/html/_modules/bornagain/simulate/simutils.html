@@ -1,0 +1,375 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.simulate.simutils &mdash; bornagain 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bornagain.html">bornagain package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>bornagain.simulate.simutils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bornagain.simulate.simutils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># import refdata</span>
+
+
+<span class="c1"># def amplitudes_with_cmans(q, r, Z):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     compute scattering amplitudes</span>
+<span class="c1">#</span>
+<span class="c1">#     q: 2D np.array of q vectors</span>
+<span class="c1">#     r: 2D np.array of atom coors</span>
+<span class="c1">#     Z: 1D np.array of atomic numbers corresponding to r</span>
+<span class="c1">#</span>
+<span class="c1">#     FIXME: Derek - is this used anywhere?</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#     cman = refdata.get_cromermann_parameters(Z)</span>
+<span class="c1">#     form_facts = refdata.get_cmann_form_factors(cman, q)</span>
+<span class="c1">#     ff_mat = np.array([form_facts[z] for z in Z]).T.astype(np.float32)</span>
+<span class="c1">#     amps = (np.dot(q, r.T)).astype(np.float32)</span>
+<span class="c1">#     amps = np.exp(1j * amps).astype(np.complex64)</span>
+<span class="c1">#     amps = np.sum(amps * ff_mat, 1).astype(np.complex64)</span>
+<span class="c1">#     return amps</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># def amplitudes(q, r):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     compute scattering amplitudes without form factors</span>
+<span class="c1">#</span>
+<span class="c1">#     q: 2D np.array of q vectors</span>
+<span class="c1">#     r: 2D np.array of atom coors</span>
+<span class="c1">#</span>
+<span class="c1">#     FIXME: Derek - is this used anywhere?</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     amps = np.dot(q, r.T)</span>
+<span class="c1">#     amps = np.exp(1j * amps)</span>
+<span class="c1">#     amps = np.sum(amps, 1)</span>
+<span class="c1">#     return amps</span>
+
+
+<div class="viewcode-block" id="sphericalize"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.simutils.sphericalize">[docs]</a><span class="k">def</span> <span class="nf">sphericalize</span><span class="p">(</span><span class="n">lattice</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;attempt to sphericalize a 2D lattice point array&quot;&quot;&quot;</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">rads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">lattice</span> <span class="o">-</span> <span class="n">center</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">max_rad</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lattice</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="k">return</span> <span class="n">lattice</span><span class="p">[</span><span class="n">rads</span> <span class="o">&lt;</span> <span class="n">max_rad</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="area_beam"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.simutils.area_beam">[docs]</a><span class="k">def</span> <span class="nf">area_beam</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function returns the cross sectional area of illuminated</span>
+<span class="sd">    solvent assuming no crystal is present. if the beam side length</span>
+<span class="sd">    is greater than 2r it reutrns the cross-sectional area of the jet.</span>
+
+<span class="sd">    arguments</span>
+<span class="sd">    ------------</span>
+<span class="sd">    lb: the side length of the beam</span>
+<span class="sd">    r:  the radius of the jet</span>
+
+<span class="sd">    returns</span>
+<span class="sd">    ------------</span>
+<span class="sd">    float value of the cross sectional area of illuminated jet</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">lb</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="o">*</span><span class="n">r</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span>
+    <span class="k">elif</span> <span class="n">lb</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">lb</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="o">*</span><span class="n">r</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span> <span class="o">-</span> <span class="n">lb</span><span class="o">*</span><span class="n">lb</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">lb</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">r</span><span class="p">))</span>
+        <span class="n">sliver</span> <span class="o">=</span> <span class="p">(</span><span class="n">theta</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">lb</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">sliver</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;beam side length must be greater than zero.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="area_crys"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.simutils.area_crys">[docs]</a><span class="k">def</span> <span class="nf">area_crys</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function finds the exposed cross-sectional area of solvent</span>
+<span class="sd">    from a cubic crystal and cylindrical jet. If the crystal is larger</span>
+<span class="sd">    than the beam it returns zero. Its mainly used in the function</span>
+<span class="sd">    &quot;volume_solvent.&quot;</span>
+
+<span class="sd">    arguments</span>
+<span class="sd">    -------------</span>
+<span class="sd">    lc: the side length of the crystal</span>
+<span class="sd">    r:  the radius of the jet</span>
+
+<span class="sd">    returns</span>
+<span class="sd">    -------------</span>
+<span class="sd">    a float value for the cross-sectional area of illuminated solvent</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">lc</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="o">*</span><span class="n">r</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">lc</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">r</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span> <span class="o">-</span> <span class="n">lc</span><span class="o">*</span><span class="n">lc</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">lc</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">r</span><span class="p">))</span>
+        <span class="n">sliver</span> <span class="o">=</span> <span class="p">(</span><span class="n">theta</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">lc</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">4</span><span class="o">*</span><span class="n">sliver</span>
+    <span class="k">elif</span> <span class="n">lc</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">lc</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">r</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span> <span class="o">-</span> <span class="n">lc</span><span class="o">*</span><span class="n">lc</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;crystal side length must be greater than zero.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="volume_solvent"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.simutils.volume_solvent">[docs]</a><span class="k">def</span> <span class="nf">volume_solvent</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">lc</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function returns the volume of illuminated solvent assuming</span>
+<span class="sd">    a &quot;square&quot; beam, a cubic crystal and a cylindrical jet of solvent.</span>
+
+<span class="sd">    arguments</span>
+<span class="sd">    --------------</span>
+<span class="sd">    lb: The side length of the square beam</span>
+<span class="sd">    lc: The side length of the cubuc crystal</span>
+<span class="sd">    r:  The radius of the solvent jet</span>
+
+<span class="sd">    returns</span>
+<span class="sd">    --------------</span>
+<span class="sd">    float value of the volume of illuminated solvent</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">lb</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="o">*</span><span class="n">r</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lc</span> <span class="o">&gt;=</span> <span class="n">lb</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">lc</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="o">*</span><span class="n">r</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="p">(</span><span class="n">lb</span><span class="o">-</span><span class="n">lc</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">lc</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">r</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="p">(</span><span class="n">lb</span><span class="o">-</span><span class="n">lc</span><span class="p">)</span> <span class="o">+</span> <span class="n">lc</span><span class="o">*</span><span class="p">(</span><span class="n">area_crys</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">r</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">lc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="p">(</span><span class="n">lb</span><span class="p">)</span> <span class="o">-</span> <span class="n">lc</span><span class="o">**</span><span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Crystal side length must be greater than zero&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">lb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lc</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="o">*</span><span class="n">r</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">lc</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">r</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">lc</span> <span class="o">&gt;=</span> <span class="n">lb</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span> <span class="o">-</span> <span class="n">lc</span><span class="o">*</span><span class="n">lc</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">lb</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">area_crys</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">lb</span><span class="o">/</span><span class="mi">2</span>
+                <span class="k">elif</span> <span class="n">lb</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">area_beam</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">lb</span><span class="o">*</span><span class="n">lc</span><span class="p">))</span> <span class="o">*</span> <span class="n">lb</span>
+            <span class="k">if</span> <span class="n">lb</span> <span class="o">&gt;</span> <span class="n">lc</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">area_crys</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">+</span> <span class="n">area_beam</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">lb</span>
+        <span class="k">elif</span> <span class="n">lc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">lc</span> <span class="o">&gt;=</span> <span class="n">lb</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">area_beam</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">-</span> <span class="n">lb</span><span class="o">*</span><span class="n">lc</span><span class="p">)</span> <span class="o">*</span> <span class="n">lb</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">area_beam</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">lb</span> <span class="o">-</span> <span class="n">lc</span><span class="o">**</span><span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Crystal side length must be greater than zero.&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

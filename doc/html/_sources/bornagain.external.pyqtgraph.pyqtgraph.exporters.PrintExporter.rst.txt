@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.exporters.PrintExporter module
+=====================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.exporters.PrintExporter
+    :members:
+    :undoc-members:
+    :show-inheritance:

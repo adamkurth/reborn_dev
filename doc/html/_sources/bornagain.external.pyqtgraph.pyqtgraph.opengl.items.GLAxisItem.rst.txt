@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLAxisItem module
+=====================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLAxisItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

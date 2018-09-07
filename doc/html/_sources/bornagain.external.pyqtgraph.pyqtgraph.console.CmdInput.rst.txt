@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput module
+==============================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.console.CmdInput
+    :members:
+    :undoc-members:
+    :show-inheritance:

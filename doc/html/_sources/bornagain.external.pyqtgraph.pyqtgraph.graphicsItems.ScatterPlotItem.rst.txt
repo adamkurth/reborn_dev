@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ScatterPlotItem module
+===========================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ScatterPlotItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

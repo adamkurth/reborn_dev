@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLBoxItem module
+====================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLBoxItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

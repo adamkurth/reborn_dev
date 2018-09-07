@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLVolumeItem module
+=======================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLVolumeItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

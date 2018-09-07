@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartCtrlTemplate\_pyside module
+=====================================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartCtrlTemplate_pyside
+    :members:
+    :undoc-members:
+    :show-inheritance:

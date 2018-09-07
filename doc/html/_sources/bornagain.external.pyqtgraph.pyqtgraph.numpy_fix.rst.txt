@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.numpy\_fix module
+========================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.numpy_fix
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.dockarea.DockArea module
+===============================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.dockarea.DockArea
+    :members:
+    :undoc-members:
+    :show-inheritance:

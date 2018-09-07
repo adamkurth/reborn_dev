@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.axisCtrlTemplate\_pyqt module
+==========================================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ViewBox.axisCtrlTemplate_pyqt
+    :members:
+    :undoc-members:
+    :show-inheritance:

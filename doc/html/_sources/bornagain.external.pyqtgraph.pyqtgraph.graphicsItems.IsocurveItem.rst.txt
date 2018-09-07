@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.IsocurveItem module
+========================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.IsocurveItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

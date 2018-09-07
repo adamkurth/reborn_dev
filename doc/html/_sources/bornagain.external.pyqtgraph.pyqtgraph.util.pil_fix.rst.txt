@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.util.pil\_fix module
+===========================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.util.pil_fix
+    :members:
+    :undoc-members:
+    :show-inheritance:

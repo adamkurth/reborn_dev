@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ErrorBarItem module
+========================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.ErrorBarItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

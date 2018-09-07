@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.LabelItem module
+=====================================================================
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.LabelItem
+    :members:
+    :undoc-members:
+    :show-inheritance:

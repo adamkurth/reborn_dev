@@ -1,0 +1,25 @@
+bornagain.external.pyqtgraph.pyqtgraph.canvas package
+=====================================================
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.external.pyqtgraph.pyqtgraph.canvas.Canvas
+   bornagain.external.pyqtgraph.pyqtgraph.canvas.CanvasItem
+   bornagain.external.pyqtgraph.pyqtgraph.canvas.CanvasManager
+   bornagain.external.pyqtgraph.pyqtgraph.canvas.CanvasTemplate_pyqt
+   bornagain.external.pyqtgraph.pyqtgraph.canvas.CanvasTemplate_pyqt5
+   bornagain.external.pyqtgraph.pyqtgraph.canvas.CanvasTemplate_pyside
+   bornagain.external.pyqtgraph.pyqtgraph.canvas.TransformGuiTemplate_pyqt
+   bornagain.external.pyqtgraph.pyqtgraph.canvas.TransformGuiTemplate_pyqt5
+   bornagain.external.pyqtgraph.pyqtgraph.canvas.TransformGuiTemplate_pyside
+
+Module contents
+---------------
+
+.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.canvas
+    :members:
+    :undoc-members:
+    :show-inheritance:
