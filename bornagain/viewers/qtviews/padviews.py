@@ -1,49 +1,10 @@
-#!/usr/bin/env python
-
-import sys
 import numpy as np
-# import pyqtgraph as pg
 from PyQt5 import uic
 
-sys.path.append('..')
-import bornagain.external.pyqtgraph as pg
-from bornagain import detector
-from bornagain.simulate.clcore import ClCore
-from bornagain.simulate import atoms
-from bornagain.target.crystal import structure
-from bornagain.units import hc, keV
+import pyqtgraph as pg
 import bornagain.external.pyqtgraph as bpg
-from bornagain.external import crystfel
 
-
-photon_energy = 6/keV
-wavelength = hc/photon_energy
-pdb_file = '../examples/data/pdb/2LYZ.pdb'
-geom_file = '../examples/data/crystfel/geom/pnccd_front.geom'
-
-sim = ClCore(group_size=32, double_precision=False)
-
-pads = crystfel.geometry_file_to_pad_geometry_list(geom_file)
-
-cryst = structure(pdb_file)
-r = cryst.r
-f = atoms.get_scattering_factors(cryst.Z, photon_energy=photon_energy)
-q = [pad.q_vecs(beam_vec=[0, 0, 1], wavelength=wavelength) for pad in pads]
-q = np.ravel(q)
-
-A = sim.phase_factor_qrf(q, r, f)
-I = np.abs(A)**2
-
-data_list = detector.split_pad_data(pads, I)
-
-im = data_list[0]
-mx = np.max(im)
-for i in np.arange(0, 9):
-    im[2**i, :] = mx
-    im[:, 2**i] = mx
-
-
-class PADGui(object):
+class PADView(object):
 
     pad_geometry = []
     data = []
@@ -159,8 +120,3 @@ class PADGui(object):
     def start(self):
 
         self.app.exec_()
-
-
-padgui = PADGui(data=data_list, pad_geometry=pads)
-padgui.add_rings([100])
-padgui.start()

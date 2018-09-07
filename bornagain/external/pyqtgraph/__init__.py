@@ -12,7 +12,10 @@ keep_open    Keeps a window open (e.g. when window vanishes upon exiting script)
 Utilities for operating on the colormap of multiple images at once
 MultiHistogramLUTWidget
 MultiHistogramLUTItem
+
+Here are the bugfixes:
+ImageItem - got rid of the flicker due to undersampling of the image when zoomed out.
 """
 
 from .extras import *
-from .pyqtgraph_core import *
+from .ImageItem import *
