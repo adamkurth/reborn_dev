@@ -1275,11 +1275,13 @@ class PanelList(object):
         self.append(p)
 
 
-class SimpleDetector(Panel):
+
+class SimplePAD(PADGeometry):
     """
-    A simple wrapper for folks who wish to use use the Panels
-    class without learning the intricacies. This will return a detector object representing a
-    square detector
+    A simple child class to PADGeometry with some higher level functionality
+    
+    This will return a detector object representing a
+    square pixel array detector
     
     .. note:: 
         - One can readout pixel intensities using :func:`readout`
@@ -1299,36 +1301,59 @@ class SimpleDetector(Panel):
         - wavelen (float)
             the wavelength of the photons (in Angstroms)
 
+        - center (tuple)
+            the fast-scan center coordinate and the slow-scan center coordinate
+
     """
 
-    def __init__(self, n_pixels=1000, pixsize=0.00005, detdist=0.05, wavelen=1., *args, **kwargs):
+    def __init__(self, n_pixels=1000, pixsize=0.00005, detdist=0.05, wavelen=1., center=None,
+                    *args, **kwargs):
 
-        Panel.__init__(self, *args, **kwargs)
+        PADGeometry.__init__(self, *args, **kwargs)
+
 
         self.detector_distance = detdist
         self.wavelength = wavelen
         self.si_energy = units.hc / (wavelen * 1e-10)
 
+        self.simple_setup(n_pixels=n_pixels, 
+                pixel_size=pixsize, 
+                distance=detdist)
+
         self.fig = None
 
-        #       make a single panel detector:
-        self.simple_setup(
-            n_pixels,
-            n_pixels,
-            pixsize,
-            detdist,
-            wavelen, )
+        # shape of the 2D det panel (2D image)
+        self.img_sh = self.shape() 
+        
+        if center is not None:
+            assert( len( center)==2)
+            assert( center[0]  < pad.n_fs )
+            assert( center[1] <  pad.n_ss)
+            self.center = center
+        else:
+            self.center = map(lambda x: x / 2., self.img_sh)
 
-        #       shape of the 2D det panel (2D image)
-        self.img_sh = (self.nS, self.nF)
-        self.center = map(lambda x: x / 2., self.img_sh)
+        self.SOLID_ANG = self.solid_angles() 
 
-        self.SOLID_ANG = np.cos(np.arcsin(self.Qmag * self.wavelength / 4 / np.pi)) ** 3
+        self._make_Qmag()
 
+        # useful functions fr converting between pixel radii and momentum transfer
         self.rad2q = lambda rad: 4 * np.pi * np.sin(.5 * np.arctan(rad * pixsize / detdist)) / wavelen
         self.q2rad = lambda q: np.tan(np.arcsin(q * wavelen / 4 / np.pi) * 2) * detdist / pixsize
 
         self.intens = None
+
+    
+    def _make_Qmag(self):
+        """
+        Makes the momentum transfer of each Q
+        """
+        beam_vector = np.array( [ 0,0,1 ] )
+        
+        self.Q_vectors = self.q_vecs( 
+                    beam_vec=np.array([0,0,1]), 
+                    wavelength=self.wavelength)
+        self.Qmag = np.sqrt( np.sum( self.Q_vectors**2 , axis=1 ))
 
     def readout(self, amplitudes):
         """
@@ -1416,8 +1441,8 @@ class SimpleDetector(Panel):
             fig = self.fig
         fig.clear()
         ax = plt.gca()
-        qx_min, qy_min = self.Q[:, :2].min(0)
-        qx_max, qy_max = self.Q[:, :2].max(0)
+        qx_min, qy_min = self.Q_vectors[:, :2].min(0)
+        qx_max, qy_max = self.Q_vectors[:, :2].max(0)
         extent = (qx_min, qx_max, qy_min, qy_max)
         if use_log:
             ax_img = ax.imshow(
