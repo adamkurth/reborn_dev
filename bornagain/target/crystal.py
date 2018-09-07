@@ -46,6 +46,10 @@ class structure(object):
         if pdbFilePath is not None:
             self.load_pdb(pdbFilePath)
 
+    @property
+    def n_molecules(self):
+        return self.nMolecules
+
     def load_pdb(self, pdbFilePath):
         r"""
 

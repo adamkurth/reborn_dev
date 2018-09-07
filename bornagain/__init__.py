@@ -6,5 +6,5 @@ from . import source
 from . import units
 from . import utils
 
-#from .detector import SimpleDetector
+from .detector import SimplePAD
 from .target.crystal import Molecule

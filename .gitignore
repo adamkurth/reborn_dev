@@ -16,3 +16,5 @@ temp
 .adxv*
 .pytest_cache
 __pycache__
+doc/html/bornagain.external.pyqtgraph.pyqtgraph*
+doc/source/bornagain.external.pyqtgraph.pyqtgraph*
