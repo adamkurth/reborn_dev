@@ -70,24 +70,72 @@
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuTest">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>Test</string>
+     <string>File</string>
     </property>
+    <widget class="QMenu" name="menuSimulate">
+     <property name="title">
+      <string>Simulate</string>
+     </property>
+     <widget class="QMenu" name="menuLysozyme">
+      <property name="title">
+       <string>Lysozyme molecule</string>
+      </property>
+      <addaction name="actionCSPAD"/>
+      <addaction name="actionPnCCD"/>
+     </widget>
+     <addaction name="menuLysozyme"/>
+    </widget>
     <addaction name="actionTest"/>
-    <addaction name="actionTest1"/>
+    <addaction name="menuSimulate"/>
    </widget>
-   <addaction name="menuTest"/>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuRings">
+     <property name="title">
+      <string>Rings</string>
+     </property>
+     <addaction name="actionShow"/>
+     <addaction name="actionFix"/>
+     <addaction name="actionFix_radius"/>
+    </widget>
+    <addaction name="menuRings"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionTest">
    <property name="text">
-    <string>test1</string>
+    <string>Open</string>
    </property>
   </action>
-  <action name="actionTest1">
+  <action name="actionShow">
    <property name="text">
-    <string>test1</string>
+    <string>Show</string>
+   </property>
+  </action>
+  <action name="actionFix">
+   <property name="text">
+    <string>Fix center</string>
+   </property>
+  </action>
+  <action name="actionFix_radius">
+   <property name="text">
+    <string>Fix radius</string>
+   </property>
+  </action>
+  <action name="actionCSPAD">
+   <property name="text">
+    <string>CSPAD</string>
+   </property>
+  </action>
+  <action name="actionPnCCD">
+   <property name="text">
+    <string>pnCCD</string>
    </property>
   </action>
  </widget>
