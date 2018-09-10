@@ -1,3 +1,7 @@
+r"""
+This is the documentation for the bornagain package.
+"""
+
 from . import detector
 from . import scatter
 # from . import simulate
@@ -14,16 +18,43 @@ CONFIG_OPTIONS = {'warn_depreciated': True,
                   'force_depreciated': False}
 
 
-def set_global(opt, value):
-    global CONFIG_OPTIONS
-    if opt not in CONFIG_OPTIONS:
-        raise KeyError('Unknown configuration option "%s"' % opt)
-    if opt == 'warn_depreciated' and value not in (True, False):
-        raise ValueError('warn_depreciated must be either True or False')
-    CONFIG_OPTIONS[opt] = value
+def set_global(option, value):
 
+    r"""
 
-def get_global(opt):
-    """Return the value of a single global configuration option.
+    Set global configurations.
+
+    Args:
+        option: One of the following:
+    ==================================  ================================================================
+    Option                              Effect
+    ==================================  ================================================================
+    'warn_depreciated' (True/False):    Print warnings when depreciated classes etc. are used.
+    'force_depreciated' (True/False):   Like 'warn_depreciated' but raise RunTimeError instead of warn.
+    ==================================  ================================================================
+        value: The value that you wish to associate with one of the above options.
+
+    Returns: Nothing
     """
-    return CONFIG_OPTIONS[opt]
+
+    global CONFIG_OPTIONS
+    if option not in CONFIG_OPTIONS:
+        raise KeyError('Unknown configuration option "%s"' % option)
+    if option == 'warn_depreciated' and value not in (True, False):
+        raise ValueError('warn_depreciated must be either True or False')
+    CONFIG_OPTIONS[option] = value
+
+
+def get_global(option):
+
+    r"""
+
+    Get global configurations.
+
+    Args:
+        option: See :func:`set_global` for the relevant options.
+
+    Returns: The value associated with the option.
+    """
+
+    return CONFIG_OPTIONS[option]
