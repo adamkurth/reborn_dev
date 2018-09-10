@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd ../doc
-./update-documentation $*
+./update-documentation.sh $*
