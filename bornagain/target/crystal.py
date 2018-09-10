@@ -51,6 +51,7 @@ class structure(object):
         return self.nMolecules
 
     def load_pdb(self, pdbFilePath):
+
         r"""
 
         Populate the class with all the info from a PDB file.
@@ -62,6 +63,7 @@ class structure(object):
         parse_pdb(pdbFilePath, self)
 
     def set_cell(self, a, b, c, alpha, beta, gamma):
+
         r"""
 
         Set the unit cell lattice.
@@ -216,7 +218,8 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
 
 
 def get_symmetry_operators_from_space_group(hm_symbol):
-    """
+
+    r"""
     For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
     translation and rotation operators.  These operators are in the crystal basis.
     As of now, this is a rather unreliable function.  My brain hurts badly after attempting
@@ -297,7 +300,9 @@ class Atoms:
             print("Cannot save to xyz because element strings were not provided...")
 
     def set_elem(self, elem):
-        """sets list of elements names for use in xyz format files"""
+
+        r"""sets list of elements names for use in xyz format files"""
+
         elem = np.array(elem, dtype='S16')
         assert(self.elem.shape[0] == self.x.shape[0])
         self.elem = elem
@@ -327,7 +332,7 @@ class Molecule(structure):
         return x, y, z
 
     def mat_mult_many(self, M, V):
-        """ helper for applying matrix multiplications on many vectors"""
+        r""" helper for applying matrix multiplications on many vectors"""
         return np.einsum('ij,kj->ki', M, V)
 
     def shift(self, monomer, na, nb, nc):
@@ -347,7 +352,7 @@ class Molecule(structure):
 
 
     def transform(self, x, y, z):
-        """x,y,z are fractional coordinates"""
+        r"""x,y,z are fractional coordinates"""
         xyz = np.zeros((x.shape[0], 3))
         xyz[:, 0] = x
         xyz[:, 1] = y
@@ -365,17 +370,32 @@ class Molecule(structure):
 
 
 class Lattice:
+
     def __init__(self, a=281., b=281., c=165.2,
                  alpha=90., beta=90., gamma=120.):
+        r"""
+        Needs explanation from Derek.
+
+        Also, the input are in units that break the bornagain convention, which will
+        be changed eventually.
+        TODO: fix the units
+
+        Args:
+            a: Lattice constant in angstroms
+            b: Lattice constant in angstroms
+            c: Lattice constatn in angstroms
+            alpha: b-c angle in degrees
+            beta: a-c angle in degrees
+            gamma: b-c angle in degrees
         """
-        a,b,c are in Angstroms
-        alpha, beta, gamma are in degrees
-        default is for PS1
-        """
-#       unit cell edges
+
+        # unit cell edges
         alpha = alpha * np.pi / 180.
         beta = beta * np.pi / 180.
         gamma = gamma * np.pi / 180.
+
+        # The definitions below are also found in the crystal structure class
+        # TODO: merge this with the crystal.structure class (after we re-name to crystal.Structure - PEP8)
 
         cos = np.cos
         sin = np.sin
@@ -391,18 +411,15 @@ class Lattice:
         self.Oinv = np.linalg.inv(self.O)
 
     def assemble(self, n_unit=10, spherical=False):
-        """
-        Assembles the lattice vecors (unit cell origins) based
-        on the lattice constants provided.
-        n_unit, int or 3-tuple of ints
-            Number of unit cells along each crystal axis(default is square)
-            If n_unit is a 3-tuple (n_unit_a, n_unit_b, n_unit_c) then the 
-            crystal can be rectangular
-        spherical, bool
-            Whether to apply a spherical boundary to the crystal after it
-            is created.
+
+        r"""
+        Creates a finite lattice (self.vecs)
+        Args:
+            n_unit (int or 3-tuple): Number of unit cells along each crystal axis
+            spherical (bool): If true, apply a spherical boundary to the crystal.
 
         """
+
         #       lattice coordinates
         try:
             n_unit_a, n_unit_b, n_unit_c = n_unit
