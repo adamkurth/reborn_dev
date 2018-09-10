@@ -10,12 +10,40 @@ from numpy import sin, cos
 # not sure where to seed
 np.random.seed()
 
-def vec_check(vec, hardcheck=False, dimension=3):
+def vec_check2(vec, *args, **kwargs):
+
+    r"""
+    Same as vec_check(vec, dimension=2).  See :func:`vec_check <bornagain.utils.vec_check>`
     """
-    Check that a vector meets our assumption of an Nx3 numpy array.  This is
-    helpful, for example, when we want to ensure that dot products and broadcasting
-    will work as expected. We could of course add an argument for vectors of
-    dimension other than 3, but for now 3-vectors are all that we work with.
+
+    return vec_check(vec, dimension=2, *args, **kwargs)
+
+def vec_check3(vec, *args, **kwargs):
+
+    r"""
+    Same as vec_check(vec, dimension=2)
+    """
+
+    return vec_check(vec, dimension=3, *args, **kwargs)
+
+def vec_check(vec, hardcheck=False, dimension=3):
+
+    r"""
+    Check that a vector meets our assumptions, and correct it if it doesn't.
+
+    Our assumptions are that:
+        1) The array shape is Nxd, where d is the dimension of the vector, and
+           N is the number of vectors.  This is important when applying rotation
+           operations to many vectors.
+        2) The array is c-contiguous.  This is important for passing arrays into
+           external c functions or to opencl kernels.
+
+    The above also helps when we want to ensure that dot products and broadcasting
+    will work as expected.
+
+    Note that we have chosen to keep vector components close in memory.  I.e.,
+    the x, y, and z components of a given vector are contiguous.  This will ensure
+    that rotations and broadcasting are as fast as can be.
 
     Input:
 
@@ -25,6 +53,8 @@ def vec_check(vec, hardcheck=False, dimension=3):
     hardcheck: If True, then this function will raise a ValueError if the check
     fails.  If False, then this function attempts to fix the problem
     with the input.
+
+    dimension: The expected dimension of the vectors
 
     ==== Output:
     vec: The original input if it satisfies our conditions.  Otherwise
@@ -45,9 +75,9 @@ def vec_check(vec, hardcheck=False, dimension=3):
     if len(vec.shape) == 1:
         vec = vec[np.newaxis]
     if len(vec.shape) != 2:
-        raise ValueError('Vectors must be Nx3 numpy ndarrays')
-    if vec.shape[1] != 3:
-        if vec.shape[0] != 3:
+        raise ValueError('Vectors must be Nx%d numpy ndarrays' % (dimension))
+    if vec.shape[1] != dimension:
+        if vec.shape[0] != dimension:
             raise ValueError('Vectors must be Nx3 numpy ndarrays')
         else:
             vec = vec.T
@@ -59,8 +89,10 @@ def vec_check(vec, hardcheck=False, dimension=3):
 
 def vec_norm(V):
 
-    v = V
-    if v.ndim != 2:
+
+
+    V = vec_check(V)
+    if V.ndim != 2:
         raise ValueError("V must have one or two dimensions.")
     n = np.sqrt(np.sum(V * V, axis=1))
     return (V.T / n).T
@@ -68,6 +100,7 @@ def vec_norm(V):
 
 def vec_mag(V):
 
+    V = vec_check(V)
     if V.ndim != 2:
         raise ValueError("V must have one or two dimensions.")
     return np.sqrt(np.sum(V * V, axis=1))
