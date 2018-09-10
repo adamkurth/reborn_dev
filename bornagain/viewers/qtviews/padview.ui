@@ -144,6 +144,9 @@
    <property name="text">
     <string>Grid</string>
    </property>
+   <property name="toolTip">
+    <string>Overlay grid</string>
+   </property>
   </action>
   <action name="actionRings">
    <property name="text">

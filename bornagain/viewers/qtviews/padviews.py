@@ -12,11 +12,13 @@ import bornagain as ba
 
 padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
 
+
 class PADView(object):
 
-
     r"""
-    This is supposed to be an easy way to view PAD data, provided a list of PADGeometry instances.
+    This is supposed to be an easy way to view PAD data, particularly if you have multiple
+    detector panels.  You can set it up by providing a list of :class:`PADGeometry` instances
+    along with a list of data arrays.
 
     It is a work in progress...
     """
@@ -267,8 +269,6 @@ class PADView(object):
 
     def edit_ring_radii(self):
 
-        # cur_rad = ""
-
         text, ok = QInputDialog.getText(self.main_window, "Enter ring radii (comma separated)", "Ring radii", QLineEdit.Normal, "100,200")
         if ok:
             if text == '':
@@ -318,7 +318,6 @@ class PADView(object):
 
         for i in range(0, len(self.rings)):
             self.viewbox.removeItem(self.rings[i])
-
 
     def add_grid(self):
 
