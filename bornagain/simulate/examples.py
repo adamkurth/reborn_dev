@@ -10,7 +10,15 @@ from bornagain.simulate.clcore import ClCore
 
 lysozyme_pdb_file = pkg_resources.resource_filename('bornagain.simulate', 'data/pdb/2LYZ.pdb')
 pnccd_geom_file = pkg_resources.resource_filename('bornagain.simulate', 'data/geom/pnccd_front.geom')
+cspad_geom_file = pkg_resources.resource_filename('bornagain.simulate', 'data/geom/cspad.geom')
 
+def pnccd_pads():
+
+    return crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
+
+def cspad_pads():
+
+    return crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
 def lysozyme_molecule(pads=None, wavelength=None):
 
