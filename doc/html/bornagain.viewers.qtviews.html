@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bornagain.viewers.qtviews package &mdash; bornagain 0.0.1 documentation</title>
+  <title>bornagain.viewers.qtviews package &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
+    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
         <link rel="up" title="bornagain.viewers package" href="bornagain.viewers.html"/>
         <link rel="next" title="bornagain" href="modules.html"/>
         <link rel="prev" title="bornagain.viewers package" href="bornagain.viewers.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.0.1
+                0.2018.9.9
               </div>
             
           
@@ -214,8 +214,15 @@
 <span id="bornagain-viewers-qtviews-padviews-module"></span><h2>bornagain.viewers.qtviews.padviews module<a class="headerlink" href="#module-bornagain.viewers.qtviews.padviews" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="bornagain.viewers.qtviews.padviews.PADView">
-<em class="property">class </em><code class="descclassname">bornagain.viewers.qtviews.padviews.</code><code class="descname">PADView</code><span class="sig-paren">(</span><em>pad_geometry=[]</em>, <em>data=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">bornagain.viewers.qtviews.padviews.</code><code class="descname">PADView</code><span class="sig-paren">(</span><em>pad_geometry=[]</em>, <em>pad_data=[]</em>, <em>logscale=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This is supposed to be an easy way to view PAD data, provided a list of PADGeometry instances.</p>
+<p>It is a work in progress…</p>
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.pad_labels">
+<code class="descname">pad_labels</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.pad_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="bornagain.viewers.qtviews.padviews.PADView.rois">
 <code class="descname">rois</code><em class="property"> = []</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.rois" title="Permalink to this definition">¶</a></dt>
@@ -232,13 +239,28 @@
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.grid">
+<code class="descname">grid</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.coord_axes">
+<code class="descname">coord_axes</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.coord_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="bornagain.viewers.qtviews.padviews.PADView.pad_geometry">
 <code class="descname">pad_geometry</code><em class="property"> = []</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.pad_geometry" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.viewers.qtviews.padviews.PADView.data">
-<code class="descname">data</code><em class="property"> = []</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.data" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.viewers.qtviews.padviews.PADView.pad_data">
+<code class="descname">pad_data</code><em class="property"> = []</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.pad_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.n_pads">
+<code class="descname">n_pads</code><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.n_pads" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -247,23 +269,63 @@
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.show_coordinate_axes">
+<code class="descname">show_coordinate_axes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.show_coordinate_axes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.show_coordinate_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.hide_coordinate_axes">
+<code class="descname">hide_coordinate_axes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.hide_coordinate_axes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.hide_coordinate_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.toggle_coordinate_axes">
+<code class="descname">toggle_coordinate_axes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.toggle_coordinate_axes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.toggle_coordinate_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.show_pad_labels">
+<code class="descname">show_pad_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.show_pad_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.show_pad_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.hide_pad_labels">
+<code class="descname">hide_pad_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.hide_pad_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.hide_pad_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.toggle_pad_labels">
+<code class="descname">toggle_pad_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.toggle_pad_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.toggle_pad_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="bornagain.viewers.qtviews.padviews.PADView.setup_pads">
-<code class="descname">setup_pads</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.setup_pads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.setup_pads" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setup_pads</code><span class="sig-paren">(</span><em>show_scans=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.setup_pads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.setup_pads" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="bornagain.viewers.qtviews.padviews.PADView.enable_geometry_adjustment">
-<code class="descname">enable_geometry_adjustment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.enable_geometry_adjustment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.enable_geometry_adjustment" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.viewers.qtviews.padviews.PADView.mouse_moved">
+<code class="descname">mouse_moved</code><span class="sig-paren">(</span><em>evt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.mouse_moved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.mouse_moved" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="bornagain.viewers.qtviews.padviews.PADView.disable_geometry_adjustment">
-<code class="descname">disable_geometry_adjustment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.disable_geometry_adjustment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.disable_geometry_adjustment" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.viewers.qtviews.padviews.PADView.edit_ring_radii">
+<code class="descname">edit_ring_radii</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.edit_ring_radii"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.edit_ring_radii" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="bornagain.viewers.qtviews.padviews.PADView.add_rings">
-<code class="descname">add_rings</code><span class="sig-paren">(</span><em>radii=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.add_rings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.add_rings" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_rings</code><span class="sig-paren">(</span><em>radii=[]</em>, <em>pens=None</em>, <em>radius_handle=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.add_rings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.add_rings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.hide_ring_radius_handles">
+<code class="descname">hide_ring_radius_handles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.hide_ring_radius_handles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.hide_ring_radius_handles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.remove_rings">
+<code class="descname">remove_rings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.remove_rings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.remove_rings" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -277,8 +339,8 @@
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="bornagain.viewers.qtviews.padviews.PADView.init_ui">
-<code class="descname">init_ui</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.init_ui"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.init_ui" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.viewers.qtviews.padviews.PADView.toggle_grid">
+<code class="descname">toggle_grid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.toggle_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.toggle_grid" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -420,7 +482,7 @@ Python list and size is a float scalar.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.0.1',
+            VERSION:'0.2018.9.9',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bornagain.viewers.qtviews.qtviews &mdash; bornagain 0.0.1 documentation</title>
+  <title>bornagain.viewers.qtviews.qtviews &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../../search.html"/>
-    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../../index.html"/>
+    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../../index.html"/>
         <link rel="up" title="Module code" href="../../../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.0.1
+                0.2018.9.9
               </div>
             
           
@@ -178,11 +178,22 @@
           <span class="n">pg</span><span class="o">.</span><span class="n">glColor</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]),</span>
           <span class="n">pg</span><span class="o">.</span><span class="n">glColor</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">])]</span>
 
+<span class="n">pens</span> <span class="o">=</span> <span class="p">[</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">]),</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]),</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">]),</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]),</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">])]</span>
+
 <div class="viewcode-block" id="bright_colors"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.bright_colors">[docs]</a><span class="k">def</span> <span class="nf">bright_colors</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot; Some nice colors.  Only 8 available, which loops around as the input index increments.&quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">colors</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)]</span></div>
+
+
 
 <div class="viewcode-block" id="Volumetric3D"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D">[docs]</a><span class="k">class</span> <span class="nc">Volumetric3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; View a 3D density map &#39;&#39;&#39;</span>
@@ -435,7 +446,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../../',
-            VERSION:'0.0.1',
+            VERSION:'0.2018.9.9',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

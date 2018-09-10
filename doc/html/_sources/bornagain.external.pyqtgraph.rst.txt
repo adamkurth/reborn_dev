@@ -4,18 +4,18 @@ bornagain.external.pyqtgraph package
 Submodules
 ----------
 
-bornagain.external.pyqtgraph.ImageItem module
----------------------------------------------
-
-.. automodule:: bornagain.external.pyqtgraph.ImageItem
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 bornagain.external.pyqtgraph.extras module
 ------------------------------------------
 
 .. automodule:: bornagain.external.pyqtgraph.extras
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bornagain.external.pyqtgraph.mods module
+----------------------------------------
+
+.. automodule:: bornagain.external.pyqtgraph.mods
     :members:
     :undoc-members:
     :show-inheritance:

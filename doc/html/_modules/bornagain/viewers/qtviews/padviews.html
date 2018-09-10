@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bornagain.viewers.qtviews.padviews &mdash; bornagain 0.0.1 documentation</title>
+  <title>bornagain.viewers.qtviews.padviews &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../../search.html"/>
-    <link rel="top" title="bornagain 0.0.1 documentation" href="../../../../index.html"/>
+    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../../index.html"/>
         <link rel="up" title="Module code" href="../../../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.0.1
+                0.2018.9.9
               </div>
             
           
@@ -161,122 +161,345 @@
   <h1>Source code for bornagain.viewers.qtviews.padviews</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">uic</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="k">import</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QLineEdit</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtGui</span> <span class="k">import</span> <span class="n">QShortcut</span><span class="p">,</span> <span class="n">QKeySequence</span><span class="p">,</span> <span class="n">QTransform</span>
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
 
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="n">pg</span><span class="o">.</span><span class="n">setConfigOptions</span><span class="p">(</span><span class="n">imageAxisOrder</span><span class="o">=</span><span class="s1">&#39;row-major&#39;</span><span class="p">)</span>
 <span class="kn">import</span> <span class="nn">bornagain.external.pyqtgraph</span> <span class="k">as</span> <span class="nn">bpg</span>
+<span class="kn">from</span> <span class="nn">bornagain.utils</span> <span class="k">import</span> <span class="n">vec_norm</span><span class="p">,</span> <span class="n">vec_mag</span>
+<span class="kn">import</span> <span class="nn">bornagain</span> <span class="k">as</span> <span class="nn">ba</span>
+
+<span class="n">padviewui</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.viewers.qtviews&#39;</span><span class="p">,</span> <span class="s1">&#39;padview.ui&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PADView"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView">[docs]</a><span class="k">class</span> <span class="nc">PADView</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is supposed to be an easy way to view PAD data, provided a list of PADGeometry instances.</span>
+
+<span class="sd">    It is a work in progress...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Note that most of the interface was created using the QT Designer tool.  Here are some important ones:</span>
+    <span class="c1"># self.histogram is a bornagain.external.pyqtgraph.MultiHistogramLUTWidget</span>
+
     <span class="n">pad_geometry</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pad_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pad_labels</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">rois</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">rings</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">coord_axes</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_geometry</span><span class="o">=</span><span class="p">[],</span> <span class="n">data</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_geometry</span><span class="o">=</span><span class="p">[],</span> <span class="n">pad_data</span><span class="o">=</span><span class="p">[],</span> <span class="n">logscale</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span> <span class="o">=</span> <span class="n">pad_geometry</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span> <span class="o">=</span> <span class="n">pad_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logscale</span> <span class="o">=</span> <span class="n">logscale</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">mkQApp</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span> <span class="o">=</span> <span class="n">uic</span><span class="o">.</span><span class="n">loadUi</span><span class="p">(</span><span class="s1">&#39;gwiz.ui&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span> <span class="o">=</span> <span class="n">uic</span><span class="o">.</span><span class="n">loadUi</span><span class="p">(</span><span class="n">padviewui</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">ViewBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">invertX</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">setAspectLocked</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">graphics_view</span><span class="o">.</span><span class="n">setCentralItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_pads</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_grid</span><span class="p">()</span>
-        <span class="c1"># self.remove_grid()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_histogram_tool</span><span class="p">()</span>
-        <span class="c1"># self.enable_geometry_adjustment()</span>
-        <span class="c1">#</span>
-        <span class="c1"># self.main_window.setWindowState(self.main_window.windowState() &amp; ~pg.QtCore.Qt.WindowMinimized</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">SignalProxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseMoved</span><span class="p">,</span> <span class="n">rateLimit</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">slot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mouse_moved</span><span class="p">)</span>
+        <span class="c1"># self.label = pg.LabelItem(justify=&#39;right&#39;)</span>
+        <span class="c1"># self.viewbox.addItem(self.label)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">actionGrid</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_grid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">actionRings</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_ring_radii</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_shortcut</span> <span class="o">=</span> <span class="n">QShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+g&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_shortcut</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_grid</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rings_shortcut</span> <span class="o">=</span> <span class="n">QShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+r&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rings_shortcut</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_ring_radii</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords_shortcut</span> <span class="o">=</span> <span class="n">QShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+a&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords_shortcut</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_coordinate_axes</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_shortcut</span> <span class="o">=</span> <span class="n">QShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+l&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_shortcut</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_pad_labels</span><span class="p">)</span>
+
+
+        <span class="c1"># self.main_window.setWindowState(self.main_window.windowState()</span>
+        <span class="c1">#                                 &amp; ~pg.QtCore.Qt.WindowMinimized</span>
         <span class="c1">#                                 | pg.QtCore.Qt.WindowActive)</span>
         <span class="c1"># self.main_window.activateWindow()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="c1"># self.main_window.showMaximized()</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PADView.setup_histogram_tool"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.setup_histogram_tool">[docs]</a>    <span class="k">def</span> <span class="nf">setup_histogram_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="c1"># self.lut = bpg.MultiHistogramLUTWidget()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">gradient</span><span class="o">.</span><span class="n">loadPreset</span><span class="p">(</span><span class="s1">&#39;flame&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">setImageItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">)</span></div>
-        <span class="c1"># self.viewbox2 = pg.ViewBox()</span>
-        <span class="c1"># self.main_window.graphics_view2.setCentralItem(self.lut)</span>
+
+<div class="viewcode-block" id="PADView.show_coordinate_axes"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.show_coordinate_axes">[docs]</a>    <span class="k">def</span> <span class="nf">show_coordinate_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">L</span> <span class="o">=</span> <span class="mi">100</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotDataItem</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">L</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">L</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotDataItem</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">ScatterPlotItem</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkBrush</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coord_axes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PADView.hide_coordinate_axes"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_coordinate_axes">[docs]</a>    <span class="k">def</span> <span class="nf">hide_coordinate_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_axes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_axes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coord_axes</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PADView.toggle_coordinate_axes"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_coordinate_axes">[docs]</a>    <span class="k">def</span> <span class="nf">toggle_coordinate_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_coordinate_axes</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide_coordinate_axes</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PADView.show_pad_labels"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.show_pad_labels">[docs]</a>    <span class="k">def</span> <span class="nf">show_pad_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">pad_labels</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pads</span><span class="p">):</span>
+
+                <span class="n">lab</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkBrush</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">fs</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">fs_vec</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">*</span><span class="n">g</span><span class="o">.</span><span class="n">n_fs</span><span class="o">/</span><span class="mi">2</span>
+                <span class="n">ss</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">ss_vec</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">*</span><span class="n">g</span><span class="o">.</span><span class="n">n_ss</span><span class="o">/</span><span class="mi">2</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">t_vec</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">fs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ss</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">g</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">()</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">fs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ss</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">g</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">()</span>
+                <span class="n">lab</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pad_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lab</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">lab</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PADView.hide_pad_labels"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_pad_labels">[docs]</a>    <span class="k">def</span> <span class="nf">hide_pad_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_labels</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">lab</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pad_labels</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PADView.toggle_pad_labels"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_pad_labels">[docs]</a>    <span class="k">def</span> <span class="nf">toggle_pad_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_pad_labels</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide_pad_labels</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_apply_pad_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+
+        <span class="c1"># This is really aweful.  I don&#39;t know if this is the best way to do the transforms, but it&#39;s the best</span>
+        <span class="c1"># I could do given the fact that I&#39;m not able to track down all the needed info on how all of these</span>
+        <span class="c1"># Transforms are applied.  I can only say that a physicist did not invent this system.</span>
+
+        <span class="c1"># 3D basis vectors of panel (length encodes pixel size):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">fs_vec</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">ss_vec</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="c1"># 3D translation to *center* of corner pixel (first pixel in memory):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">t_vec</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="c1"># Normalize all vectors to pixel size.  This is a hack that needs to be fixed later.  Obviously, we cannot</span>
+        <span class="c1"># show multiple detectors at different distances using this stupid pixel-based convention.</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">()</span>
+        <span class="n">f</span> <span class="o">/=</span> <span class="n">ps</span>
+        <span class="n">s</span> <span class="o">/=</span> <span class="n">ps</span>
+        <span class="n">t</span> <span class="o">/=</span> <span class="n">ps</span>
+
+        <span class="c1"># Strip off the z component.  Another dumb move.</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># Offset translation since pixel should be centered.</span>
+        <span class="n">t</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+
+        <span class="c1"># These two operations set the &quot;home&quot; position of the panel such that the fast-scan direction</span>
+        <span class="c1"># is along the viewbox &quot;x&quot; axis.  I don&#39;t know if this is the corret thing to do -- needs further</span>
+        <span class="c1"># attention.  I would imagine that pyqtgraph has a better way to do this, but I haven&#39;t found the right</span>
+        <span class="c1"># feature yet.</span>
+        <span class="n">im</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">im</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">)</span>
+
+        <span class="c1"># Scale the axes.  This is a phony way to deal with detector tilts.  Better than nothing I guess.</span>
+        <span class="n">scf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">f</span> <span class="o">*</span> <span class="n">f</span><span class="p">))</span>
+        <span class="n">scs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">s</span> <span class="o">*</span> <span class="n">s</span><span class="p">))</span>
+
+        <span class="c1"># Note that the *sign* of this scale factor takes care of the fact that 2D rotations alone</span>
+        <span class="c1"># cannot deal with a transpose operation.  What follows is a confusing hack... must be a better way.</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">]))[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="c1"># Here goes the re-scaling</span>
+        <span class="n">im</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">sign</span> <span class="o">*</span> <span class="n">scs</span><span class="p">,</span> <span class="n">scf</span><span class="p">)</span>
+
+        <span class="c1"># Rotate the axes</span>
+        <span class="n">fnorm</span> <span class="o">=</span> <span class="n">f</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">f</span> <span class="o">*</span> <span class="n">f</span><span class="p">))</span>
+        <span class="n">ang</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">fnorm</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">fnorm</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># No, wait, don&#39;t rotate the axes... experimentation says to translate first despite the fact that it</span>
+        <span class="c1"># doesn&#39;t make much sense to do things that way.  Maybe I just gave up too soon, but I found that I needed</span>
+        <span class="c1"># to translate first...</span>
+
+        <span class="c1"># Translate the scaled/rotated image.  Turns out we need to flip the sign of the translation vector</span>
+        <span class="c1"># coordinate corresponding to the axis we flipped.  I don&#39;t know why, but I&#39;ve completely given up on the</span>
+        <span class="c1"># idea of understanding the many layers of coordinate systems and transformations...</span>
+        <span class="n">im</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">sign</span> <span class="o">*</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">im</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="o">-</span><span class="n">sign</span> <span class="o">*</span> <span class="n">ang</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+        <span class="c1"># Now, one would *think* that we could define a simple matrix transform, and then translate the resulting</span>
+        <span class="c1"># image (which has been rotated and possibly skewed to imitate a 3D rotation).  I tried and failed.  But</span>
+        <span class="c1"># It&#39;s worthwile to try again, since it would be brilliant if we could just learn how to define these</span>
+        <span class="c1"># transforms and apply them to all relevant graphics items.</span>
+        <span class="c1"># trans = QTransform()</span>
+        <span class="c1"># trans.scale(M[0, 0], M[1, 1])</span>
+        <span class="c1"># trans.translate(t[0], t[1])</span>
+        <span class="c1"># im.setTransform(trans)</span>
 
 
-<div class="viewcode-block" id="PADView.setup_pads"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.setup_pads">[docs]</a>    <span class="k">def</span> <span class="nf">setup_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PADView.setup_pads"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.setup_pads">[docs]</a>    <span class="k">def</span> <span class="nf">setup_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show_scans</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">overall_levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pads</span><span class="p">):</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span><span class="p">)):</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="c1"># d[0:10, 0:100] = np.max(d)</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">shape</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">t_vec</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="n">p</span><span class="o">.</span><span class="n">pixel_size</span><span class="p">()</span>
-            <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">ROI</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
-            <span class="n">r</span><span class="o">.</span><span class="n">translatable</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">r</span><span class="o">.</span><span class="n">rotateAllowed</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">r</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-            <span class="n">im</span> <span class="o">=</span> <span class="n">bpg</span><span class="o">.</span><span class="n">ImageItem</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="c1">#, levels=self.overall_levels)</span>
-            <span class="n">im</span><span class="o">.</span><span class="n">setAutoDownsample</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-            <span class="n">im</span><span class="o">.</span><span class="n">setParentItem</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rois</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im</span><span class="p">)</span></div>
+            <span class="c1"># p = self.pad_geometry[i]</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logscale</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">d</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PADView.enable_geometry_adjustment"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.enable_geometry_adjustment">[docs]</a>    <span class="k">def</span> <span class="nf">enable_geometry_adjustment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">show_scans</span><span class="p">:</span>  <span class="c1"># For testing - show fast scan axis</span>
+                <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">0.005</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">),</span>
+                  <span class="mi">0</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)]</span> <span class="o">*=</span> <span class="mf">0.1</span>
 
-        <span class="k">for</span> <span class="n">roi</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rois</span><span class="p">:</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="n">bpg</span><span class="o">.</span><span class="n">ImageItem</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
-            <span class="n">roi</span><span class="o">.</span><span class="n">translatable</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">roi</span><span class="o">.</span><span class="n">rotateAllowed</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">roi</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">))</span>
-            <span class="n">roi</span><span class="o">.</span><span class="n">addRotateHandle</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
-            <span class="n">roi</span><span class="o">.</span><span class="n">addRotateHandle</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_pad_transform</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">im</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PADView.disable_geometry_adjustment"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.disable_geometry_adjustment">[docs]</a>    <span class="k">def</span> <span class="nf">disable_geometry_adjustment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PADView.mouse_moved"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.mouse_moved">[docs]</a>    <span class="k">def</span> <span class="nf">mouse_moved</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">):</span>
 
-        <span class="k">for</span> <span class="n">roi</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rois</span><span class="p">:</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">evt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">ppos</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">intensity</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">sceneBoundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sceneBoundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
+                    <span class="n">pid</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="n">ppos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">mapFromScene</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+                    <span class="n">ppos</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ppos</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ppos</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span>
+                    <span class="k">continue</span>
 
-            <span class="n">roi</span><span class="o">.</span><span class="n">translatable</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">roi</span><span class="o">.</span><span class="n">rotateAllowed</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">roi</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">handle</span> <span class="ow">in</span> <span class="n">roi</span><span class="o">.</span><span class="n">handles</span><span class="p">:</span>
-                <span class="n">roi</span><span class="o">.</span><span class="n">removeHandle</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span></div>
+            <span class="c1"># pnt = self.viewbox.mapSceneToView(pos)</span>
+            <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">ppos</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">ppos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">pid</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+                <span class="n">sh</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">shape</span>
+                <span class="k">if</span> <span class="n">ss</span> <span class="o">&lt;</span> <span class="n">sh</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">fs</span> <span class="o">&lt;</span> <span class="n">sh</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">intensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span><span class="p">[</span><span class="n">pid</span><span class="p">][</span><span class="n">ss</span><span class="p">,</span> <span class="n">fs</span><span class="p">]</span>
 
+            <span class="k">if</span> <span class="n">pid</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;Panel </span><span class="si">%2d</span><span class="s1">; ss=</span><span class="si">%4d</span><span class="s1">; fs=</span><span class="si">%4d</span><span class="s1">; I=</span><span class="si">%8g</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">intensity</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">statusbar</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="n">status</span><span class="p">)</span></div>
+            <span class="c1">#self.label.setText(</span>
+            <span class="c1">#    &quot;&lt;span style=&#39;font-size: 12pt&#39;&gt;x=%0.1f,   &lt;span style=&#39;color: red&#39;&gt;y1=%0.1f&lt;/span&gt;&quot; % (</span>
+            <span class="c1">#    pnt.x(), pnt.y()))</span>
 
-<div class="viewcode-block" id="PADView.add_rings"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.add_rings">[docs]</a>    <span class="k">def</span> <span class="nf">add_rings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radii</span><span class="o">=</span><span class="p">[]):</span>
+<div class="viewcode-block" id="PADView.edit_ring_radii"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.edit_ring_radii">[docs]</a>    <span class="k">def</span> <span class="nf">edit_ring_radii</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="c1"># TODO: does not work</span>
+        <span class="c1"># cur_rad = &quot;&quot;</span>
 
-        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">radii</span><span class="p">:</span>
-            <span class="n">circ</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">CircleROI</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">r</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="n">r</span><span class="o">*</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">text</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QInputDialog</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">,</span> <span class="s2">&quot;Enter ring radii (comma separated)&quot;</span><span class="p">,</span> <span class="s2">&quot;Ring radii&quot;</span><span class="p">,</span> <span class="n">QLineEdit</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="s2">&quot;100,200&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remove_rings</span><span class="p">()</span>
+                <span class="k">return</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="n">rad</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rad</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_rings</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_rings</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PADView.add_rings"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.add_rings">[docs]</a>    <span class="k">def</span> <span class="nf">add_rings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radii</span><span class="o">=</span><span class="p">[],</span> <span class="n">pens</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">radius_handle</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,)):</span>
+            <span class="n">radii</span> <span class="o">=</span> <span class="p">[</span><span class="n">radii</span><span class="p">]</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">radii</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pens</span> <span class="o">=</span> <span class="p">[</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">)]</span><span class="o">*</span><span class="n">n</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+            <span class="n">circ</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">CircleROI</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">radii</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mf">0.5</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">radii</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">pen</span><span class="o">=</span><span class="n">pens</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
             <span class="n">circ</span><span class="o">.</span><span class="n">translatable</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">circ</span><span class="o">.</span><span class="n">removable</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="c1"># circ.removeHandle(circ.handles[0])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">circ</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">circ</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">circ</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">radius_handle</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide_ring_radius_handles</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PADView.hide_ring_radius_handles"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_ring_radius_handles">[docs]</a>    <span class="k">def</span> <span class="nf">hide_ring_radius_handles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">circ</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rings</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">handle</span> <span class="ow">in</span> <span class="n">circ</span><span class="o">.</span><span class="n">handles</span><span class="p">:</span>
+                <span class="n">circ</span><span class="o">.</span><span class="n">removeHandle</span><span class="p">(</span><span class="n">handle</span><span class="p">[</span><span class="s1">&#39;item&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PADView.remove_rings"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.remove_rings">[docs]</a>    <span class="k">def</span> <span class="nf">remove_rings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rings</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rings</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></div>
+
 
 <div class="viewcode-block" id="PADView.add_grid"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.add_grid">[docs]</a>    <span class="k">def</span> <span class="nf">add_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">GridItem</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">GridItem</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADView.remove_grid"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.remove_grid">[docs]</a>    <span class="k">def</span> <span class="nf">remove_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="kc">None</span></div>
 
+<div class="viewcode-block" id="PADView.toggle_grid"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_grid">[docs]</a>    <span class="k">def</span> <span class="nf">toggle_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-<div class="viewcode-block" id="PADView.init_ui"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.init_ui">[docs]</a>    <span class="k">def</span> <span class="nf">init_ui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="n">mw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span>
-        <span class="n">mw</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span>
-        <span class="n">mw</span><span class="o">.</span><span class="n">center</span><span class="p">()</span></div>
-
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;toggle grid&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_grid</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_grid</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PADView.start"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.padviews.PADView.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -317,7 +540,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../../',
-            VERSION:'0.0.1',
+            VERSION:'0.2018.9.9',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

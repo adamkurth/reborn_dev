@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bornagain.utils &mdash; bornagain 0.0.1 documentation</title>
+  <title>bornagain.utils &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="bornagain 0.0.1 documentation" href="../../index.html"/>
+    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.0.1
+                0.2018.9.9
               </div>
             
           
@@ -171,12 +171,40 @@
 <span class="c1"># not sure where to seed</span>
 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">()</span>
 
+<div class="viewcode-block" id="vec_check2"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_check2">[docs]</a><span class="k">def</span> <span class="nf">vec_check2</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Same as vec_check(vec, dimension=2).  See :func:`vec_check &lt;bornagain.utils.vec_check&gt;`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="vec_check3"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_check3">[docs]</a><span class="k">def</span> <span class="nf">vec_check3</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Same as vec_check(vec, dimension=2)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="vec_check"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_check">[docs]</a><span class="k">def</span> <span class="nf">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">hardcheck</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check that a vector meets our assumption of an Nx3 numpy array.  This is</span>
-<span class="sd">    helpful, for example, when we want to ensure that dot products and broadcasting</span>
-<span class="sd">    will work as expected. We could of course add an argument for vectors of</span>
-<span class="sd">    dimension other than 3, but for now 3-vectors are all that we work with.</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check that a vector meets our assumptions, and correct it if it doesn&#39;t.</span>
+
+<span class="sd">    Our assumptions are that:</span>
+<span class="sd">        1) The array shape is Nxd, where d is the dimension of the vector, and</span>
+<span class="sd">           N is the number of vectors.  This is important when applying rotation</span>
+<span class="sd">           operations to many vectors.</span>
+<span class="sd">        2) The array is c-contiguous.  This is important for passing arrays into</span>
+<span class="sd">           external c functions or to opencl kernels.</span>
+
+<span class="sd">    The above also helps when we want to ensure that dot products and broadcasting</span>
+<span class="sd">    will work as expected.</span>
+
+<span class="sd">    Note that we have chosen to keep vector components close in memory.  I.e.,</span>
+<span class="sd">    the x, y, and z components of a given vector are contiguous.  This will ensure</span>
+<span class="sd">    that rotations and broadcasting are as fast as can be.</span>
 
 <span class="sd">    Input:</span>
 
@@ -186,6 +214,8 @@
 <span class="sd">    hardcheck: If True, then this function will raise a ValueError if the check</span>
 <span class="sd">    fails.  If False, then this function attempts to fix the problem</span>
 <span class="sd">    with the input.</span>
+
+<span class="sd">    dimension: The expected dimension of the vectors</span>
 
 <span class="sd">    ==== Output:</span>
 <span class="sd">    vec: The original input if it satisfies our conditions.  Otherwise</span>
@@ -206,9 +236,9 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">vec</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Vectors must be Nx</span><span class="si">%d</span><span class="s1"> numpy ndarrays&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dimension</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dimension</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">vec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dimension</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Vectors must be Nx3 numpy ndarrays&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">vec</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span>
@@ -220,8 +250,10 @@
 
 <div class="viewcode-block" id="vec_norm"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_norm">[docs]</a><span class="k">def</span> <span class="nf">vec_norm</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
 
-    <span class="n">v</span> <span class="o">=</span> <span class="n">V</span>
-    <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+
+
+    <span class="n">V</span> <span class="o">=</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">V</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;V must have one or two dimensions.&quot;</span><span class="p">)</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">V</span> <span class="o">*</span> <span class="n">V</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
@@ -229,6 +261,7 @@
 
 <div class="viewcode-block" id="vec_mag"><a class="viewcode-back" href="../../bornagain.html#bornagain.utils.vec_mag">[docs]</a><span class="k">def</span> <span class="nf">vec_mag</span><span class="p">(</span><span class="n">V</span><span class="p">):</span>
 
+    <span class="n">V</span> <span class="o">=</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">V</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;V must have one or two dimensions.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">V</span> <span class="o">*</span> <span class="n">V</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
@@ -511,7 +544,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.0.1',
+            VERSION:'0.2018.9.9',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

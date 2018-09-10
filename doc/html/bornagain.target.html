@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bornagain.target package &mdash; bornagain 0.0.1 documentation</title>
+  <title>bornagain.target package &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
+    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
         <link rel="up" title="bornagain package" href="bornagain.html"/>
         <link rel="next" title="bornagain.viewers package" href="bornagain.viewers.html"/>
         <link rel="prev" title="bornagain.simulate package" href="bornagain.simulate.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.0.1
+                0.2018.9.9
               </div>
             
           
@@ -501,18 +501,11 @@ to make sense of the ways in which space groups are specified…</p>
 <dl class="method">
 <dt id="bornagain.target.crystal.Lattice.assemble">
 <code class="descname">assemble</code><span class="sig-paren">(</span><em>n_unit=10</em>, <em>spherical=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Lattice.assemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Lattice.assemble" title="Permalink to this definition">¶</a></dt>
-<dd><p>Assembles the lattice vecors (unit cell origins) based
-on the lattice constants provided.
-n_unit, int or 3-tuple of ints</p>
-<blockquote>
-<div>Number of unit cells along each crystal axis(default is square)
-If n_unit is a 3-tuple (n_unit_a, n_unit_b, n_unit_c) then the
-crystal can be rectangular</div></blockquote>
-<dl class="docutils">
-<dt>spherical, bool</dt>
-<dd>Whether to apply a spherical boundary to the crystal after it
-is created.</dd>
-</dl>
+<dd><p>Creates a finite lattice (self.vecs)
+:param n_unit: Number of unit cells along each crystal axis
+:type n_unit: int or 3-tuple
+:param spherical: If true, apply a spherical boundary to the crystal.
+:type spherical: bool</p>
 </dd></dl>
 
 </dd></dl>
@@ -828,7 +821,7 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.0.1',
+            VERSION:'0.2018.9.9',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

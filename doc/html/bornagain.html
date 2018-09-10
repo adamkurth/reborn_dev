@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bornagain package &mdash; bornagain 0.0.1 documentation</title>
+  <title>bornagain package &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="bornagain 0.0.1 documentation" href="index.html"/>
+    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
         <link rel="next" title="bornagain.external package" href="bornagain.external.html"/>
         <link rel="prev" title="Installation" href="installation.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.0.1
+                0.2018.9.9
               </div>
             
           
@@ -212,8 +212,8 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.external.pyqtgraph.html">bornagain.external.pyqtgraph package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#module-bornagain.external.pyqtgraph.ImageItem">bornagain.external.pyqtgraph.ImageItem module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#module-bornagain.external.pyqtgraph.extras">bornagain.external.pyqtgraph.extras module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#module-bornagain.external.pyqtgraph.mods">bornagain.external.pyqtgraph.mods module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#module-bornagain.external.pyqtgraph">Module contents</a></li>
 </ul>
 </li>
@@ -825,18 +825,44 @@ Joule.</p>
 <span id="bornagain-utils-module"></span><h2>bornagain.utils module<a class="headerlink" href="#module-bornagain.utils" title="Permalink to this headline">¶</a></h2>
 <p>Some utility functions that might be useful throughout bornagain.  Don’t put highly specialized functions here.</p>
 <dl class="function">
+<dt id="bornagain.utils.vec_check2">
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_check2</code><span class="sig-paren">(</span><em>vec</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_check2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_check2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as vec_check(vec, dimension=2).  See <a class="reference internal" href="#bornagain.utils.vec_check" title="bornagain.utils.vec_check"><code class="xref py py-func docutils literal notranslate"><span class="pre">vec_check</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.vec_check3">
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_check3</code><span class="sig-paren">(</span><em>vec</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_check3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_check3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as vec_check(vec, dimension=2)</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="bornagain.utils.vec_check">
 <code class="descclassname">bornagain.utils.</code><code class="descname">vec_check</code><span class="sig-paren">(</span><em>vec</em>, <em>hardcheck=False</em>, <em>dimension=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_check" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check that a vector meets our assumption of an Nx3 numpy array.  This is
-helpful, for example, when we want to ensure that dot products and broadcasting
-will work as expected. We could of course add an argument for vectors of
-dimension other than 3, but for now 3-vectors are all that we work with.</p>
+<dd><p>Check that a vector meets our assumptions, and correct it if it doesn’t.</p>
+<dl class="docutils">
+<dt>Our assumptions are that:</dt>
+<dd><ol class="first last arabic simple">
+<li>The array shape is Nxd, where d is the dimension of the vector, and
+N is the number of vectors.  This is important when applying rotation
+operations to many vectors.</li>
+<li>The array is c-contiguous.  This is important for passing arrays into
+external c functions or to opencl kernels.</li>
+</ol>
+</dd>
+</dl>
+<p>The above also helps when we want to ensure that dot products and broadcasting
+will work as expected.</p>
+<p>Note that we have chosen to keep vector components close in memory.  I.e.,
+the x, y, and z components of a given vector are contiguous.  This will ensure
+that rotations and broadcasting are as fast as can be.</p>
 <p>Input:</p>
 <p>vec: The object that we are trying to make conform to our assumption
 about vectors.</p>
 <p>hardcheck: If True, then this function will raise a ValueError if the check
 fails.  If False, then this function attempts to fix the problem
 with the input.</p>
+<p>dimension: The expected dimension of the vectors</p>
 <p>==== Output:
 vec: The original input if it satisfies our conditions.  Otherwise
 return a modified numpy ndarray with the correct shape.</p>
@@ -976,7 +1002,7 @@ details of how this works.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.0.1',
+            VERSION:'0.2018.9.9',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
