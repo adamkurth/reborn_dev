@@ -6,6 +6,7 @@ Basic utilities for dealing with crystalline objects.
 import numpy as np
 from numpy import sin, cos, sqrt
 
+import bornagain as ba
 from bornagain.target import spgrp
 from bornagain import utils
 from bornagain.simulate import atoms, simutils
@@ -16,7 +17,6 @@ class structure(object):
     r"""
     A container class for stuff needed when dealing with crystal structures.
     """
-
     r = None  #: Atomic coordinates (3xN array)
     _x = None  #: Fractional coordinates (3xN array)
     O = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
@@ -42,6 +42,10 @@ class structure(object):
     symTs = None #: Symmetry translations (in crystal basis)
 
     def __init__(self, pdbFilePath=None):
+
+        if ba.get_global('warn_depreciated'):
+            utils.warn('The class "structure" is depreciated.  Use "Structure" instead.'
+                       ' (This change was made for PEP8 compliance.)')
 
         if pdbFilePath is not None:
             self.load_pdb(pdbFilePath)
@@ -138,6 +142,13 @@ class structure(object):
         if self._x is None:
             self._x = np.dot(self.Oinv, self.r.T).T
         return self._x
+
+
+class Structure(structure):
+
+    def __init__(self, *args, **kwargs):
+
+        structure.__init__(self, *args, **kwargs)
 
 
 def parse_pdb(pdbFilePath, crystalStruct=None):
@@ -324,7 +335,7 @@ class Molecule(structure):
         return x,y,z
 
     def get_1d_coords(self):
-        x, y, z = self._seprate_xyz( self.atom_vecs)
+        x, y, z = self._seprate_xyz(self.atom_vecs)
         return x, y, z
 
     def get_1d_frac_coords(self):
