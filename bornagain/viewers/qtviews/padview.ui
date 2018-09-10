@@ -94,15 +94,9 @@
     <property name="title">
      <string>View</string>
     </property>
-    <widget class="QMenu" name="menuRings">
-     <property name="title">
-      <string>Rings</string>
-     </property>
-     <addaction name="actionShow"/>
-     <addaction name="actionFix"/>
-     <addaction name="actionFix_radius"/>
-    </widget>
-    <addaction name="menuRings"/>
+    <addaction name="actionPanel_IDs"/>
+    <addaction name="actionGrid"/>
+    <addaction name="actionRings"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -136,6 +130,24 @@
   <action name="actionPnCCD">
    <property name="text">
     <string>pnCCD</string>
+   </property>
+  </action>
+  <action name="actionPanel_IDs">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Panel IDs</string>
+   </property>
+  </action>
+  <action name="actionGrid">
+   <property name="text">
+    <string>Grid</string>
+   </property>
+  </action>
+  <action name="actionRings">
+   <property name="text">
+    <string>Rings</string>
    </property>
   </action>
  </widget>
