@@ -36,7 +36,7 @@
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.simulate.solutions</li>
     
     
@@ -167,7 +169,7 @@
 <span class="n">file_name</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span>
                                                   <span class="s1">&#39;data/water_scattering_data.txt&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.solutions.load_data">[docs]</a><span class="nd">@memoize</span>
+<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../../../bornagain.simulate.solutions.html#bornagain.simulate.solutions.load_data">[docs]</a><span class="nd">@memoize</span>
 <span class="k">def</span> <span class="nf">load_data</span><span class="p">():</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -183,7 +185,7 @@
     <span class="k">return</span> <span class="mf">1e10</span><span class="o">*</span><span class="n">Q</span><span class="p">,</span> <span class="n">intensities</span><span class="p">,</span> <span class="n">temperatures</span></div>
 
 
-<div class="viewcode-block" id="get_water_profile"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.solutions.get_water_profile">[docs]</a><span class="k">def</span> <span class="nf">get_water_profile</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">298</span><span class="p">):</span>
+<div class="viewcode-block" id="get_water_profile"><a class="viewcode-back" href="../../../bornagain.simulate.solutions.html#bornagain.simulate.solutions.get_water_profile">[docs]</a><span class="k">def</span> <span class="nf">get_water_profile</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">298</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get water scattering profile from Greg Hura&#39;s PhD thesis data.  Interpolates the data for given</span>

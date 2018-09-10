@@ -36,7 +36,7 @@
               href="../../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../../index.html"/>
-        <link rel="up" title="Module code" href="../../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../../bornagain.html"/> 
 
   
   <script src="../../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.external.pyqtgraph.extras</li>
     
     
@@ -164,21 +166,21 @@
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
 
 
-<div class="viewcode-block" id="keep_open"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.keep_open">[docs]</a><span class="k">def</span> <span class="nf">keep_open</span><span class="p">():</span>
+<div class="viewcode-block" id="keep_open"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.keep_open">[docs]</a><span class="k">def</span> <span class="nf">keep_open</span><span class="p">():</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
-
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple helper that keeps qtgraph window open when you run a script from the terminal.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">pg</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="MultiHistogramLUTWidget"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget">[docs]</a><span class="k">class</span> <span class="nc">MultiHistogramLUTWidget</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">GraphicsView</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiHistogramLUTWidget"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget">[docs]</a><span class="k">class</span> <span class="nc">MultiHistogramLUTWidget</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">GraphicsView</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is the equivalent of HistogramLUTWidget, but wraps MultiHistogramLUTWidget.</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the equivalent of :class:`pyqtgraph.HistogramLUTWidget`, but wraps</span>
+<span class="sd">    :class:`MultiHistogramLUTWidget &lt;bornagain.external.pyqtgraph.MultiHistogramLUTItem&gt;` instead of</span>
+<span class="sd">    :class:`pyqtgraph.HistogramLUTItem`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
@@ -189,19 +191,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">,</span> <span class="n">pg</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">95</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MultiHistogramLUTWidget.sizeHint"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiHistogramLUTWidget.sizeHint"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">pg</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">115</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MultiHistogramLUTItem"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem">[docs]</a><span class="k">class</span> <span class="nc">MultiHistogramLUTItem</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">HistogramLUTItem</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is an extension to the HistogramLUTItem that allows control over multiple images. The main feature is the</span>
-<span class="sd">    addition of the setImageItems() method.</span>
+<div class="viewcode-block" id="MultiHistogramLUTItem"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem">[docs]</a><span class="k">class</span> <span class="nc">MultiHistogramLUTItem</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">HistogramLUTItem</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a bornagain extension to the :class:`pyqtgraph.HistogramLUTItem` that allows control</span>
+<span class="sd">    over multiple images. The main feature is the</span>
+<span class="sd">    addition of the :func:`setImageItems` method.</span>
 
-<span class="sd">    This is a graphicsWidget which provides controls for adjusting the display of an image.</span>
+<span class="sd">    This is a :class:`pyqtgraph.graphicsWidget` which provides controls for adjusting the display of an image.</span>
 
 <span class="sd">    Includes:</span>
 
@@ -233,9 +236,10 @@
         <span class="n">pg</span><span class="o">.</span><span class="n">HistogramLUTItem</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="MultiHistogramLUTItem.setImageItems"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems">[docs]</a>    <span class="k">def</span> <span class="nf">setImageItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imgs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set an ImageItem to have its levels and LUT automatically controlled</span>
-<span class="sd">        by this HistogramLUTItem.</span>
+<div class="viewcode-block" id="MultiHistogramLUTItem.setImageItems"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems">[docs]</a>    <span class="k">def</span> <span class="nf">setImageItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imgs</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set a list of :class:`pyqtgraph.ImageItem` instances that will have their levels</span>
+<span class="sd">        and LUT automatically controlled by this HistogramLUTItem.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span> <span class="o">=</span> <span class="p">[]</span>
@@ -255,7 +259,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">imageChanged</span><span class="p">(</span><span class="n">autoLevel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MultiHistogramLUTItem.gradientChanged"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.gradientChanged">[docs]</a>    <span class="k">def</span> <span class="nf">gradientChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiHistogramLUTItem.gradientChanged"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.gradientChanged">[docs]</a>    <span class="k">def</span> <span class="nf">gradientChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient</span><span class="o">.</span><span class="n">isLookupTrivial</span><span class="p">():</span>
                 <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
@@ -268,7 +272,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sigLookupTableChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MultiHistogramLUTItem.regionChanged"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">regionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiHistogramLUTItem.regionChanged"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">regionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># print(&#39;regionChanged&#39;)</span>
             <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
@@ -276,7 +280,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sigLevelChangeFinished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MultiHistogramLUTItem.regionChanging"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanging">[docs]</a>    <span class="k">def</span> <span class="nf">regionChanging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiHistogramLUTItem.regionChanging"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanging">[docs]</a>    <span class="k">def</span> <span class="nf">regionChanging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># print(&#39;regionChanging&#39;)</span>
             <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
@@ -285,8 +289,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="MultiHistogramLUTItem.setLevelMode"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setLevelMode">[docs]</a>    <span class="k">def</span> <span class="nf">setLevelMode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Set the method of controlling the image levels offered to the user.</span>
+<div class="viewcode-block" id="MultiHistogramLUTItem.setLevelMode"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setLevelMode">[docs]</a>    <span class="k">def</span> <span class="nf">setLevelMode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the method of controlling the image levels offered to the user.</span>
 <span class="sd">        Options are &#39;mono&#39; or &#39;rgba&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;mono&#39;</span><span class="p">,</span> <span class="s1">&#39;rgba&#39;</span><span class="p">)</span>

@@ -36,7 +36,7 @@
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.simulate.atoms</li>
     
     
@@ -180,7 +182,7 @@
        <span class="s1">&#39;Uut&#39;</span><span class="p">,</span> <span class="s1">&#39;Uuq&#39;</span><span class="p">,</span> <span class="s1">&#39;Uup&#39;</span><span class="p">,</span> <span class="s1">&#39;Uuh&#39;</span><span class="p">,</span> <span class="s1">&#39;Uus&#39;</span><span class="p">,</span> <span class="s1">&#39;Uuo&#39;</span><span class="p">])</span>
 
 
-<div class="viewcode-block" id="atomic_symbols_to_numbers"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.atomic_symbols_to_numbers">[docs]</a><span class="k">def</span> <span class="nf">atomic_symbols_to_numbers</span><span class="p">(</span><span class="n">symbols</span><span class="p">):</span>
+<div class="viewcode-block" id="atomic_symbols_to_numbers"><a class="viewcode-back" href="../../../bornagain.simulate.atoms.html#bornagain.simulate.atoms.atomic_symbols_to_numbers">[docs]</a><span class="k">def</span> <span class="nf">atomic_symbols_to_numbers</span><span class="p">(</span><span class="n">symbols</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert atomic symbols (such as C, N, He, Be) to atomic numbers.</span>
 
@@ -206,7 +208,7 @@
     <span class="k">return</span> <span class="n">Z</span></div>
 
 
-<div class="viewcode-block" id="atomic_numbers_to_symbols"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.atomic_numbers_to_symbols">[docs]</a><span class="k">def</span> <span class="nf">atomic_numbers_to_symbols</span><span class="p">(</span><span class="n">numbers</span><span class="p">):</span>
+<div class="viewcode-block" id="atomic_numbers_to_symbols"><a class="viewcode-back" href="../../../bornagain.simulate.atoms.html#bornagain.simulate.atoms.atomic_numbers_to_symbols">[docs]</a><span class="k">def</span> <span class="nf">atomic_numbers_to_symbols</span><span class="p">(</span><span class="n">numbers</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert atomic numbers to atomic symbols (such as C, N, He, Ca)</span>
 
@@ -224,7 +226,7 @@
     <span class="k">return</span> <span class="n">symbols</span></div>
 
 
-<div class="viewcode-block" id="get_henke_data"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.get_henke_data">[docs]</a><span class="nd">@utils</span><span class="o">.</span><span class="n">memoize</span>
+<div class="viewcode-block" id="get_henke_data"><a class="viewcode-back" href="../../../bornagain.simulate.atoms.html#bornagain.simulate.atoms.get_henke_data">[docs]</a><span class="nd">@utils</span><span class="o">.</span><span class="n">memoize</span>
 <span class="k">def</span> <span class="nf">get_henke_data</span><span class="p">(</span><span class="n">atomic_number</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load Henke scattering factor data from disk, cache for future retrieval. The</span>
@@ -256,7 +258,7 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="get_scattering_factors"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.atoms.get_scattering_factors">[docs]</a><span class="k">def</span> <span class="nf">get_scattering_factors</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">photon_energy</span><span class="p">):</span>
+<div class="viewcode-block" id="get_scattering_factors"><a class="viewcode-back" href="../../../bornagain.simulate.atoms.html#bornagain.simulate.atoms.get_scattering_factors">[docs]</a><span class="k">def</span> <span class="nf">get_scattering_factors</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">photon_energy</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get complex atomic scattering factors.</span>
 

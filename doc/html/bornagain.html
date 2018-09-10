@@ -101,13 +101,14 @@
 <li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bornagain.detector">bornagain.detector module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bornagain.scatter">bornagain.scatter module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bornagain.source">bornagain.source module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bornagain.units">bornagain.units module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bornagain.utils">bornagain.utils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-bornagain">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.detector.html">bornagain.detector module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.scatter.html">bornagain.scatter module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.source.html">bornagain.source module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.units.html">bornagain.units module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.utils.html">bornagain.utils module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
@@ -119,13 +120,14 @@
 <li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-bornagain.detector">bornagain.detector module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-bornagain.scatter">bornagain.scatter module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-bornagain.source">bornagain.source module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-bornagain.units">bornagain.units module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-bornagain.utils">bornagain.utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-bornagain">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.detector.html">bornagain.detector module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.scatter.html">bornagain.scatter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.source.html">bornagain.source module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.units.html">bornagain.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.utils.html">bornagain.utils module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -194,8 +196,60 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="bornagain-package">
-<h1>bornagain package<a class="headerlink" href="#bornagain-package" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-bornagain">
+<span id="bornagain-package"></span><h1>bornagain package<a class="headerlink" href="#module-bornagain" title="Permalink to this headline">¶</a></h1>
+<p>This is the documentation for the bornagain package.</p>
+<dl class="function">
+<dt id="bornagain.set_global">
+<code class="descclassname">bornagain.</code><code class="descname">set_global</code><span class="sig-paren">(</span><em>option</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain.html#set_global"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.set_global" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set global configurations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>option</strong> – One of the following:</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="35%" />
+<col width="65%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Effect</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>‘warn_depreciated’ (True/False):</td>
+<td>Print warnings when depreciated classes etc. are used.</td>
+</tr>
+<tr class="row-odd"><td>‘force_depreciated’ (True/False):</td>
+<td>Like ‘warn_depreciated’ but raise RunTimeError instead of warn.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<div>value: The value that you wish to associate with one of the above options.</div></blockquote>
+<p>Returns: Nothing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.get_global">
+<code class="descclassname">bornagain.</code><code class="descname">get_global</code><span class="sig-paren">(</span><em>option</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain.html#get_global"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.get_global" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get global configurations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>option</strong> – See <a class="reference internal" href="#bornagain.set_global" title="bornagain.set_global"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_global()</span></code></a> for the relevant options.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: The value associated with the option.</p>
+</dd></dl>
+
 <div class="section" id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -203,63 +257,70 @@
 <li class="toctree-l1"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.external.html#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.external.cfelpyutils.html">bornagain.external.cfelpyutils package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.cfelpyutils.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.cfelpyutils.html#module-bornagain.external.cfelpyutils.crystfel_utils">bornagain.external.cfelpyutils.crystfel_utils module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.cfelpyutils.html#module-bornagain.external.cfelpyutils.geometry_utils">bornagain.external.cfelpyutils.geometry_utils module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.cfelpyutils.html#module-bornagain.external.cfelpyutils.parameter_utils">bornagain.external.cfelpyutils.parameter_utils module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.cfelpyutils.html#module-bornagain.external.cfelpyutils">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.cfelpyutils.html#submodules">Submodules</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="bornagain.external.cfelpyutils.crystfel_utils.html">bornagain.external.cfelpyutils.crystfel_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="bornagain.external.cfelpyutils.geometry_utils.html">bornagain.external.cfelpyutils.geometry_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="bornagain.external.cfelpyutils.parameter_utils.html">bornagain.external.cfelpyutils.parameter_utils module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.external.pyqtgraph.html">bornagain.external.pyqtgraph package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#module-bornagain.external.pyqtgraph.extras">bornagain.external.pyqtgraph.extras module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#module-bornagain.external.pyqtgraph.mods">bornagain.external.pyqtgraph.mods module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#module-bornagain.external.pyqtgraph">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#submodules">Submodules</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="bornagain.external.pyqtgraph.extras.html">bornagain.external.pyqtgraph.extras module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="bornagain.external.pyqtgraph.mods.html">bornagain.external.pyqtgraph.mods module</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.external.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.external.html#module-bornagain.external.crystfel">bornagain.external.crystfel module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.external.html#module-bornagain.external.lcls">bornagain.external.lcls module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.external.html#module-bornagain.external">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.external.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.external.crystfel.html">bornagain.external.crystfel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.external.lcls.html">bornagain.external.lcls module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.simulate.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.atoms">bornagain.simulate.atoms module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.clcore">bornagain.simulate.clcore module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.examples">bornagain.simulate.examples module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.refdata">bornagain.simulate.refdata module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.simutils">bornagain.simulate.simutils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.solutions">bornagain.simulate.solutions module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate.thorn">bornagain.simulate.thorn module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.simulate.html#module-bornagain.simulate">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.simulate.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.atoms.html">bornagain.simulate.atoms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.clcore.html">bornagain.simulate.clcore module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.examples.html">bornagain.simulate.examples module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.refdata.html">bornagain.simulate.refdata module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.simutils.html">bornagain.simulate.simutils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.solutions.html">bornagain.simulate.solutions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.thorn.html">bornagain.simulate.thorn module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.target.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.target.html#module-bornagain.target.crystal">bornagain.target.crystal module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.target.html#module-bornagain.target.density">bornagain.target.density module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.target.html#module-bornagain.target.placer">bornagain.target.placer module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.target.html#module-bornagain.target.spgrp">bornagain.target.spgrp module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.target.html#module-bornagain.target">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.target.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.target.crystal.html">bornagain.target.crystal module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.target.density.html">bornagain.target.density module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.target.placer.html">bornagain.target.placer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.target.spgrp.html">bornagain.target.spgrp module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.viewers.html#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.qtviews.html">bornagain.viewers.qtviews package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.qtviews.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.qtviews.html#module-bornagain.viewers.qtviews.padviews">bornagain.viewers.qtviews.padviews module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.qtviews.html#module-bornagain.viewers.qtviews.qtviews">bornagain.viewers.qtviews.qtviews module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.qtviews.html#module-bornagain.viewers.qtviews">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.qtviews.html#submodules">Submodules</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="bornagain.viewers.qtviews.padviews.html">bornagain.viewers.qtviews.padviews module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="bornagain.viewers.qtviews.qtviews.html">bornagain.viewers.qtviews.qtviews module</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.viewers.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.viewers.html#module-bornagain.viewers.joesviews">bornagain.viewers.joesviews module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.viewers.html#module-bornagain.viewers">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.viewers.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.joesviews.html">bornagain.viewers.joesviews module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -267,694 +328,15 @@
 </div>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-bornagain.detector">
-<span id="bornagain-detector-module"></span><h2>bornagain.detector module<a class="headerlink" href="#module-bornagain.detector" title="Permalink to this headline">¶</a></h2>
-<p>Classes for analyzing/simulating diffraction data contained in pixel array
-detectors (PADs).</p>
-<dl class="class">
-<dt id="bornagain.detector.PADGeometry">
-<em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">PADGeometry</code><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This is a simplified version of the Panel class.  Hopefully it replaces Panel.  One main difference is that it does
-not include any information about the source, which makes a lot more sense and removes several headaches that I
-dealt with previously.  Another big difference is the emphasis on simplicity.  So far, there is no cache for
-derived arrays, but maybe that will be added later (but only on an as-needed basis…).
-As a result of simplifications, there are no checks; the programmer must think.</p>
-<dl class="attribute">
-<dt id="bornagain.detector.PADGeometry.n_fs">
-<code class="descname">n_fs</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.detector.PADGeometry.n_fs" title="Permalink to this definition">¶</a></dt>
-<dd><p>The number of fast-scan pixels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.detector.PADGeometry.n_ss">
-<code class="descname">n_ss</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.detector.PADGeometry.n_ss" title="Permalink to this definition">¶</a></dt>
-<dd><p>The number of slow-scan pixels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.detector.PADGeometry.n_pixels">
-<code class="descname">n_pixels</code><a class="headerlink" href="#bornagain.detector.PADGeometry.n_pixels" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.detector.PADGeometry.fs_vec">
-<code class="descname">fs_vec</code><a class="headerlink" href="#bornagain.detector.PADGeometry.fs_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fast-scan basis vector.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.detector.PADGeometry.ss_vec">
-<code class="descname">ss_vec</code><a class="headerlink" href="#bornagain.detector.PADGeometry.ss_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Slow-scan basis vector.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.detector.PADGeometry.t_vec">
-<code class="descname">t_vec</code><a class="headerlink" href="#bornagain.detector.PADGeometry.t_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Translation vector pointing from origin to center of corner pixel, which is first in memory.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.save">
-<code class="descname">save</code><span class="sig-paren">(</span><em>save_fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.save" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves an hdf5 file with class attributes for later use</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="bornagain.detector.PADGeometry.load">
-<em class="property">classmethod </em><code class="descname">load</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>load a PAD object from fname</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.simple_setup">
-<code class="descname">simple_setup</code><span class="sig-paren">(</span><em>n_pixels=1000</em>, <em>pixel_size=0.0001</em>, <em>distance=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.simple_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.simple_setup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make this a square PAD with beam at center.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">object</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.pixel_size">
-<code class="descname">pixel_size</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.pixel_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.pixel_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return pixel size, assuming square pixels.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.shape">
-<code class="descname">shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return tuple corresponding to the numpy shape of this PAD.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.indices_to_vectors">
-<code class="descname">indices_to_vectors</code><span class="sig-paren">(</span><em>j</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.indices_to_vectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.indices_to_vectors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert pixel indices to translation vectors pointing from origin to position on panel.
-The positions need not lie on the actual panel; this assums an infinite plane.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>i</strong> (<em>float</em>) – Fast-scan index.</li>
-<li><strong>j</strong> (<em>float</em>) – Slow-scan index.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Nx3 numpy array</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.position_vecs">
-<code class="descname">position_vecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.position_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.position_vecs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute vectors pointing from origin to pixel centers.</p>
-<p>Returns: Nx3 numpy array</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.norm_vec">
-<code class="descname">norm_vec</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.norm_vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.norm_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>The vector that is normal to the PAD plane.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.ds_vecs">
-<code class="descname">ds_vecs</code><span class="sig-paren">(</span><em>beam_vec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.ds_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.ds_vecs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalized scattering vectors s - s0 where s0 is the incident beam direction
-and s is the outgoing vector for a given pixel.  This does <strong>not</strong> have
-the 2*pi/lambda factor included.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.q_vecs">
-<code class="descname">q_vecs</code><span class="sig-paren">(</span><em>beam_vec=None</em>, <em>wavelength=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.q_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.q_vecs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate scattering vectors:</p>
-<blockquote>
-<div><span class="math notranslate">\(\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)\)</span></div></blockquote>
-<p>Returns: numpy array</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.solid_angles2">
-<code class="descname">solid_angles2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.solid_angles2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.solid_angles2" title="Permalink to this definition">¶</a></dt>
-<dd><p>this should be sped up by vectorizing, but its more readable for now
-and only has to be done once per PAD geometry…</p>
-<p>Divide each pixel up into two triangles with vertices R1,R2,R3
-and R2,R3,R4. Then use analytical form to find the solid angle of
-each triangle. Sum them to get the solid angle of pixel.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.solid_angles">
-<code class="descname">solid_angles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.solid_angles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.solid_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:</p>
-<blockquote>
-<div><span class="math notranslate">\(\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}\)</span>.</div></blockquote>
-<p>Returns: numpy array</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.polarization_factors">
-<code class="descname">polarization_factors</code><span class="sig-paren">(</span><em>polarization_vec</em>, <em>beam_vec</em>, <em>weight=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.polarization_factors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.polarization_factors" title="Permalink to this definition">¶</a></dt>
-<dd><p>The scattering polarization factors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>polarization_vec</strong> (<em>numpy array</em>) – First beam polarization vector (second is this one crossed with beam vector)</li>
-<li><strong>beam_vec</strong> (<em>numpy array</em>) – Incident beam vector</li>
-<li><strong>weight</strong> (<em>float</em>) – The weight of the first polarization component (second is one minus this weight)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Returns:  numpy array</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.scattering_angles">
-<code class="descname">scattering_angles</code><span class="sig-paren">(</span><em>beam_vec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.scattering_angles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.scattering_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Scattering angles (i.e. half the Bragg angles).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>beam_vec</strong> (<em>numpy array</em>) – Incident beam vector.</td>
-</tr>
-</tbody>
-</table>
-<p>Returns: numpy array</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADGeometry.reshape">
-<code class="descname">reshape</code><span class="sig-paren">(</span><em>dat</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.reshape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.reshape" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.detector.split_pad_data">
-<code class="descclassname">bornagain.detector.</code><code class="descname">split_pad_data</code><span class="sig-paren">(</span><em>pad_list=[]</em>, <em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#split_pad_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.split_pad_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a contiguous block of data, split it up into individual PAD panels</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pad_list</strong> – A list of PADGeometry instances</li>
-<li><strong>data</strong> – A contiguous array with data values (total pixels to add up to sum of pixels in all PADs)</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of 2D PAD data arrays</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="class">
-<dt id="bornagain.detector.PADAssembler">
-<em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">PADAssembler</code><span class="sig-paren">(</span><em>pad_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADAssembler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADAssembler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Assemble PAD data into a fake single-panel PAD.  This is done in a lazy way.  The resulting image is not
-centered in any way; the fake detector is a snug fit to the individual PADs.</p>
-<p>A list of PADGeometry objects are required on initialization, as the first argument.  The data needed to
-“interpolate” are cached, hence the need for a class.  The geometry cannot change; there is no update method.</p>
-<dl class="method">
-<dt id="bornagain.detector.PADAssembler.assemble_data">
-<code class="descname">assemble_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADAssembler.assemble_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADAssembler.assemble_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a contiguous block of data, create the fake single-panel PAD.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>numpy array</em>) – Image data</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Assembled PAD image</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">assembled_data (numpy array)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.PADAssembler.assemble_data_list">
-<code class="descname">assemble_data_list</code><span class="sig-paren">(</span><em>data_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADAssembler.assemble_data_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADAssembler.assemble_data_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Same as assemble_data() method, but accepts a list of individual panels in the form of a list.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data_list</strong> (<em>list of numpy arrays</em>) – Image data</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Assembled PAD image</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">assembled_data (numpy array)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="bornagain.detector.SimplePAD">
-<em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">SimplePAD</code><span class="sig-paren">(</span><em>n_pixels=1000</em>, <em>pixsize=5e-05</em>, <em>detdist=0.05</em>, <em>wavelen=1.0</em>, <em>center=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimplePAD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimplePAD" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.detector.PADGeometry</span></code></a></p>
-<p>A simple child class to PADGeometry with some higher level functionality</p>
-<p>This will return a detector object representing a
-square pixel array detector</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ul class="last simple">
-<li>One can readout pixel intensities using <a class="reference internal" href="#bornagain.detector.SimplePAD.readout" title="bornagain.detector.SimplePAD.readout"><code class="xref py py-func docutils literal notranslate"><span class="pre">readout()</span></code></a></li>
-<li>After reading out amplitudes, one can display pixels using <a class="reference internal" href="#bornagain.detector.SimplePAD.display" title="bornagain.detector.SimplePAD.display"><code class="xref py py-func docutils literal notranslate"><span class="pre">display()</span></code></a></li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.detector.html">bornagain.detector module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.scatter.html">bornagain.scatter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.source.html">bornagain.source module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.units.html">bornagain.units module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.utils.html">bornagain.utils module</a></li>
 </ul>
 </div>
-<dl class="docutils">
-<dt>Arguments</dt>
-<dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>n_pixels (int)</dt>
-<dd>the number of pixels along one edge</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>pixsize (float)</dt>
-<dd>the edge length of the square pixels in meters</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>detdist (float)</dt>
-<dd>the distance from the interaction region to the point where
-the forward beam intersects the detector (in meters)</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>wavelen (float)</dt>
-<dd>the wavelength of the photons (in Angstroms)</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>center (tuple)</dt>
-<dd>the fast-scan center coordinate and the slow-scan center coordinate</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-<dl class="method">
-<dt id="bornagain.detector.SimplePAD.readout">
-<code class="descname">readout</code><span class="sig-paren">(</span><em>amplitudes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimplePAD.readout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimplePAD.readout" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given scattering amplitudes, this calculates the corresponding intensity values.</p>
-<dl class="docutils">
-<dt>Arguments</dt>
-<dd>amplitudes (complex np.ndarray) : Scattering amplitudes same shape as <cite>self.Q</cite></dd>
-<dt>Returns</dt>
-<dd>np.ndarray : Scattering intensities as a 2-D image.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.SimplePAD.readout_finite">
-<code class="descname">readout_finite</code><span class="sig-paren">(</span><em>amplitudes</em>, <em>qmin</em>, <em>qmax</em>, <em>flux=1e+20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimplePAD.readout_finite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimplePAD.readout_finite" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get scattering intensities as a 2D image considering
-finite scattered photons</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>amplitudes</strong> (<em>complex np.ndarray</em>) – Scattering amplitudes same shape as <cite>self.Q</cite>.</li>
-<li><strong>qmin</strong> (<em>float</em>) – Minimum q to generate intensities</li>
-<li><strong>qmax</strong> (<em>float</em>) – Maximum q to generate intenities</li>
-<li><strong>flux</strong> (<em>float</em>) – Forward beam flux in Photons per square centimeter</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Scattering intensities as a 2-D image.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.SimplePAD.display">
-<code class="descname">display</code><span class="sig-paren">(</span><em>use_log=True</em>, <em>vmax=None</em>, <em>pause=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimplePAD.display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimplePAD.display" title="Permalink to this definition">¶</a></dt>
-<dd><p>Displays a detector. Extra kwargs are passed
-to matplotlib.figure</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ul class="last simple">
-<li>Requires matplotlib.</li>
-<li><dl class="first docutils">
-<dt>Must first run <a class="reference internal" href="#bornagain.detector.SimplePAD.readout" title="bornagain.detector.SimplePAD.readout"><code class="xref py py-func docutils literal notranslate"><span class="pre">readout()</span></code></a> or <a class="reference internal" href="#bornagain.detector.SimplePAD.readout_finite" title="bornagain.detector.SimplePAD.readout_finite"><code class="xref py py-func docutils literal notranslate"><span class="pre">readout_finite()</span></code></a></dt>
-<dd>at least one time</dd>
-</dl>
-</li>
-</ul>
-</div>
-<dl class="docutils">
-<dt>Arguments</dt>
-<dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>use_log (bool)</dt>
-<dd>whether to use log-scaling when displaying the intensity image.</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>vmax (float)</dt>
-<dd>colorbar scaling argument.</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="bornagain.detector.IcosphereGeometry">
-<em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">IcosphereGeometry</code><span class="sig-paren">(</span><em>n_subdivisions=1</em>, <em>radius=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#IcosphereGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.IcosphereGeometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Experimental class for a spherical detector that follows the “icosphere” geometry.
-The Icosphere is generated by sub-dividing the vertices of an icosahedron.
-The following blog was helpful:
-<a class="reference external" href="http://sinestesia.co/blog/tutorials/python-icospheres/">http://sinestesia.co/blog/tutorials/python-icospheres/</a>
-The code is quite slow; needs to be vectorized with numpy…</p>
-<dl class="attribute">
-<dt id="bornagain.detector.IcosphereGeometry.n_subdivisions">
-<code class="descname">n_subdivisions</code><em class="property"> = 1</em><a class="headerlink" href="#bornagain.detector.IcosphereGeometry.n_subdivisions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.detector.IcosphereGeometry.radius">
-<code class="descname">radius</code><em class="property"> = 1</em><a class="headerlink" href="#bornagain.detector.IcosphereGeometry.radius" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="bornagain.detector.IcosphereGeometry.compute_vertices_and_faces">
-<code class="descname">compute_vertices_and_faces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#IcosphereGeometry.compute_vertices_and_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.IcosphereGeometry.compute_vertices_and_faces" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-bornagain.scatter">
-<span id="bornagain-scatter-module"></span><h2>bornagain.scatter module<a class="headerlink" href="#module-bornagain.scatter" title="Permalink to this headline">¶</a></h2>
-<p>Classes related to x-ray “scattering”, which loosely means diffraction from many objects in random orientations.</p>
-<dl class="class">
-<dt id="bornagain.scatter.RadialProfile">
-<em class="property">class </em><code class="descclassname">bornagain.scatter.</code><code class="descname">RadialProfile</code><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Helper class to create radial profiles.</p>
-<dl class="method">
-<dt id="bornagain.scatter.RadialProfile.make_plan">
-<code class="descname">make_plan</code><span class="sig-paren">(</span><em>q_mags</em>, <em>mask=None</em>, <em>n_bins=100</em>, <em>q_range=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile.make_plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile.make_plan" title="Permalink to this definition">¶</a></dt>
-<dd><p>Setup the binning indices for the creation of radial profiles.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>q_mags</strong> (<em>numpy array</em>) – Scattering vector magnitudes.</li>
-<li><strong>mask</strong> (<em>numpy array</em>) – Pixel mask.  Should be ones and zeros, where one means “good” and zero means “bad”.</li>
-<li><strong>n_bins</strong> (<em>int</em>) – Number of bins.</li>
-<li><strong>q_range</strong> (<em>list-like</em>) – The minimum and maximum of the scattering vector magnitudes.  The bin size will be equal to
-(max_q - min_q) / n_bins</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="bornagain.scatter.RadialProfile.get_profile">
-<code class="descname">get_profile</code><span class="sig-paren">(</span><em>data</em>, <em>average=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile.get_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile.get_profile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a radial profile for a particular dataframe.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>numpy array</em>) – Intensity data.</li>
-<li><strong>average</strong> (<em>bool</em>) – If true, divide the sum in each bin by the counts, else return the sum.  Default: True.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The requested radial profile.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">profile (numpy array)</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-bornagain.source">
-<span id="bornagain-source-module"></span><h2>bornagain.source module<a class="headerlink" href="#module-bornagain.source" title="Permalink to this headline">¶</a></h2>
-<p>Classes related to x-ray sources.</p>
-<dl class="class">
-<dt id="bornagain.source.Beam">
-<em class="property">class </em><code class="descclassname">bornagain.source.</code><code class="descname">Beam</code><span class="sig-paren">(</span><em>beam_vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/source.html#Beam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.source.Beam" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A minimal containor to gather x-ray beam properties.</p>
-<dl class="attribute">
-<dt id="bornagain.source.Beam.wavelength">
-<code class="descname">wavelength</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.wavelength" title="Permalink to this definition">¶</a></dt>
-<dd><p>Nominal photon wavelength</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.beam_vec">
-<code class="descname">beam_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.beam_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Nominal direction of incident beam</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.polarization_vec">
-<code class="descname">polarization_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.polarization_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Direction of the first polarization vector</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.polarization_weight">
-<code class="descname">polarization_weight</code><em class="property"> = 1</em><a class="headerlink" href="#bornagain.source.Beam.polarization_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Weight of the first polarization vector</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.photon_energy">
-<code class="descname">photon_energy</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.photon_energy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.spectral_width_fwhm">
-<code class="descname">spectral_width_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.spectral_width_fwhm" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.pulse_energy">
-<code class="descname">pulse_energy</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.pulse_energy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.n_photons">
-<code class="descname">n_photons</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.n_photons" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.beam_divergence_fwhm">
-<code class="descname">beam_divergence_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.beam_divergence_fwhm" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.beam_diameter_fwhm">
-<code class="descname">beam_diameter_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.beam_diameter_fwhm" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.fluence">
-<code class="descname">fluence</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.fluence" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.fluence_jitter_fwhm">
-<code class="descname">fluence_jitter_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.fluence_jitter_fwhm" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-bornagain.units">
-<span id="bornagain-units-module"></span><h2>bornagain.units module<a class="headerlink" href="#module-bornagain.units" title="Permalink to this headline">¶</a></h2>
-<p>Collection of constants that are useful for converting to SI units.
-For example, the eV constant is equal to the number of electron volts per
-Joule.</p>
-</div>
-<div class="section" id="module-bornagain.utils">
-<span id="bornagain-utils-module"></span><h2>bornagain.utils module<a class="headerlink" href="#module-bornagain.utils" title="Permalink to this headline">¶</a></h2>
-<p>Some utility functions that might be useful throughout bornagain.  Don’t put highly specialized functions here.</p>
-<dl class="function">
-<dt id="bornagain.utils.vec_check2">
-<code class="descclassname">bornagain.utils.</code><code class="descname">vec_check2</code><span class="sig-paren">(</span><em>vec</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_check2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_check2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Same as vec_check(vec, dimension=2).  See <a class="reference internal" href="#bornagain.utils.vec_check" title="bornagain.utils.vec_check"><code class="xref py py-func docutils literal notranslate"><span class="pre">vec_check</span></code></a></p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.vec_check3">
-<code class="descclassname">bornagain.utils.</code><code class="descname">vec_check3</code><span class="sig-paren">(</span><em>vec</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_check3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_check3" title="Permalink to this definition">¶</a></dt>
-<dd><p>Same as vec_check(vec, dimension=2)</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.vec_check">
-<code class="descclassname">bornagain.utils.</code><code class="descname">vec_check</code><span class="sig-paren">(</span><em>vec</em>, <em>hardcheck=False</em>, <em>dimension=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_check" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check that a vector meets our assumptions, and correct it if it doesn’t.</p>
-<dl class="docutils">
-<dt>Our assumptions are that:</dt>
-<dd><ol class="first last arabic simple">
-<li>The array shape is Nxd, where d is the dimension of the vector, and
-N is the number of vectors.  This is important when applying rotation
-operations to many vectors.</li>
-<li>The array is c-contiguous.  This is important for passing arrays into
-external c functions or to opencl kernels.</li>
-</ol>
-</dd>
-</dl>
-<p>The above also helps when we want to ensure that dot products and broadcasting
-will work as expected.</p>
-<p>Note that we have chosen to keep vector components close in memory.  I.e.,
-the x, y, and z components of a given vector are contiguous.  This will ensure
-that rotations and broadcasting are as fast as can be.</p>
-<p>Input:</p>
-<p>vec: The object that we are trying to make conform to our assumption
-about vectors.</p>
-<p>hardcheck: If True, then this function will raise a ValueError if the check
-fails.  If False, then this function attempts to fix the problem
-with the input.</p>
-<p>dimension: The expected dimension of the vectors</p>
-<p>==== Output:
-vec: The original input if it satisfies our conditions.  Otherwise
-return a modified numpy ndarray with the correct shape.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.vec_norm">
-<code class="descclassname">bornagain.utils.</code><code class="descname">vec_norm</code><span class="sig-paren">(</span><em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_norm" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.vec_mag">
-<code class="descclassname">bornagain.utils.</code><code class="descname">vec_mag</code><span class="sig-paren">(</span><em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_mag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_mag" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.warn">
-<code class="descclassname">bornagain.utils.</code><code class="descname">warn</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#warn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.warn" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple warning message</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.error">
-<code class="descclassname">bornagain.utils.</code><code class="descname">error</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple error message (to be replaced later…)</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.random_rotation">
-<code class="descclassname">bornagain.utils.</code><code class="descname">random_rotation</code><span class="sig-paren">(</span><em>deflection=1.0</em>, <em>randnums=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#random_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.random_rotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a random rotation matrix.</p>
-<p>deflection: the magnitude of the rotation. For 0, no rotation; for 1, competely random
-rotation. Small deflection =&gt; small perturbation.
-randnums: 3 random numbers in the range [0, 1]. If <cite>None</cite>, they will be auto-generated.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.rotation_about_axis">
-<code class="descclassname">bornagain.utils.</code><code class="descname">rotation_about_axis</code><span class="sig-paren">(</span><em>theta</em>, <em>u</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#rotation_about_axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.rotation_about_axis" title="Permalink to this definition">¶</a></dt>
-<dd><p>This needs to be tested.  It was taken from
-<a class="reference external" href="https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python">https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python</a></p>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.random_beam_vector">
-<code class="descclassname">bornagain.utils.</code><code class="descname">random_beam_vector</code><span class="sig-paren">(</span><em>div_fwhm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#random_beam_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.random_beam_vector" title="Permalink to this definition">¶</a></dt>
-<dd><p>A random vector for emulating beam divergence.
-Generates a random normal vector that is nominally along the [0,0,1] direction
-but with a random rotation along the [1,0,0] axis with given FWHM (Gaussian
-distributed and centered about zero) followed by a random rotation about the
-[0,0,1] axis with uniform distribution in the interval [0,2*pi).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>div_fwhm</strong> – </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.random_mosaic_rotation">
-<code class="descclassname">bornagain.utils.</code><code class="descname">random_mosaic_rotation</code><span class="sig-paren">(</span><em>mosaicity_fwhm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#random_mosaic_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.random_mosaic_rotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.
-We take the matrix product of three rotations, each of the same FWHM, about the three
-orthogonal axis.  The order of this product is a random permutation.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mosaicity_fwhm</strong> – </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.utils.memoize">
-<code class="descclassname">bornagain.utils.</code><code class="descname">memoize</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#memoize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.memoize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is a function decorator for caching results from a function, to avoid
-excessive computation or reading from disk.  Search the web for more
-details of how this works.</p>
-</dd></dl>
-
-</div>
-<div class="section" id="module-bornagain">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bornagain" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 

@@ -36,7 +36,7 @@
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.target.placer</li>
     
     
@@ -164,7 +166,7 @@
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="k">import</span> <span class="n">distance</span><span class="p">,</span> <span class="n">cKDTree</span>
 
 
-<div class="viewcode-block" id="Place"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.placer.Place">[docs]</a><span class="k">class</span> <span class="nc">Place</span><span class="p">(</span><span class="n">cKDTree</span><span class="p">):</span>
+<div class="viewcode-block" id="Place"><a class="viewcode-back" href="../../../bornagain.target.placer.html#bornagain.target.placer.Place">[docs]</a><span class="k">class</span> <span class="nc">Place</span><span class="p">(</span><span class="n">cKDTree</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box_edge</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">,</span> <span class="n">max_try</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Place points into a box of edge length box_edge, and don&#39;t let any two points</span>
@@ -190,7 +192,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">max_try</span> <span class="o">=</span> <span class="n">max_try</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">too_dense</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="Place.insert"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.placer.Place.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Place.insert"><a class="viewcode-back" href="../../../bornagain.target.placer.html#bornagain.target.placer.Place.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;adds a new point to the box&quot;&quot;&quot;</span>
         <span class="n">new_pt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_edge</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
         <span class="n">n_try</span> <span class="o">=</span> <span class="mi">0</span>
@@ -209,7 +211,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">Place</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># re-initialize the parent class with new data</span></div></div>
 
 
-<div class="viewcode-block" id="place_spheres"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.placer.place_spheres">[docs]</a><span class="k">def</span> <span class="nf">place_spheres</span><span class="p">(</span><span class="n">Vf</span><span class="p">,</span> <span class="n">sph_rad</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">box_edge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Nspheres</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+<div class="viewcode-block" id="place_spheres"><a class="viewcode-back" href="../../../bornagain.target.placer.html#bornagain.target.placer.place_spheres">[docs]</a><span class="k">def</span> <span class="nf">place_spheres</span><span class="p">(</span><span class="n">Vf</span><span class="p">,</span> <span class="n">sph_rad</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">box_edge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Nspheres</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Vf, float</span>
 <span class="sd">        Fraction of sample volume occupied by spheres</span>

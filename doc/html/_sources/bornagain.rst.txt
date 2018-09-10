@@ -1,6 +1,11 @@
 bornagain package
 =================
 
+.. automodule:: bornagain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
@@ -14,51 +19,11 @@ Subpackages
 Submodules
 ----------
 
-bornagain.detector module
--------------------------
+.. toctree::
 
-.. automodule:: bornagain.detector
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   bornagain.detector
+   bornagain.scatter
+   bornagain.source
+   bornagain.units
+   bornagain.utils
 
-bornagain.scatter module
-------------------------
-
-.. automodule:: bornagain.scatter
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.source module
------------------------
-
-.. automodule:: bornagain.source
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.units module
-----------------------
-
-.. automodule:: bornagain.units
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.utils module
-----------------------
-
-.. automodule:: bornagain.utils
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: bornagain
-    :members:
-    :undoc-members:
-    :show-inheritance:

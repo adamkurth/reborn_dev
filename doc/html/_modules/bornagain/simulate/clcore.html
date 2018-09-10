@@ -36,7 +36,7 @@
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.simulate.clcore</li>
     
     
@@ -186,8 +188,27 @@
 <span class="n">clcore_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
     <span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;clcore.cpp&#39;</span><span class="p">)</span>
 
+<div class="viewcode-block" id="create_some_gpu_context"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.create_some_gpu_context">[docs]</a><span class="k">def</span> <span class="nf">create_some_gpu_context</span><span class="p">():</span>
 
-<div class="viewcode-block" id="ClCore"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore">[docs]</a><span class="k">class</span> <span class="nc">ClCore</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Since cl.create_some_context() sometimes forces a CPU on macs, this function will attempt to use a GPU</span>
+<span class="sd">    context if possible.</span>
+
+<span class="sd">    Returns: opencl context</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">platform</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">get_platforms</span><span class="p">()</span>
+        <span class="n">devices</span> <span class="o">=</span> <span class="n">platform</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span><span class="n">device_type</span><span class="o">=</span><span class="n">cl</span><span class="o">.</span><span class="n">device_type</span><span class="o">.</span><span class="n">GPU</span><span class="p">)</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">Context</span><span class="p">(</span><span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">create_some_context</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">context</span></div>
+
+<div class="viewcode-block" id="ClCore"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore">[docs]</a><span class="k">class</span> <span class="nc">ClCore</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">double_precision</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
@@ -197,12 +218,7 @@
 
         <span class="c1"># Setup the context</span>
         <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span> <span class="c1"># Derek: cl.create_some_context() was forcing CPU on both my macs.. so I thought its best to try to force GPU first. this works well</span>
-                <span class="n">platform</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">get_platforms</span><span class="p">()</span>
-                <span class="n">devices</span> <span class="o">=</span> <span class="n">platform</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_devices</span><span class="p">(</span><span class="n">device_type</span><span class="o">=</span><span class="n">cl</span><span class="o">.</span><span class="n">device_type</span><span class="o">.</span><span class="n">GPU</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">Context</span><span class="p">(</span><span class="n">devices</span><span class="o">=</span><span class="n">devices</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">create_some_context</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">create_some_gpu_context</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span>
 
@@ -224,7 +240,7 @@
         <span class="c1"># important for comermann pipeline</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">primed_cromermann</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="ClCore.set_groupsize"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.set_groupsize">[docs]</a>    <span class="k">def</span> <span class="nf">set_groupsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_size</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.set_groupsize"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.set_groupsize">[docs]</a>    <span class="k">def</span> <span class="nf">set_groupsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_size</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If the environment variable BORNAGAIN_CL_GROUPSIZE is set then use</span>
 <span class="sd">        that value.</span>
@@ -354,7 +370,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">qrf_kam_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">qrf_kam</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qrf_kam_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
 
-<div class="viewcode-block" id="ClCore.vec4"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.vec4">[docs]</a>    <span class="k">def</span> <span class="nf">vec4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.vec4"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.vec4">[docs]</a>    <span class="k">def</span> <span class="nf">vec4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evdidently pyopencl does not deal with 3-vectors very well, so we use</span>
 <span class="sd">        4-vectors and pad with a zero at the end.</span>
@@ -373,7 +389,7 @@
             <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">real_t</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ClCore.vec16"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.vec16">[docs]</a>    <span class="k">def</span> <span class="nf">vec16</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.vec16"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.vec16">[docs]</a>    <span class="k">def</span> <span class="nf">vec16</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The best way to pass in a rotation matrix is as a float16.  This is a helper function for preparing a numpy</span>
 <span class="sd">        array so that it can be passed in as a float16.</span>
@@ -394,7 +410,7 @@
         <span class="n">R16</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">R16</span></div>
 
-<div class="viewcode-block" id="ClCore.to_device_static"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.to_device_static">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ClCore.to_device_static"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.to_device_static">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">to_device_static</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">queue</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Static method</span>
@@ -419,7 +435,7 @@
         <span class="k">return</span> <span class="n">cl</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span>
                                   <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)))</span></div>
 
-<div class="viewcode-block" id="ClCore.to_device"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.to_device">[docs]</a>    <span class="k">def</span> <span class="nf">to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.to_device"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.to_device">[docs]</a>    <span class="k">def</span> <span class="nf">to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy </span>
 <span class="sd">        array into a pyopencl.array and send it to the device memory.  So far this only</span>
@@ -451,7 +467,7 @@
         <span class="k">return</span> <span class="n">cl</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span>
                                   <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)))</span></div>
 
-<div class="viewcode-block" id="ClCore.get_group_size"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.get_group_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_group_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.get_group_size"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.get_group_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_group_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        retrieve the currently set group_size</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -461,7 +477,7 @@
 
         <span class="k">return</span> <span class="n">group_size_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="ClCore.mod_squared_complex_to_real"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real">[docs]</a>    <span class="k">def</span> <span class="nf">mod_squared_complex_to_real</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">I</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.mod_squared_complex_to_real"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real">[docs]</a>    <span class="k">def</span> <span class="nf">mod_squared_complex_to_real</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">I</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Compute the real-valued modulus square of complex numbers.</span>
 <span class="sd">        Good example of a function that shouldn&#39;t exist, but I needed to add </span>
@@ -480,7 +496,7 @@
                                             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">A</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">I</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ClCore.phase_factor_qrf_chunk"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_qrf_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">Nchunk</span><span class="p">,</span> <span class="n">q_is_qdev</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.phase_factor_qrf_chunk"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_qrf_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">Nchunk</span><span class="p">,</span> <span class="n">q_is_qdev</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</span>
 
@@ -532,7 +548,7 @@
                                      <span class="n">n_pixels</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span></div>
 
     
-<div class="viewcode-block" id="ClCore.phase_factor_qrf_inplace"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf_inplace">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_qrf_inplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_is_qdev</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.phase_factor_qrf_inplace"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf_inplace">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_qrf_inplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_is_qdev</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</span>
 
@@ -577,22 +593,22 @@
                                  <span class="n">n_pixels</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ClCore.next_multiple_groupsize"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.next_multiple_groupsize">[docs]</a>    <span class="k">def</span> <span class="nf">next_multiple_groupsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.next_multiple_groupsize"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.next_multiple_groupsize">[docs]</a>    <span class="k">def</span> <span class="nf">next_multiple_groupsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">N</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">-</span> <span class="n">N</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="ClCore.init_amps"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.init_amps">[docs]</a>    <span class="k">def</span> <span class="nf">init_amps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Npix</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.init_amps"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.init_amps">[docs]</a>    <span class="k">def</span> <span class="nf">init_amps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Npix</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Npix</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complex_t</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">Npix</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="ClCore.release_amps"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.release_amps">[docs]</a>    <span class="k">def</span> <span class="nf">release_amps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.release_amps"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.release_amps">[docs]</a>    <span class="k">def</span> <span class="nf">release_amps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">amps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">reset</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">init_amps</span><span class="p">(</span><span class="n">amps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">amps</span></div>
 
-<div class="viewcode-block" id="ClCore.phase_factor_qrf"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_qrf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.phase_factor_qrf"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_qrf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</span>
 
@@ -639,7 +655,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">a_dev</span></div>
 
-<div class="viewcode-block" id="ClCore.phase_factor_pad"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.phase_factor_pad">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.phase_factor_pad"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_pad">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        This should simulate detector panels.</span>
 
@@ -705,7 +721,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">a_dev</span></div>
 
-<div class="viewcode-block" id="ClCore.phase_factor_mesh"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.phase_factor_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">q_min</span><span class="p">,</span> <span class="n">q_max</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.phase_factor_mesh"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">q_min</span><span class="p">,</span> <span class="n">q_max</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Compute phase factors on a regular 3D mesh of q-space samples.</span>
 
@@ -763,7 +779,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">a_dev</span></div>
 
-<div class="viewcode-block" id="ClCore.buffer_mesh_lookup"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">buffer_mesh_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_map</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">q_min</span><span class="p">,</span> <span class="n">q_max</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.buffer_mesh_lookup"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">buffer_mesh_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_map</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">q_min</span><span class="p">,</span> <span class="n">q_max</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is supposed to lookup intensities from a 3d mesh of amplitudes.</span>
 
@@ -821,7 +837,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">a_out_dev</span></div>
 
-<div class="viewcode-block" id="ClCore.lattice_transform_intensities_pad"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.lattice_transform_intensities_pad">[docs]</a>    <span class="k">def</span> <span class="nf">lattice_transform_intensities_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abc</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span>
+<div class="viewcode-block" id="ClCore.lattice_transform_intensities_pad"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.lattice_transform_intensities_pad">[docs]</a>    <span class="k">def</span> <span class="nf">lattice_transform_intensities_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abc</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span>
                                           <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">I</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate crystal lattice transform intensities for a pixel-array detector.  This is the usual transform for</span>
@@ -879,7 +895,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">I_dev</span></div>
 
-<div class="viewcode-block" id="ClCore.gaussian_lattice_transform_intensities_pad"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.gaussian_lattice_transform_intensities_pad">[docs]</a>    <span class="k">def</span> <span class="nf">gaussian_lattice_transform_intensities_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abc</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span>
+<div class="viewcode-block" id="ClCore.gaussian_lattice_transform_intensities_pad"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.gaussian_lattice_transform_intensities_pad">[docs]</a>    <span class="k">def</span> <span class="nf">gaussian_lattice_transform_intensities_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abc</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span>
                                                    <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">I</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian approximation</span>
@@ -938,7 +954,7 @@
             <span class="k">return</span> <span class="n">I_dev</span></div>
 
 
-<div class="viewcode-block" id="ClCore.prime_cromermann_simulator"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.prime_cromermann_simulator">[docs]</a>    <span class="k">def</span> <span class="nf">prime_cromermann_simulator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_vecs</span><span class="p">,</span> <span class="n">atomic_nums</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incoherent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.prime_cromermann_simulator"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.prime_cromermann_simulator">[docs]</a>    <span class="k">def</span> <span class="nf">prime_cromermann_simulator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_vecs</span><span class="p">,</span> <span class="n">atomic_nums</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incoherent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare special array data for cromermann simulation</span>
 
@@ -995,7 +1011,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">primed_cromermann</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="ClCore.get_r_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.get_r_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">get_r_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_vecs</span><span class="p">,</span> <span class="n">sub_com</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.get_r_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.get_r_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">get_r_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_vecs</span><span class="p">,</span> <span class="n">sub_com</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        combine atomic vectors and atomic flux factors</span>
 <span class="sd">        into an openCL buffer</span>
@@ -1035,7 +1051,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r_vecs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ClCore.get_q_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.get_q_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">get_q_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.get_q_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.get_q_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">get_q_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        combine form factors and q-vectors and load onto a CL buffer</span>
 <span class="sd">        </span>
@@ -1075,7 +1091,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_A_buff_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span><span class="o">.</span><span class="n">data</span>
 
-<div class="viewcode-block" id="ClCore.run_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.run_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">run_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span> 
+<div class="viewcode-block" id="ClCore.run_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.run_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">run_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span> 
                     <span class="n">rand_rot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the qrf kam simulator.</span>
@@ -1148,7 +1164,7 @@
     <span class="k">def</span> <span class="nf">_set_com_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ClCore.release_amplitudes"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.ClCore.release_amplitudes">[docs]</a>    <span class="k">def</span> <span class="nf">release_amplitudes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ClCore.release_amplitudes"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.release_amplitudes">[docs]</a>    <span class="k">def</span> <span class="nf">release_amplitudes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Releases the amplitude buffer from the GPU</span>
 <span class="sd">        </span>
@@ -1162,7 +1178,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_load_amp_buffer</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">Amps</span></div></div>
 
-<div class="viewcode-block" id="helpme"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.helpme">[docs]</a><span class="k">def</span> <span class="nf">helpme</span><span class="p">():</span>
+<div class="viewcode-block" id="helpme"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.helpme">[docs]</a><span class="k">def</span> <span class="nf">helpme</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Print out some useful information about platforms and devices that are</span>
 <span class="sd">    available for running simulations.</span>
@@ -1265,7 +1281,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; export PYOPENCL_CTX=&#39;1&#39;&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="test"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.clcore.test">[docs]</a><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+<div class="viewcode-block" id="test"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.test">[docs]</a><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
     <span class="kn">import</span> <span class="nn">pkg_resources</span>
     <span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">Molecule</span>
     <span class="n">pdb</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;bornagain/bornagain&#39;</span><span class="p">,</span>

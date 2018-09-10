@@ -36,7 +36,7 @@
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.simulate.simutils</li>
     
     
@@ -199,14 +201,14 @@
 <span class="c1">#     return amps</span>
 
 
-<div class="viewcode-block" id="sphericalize"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.simutils.sphericalize">[docs]</a><span class="k">def</span> <span class="nf">sphericalize</span><span class="p">(</span><span class="n">lattice</span><span class="p">):</span>
+<div class="viewcode-block" id="sphericalize"><a class="viewcode-back" href="../../../bornagain.simulate.simutils.html#bornagain.simulate.simutils.sphericalize">[docs]</a><span class="k">def</span> <span class="nf">sphericalize</span><span class="p">(</span><span class="n">lattice</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;attempt to sphericalize a 2D lattice point array&quot;&quot;&quot;</span>
     <span class="n">center</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">rads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">lattice</span> <span class="o">-</span> <span class="n">center</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="n">max_rad</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lattice</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.</span>
     <span class="k">return</span> <span class="n">lattice</span><span class="p">[</span><span class="n">rads</span> <span class="o">&lt;</span> <span class="n">max_rad</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="area_beam"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.simutils.area_beam">[docs]</a><span class="k">def</span> <span class="nf">area_beam</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<div class="viewcode-block" id="area_beam"><a class="viewcode-back" href="../../../bornagain.simulate.simutils.html#bornagain.simulate.simutils.area_beam">[docs]</a><span class="k">def</span> <span class="nf">area_beam</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This function returns the cross sectional area of illuminated</span>
 <span class="sd">    solvent assuming no crystal is present. if the beam side length</span>
@@ -232,7 +234,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;beam side length must be greater than zero.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="area_crys"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.simutils.area_crys">[docs]</a><span class="k">def</span> <span class="nf">area_crys</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<div class="viewcode-block" id="area_crys"><a class="viewcode-back" href="../../../bornagain.simulate.simutils.html#bornagain.simulate.simutils.area_crys">[docs]</a><span class="k">def</span> <span class="nf">area_crys</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This function finds the exposed cross-sectional area of solvent</span>
 <span class="sd">    from a cubic crystal and cylindrical jet. If the crystal is larger</span>
@@ -261,7 +263,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;crystal side length must be greater than zero.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="volume_solvent"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.simutils.volume_solvent">[docs]</a><span class="k">def</span> <span class="nf">volume_solvent</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">lc</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<div class="viewcode-block" id="volume_solvent"><a class="viewcode-back" href="../../../bornagain.simulate.simutils.html#bornagain.simulate.simutils.volume_solvent">[docs]</a><span class="k">def</span> <span class="nf">volume_solvent</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">lc</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This function returns the volume of illuminated solvent assuming</span>
 <span class="sd">    a &quot;square&quot; beam, a cubic crystal and a cylindrical jet of solvent.</span>

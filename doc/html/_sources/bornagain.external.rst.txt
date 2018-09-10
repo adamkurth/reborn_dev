@@ -1,6 +1,11 @@
 bornagain.external package
 ==========================
 
+.. automodule:: bornagain.external
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
@@ -12,27 +17,8 @@ Subpackages
 Submodules
 ----------
 
-bornagain.external.crystfel module
-----------------------------------
+.. toctree::
 
-.. automodule:: bornagain.external.crystfel
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   bornagain.external.crystfel
+   bornagain.external.lcls
 
-bornagain.external.lcls module
-------------------------------
-
-.. automodule:: bornagain.external.lcls
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: bornagain.external
-    :members:
-    :undoc-members:
-    :show-inheritance:

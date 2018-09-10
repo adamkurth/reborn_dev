@@ -36,7 +36,7 @@
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.simulate.refdata</li>
     
     
@@ -171,7 +173,7 @@
 <span class="c1"># Helper functions for accessing REFERENCE TABLES</span>
 <span class="c1"># ------------------------------------------------------------------------------</span>
 
-<div class="viewcode-block" id="get_cmann_form_factors"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.refdata.get_cmann_form_factors">[docs]</a><span class="k">def</span> <span class="nf">get_cmann_form_factors</span><span class="p">(</span><span class="n">cman</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<div class="viewcode-block" id="get_cmann_form_factors"><a class="viewcode-back" href="../../../bornagain.simulate.refdata.html#bornagain.simulate.refdata.get_cmann_form_factors">[docs]</a><span class="k">def</span> <span class="nf">get_cmann_form_factors</span><span class="p">(</span><span class="n">cman</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    cman is a dict of {atomic_number : array of cman parameters}</span>
 
@@ -203,7 +205,7 @@
     <span class="k">return</span> <span class="n">form_facts</span>   </div>
 
 
-<div class="viewcode-block" id="get_cromermann_parameters"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.refdata.get_cromermann_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">):</span> 
+<div class="viewcode-block" id="get_cromermann_parameters"><a class="viewcode-back" href="../../../bornagain.simulate.refdata.html#bornagain.simulate.refdata.get_cromermann_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">):</span> 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modified from tjlane/thor.git</span>
 <span class="sd">    Get cromer-mann parameters for each atom type</span>
@@ -232,7 +234,7 @@
     <span class="k">return</span> <span class="n">cromermann</span> </div>
 
 
-<div class="viewcode-block" id="get_cromermann_parameters_legacy"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.refdata.get_cromermann_parameters_legacy">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters_legacy</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">max_num_atom_types</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_cromermann_parameters_legacy"><a class="viewcode-back" href="../../../bornagain.simulate.refdata.html#bornagain.simulate.refdata.get_cromermann_parameters_legacy">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters_legacy</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">max_num_atom_types</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get cromer-mann parameters for each atom type and renumber the atom </span>
 <span class="sd">    types to 0, 1, 2, ... to point to their CM params.</span>

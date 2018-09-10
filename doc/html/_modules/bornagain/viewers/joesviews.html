@@ -36,7 +36,7 @@
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.viewers.joesviews</li>
     
     
@@ -163,7 +165,7 @@
 <span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d.art3d</span> <span class="k">import</span> <span class="n">Poly3DCollection</span>
 <span class="kn">from</span> <span class="nn">skimage</span> <span class="k">import</span> <span class="n">measure</span>
 
-<div class="viewcode-block" id="meshplot3D"><a class="viewcode-back" href="../../../bornagain.viewers.html#bornagain.viewers.joesviews.meshplot3D">[docs]</a><span class="k">def</span> <span class="nf">meshplot3D</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">isosurface_value</span><span class="p">):</span>
+<div class="viewcode-block" id="meshplot3D"><a class="viewcode-back" href="../../../bornagain.viewers.joesviews.html#bornagain.viewers.joesviews.meshplot3D">[docs]</a><span class="k">def</span> <span class="nf">meshplot3D</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">isosurface_value</span><span class="p">):</span>
     <span class="c1"># Use marching cubes to obtain a surface mesh</span>
     <span class="k">if</span> <span class="n">isosurface_value</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="n">isosurface_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">*</span><span class="mf">1.1</span>

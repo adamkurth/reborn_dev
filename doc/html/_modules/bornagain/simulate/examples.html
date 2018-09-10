@@ -36,7 +36,7 @@
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.simulate.examples</li>
     
     
@@ -173,15 +175,27 @@
 <span class="n">pnccd_geom_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/geom/pnccd_front.geom&#39;</span><span class="p">)</span>
 <span class="n">cspad_geom_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/geom/cspad.geom&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="pnccd_pads"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.examples.pnccd_pads">[docs]</a><span class="k">def</span> <span class="nf">pnccd_pads</span><span class="p">():</span>
+
+<div class="viewcode-block" id="pnccd_pads"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.pnccd_pads">[docs]</a><span class="k">def</span> <span class="nf">pnccd_pads</span><span class="p">():</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Generate a list of :class:`PADGeometry &lt;bornagain.detector.PADGeometry&gt;` instances that are inspired by</span>
+<span class="sd">    the `pnCCD &lt;https://doi.org/10.1016/j.nima.2009.12.053&gt;`_ detector.</span>
+
+<span class="sd">    Returns: List of :class:`PADGeometry &lt;bornagain.detector.PADGeometry&gt;` instances.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">crystfel</span><span class="o">.</span><span class="n">geometry_file_to_pad_geometry_list</span><span class="p">(</span><span class="n">pnccd_geom_file</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="cspad_pads"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.examples.cspad_pads">[docs]</a><span class="k">def</span> <span class="nf">cspad_pads</span><span class="p">():</span>
+
+<div class="viewcode-block" id="cspad_pads"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.cspad_pads">[docs]</a><span class="k">def</span> <span class="nf">cspad_pads</span><span class="p">():</span>
 
     <span class="k">return</span> <span class="n">crystfel</span><span class="o">.</span><span class="n">geometry_file_to_pad_geometry_list</span><span class="p">(</span><span class="n">cspad_geom_file</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="lysozyme_molecule"><a class="viewcode-back" href="../../../bornagain.simulate.html#bornagain.simulate.examples.lysozyme_molecule">[docs]</a><span class="k">def</span> <span class="nf">lysozyme_molecule</span><span class="p">(</span><span class="n">pads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="lysozyme_molecule"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.lysozyme_molecule">[docs]</a><span class="k">def</span> <span class="nf">lysozyme_molecule</span><span class="p">(</span><span class="n">pads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
 
     <span class="k">if</span> <span class="n">wavelength</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

@@ -36,7 +36,7 @@
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
+        <link rel="up" title="bornagain" href="../bornagain.html"/> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.scatter</li>
     
     
@@ -166,7 +168,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="RadialProfile"><a class="viewcode-back" href="../../bornagain.html#bornagain.scatter.RadialProfile">[docs]</a><span class="k">class</span> <span class="nc">RadialProfile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="RadialProfile"><a class="viewcode-back" href="../../bornagain.scatter.html#bornagain.scatter.RadialProfile">[docs]</a><span class="k">class</span> <span class="nc">RadialProfile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Helper class to create radial profiles.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -183,7 +185,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">q_range</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">counts_non_zero</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="RadialProfile.make_plan"><a class="viewcode-back" href="../../bornagain.html#bornagain.scatter.RadialProfile.make_plan">[docs]</a>    <span class="k">def</span> <span class="nf">make_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_mags</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">q_range</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="RadialProfile.make_plan"><a class="viewcode-back" href="../../bornagain.scatter.html#bornagain.scatter.RadialProfile.make_plan">[docs]</a>    <span class="k">def</span> <span class="nf">make_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_mags</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">q_range</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Setup the binning indices for the creation of radial profiles.</span>
 
@@ -233,7 +235,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">q_range</span> <span class="o">=</span> <span class="n">q_range</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">counts_non_zero</span> <span class="o">=</span> <span class="n">counts_non_zero</span></div>
 
-<div class="viewcode-block" id="RadialProfile.get_profile"><a class="viewcode-back" href="../../bornagain.html#bornagain.scatter.RadialProfile.get_profile">[docs]</a>    <span class="k">def</span> <span class="nf">get_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="RadialProfile.get_profile"><a class="viewcode-back" href="../../bornagain.scatter.html#bornagain.scatter.RadialProfile.get_profile">[docs]</a>    <span class="k">def</span> <span class="nf">get_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a radial profile for a particular dataframe.</span>
 

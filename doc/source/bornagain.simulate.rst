@@ -1,70 +1,21 @@
 bornagain.simulate package
 ==========================
 
-Submodules
-----------
-
-bornagain.simulate.atoms module
--------------------------------
-
-.. automodule:: bornagain.simulate.atoms
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.simulate.clcore module
---------------------------------
-
-.. automodule:: bornagain.simulate.clcore
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.simulate.examples module
-----------------------------------
-
-.. automodule:: bornagain.simulate.examples
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.simulate.refdata module
----------------------------------
-
-.. automodule:: bornagain.simulate.refdata
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.simulate.simutils module
-----------------------------------
-
-.. automodule:: bornagain.simulate.simutils
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.simulate.solutions module
------------------------------------
-
-.. automodule:: bornagain.simulate.solutions
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-bornagain.simulate.thorn module
--------------------------------
-
-.. automodule:: bornagain.simulate.thorn
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
 .. automodule:: bornagain.simulate
     :members:
     :undoc-members:
     :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.simulate.atoms
+   bornagain.simulate.clcore
+   bornagain.simulate.examples
+   bornagain.simulate.refdata
+   bornagain.simulate.simutils
+   bornagain.simulate.solutions
+   bornagain.simulate.thorn
+

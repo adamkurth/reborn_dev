@@ -10,7 +10,7 @@ from bornagain.target import crystal, density
 
 def test_transforms():
 
-    cryst = crystal.structure()
+    cryst = crystal.Structure()
     cryst.set_spacegroup('P 63')
     cryst.set_cell(1e-9, 1e-9, 1e-9, 90*np.pi/180, 90*np.pi/180, 120*np.pi/180)
 

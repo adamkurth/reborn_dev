@@ -5,10 +5,8 @@ import pyqtgraph as pg
 
 def keep_open():
 
-    """
-
+    r"""
     Simple helper that keeps qtgraph window open when you run a script from the terminal.
-
     """
 
     pg.QtGui.QApplication.instance().exec_()
@@ -16,8 +14,10 @@ def keep_open():
 
 class MultiHistogramLUTWidget(pg.GraphicsView):
 
-    """
-    This is the equivalent of HistogramLUTWidget, but wraps MultiHistogramLUTWidget.
+    r"""
+    This is the equivalent of :class:`pyqtgraph.HistogramLUTWidget`, but wraps
+    :class:`MultiHistogramLUTWidget <bornagain.external.pyqtgraph.MultiHistogramLUTItem>` instead of
+    :class:`pyqtgraph.HistogramLUTItem`.
     """
 
     def __init__(self, parent=None, *args, **kargs):
@@ -29,6 +29,11 @@ class MultiHistogramLUTWidget(pg.GraphicsView):
         self.setMinimumWidth(95)
 
     def sizeHint(self):
+
+        r"""
+        Undocumented pyqtgraph method.
+        """
+
         return pg.QtCore.QSize(115, 200)
 
     def __getattr__(self, attr):
@@ -36,11 +41,13 @@ class MultiHistogramLUTWidget(pg.GraphicsView):
 
 
 class MultiHistogramLUTItem(pg.HistogramLUTItem):
-    """
-    This is an extension to the HistogramLUTItem that allows control over multiple images. The main feature is the
-    addition of the setImageItems() method.
 
-    This is a graphicsWidget which provides controls for adjusting the display of an image.
+    r"""
+    This is a bornagain extension to the :class:`pyqtgraph.HistogramLUTItem` that allows control
+    over multiple images. The main feature is the
+    addition of the :func:`setImageItems` method.
+
+    This is a :class:`pyqtgraph.graphicsWidget` which provides controls for adjusting the display of an image.
 
     Includes:
 
@@ -69,12 +76,17 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
 
     def __init__(self, *args, **kwargs):
 
+        r"""
+        Undocumented pyqtgraph method.
+        """
+
         pg.HistogramLUTItem.__init__(self, *args, **kwargs)
 
 
     def setImageItems(self, imgs):
-        """Set an ImageItem to have its levels and LUT automatically controlled
-        by this HistogramLUTItem.
+        r"""
+        Set a list of :class:`pyqtgraph.ImageItem` instances that will have their levels
+        and LUT automatically controlled by this HistogramLUTItem.
         """
         i = 0
         self.imageItems = []
@@ -93,8 +105,12 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
         self.regionChanged()
         self.imageChanged(autoLevel=True)
 
-
     def gradientChanged(self):
+
+        r"""
+        Undocumented pyqtgraph method.
+        """
+
         if self.imageItem() is not None:
             if self.gradient.isLookupTrivial():
                 for im in self.imageItems:
@@ -106,16 +122,23 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
         self.lut = None
         self.sigLookupTableChanged.emit(self)
 
-
     def regionChanged(self):
+
+        r"""
+        Undocumented pyqtgraph method.
+        """
+
         if self.imageItem() is not None:
             # print('regionChanged')
             for im in self.imageItems:
                 im.setLevels(self.getLevels())
         self.sigLevelChangeFinished.emit(self)
 
-
     def regionChanging(self):
+
+        r"""
+        Undocumented pyqtgraph method.
+        """
         if self.imageItem() is not None:
             # print('regionChanging')
             for im in self.imageItems:
@@ -123,9 +146,10 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
         self.sigLevelsChanged.emit(self)
         self.update()
 
-
     def setLevelMode(self, mode):
-        """ Set the method of controlling the image levels offered to the user.
+
+        r"""
+        Set the method of controlling the image levels offered to the user.
         Options are 'mono' or 'rgba'.
         """
         assert mode in ('mono', 'rgba')

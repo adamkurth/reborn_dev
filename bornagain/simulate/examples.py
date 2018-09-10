@@ -15,6 +15,15 @@ cspad_geom_file = pkg_resources.resource_filename('bornagain.simulate', 'data/ge
 
 def pnccd_pads():
 
+    r"""
+
+    Generate a list of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances that are inspired by
+    the `pnCCD <https://doi.org/10.1016/j.nima.2009.12.053>`_ detector.
+
+    Returns: List of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances.
+
+    """
+
     return crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
 
 

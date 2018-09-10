@@ -36,7 +36,7 @@
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.target.density</li>
     
     
@@ -168,7 +170,7 @@
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">binned_statistic_dd</span>
 
 
-<div class="viewcode-block" id="CrystalMeshTool"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool">[docs]</a><span class="k">class</span> <span class="nc">CrystalMeshTool</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool">[docs]</a><span class="k">class</span> <span class="nc">CrystalMeshTool</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A helper class for working with 3D density maps.  Most importantly, it allows one to do spacegroup symmetry</span>
@@ -227,7 +229,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>  <span class="c1">#:  Linear length fo map (=N^3)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>  <span class="c1">#:  The stride vector (mostly for internal use)</span>
 
-<div class="viewcode-block" id="CrystalMeshTool.get_n_vecs"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.get_n_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_n_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.get_n_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_n_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_n_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -249,7 +251,7 @@
         <span class="c1"># n_vecs = n_vecs[:, ::-1]</span>
         <span class="k">return</span> <span class="n">n_vecs</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.get_x_vecs"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.get_x_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_x_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.get_x_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_x_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_x_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -266,7 +268,7 @@
         <span class="n">x_vecs</span> <span class="o">=</span> <span class="n">x_vecs</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
         <span class="k">return</span> <span class="n">x_vecs</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.get_r_vecs"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.get_r_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_r_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.get_r_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_r_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_r_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -281,7 +283,7 @@
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.get_h_vecs"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.get_h_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_h_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.get_h_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_h_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_h_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -299,7 +301,7 @@
         <span class="n">h</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nc</span>
         <span class="k">return</span> <span class="n">h</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.get_q_vecs"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.get_q_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_q_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.get_q_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_q_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_q_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -312,7 +314,7 @@
         <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_h_vecs</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
 
 
-<div class="viewcode-block" id="CrystalMeshTool.get_sym_luts"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.get_sym_luts">[docs]</a>    <span class="k">def</span> <span class="nf">get_sym_luts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.get_sym_luts"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_sym_luts">[docs]</a>    <span class="k">def</span> <span class="nf">get_sym_luts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -341,7 +343,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sym_luts</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.symmetry_transform"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.symmetry_transform">[docs]</a>    <span class="k">def</span> <span class="nf">symmetry_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.symmetry_transform"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.symmetry_transform">[docs]</a>    <span class="k">def</span> <span class="nf">symmetry_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -365,7 +367,7 @@
 
         <span class="k">return</span> <span class="n">data_trans</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.shape"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.shape">[docs]</a>    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.shape"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.shape">[docs]</a>    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -377,7 +379,7 @@
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.reshape"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.reshape">[docs]</a>    <span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.reshape"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.reshape">[docs]</a>    <span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -393,7 +395,7 @@
         <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span>
         <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.reshape3"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.reshape3">[docs]</a>    <span class="k">def</span> <span class="nf">reshape3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.reshape3"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.reshape3">[docs]</a>    <span class="k">def</span> <span class="nf">reshape3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -407,7 +409,7 @@
         <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span>
         <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.zeros"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.zeros"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -420,7 +422,7 @@
         <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.place_atoms_in_map"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.place_atoms_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_atoms_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.place_atoms_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.place_atoms_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_atoms_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -442,7 +444,7 @@
 
         <span class="k">return</span> <span class="n">a</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.place_intensities_in_map"><a class="viewcode-back" href="../../../bornagain.target.html#bornagain.target.density.CrystalMeshTool.place_intensities_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_intensities_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.place_intensities_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.place_intensities_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_intensities_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 

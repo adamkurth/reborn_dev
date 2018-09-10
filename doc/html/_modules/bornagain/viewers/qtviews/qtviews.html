@@ -36,7 +36,7 @@
               href="../../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../../index.html"/>
-        <link rel="up" title="Module code" href="../../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../../bornagain.html"/> 
 
   
   <script src="../../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.viewers.qtviews.qtviews</li>
     
     
@@ -187,7 +189,7 @@
         <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]),</span>
         <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">])]</span>
 
-<div class="viewcode-block" id="bright_colors"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.bright_colors">[docs]</a><span class="k">def</span> <span class="nf">bright_colors</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="bright_colors"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.bright_colors">[docs]</a><span class="k">def</span> <span class="nf">bright_colors</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot; Some nice colors.  Only 8 available, which loops around as the input index increments.&quot;&quot;&quot;</span>
 
@@ -195,7 +197,7 @@
 
 
 
-<div class="viewcode-block" id="Volumetric3D"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D">[docs]</a><span class="k">class</span> <span class="nc">Volumetric3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Volumetric3D"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D">[docs]</a><span class="k">class</span> <span class="nc">Volumetric3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; View a 3D density map &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -208,7 +210,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">datSum</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">defaultColor</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">glColor</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">])</span>
 
-<div class="viewcode-block" id="Volumetric3D.add_density"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.add_density">[docs]</a>    <span class="k">def</span> <span class="nf">add_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Volumetric3D.add_density"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.add_density">[docs]</a>    <span class="k">def</span> <span class="nf">add_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">col</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span>
@@ -228,13 +230,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">col</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="n">rho</span></div>
 
-<div class="viewcode-block" id="Volumetric3D.add_grid"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.add_grid">[docs]</a>    <span class="k">def</span> <span class="nf">add_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Volumetric3D.add_grid"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.add_grid">[docs]</a>    <span class="k">def</span> <span class="nf">add_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">g</span> <span class="o">=</span> <span class="n">gl</span><span class="o">.</span><span class="n">GLGridItem</span><span class="p">()</span>
         <span class="n">g</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">g</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Volumetric3D.add_lines"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.add_lines">[docs]</a>    <span class="k">def</span> <span class="nf">add_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Volumetric3D.add_lines"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.add_lines">[docs]</a>    <span class="k">def</span> <span class="nf">add_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultColor</span>
@@ -249,7 +251,7 @@
         <span class="n">plt</span> <span class="o">=</span> <span class="n">gl</span><span class="o">.</span><span class="n">GLLinePlotItem</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">plt</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Volumetric3D.add_rgb_axis"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.add_rgb_axis">[docs]</a>    <span class="k">def</span> <span class="nf">add_rgb_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Volumetric3D.add_rgb_axis"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.add_rgb_axis">[docs]</a>    <span class="k">def</span> <span class="nf">add_rgb_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">wid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultWidth</span>
@@ -265,7 +267,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span> <span class="o">*</span> <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Volumetric3D.show"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Volumetric3D.show"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">255.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">255.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
@@ -280,7 +282,7 @@
         <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div></div>
 
 
-<div class="viewcode-block" id="MapProjection"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.MapProjection">[docs]</a><span class="k">def</span> <span class="nf">MapProjection</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="MapProjection"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.MapProjection">[docs]</a><span class="k">def</span> <span class="nf">MapProjection</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; View a 3D density map as a projection along selected axes (which can be a list)&#39;&#39;&#39;</span>
 
     <span class="k">if</span> <span class="n">axis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -303,7 +305,7 @@
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="MapSlices"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.MapSlices">[docs]</a><span class="k">def</span> <span class="nf">MapSlices</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="MapSlices"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.MapSlices">[docs]</a><span class="k">def</span> <span class="nf">MapSlices</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; View a 3D density map as a projection along selected axes (which can be a list)&#39;&#39;&#39;</span>
 
     <span class="c1"># This assumes we have a cube...</span>
@@ -342,7 +344,7 @@
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Scatter3D"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D">[docs]</a><span class="k">class</span> <span class="nc">Scatter3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Scatter3D"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D">[docs]</a><span class="k">class</span> <span class="nc">Scatter3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39; Simple viewer for 3D scatter plots. &#39;&#39;&#39;</span>
 
@@ -355,7 +357,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">defaultWidth</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxDist</span> <span class="o">=</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="Scatter3D.add_points"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.add_points">[docs]</a>    <span class="k">def</span> <span class="nf">add_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Scatter3D.add_points"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.add_points">[docs]</a>    <span class="k">def</span> <span class="nf">add_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39; Add an Nx3 array of points r with specified color and size.  Color is a 3-element</span>
 <span class="sd">		    Python list and size is a float scalar. &#39;&#39;&#39;</span>
@@ -374,7 +376,7 @@
         <span class="n">plt</span> <span class="o">=</span> <span class="n">gl</span><span class="o">.</span><span class="n">GLScatterPlotItem</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">siz</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">plt</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Scatter3D.add_lines"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.add_lines">[docs]</a>    <span class="k">def</span> <span class="nf">add_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Scatter3D.add_lines"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.add_lines">[docs]</a>    <span class="k">def</span> <span class="nf">add_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultColor</span>
@@ -389,7 +391,7 @@
         <span class="n">plt</span> <span class="o">=</span> <span class="n">gl</span><span class="o">.</span><span class="n">GLLinePlotItem</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">plt</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Scatter3D.add_rgb_axis"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.add_rgb_axis">[docs]</a>    <span class="k">def</span> <span class="nf">add_rgb_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Scatter3D.add_rgb_axis"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.add_rgb_axis">[docs]</a>    <span class="k">def</span> <span class="nf">add_rgb_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">wid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultWidth</span>
@@ -405,7 +407,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span> <span class="o">*</span> <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Scatter3D.show"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Scatter3D.show"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">setCameraPosition</span><span class="p">(</span><span class="n">distance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxDist</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>

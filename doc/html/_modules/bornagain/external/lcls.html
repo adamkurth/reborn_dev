@@ -36,7 +36,7 @@
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
@@ -141,6 +141,8 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
+          <li><a href="../../bornagain.html">bornagain</a> &raquo;</li>
+        
       <li>bornagain.external.lcls</li>
     
     
@@ -166,7 +168,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="reshape_psana_cspad_array_to_cheetah_array"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">[docs]</a><span class="k">def</span> <span class="nf">reshape_psana_cspad_array_to_cheetah_array</span><span class="p">(</span><span class="n">psana_array</span><span class="p">):</span>
+<div class="viewcode-block" id="reshape_psana_cspad_array_to_cheetah_array"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">[docs]</a><span class="k">def</span> <span class="nf">reshape_psana_cspad_array_to_cheetah_array</span><span class="p">(</span><span class="n">psana_array</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform psana cspad numpy array of shape (32,185,388) into array to Cheetah array of shape (1480, 1552).</span>
 <span class="sd">    Unfortunately, the Cheetah format requires a re-write of the data in memory, and one result of this re-write is that</span>
@@ -193,7 +195,7 @@
     <span class="k">return</span> <span class="n">cheetah_array</span></div>
 
 
-<div class="viewcode-block" id="cheetah_cspad_array_to_pad_list"><a class="viewcode-back" href="../../../bornagain.external.html#bornagain.external.lcls.cheetah_cspad_array_to_pad_list">[docs]</a><span class="k">def</span> <span class="nf">cheetah_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">psana_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
+<div class="viewcode-block" id="cheetah_cspad_array_to_pad_list"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.cheetah_cspad_array_to_pad_list">[docs]</a><span class="k">def</span> <span class="nf">cheetah_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">psana_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with</span>
 <span class="sd">    data in the native psana format.  First you should create a crystfel geometry dictionary.</span>

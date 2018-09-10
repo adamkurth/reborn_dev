@@ -1,6 +1,11 @@
 bornagain.viewers package
 =========================
 
+.. automodule:: bornagain.viewers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
@@ -11,19 +16,7 @@ Subpackages
 Submodules
 ----------
 
-bornagain.viewers.joesviews module
-----------------------------------
+.. toctree::
 
-.. automodule:: bornagain.viewers.joesviews
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   bornagain.viewers.joesviews
 
-
-Module contents
----------------
-
-.. automodule:: bornagain.viewers
-    :members:
-    :undoc-members:
-    :show-inheritance:

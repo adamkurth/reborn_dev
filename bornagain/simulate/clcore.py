@@ -25,6 +25,25 @@ from bornagain.simulate import refdata
 clcore_file = pkg_resources.resource_filename(
     'bornagain.simulate', 'clcore.cpp')
 
+def create_some_gpu_context():
+
+    r"""
+
+    Since cl.create_some_context() sometimes forces a CPU on macs, this function will attempt to use a GPU
+    context if possible.
+
+    Returns: opencl context
+
+    """
+
+    try:
+        platform = cl.get_platforms()
+        devices = platform[0].get_devices(device_type=cl.device_type.GPU)
+        context = cl.Context(devices=devices)
+    except:
+        context = cl.create_some_context()
+
+    return context
 
 class ClCore(object):
     def __init__(self, context=None, queue=None, group_size=None,
@@ -36,12 +55,7 @@ class ClCore(object):
 
         # Setup the context
         if context is None:
-            try: # Derek: cl.create_some_context() was forcing CPU on both my macs.. so I thought its best to try to force GPU first. this works well
-                platform = cl.get_platforms()
-                devices = platform[0].get_devices(device_type=cl.device_type.GPU)
-                self.context = cl.Context(devices=devices)
-            except:
-                self.context = cl.create_some_context()
+            self.context = create_some_gpu_context()
         else:
             self.context = context
 

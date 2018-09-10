@@ -48,18 +48,9 @@ if True:
     pad.t_vec = t
     pads.append(pad)
 
-if 0:
-    if 1:
-        pads = pads[0:2]
-    else:
-        pads = pads[1:]
 
 pads = examples.cspad_pads()
 # pads = examples.pnccd_pads()
-
-
-
-
 
 sim = examples.lysozyme_molecule(pads=pads)
 
