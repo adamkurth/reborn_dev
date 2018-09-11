@@ -2,7 +2,8 @@
 
 r"""
 This module is essentially just a data container and should not be used externally.  The data should be 
-accessed using :func:`get_symmetry_operators_from_space_group`.
+accessed using :func:`get_symmetry_operators_from_space_group 
+<bornagain.target.crystal.get_symmetry_operators_from_space_group>`.
 
 The data were taken from the `spglib <https://atztogo.github.io/spglib/>`_ package.
 
