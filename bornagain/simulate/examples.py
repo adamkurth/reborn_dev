@@ -29,11 +29,31 @@ def pnccd_pads():
 
 def cspad_pads():
 
+    r"""
+
+    Generate a list of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances that are inspired by
+    the `CSPAD <http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-15284.pdf>`_ detector.
+
+    Returns: List of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances.
+
+    """
+
     return crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
 
 def lysozyme_molecule(pads=None, wavelength=None):
 
+    r"""
+
+    Simple simulation of lysozyme molecule using :class:`ClCore <bornagain.simulate.clcore.ClCore>`.
+
+    Args:
+        pads: List of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances.
+        wavelength: As always, in SI units.
+
+    Returns: dictionary with {'pad_geometry': pads, 'intensity': data_list}
+
+    """
 
     if wavelength is None:
         wavelength = 1.5e-10

@@ -32,6 +32,7 @@ def set_global(option, value):
     'warn_depreciated' (True/False):    Print warnings when depreciated classes etc. are used.
     'force_depreciated' (True/False):   Like 'warn_depreciated' but raise RunTimeError instead of warn.
     ==================================  ================================================================
+
         value: The value that you wish to associate with one of the above options.
 
     Returns: Nothing

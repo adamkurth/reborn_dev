@@ -36,7 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
-        <link rel="next" title="Installation" href="installation.html"/>
+        <link rel="next" title="PAD data and geometry formats" href="geometry.html"/>
         <link rel="prev" title="bornagain’s documentation" href="index.html"/> 
 
   
@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#simulation">Simulation</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">PAD data and geometry formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.html">bornagain package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
@@ -182,7 +183,7 @@
 </div>
 <div class="section" id="x-ray-beams">
 <h2>X-ray beams<a class="headerlink" href="#x-ray-beams" title="Permalink to this headline">¶</a></h2>
-<p>The bornagain package provides the <a class="reference internal" href="bornagain.source.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref any py py-class docutils literal notranslate"><span class="pre">source.Beam</span></code></a> class for describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of parameters that are needed to describe a beam are:</p>
+<p>The bornagain package provides the <a class="reference internal" href="bornagain.source.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref py py-class docutils literal notranslate"><span class="pre">Beam</span></code></a> class for describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of parameters that are needed to describe a beam are:</p>
 <blockquote>
 <div><span class="math notranslate">\(\lambda\)</span> : the “nominal” wavelength of the beam</div></blockquote>
 <p>and</p>
@@ -196,7 +197,7 @@
 <p>Most of the above parameters can be specified by an instance of the <a class="reference internal" href="bornagain.source.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref any py py-class docutils literal notranslate"><span class="pre">source.Beam</span></code></a> class.  Derived quantities such as the polarization correction are tied to classes contained in the <a class="reference internal" href="bornagain.detector.html#module-bornagain.detector" title="bornagain.detector"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">detector</span></code></a> module.</p>
 </div>
 <div class="section" id="pixel-array-detectors">
-<h2>Pixel-Array Detectors<a class="headerlink" href="#pixel-array-detectors" title="Permalink to this headline">¶</a></h2>
+<span id="shortanchor"></span><h2>Pixel-Array Detectors<a class="headerlink" href="#pixel-array-detectors" title="Permalink to this headline">¶</a></h2>
 <div class="figure" id="id1">
 <a class="reference internal image-reference" href="_images/pad.jpg"><img alt="Pixel-array detector schematic" src="_images/pad.jpg" style="width: 1062.4px; height: 493.6px;" /></a>
 <p class="caption"><span class="caption-text">Schematic of a Pixel-Array Detector.</span></p>
@@ -259,7 +260,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="geometry.html" class="btn btn-neutral float-right" title="PAD data and geometry formats" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral" title="bornagain’s documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -48,7 +48,6 @@ if True:
     pad.t_vec = t
     pads.append(pad)
 
-
 pads = examples.cspad_pads()
 # pads = examples.pnccd_pads()
 

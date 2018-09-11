@@ -91,6 +91,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../geometry.html">PAD data and geometry formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../bornagain.html">bornagain package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">bornagain</a></li>
@@ -192,6 +193,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">95</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MultiHistogramLUTWidget.sizeHint"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Undocumented pyqtgraph method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">return</span> <span class="n">pg</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">115</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
@@ -199,6 +205,7 @@
 
 
 <div class="viewcode-block" id="MultiHistogramLUTItem"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem">[docs]</a><span class="k">class</span> <span class="nc">MultiHistogramLUTItem</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">HistogramLUTItem</span><span class="p">):</span>
+
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a bornagain extension to the :class:`pyqtgraph.HistogramLUTItem` that allows control</span>
 <span class="sd">    over multiple images. The main feature is the</span>
@@ -233,6 +240,10 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Undocumented pyqtgraph method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">pg</span><span class="o">.</span><span class="n">HistogramLUTItem</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
@@ -258,8 +269,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">regionChanged</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imageChanged</span><span class="p">(</span><span class="n">autoLevel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
-
 <div class="viewcode-block" id="MultiHistogramLUTItem.gradientChanged"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.gradientChanged">[docs]</a>    <span class="k">def</span> <span class="nf">gradientChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Undocumented pyqtgraph method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient</span><span class="o">.</span><span class="n">isLookupTrivial</span><span class="p">():</span>
                 <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
@@ -271,16 +286,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lut</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigLookupTableChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-
 <div class="viewcode-block" id="MultiHistogramLUTItem.regionChanged"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">regionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Undocumented pyqtgraph method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># print(&#39;regionChanged&#39;)</span>
             <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
                 <span class="n">im</span><span class="o">.</span><span class="n">setLevels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLevels</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigLevelChangeFinished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-
 <div class="viewcode-block" id="MultiHistogramLUTItem.regionChanging"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanging">[docs]</a>    <span class="k">def</span> <span class="nf">regionChanging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Undocumented pyqtgraph method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># print(&#39;regionChanging&#39;)</span>
             <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
@@ -288,8 +310,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sigLevelsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 
-
 <div class="viewcode-block" id="MultiHistogramLUTItem.setLevelMode"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setLevelMode">[docs]</a>    <span class="k">def</span> <span class="nf">setLevelMode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the method of controlling the image levels offered to the user.</span>
 <span class="sd">        Options are &#39;mono&#39; or &#39;rgba&#39;.</span>

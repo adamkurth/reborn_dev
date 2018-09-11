@@ -17,7 +17,7 @@ Some basics
 X-ray beams
 -----------
 
-The bornagain package provides the :any:`source.Beam` class for describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of parameters that are needed to describe a beam are:
+The bornagain package provides the :class:`Beam <bornagain.source.Beam>` class for describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of parameters that are needed to describe a beam are:
 
    :math:`\lambda` : the "nominal" wavelength of the beam
 
@@ -36,6 +36,8 @@ This single vector is appropriate for linearly polarized beams.  For beams that 
 
 Most of the above parameters can be specified by an instance of the :any:`source.Beam` class.  Derived quantities such as the polarization correction are tied to classes contained in the :any:`detector` module.
 
+
+.. _ShortAnchor:
 
 Pixel-Array Detectors
 ---------------------

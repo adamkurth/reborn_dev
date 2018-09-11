@@ -12,6 +12,7 @@ Contents
    :maxdepth: 2
    
    overview
+   geometry
    installation
    bornagain
    modules

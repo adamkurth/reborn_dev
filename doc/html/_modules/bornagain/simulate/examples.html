@@ -91,6 +91,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">PAD data and geometry formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../bornagain.html">bornagain package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
@@ -192,11 +193,31 @@
 
 <div class="viewcode-block" id="cspad_pads"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.cspad_pads">[docs]</a><span class="k">def</span> <span class="nf">cspad_pads</span><span class="p">():</span>
 
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Generate a list of :class:`PADGeometry &lt;bornagain.detector.PADGeometry&gt;` instances that are inspired by</span>
+<span class="sd">    the `CSPAD &lt;http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-15284.pdf&gt;`_ detector.</span>
+
+<span class="sd">    Returns: List of :class:`PADGeometry &lt;bornagain.detector.PADGeometry&gt;` instances.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="n">crystfel</span><span class="o">.</span><span class="n">geometry_file_to_pad_geometry_list</span><span class="p">(</span><span class="n">cspad_geom_file</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="lysozyme_molecule"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.lysozyme_molecule">[docs]</a><span class="k">def</span> <span class="nf">lysozyme_molecule</span><span class="p">(</span><span class="n">pads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Simple simulation of lysozyme molecule using :class:`ClCore &lt;bornagain.simulate.clcore.ClCore&gt;`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pads: List of :class:`PADGeometry &lt;bornagain.detector.PADGeometry&gt;` instances.</span>
+<span class="sd">        wavelength: As always, in SI units.</span>
+
+<span class="sd">    Returns: dictionary with {&#39;pad_geometry&#39;: pads, &#39;intensity&#39;: data_list}</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">wavelength</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">wavelength</span> <span class="o">=</span> <span class="mf">1.5e-10</span>

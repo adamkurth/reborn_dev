@@ -91,6 +91,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">PAD data and geometry formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../bornagain.html">bornagain package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
@@ -161,13 +162,15 @@
            <div itemprop="articleBody">
             
   <h1>Source code for bornagain.external.crystfel</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Method for working with CrystFEL geometry files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">detector</span>
 <span class="kn">from</span> <span class="nn">.cfelpyutils.crystfel_utils</span> <span class="k">import</span> <span class="n">load_crystfel_geometry</span>
-
 
 
 <div class="viewcode-block" id="geometry_file_to_dict"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_dict">[docs]</a><span class="k">def</span> <span class="nf">geometry_file_to_dict</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">):</span>
@@ -189,8 +192,8 @@
 <div class="viewcode-block" id="geometry_dict_to_pad_geometry_list"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_dict_to_pad_geometry_list">[docs]</a><span class="k">def</span> <span class="nf">geometry_dict_to_pad_geometry_list</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Given a CrystFEL geometry dictionary, create a list of PADGeometry objects.  This will also append extra</span>
-<span class="sd">    crystfel-specific items like fsx, max_fs, etc.</span>
+<span class="sd">    Given a CrystFEL geometry dictionary, create a list of :class:&lt;bornagain.geometry.PADGeometry` objects.</span>
+<span class="sd">    This will also append the name of the panel to the PADGeometry instance.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        geometry_file (str): Path to geometry file</span>
@@ -219,7 +222,7 @@
 
 <div class="viewcode-block" id="geometry_file_to_pad_geometry_list"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_pad_geometry_list">[docs]</a><span class="k">def</span> <span class="nf">geometry_file_to_pad_geometry_list</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a CrystFEL geometry file, create a list of PADGeometry objects.  This will also append extra</span>
 <span class="sd">    crystfel-specific items like fsx, max_fs, etc.</span>
 
@@ -237,19 +240,19 @@
 
 
 <div class="viewcode-block" id="split_image"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.split_image">[docs]</a><span class="k">def</span> <span class="nf">split_image</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
+
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Split a 2D image into individual panels (useful for working with Cheetah output).</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        data (numpy array) :</span>
-<span class="sd">            Image data</span>
-<span class="sd">        geom_dict (dict) :</span>
-<span class="sd">            Geometry dictionary</span>
+<span class="sd">        data (numpy array) : Contiguous block of image data</span>
+<span class="sd">        geom_dict (dict) : Geometry dictionary</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        split_data (list) :</span>
 <span class="sd">            List of individual PAD panel data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">split_data</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
         <span class="n">split_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
