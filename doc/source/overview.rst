@@ -1,18 +1,30 @@
 Overview
 ========
 
-Some day this page will have sufficient information to get you started with bornagain.
+The bornagain package contains utilities for dealing with diffraction simulations and data analysis.  In a nutshell, the basic elements of the package consist of:
 
-Some basics
------------
+- Detector classes for organizing detector geometry in a consistent way.
+- A beam class, which describes the incident x-ray beam.
+- "Target" classes that describe objects that we shoot with x-rays.
+- GPU-based simulation utilities.
+- A few tools for dealing with file formats.
+- A few tools for displaying diffraction data.
+- A few analysis algorithms.
 
-- You must first learn the basics of `Python <https://www.python.org/>`_, preferably including the basic principles of object-oriented programming.
-- It is recommended that you use Python 3.6 or later.
+If you are new to programming and diffraction analysis, read the following:
+
+- In order to make good use of bornagain, you must learn the `Python <https://www.python.org/>`_ language.  You probably also need to learn the basics of object-oriented programming.
 - The `tab-completion feature <https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion>`_ of `iPython <https://ipython.org/>`_ is one of the most efficient ways to explore the functionality of bornagain classes.
-- The `numpy <http://www.numpy.org/#>`_ package is central to bornagain.
-- All units in bornagain are SI.  Angles are radians.  There are no known exceptions so far.
-- Everything is vectorized in bornagain.  Terms like "row", "column", "x", "y", or "z" have no official meaning.
-- If documentation is missing or confusing, please fix it or tell someone (e.g. rkirian at asu dot edu).
+- The `numpy <http://www.numpy.org/#>`_ package is central to bornagain.  You must learn to use numpy along with the basic principles of `array programming <https://en.wikipedia.org/wiki/Array_programming>`_.
+
+There are a few things to be aware of immediately:
+
+- All units in bornagain are SI for the sake of simplistic consistency.  Angles are radians.  There are no known exceptions so far.
+- We must be consistent in the way that we specify vectors using numpy arrays.  Same goes for rotation matrices.  We therefore have utilities like vec_check() and rotate_vecs() to make sure we shape arrays consistently and operate on vectors in a consistent way.
+- If documentation is missing or confusing, please fix it or tell someone who can.
+
+
+
 
 X-ray beams
 -----------
@@ -34,10 +46,6 @@ Beam polarization can also be important:
 
 This single vector is appropriate for linearly polarized beams.  For beams that are not purely linearly polarized, one can sum the contributions from each of the two polarizations.  The second polarization vector is of course :math:`\hat{u}\times\hat{b}` .
 
-Most of the above parameters can be specified by an instance of the :any:`source.Beam` class.  Derived quantities such as the polarization correction are tied to classes contained in the :any:`detector` module.
-
-
-.. _ShortAnchor:
 
 Pixel-Array Detectors
 ---------------------
@@ -93,18 +101,3 @@ where the vector normal to the PAD is
     :math:`\hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}`
 
 The :any:`PADGeometry` class can currently generate the above quantities for you.  More can be added if they are necessary.
-
-Simulation
-----------
-
-The most basic starting point for a diffraction pattern from a collection of atoms is:
-
-   :math:`I(\vec{q}) = I_0 r_e^2 |F(\vec{q})|^2 \Delta\Omega`
-
-where the overall structure factor is
-
-   :math:`F(\vec{q}) = \sum_n f_n(q)e^{i\vec{q}\cdot\vec{r}_n}`
-
-and :math:`f_n(q)` is the wavelength-dependent scattering factor for atom :math:`n`.
-
-More will follow from here.

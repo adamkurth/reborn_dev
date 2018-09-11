@@ -3,7 +3,7 @@ bornagain's documentation
 
 The bornagain python package is meant to be used for the simulation and analysis of
 x-ray diffraction under the Born approximation.  It is not the first attempt to create
-such a package, hence the name.  So far, nothing is finished in bornagain...
+such a package, hence the double-meaning of the name.  Bornagain is under continuous development at this time.  Don't be surprised if the API changes somewhat.
 
 Contents
 ========
@@ -12,8 +12,9 @@ Contents
    :maxdepth: 2
    
    overview
-   geometry
    installation
+   geometry
+   simulations
    bornagain
    modules
    coding

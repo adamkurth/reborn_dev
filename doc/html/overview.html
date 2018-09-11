@@ -36,7 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
-        <link rel="next" title="PAD data and geometry formats" href="geometry.html"/>
+        <link rel="next" title="Installation" href="installation.html"/>
         <link rel="prev" title="bornagain’s documentation" href="index.html"/> 
 
   
@@ -92,14 +92,13 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#some-basics">Some basics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-ray-beams">X-ray beams</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pixel-array-detectors">Pixel-Array Detectors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#simulation">Simulation</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="geometry.html">PAD data and geometry formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">PAD data and geometry formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.html">bornagain package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
@@ -168,19 +167,28 @@
             
   <div class="section" id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
-<p>Some day this page will have sufficient information to get you started with bornagain.</p>
-<div class="section" id="some-basics">
-<h2>Some basics<a class="headerlink" href="#some-basics" title="Permalink to this headline">¶</a></h2>
+<p>The bornagain package contains utilities for dealing with diffraction simulations and data analysis.  In a nutshell, the basic elements of the package consist of:</p>
 <ul class="simple">
-<li>You must first learn the basics of <a class="reference external" href="https://www.python.org/">Python</a>, preferably including the basic principles of object-oriented programming.</li>
-<li>It is recommended that you use Python 3.6 or later.</li>
-<li>The <a class="reference external" href="https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion">tab-completion feature</a> of <a class="reference external" href="https://ipython.org/">iPython</a> is one of the most efficient ways to explore the functionality of bornagain classes.</li>
-<li>The <a class="reference external" href="http://www.numpy.org/#">numpy</a> package is central to bornagain.</li>
-<li>All units in bornagain are SI.  Angles are radians.  There are no known exceptions so far.</li>
-<li>Everything is vectorized in bornagain.  Terms like “row”, “column”, “x”, “y”, or “z” have no official meaning.</li>
-<li>If documentation is missing or confusing, please fix it or tell someone (e.g. rkirian at asu dot edu).</li>
+<li>Detector classes for organizing detector geometry in a consistent way.</li>
+<li>A beam class, which describes the incident x-ray beam.</li>
+<li>“Target” classes that describe objects that we shoot with x-rays.</li>
+<li>GPU-based simulation utilities.</li>
+<li>A few tools for dealing with file formats.</li>
+<li>A few tools for displaying diffraction data.</li>
+<li>A few analysis algorithms.</li>
 </ul>
-</div>
+<p>If you are new to programming and diffraction analysis, read the following:</p>
+<ul class="simple">
+<li>In order to make good use of bornagain, you must learn the <a class="reference external" href="https://www.python.org/">Python</a> language.  You probably also need to learn the basics of object-oriented programming.</li>
+<li>The <a class="reference external" href="https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion">tab-completion feature</a> of <a class="reference external" href="https://ipython.org/">iPython</a> is one of the most efficient ways to explore the functionality of bornagain classes.</li>
+<li>The <a class="reference external" href="http://www.numpy.org/#">numpy</a> package is central to bornagain.  You must learn to use numpy along with the basic principles of <a class="reference external" href="https://en.wikipedia.org/wiki/Array_programming">array programming</a>.</li>
+</ul>
+<p>There are a few things to be aware of immediately:</p>
+<ul class="simple">
+<li>All units in bornagain are SI for the sake of simplistic consistency.  Angles are radians.  There are no known exceptions so far.</li>
+<li>We must be consistent in the way that we specify vectors using numpy arrays.  Same goes for rotation matrices.  We therefore have utilities like vec_check() and rotate_vecs() to make sure we shape arrays consistently and operate on vectors in a consistent way.</li>
+<li>If documentation is missing or confusing, please fix it or tell someone who can.</li>
+</ul>
 <div class="section" id="x-ray-beams">
 <h2>X-ray beams<a class="headerlink" href="#x-ray-beams" title="Permalink to this headline">¶</a></h2>
 <p>The bornagain package provides the <a class="reference internal" href="bornagain.source.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref py py-class docutils literal notranslate"><span class="pre">Beam</span></code></a> class for describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of parameters that are needed to describe a beam are:</p>
@@ -194,10 +202,9 @@
 <blockquote>
 <div><span class="math notranslate">\(\hat{u}\)</span> is the polarization vector for the x-ray beam.</div></blockquote>
 <p>This single vector is appropriate for linearly polarized beams.  For beams that are not purely linearly polarized, one can sum the contributions from each of the two polarizations.  The second polarization vector is of course <span class="math notranslate">\(\hat{u}\times\hat{b}\)</span> .</p>
-<p>Most of the above parameters can be specified by an instance of the <a class="reference internal" href="bornagain.source.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref any py py-class docutils literal notranslate"><span class="pre">source.Beam</span></code></a> class.  Derived quantities such as the polarization correction are tied to classes contained in the <a class="reference internal" href="bornagain.detector.html#module-bornagain.detector" title="bornagain.detector"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">detector</span></code></a> module.</p>
 </div>
 <div class="section" id="pixel-array-detectors">
-<span id="shortanchor"></span><h2>Pixel-Array Detectors<a class="headerlink" href="#pixel-array-detectors" title="Permalink to this headline">¶</a></h2>
+<h2>Pixel-Array Detectors<a class="headerlink" href="#pixel-array-detectors" title="Permalink to this headline">¶</a></h2>
 <div class="figure" id="id1">
 <a class="reference internal image-reference" href="_images/pad.jpg"><img alt="Pixel-array detector schematic" src="_images/pad.jpg" style="width: 1062.4px; height: 493.6px;" /></a>
 <p class="caption"><span class="caption-text">Schematic of a Pixel-Array Detector.</span></p>
@@ -237,17 +244,6 @@
 <div><span class="math notranslate">\(\hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}\)</span></div></blockquote>
 <p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> class can currently generate the above quantities for you.  More can be added if they are necessary.</p>
 </div>
-<div class="section" id="simulation">
-<h2>Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline">¶</a></h2>
-<p>The most basic starting point for a diffraction pattern from a collection of atoms is:</p>
-<blockquote>
-<div><span class="math notranslate">\(I(\vec{q}) = I_0 r_e^2 |F(\vec{q})|^2 \Delta\Omega\)</span></div></blockquote>
-<p>where the overall structure factor is</p>
-<blockquote>
-<div><span class="math notranslate">\(F(\vec{q}) = \sum_n f_n(q)e^{i\vec{q}\cdot\vec{r}_n}\)</span></div></blockquote>
-<p>and <span class="math notranslate">\(f_n(q)\)</span> is the wavelength-dependent scattering factor for atom <span class="math notranslate">\(n\)</span>.</p>
-<p>More will follow from here.</p>
-</div>
 </div>
 
 
@@ -260,7 +256,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="geometry.html" class="btn btn-neutral float-right" title="PAD data and geometry formats" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral" title="bornagain’s documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
