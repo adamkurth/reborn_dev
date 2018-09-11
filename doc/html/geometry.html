@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PAD data and geometry formats &mdash; bornagain 0.2018.9.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
+        <link rel="next" title="Diffration simulations" href="simulations.html"/>
+        <link rel="prev" title="Installation" href="installation.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2018.9.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PAD data and geometry formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#generic-description-of-data-layout">Generic description of data layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-crystfel-geometry-files">Working with CrystFEL geometry files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>PAD data and geometry formats</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/geometry.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pad-data-and-geometry-formats">
+<h1>PAD data and geometry formats<a class="headerlink" href="#pad-data-and-geometry-formats" title="Permalink to this headline">¶</a></h1>
+<p>The most common diffraction detector is a Pixel-Array Detector (PAD).  The basic concepts of the physical layout have been discussed elsewhere.</p>
+<p>A central task in diffraction analysis is the assignment of physical locations (3D vectors) to each detector pixel.  Actually, our task is two-fold:</p>
+<ol class="arabic simple">
+<li>Transform the data found on disk or in RAM to a useful numpy array.</li>
+<li>Create a map from numpy array elements to physical locations.</li>
+</ol>
+<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> contains the needed information to perform step (2).  This class also includes convenience methods that calculate commonly used quantities such as pixel solid angles, scattering vectors, and so on.  Once you have a <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instance and a corresponding numpy array, it is (hopefully) much easier to perform your analysis tasks due to the standardized interface.  The main hurdle is often the layer of code that is needed to transplant raw data from a facility into the standard bornagain data containers.  That is what we will discuss below.</p>
+<p>Before moving on, there is one caveat that needs to be mentioned now.  Since XFELs tend to use multiple PADs, you should plan to work with lists of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances rather than a single one.  Most XFELs have segmented detectors that consist of several independent PADs.</p>
+<div class="section" id="generic-description-of-data-layout">
+<h2>Generic description of data layout<a class="headerlink" href="#generic-description-of-data-layout" title="Permalink to this headline">¶</a></h2>
+<p>Data stored on disk may be thought of as a finite 1D array, and our task is to chop it up into chunks of data corresponding to individual PADs.  We assume here that you are able to convert data on disk or RAM into a numpy array – there are of course various details such as <a class="reference external" href="https://en.wikipedia.org/wiki/Data_type">data type</a> and <a class="reference external" href="https://en.wikipedia.org/wiki/Endianness">endianness</a> but usually there is a package such as <a class="reference external" href="https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis">psnaa</a> that does this work for you, or the data comes in a well-documented and well-supported format like <a class="reference external" href="https://support.hdfgroup.org/HDF5/">hdf5</a> in which case we may use a package like <a class="reference external" href="https://www.h5py.org/">h5py</a> to load the data.</p>
+<p>In the most generic case, where we have a 1D data array that we wish to convert into individual 2D PAD data arrays, we need a few things:</p>
+<p>1) The size of the 2D array we intend to extract, which we refer to as n_fs and n_ss for fast-scan and slow-scan directions.
+1) The index of the first entry that corresponds to the corner pixel.
+2) The fast-scan stride and the slow-scan stride.</p>
+</div>
+<div class="section" id="working-with-crystfel-geometry-files">
+<h2>Working with CrystFEL geometry files<a class="headerlink" href="#working-with-crystfel-geometry-files" title="Permalink to this headline">¶</a></h2>
+<p>Firstly, you need to read about the CrystFEL <a class="reference external" href="http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html">geom</a>
+file specification.  A few comments:</p>
+<ul class="simple">
+<li>CrystFEL geom files contain more than geometry information.</li>
+<li>geom files contain information about the detector, regarding e.g. saturation levels, common-mode noise and conversions between digital data units and deposited x-ray energy.</li>
+<li>geom files contain information about the formatting of the files that contain the data</li>
+<li>geom files contain information that affects the behaviour of programs like indexamajig (e.g. the no_index card)</li>
+</ul>
+<p>If you want the complete information in the geom file you can convert it to a python dictionary using the <code class="xref py py-func docutils literal notranslate"><span class="pre">geometry_file_to_dict()</span></code> function, which is just a wrapper for the corresponding function in the cfelpyutils package.</p>
+<p>Most importantly, geom files contain the three principal vectors that bornagain utilizes, albeit it may not be obvious at first glance when you look into the geom file.  If you just want this information, then you can simply use a geom file to generate a list <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances.</p>
+<p>If you have a CrystFEL geom file, you can load all the information into a python dictionary object with the <a class="reference internal" href="bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_dict" title="bornagain.external.crystfel.geometry_file_to_dict"><code class="xref py py-func docutils literal notranslate"><span class="pre">bornagain.external.crystfel.geometry_file_to_dict()</span></code></a> function.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="simulations.html" class="btn btn-neutral float-right" title="Diffration simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

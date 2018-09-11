@@ -1,0 +1,7 @@
+bornagain.external.pyqtgraph.mods module
+========================================
+
+.. automodule:: bornagain.external.pyqtgraph.mods
+    :members:
+    :undoc-members:
+    :show-inheritance:

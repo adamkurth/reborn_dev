@@ -15,7 +15,6 @@ Contents
    installation
    geometry
    simulations
-   bornagain
    modules
    coding
 

@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.utils module &mdash; bornagain 0.2018.9.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
+        <link rel="up" title="bornagain package" href="bornagain.html"/>
+        <link rel="next" title="Coding guidlines for developers" href="coding.html"/>
+        <link rel="prev" title="bornagain.units module" href="bornagain.units.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2018.9.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">PAD data and geometry formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="bornagain.detector.html">bornagain.detector module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.scatter.html">bornagain.scatter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.source.html">bornagain.source module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.units.html">bornagain.units module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">bornagain.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">bornagain</a> &raquo;</li>
+        
+          <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
+        
+      <li>bornagain.utils module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/bornagain.utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-bornagain.utils">
+<span id="bornagain-utils-module"></span><h1>bornagain.utils module<a class="headerlink" href="#module-bornagain.utils" title="Permalink to this headline">¶</a></h1>
+<p>Some utility functions that might be useful throughout bornagain.  Don’t put highly specialized functions here.</p>
+<dl class="function">
+<dt id="bornagain.utils.vec_check2">
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_check2</code><span class="sig-paren">(</span><em>vec</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_check2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_check2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as vec_check(vec, dimension=2).  See <a class="reference internal" href="#bornagain.utils.vec_check" title="bornagain.utils.vec_check"><code class="xref py py-func docutils literal notranslate"><span class="pre">vec_check</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.vec_check3">
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_check3</code><span class="sig-paren">(</span><em>vec</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_check3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_check3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as vec_check(vec, dimension=2)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.vec_check">
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_check</code><span class="sig-paren">(</span><em>vec</em>, <em>hardcheck=False</em>, <em>dimension=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that a vector meets our assumptions, and correct it if it doesn’t.</p>
+<dl class="docutils">
+<dt>Our assumptions are that:</dt>
+<dd><ol class="first last arabic simple">
+<li>The array shape is Nxd, where d is the dimension of the vector, and
+N is the number of vectors.  This is important when applying rotation
+operations to many vectors.</li>
+<li>The array is c-contiguous.  This is important for passing arrays into
+external c functions or to opencl kernels.</li>
+</ol>
+</dd>
+</dl>
+<p>The above also helps when we want to ensure that dot products and broadcasting
+will work as expected.</p>
+<p>Note that we have chosen to keep vector components close in memory.  I.e.,
+the x, y, and z components of a given vector are contiguous.  This will ensure
+that rotations and broadcasting are as fast as can be.</p>
+<p>Input:</p>
+<p>vec: The object that we are trying to make conform to our assumption
+about vectors.</p>
+<p>hardcheck: If True, then this function will raise a ValueError if the check
+fails.  If False, then this function attempts to fix the problem
+with the input.</p>
+<p>dimension: The expected dimension of the vectors</p>
+<p>==== Output:
+vec: The original input if it satisfies our conditions.  Otherwise
+return a modified numpy ndarray with the correct shape.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.vec_norm">
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_norm</code><span class="sig-paren">(</span><em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_norm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.vec_mag">
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_mag</code><span class="sig-paren">(</span><em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_mag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_mag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.warn">
+<code class="descclassname">bornagain.utils.</code><code class="descname">warn</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#warn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.warn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple warning message</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.error">
+<code class="descclassname">bornagain.utils.</code><code class="descname">error</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple error message (to be replaced later…)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.random_rotation">
+<code class="descclassname">bornagain.utils.</code><code class="descname">random_rotation</code><span class="sig-paren">(</span><em>deflection=1.0</em>, <em>randnums=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#random_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.random_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a random rotation matrix.</p>
+<p>deflection: the magnitude of the rotation. For 0, no rotation; for 1, competely random
+rotation. Small deflection =&gt; small perturbation.
+randnums: 3 random numbers in the range [0, 1]. If <cite>None</cite>, they will be auto-generated.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.rotation_about_axis">
+<code class="descclassname">bornagain.utils.</code><code class="descname">rotation_about_axis</code><span class="sig-paren">(</span><em>theta</em>, <em>u</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#rotation_about_axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.rotation_about_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>This needs to be tested.  It was taken from
+<a class="reference external" href="https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python">https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.random_beam_vector">
+<code class="descclassname">bornagain.utils.</code><code class="descname">random_beam_vector</code><span class="sig-paren">(</span><em>div_fwhm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#random_beam_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.random_beam_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>A random vector for emulating beam divergence.
+Generates a random normal vector that is nominally along the [0,0,1] direction
+but with a random rotation along the [1,0,0] axis with given FWHM (Gaussian
+distributed and centered about zero) followed by a random rotation about the
+[0,0,1] axis with uniform distribution in the interval [0,2*pi).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>div_fwhm</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.random_mosaic_rotation">
+<code class="descclassname">bornagain.utils.</code><code class="descname">random_mosaic_rotation</code><span class="sig-paren">(</span><em>mosaicity_fwhm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#random_mosaic_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.random_mosaic_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.
+We take the matrix product of three rotations, each of the same FWHM, about the three
+orthogonal axis.  The order of this product is a random permutation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mosaicity_fwhm</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.memoize">
+<code class="descclassname">bornagain.utils.</code><code class="descname">memoize</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#memoize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.memoize" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a function decorator for caching results from a function, to avoid
+excessive computation or reading from disk.  Search the web for more
+details of how this works.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="coding.html" class="btn btn-neutral float-right" title="Coding guidlines for developers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bornagain.units.html" class="btn btn-neutral" title="bornagain.units module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

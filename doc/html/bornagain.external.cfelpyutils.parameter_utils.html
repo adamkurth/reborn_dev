@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.external.cfelpyutils.parameter_utils module &mdash; bornagain 0.2018.9.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
+        <link rel="up" title="bornagain.external.cfelpyutils package" href="bornagain.external.cfelpyutils.html"/>
+        <link rel="next" title="bornagain.external.pyqtgraph package" href="bornagain.external.pyqtgraph.html"/>
+        <link rel="prev" title="bornagain.external.cfelpyutils.geometry_utils module" href="bornagain.external.cfelpyutils.geometry_utils.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2018.9.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">PAD data and geometry formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">bornagain</a> &raquo;</li>
+        
+          <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
+        
+          <li><a href="bornagain.external.html">bornagain.external package</a> &raquo;</li>
+        
+          <li><a href="bornagain.external.cfelpyutils.html">bornagain.external.cfelpyutils package</a> &raquo;</li>
+        
+      <li>bornagain.external.cfelpyutils.parameter_utils module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/bornagain.external.cfelpyutils.parameter_utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-bornagain.external.cfelpyutils.parameter_utils">
+<span id="bornagain-external-cfelpyutils-parameter-utils-module"></span><h1>bornagain.external.cfelpyutils.parameter_utils module<a class="headerlink" href="#module-bornagain.external.cfelpyutils.parameter_utils" title="Permalink to this headline">¶</a></h1>
+<p>Parameter parsing utilities.</p>
+<p>This module contains the implementation of functions that are used to
+parse and manipulate options and parameters, as extracted by the
+python <code class="xref py py-obj docutils literal notranslate"><span class="pre">configparse</span></code> module.</p>
+<dl class="function">
+<dt id="bornagain.external.cfelpyutils.parameter_utils.convert_parameters">
+<code class="descclassname">bornagain.external.cfelpyutils.parameter_utils.</code><code class="descname">convert_parameters</code><span class="sig-paren">(</span><em>config_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/parameter_utils.html#convert_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.parameter_utils.convert_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert strings in parameter dictionaries to the correct data type.</p>
+<p>Convert a dictionary extracted by the configparse module to a
+dictionary contaning the same parameters converted from strings to
+correct types (int, float, string, etc.)</p>
+<p>Try to convert each entry in the dictionary according to the
+following rules. The first rule that applies to the entry
+determines the type.</p>
+<ul>
+<li><p class="first">If the entry starts and ends with a single quote or double quote,
+leave it as a string.</p>
+</li>
+<li><p class="first">If the entry starts and ends with a square bracket, convert it to
+a list.</p>
+</li>
+<li><p class="first">If the entry starts and ends with a curly braces, convert it to a
+dictionary or a set.</p>
+</li>
+<li><p class="first">If the entry is the word None, without quotes, convert it to
+NoneType.</p>
+</li>
+<li><p class="first">If the entry is the word False, without quotes, convert it to a
+boolean False.</p>
+</li>
+<li><p class="first">If the entry is the word True, without quotes, convert it to a
+boolean True.</p>
+</li>
+<li><p class="first">If none of the previous options match the content of the entry,
+try to interpret the entry in order as:</p>
+<blockquote>
+<div><ul class="simple">
+<li>An integer number.</li>
+<li>A float number.</li>
+<li>A string.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">If all else fails, raise an exception.</p>
+</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>Dict</em><em>[</em><em>str</em><em>]</em>) – a dictionary containing the parameters from
+a configuration file as extracted by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">configparser</span></code> module).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary with the same structure as the input
+dictionary, but with correct types assigned to each entry.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code> – if an entry cannot be converted to any supported
+type.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="bornagain.external.pyqtgraph.html" class="btn btn-neutral float-right" title="bornagain.external.pyqtgraph package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bornagain.external.cfelpyutils.geometry_utils.html" class="btn btn-neutral" title="bornagain.external.cfelpyutils.geometry_utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

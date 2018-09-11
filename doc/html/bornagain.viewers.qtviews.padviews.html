@@ -1,0 +1,402 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.viewers.qtviews.padviews module &mdash; bornagain 0.2018.9.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
+        <link rel="up" title="bornagain.viewers.qtviews package" href="bornagain.viewers.qtviews.html"/>
+        <link rel="next" title="bornagain.viewers.qtviews.qtviews module" href="bornagain.viewers.qtviews.qtviews.html"/>
+        <link rel="prev" title="bornagain.viewers.qtviews package" href="bornagain.viewers.qtviews.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2018.9.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">PAD data and geometry formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">bornagain</a> &raquo;</li>
+        
+          <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
+        
+          <li><a href="bornagain.viewers.html">bornagain.viewers package</a> &raquo;</li>
+        
+          <li><a href="bornagain.viewers.qtviews.html">bornagain.viewers.qtviews package</a> &raquo;</li>
+        
+      <li>bornagain.viewers.qtviews.padviews module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/bornagain.viewers.qtviews.padviews.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-bornagain.viewers.qtviews.padviews">
+<span id="bornagain-viewers-qtviews-padviews-module"></span><h1>bornagain.viewers.qtviews.padviews module<a class="headerlink" href="#module-bornagain.viewers.qtviews.padviews" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="bornagain.viewers.qtviews.padviews.PADView">
+<em class="property">class </em><code class="descclassname">bornagain.viewers.qtviews.padviews.</code><code class="descname">PADView</code><span class="sig-paren">(</span><em>pad_geometry=[]</em>, <em>pad_data=[]</em>, <em>logscale=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This is supposed to be an easy way to view PAD data, particularly if you have multiple
+detector panels.  You can set it up by providing a list of <code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code> instances
+along with a list of data arrays.</p>
+<p>It is a work in progress…</p>
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.pad_labels">
+<code class="descname">pad_labels</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.pad_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.rois">
+<code class="descname">rois</code><em class="property"> = []</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.rois" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.images">
+<code class="descname">images</code><em class="property"> = []</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.images" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.rings">
+<code class="descname">rings</code><em class="property"> = []</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.rings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.grid">
+<code class="descname">grid</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.coord_axes">
+<code class="descname">coord_axes</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.coord_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.pad_geometry">
+<code class="descname">pad_geometry</code><em class="property"> = []</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.pad_geometry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.pad_data">
+<code class="descname">pad_data</code><em class="property"> = []</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.pad_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.n_pads">
+<code class="descname">n_pads</code><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.n_pads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.setup_histogram_tool">
+<code class="descname">setup_histogram_tool</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.setup_histogram_tool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.setup_histogram_tool" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.show_coordinate_axes">
+<code class="descname">show_coordinate_axes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.show_coordinate_axes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.show_coordinate_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.hide_coordinate_axes">
+<code class="descname">hide_coordinate_axes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.hide_coordinate_axes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.hide_coordinate_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.toggle_coordinate_axes">
+<code class="descname">toggle_coordinate_axes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.toggle_coordinate_axes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.toggle_coordinate_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.show_pad_labels">
+<code class="descname">show_pad_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.show_pad_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.show_pad_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.hide_pad_labels">
+<code class="descname">hide_pad_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.hide_pad_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.hide_pad_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.toggle_pad_labels">
+<code class="descname">toggle_pad_labels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.toggle_pad_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.toggle_pad_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.setup_pads">
+<code class="descname">setup_pads</code><span class="sig-paren">(</span><em>show_scans=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.setup_pads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.setup_pads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.mouse_moved">
+<code class="descname">mouse_moved</code><span class="sig-paren">(</span><em>evt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.mouse_moved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.mouse_moved" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.edit_ring_radii">
+<code class="descname">edit_ring_radii</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.edit_ring_radii"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.edit_ring_radii" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.add_rings">
+<code class="descname">add_rings</code><span class="sig-paren">(</span><em>radii=[]</em>, <em>pens=None</em>, <em>radius_handle=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.add_rings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.add_rings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.hide_ring_radius_handles">
+<code class="descname">hide_ring_radius_handles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.hide_ring_radius_handles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.hide_ring_radius_handles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.remove_rings">
+<code class="descname">remove_rings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.remove_rings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.remove_rings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.add_grid">
+<code class="descname">add_grid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.add_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.add_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.remove_grid">
+<code class="descname">remove_grid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.remove_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.remove_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.toggle_grid">
+<code class="descname">toggle_grid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.toggle_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.toggle_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="bornagain.viewers.qtviews.qtviews.html" class="btn btn-neutral float-right" title="bornagain.viewers.qtviews.qtviews module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bornagain.viewers.qtviews.html" class="btn btn-neutral" title="bornagain.viewers.qtviews package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Richard A Kirian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
