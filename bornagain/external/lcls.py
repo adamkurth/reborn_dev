@@ -1,5 +1,8 @@
 r"""
-Utilities to convert
+Utilities for working with LCLS data.  Most of what you need is already in the psana package.  I don't know where the
+official psana documentation is but if you work with LCLS data you should at least skim through all of the material in
+the `LCLS Data Analysis Confluence pages <https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis>`_.
+Note that there is documentation on `LCLS PAD geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 """
 
 import numpy as np
@@ -7,10 +10,9 @@ import numpy as np
 
 def reshape_psana_cspad_array_to_cheetah_array(psana_array):
     r"""
-    Transform psana cspad numpy array of shape (32,185,388) into array to Cheetah array of shape (1480, 1552).
-    Unfortunately, the Cheetah format requires a re-write of the data in memory, and one result of this re-write is that
-    each detector panel is no longer stored contiguously in memory.  A second result is that newcomers will of course
-    be very confused when they first encounter this undocumented aspect of Cheetah.
+    Transform  a native psana cspad numpy array of shape (32,185,388) into a "Cheetah array" of shape (1480, 1552).
+    Conversion to Cheetah format requires a re-write of the data in memory, and each detector panel is no longer stored
+    contiguously in memory.
 
     Arguments:
         psana_array (numpy array) :
@@ -35,7 +37,8 @@ def reshape_psana_cspad_array_to_cheetah_array(psana_array):
 def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
     r"""
     This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with
-    data in the native psana format.  First you should create a crystfel geometry dictionary.
+    data in the native psana format.  First you should create a crystfel geometry dictionary using the function
+    :func:`geometry_file_to_pad_geometry_list() <bornagain.external.crystfel.geometry_file_to_pad_geometry_list>`.
 
     Arguments:
         psana_array (numpy array) :
