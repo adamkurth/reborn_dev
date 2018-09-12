@@ -148,7 +148,7 @@ class PADView(object):
 
         # This is really aweful.  I don't know if this is the best way to do the transforms, but it's the best
         # I could do given the fact that I'm not able to track down all the needed info on how all of these
-        # Transforms are applied.  I can only say that a physicist did not invent this system.
+        # transforms are applied.  I can only say that a physicist did not invent this system.
 
         # 3D basis vectors of panel (length encodes pixel size):
         f = p.fs_vec.ravel()
@@ -319,13 +319,13 @@ class PADView(object):
         for i in range(0, len(self.rings)):
             self.viewbox.removeItem(self.rings[i])
 
-    def add_grid(self):
+    def show_grid(self):
 
         if self.grid is None:
             self.grid = pg.GridItem()
         self.viewbox.addItem(self.grid)
 
-    def remove_grid(self):
+    def hide_grid(self):
 
         if self.grid is not None:
             self.viewbox.removeItem(self.grid)
@@ -333,11 +333,23 @@ class PADView(object):
 
     def toggle_grid(self):
 
-        print('toggle grid')
         if self.grid is None:
-            self.add_grid()
+            self.show_grid()
         else:
-            self.remove_grid()
+            self.hide_grid()
+
+    def show_pad_frame(self, n, pen=None):
+
+        if pen is None:
+            pen = pg.mkPen([0, 255, 0], width=1)
+        self.images[n].setBorder(pen)
+
+    def show_pad_frames(self, pen=None):
+
+        if pen is None:
+            pen = pg.mkPen([0, 255, 0], width=1)
+        for image in self.images:
+            image.setBorder(pen)
 
     def start(self):
 
