@@ -412,6 +412,9 @@ class Lattice:
         sin = np.sin
         self.V = a * b * c * np.sqrt(1 - cos(alpha)**2 - cos(beta) **
                                      2 - cos(gamma)**2 + 2 * cos(alpha) * cos(beta) * cos(gamma))
+        self.amag = a
+        self.bmag = b
+        self.cmag = c
         self.a = np.array([a, 0, 0])
         self.b = np.array([b * cos(gamma), b * sin(gamma), 0])
         self.c = np.array([c * cos(beta),
@@ -442,6 +445,19 @@ class Lattice:
                               for j in xrange(n_unit_b)
                               for k in xrange(n_unit_c)])
 
-#       sphericalize the lattice..
+        # sphericalize the lattice..
         if spherical:
             self.vecs = simutils.sphericalize(self.vecs)
+
+    # This is an awful name but Python doesn't have function overloading
+    def assemble3(self, n_a=10, n_b=10, n_c=10, spherical=False):
+        # Lattice coordinates
+        self.vecs = np.array([i * self.a + j * self.b + k * self.c
+                              for i in xrange(n_a)
+                              for j in xrange(n_b)
+                              for k in xrange(n_c)])
+
+        # sphericalize the lattice..
+        if spherical:
+            self.vecs = simutils.sphericalize(self.vecs)
+

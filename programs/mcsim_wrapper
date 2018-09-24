@@ -1,0 +1,351 @@
+#!/usr/bin/env python
+
+"""
+TODO:
+
+1. Add LCP scattering.
+2. Incorporate mosaicity into shape transform instead of MC style
+3. Print more information to user.
+4. Turn this into a wrapper for bornagain/simulate/mcsim
+
+"""
+
+import os
+import sys
+import time
+import numpy as np
+import configargparse
+import h5py
+from glob import glob
+from scipy.special import erf
+
+sys.path.append("..")  # This path setting won't be needed once bornagain is properly installed
+import bornagain as ba
+from bornagain.simulate import solutions
+from bornagain.simulate import simutils
+from bornagain.utils import vec_mag
+from bornagain.units import r_e, hc, keV
+import bornagain.simulate.clcore as core
+
+########################################################################################################################
+# Command-line input.  Most defaults are set here, but are subject to change (so do not rely on them).
+########################################################################################################################
+
+p = configargparse.ArgParser("""
+Monte Carlo simulations of crystal diffraction on a GPU.
+A more elaborate description of this program will follow...
+""")
+a = p.add
+
+a('--config', is_config_file=True,
+  help='Config file path, absolute path not relative path')
+
+a('--pdb_file', type=str, nargs=1, default='../examples/data/pdb/2LYZ-P1.pdb',
+  help='PDB file (symmetry is **not** expanded)')
+
+a('--shape_transform', type=str, nargs=1, default='gaussian',
+  help='Crystal shape transform model.  Options are parallelepiped or gaussian.')
+
+a('--iterations', type=int, nargs=1, default=1000,
+  help='Number of independent Monte Carlo iterations to average')
+
+a('--double_precision', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='Use double precision if device allows.')
+
+a('--write_geom', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='Write a crystfel geometry file.')
+
+a('--write_hdf5', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='Write data to hdf5 files.')
+
+a('--mplview', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='View the pattern with matplotlib.')
+
+a('--qtview', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='View the pattern with pyqtgraph.')
+
+a('--skview', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='View the pattern with skimage viewer.')
+
+a('--quiet', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='Decreases printed output.')
+
+a('--add_noise', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='Adds Poisson noise to the image.')
+
+a('--cromer_mann', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='Cromer Mann')
+
+a('--wigner', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='Overlay wigner cells')
+
+a('--no_rotation', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=True,
+  help='Removes random rotation of the crystal')
+
+a('--fix_rotation_sequence', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1,
+  help='Fixes the sequence of random orientation matrices so that mcsim can be run several times under different conditions, maintaining the same set of matrices throughout')
+
+a('--no_beam_mask', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=True,
+  help='Stops direct beam masking')
+
+a('--no_monte_carlo',type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=True,
+  help='Stops Monte Carlo simulation')
+
+a('--beam_diameter', type=float, nargs=1, default=100e-6,
+  help='Beam diameter')
+
+a('--beam_divergence', type=float, nargs=1, default=0.010,
+  help = 'Changes the beam divergence, input in radians')
+
+a('--detector_distance', type=float, nargs=1, default=100e-3,
+  help='Distance to the detector')
+
+a('--pixel_size', type=float, nargs=1, default = 110e-6,
+  help='Size of the pixels')
+
+a('--photon_energy', type=float, nargs=1, default=12.0,
+  help='Photon energy in keV')
+
+a('--wavelength_fwhm', type=float, nargs=1, default=0.02,
+  help='Spectral dispersion full-width, half-max value (dlambda/lambda)')
+
+a('--photon_energy_fwhm', type=float, nargs=1, default=-1,
+  help='Photon energy bandwidth full-width, half-max value (dE/E).')
+
+a('--n_pixels', type=float, nargs=1, default=1000,
+  help='Number of pixels')
+
+a('--transmission', type=float, nargs=1, default=1.0,
+  help='Transmission coefficient')
+
+a('--n_photons', type=float, nargs=1, default=1e8,
+  help='Number of photons')
+
+a('--mosaic_domain_size', type=float, nargs=1, default=1000e-9,
+  help='Mosaic domain size')
+
+a('--mosaic_domain_size_fwhm', type=float, nargs=1, default=0.0,
+  help='FWHM of mosaic domain size distribution (dside/side)')
+
+a('--mosaicity_fwhm', type=float, nargs=1, default=0.0001,
+  help='Mosaicity full-width, half-max value')
+
+a('--results_dir', type=str, nargs=1, default='/data/temp/cxls-lysozyme-02/',
+  help='Directory where the results are saved')
+
+a('--num_patterns', type=int, nargs=1, default=1,
+  help='Number of patterns to simulate')
+
+a('--crystal_size', type=float, nargs=1, default=0.0,
+  help='Size of crystal in meters (default is beam diameter)')
+
+a('--crystal_size_fwhm', type=float, nargs=1, default=0.0,
+  help='FWHM of crystal size distribution (dside/side)')
+
+a('--write_crystal_sizes', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='Write text file of crystal and mosaic domain sizes per pattern.')
+
+a('--water_radius', type=float, nargs=1, default=0.0,
+  help='Radius of water jet in meters without crystal in it. Must be large enough to fully envelop crystal.')
+
+a('--temperature', type=float, nargs=1, default=298.16,
+  help='Temperature of water jet in Kelvin. Default is 298.16 K.')
+
+a('--flux', type=float, nargs=1, default=0,
+  help='Flux of icident beam in photons/s. Must also specify exposure. Replaces n_photons.')
+
+a('--exposure', type=float, nargs=1, default=0,
+  help='Exposure time in seconds. Must also specify flux. Replaces n_photons.')
+
+a('--beam_spatial_profile', type=str, nargs=1, default='tophat',
+  help='Gaussian or tophat photon density for beam. If Gaussian, beam_diameter is assumed to be 3 sigmas.')
+
+a('--compression', type=str, nargs=1, default=None,
+  help='h5py compression, default None, can be lzf or gzip')
+
+a('--ideal_only', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='only store the ideal scattering in output (not the noisy scattering)')
+
+a('--expand_symmetry', type=lambda s: s.lower() in ['true', 't', 'yes', '1'], nargs=1, default=False,
+  help='expand the PDB coordinates according to crystal symmetry operators')
+
+a = p.parse_args()
+
+
+########################################################################################################################
+# Now do something intelligent with the input.  Basic sanity checks, etc.
+########################################################################################################################
+
+def get_arg(arg):
+    # Annoyingly, I can't seem to predict if parse_args() members will be list objects; this function checks for that
+    # and returns the first list item as appropriate
+    if isinstance(arg, (list, tuple)): return arg[0]
+    return arg
+
+# This needs to be thought through more carefully.  E.g. check if pdb file exists, send message if it doesn't, and so
+# on.
+pdb_file                        = get_arg(a.pdb_file)
+n_monte_carlo_iterations        = get_arg(a.iterations)
+shape_transform_model           = get_arg(a.shape_transform)
+write_hdf5                      = get_arg(a.write_hdf5)
+write_geom                      = get_arg(a.write_geom)
+mplview                         = get_arg(a.mplview)
+qtview                          = get_arg(a.qtview)
+skview                          = get_arg(a.skview)
+quiet                           = get_arg(a.quiet)
+cromer_mann                     = get_arg(a.cromer_mann)
+random_rotation                 = get_arg(a.no_rotation)
+beam_diameter                   = get_arg(a.beam_diameter)
+detector_distance               = get_arg(a.detector_distance)
+pixel_size                      = get_arg(a.pixel_size)
+add_noise                       = get_arg(a.add_noise)
+photon_energy                   = get_arg(a.photon_energy) / keV
+n_pixels                        = get_arg(a.n_pixels)
+transmission                    = get_arg(a.transmission)
+n_photons                       = int(get_arg(a.n_photons)) # pulse_energy / photon energy 
+mosaic_domain_size              = get_arg(a.mosaic_domain_size)
+mosaic_domain_size_fwhm         = mosaic_domain_size * get_arg(a.mosaic_domain_size_fwhm)
+mosaicity_fwhm                  = get_arg(a.mosaicity_fwhm)
+overlay_wigner_cells            = get_arg(a.wigner)
+results_dir                     = get_arg(a.results_dir)
+mask_direct_beam                = get_arg(a.no_beam_mask)
+approximate_shape_transform     = get_arg(a.shape_transform)
+do_monte_carlo                  = get_arg(a.no_monte_carlo) # This should not be needed; set bandwidth etc. to zero of you don't want monte carlo...
+beam_divergence_fwhm            = get_arg(a.beam_divergence) * (8e-6 / beam_diameter)
+num_patterns                    = get_arg(a.num_patterns)
+water_radius                    = get_arg(a.water_radius)
+temperature                     = get_arg(a.temperature)
+flux                            = get_arg(a.flux)
+exposure                        = get_arg(a.exposure)
+beam_spatial_profile            = get_arg(a.beam_spatial_profile)
+photon_energy_fwhm              = get_arg(a.photon_energy_fwhm)
+wavelength_fwhm                 = get_arg(a.wavelength_fwhm)
+wavelength                      = hc / photon_energy # pulse_energy = 0.0024
+crystal_size                    = get_arg(a.crystal_size)
+if crystal_size == 0:
+    crystal_size = beam_diameter
+crystal_size_fwhm               = crystal_size * get_arg(a.crystal_size_fwhm)
+write_crystal_sizes             = get_arg(a.write_crystal_sizes)
+if(flux != 0):
+    n_photons = flux*exposure # Get number of photons from beam parameters
+I0                              = transmission * n_photons / (beam_diameter ** 2) # Square beam
+rotation_axis                   = [1, 0, 0]
+rotation_angle                  = 0.1
+compression                     = get_arg(a.compression)
+write_ideal_only                = get_arg(a.ideal_only)
+expand_symm                     = get_arg( a.expand_symmetry)
+fix_rot_seq                     = get_arg(a.fix_rotation_sequence)
+
+if mplview==qtview and mplview==True or mplview==skview and mplview==True or qtview==skview and qtview==True:
+    sys.exit('ERROR: Only one viewer can be used. Please choose either mplview, qtview, or skview')
+
+if flux!=0 and exposure==0 or flux==0 and exposure!=0:
+    sys.exit('ERROR: flux and exposure must be used together, both values must be non-zero.')
+
+if temperature<0 or n_monte_carlo_iterations<0 or beam_diameter<0 or detector_distance<0 or pixel_size<0 or \
+    n_pixels<0 or mosaic_domain_size<0 or mosaicity_fwhm<0 or beam_divergence_fwhm<0 or photon_energy<0 or \
+    n_photons<0 or num_patterns<0 or water_radius<0 or flux<0 or exposure<0:
+    sys.exit('ERROR: one or more of you parameters is an invalid negative value')
+
+if n_monte_carlo_iterations < 1:
+    sys.exit('ERROR: iterations must be an integer larger than zero')
+
+if beam_diameter==0:
+    sys.exit('ERROR: beam diameter must be greater than zero')
+
+if detector_distance==0:
+    sys.exit('ERROR: detector distance must be greater than zero')
+
+if pixel_size==0:
+    sys.exit('ERROR: pixel_size must be greater than zero')
+
+if n_pixels==0:
+    sys.exit('ERROR: n_pixels must be greater than zero')
+
+if mosaic_domain_size==0:
+    sys.exit('ERROR: mosaic_domain_size must be greater than zero')
+
+if photon_energy==0:
+    sys.exit('ERROR: photon_energy must be greater than zero')
+
+if num_patterns==0:
+    sys.exit('ERROR: num_patterns must be greater than zero') 
+
+if flux==0 and exposure==0 and n_photons==0:
+    sys.exit('ERROR: either n_photons or flux must be greater than zero')
+
+if photon_energy_fwhm != -1 and wavelength_fwhm != 0.02:
+    sys.exit('ERROR: photon_energy_fwhm and wavelength_fwhm cannot both be specified, please specify just one')
+
+# Get true FWHM value for wavelength
+if photon_energy_fwhm != -1:
+    wavelength_fwhm  = (wavelength**2 * photon_energy_fwhm * photon_energy) / float(hc)
+else:
+    wavelength_fwhm *= wavelength
+
+if not quiet:
+    write = sys.stdout.write
+else:
+    write = lambda x: x
+
+# Don't import nasty viewer libraries unless needed...:
+if mplview:
+    import matplotlib.pyplot as plt
+if qtview:
+    import pyqtgraph as pg
+    pg.setConfigOptions(antialias=True)
+if skview:
+    from skimage.viewer import ImageViewer
+
+if shape_transform_model == 'gaussian':
+    approximate_shape_transform = True
+elif shape_transform_model == 'parallelepiped':
+    approximate_shape_transform = False
+else:
+    sys.stderr.write('Crystal shape transform model not recognized: %s\n' % (shape_transform_model))
+    sys.stderr.write('The options are: gaussian or parallelepiped\n')
+    sys.exit(1)
+
+# The following is just for display purposes:
+# Most likely the display settings are wrong... difficult to guess at this...
+# TODO: Have these display settings work with the GUI
+"""
+if qtview or mplview or skview:
+
+    if add_noise:
+        write('Displaying with noise\n')
+        I_display = I_noisy.copy()
+    else:
+        write('Displaying **without** noise\n')
+        I_display = I_ideal.copy()
+
+    if overlay_wigner_cells:
+        hkl = cryst.O.dot(R).dot(q.T) / 2.0 / np.pi  # .dot(cryst.Oinv)
+        delta = hkl - np.round(hkl)
+        delta = npad.ss_vecqrt(npad.ss_vecum(delta ** 2, axis=0))
+        peak_mask = np.zeros((pad.n_fs * pad.n_ss))
+        peak_mask[delta < 0.5] = 1
+        I_display += peak_mask * 1e-2
+
+    if mask_direct_beam:
+        write('Masking direct beam\n')
+        I_display *= direct_beam_mask
+
+    write('Taking log10 of simulated intensities\n')
+    I_display = np.log10(I_display + 1e-20)
+    I_display = I_display.reshape((pad.n_ss, pad.n_fs))
+
+    if qtview:
+        img = pg.image(I_display, autoLevels=False, levels=[-0.4, np.log10(10)],
+                       title='log10(I); %.1f micron; %.2f mrad; %.1f%% BW; ' %
+                             (beam_diameter * 1e6, beam_divergence_fwhm * 1000, wavelength_fwhm / wavelength * 100))
+        if __name__ == '__main__':
+            if sys.flags.interactive != 1 or not hasattr(QtCore, 'PYQT_VERSION'):
+                pg.QtGui.QApplication.exec_()
+    elif skview:
+        viewer = ImageViewer(I_display)
+        viewer.show()
+    elif mplview:
+        plt.imshow(I_display, interpolation='nearest', cmap='gray', origin='lower')
+        plt.show()
+"""
