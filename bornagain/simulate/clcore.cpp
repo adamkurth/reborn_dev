@@ -525,7 +525,6 @@ kernel void gaussian_lattice_transform_intensities_pad(
     }
 }
 
-
 __kernel void qrf_default(
     __global dsfloat16 *q_vecs,
     __global dsfloat4 *r_vecs,
