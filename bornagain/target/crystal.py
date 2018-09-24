@@ -12,7 +12,7 @@ from bornagain import utils
 from bornagain.simulate import atoms, simutils
 
 
-class structure(object):
+class Structure(object):
 
     r"""
     A container class for stuff needed when dealing with crystal structures.
@@ -42,10 +42,6 @@ class structure(object):
     symTs = None #: Symmetry translations (in crystal basis)
 
     def __init__(self, pdbFilePath=None):
-
-        if ba.get_global('warn_depreciated'):
-            utils.warn('The class "structure" is depreciated.  Use "Structure" instead.'
-                       ' (This change was made for PEP8 compliance.)')
 
         if pdbFilePath is not None:
             self.load_pdb(pdbFilePath)
@@ -144,11 +140,18 @@ class structure(object):
         return self._x
 
 
-class Structure(structure):
+class structure(Structure):
 
     def __init__(self, *args, **kwargs):
 
-        structure.__init__(self, *args, **kwargs)
+        Structure.__init__(self, *args, **kwargs)
+
+        if ba.get_global('warn_depreciated'):
+            utils.warn('The class "structure" is depreciated.  Use "Structure" instead.'
+                       ' (This change was made for PEP8 compliance.)')
+
+
+
 
 
 def parse_pdb(pdbFilePath, crystalStruct=None):
