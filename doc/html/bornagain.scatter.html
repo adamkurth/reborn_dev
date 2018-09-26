@@ -88,8 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
@@ -175,11 +175,12 @@
             
   <div class="section" id="module-bornagain.scatter">
 <span id="bornagain-scatter-module"></span><h1>bornagain.scatter module<a class="headerlink" href="#module-bornagain.scatter" title="Permalink to this headline">¶</a></h1>
-<p>Classes related to x-ray “scattering”, which loosely means diffraction from many objects in random orientations.</p>
+<p>Classes related to x-ray &#8220;scattering&#8221;,
+which loosely means diffraction from many objects in random orientations.</p>
 <dl class="class">
 <dt id="bornagain.scatter.RadialProfile">
 <em class="property">class </em><code class="descclassname">bornagain.scatter.</code><code class="descname">RadialProfile</code><a class="reference internal" href="_modules/bornagain/scatter.html#RadialProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.scatter.RadialProfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Helper class to create radial profiles.</p>
 <dl class="method">
 <dt id="bornagain.scatter.RadialProfile.make_plan">
@@ -190,10 +191,12 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>q_mags</strong> (<em>numpy array</em>) – Scattering vector magnitudes.</li>
-<li><strong>mask</strong> (<em>numpy array</em>) – Pixel mask.  Should be ones and zeros, where one means “good” and zero means “bad”.</li>
-<li><strong>n_bins</strong> (<em>int</em>) – Number of bins.</li>
-<li><strong>q_range</strong> (<em>list-like</em>) – The minimum and maximum of the scattering vector magnitudes.  The bin size will be equal to
+<li><strong>q_mags</strong> (<em>numpy array</em>) &#8211; Scattering vector magnitudes.</li>
+<li><strong>mask</strong> (<em>numpy array</em>) &#8211; Pixel mask.  Should be ones and zeros,
+where one means &#8220;good&#8221; and zero means &#8220;bad&#8221;.</li>
+<li><strong>n_bins</strong> (<em>int</em>) &#8211; Number of bins.</li>
+<li><strong>q_range</strong> (<em>list-like</em>) &#8211; The minimum and maximum of the scattering vector magnitudes.
+The bin size will be equal to
 (max_q - min_q) / n_bins</li>
 </ul>
 </td>
@@ -211,8 +214,9 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>numpy array</em>) – Intensity data.</li>
-<li><strong>average</strong> (<em>bool</em>) – If true, divide the sum in each bin by the counts, else return the sum.  Default: True.</li>
+<li><strong>data</strong> (<em>numpy array</em>) &#8211; Intensity data.</li>
+<li><strong>average</strong> (<em>bool</em>) &#8211; If true, divide the sum in each bin by the counts,
+else return the sum.  Default: True.</li>
 </ul>
 </td>
 </tr>
@@ -283,7 +287,7 @@
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

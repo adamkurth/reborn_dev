@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.simulate.mcsim module" href="bornagain.simulate.mcsim.html" />
+    <link rel="next" title="bornagain.simulate.mcpotato module" href="bornagain.simulate.mcpotato.html" />
     <link rel="prev" title="bornagain.simulate.clcore module" href="bornagain.simulate.clcore.html" /> 
 
   
@@ -88,8 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
@@ -179,36 +179,36 @@
 <dl class="function">
 <dt id="bornagain.simulate.examples.pnccd_pads">
 <code class="descclassname">bornagain.simulate.examples.</code><code class="descname">pnccd_pads</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#pnccd_pads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.pnccd_pads" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a list of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances that are inspired by
+<dd><p>Generate a list of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> instances that are inspired by
 the <a class="reference external" href="https://doi.org/10.1016/j.nima.2009.12.053">pnCCD</a> detector.</p>
-<p>Returns: List of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances.</p>
+<p>Returns: List of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> instances.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="bornagain.simulate.examples.cspad_pads">
 <code class="descclassname">bornagain.simulate.examples.</code><code class="descname">cspad_pads</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#cspad_pads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.cspad_pads" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a list of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances that are inspired by
+<dd><p>Generate a list of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> instances that are inspired by
 the <a class="reference external" href="http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-15284.pdf">CSPAD</a> detector.</p>
-<p>Returns: List of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances.</p>
+<p>Returns: List of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> instances.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="bornagain.simulate.examples.lysozyme_molecule">
 <code class="descclassname">bornagain.simulate.examples.</code><code class="descname">lysozyme_molecule</code><span class="sig-paren">(</span><em>pads=None</em>, <em>wavelength=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#lysozyme_molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.lysozyme_molecule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple simulation of lysozyme molecule using <a class="reference internal" href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore" title="bornagain.simulate.clcore.ClCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClCore</span></code></a>.</p>
+<dd><p>Simple simulation of lysozyme molecule using <a class="reference internal" href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore" title="bornagain.simulate.clcore.ClCore"><code class="xref py py-class docutils literal"><span class="pre">ClCore</span></code></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>pads</strong> – List of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances.</li>
-<li><strong>wavelength</strong> – As always, in SI units.</li>
+<li><strong>pads</strong> &#8211; List of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> instances.</li>
+<li><strong>wavelength</strong> &#8211; As always, in SI units.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<p>Returns: dictionary with {‘pad_geometry’: pads, ‘intensity’: data_list}</p>
+<p>Returns: dictionary with {&#8216;pad_geometry&#8217;: pads, &#8216;intensity&#8217;: data_list}</p>
 </dd></dl>
 
 </div>
@@ -221,7 +221,7 @@ the <a class="reference external" href="http://www.slac.stanford.edu/cgi-wrap/ge
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.simulate.mcsim.html" class="btn btn-neutral float-right" title="bornagain.simulate.mcsim module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.simulate.mcpotato.html" class="btn btn-neutral float-right" title="bornagain.simulate.mcpotato module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="bornagain.simulate.clcore.html" class="btn btn-neutral" title="bornagain.simulate.clcore module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -266,7 +266,7 @@ the <a class="reference external" href="http://www.slac.stanford.edu/cgi-wrap/ge
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Diffration simulations" href="simulations.html" />
+    <link rel="next" title="Simulations" href="simulations.html" />
     <link rel="prev" title="Targets" href="targets.html" /> 
 
   
@@ -94,8 +94,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#working-with-crystfel-geometry-files">Working with CrystFEL geometry files</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 
@@ -169,40 +169,40 @@
 <a class="reference internal image-reference" href="_images/pad.jpg"><img alt="Pixel-array detector schematic" src="_images/pad.jpg" style="width: 1062.4px; height: 493.6px;" /></a>
 <p class="caption"><span class="caption-text">Schematic of a Pixel-Array Detector.</span></p>
 </div>
-<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> class contains the data and methods needed to deal with “pixel-array detectors”.  This detector is like a CCD and is assumed to consist of an orthogonal 2D grid of pixels.  The 2D grid is described by the following vectors:</p>
+<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> class contains the data and methods needed to deal with &#8220;pixel-array detectors&#8221;.  This detector is like a CCD and is assumed to consist of an orthogonal 2D grid of pixels.  The 2D grid is described by the following vectors:</p>
 <blockquote>
-<div><p><span class="math notranslate nohighlight">\(\vec{t}\)</span> is the vector pointing from the origin to the center of the corner detector pixel that is assumed to be the first in memory.</p>
-<p><span class="math notranslate nohighlight">\(\vec{f}\)</span> is the vector that points along the “fast-scan” direction.  This is the distance and direction that points to the next pixel.</p>
+<div><p><span class="math">\(\vec{t}\)</span> is the vector pointing from the origin to the center of the corner detector pixel that is assumed to be the first in memory.</p>
+<p><span class="math">\(\vec{f}\)</span> is the vector that points along the &#8220;fast-scan&#8221; direction.  This is the distance and direction that points to the next pixel.</p>
 </div></blockquote>
 <p>that is adjacent in physical space, as well as in computer memory.  The length of this vector indicates the pixel size.</p>
 <blockquote>
-<div><p><span class="math notranslate nohighlight">\(n_f\)</span> is the number of fast-scan pixels in the detector.</p>
-<p><span class="math notranslate nohighlight">\(\vec{s}\)</span> is the vector that points along the “slow-scan” direction.  This is much like the <span class="math notranslate nohighlight">\(\vec{f}\)</span> vector, but these pixels are only adjacent in physical space but not in computer memory.  In computer memory, adjacent pixels have a memory stride of length <span class="math notranslate nohighlight">\(n_f\)</span>.</p>
-<p><span class="math notranslate nohighlight">\(n_s\)</span> is the number of slow-scan pixels in the detector.</p>
+<div><p><span class="math">\(n_f\)</span> is the number of fast-scan pixels in the detector.</p>
+<p><span class="math">\(\vec{s}\)</span> is the vector that points along the &#8220;slow-scan&#8221; direction.  This is much like the <span class="math">\(\vec{f}\)</span> vector, but these pixels are only adjacent in physical space but not in computer memory.  In computer memory, adjacent pixels have a memory stride of length <span class="math">\(n_f\)</span>.</p>
+<p><span class="math">\(n_s\)</span> is the number of slow-scan pixels in the detector.</p>
 </div></blockquote>
 <p>Note that there are no angles involved in describing the detector geometry.  That is because angles are confusing due to the many different conventions used by different reference books and software.  Also, importantly, rotation operations do not commute, which only adds to the confusion.</p>
-<p>With the above vectors specified, we may now generate the quantities that will be useful when doing diffraction analysis and simulations.  The vector pointing from the origin (where the target is located) to a detector pixel indexed by <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span>, is</p>
+<p>With the above vectors specified, we may now generate the quantities that will be useful when doing diffraction analysis and simulations.  The vector pointing from the origin (where the target is located) to a detector pixel indexed by <span class="math">\(i\)</span> and <span class="math">\(j\)</span>, is</p>
 <blockquote>
-<div><span class="math notranslate nohighlight">\(\vec{v}_{ij}=\vec{t}+i\vec{f}+j\vec{s}\)</span></div></blockquote>
-<p>Now let’s compute the scattering vector for pixel <span class="math notranslate nohighlight">\(i,j\)</span>:</p>
+<div><span class="math">\(\vec{v}_{ij}=\vec{t}+i\vec{f}+j\vec{s}\)</span></div></blockquote>
+<p>Now let&#8217;s compute the scattering vector for pixel <span class="math">\(i,j\)</span>:</p>
 <blockquote>
-<div><span class="math notranslate nohighlight">\(\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)\)</span></div></blockquote>
-<p>where <span class="math notranslate nohighlight">\(\lambda\)</span> is the photon wavelength.  Next we can compute the scattering angle of a pixel:</p>
+<div><span class="math">\(\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)\)</span></div></blockquote>
+<p>where <span class="math">\(\lambda\)</span> is the photon wavelength.  Next we can compute the scattering angle of a pixel:</p>
 <blockquote>
-<div><span class="math notranslate nohighlight">\(\theta_{ij} = \arccos(\hat{v}_{ij}\cdot\hat{b})\)</span></div></blockquote>
+<div><span class="math">\(\theta_{ij} = \arccos(\hat{v}_{ij}\cdot\hat{b})\)</span></div></blockquote>
 <p>For linearly polarized light, the polarization correction is</p>
 <blockquote>
-<div><span class="math notranslate nohighlight">\(P_{ij} = 1 - |\hat{u}\cdot\hat{v}_{ij}|^2\)</span></div></blockquote>
+<div><span class="math">\(P_{ij} = 1 - |\hat{u}\cdot\hat{v}_{ij}|^2\)</span></div></blockquote>
 <p>If the light is not linearly polarized, then the polarization factor is a weighted sum of the above component and this one:</p>
 <blockquote>
-<div><span class="math notranslate nohighlight">\(P'_{ij} = 1 - |(\hat{b}\times\hat{u})\cdot\hat{v}_{ij}|^2\)</span></div></blockquote>
+<div><span class="math">\(P'_{ij} = 1 - |(\hat{b}\times\hat{u})\cdot\hat{v}_{ij}|^2\)</span></div></blockquote>
 <p>The solid angle of a pixel is approximately equal to</p>
 <blockquote>
-<div><span class="math notranslate nohighlight">\(\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}\)</span></div></blockquote>
+<div><span class="math">\(\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}\)</span></div></blockquote>
 <p>where the vector normal to the PAD is</p>
 <blockquote>
-<div><span class="math notranslate nohighlight">\(\hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}\)</span></div></blockquote>
-<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> class can currently generate the above quantities for you.  More can be added if they are necessary.</p>
+<div><span class="math">\(\hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}\)</span></div></blockquote>
+<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> class can currently generate the above quantities for you.  More can be added if they are necessary.</p>
 </div>
 <div class="section" id="data-and-geometry-formats">
 <h2>Data and geometry formats<a class="headerlink" href="#data-and-geometry-formats" title="Permalink to this headline">¶</a></h2>
@@ -211,37 +211,37 @@
 <li>Transform the data found on disk or in RAM to a useful numpy arrays.</li>
 <li>Create a mapping from each pair numpy array indices to the corresponding position 3-vector.</li>
 </ol>
-<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> contains the needed information to perform step (2).  This class also includes convenience methods that calculate commonly used quantities such as pixel solid angles, scattering vectors, and so on.  Once you have a <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instance and a corresponding numpy array, the standardized interface will make it easier to re-use code.</p>
+<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> contains the needed information to perform step (2).  This class also includes convenience methods that calculate commonly used quantities such as pixel solid angles, scattering vectors, and so on.  Once you have a <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> instance and a corresponding numpy array, the standardized interface will make it easier to re-use code.</p>
 <p>The main hurdle usually lies in step (1), for which we need layer of code to transplant raw data from a facility into standard numpy arrays.  This is discussed in the next section.</p>
-<p>Before moving on, there is one caveat that needs to be mentioned.  Since XFELs tend to use multiple PADs, you should plan to work with lists of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances rather than a single one.  You can still do vectorized operations on all panels at once with the numpy ravel function, as shown in some example somewhere (TODO:rickk).</p>
+<p>Before moving on, there is one caveat that needs to be mentioned.  Since XFELs tend to use multiple PADs, you should plan to work with lists of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> instances rather than a single one.  You can still do vectorized operations on all panels at once with the numpy ravel function, as shown in some example somewhere (TODO:rickk).</p>
 </div>
 <div class="section" id="generic-description-of-data-layout">
 <h2>Generic description of data layout<a class="headerlink" href="#generic-description-of-data-layout" title="Permalink to this headline">¶</a></h2>
-<p>It’s not likely that bornagain will have some generalized class for reading in data in arbitrary formats.  We’ll eventually support the <a class="reference external" href="http://www.cxidb.org/">cxidb</a> file format, and for any other format someone must write a custom function.  But it’s nonetheless worthwile to think a little bit about the task at hand.</p>
+<p>It&#8217;s not likely that bornagain will have some generalized class for reading in data in arbitrary formats.  We&#8217;ll eventually support the <a class="reference external" href="http://www.cxidb.org/">cxidb</a> file format, and for any other format someone must write a custom function.  But it&#8217;s nonetheless worthwile to think a little bit about the task at hand.</p>
 <p>Data stored on disk may be thought of as a finite 1D array, and our task is to chop it up into chunks of data corresponding to individual pixel-array detectors.  The first step is probably to convert data on disk or RAM into a numpy array, and usually there is a package such as <a class="reference external" href="https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis">psana</a> that does this work for you, or the data comes in a well-documented and well-supported format like <a class="reference external" href="https://support.hdfgroup.org/HDF5/">hdf5</a> in which case we may use a package like <a class="reference external" href="https://www.h5py.org/">h5py</a>.</p>
-<p>In the best of situations, we get a numpy array with some reasonable shape, and it’s then easy to split up the block of contiguous data into a list of individual panels.  You don’t need to copy memory; you can instead use numpy <a class="reference external" href="https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.ndarray.view.html">views</a> of the initial array.</p>
+<p>In the best of situations, we get a numpy array with some reasonable shape, and it&#8217;s then easy to split up the block of contiguous data into a list of individual panels.  You don&#8217;t need to copy memory; you can instead use numpy <a class="reference external" href="https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.ndarray.view.html">views</a> of the initial array.</p>
 <p>In the most generic case, where we have a 1D data array that we wish to convert into individual 2D PAD data arrays, we need a few things:</p>
 <ol class="arabic simple">
-<li>The size of the 2D array we intend to extract, which we refer to as <span class="math notranslate nohighlight">\(n_{fs}\)</span> and <span class="math notranslate nohighlight">\(n_{ss}\)</span> for fast-scan and slow-scan directions.</li>
-<li>The index <span class="math notranslate nohighlight">\(a\)</span> of the first datapoint in memory, assumed to correspond to a corner pixel.</li>
-<li>The fast-scan stride, <span class="math notranslate nohighlight">\(S_f\)</span>, and the slow-scan stride <span class="math notranslate nohighlight">\(S_s\)</span>.</li>
+<li>The size of the 2D array we intend to extract, which we refer to as <span class="math">\(n_{fs}\)</span> and <span class="math">\(n_{ss}\)</span> for fast-scan and slow-scan directions.</li>
+<li>The index <span class="math">\(a\)</span> of the first datapoint in memory, assumed to correspond to a corner pixel.</li>
+<li>The fast-scan stride, <span class="math">\(S_f\)</span>, and the slow-scan stride <span class="math">\(S_s\)</span>.</li>
 </ol>
-<p>From the above, we can get the intensity value of pixel <span class="math notranslate nohighlight">\(i,j\)</span> from the raw data array as follows:</p>
-<p><span class="math notranslate nohighlight">\(PAD[i,j] = RAW[a + i*S_f + j*S_s]\)</span></p>
-<p>We’ve not had to deal with this general case yet, but when we do we can probably just use the numpy methods of dealing with arbitrary strides.</p>
+<p>From the above, we can get the intensity value of pixel <span class="math">\(i,j\)</span> from the raw data array as follows:</p>
+<p><span class="math">\(PAD[i,j] = RAW[a + i*S_f + j*S_s]\)</span></p>
+<p>We&#8217;ve not had to deal with this general case yet, but when we do we can probably just use the numpy methods of dealing with arbitrary strides.</p>
 </div>
 <div class="section" id="working-with-crystfel-geometry-files">
 <h2>Working with CrystFEL geometry files<a class="headerlink" href="#working-with-crystfel-geometry-files" title="Permalink to this headline">¶</a></h2>
 <p>Firstly, you need to read about the CrystFEL <a class="reference external" href="http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html">geom</a>
-file specification.  Note that CrystFEL geom files contain a lot more than geometry information.  They also contain information about…</p>
+file specification.  Note that CrystFEL geom files contain a lot more than geometry information.  They also contain information about...</p>
 <ul class="simple">
 <li>detector properties (e.g. saturation levels, common-mode noise and conversions between digital data units and deposited x-ray energy),</li>
 <li>information about how to obtain encoder values that specify detector positions,</li>
 <li>formatting of the files that contain the diffraction data,</li>
 <li>how programs like indexamajig should treat the data (e.g. the no_index card)</li>
 </ul>
-<p>If you want to read in the complete information from a geom file you can convert it to a python dictionary using the <code class="xref py py-func docutils literal notranslate"><span class="pre">geometry_file_to_dict()</span></code> function, which is just a wrapper for the corresponding function in the <a class="reference external" href="https://pypi.org/project/cfelpyutils/">cfelpyutils</a> package.</p>
-<p>Most importantly, geom files contain the three principal vectors that bornagain utilizes, albeit it may not be obvious at first glance when you look into the geom file.  If you just want this information, then you can simply use a geom file to generate a list of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances for use in bornagain.</p>
+<p>If you want to read in the complete information from a geom file you can convert it to a python dictionary using the <code class="xref py py-func docutils literal"><span class="pre">geometry_file_to_dict()</span></code> function, which is just a wrapper for the corresponding function in the <a class="reference external" href="https://pypi.org/project/cfelpyutils/">cfelpyutils</a> package.</p>
+<p>Most importantly, geom files contain the three principal vectors that bornagain utilizes, albeit it may not be obvious at first glance when you look into the geom file.  If you just want this information, then you can simply use a geom file to generate a list of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal"><span class="pre">PADGeometry</span></code></a> instances for use in bornagain.</p>
 </div>
 </div>
 
@@ -253,7 +253,7 @@ file specification.  Note that CrystFEL geom files contain a lot more than geome
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="simulations.html" class="btn btn-neutral float-right" title="Diffration simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="simulations.html" class="btn btn-neutral float-right" title="Simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="targets.html" class="btn btn-neutral" title="Targets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -298,7 +298,7 @@ file specification.  Note that CrystFEL geom files contain a lot more than geome
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -1,5 +1,6 @@
 """
-Some utility functions that might be useful throughout bornagain.  Don't put highly specialized functions here.
+Some utility functions that might be useful throughout bornagain.
+Don't put highly specialized functions here.
 """
 
 from functools import wraps
@@ -10,40 +11,42 @@ from numpy import sin, cos
 # not sure where to seed
 np.random.seed()
 
-def vec_check2(vec, *args, **kwargs):
 
+def vec_check2(vec, *args, **kwargs):
     r"""
-    Same as vec_check(vec, dimension=2).  See :func:`vec_check <bornagain.utils.vec_check>`
+    Same as vec_check(vec, dimension=2).
+    See :func:`vec_check <bornagain.utils.vec_check>`
     """
 
     return vec_check(vec, dimension=2, *args, **kwargs)
 
-def vec_check3(vec, *args, **kwargs):
 
+def vec_check3(vec, *args, **kwargs):
     r"""
     Same as vec_check(vec, dimension=2)
     """
 
     return vec_check(vec, dimension=3, *args, **kwargs)
 
-def vec_check(vec, hardcheck=False, dimension=3):
 
+def vec_check(vec, hardcheck=False, dimension=3):
     r"""
     Check that a vector meets our assumptions, and correct it if it doesn't.
 
     Our assumptions are that:
         1) The array shape is Nxd, where d is the dimension of the vector, and
-           N is the number of vectors.  This is important when applying rotation
-           operations to many vectors.
-        2) The array is c-contiguous.  This is important for passing arrays into
-           external c functions or to opencl kernels.
+           N is the number of vectors.
+           This is important when applying rotation operations to many vectors.
+        2) The array is c-contiguous.
+           This is important for passing arrays into external
+           c functions or to opencl kernels.
 
-    The above also helps when we want to ensure that dot products and broadcasting
-    will work as expected.
+    The above also helps when we want to ensure that dot products
+    and broadcasting will work as expected.
 
     Note that we have chosen to keep vector components close in memory.  I.e.,
-    the x, y, and z components of a given vector are contiguous.  This will ensure
-    that rotations and broadcasting are as fast as can be.
+    the x, y, and z components of a given vector are contiguous.
+    This will ensure that rotations and broadcasting are as fast as can be.
 
     Input:
 
@@ -89,8 +92,6 @@ def vec_check(vec, hardcheck=False, dimension=3):
 
 def vec_norm(V):
 
-
-
     V = vec_check(V)
     if V.ndim != 2:
         raise ValueError("V must have one or two dimensions.")
@@ -116,7 +117,6 @@ def error(message):
     """ Simple error message (to be replaced later...) """
 
     sys.stderr.write("ERROR: %s\n" % message)
-
 
 
 # def axisAndAngleToMatrix(axis, angle):
@@ -224,9 +224,11 @@ def random_rotation(deflection=1.0, randnums=None):
     """
     Creates a random rotation matrix.
 
-    deflection: the magnitude of the rotation. For 0, no rotation; for 1, competely random
-    rotation. Small deflection => small perturbation.
-    randnums: 3 random numbers in the range [0, 1]. If `None`, they will be auto-generated.
+    deflection: the magnitude of the rotation.
+    For 0, no rotation; for 1, competely random rotation.
+    Small deflection => small perturbation.
+    randnums: 3 random numbers in the range [0, 1].
+    If `None`, they will be auto-generated.
     """
     # from
     # http://www.realtimerendering.com/resources/GraphicsGems/gemsiii/rand_rotation.c
@@ -264,25 +266,30 @@ def random_rotation(deflection=1.0, randnums=None):
 
 
 def rotation_about_axis(theta, u):
-
     """
     This needs to be tested.  It was taken from
     https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python
     """
 
-    return np.array([[cos(theta) + u[0]**2 * (1-cos(theta)), u[0] * u[1] * (1-cos(theta)) - u[2] * sin(theta), u[0] * u[2] * (1 - cos(theta)) + u[1] * sin(theta)],
-                     [u[0] * u[1] * (1-cos(theta)) + u[2] * sin(theta), cos(theta) + u[1]**2 * (1-cos(theta)), u[1] * u[2] * (1 - cos(theta)) - u[0] * sin(theta)],
-                     [u[0] * u[2] * (1-cos(theta)) - u[1] * sin(theta), u[1] * u[2] * (1-cos(theta)) + u[0] * sin(theta), cos(theta) + u[2]**2 * (1-cos(theta))]])
+    return np.array([[cos(theta) + u[0]**2 * (1 - cos(theta)),
+                      u[0] * u[1] * (1 - cos(theta)) - u[2] * sin(theta),
+                      u[0] * u[2] * (1 - cos(theta)) + u[1] * sin(theta)],
+                     [u[0] * u[1] * (1 - cos(theta)) + u[2] * sin(theta),
+                      cos(theta) + u[1]**2 * (1 - cos(theta)),
+                      u[1] * u[2] * (1 - cos(theta)) - u[0] * sin(theta)],
+                     [u[0] * u[2] * (1 - cos(theta)) - u[1] * sin(theta),
+                      u[1] * u[2] * (1 - cos(theta)) + u[0] * sin(theta),
+                      cos(theta) + u[2]**2 * (1 - cos(theta))]])
 
 
 def random_beam_vector(div_fwhm):
-
     """
     A random vector for emulating beam divergence.
-    Generates a random normal vector that is nominally along the [0,0,1] direction
-    but with a random rotation along the [1,0,0] axis with given FWHM (Gaussian
-    distributed and centered about zero) followed by a random rotation about the
-    [0,0,1] axis with uniform distribution in the interval [0,2*pi).
+    Generates a random normal vector that is nominally
+    along the [0,0,1] direction but with a random rotation along the [1,0,0]
+    axis with given FWHM (Gaussian distributed and centered about zero)
+    followed by a random rotation about the  [0,0,1] axis with
+    uniform distribution in the interval [0,2*pi).
 
     :param div_fwhm:
     :return:
@@ -294,25 +301,26 @@ def random_beam_vector(div_fwhm):
         return B
 
     # First rotate around the x axis with Gaussian prob. dist.
-    sig = div_fwhm/2.354820045
+    sig = div_fwhm / 2.354820045
     theta = np.random.normal(0, sig, [1])[0]
     Rtheta = rotation_about_axis(theta, [1.0, 0, 0])
     B = np.dot(Rtheta, B)
 
     # Next rotate around z axis with uniform dist [0,2*pi)
-    phi = np.random.random(1)[0]*2*np.pi
+    phi = np.random.random(1)[0] * 2 * np.pi
     Rphi = rotation_about_axis(phi, [0, 0, 1.0])
     B = np.dot(Rphi, B)
     B /= np.sqrt(np.sum(B**2))
 
     return B
 
-def random_mosaic_rotation(mosaicity_fwhm):
 
+def random_mosaic_rotation(mosaicity_fwhm):
     """
-    Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.
-    We take the matrix product of three rotations, each of the same FWHM, about the three
-    orthogonal axis.  The order of this product is a random permutation.
+    Attempt to generate a random orientation for a crystal mosaic domain.
+    This is a hack. We take the matrix product of three rotations,
+    each of the same FWHM, about the three orthogonal axes.
+    The order of this product is a random permutation.
 
     :param mosaicity_fwhm:
     :return:
@@ -322,9 +330,12 @@ def random_mosaic_rotation(mosaicity_fwhm):
         return np.eye(3)
 
     Rs = []
-    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [1.0, 0, 0]))
-    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 1.0, 0]))
-    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
+    Rs.append(rotation_about_axis(np.random.normal(
+        0, mosaicity_fwhm / 2.354820045, [1])[0], [1.0, 0, 0]))
+    Rs.append(rotation_about_axis(np.random.normal(
+        0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 1.0, 0]))
+    Rs.append(rotation_about_axis(np.random.normal(
+        0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
     rind = np.random.permutation([0, 1, 2])
     return Rs[rind[0]].dot(Rs[rind[1]].dot(Rs[rind[2]]))
 

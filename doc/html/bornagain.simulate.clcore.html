@@ -88,8 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
@@ -177,9 +177,9 @@
   <div class="section" id="module-bornagain.simulate.clcore">
 <span id="bornagain-simulate-clcore-module"></span><h1>bornagain.simulate.clcore module<a class="headerlink" href="#module-bornagain.simulate.clcore" title="Permalink to this headline">¶</a></h1>
 <p>This module contains some core functions that are useful for simulating
-diffraction on GPU devices.  It is not finished yet…</p>
+diffraction on GPU devices.  It is not finished yet...</p>
 <p>Some environment variables that affect this module:
-‘BORNAGAIN_CL_GROUPSIZE’ : This sets the default groupsize.  It will
+&#8216;BORNAGAIN_CL_GROUPSIZE&#8217; : This sets the default groupsize.  It will
 otherwise be 32.  If you are using a CPU you might want to set
 BORNAGAIN_CL_GROUPSIZE=1 .</p>
 <dl class="function">
@@ -193,7 +193,7 @@ context if possible.</p>
 <dl class="class">
 <dt id="bornagain.simulate.clcore.ClCore">
 <em class="property">class </em><code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">ClCore</code><span class="sig-paren">(</span><em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em>, <em>double_precision=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.set_groupsize">
 <code class="descname">set_groupsize</code><span class="sig-paren">(</span><em>group_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.set_groupsize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.set_groupsize" title="Permalink to this definition">¶</a></dt>
@@ -213,8 +213,8 @@ smaller (but print warning)</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong><strong>, </strong><strong>np.ndarray</strong> (<em>-</em>) – </li>
-<li><strong>dtype</strong><strong>, </strong><strong>np.dtype</strong> (<em>-</em>) – default is np.float32</li>
+<li><strong>x</strong><strong>, </strong><strong>np.ndarray</strong> (<em>-</em>) &#8211; </li>
+<li><strong>dtype</strong><strong>, </strong><strong>np.dtype</strong> (<em>-</em>) &#8211; default is np.float32</li>
 </ul>
 </td>
 </tr>
@@ -238,8 +238,8 @@ array so that it can be passed in as a float16.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>R</strong><strong>, </strong><strong>np.ndarray</strong> (<em>-</em>) – </li>
-<li><strong>dtype</strong><strong>, </strong><strong>np.dtype</strong> (<em>-</em>) – default is np.float32</li>
+<li><strong>R</strong><strong>, </strong><strong>np.ndarray</strong> (<em>-</em>) &#8211; </li>
+<li><strong>dtype</strong><strong>, </strong><strong>np.dtype</strong> (<em>-</em>) &#8211; default is np.float32</li>
 </ul>
 </td>
 </tr>
@@ -265,10 +265,10 @@ deals with float and comlex arrays, and it should figure out which type it is.</
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>array</strong> (<em>numpy/cl array; float/complex type</em>) – Input array.</li>
-<li><strong>dtype</strong> (<em>np.dtype</em>) – Specify the desired type in opencl.  The two types that
+<li><strong>array</strong> (<em>numpy/cl array; float/complex type</em>) &#8211; Input array.</li>
+<li><strong>dtype</strong> (<em>np.dtype</em>) &#8211; Specify the desired type in opencl.  The two types that
 are useful here are np.float32 and np.complex64</li>
-<li><strong>CL queue</strong> (<em>queue</em><em>,</em>) – </li>
+<li><strong>CL queue</strong> (<em>queue</em><em>,</em><em></em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -290,10 +290,10 @@ deals with float and comlex arrays, and it should figure out which type it is.</
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>array</strong> (<em>numpy/cl array; float/complex type</em>) – Input array.</li>
-<li><strong>shape</strong> (<em>tuple</em>) – Optionally specify the shape of the desired array.  This is
+<li><strong>array</strong> (<em>numpy/cl array; float/complex type</em>) &#8211; Input array.</li>
+<li><strong>shape</strong> (<em>tuple</em>) &#8211; Optionally specify the shape of the desired array.  This is
 ignored if array is not None.</li>
-<li><strong>dtype</strong> (<em>np.dtype</em>) – Specify the desired type in opencl.  The two types that
+<li><strong>dtype</strong> (<em>np.dtype</em>) &#8211; Specify the desired type in opencl.  The two types that
 are useful here are np.float32 and np.complex64</li>
 </ul>
 </td>
@@ -315,7 +315,7 @@ are useful here are np.float32 and np.complex64</li>
 <dt id="bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real">
 <code class="descname">mod_squared_complex_to_real</code><span class="sig-paren">(</span><em>A</em>, <em>I</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.mod_squared_complex_to_real"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the real-valued modulus square of complex numbers.
-Good example of a function that shouldn’t exist, but I needed to add
+Good example of a function that shouldn&#8217;t exist, but I needed to add
 it here because the pyopencl.array.Array class fails at this seemingly
 simple task.</p>
 </dd></dl>
@@ -329,11 +329,11 @@ simple task.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><em>N</em><em>,</em><em>3</em><em>]</em>) – Scattering vectors (2pi/lambda).</li>
-<li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em>) – Atomic coordinates.</li>
-<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em>) – Complex scattering factors.</li>
-<li><strong>number of chunks to split up atoms..</strong> (<em>Nchunk</em><em>,</em>) – </li>
-<li><strong>a</strong> (<em>cl complex array</em><em> [</em><em>N</em><em>]</em>) – Optional container for complex scattering
+<li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><a class="reference internal" href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.N" title="bornagain.target.density.CrystalMeshTool.N"><em>N</em></a><em>,</em><em>3</em><em>]</em><em></em>) &#8211; Scattering vectors (2pi/lambda).</li>
+<li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em><em></em>) &#8211; Atomic coordinates.</li>
+<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em><em></em>) &#8211; Complex scattering factors.</li>
+<li><strong>number of chunks to split up atoms..</strong> (<em>Nchunk</em><em>,</em><em></em>) &#8211; </li>
+<li><strong>a</strong> (<em>cl complex array</em><em> [</em><a class="reference internal" href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.N" title="bornagain.target.density.CrystalMeshTool.N"><em>N</em></a><em>]</em><em></em>) &#8211; Optional container for complex scattering
 amplitudes.</li>
 </ul>
 </td>
@@ -346,7 +346,7 @@ amplitudes.</li>
 </p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [N])</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [<a class="reference internal" href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.N" title="bornagain.target.density.CrystalMeshTool.N">N</a>])</p>
 </td>
 </tr>
 </tbody>
@@ -362,11 +362,11 @@ amplitudes.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><em>N</em><em>,</em><em>3</em><em>]</em>) – Scattering vectors (2pi/lambda).</li>
-<li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em>) – Atomic coordinates.</li>
-<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em>) – Complex scattering factors.</li>
-<li><strong>R</strong> (<em>numpy array</em><em> [</em><em>3</em><em>,</em><em>3</em><em>]</em>) – Rotation matrix acting on q vectors.</li>
-<li><strong>a</strong> (<em>cl complex array</em><em> [</em><em>N</em><em>]</em>) – Optional container for complex scattering
+<li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><a class="reference internal" href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.N" title="bornagain.target.density.CrystalMeshTool.N"><em>N</em></a><em>,</em><em>3</em><em>]</em><em></em>) &#8211; Scattering vectors (2pi/lambda).</li>
+<li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em><em></em>) &#8211; Atomic coordinates.</li>
+<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em><em></em>) &#8211; Complex scattering factors.</li>
+<li><strong>R</strong> (<em>numpy array</em><em> [</em><em>3</em><em>,</em><em>3</em><em>]</em><em></em>) &#8211; Rotation matrix acting on q vectors.</li>
+<li><strong>a</strong> (<em>cl complex array</em><em> [</em><a class="reference internal" href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.N" title="bornagain.target.density.CrystalMeshTool.N"><em>N</em></a><em>]</em><em></em>) &#8211; Optional container for complex scattering
 amplitudes.</li>
 </ul>
 </td>
@@ -379,7 +379,7 @@ amplitudes.</li>
 </p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [N])</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [<a class="reference internal" href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.N" title="bornagain.target.density.CrystalMeshTool.N">N</a>])</p>
 </td>
 </tr>
 </tbody>
@@ -410,11 +410,11 @@ amplitudes.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><em>N</em><em>,</em><em>3</em><em>]</em>) – Scattering vectors (2pi/lambda).</li>
-<li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em>) – Atomic coordinates.</li>
-<li><strong>R</strong> (<em>numpy array</em><em> [</em><em>3</em><em>,</em><em>3</em><em>]</em>) – Rotation matrix acting on q vectors.</li>
-<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em>) – Complex scattering factors.</li>
-<li><strong>a</strong> (<em>cl complex array</em><em> [</em><em>N</em><em>]</em>) – Optional container for complex scattering
+<li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><a class="reference internal" href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.N" title="bornagain.target.density.CrystalMeshTool.N"><em>N</em></a><em>,</em><em>3</em><em>]</em><em></em>) &#8211; Scattering vectors (2pi/lambda).</li>
+<li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em><em></em>) &#8211; Atomic coordinates.</li>
+<li><strong>R</strong> (<em>numpy array</em><em> [</em><em>3</em><em>,</em><em>3</em><em>]</em><em></em>) &#8211; Rotation matrix acting on q vectors.</li>
+<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em><em></em>) &#8211; Complex scattering factors.</li>
+<li><strong>a</strong> (<em>cl complex array</em><em> [</em><a class="reference internal" href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.N" title="bornagain.target.density.CrystalMeshTool.N"><em>N</em></a><em>]</em><em></em>) &#8211; Optional container for complex scattering
 amplitudes.</li>
 </ul>
 </td>
@@ -427,7 +427,7 @@ amplitudes.</li>
 </p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [N])</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [<a class="reference internal" href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.N" title="bornagain.target.density.CrystalMeshTool.N">N</a>])</p>
 </td>
 </tr>
 </tbody>
@@ -443,32 +443,32 @@ amplitudes.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>r</strong> – An Nx3 numpy array with atomic coordinates (meters)</li>
-<li><strong>f</strong> – A numpy array with complex scattering factors</li>
-<li><strong>T</strong> – A 1x3 numpy array with vector components pointing from sample to
+<li><strong>r</strong> &#8211; An Nx3 numpy array with atomic coordinates (meters)</li>
+<li><strong>f</strong> &#8211; A numpy array with complex scattering factors</li>
+<li><strong>T</strong> &#8211; A 1x3 numpy array with vector components pointing from sample to
 the center of the first pixel in memory</li>
-<li><strong>F</strong> – A 1x3 numpy array containing the basis vector components pointing
+<li><strong>F</strong> &#8211; A 1x3 numpy array containing the basis vector components pointing
 in the direction corresponding to contiguous pixels in memory
-(“fast scan”).</li>
-<li><strong>S</strong> – A 1x3 numpy array containing the basis vector components pointing
+(&#8220;fast scan&#8221;).</li>
+<li><strong>S</strong> &#8211; A 1x3 numpy array containing the basis vector components pointing
 in the direction corresponding to non-contiguous pixels in
-memory (“slow scan”).</li>
-<li><strong>B</strong> – A 1x3 numpy array with unit-vector components corresponding to the
+memory (&#8220;slow scan&#8221;).</li>
+<li><strong>B</strong> &#8211; A 1x3 numpy array with unit-vector components corresponding to the
 incident x-ray beam direction</li>
-<li><strong>nF</strong> – Number of fast-scan pixels (corresponding to F vector) in the
+<li><strong>nF</strong> &#8211; Number of fast-scan pixels (corresponding to F vector) in the
 detector panel</li>
-<li><strong>nS</strong> – Number of slow-scan pixels (corresponding to S vector) in the
+<li><strong>nS</strong> &#8211; Number of slow-scan pixels (corresponding to S vector) in the
 detector panel</li>
-<li><strong>w</strong> – The photon wavelength in meters</li>
-<li><strong>R</strong> – Optional numpy array [3x3] specifying rotation of q vectors</li>
-<li><strong>a</strong> – Optional output complex scattering amplitude cl array</li>
+<li><strong>w</strong> &#8211; The photon wavelength in meters</li>
+<li><strong>R</strong> &#8211; Optional numpy array [3x3] specifying rotation of q vectors</li>
+<li><strong>a</strong> &#8211; Optional output complex scattering amplitude cl array</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A numpy array of length nF*nS containing complex scattering</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">A</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.A" title="bornagain.target.crystal.Structure.A">A</a></p>
 </td>
 </tr>
 </tbody>
@@ -485,13 +485,13 @@ detector panel</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>r</strong> (<em>Nx3 numpy array</em>) – Atomic coordinates</li>
-<li><strong>f</strong> (<em>numpy array</em>) – A numpy array of complex atomic scattering factors</li>
-<li><strong>N</strong> (<em>numpy array length 3</em>) – Number of q-space samples in each of the three
+<li><strong>r</strong> (<em>Nx3 numpy array</em>) &#8211; Atomic coordinates</li>
+<li><strong>f</strong> (<em>numpy array</em>) &#8211; A numpy array of complex atomic scattering factors</li>
+<li><strong>N</strong> (<em>numpy array length 3</em>) &#8211; Number of q-space samples in each of the three
 dimensions</li>
-<li><strong>q_min</strong> (<em>numpy array length 3</em>) – Minimum q-space magnitudes in the 3d mesh.
+<li><strong>q_min</strong> (<em>numpy array length 3</em>) &#8211; Minimum q-space magnitudes in the 3d mesh.
 These values specify the <em>center</em> of the first voxel.</li>
-<li><strong>q_max</strong> (<em>numpy array length 3</em>) – Naximum q-space magnitudes in the 3d mesh.
+<li><strong>q_max</strong> (<em>numpy array length 3</em>) &#8211; Naximum q-space magnitudes in the 3d mesh.
 These values specify the <em>center</em> of the voxel.</li>
 </ul>
 </td>
@@ -517,15 +517,15 @@ These values specify the <em>center</em> of the voxel.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>a_map</strong> (<em>numpy array</em>) – Complex scattering amplitudes (usually generated from
+<li><strong>a_map</strong> (<em>numpy array</em>) &#8211; Complex scattering amplitudes (usually generated from
 the function phase_factor_mesh())</li>
-<li><strong>N</strong> (<em>int</em>) – As defined in phase_factor_mesh()</li>
-<li><strong>q_min</strong> (<em>float</em>) – As defined in phase_factor_mesh()</li>
-<li><strong>q_max</strong> (<em>float</em>) – As defined in phase_factor_mesh()</li>
-<li><strong>q</strong> (<em>Nx3 numpy array</em>) – q-space coordinates at which we want to interpolate
+<li><strong>N</strong> (<em>int</em>) &#8211; As defined in phase_factor_mesh()</li>
+<li><strong>q_min</strong> (<em>float</em>) &#8211; As defined in phase_factor_mesh()</li>
+<li><strong>q_max</strong> (<em>float</em>) &#8211; As defined in phase_factor_mesh()</li>
+<li><strong>q</strong> (<em>Nx3 numpy array</em>) &#8211; q-space coordinates at which we want to interpolate
 the complex amplitudes in a_dev</li>
-<li><strong>R</strong> (<em>3x3 numpy array</em>) – Rotation matrix that will act on the q vectors</li>
-<li><strong>a</strong> – (clarray) The output array (optional)</li>
+<li><strong>R</strong> (<em>3x3 numpy array</em>) &#8211; Rotation matrix that will act on the q vectors</li>
+<li><strong>a</strong> &#8211; (clarray) The output array (optional)</li>
 </ul>
 </td>
 </tr>
@@ -540,24 +540,24 @@ the complex amplitudes in a_dev</li>
 <dt id="bornagain.simulate.clcore.ClCore.lattice_transform_intensities_pad">
 <code class="descname">lattice_transform_intensities_pad</code><span class="sig-paren">(</span><em>abc</em>, <em>N</em>, <em>T</em>, <em>F</em>, <em>S</em>, <em>B</em>, <em>nF</em>, <em>nS</em>, <em>w</em>, <em>R=None</em>, <em>I=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.lattice_transform_intensities_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.lattice_transform_intensities_pad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate crystal lattice transform intensities for a pixel-array detector.  This is the usual transform for
-an idealized parallelepiped crystal (usually not very realistic…).</p>
+an idealized parallelepiped crystal (usually not very realistic...).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>abc</strong> (<em>numpy array</em>) – A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.</li>
-<li><strong>N</strong> (<em>numpy array</em>) – An array containing number of unit cells along each of three axes.</li>
-<li><strong>T</strong> (<em>numpy array</em>) – Translation to center of corner pixel.</li>
-<li><strong>F</strong> (<em>numpy array</em>) – Fast-scan basis vector.</li>
-<li><strong>S</strong> (<em>numpy array</em>) – Slow-scan basis vector.</li>
-<li><strong>B</strong> (<em>numpy array</em>) – Incident beam vector.</li>
-<li><strong>nF</strong> (<em>int</em>) – Number of fast-scan pixels.</li>
-<li><strong>nS</strong> (<em>int</em>) – Number of slow-scan pixels.</li>
-<li><strong>w</strong> (<em>float</em>) – Wavelength.</li>
-<li><strong>R</strong> (<em>numpy array</em>) – Rotation matrix acting on q vectors.</li>
-<li><strong>(</strong> (<em>I</em>) – class:pyopencl.array.Array) : OpenCL device array containing intensities.</li>
-<li><strong>add</strong> (<em>bool</em>) – If true, the function will add to the input I buffer, else the buffer is overwritten.</li>
+<li><strong>abc</strong> (<em>numpy array</em>) &#8211; A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.</li>
+<li><strong>N</strong> (<em>numpy array</em>) &#8211; An array containing number of unit cells along each of three axes.</li>
+<li><strong>T</strong> (<em>numpy array</em>) &#8211; Translation to center of corner pixel.</li>
+<li><strong>F</strong> (<em>numpy array</em>) &#8211; Fast-scan basis vector.</li>
+<li><strong>S</strong> (<em>numpy array</em>) &#8211; Slow-scan basis vector.</li>
+<li><strong>B</strong> (<em>numpy array</em>) &#8211; Incident beam vector.</li>
+<li><strong>nF</strong> (<em>int</em>) &#8211; Number of fast-scan pixels.</li>
+<li><strong>nS</strong> (<em>int</em>) &#8211; Number of slow-scan pixels.</li>
+<li><strong>w</strong> (<em>float</em>) &#8211; Wavelength.</li>
+<li><strong>R</strong> (<em>numpy array</em>) &#8211; Rotation matrix acting on q vectors.</li>
+<li><strong></strong><strong>(</strong><strong></strong> (<em>I</em>) &#8211; class:pyopencl.array.Array) : OpenCL device array containing intensities.</li>
+<li><strong>add</strong> (<em>bool</em>) &#8211; If true, the function will add to the input I buffer, else the buffer is overwritten.</li>
 </ul>
 </td>
 </tr>
@@ -578,18 +578,18 @@ to the lattice transform.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>abc</strong> (<em>numpy array</em>) – A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.</li>
-<li><strong>N</strong> (<em>numpy array</em>) – An array containing number of unit cells along each of three axes.</li>
-<li><strong>T</strong> (<em>numpy array</em>) – Translation to center of corner pixel.</li>
-<li><strong>F</strong> (<em>numpy array</em>) – Fast-scan basis vector.</li>
-<li><strong>S</strong> (<em>numpy array</em>) – Slow-scan basis vector.</li>
-<li><strong>B</strong> (<em>numpy array</em>) – Incident beam vector.</li>
-<li><strong>nF</strong> (<em>int</em>) – Number of fast-scan pixels.</li>
-<li><strong>nS</strong> (<em>int</em>) – Number of slow-scan pixels.</li>
-<li><strong>w</strong> (<em>float</em>) – Wavelength.</li>
-<li><strong>R</strong> (<em>numpy array</em>) – Rotation matrix acting on q vectors.</li>
-<li><strong>(</strong> (<em>I</em>) – class:pyopencl.array.Array) : OpenCL device array containing intensities.</li>
-<li><strong>add</strong> (<em>bool</em>) – If true, the function will add to the input I buffer, else the buffer is overwritten.</li>
+<li><strong>abc</strong> (<em>numpy array</em>) &#8211; A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.</li>
+<li><strong>N</strong> (<em>numpy array</em>) &#8211; An array containing number of unit cells along each of three axes.</li>
+<li><strong>T</strong> (<em>numpy array</em>) &#8211; Translation to center of corner pixel.</li>
+<li><strong>F</strong> (<em>numpy array</em>) &#8211; Fast-scan basis vector.</li>
+<li><strong>S</strong> (<em>numpy array</em>) &#8211; Slow-scan basis vector.</li>
+<li><strong>B</strong> (<em>numpy array</em>) &#8211; Incident beam vector.</li>
+<li><strong>nF</strong> (<em>int</em>) &#8211; Number of fast-scan pixels.</li>
+<li><strong>nS</strong> (<em>int</em>) &#8211; Number of slow-scan pixels.</li>
+<li><strong>w</strong> (<em>float</em>) &#8211; Wavelength.</li>
+<li><strong>R</strong> (<em>numpy array</em>) &#8211; Rotation matrix acting on q vectors.</li>
+<li><strong></strong><strong>(</strong><strong></strong> (<em>I</em>) &#8211; class:pyopencl.array.Array) : OpenCL device array containing intensities.</li>
+<li><strong>add</strong> (<em>bool</em>) &#8211; If true, the function will add to the input I buffer, else the buffer is overwritten.</li>
 </ul>
 </td>
 </tr>
@@ -609,10 +609,10 @@ to the lattice transform.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>q_vecs</strong> (<em>np.ndarray</em>) – Npixels x 3 array of cartesian pixels qx, qy, qz</li>
-<li><strong>atomic_num</strong> (<em>np.ndarray</em>) – Natoms x 1 array of atomic numbers corresponding
+<li><strong>q_vecs</strong> (<em>np.ndarray</em>) &#8211; Npixels x 3 array of cartesian pixels qx, qy, qz</li>
+<li><strong>atomic_num</strong> (<em>np.ndarray</em>) &#8211; Natoms x 1 array of atomic numbers corresponding
 to the atoms in the target</li>
-<li><strong>bool</strong> (<em>incoherent</em>) – Whether to make form factors random</li>
+<li><strong>bool</strong> (<em>incoherent</em>) &#8211; Whether to make form factors random</li>
 </ul>
 </td>
 </tr>
@@ -630,8 +630,8 @@ into an openCL buffer</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>atom_vecs</strong> (<em>np.ndarray</em>) – Atomic positions</li>
-<li><strong>sub_com</strong> (<em>bool</em>) – Whether to sub the center of mass from the atom vecs</li>
+<li><strong>atom_vecs</strong> (<em>np.ndarray</em>) &#8211; Atomic positions</li>
+<li><strong>sub_com</strong> (<em>bool</em>) &#8211; Whether to sub the center of mass from the atom vecs</li>
 </ul>
 </td>
 </tr>
@@ -654,8 +654,8 @@ into an openCL buffer</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>q_vecs</strong> (<em>np.ndarray</em>) – Npixels x 3 array (inverse angstroms)</li>
-<li><strong>atomic_nums</strong> (<em>np.ndarray</em>) – Natoms x 1 array of atomic numbers</li>
+<li><strong>q_vecs</strong> (<em>np.ndarray</em>) &#8211; Npixels x 3 array (inverse angstroms)</li>
+<li><strong>atomic_nums</strong> (<em>np.ndarray</em>) &#8211; Natoms x 1 array of atomic numbers</li>
 </ul>
 </td>
 </tr>
@@ -682,12 +682,12 @@ group_size that is greater than Npixels</p>
 <dd>should have shape NpixelsCLx16 where
 NpixelsCL is the first multiple of group_size greater than
 Npixels.
-Use <a class="reference internal" href="#bornagain.simulate.clcore.ClCore.get_group_size" title="bornagain.simulate.clcore.ClCore.get_group_size"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_group_size()</span></code></a> to check the currently
+Use <a class="reference internal" href="#bornagain.simulate.clcore.ClCore.get_group_size" title="bornagain.simulate.clcore.ClCore.get_group_size"><code class="xref py py-func docutils literal"><span class="pre">get_group_size()</span></code></a> to check the currently
 set group_size. The data stored in
 q[Npixels,:3] should be the q-vectors.
 The data stored in q[Npixels,3:Nspecies] should be the
 q-dependent atomic form factors for up to Nspecies=13
-atom species See <code class="xref py py-func docutils literal notranslate"><span class="pre">prime_comermann_simulator()</span></code>
+atom species See <code class="xref py py-func docutils literal"><span class="pre">prime_comermann_simulator()</span></code>
 for details regarding the form factor storage and atom
 species identifier</dd>
 <dt>r_buff_data (pyopenCL buffer data) :</dt>
@@ -712,7 +712,7 @@ in q_buff_data.</dd>
 r_buff_data[r_i,3].
 Then, for pixel q_i, the simulator can find the corresponding
 form factor in q_buff_dat[q_i,3+sp_i].
-I know it is confusing, but it’s efficient.</p>
+I know it is confusing, but it&#8217;s efficient.</p>
 </div>
 </dd></dl>
 
@@ -724,7 +724,7 @@ I know it is confusing, but it’s efficient.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reset</strong> (<em>bool</em>) – Reset the amplitude buffer to 0’s on the GPU</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reset</strong> (<em>bool</em>) &#8211; Reset the amplitude buffer to 0&#8217;s on the GPU</td>
 </tr>
 </tbody>
 </table>
@@ -800,7 +800,7 @@ available for running simulations.</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

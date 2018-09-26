@@ -88,8 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
@@ -180,12 +180,17 @@ detectors (PADs).</p>
 <dl class="class">
 <dt id="bornagain.detector.PADGeometry">
 <em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">PADGeometry</code><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This is a simplified version of the Panel class.  Hopefully it replaces Panel.  One main difference is that it does
-not include any information about the source, which makes a lot more sense and removes several headaches that I
-dealt with previously.  Another big difference is the emphasis on simplicity.  So far, there is no cache for
-derived arrays, but maybe that will be added later (but only on an as-needed basis…).
-As a result of simplifications, there are no checks; the programmer must think.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This is a simplified version of the Panel class.
+Hopefully it replaces Panel.
+One main difference is that it does not include any information
+about the source, which makes a lot more sense and removes several
+headaches that I dealt with previously.
+Another big difference is the emphasis on simplicity.
+So far, there is no cache for derived arrays,
+but maybe that will be added later (but only on an as-needed basis...).
+As a result of simplifications, there are no checks;
+the programmer must think.</p>
 <dl class="attribute">
 <dt id="bornagain.detector.PADGeometry.n_fs">
 <code class="descname">n_fs</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.detector.PADGeometry.n_fs" title="Permalink to this definition">¶</a></dt>
@@ -218,7 +223,8 @@ As a result of simplifications, there are no checks; the programmer must think.<
 <dl class="attribute">
 <dt id="bornagain.detector.PADGeometry.t_vec">
 <code class="descname">t_vec</code><a class="headerlink" href="#bornagain.detector.PADGeometry.t_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Translation vector pointing from origin to center of corner pixel, which is first in memory.</p>
+<dd><p>Translation vector pointing from origin to center
+of corner pixel, which is first in memory.</p>
 </dd></dl>
 
 <dl class="method">
@@ -264,15 +270,17 @@ As a result of simplifications, there are no checks; the programmer must think.<
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.indices_to_vectors">
 <code class="descname">indices_to_vectors</code><span class="sig-paren">(</span><em>j</em>, <em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.indices_to_vectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.indices_to_vectors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert pixel indices to translation vectors pointing from origin to position on panel.
-The positions need not lie on the actual panel; this assums an infinite plane.</p>
+<dd><p>Convert pixel indices to translation vectors pointing
+from origin to position on panel.
+The positions need not lie on the actual panel;
+this assums an infinite plane.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>i</strong> (<em>float</em>) – Fast-scan index.</li>
-<li><strong>j</strong> (<em>float</em>) – Slow-scan index.</li>
+<li><strong>i</strong> (<em>float</em>) &#8211; Fast-scan index.</li>
+<li><strong>j</strong> (<em>float</em>) &#8211; Slow-scan index.</li>
 </ul>
 </td>
 </tr>
@@ -299,25 +307,26 @@ The positions need not lie on the actual panel; this assums an infinite plane.</
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.ds_vecs">
 <code class="descname">ds_vecs</code><span class="sig-paren">(</span><em>beam_vec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.ds_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.ds_vecs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalized scattering vectors s - s0 where s0 is the incident beam direction
-and s is the outgoing vector for a given pixel.  This does <strong>not</strong> have
-the 2*pi/lambda factor included.</p>
+<dd><p>Normalized scattering vectors s - s0 where s0 is the incident beam
+direction and s is the outgoing vector for a given pixel.
+This does <strong>not</strong> have the 2*pi/lambda factor included.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.q_vecs">
 <code class="descname">q_vecs</code><span class="sig-paren">(</span><em>beam_vec=None</em>, <em>wavelength=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.q_vecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.q_vecs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate scattering vectors:</p>
+<dd><blockquote>
+<div>Calculate scattering vectors:</div></blockquote>
+<p><span class="math">\(\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)\)</span></p>
 <blockquote>
-<div><span class="math notranslate nohighlight">\(\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)\)</span></div></blockquote>
-<p>Returns: numpy array</p>
+<div>Returns: numpy array</div></blockquote>
 </dd></dl>
 
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.solid_angles2">
 <code class="descname">solid_angles2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.solid_angles2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.solid_angles2" title="Permalink to this definition">¶</a></dt>
 <dd><p>this should be sped up by vectorizing, but its more readable for now
-and only has to be done once per PAD geometry…</p>
+and only has to be done once per PAD geometry...</p>
 <p>Divide each pixel up into two triangles with vertices R1,R2,R3
 and R2,R3,R4. Then use analytical form to find the solid angle of
 each triangle. Sum them to get the solid angle of pixel.</p>
@@ -326,9 +335,12 @@ each triangle. Sum them to get the solid angle of pixel.</p>
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.solid_angles">
 <code class="descname">solid_angles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.solid_angles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.solid_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:</p>
+<dd><p>Calculate solid angles of pixels.   Assuming the pixel is small, the
+approximation to the solid angle is:</p>
 <blockquote>
-<div><span class="math notranslate nohighlight">\(\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}\)</span>.</div></blockquote>
+<div><span class="math">\(\Delta \Omega_{ij} \approx
+\frac{\text{Area}}{R^2}\cos(\theta)
+= \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}\)</span>.</div></blockquote>
 <p>Returns: numpy array</p>
 </dd></dl>
 
@@ -341,9 +353,11 @@ each triangle. Sum them to get the solid angle of pixel.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>polarization_vec</strong> (<em>numpy array</em>) – First beam polarization vector (second is this one crossed with beam vector)</li>
-<li><strong>beam_vec</strong> (<em>numpy array</em>) – Incident beam vector</li>
-<li><strong>weight</strong> (<em>float</em>) – The weight of the first polarization component (second is one minus this weight)</li>
+<li><strong>polarization_vec</strong> (<em>numpy array</em>) &#8211; First beam polarization vector
+(second is this one crossed with beam vector)</li>
+<li><strong>beam_vec</strong> (<em>numpy array</em>) &#8211; Incident beam vector</li>
+<li><strong>weight</strong> (<em>float</em>) &#8211; The weight of the first polarization component
+(second is one minus this weight)</li>
 </ul>
 </td>
 </tr>
@@ -360,7 +374,7 @@ each triangle. Sum them to get the solid angle of pixel.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>beam_vec</strong> (<em>numpy array</em>) – Incident beam vector.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>beam_vec</strong> (<em>numpy array</em>) &#8211; Incident beam vector.</td>
 </tr>
 </tbody>
 </table>
@@ -383,8 +397,9 @@ each triangle. Sum them to get the solid angle of pixel.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pad_list</strong> – A list of PADGeometry instances</li>
-<li><strong>data</strong> – A contiguous array with data values (total pixels to add up to sum of pixels in all PADs)</li>
+<li><strong>pad_list</strong> &#8211; A list of PADGeometry instances</li>
+<li><strong>data</strong> &#8211; A contiguous array with data values</li>
+<li><strong>pixels to add up to sum of pixels in all PADs</strong><strong>)</strong><strong></strong> (<em></em><em>(</em><em>total</em>) &#8211; </li>
 </ul>
 </td>
 </tr>
@@ -398,11 +413,15 @@ each triangle. Sum them to get the solid angle of pixel.</p>
 <dl class="class">
 <dt id="bornagain.detector.PADAssembler">
 <em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">PADAssembler</code><span class="sig-paren">(</span><em>pad_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADAssembler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADAssembler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Assemble PAD data into a fake single-panel PAD.  This is done in a lazy way.  The resulting image is not
-centered in any way; the fake detector is a snug fit to the individual PADs.</p>
-<p>A list of PADGeometry objects are required on initialization, as the first argument.  The data needed to
-“interpolate” are cached, hence the need for a class.  The geometry cannot change; there is no update method.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Assemble PAD data into a fake single-panel PAD.
+This is done in a lazy way.
+The resulting image is not centered in any way;
+the fake detector is a snug fit to the individual PADs.</p>
+<p>A list of PADGeometry objects are required on initialization,
+as the first argument.  The data needed to &#8220;interpolate&#8221; are cached,
+hence the need for a class.  The geometry cannot change;
+there is no update method.</p>
 <dl class="method">
 <dt id="bornagain.detector.PADAssembler.assemble_data">
 <code class="descname">assemble_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADAssembler.assemble_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADAssembler.assemble_data" title="Permalink to this definition">¶</a></dt>
@@ -411,7 +430,7 @@ centered in any way; the fake detector is a snug fit to the individual PADs.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>numpy array</em>) – Image data</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>numpy array</em>) &#8211; Image data</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Assembled PAD image</td>
 </tr>
@@ -424,12 +443,13 @@ centered in any way; the fake detector is a snug fit to the individual PADs.</p>
 <dl class="method">
 <dt id="bornagain.detector.PADAssembler.assemble_data_list">
 <code class="descname">assemble_data_list</code><span class="sig-paren">(</span><em>data_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADAssembler.assemble_data_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADAssembler.assemble_data_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Same as assemble_data() method, but accepts a list of individual panels in the form of a list.</p>
+<dd><p>Same as assemble_data() method, but accepts a list of
+individual panels in the form of a list.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data_list</strong> (<em>list of numpy arrays</em>) – Image data</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data_list</strong> (<em>list of numpy arrays</em>) &#8211; Image data</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Assembled PAD image</td>
 </tr>
@@ -444,15 +464,16 @@ centered in any way; the fake detector is a snug fit to the individual PADs.</p>
 <dl class="class">
 <dt id="bornagain.detector.SimplePAD">
 <em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">SimplePAD</code><span class="sig-paren">(</span><em>n_pixels=1000</em>, <em>pixsize=5e-05</em>, <em>detdist=0.05</em>, <em>wavelen=1.0</em>, <em>center=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimplePAD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimplePAD" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.detector.PADGeometry</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal"><span class="pre">bornagain.detector.PADGeometry</span></code></a></p>
 <p>A simple child class to PADGeometry with some higher level functionality</p>
 <p>This will return a detector object representing a
 square pixel array detector</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <ul class="last simple">
-<li>One can readout pixel intensities using <a class="reference internal" href="#bornagain.detector.SimplePAD.readout" title="bornagain.detector.SimplePAD.readout"><code class="xref py py-func docutils literal notranslate"><span class="pre">readout()</span></code></a></li>
-<li>After reading out amplitudes, one can display pixels using <a class="reference internal" href="#bornagain.detector.SimplePAD.display" title="bornagain.detector.SimplePAD.display"><code class="xref py py-func docutils literal notranslate"><span class="pre">display()</span></code></a></li>
+<li>One can readout pixel intensities using <a class="reference internal" href="#bornagain.detector.SimplePAD.readout" title="bornagain.detector.SimplePAD.readout"><code class="xref py py-func docutils literal"><span class="pre">readout()</span></code></a></li>
+<li>After reading out amplitudes, one can display pixels using
+<a class="reference internal" href="#bornagain.detector.SimplePAD.display" title="bornagain.detector.SimplePAD.display"><code class="xref py py-func docutils literal"><span class="pre">display()</span></code></a></li>
 </ul>
 </div>
 <dl class="docutils">
@@ -490,10 +511,12 @@ the forward beam intersects the detector (in meters)</dd>
 <dl class="method">
 <dt id="bornagain.detector.SimplePAD.readout">
 <code class="descname">readout</code><span class="sig-paren">(</span><em>amplitudes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#SimplePAD.readout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.SimplePAD.readout" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given scattering amplitudes, this calculates the corresponding intensity values.</p>
+<dd><p>Given scattering amplitudes, this calculates the
+corresponding intensity values.</p>
 <dl class="docutils">
 <dt>Arguments</dt>
-<dd>amplitudes (complex np.ndarray) : Scattering amplitudes same shape as <cite>self.Q</cite></dd>
+<dd>amplitudes (complex np.ndarray) :
+Scattering amplitudes same shape as <cite>self.Q</cite></dd>
 <dt>Returns</dt>
 <dd>np.ndarray : Scattering intensities as a 2-D image.</dd>
 </dl>
@@ -509,10 +532,11 @@ finite scattered photons</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>amplitudes</strong> (<em>complex np.ndarray</em>) – Scattering amplitudes same shape as <cite>self.Q</cite>.</li>
-<li><strong>qmin</strong> (<em>float</em>) – Minimum q to generate intensities</li>
-<li><strong>qmax</strong> (<em>float</em>) – Maximum q to generate intenities</li>
-<li><strong>flux</strong> (<em>float</em>) – Forward beam flux in Photons per square centimeter</li>
+<li><strong>amplitudes</strong> (<em>complex np.ndarray</em>) &#8211; </li>
+<li><strong>amplitudes same shape as self.Q.</strong> (<em>Scattering</em>) &#8211; </li>
+<li><strong>qmin</strong> (<em>float</em>) &#8211; Minimum q to generate intensities</li>
+<li><strong>qmax</strong> (<em>float</em>) &#8211; Maximum q to generate intenities</li>
+<li><strong>flux</strong> (<em>float</em>) &#8211; Forward beam flux in Photons per square centimeter</li>
 </ul>
 </td>
 </tr>
@@ -536,7 +560,7 @@ to matplotlib.figure</p>
 <ul class="last simple">
 <li>Requires matplotlib.</li>
 <li><dl class="first docutils">
-<dt>Must first run <a class="reference internal" href="#bornagain.detector.SimplePAD.readout" title="bornagain.detector.SimplePAD.readout"><code class="xref py py-func docutils literal notranslate"><span class="pre">readout()</span></code></a> or <a class="reference internal" href="#bornagain.detector.SimplePAD.readout_finite" title="bornagain.detector.SimplePAD.readout_finite"><code class="xref py py-func docutils literal notranslate"><span class="pre">readout_finite()</span></code></a></dt>
+<dt>Must first run <a class="reference internal" href="#bornagain.detector.SimplePAD.readout" title="bornagain.detector.SimplePAD.readout"><code class="xref py py-func docutils literal"><span class="pre">readout()</span></code></a> or <a class="reference internal" href="#bornagain.detector.SimplePAD.readout_finite" title="bornagain.detector.SimplePAD.readout_finite"><code class="xref py py-func docutils literal"><span class="pre">readout_finite()</span></code></a></dt>
 <dd>at least one time</dd>
 </dl>
 </li>
@@ -565,11 +589,12 @@ to matplotlib.figure</p>
 <dl class="class">
 <dt id="bornagain.detector.IcosphereGeometry">
 <em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">IcosphereGeometry</code><span class="sig-paren">(</span><em>n_subdivisions=1</em>, <em>radius=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#IcosphereGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.IcosphereGeometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Experimental class for a spherical detector that follows the “icosphere” geometry.
+<dd><p>Experimental class for a spherical detector that
+follows the &#8220;icosphere&#8221; geometry.
 The Icosphere is generated by sub-dividing the vertices of an icosahedron.
 The following blog was helpful:
 <a class="reference external" href="http://sinestesia.co/blog/tutorials/python-icospheres/">http://sinestesia.co/blog/tutorials/python-icospheres/</a>
-The code is quite slow; needs to be vectorized with numpy…</p>
+The code is quite slow; needs to be vectorized with numpy...</p>
 <dl class="attribute">
 <dt id="bornagain.detector.IcosphereGeometry.n_subdivisions">
 <code class="descname">n_subdivisions</code><em class="property"> = 1</em><a class="headerlink" href="#bornagain.detector.IcosphereGeometry.n_subdivisions" title="Permalink to this definition">¶</a></dt>
@@ -642,7 +667,7 @@ The code is quite slow; needs to be vectorized with numpy…</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

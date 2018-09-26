@@ -1,5 +1,5 @@
-Diffration simulations
-======================
+Simulations
+===========
 
 The most basic starting point for a diffraction pattern from a collection of atoms is:
 

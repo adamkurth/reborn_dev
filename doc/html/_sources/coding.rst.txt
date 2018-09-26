@@ -1,15 +1,15 @@
-Coding guidlines for developers
-===============================
+Coding guidlines
+================
 
 Overview of bornagain
 ---------------------
 
-(This project is still in an early stage, so many of the guidelines below have not been followed.  We'll fix that in the next months.)
+(This project is still in an early stage, so many of the guidelines below have not been followed...)
 
 Some things to consider before writing code:
 
 * The bornagain API should be thought of as an "interface" for analysis and simulation.  That is, we envision that the user will be working from an iPython prompt or similar, and they plan to accomplish something that can't be done easily with existing programs.
-* The scope of this project is diffraction under the Born approximation.  It will not grow beyond that.
+* The scope of this project is diffraction under the Born approximation.
 * Usability is more important than speed.  If speed is needed, we will tuck the details away (as in the clcore.py module).
 * Always write tests along with modules.  We will use `pytest <http://doc.pytest.org/>`_ for testing.  Read about pytest.
 * All units are SI (angles in radians) unless there is a *very* good reason to do something different.

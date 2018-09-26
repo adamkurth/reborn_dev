@@ -1,5 +1,5 @@
-bornagain.external.cfelpyutils.parameter\_utils module
-======================================================
+bornagain.external.cfelpyutils.parameter_utils module
+=====================================================
 
 .. automodule:: bornagain.external.cfelpyutils.parameter_utils
     :members:

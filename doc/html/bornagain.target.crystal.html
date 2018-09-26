@@ -88,8 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
@@ -180,7 +180,7 @@
 <dl class="class">
 <dt id="bornagain.target.crystal.Structure">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">Structure</code><span class="sig-paren">(</span><em>pdbFilePath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Structure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>A container class for stuff needed when dealing with crystal structures.</p>
 <dl class="attribute">
 <dt id="bornagain.target.crystal.Structure.r">
@@ -327,7 +327,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pdbFilePath</strong> – Path to the PDB file</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pdbFilePath</strong> &#8211; Path to the PDB file</td>
 </tr>
 </tbody>
 </table>
@@ -342,12 +342,12 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>a</strong> – Lattice constant</li>
-<li><strong>b</strong> – Lattice constant</li>
-<li><strong>c</strong> – Lattice constant</li>
-<li><strong>alpha</strong> – Lattice angle</li>
-<li><strong>beta</strong> – Lattice angle</li>
-<li><strong>gamma</strong> – Lattice angle</li>
+<li><strong>a</strong> &#8211; Lattice constant</li>
+<li><strong>b</strong> &#8211; Lattice constant</li>
+<li><strong>c</strong> &#8211; Lattice constant</li>
+<li><strong>alpha</strong> &#8211; Lattice angle</li>
+<li><strong>beta</strong> &#8211; Lattice angle</li>
+<li><strong>gamma</strong> &#8211; Lattice angle</li>
 </ul>
 </td>
 </tr>
@@ -363,7 +363,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>hermann_mauguin_symbol</strong> – This can be a string (like ‘P 63’ or a number 1-530)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>hermann_mauguin_symbol</strong> &#8211; This can be a string (like &#8216;P 63&#8217; or a number 1-530)</td>
 </tr>
 </tbody>
 </table>
@@ -381,13 +381,13 @@
 <dl class="class">
 <dt id="bornagain.target.crystal.structure">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">structure</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#bornagain.target.crystal.Structure" title="bornagain.target.crystal.Structure"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.target.crystal.Structure</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#bornagain.target.crystal.Structure" title="bornagain.target.crystal.Structure"><code class="xref py py-class docutils literal"><span class="pre">bornagain.target.crystal.Structure</span></code></a></p>
 </dd></dl>
 
 <dl class="function">
 <dt id="bornagain.target.crystal.parse_pdb">
 <code class="descclassname">bornagain.target.crystal.</code><code class="descname">parse_pdb</code><span class="sig-paren">(</span><em>pdbFilePath</em>, <em>crystalStruct=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#parse_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.parse_pdb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a <a class="reference internal" href="#bornagain.target.crystal.structure" title="bornagain.target.crystal.structure"><code class="xref py py-class docutils literal notranslate"><span class="pre">structure</span></code></a> object with PDB information.</p>
+<dd><p>Return a <a class="reference internal" href="#bornagain.target.crystal.structure" title="bornagain.target.crystal.structure"><code class="xref py py-class docutils literal"><span class="pre">structure</span></code></a> object with PDB information.</p>
 </dd></dl>
 
 <dl class="function">
@@ -396,7 +396,7 @@
 <dd><p>For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
 translation and rotation operators.  These operators are in the crystal basis.
 As of now, this is a rather unreliable function.  My brain hurts badly after attempting
-to make sense of the ways in which space groups are specified…</p>
+to make sense of the ways in which space groups are specified...</p>
 <p>Input: A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)</p>
 <dl class="docutils">
 <dt>Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy</dt>
@@ -428,7 +428,7 @@ to make sense of the ways in which space groups are specified…</p>
 <dl class="class">
 <dt id="bornagain.target.crystal.Molecule">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">Molecule</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#bornagain.target.crystal.structure" title="bornagain.target.crystal.structure"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.target.crystal.structure</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#bornagain.target.crystal.structure" title="bornagain.target.crystal.structure"><code class="xref py py-class docutils literal"><span class="pre">bornagain.target.crystal.structure</span></code></a></p>
 <dl class="method">
 <dt id="bornagain.target.crystal.Molecule.get_1d_coords">
 <code class="descname">get_1d_coords</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule.get_1d_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule.get_1d_coords" title="Permalink to this definition">¶</a></dt>
@@ -538,7 +538,7 @@ to make sense of the ways in which space groups are specified…</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

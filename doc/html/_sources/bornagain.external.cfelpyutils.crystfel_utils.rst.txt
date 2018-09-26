@@ -1,5 +1,5 @@
-bornagain.external.cfelpyutils.crystfel\_utils module
-=====================================================
+bornagain.external.cfelpyutils.crystfel_utils module
+====================================================
 
 .. automodule:: bornagain.external.cfelpyutils.crystfel_utils
     :members:

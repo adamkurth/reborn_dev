@@ -95,8 +95,8 @@
 <li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 
@@ -174,30 +174,30 @@ code alongside results is good practice anyways.</p>
 <dt>If the bornagain package directory is not in your working directory, you might need to add bornagain to your python path</dt>
 <dd>by doing something like this:</dd>
 </dl>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;../example/path/to/bornagain&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Another option is to make a symbolic link to the bornagain package, like this:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ln -s path/to/bornagain/bornagain path/where/your/script/is
+<div class="highlight-bash"><div class="highlight"><pre><span></span>ln -s path/to/bornagain/bornagain path/where/your/script/is
 </pre></div>
 </div>
 <p>If you use a symbolic link as above, you can simply add an import statement in your script</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bornagain</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bornagain</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
 <p>We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
-compatibility with both pyqt4 and pyqt5 (which is proving to be somewhat difficult…).
-If you’re deciding on which version to use, here are a couple things to consider:</p>
+compatibility with both pyqt4 and pyqt5 (which is proving to be somewhat difficult...).
+If you&#8217;re deciding on which version to use, here are a couple things to consider:</p>
 <ul class="simple">
 <li>At the time of this writing, the LCLS psana module requires Python 2.7.</li>
-<li>It doesn’t appear to be easy to install both pyqt4 and pyqt5 in the same Python installation</li>
+<li>It doesn&#8217;t appear to be easy to install both pyqt4 and pyqt5 in the same Python installation</li>
 <li><a class="reference external" href="https://conda.io/miniconda.html">Anaconda and Miniconda</a> python do not support pyqt4 in Python 3.7.</li>
 </ul>
-<p>It’s hard to say what’s best for you, but hopefully things work no matter what versions of software you use.</p>
+<p>It&#8217;s hard to say what&#8217;s best for you, but hopefully things work no matter what versions of software you use.</p>
 </div>
 <div class="section" id="example-setup-with-python-3">
 <h2>Example setup with Python 3<a class="headerlink" href="#example-setup-with-python-3" title="Permalink to this headline">¶</a></h2>
@@ -205,27 +205,27 @@ If you’re deciding on which version to use, here are a couple things to consid
 <a class="reference external" href="https://conda.io/miniconda.html">Miniconda</a>.</p>
 <p>The best thing to do is probably to make a new
 <a class="reference external" href="https://conda.io/docs/user-guide/tasks/manage-environments.html">conda environment</a>  like this:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create -n bornagain34 -c conda-forge <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6 <span class="nv">pyqt</span><span class="o">=</span><span class="m">5</span> h5py numpy scipy scikit-image matplotlib ipython pytest <span class="se">\</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>conda create -n bornagain34 -c conda-forge <span class="nv">python</span><span class="o">=</span>3.6 <span class="nv">pyqt</span><span class="o">=</span><span class="m">5</span> h5py numpy scipy scikit-image matplotlib ipython pytest <span class="se">\</span>
 sphinx pyqtgraph pyopencl pyopengl
 </pre></div>
 </div>
 <p>The only downside to the conda environment is that you need to remember to activate that environment every time you use
 bornagain, like this:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> activate bornagain34
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">source</span> activate bornagain34
 </pre></div>
 </div>
-<p>If you don’t want to use a conda environment you can just install the modules you need in the default environment:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install -c conda-forge <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6 <span class="nv">pyqt</span><span class="o">=</span><span class="m">5</span> h5py numpy scipy scikit-image matplotlib ipython pytest <span class="se">\</span>
+<p>If you don&#8217;t want to use a conda environment you can just install the modules you need in the default environment:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>conda install -c conda-forge <span class="nv">python</span><span class="o">=</span>3.6 <span class="nv">pyqt</span><span class="o">=</span><span class="m">5</span> h5py numpy scipy scikit-image matplotlib ipython pytest <span class="se">\</span>
  sphinx pyqtgraph pyopencl pyopengl
 </pre></div>
 </div>
 <p>In order to check if the installation worked, run the following:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/bornagain/test
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/bornagain/test
 pytest
 </pre></div>
 </div>
-<p>If you get a runtime error involving <code class="code docutils literal notranslate"><span class="pre">pyopencl.cffi_cl.LogicError:</span> <span class="pre">clGetPlatformIDs</span> <span class="pre">failed:</span></code> it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple as doing the following:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp /etc/OpenCL/vendors/nvidia.icd ~/miniconda3/etc/OpenCL/vendors
+<p>If you get a runtime error involving <code class="code docutils literal"><span class="pre">pyopencl.cffi_cl.LogicError:</span> <span class="pre">clGetPlatformIDs</span> <span class="pre">failed:</span></code> it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple as doing the following:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>cp /etc/OpenCL/vendors/nvidia.icd ~/miniconda3/etc/OpenCL/vendors
 </pre></div>
 </div>
 <p>For any further issues with pyopencl, there are some helpful notes <a class="reference external" href="https://documen.tician.de/pyopencl/misc.html">here</a>.</p>
@@ -233,7 +233,7 @@ pytest
 <div class="section" id="python-2">
 <h2>Python 2<a class="headerlink" href="#python-2" title="Permalink to this headline">¶</a></h2>
 <p>There was past success with the <a class="reference external" href="https://anaconda.org">Anaconda</a> Python 2.7 distribution.  The following usually works:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install h5py                     <span class="c1"># Optional for file writing</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>conda install h5py                     <span class="c1"># Optional for file writing</span>
 conda install <span class="nv">pyqt</span><span class="o">=</span><span class="m">4</span>                   <span class="c1"># Optional for viewing</span>
 conda install pyqtgraph                <span class="c1"># Optional for viewing</span>
 conda install -c conda-forge pyopencl  <span class="c1"># Optional for simulations</span>
@@ -241,7 +241,7 @@ conda install sphinx                   <span class="c1"># Optional for building 
 </pre></div>
 </div>
 <p>Notably, pyqtgraph seems not to work well with pyqt5, so you will need to force pyqt4 as in the above.  It is probably most reasonable to create an environment for bornagain:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create --name bornagain
+<div class="highlight-bash"><div class="highlight"><pre><span></span>conda create --name bornagain
 <span class="nb">source</span> activate bornagain
 </pre></div>
 </div>
@@ -250,7 +250,7 @@ conda install sphinx                   <span class="c1"># Optional for building 
 <div class="section" id="installation-on-scientific-linux-6">
 <h2>Installation on Scientific Linux 6<a class="headerlink" href="#installation-on-scientific-linux-6" title="Permalink to this headline">¶</a></h2>
 <p>To install <cite>pyopencl</cite> on SL6 I found it necessary to download the pyopencl-2016.2.1 source, and then from within the directory I did something along these lines:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
 sudo yum install devtoolset-2
 scl <span class="nb">enable</span> devtoolset-2 bash
 ./configure.py --cl-inc-dir<span class="o">=</span>/usr/local/cuda/include --cl-lib-dir<span class="o">=</span>/usr/local/cuda/lib64
@@ -313,7 +313,7 @@ make install
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

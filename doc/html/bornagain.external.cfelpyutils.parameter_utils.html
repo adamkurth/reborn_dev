@@ -88,8 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
@@ -181,7 +181,7 @@
 <p>Parameter parsing utilities.</p>
 <p>This module contains the implementation of functions that are used to
 parse and manipulate options and parameters, as extracted by the
-python <code class="xref py py-obj docutils literal notranslate"><span class="pre">configparse</span></code> module.</p>
+python <code class="xref py py-obj docutils literal"><span class="pre">configparse</span></code> module.</p>
 <dl class="function">
 <dt id="bornagain.external.cfelpyutils.parameter_utils.convert_parameters">
 <code class="descclassname">bornagain.external.cfelpyutils.parameter_utils.</code><code class="descname">convert_parameters</code><span class="sig-paren">(</span><em>config_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cfelpyutils/parameter_utils.html#convert_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cfelpyutils.parameter_utils.convert_parameters" title="Permalink to this definition">¶</a></dt>
@@ -228,16 +228,16 @@ try to interpret the entry in order as:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>Dict</em><em>[</em><em>str</em><em>]</em>) – a dictionary containing the parameters from
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> (<em>Dict</em><em>[</em><em>str</em><em>]</em><em></em>) &#8211; a dictionary containing the parameters from
 a configuration file as extracted by the
-<code class="xref py py-obj docutils literal notranslate"><span class="pre">configparser</span></code> module).</td>
+<code class="xref py py-obj docutils literal"><span class="pre">configparser</span></code> module).</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary with the same structure as the input
 dictionary, but with correct types assigned to each entry.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Dict</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code> – if an entry cannot be converted to any supported
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> &#8211; if an entry cannot be converted to any supported
 type.</td>
 </tr>
 </tbody>
@@ -299,7 +299,7 @@ type.</td>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

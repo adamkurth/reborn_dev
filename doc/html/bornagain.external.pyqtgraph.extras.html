@@ -88,8 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
@@ -187,10 +187,10 @@
 <dl class="class">
 <dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget">
 <em class="property">class </em><code class="descclassname">bornagain.external.pyqtgraph.extras.</code><code class="descname">MultiHistogramLUTWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>*args</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.widgets.GraphicsView.GraphicsView</span></code></p>
-<p>This is the equivalent of <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.HistogramLUTWidget</span></code>, but wraps
-<code class="xref py py-class docutils literal notranslate"><span class="pre">MultiHistogramLUTWidget</span></code> instead of
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.HistogramLUTItem</span></code>.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.widgets.GraphicsView.GraphicsView</span></code></p>
+<p>This is the equivalent of <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.HistogramLUTWidget</span></code>, but wraps
+<code class="xref py py-class docutils literal"><span class="pre">MultiHistogramLUTWidget</span></code> instead of
+<code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.HistogramLUTItem</span></code>.</p>
 <dl class="method">
 <dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget.sizeHint">
 <code class="descname">sizeHint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTWidget.sizeHint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget.sizeHint" title="Permalink to this definition">¶</a></dt>
@@ -202,11 +202,11 @@
 <dl class="class">
 <dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem">
 <em class="property">class </em><code class="descclassname">bornagain.external.pyqtgraph.extras.</code><code class="descname">MultiHistogramLUTItem</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.graphicsItems.HistogramLUTItem.HistogramLUTItem</span></code></p>
-<p>This is a bornagain extension to the <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.HistogramLUTItem</span></code> that allows control
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.graphicsItems.HistogramLUTItem.HistogramLUTItem</span></code></p>
+<p>This is a bornagain extension to the <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.HistogramLUTItem</span></code> that allows control
 over multiple images. The main feature is the
-addition of the <a class="reference internal" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems" title="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems"><code class="xref py py-func docutils literal notranslate"><span class="pre">setImageItems()</span></code></a> method.</p>
-<p>This is a <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.graphicsWidget</span></code> which provides controls for adjusting the display of an image.</p>
+addition of the <a class="reference internal" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems" title="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems"><code class="xref py py-func docutils literal"><span class="pre">setImageItems()</span></code></a> method.</p>
+<p>This is a <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.graphicsWidget</span></code> which provides controls for adjusting the display of an image.</p>
 <p>Includes:</p>
 <ul class="simple">
 <li>Image histogram</li>
@@ -218,15 +218,15 @@ addition of the <a class="reference internal" href="#bornagain.external.pyqtgrap
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>image</strong> (<a class="reference internal" href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem" title="bornagain.external.pyqtgraph.mods.ImageItem"><em>ImageItem</em></a><em> or </em><em>None</em>) – If <em>image</em> is provided, then the control will be automatically linked to
+<li><strong>image</strong> (<a class="reference internal" href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem" title="bornagain.external.pyqtgraph.mods.ImageItem"><em>ImageItem</em></a><em> or </em><em>None</em>) &#8211; If <em>image</em> is provided, then the control will be automatically linked to
 the image and changes to the control will be immediately reflected in
-the image’s appearance.</li>
-<li><strong>fillHistogram</strong> (<em>bool</em>) – By default, the histogram is rendered with a fill.
+the image&#8217;s appearance.</li>
+<li><strong>fillHistogram</strong> (<em>bool</em>) &#8211; By default, the histogram is rendered with a fill.
 For performance, set <em>fillHistogram</em> = False.</li>
-<li><strong>rgbHistogram</strong> (<em>bool</em>) – Sets whether the histogram is computed once over all channels of the
+<li><strong>rgbHistogram</strong> (<em>bool</em>) &#8211; Sets whether the histogram is computed once over all channels of the
 image, or once per channel.</li>
-<li><strong>levelMode</strong> (<em>'mono'</em><em> or </em><em>'rgba'</em>) – If ‘mono’, then only a single set of black/whilte level lines is drawn,
-and the levels apply to all channels in the image. If ‘rgba’, then one
+<li><strong>levelMode</strong> (<em>'mono'</em><em> or </em><em>'rgba'</em>) &#8211; If &#8216;mono&#8217;, then only a single set of black/whilte level lines is drawn,
+and the levels apply to all channels in the image. If &#8216;rgba&#8217;, then one
 set of levels is drawn for each channel.</li>
 </ul>
 </td>
@@ -236,7 +236,7 @@ set of levels is drawn for each channel.</li>
 <dl class="method">
 <dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems">
 <code class="descname">setImageItems</code><span class="sig-paren">(</span><em>imgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTItem.setImageItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set a list of <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.ImageItem</span></code> instances that will have their levels
+<dd><p>Set a list of <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.ImageItem</span></code> instances that will have their levels
 and LUT automatically controlled by this HistogramLUTItem.</p>
 </dd></dl>
 
@@ -262,7 +262,7 @@ and LUT automatically controlled by this HistogramLUTItem.</p>
 <dt id="bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setLevelMode">
 <code class="descname">setLevelMode</code><span class="sig-paren">(</span><em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/extras.html#MultiHistogramLUTItem.setLevelMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setLevelMode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the method of controlling the image levels offered to the user.
-Options are ‘mono’ or ‘rgba’.</p>
+Options are &#8216;mono&#8217; or &#8216;rgba&#8217;.</p>
 </dd></dl>
 
 </dd></dl>
@@ -322,7 +322,7 @@ Options are ‘mono’ or ‘rgba’.</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

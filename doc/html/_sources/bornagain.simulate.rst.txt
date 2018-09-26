@@ -14,7 +14,9 @@ Submodules
    bornagain.simulate.atoms
    bornagain.simulate.clcore
    bornagain.simulate.examples
+   bornagain.simulate.mcpotato
    bornagain.simulate.mcsim
+   bornagain.simulate.potato
    bornagain.simulate.refdata
    bornagain.simulate.simutils
    bornagain.simulate.solutions

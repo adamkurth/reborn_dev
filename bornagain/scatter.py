@@ -1,5 +1,6 @@
 r"""
-Classes related to x-ray "scattering", which loosely means diffraction from many objects in random orientations.
+Classes related to x-ray "scattering",
+which loosely means diffraction from many objects in random orientations.
 """
 
 import numpy as np
@@ -30,11 +31,13 @@ class RadialProfile(object):
             q_mags (numpy array) :
                 Scattering vector magnitudes.
             mask (numpy array) :
-                Pixel mask.  Should be ones and zeros, where one means "good" and zero means "bad".
+                Pixel mask.  Should be ones and zeros,
+                where one means "good" and zero means "bad".
             n_bins (int) :
                 Number of bins.
             q_range (list-like) :
-                The minimum and maximum of the scattering vector magnitudes.  The bin size will be equal to
+                The minimum and maximum of the scattering vector magnitudes.
+                The bin size will be equal to
                 (max_q - min_q) / n_bins
         """
 
@@ -80,15 +83,18 @@ class RadialProfile(object):
             data (numpy array) :
                 Intensity data.
             average (bool) :
-                If true, divide the sum in each bin by the counts, else return the sum.  Default: True.
+                If true, divide the sum in each bin by the counts,
+                else return the sum.  Default: True.
 
         Returns:
             profile (numpy array) :
                 The requested radial profile.
         """
 
-        profile = np.bincount(self.bin_indices, data.ravel() * self.mask, self.n_bins)
+        profile = np.bincount(self.bin_indices, data.ravel() *
+                              self.mask, self.n_bins)
         if average:
-            profile.flat[self.counts_non_zero] /= self.counts.flat[self.counts_non_zero]
+            profile.flat[self.counts_non_zero] /= \
+            self.counts.flat[self.counts_non_zero]
 
         return profile
