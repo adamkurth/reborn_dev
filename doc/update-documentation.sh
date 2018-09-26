@@ -14,3 +14,5 @@ rm source/modules.rst
 make clean
 make html
 cp -r build/html/* html
+rm source/bornagain*.rst modules.rst
+

@@ -24,28 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
-        <link rel="up" title="bornagain.target package" href="bornagain.target.html"/>
-        <link rel="next" title="bornagain.viewers package" href="bornagain.viewers.html"/>
-        <link rel="prev" title="bornagain.target.placer module" href="bornagain.target.placer.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="bornagain.viewers package" href="bornagain.viewers.html" />
+    <link rel="prev" title="bornagain.target.placer module" href="bornagain.target.placer.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -94,8 +85,11 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="geometry.html">PAD data and geometry formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
@@ -110,7 +104,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
 </ul>
 
             
@@ -122,7 +115,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">bornagain</a>
@@ -130,9 +123,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -185,29 +179,20 @@
 <p>This module is essentially just a data container and should not be used externally.  The data should be
 accessed using <a class="reference internal" href="bornagain.target.crystal.html#bornagain.target.crystal.get_symmetry_operators_from_space_group" title="bornagain.target.crystal.get_symmetry_operators_from_space_group"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_symmetry_operators_from_space_group</span></code></a>.</p>
 <p>The data were taken from the <a class="reference external" href="https://atztogo.github.io/spglib/">spglib</a> package.</p>
+<p>This module defines the following lists:</p>
+<p>_spgrp_ops: The list of dictionaries containing the symmetry operations (translations and rotations).</p>
+<p>_hmsym: The list of Hermann–Mauguin symbols (python strings)</p>
 <dl class="docutils">
-<dt>This module defines the following lists:</dt>
-<dd><dl class="first last docutils">
-<dt>_spgrp_ops: The list of dictionaries containing the symmetry operations</dt>
-<dd><blockquote class="first">
-<div>(translations and rotations).</div></blockquote>
-<p>_hmsym: The list of Hermann–Mauguin symbols (python strings)
-_sgnum: The list of space group numbers (ranging from 1-230) corresponding to</p>
-<blockquote class="last">
-<div>each of the Hall numbers (ranging from 1-530).  I don’t yet understand
+<dt>_sgnum: The list of space group numbers (ranging from 1-230) corresponding to</dt>
+<dd>each of the Hall numbers (ranging from 1-530).  I don’t yet understand
 what the Hall numbers are… but there is a useful table here:
-<a class="reference external" href="http://pmsl.planet.sci.kobe-u.ac.jp/~seto/?page_id=37&amp;lang=en">http://pmsl.planet.sci.kobe-u.ac.jp/~seto/?page_id=37&amp;lang=en</a></div></blockquote>
-</dd>
-</dl>
-</dd>
+<a class="reference external" href="http://pmsl.planet.sci.kobe-u.ac.jp/~seto/?page_id=37&amp;lang=en">http://pmsl.planet.sci.kobe-u.ac.jp/~seto/?page_id=37&amp;lang=en</a></dd>
 </dl>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -229,7 +214,7 @@ what the Hall numbers are… but there is a useful table here:
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -248,6 +233,7 @@ what the Hall numbers are… but there is a useful table here:
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -261,19 +247,13 @@ what the Hall numbers are… but there is a useful table here:
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

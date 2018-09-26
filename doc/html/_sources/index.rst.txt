@@ -9,14 +9,16 @@ Contents
 ========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    
    overview
    installation
+   beams
+   targets
    geometry
    simulations
-   modules
    coding
+   modules
 
 Indices and tables
 ==================

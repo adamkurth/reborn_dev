@@ -97,6 +97,7 @@
     <addaction name="actionPanel_IDs"/>
     <addaction name="actionGrid"/>
     <addaction name="actionRings"/>
+    <addaction name="actionBeam_position"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -151,6 +152,11 @@
   <action name="actionRings">
    <property name="text">
     <string>Rings</string>
+   </property>
+  </action>
+  <action name="actionBeam_position">
+   <property name="text">
+    <string>Beam position</string>
    </property>
   </action>
  </widget>

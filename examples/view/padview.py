@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys
 sys.path.append('../..')
 
@@ -6,18 +8,29 @@ from bornagain.simulate import examples
 from bornagain.viewers.qtviews import PADView
 from bornagain import detector
 import numpy as np
-# import pyqtgraph as pg
+import pyqtgraph as pg
 
-# pads = examples.pnccd_pads()
 pads = examples.cspad_pads()
-
+# pads = examples.pnccd_pads()
 for pad in pads:
     pad.t_vec.flat[2] = 0.3
 
+
+# pad = detector.PADGeometry()
+# n = 4000
+# pad.simple_setup(n, 30e-6, 0.5)
+# pads = [pad]
+# geom = pads
+# I = [np.random.rand(n, n)]
+
 sim = examples.lysozyme_molecule(pads=pads)
+
+
 
 geom = sim['pad_geometry']
 I = sim['intensity']
+
+
 I = np.ravel(I)
 tot = np.sum(I)
 I *= 100000/tot
@@ -28,7 +41,10 @@ I = detector.split_pad_data(geom, I)
 # I = [np.random.poisson(d*1e-5) + 1 for d in I]
 # I = [np.log10(d) for d in I]
 padgui = PADView(pad_data=I, pad_geometry=geom, logscale=True)
-padgui.show_pad_frames()
+padgui.show_all_geom_info()
+# padgui.show_pad_frames()
+# x = (np.random.rand(1000, 2)-0.5)*1000
+# padgui.add_scatter_plot(x[:, 0], x[:, 1], pen=pg.mkPen('g'), brush=None, width=2, pxMode=False, size=10)
 # padgui.show_coordinate_axes()
 # padgui.show_grid()
 # padgui.show_pad_labels()
