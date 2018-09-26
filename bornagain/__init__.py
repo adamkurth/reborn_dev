@@ -20,7 +20,6 @@ CONFIG_OPTIONS = {'warn_depreciated': True,
 
 
 def set_global(option, value):
-
     r"""
 
     Set global configurations.
@@ -48,7 +47,6 @@ def set_global(option, value):
 
 
 def get_global(option):
-
     r"""
 
     Get global configurations.

@@ -1,13 +1,14 @@
-import numpy                 as np
-import pyqtgraph             as pg
-import pyqtgraph.opengl      as gl
-from   pyqtgraph.Qt import QtCore, QtGui
+import numpy as np
+import pyqtgraph as pg
+import pyqtgraph.opengl as gl
+from pyqtgraph.Qt import QtCore, QtGui
 
 """
 This is supposed to have various viewers that use pyqtgraph.  It's mostly useless right now.
 """
 
-# Some default bright colors.  Might need to make this list longer in the future.
+# Some default bright colors.  Might need to make this list longer in the
+# future.
 colors = [pg.glColor([255, 0, 0]),
           pg.glColor([0, 255, 0]),
           pg.glColor([0, 0, 255]),
@@ -26,12 +27,11 @@ pens = [pg.mkPen([255, 0, 0]),
         pg.mkPen([255, 255, 255]),
         pg.mkPen([255, 128, 128])]
 
-def bright_colors(i):
 
+def bright_colors(i):
     """ Some nice colors.  Only 8 available, which loops around as the input index increments."""
 
     return colors[i % len(colors)]
-
 
 
 class Volumetric3D(object):
@@ -100,9 +100,12 @@ class Volumetric3D(object):
         else:
             axlen = length
 
-        self.add_lines(np.array([[0, 0, 0], [1, 0, 0]]) * axlen, [255, 0, 0], width=wid)
-        self.add_lines(np.array([[0, 0, 0], [0, 1, 0]]) * axlen, [0, 255, 0], width=wid)
-        self.add_lines(np.array([[0, 0, 0], [0, 0, 1]]) * axlen, [0, 0, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], [1, 0, 0]]) *
+                       axlen, [255, 0, 0], width=wid)
+        self.add_lines(np.array([[0, 0, 0], [0, 1, 0]]) *
+                       axlen, [0, 255, 0], width=wid)
+        self.add_lines(np.array([[0, 0, 0], [0, 0, 1]]) *
+                       axlen, [0, 0, 255], width=wid)
 
     def show(self, smooth=True):
 
@@ -110,7 +113,8 @@ class Volumetric3D(object):
         self.dat[..., 3] *= 255. / self.dat[..., 3].max()
         self.dat = np.ubyte(self.dat)
         v = gl.GLVolumeItem(self.dat, smooth=smooth)
-        v.translate(-self.dat.shape[0] / 2., -self.dat.shape[1] / 2., -self.dat.shape[2] / 2.)
+        v.translate(-self.dat.shape[0] / 2., -
+                    self.dat.shape[1] / 2., -self.dat.shape[2] / 2.)
 
         self.w.addItem(v)
         self.w.setCameraPosition(distance=self.maxDist * 2)
@@ -123,7 +127,7 @@ def MapProjection(data, axis=None):
     ''' View a 3D density map as a projection along selected axes (which can be a list)'''
 
     if axis is not None:
-        if type(axis) is not list:
+        if not isinstance(axis, list):
             axis = [axis]
         dat = []
         for ax in axis:
@@ -153,7 +157,7 @@ def MapSlices(data, axis=None, levels=None):
         axis = [0, 1, 2]
 
     if axis is not None:
-        if type(axis) is not list:
+        if not isinstance(axis, list):
             axis = [axis]
         dat = []
         for ax in axis:
@@ -177,7 +181,14 @@ def MapSlices(data, axis=None, levels=None):
         autoLevels = False
     else:
         autoLevels = True
-    imv.setImage(dat, xvals=np.linspace(1., 3., dat.shape[0]), levels=levels, autoLevels=autoLevels)
+    imv.setImage(
+        dat,
+        xvals=np.linspace(
+            1.,
+            3.,
+            dat.shape[0]),
+        levels=levels,
+        autoLevels=autoLevels)
     QtGui.QApplication.instance().exec_()
 
 
@@ -195,9 +206,8 @@ class Scatter3D(object):
         self.maxDist = 0
 
     def add_points(self, r, color=None, size=None):
-
         ''' Add an Nx3 array of points r with specified color and size.  Color is a 3-element
-		    Python list and size is a float scalar. '''
+                    Python list and size is a float scalar. '''
 
         if color is None:
             col = self.defaultColor
@@ -209,7 +219,11 @@ class Scatter3D(object):
         else:
             siz = size
 
-        self.maxDist = max(self.maxDist, np.amax(np.sqrt(np.sum(r * r, axis=1))))
+        self.maxDist = max(
+            self.maxDist, np.amax(
+                np.sqrt(
+                    np.sum(
+                        r * r, axis=1))))
         plt = gl.GLScatterPlotItem(pos=r, color=col, size=siz)
         self.w.addItem(plt)
 
@@ -240,9 +254,12 @@ class Scatter3D(object):
         else:
             axlen = length
 
-        self.add_lines(np.array([[0, 0, 0], [1, 0, 0]]) * axlen, [255, 0, 0], width=wid)
-        self.add_lines(np.array([[0, 0, 0], [0, 1, 0]]) * axlen, [0, 255, 0], width=wid)
-        self.add_lines(np.array([[0, 0, 0], [0, 0, 1]]) * axlen, [0, 0, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], [1, 0, 0]]) *
+                       axlen, [255, 0, 0], width=wid)
+        self.add_lines(np.array([[0, 0, 0], [0, 1, 0]]) *
+                       axlen, [0, 255, 0], width=wid)
+        self.add_lines(np.array([[0, 0, 0], [0, 0, 1]]) *
+                       axlen, [0, 0, 255], width=wid)
 
     def show(self):
 

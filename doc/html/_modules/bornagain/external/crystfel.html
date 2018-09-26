@@ -166,7 +166,6 @@
 
 
 <div class="viewcode-block" id="geometry_file_to_dict"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_dict">[docs]</a><span class="k">def</span> <span class="nf">geometry_file_to_dict</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame</span>
 <span class="sd">    Valerio if it&#39;s broken :)</span>
@@ -182,7 +181,6 @@
 
 
 <div class="viewcode-block" id="geometry_dict_to_pad_geometry_list"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_dict_to_pad_geometry_list">[docs]</a><span class="k">def</span> <span class="nf">geometry_dict_to_pad_geometry_list</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a CrystFEL geometry dictionary, create a list of :class:&lt;bornagain.geometry.PADGeometry` objects.</span>
 <span class="sd">    This will also append the name of the panel to the PADGeometry instance.</span>
@@ -213,7 +211,6 @@
 
 
 <div class="viewcode-block" id="geometry_file_to_pad_geometry_list"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_pad_geometry_list">[docs]</a><span class="k">def</span> <span class="nf">geometry_file_to_pad_geometry_list</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">):</span>
-
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Given a CrystFEL geometry file, create a list of PADGeometry objects.  This will also append extra</span>
 <span class="sd">    crystfel-specific items like fsx, max_fs, etc.</span>
@@ -232,7 +229,6 @@
 
 
 <div class="viewcode-block" id="split_image"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.split_image">[docs]</a><span class="k">def</span> <span class="nf">split_image</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
-
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Split a 2D image into individual panels (useful for working with Cheetah output).</span>
 
@@ -247,7 +243,8 @@
 
     <span class="n">split_data</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
-        <span class="n">split_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
+        <span class="n">split_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
 
     <span class="k">return</span> <span class="n">split_data</span></div>
 </pre></div>

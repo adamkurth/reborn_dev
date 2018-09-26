@@ -2,10 +2,11 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from skimage import measure
 
+
 def meshplot3D(f, isosurface_value):
     # Use marching cubes to obtain a surface mesh
     if isosurface_value < np.min(f):
-        isosurface_value = np.min(f)*1.1
+        isosurface_value = np.min(f) * 1.1
     verts, faces = measure.marching_cubes(f, isosurface_value)
 
     # Display resulting triangular mesh using Matplotlib

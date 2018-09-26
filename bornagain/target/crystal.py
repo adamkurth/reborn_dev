@@ -19,15 +19,19 @@ class Structure(object):
     """
     r = None  #: Atomic coordinates (3xN array)
     _x = None  #: Fractional coordinates (3xN array)
-    O = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
+    #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
+    O = None
     Oinv = None  #: Inverse orthogonalization matrix (3x3 array)
-    A = None  #: This is Oinv transpose (3x3 array).  Does the transform q = dot(A, h), with fractional Miller indices h.
+    #: This is Oinv transpose (3x3 array).  Does the transform q = dot(A, h), with fractional Miller indices h.
+    A = None
     Ainv = None  #: A inverse
-    T = None  #: Translation vector that goes with orthogonalization matrix (What is this used for???)
+    #: Translation vector that goes with orthogonalization matrix (What is this used for???)
+    T = None
     elements = None  #: Atomic element symbols
     Z = None  #: Atomic numbers
     spaceGroupNumber = None  #: Space group number in the Int. Tables
-    hermannMauguinSymbol = None  #: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)
+    #: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)
+    hermannMauguinSymbol = None
     a = None  #: Lattice constant
     b = None  #: Lattice constant
     c = None  #: Lattice constant
@@ -38,8 +42,8 @@ class Structure(object):
     nAtoms = None  #: Number of atoms
     nMolecules = None  #: Number of molecules per unit cell
     symOps = None  #: Symmetry operations that are applied to fractional coordinates
-    symRs = None #: Symmetry 3x3 transformation matrices (in crystal basis)
-    symTs = None #: Symmetry translations (in crystal basis)
+    symRs = None  # : Symmetry 3x3 transformation matrices (in crystal basis)
+    symTs = None  # : Symmetry translations (in crystal basis)
 
     def __init__(self, pdbFilePath=None):
 
@@ -51,7 +55,6 @@ class Structure(object):
         return self.nMolecules
 
     def load_pdb(self, pdbFilePath):
-
         r"""
 
         Populate the class with all the info from a PDB file.
@@ -63,7 +66,6 @@ class Structure(object):
         parse_pdb(pdbFilePath, self)
 
     def set_cell(self, a, b, c, alpha, beta, gamma):
-
         r"""
 
         Set the unit cell lattice.
@@ -92,15 +94,15 @@ class Structure(object):
         V = a * b * c * sqrt(1 - cos(al)**2 - cos(be) **
                              2 - cos(ga)**2 + 2 * cos(al) * cos(be) * cos(ga))
         O = np.array([
-                [a, b * cos(ga), c * cos(be)],
-                [0, b * sin(ga), c * (cos(al) - cos(be) * cos(ga)) / sin(ga)],
-                [0, 0, V / (a * b * sin(ga))]
-                ])
+            [a, b * cos(ga), c * cos(be)],
+            [0, b * sin(ga), c * (cos(al) - cos(be) * cos(ga)) / sin(ga)],
+            [0, 0, V / (a * b * sin(ga))]
+        ])
         Oinv = np.array([
-                [1 / a, -cos(ga) / (a * sin(ga)), 0],
-                [0, 1 / (b * sin(ga)), 0],
-                [0, 0, a * b * sin(ga) / V]
-                ])
+            [1 / a, -cos(ga) / (a * sin(ga)), 0],
+            [0, 1 / (b * sin(ga)), 0],
+            [0, 0, a * b * sin(ga) / V]
+        ])
         self.O = O
         self.Oinv = Oinv
         self.A = Oinv.T.copy()
@@ -108,7 +110,6 @@ class Structure(object):
         self.V = V
 
     def set_spacegroup(self, hermann_mauguin_symbol):
-
         r"""
 
         Set the spacegroup of the crystal.  This produces a cache of the symmetry transformation operations.
@@ -119,14 +120,13 @@ class Structure(object):
         """
 
         self.hermann_mauguin_symbol = hermann_mauguin_symbol
-        self.symRs, self.symTs = get_symmetry_operators_from_space_group(hermann_mauguin_symbol)
+        self.symRs, self.symTs = get_symmetry_operators_from_space_group(
+            hermann_mauguin_symbol)
         self.symRinvs = [np.linalg.inv(R) for R in self.symRs]
         self.nMolecules = len(self.symTs)
 
-
     @property
     def x(self):
-
         r"""
 
         Fractional coordinates of atoms.
@@ -147,15 +147,12 @@ class structure(Structure):
         Structure.__init__(self, *args, **kwargs)
 
         if ba.get_global('warn_depreciated'):
-            utils.warn('The class "structure" is depreciated.  Use "Structure" instead.'
-                       ' (This change was made for PEP8 compliance.)')
-
-
-
+            utils.warn(
+                'The class "structure" is depreciated.  Use "Structure" instead.'
+                ' (This change was made for PEP8 compliance.)')
 
 
 def parse_pdb(pdbFilePath, crystalStruct=None):
-
     r"""Return a :class:`structure` object with PDB information. """
 
     maxAtoms = int(1e5)
@@ -227,12 +224,11 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
     cryst.nAtoms = nAtoms
 
     cryst.set_spacegroup(hermann_mauguin_symbol)
-    
+
     return cryst
 
 
 def get_symmetry_operators_from_space_group(hm_symbol):
-
     r"""
     For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
     translation and rotation operators.  These operators are in the crystal basis.
@@ -314,7 +310,6 @@ class Atoms:
             print("Cannot save to xyz because element strings were not provided...")
 
     def set_elem(self, elem):
-
         r"""sets list of elements names for use in xyz format files"""
 
         elem = np.array(elem, dtype='S16')
@@ -328,14 +323,19 @@ class Molecule(structure):
 
         self.atom_vecs = self.r * 1e10  # atom positions!
 
-        self.lat = Lattice(self.a * 1e10, self.b * 1e10, self.c * 1e10,
-                           self.alpha * 180 / np.pi, self.beta * 180 / np.pi, self.gamma * 180 / np.pi)
+        self.lat = Lattice(
+            self.a * 1e10,
+            self.b * 1e10,
+            self.c * 1e10,
+            self.alpha * 180 / np.pi,
+            self.beta * 180 / np.pi,
+            self.gamma * 180 / np.pi)
 
         self.atom_fracs = self.mat_mult_many(self.Oinv * 1e-10, self.atom_vecs)
 
     def _separate_xyz(self, xyz):
-        x,y,z = map(np.array, zip(*xyz))
-        return x,y,z
+        x, y, z = map(np.array, zip(*xyz))
+        return x, y, z
 
     def get_1d_coords(self):
         x, y, z = self._seprate_xyz(self.atom_vecs)
@@ -350,20 +350,19 @@ class Molecule(structure):
         return np.einsum('ij,kj->ki', M, V)
 
     def shift(self, monomer, na, nb, nc):
-        xyz_frac =  self.mat_mult_many( self.Oinv*1e-10, monomer.xyz)
-        x,y,z = self._separate_xyz(xyz_frac)
-        
+        xyz_frac = self.mat_mult_many(self.Oinv * 1e-10, monomer.xyz)
+        x, y, z = self._separate_xyz(xyz_frac)
+
         x += na
         y += nb
         z += nc
-        
+
         xyz_new = np.zeros_like(monomer.xyz)
-        xyz_new[:,0] = x
-        xyz_new[:,1] = y
-        xyz_new[:,2] = z
+        xyz_new[:, 0] = x
+        xyz_new[:, 1] = y
+        xyz_new[:, 2] = z
         xyz_new = self.mat_mult_many(self.O * 1e10, xyz_new)
         return Atoms(xyz_new, self.Z, self.elements)
-
 
     def transform(self, x, y, z):
         r"""x,y,z are fractional coordinates"""
@@ -409,7 +408,8 @@ class Lattice:
         gamma = gamma * np.pi / 180.
 
         # The definitions below are also found in the crystal structure class
-        # TODO: merge this with the crystal.structure class (after we re-name to crystal.Structure - PEP8)
+        # TODO: merge this with the crystal.structure class (after we re-name
+        # to crystal.Structure - PEP8)
 
         cos = np.cos
         sin = np.sin
@@ -428,7 +428,6 @@ class Lattice:
         self.Oinv = np.linalg.inv(self.O)
 
     def assemble(self, n_unit=10, spherical=False):
-
         r"""
         Creates a finite lattice (self.vecs)
         Args:
@@ -442,7 +441,7 @@ class Lattice:
             n_unit_a, n_unit_b, n_unit_c = n_unit
         except TypeError:
             n_unit_a = n_unit_b = n_unit_c = n_unit
-          
+
         self.vecs = np.array([i * self.a + j * self.b + k * self.c
                               for i in xrange(n_unit_a)
                               for j in xrange(n_unit_b)
@@ -463,4 +462,3 @@ class Lattice:
         # sphericalize the lattice..
         if spherical:
             self.vecs = simutils.sphericalize(self.vecs)
-

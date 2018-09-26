@@ -95,6 +95,6 @@ class RadialProfile(object):
                               self.mask, self.n_bins)
         if average:
             profile.flat[self.counts_non_zero] /= \
-            self.counts.flat[self.counts_non_zero]
+                self.counts.flat[self.counts_non_zero]
 
         return profile

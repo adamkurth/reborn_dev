@@ -4,7 +4,7 @@ diffraction on GPU devices.  It is not finished yet...
 
 Some environment variables that affect this module:
 'BORNAGAIN_CL_GROUPSIZE' : This sets the default groupsize.  It will
-otherwise be 32.  If you are using a CPU you might want to set 
+otherwise be 32.  If you are using a CPU you might want to set
 BORNAGAIN_CL_GROUPSIZE=1 .
 """
 
@@ -25,8 +25,8 @@ from bornagain.simulate import refdata
 clcore_file = pkg_resources.resource_filename(
     'bornagain.simulate', 'clcore.cpp')
 
-def create_some_gpu_context():
 
+def create_some_gpu_context():
     r"""
 
     Since cl.create_some_context() sometimes forces a CPU on macs, this function will attempt to use a GPU
@@ -40,10 +40,11 @@ def create_some_gpu_context():
         platform = cl.get_platforms()
         devices = platform[0].get_devices(device_type=cl.device_type.GPU)
         context = cl.Context(devices=devices)
-    except:
+    except BaseException:
         context = cl.create_some_context()
 
     return context
+
 
 class ClCore(object):
     def __init__(self, context=None, queue=None, group_size=None,
@@ -81,7 +82,7 @@ class ClCore(object):
         """
         If the environment variable BORNAGAIN_CL_GROUPSIZE is set then use
         that value.
-        
+
         If the group size exceeds the max allowed group size, then make it
         smaller (but print warning)
         """
@@ -93,16 +94,18 @@ class ClCore(object):
         if self.double_precision:
             max_group_size = int(max_group_size / 2)
         if group_size > max_group_size:
-            sys.stderr.write('Changing group size from %d to %d.\n'
-                             'Set BORNAGAIN_CL_GROUPSIZE=%d to avoid this error.\n'
-                             % (group_size, max_group_size, max_group_size))
+            sys.stderr.write(
+                'Changing group size from %d to %d.\n'
+                'Set BORNAGAIN_CL_GROUPSIZE=%d to avoid this error.\n' %
+                (group_size, max_group_size, max_group_size))
             group_size = max_group_size
         self.group_size = group_size
 
     def _double_precision_is_available(self):
         if 'cl_khr_fp64' not in self.queue.device.extensions.split():
             return False
-        # TODO: fix stupid errors to do with Apple's CL double implementation?  Why doesn't double work on apple?
+        # TODO: fix stupid errors to do with Apple's CL double implementation?
+        # Why doesn't double work on apple?
         if self.queue.device.platform.name == 'Apple':
             return False
         return True
@@ -124,7 +127,8 @@ class ClCore(object):
                 self._use_float()
 
     def _use_double(self):
-        # TODO: Decide if integers should be made double also.  As of now, they are all single precision.
+        # TODO: Decide if integers should be made double also.  As of now, they
+        # are all single precision.
         self.int_t = np.int32
         self.real_t = np.float64
         self.complex_t = np.complex128
@@ -148,7 +152,8 @@ class ClCore(object):
         self._load_gaussian_lattice_transform_intensities_pad()
 
     def _build_openCL_programs(self):
-        clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
+        clcore_file = pkg_resources.resource_filename(
+            'bornagain.simulate', 'clcore.cpp')
         kern_str = open(clcore_file).read()
         build_opts = []
         if self.double_precision:
@@ -157,7 +162,10 @@ class ClCore(object):
             # kern_str = kern_str.replace("float", "double")
         build_opts.append('-D')
         build_opts.append('GROUP_SIZE=%d' % (self.group_size))
-        self.programs = cl.Program(self.context, kern_str).build(options=build_opts)
+        self.programs = cl.Program(
+            self.context,
+            kern_str).build(
+            options=build_opts)
 
     def _load_get_group_size(self):
         self.get_group_size_cl = self.programs.get_group_size
@@ -165,59 +173,100 @@ class ClCore(object):
 
     def _load_phase_factor_qrf(self):
         self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
-        self.phase_factor_qrf_cl.set_scalar_arg_dtypes([None, 
-            None, None, None, None, 
-            self.int_t, self.int_t,self.int_t])
+        self.phase_factor_qrf_cl.set_scalar_arg_dtypes(
+            [None, None, None, None, None, self.int_t, self.int_t, self.int_t])
 
     def _load_phase_factor_pad(self):
         self.phase_factor_pad_cl = self.programs.phase_factor_pad
         self.phase_factor_pad_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t,self.real_t, None, None, None,
-             None, self.int_t])
+            [
+                None,
+                None,
+                None,
+                None,
+                self.int_t,
+                self.int_t,
+                self.int_t,
+                self.int_t,
+                self.real_t,
+                None,
+                None,
+                None,
+                None,
+                self.int_t])
 
     def _load_phase_factor_mesh(self):
         self.phase_factor_mesh_cl = self.programs.phase_factor_mesh
-        self.phase_factor_mesh_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, self.int_t, None, None, None])
+        self.phase_factor_mesh_cl.set_scalar_arg_dtypes(
+            [None, None, None, self.int_t, self.int_t, None, None, None])
 
     def _load_buffer_mesh_lookup(self):
         self.buffer_mesh_lookup_cl = self.programs.buffer_mesh_lookup
-        self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, None, None, None, None])
+        self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes(
+            [None, None, None, self.int_t, None, None, None, None])
 
     def _load_lattice_transform_intensities_pad(self):
         self.lattice_transform_intensities_pad_cl = self.programs.lattice_transform_intensities_pad
         self.lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, self.int_t, self.int_t, self.int_t,self.real_t, None, None, None, None,
-             self.int_t])
+            [
+                None,
+                None,
+                None,
+                None,
+                self.int_t,
+                self.int_t,
+                self.int_t,
+                self.real_t,
+                None,
+                None,
+                None,
+                None,
+                self.int_t])
 
     def _load_gaussian_lattice_transform_intensities_pad(self):
         self.gaussian_lattice_transform_intensities_pad_cl = self.programs.gaussian_lattice_transform_intensities_pad
         self.gaussian_lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, self.int_t, self.int_t, self.int_t,self.real_t, None, None, None, None,
-             self.int_t])
+            [
+                None,
+                None,
+                None,
+                None,
+                self.int_t,
+                self.int_t,
+                self.int_t,
+                self.real_t,
+                None,
+                None,
+                None,
+                None,
+                self.int_t])
 
     def _load_mod_squared_complex_to_real(self):
         self.mod_squared_complex_to_real_cl = self.programs.mod_squared_complex_to_real
-        self.mod_squared_complex_to_real_cl.set_scalar_arg_dtypes([None, None, self.int_t])
+        self.mod_squared_complex_to_real_cl.set_scalar_arg_dtypes(
+            [None, None, self.int_t])
 
     def _load_qrf_default(self):
         self.qrf_default_cl = self.programs.qrf_default
-        self.qrf_default_cl.set_scalar_arg_dtypes([None, None, None, None, self.int_t])
+        self.qrf_default_cl.set_scalar_arg_dtypes(
+            [None, None, None, None, self.int_t])
 
     def _load_qrf_kam(self):
         self.qrf_kam_cl = self.programs.qrf_kam
-        self.qrf_kam_cl.set_scalar_arg_dtypes([None, None, None, None, None, self.int_t])
+        self.qrf_kam_cl.set_scalar_arg_dtypes(
+            [None, None, None, None, None, self.int_t])
 
     def vec4(self, x, dtype=None):
         """
         Evdidently pyopencl does not deal with 3-vectors very well, so we use
         4-vectors and pad with a zero at the end.
-            
+
         Arguments:
-            - x, np.ndarray 
-            
-            - dtype, np.dtype 
+            - x, np.ndarray
+
+            - dtype, np.dtype
                 default is np.float32
-            
+
         Returns:
             - numpy array of length 4
         """
@@ -252,13 +301,13 @@ class ClCore(object):
         """
         Static method
 
-        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy 
+        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
         array into a pyopencl.array and send it to the device memory.  So far this only
         deals with float and comlex arrays, and it should figure out which type it is.
 
         Arguments:
             array (numpy/cl array; float/complex type): Input array.
-            dtype (np.dtype): Specify the desired type in opencl.  The two types that 
+            dtype (np.dtype): Specify the desired type in opencl.  The two types that
                                are useful here are np.float32 and np.complex64
             queue, CL queue
         Returns:
@@ -274,15 +323,15 @@ class ClCore(object):
 
     def to_device(self, array=None, shape=None, dtype=None):
         """
-        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy 
+        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
         array into a pyopencl.array and send it to the device memory.  So far this only
         deals with float and comlex arrays, and it should figure out which type it is.
 
         Arguments:
             array (numpy/cl array; float/complex type): Input array.
-            shape (tuple): Optionally specify the shape of the desired array.  This is 
-                            ignored if array is not None. 
-            dtype (np.dtype): Specify the desired type in opencl.  The two types that 
+            shape (tuple): Optionally specify the shape of the desired array.  This is
+                            ignored if array is not None.
+            dtype (np.dtype): Specify the desired type in opencl.  The two types that
                                are useful here are np.float32 and np.complex64
 
         Returns:
@@ -317,7 +366,7 @@ class ClCore(object):
     def mod_squared_complex_to_real(self, A, I):
         '''
         Compute the real-valued modulus square of complex numbers.
-        Good example of a function that shouldn't exist, but I needed to add 
+        Good example of a function that shouldn't exist, but I needed to add
         it here because the pyopencl.array.Array class fails at this seemingly
         simple task.
         '''
@@ -326,12 +375,11 @@ class ClCore(object):
         I_dev = self.to_device(I, dtype=self.real_t)
         n = self.int_t(np.prod(A.shape))
 
-        global_size = np.int(np.ceil(n / np.float(self.group_size))
-                             * self.group_size)
+        global_size = np.int(np.ceil(n / np.float(self.group_size)) *
+                             self.group_size)
 
-        self.mod_squared_complex_to_real_cl(self.queue, (global_size,),
-                                            (self.group_size,), A.data, I.data, n)
-
+        self.mod_squared_complex_to_real_cl(
+            self.queue, (global_size,), (self.group_size,), A.data, I.data, n)
 
     def phase_factor_qrf_chunk(self, q, r, f, Nchunk, q_is_qdev=False):
         '''
@@ -341,50 +389,49 @@ class ClCore(object):
             q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
             r (numpy/cl float array [M,3]): Atomic coordinates.
             f (numpy/cl complex array [M]): Complex scattering factors.
-            Nchunk, number of chunks to split up atoms.. 
-            a (cl complex array [N]): Optional container for complex scattering 
+            Nchunk, number of chunks to split up atoms..
+            a (cl complex array [N]): Optional container for complex scattering
               amplitudes.
 
         Returns:
-            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
+            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
               if there are input cl arrays.
         '''
-        # this is an inplace method, so we add amplitudes 
-        add=self.int_t(1) # inplace 
-        
-        #if R is None:
+        # this is an inplace method, so we add amplitudes
+        add = self.int_t(1)  # inplace
+
+        # if R is None:
         R = np.eye(3, dtype=self.real_t)
         R = self.vec16(R, dtype=self.real_t)
-        
+
         n_pixels = self.int_t(q.shape[0])
-        
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
-                             * self.group_size)
-        
+
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
+                             self.group_size)
+
         if not q_is_qdev:
             q_dev = self.to_device(q, dtype=self.real_t)
         else:
             q_dev = q
 
         n_atoms = self.int_t(r.shape[0])
-        
-        r_split = np.array_split( np.arange( n_atoms), Nchunk)
+
+        r_split = np.array_split(np.arange(n_atoms), Nchunk)
         for r_rng in r_split:
             r_chunk = r[r_rng]
             f_chunk = f[r_rng]
             r_dev = self.to_device(r_chunk, dtype=self.real_t)
             f_dev = self.to_device(f_chunk, dtype=self.complex_t)
-            
+
             self.phase_factor_qrf_cl(self.queue, (global_size,),
-                                     (self.group_size,), q_dev.data, 
+                                     (self.group_size,), q_dev.data,
                                      r_dev.data,
-                                     f_dev.data, 
-                                     R, 
-                                     self.a_dev.data, 
+                                     f_dev.data,
+                                     R,
+                                     self.a_dev.data,
                                      n_atoms,
                                      n_pixels, add)
 
-    
     def phase_factor_qrf_inplace(self, q, r, f, R=None, q_is_qdev=False):
         '''
         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
@@ -394,11 +441,11 @@ class ClCore(object):
             r (numpy/cl float array [M,3]): Atomic coordinates.
             f (numpy/cl complex array [M]): Complex scattering factors.
             R (numpy array [3,3]): Rotation matrix acting on q vectors.
-            a (cl complex array [N]): Optional container for complex scattering 
+            a (cl complex array [N]): Optional container for complex scattering
               amplitudes.
 
         Returns:
-            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
+            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
               if there are input cl arrays.
         '''
 
@@ -414,21 +461,20 @@ class ClCore(object):
             q_dev = q
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
-        #R16_dev = self.to_device(R16, dtype=self.real_t)
+        # R16_dev = self.to_device(R16, dtype=self.real_t)
 
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
-                             * self.group_size)
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
+                             self.group_size)
 
-        add=self.int_t(1) # inplace always adds...
+        add = self.int_t(1)  # inplace always adds...
         self.phase_factor_qrf_cl(self.queue, (global_size,),
-                                 (self.group_size,), q_dev.data, 
+                                 (self.group_size,), q_dev.data,
                                  r_dev.data,
-                                 f_dev.data, 
-                                 R, 
-                                 self.a_dev.data, 
+                                 f_dev.data,
+                                 R,
+                                 self.a_dev.data,
                                  n_atoms,
                                  n_pixels, add)
-
 
     def next_multiple_groupsize(self, N):
         if N % self.group_size > 0:
@@ -437,7 +483,10 @@ class ClCore(object):
             return 0
 
     def init_amps(self, Npix):
-        self.a_dev = self.to_device(np.zeros(Npix), dtype=self.complex_t, shape=(Npix))
+        self.a_dev = self.to_device(
+            np.zeros(Npix),
+            dtype=self.complex_t,
+            shape=(Npix))
 
     def release_amps(self, reset=False):
         amps = self.a_dev.get()
@@ -454,11 +503,11 @@ class ClCore(object):
             r (numpy/cl float array [M,3]): Atomic coordinates.
             R (numpy array [3,3]): Rotation matrix acting on q vectors.
             f (numpy/cl complex array [M]): Complex scattering factors.
-            a (cl complex array [N]): Optional container for complex scattering 
+            a (cl complex array [N]): Optional container for complex scattering
               amplitudes.
 
         Returns:
-            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
+            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
               if there are input cl arrays.
         '''
 
@@ -478,8 +527,8 @@ class ClCore(object):
         f_dev = self.to_device(f, dtype=self.complex_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
-                             * self.group_size)
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
+                             self.group_size)
 
         self.phase_factor_qrf_cl(self.queue, (global_size,),
                                  (self.group_size,), q_dev.data, r_dev.data,
@@ -492,7 +541,20 @@ class ClCore(object):
         else:
             return a_dev
 
-    def phase_factor_pad(self, r, f, T, F, S, B, nF, nS, w, R=None, a=None, add=False):
+    def phase_factor_pad(
+            self,
+            r,
+            f,
+            T,
+            F,
+            S,
+            B,
+            nF,
+            nS,
+            w,
+            R=None,
+            a=None,
+            add=False):
         '''
         This should simulate detector panels.
 
@@ -524,7 +586,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
-        R = self.vec16(R,dtype=self.real_t)
+        R = self.vec16(R, dtype=self.real_t)
         if add:
             add = 1
         else:
@@ -537,7 +599,7 @@ class ClCore(object):
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
 
-        T = self.vec4(T,dtype=self.real_t)
+        T = self.vec4(T, dtype=self.real_t)
         F = self.vec4(F, dtype=self.real_t)
         S = self.vec4(S, dtype=self.real_t)
         B = self.vec4(B, dtype=self.real_t)
@@ -565,11 +627,11 @@ class ClCore(object):
         Arguments:
             r (Nx3 numpy array): Atomic coordinates
             f (numpy array): A numpy array of complex atomic scattering factors
-            N (numpy array length 3): Number of q-space samples in each of the three 
+            N (numpy array length 3): Number of q-space samples in each of the three
                dimensions
-            q_min (numpy array length 3): Minimum q-space magnitudes in the 3d mesh.  
+            q_min (numpy array length 3): Minimum q-space magnitudes in the 3d mesh.
                These values specify the *center* of the first voxel.
-            q_max (numpy array length 3): Naximum q-space magnitudes in the 3d mesh.  
+            q_max (numpy array length 3): Naximum q-space magnitudes in the 3d mesh.
                These values specify the *center* of the voxel.
 
         Returns:
@@ -602,8 +664,8 @@ class ClCore(object):
         q_min = self.vec4(q_min, dtype=self.real_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
-                             * self.group_size)
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
+                             self.group_size)
 
         self.phase_factor_mesh_cl(self.queue, (global_size,),
                                   (self.group_size,), r_dev.data, f_dev.data,
@@ -621,7 +683,7 @@ class ClCore(object):
         This is supposed to lookup intensities from a 3d mesh of amplitudes.
 
         Arguments:
-            a_map (numpy array): Complex scattering amplitudes (usually generated from 
+            a_map (numpy array): Complex scattering amplitudes (usually generated from
                the function phase_factor_mesh())
             N (int): As defined in phase_factor_mesh()
             q_min (float): As defined in phase_factor_mesh()
@@ -661,12 +723,23 @@ class ClCore(object):
         q_min = self.vec4(q_min, dtype=self.real_t)
         a_out_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
-                             * self.group_size)
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
+                             self.group_size)
 
-        self.buffer_mesh_lookup_cl(self.queue, (global_size,), (self.group_size,),
-                                   a_map_dev.data, q_dev.data, a_out_dev.data,
-                                   n_pixels, N, deltaQ, q_min, R)
+        self.buffer_mesh_lookup_cl(
+            self.queue,
+            (global_size,
+             ),
+            (self.group_size,
+             ),
+            a_map_dev.data,
+            q_dev.data,
+            a_out_dev.data,
+            n_pixels,
+            N,
+            deltaQ,
+            q_min,
+            R)
         self.queue.finish()
 
         if a is None:
@@ -732,8 +805,8 @@ class ClCore(object):
         else:
             return I_dev
 
-    def gaussian_lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w,
-                                                   R=None, I=None, add=False):
+    def gaussian_lattice_transform_intensities_pad(
+            self, abc, N, T, F, S, B, nF, nS, w, R=None, I=None, add=False):
         """
         Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian approximation
         to the lattice transform.
@@ -779,10 +852,25 @@ class ClCore(object):
 
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
                              self.group_size)
-        self.gaussian_lattice_transform_intensities_pad_cl(self.queue, (global_size,),
-                                                  (self.group_size,), abc,
-                                                  N, R, I_dev.data, n_pixels,
-                                                  nF, nS, w, T, F, S, B, add)
+        self.gaussian_lattice_transform_intensities_pad_cl(
+            self.queue,
+            (global_size,
+             ),
+            (self.group_size,
+             ),
+            abc,
+            N,
+            R,
+            I_dev.data,
+            n_pixels,
+            nF,
+            nS,
+            w,
+            T,
+            F,
+            S,
+            B,
+            add)
         self.queue.finish()
 
         if I is None:
@@ -790,8 +878,11 @@ class ClCore(object):
         else:
             return I_dev
 
-
-    def prime_cromermann_simulator(self, q_vecs, atomic_nums=None, incoherent=False):
+    def prime_cromermann_simulator(
+            self,
+            q_vecs,
+            atomic_nums=None,
+            incoherent=False):
         """
         Prepare special array data for cromermann simulation
 
@@ -810,13 +901,17 @@ class ClCore(object):
         self.Npix = self.int_t(q_vecs.shape[0])
 
         # allow these to overflow
-        self.Nextra_pix = self.int_t(self.group_size - self.Npix % self.group_size)
+        self.Nextra_pix = self.int_t(
+            self.group_size - self.Npix %
+            self.group_size)
 
         if atomic_nums is None:
             if not incoherent:
-                self.form_facts_arr = np.ones((self.Npix + self.Nextra_pix, 1), dtype=self.real_t)
+                self.form_facts_arr = np.ones(
+                    (self.Npix + self.Nextra_pix, 1), dtype=self.real_t)
             else:
-                self.form_facts_arr = 2*np.pi * np.random.random((self.Npix + self.Nextra_pix, 1)).astype( dtype=self.real_t)
+                self.form_facts_arr = 2 * np.pi * \
+                    np.random.random((self.Npix + self.Nextra_pix, 1)).astype(dtype=self.real_t)
             self.atomIDs = None
             self.Nspecies = 1
             self._load_amp_buffer()
@@ -824,12 +919,15 @@ class ClCore(object):
             return
 
         croman_coef = refdata.get_cromermann_parameters(atomic_nums)
-        form_facts_dict = refdata.get_cmann_form_factors(croman_coef, self.q_vecs)
+        form_facts_dict = refdata.get_cmann_form_factors(
+            croman_coef, self.q_vecs)
 
         lookup = {}  # for matching atomID to atomic number
 
         self.form_facts_arr = np.zeros(
-            (self.Npix + self.Nextra_pix, len(form_facts_dict)), dtype=self.real_t)
+            (self.Npix + self.Nextra_pix,
+             len(form_facts_dict)),
+            dtype=self.real_t)
 
         for i, z in enumerate(form_facts_dict):
             lookup[z] = i  # set the key
@@ -839,9 +937,10 @@ class ClCore(object):
 
         self.Nspecies = np.unique(atomic_nums).size
 
-        assert (self.Nspecies < 13)  # can easily change this later if necessary...
+        # can easily change this later if necessary...
+        assert (self.Nspecies < 13)
         # ^ this assertion is so we can pass inputs to GPU as a float16, 3 q vectors and 13 atom species
-        # where one is reserved to be a dummie 
+        # where one is reserved to be a dummie
 
         #       load the amplitudes
         self._load_amp_buffer()
@@ -859,7 +958,7 @@ class ClCore(object):
 
             sub_com (bool):
                 Whether to sub the center of mass from the atom vecs
-        
+
         Returns:
             pyopenCL buffer data :
                 Natoms x 4 contiguous openCL buffer array
@@ -887,11 +986,10 @@ class ClCore(object):
 
         self.r_buff = self.to_device(self.r_vecs, dtype=self.real_t)
 
-
     def get_q_cromermann(self):
-        """ 
+        """
         combine form factors and q-vectors and load onto a CL buffer
-        
+
         Arguments:
 
             q_vecs (np.ndarray) :
@@ -899,11 +997,11 @@ class ClCore(object):
 
             atomic_nums (np.ndarray) :
                 Natoms x 1 array of atomic numbers
-        
+
         Returns:
             pyopenCL buffer data :
                 Npixelbuff x 16 contiguous openCL buffer array
-                where Npixel buff is the first multiple of 
+                where Npixel buff is the first multiple of
                 group_size that is greater than Npixels
 
         """
@@ -928,47 +1026,47 @@ class ClCore(object):
 
         self._A_buff_data = self.A_buff.data
 
-    def run_cromermann(self, q_buff_data, r_buff_data, 
-                    rand_rot=False, force_rot_mat=None, com=None):
+    def run_cromermann(self, q_buff_data, r_buff_data,
+                       rand_rot=False, force_rot_mat=None, com=None):
         """
         Run the qrf kam simulator.
 
         Arguments
             q_buff_data (pyopenCL buffer data) :
-                should have shape NpixelsCLx16 where 
+                should have shape NpixelsCLx16 where
                 NpixelsCL is the first multiple of group_size greater than
-                Npixels. 
-                Use :func:`get_group_size` to check the currently 
+                Npixels.
+                Use :func:`get_group_size` to check the currently
                 set group_size. The data stored in
-                q[Npixels,:3] should be the q-vectors. 
+                q[Npixels,:3] should be the q-vectors.
                 The data stored in q[Npixels,3:Nspecies] should be the
-                q-dependent atomic form factors for up to Nspecies=13 
+                q-dependent atomic form factors for up to Nspecies=13
                 atom species See :func:`prime_comermann_simulator`
-                for details regarding the form factor storage and atom 
+                for details regarding the form factor storage and atom
                 species identifier
-            
+
             r_buff_data (pyopenCL buffer data) :
-                Should have shape Natomsx4. The data stored in 
+                Should have shape Natomsx4. The data stored in
                 r_buff_data[:,:3] are the atomic positions in cartesian
-                (x,y,z).  The data stored in r_buff_data[:,3] are 
+                (x,y,z).  The data stored in r_buff_data[:,3] are
                 the atom species identifiers (0,1,..Nspecies-1)
-                mapping the atom species here to the form factor value 
+                mapping the atom species here to the form factor value
                 in q_buff_data.
-            
+
             rand_rot (bool) :
                 Randomly rotate the molecule
-            
+
             force_rand_rot (np.ndarray) :
                 Supply a specific rotation matrix
-            
+
             com (np.ndarray) :
                 Offset the center of mass of the molecule
-                
+
         .. note::
-            For atom r_i the atom species identifier is sp_i = 
+            For atom r_i the atom species identifier is sp_i =
             r_buff_data[r_i,3].
-            Then, for pixel q_i, the simulator can find the corresponding 
-            form factor in q_buff_dat[q_i,3+sp_i]. 
+            Then, for pixel q_i, the simulator can find the corresponding
+            form factor in q_buff_dat[q_i,3+sp_i].
             I know it is confusing, but it's efficient.
         """
 
@@ -990,10 +1088,10 @@ class ClCore(object):
         self._set_com_vec()
 
         #       run the program
-        self.qrf_kam_cl( self.queue, (int(self.Npix + self.Nextra_pix),), 
-            (self.group_size,), q_buff_data, r_buff_data, 
-            self.rot_buff.data, self.com_buff.data, 
-            self._A_buff_data, self.Nato)
+        self.qrf_kam_cl(self.queue, (int(self.Npix + self.Nextra_pix),),
+                        (self.group_size,), q_buff_data, r_buff_data,
+                        self.rot_buff.data, self.com_buff.data,
+                        self._A_buff_data, self.Nato)
 
     def _set_rand_rot(self):
         self.rot_buff = self.to_device(self.rot_mat, dtype=self.real_t)
@@ -1004,7 +1102,7 @@ class ClCore(object):
     def release_amplitudes(self, reset=False):
         """
         Releases the amplitude buffer from the GPU
-        
+
         Arguments:
             reset (bool) : Reset the amplitude buffer to 0's on the GPU
 
@@ -1014,6 +1112,7 @@ class ClCore(object):
         if reset:
             self._load_amp_buffer()
         return Amps
+
 
 def helpme():
     """
@@ -1027,19 +1126,20 @@ def helpme():
                 info = getattr(info_cls, info_name)
                 try:
                     info_value = obj.get_info(info)
-                except:
+                except BaseException:
                     info_value = "<error>"
 
-                if (info_cls == cl.device_info and info_name == "PARTITION_TYPES_EXT"
-                    and isinstance(info_value, list)):
-                    print("%s: %s" % (info_name, [
-                        cl.device_partition_property_ext.to_string(v,
-                                                                   "<unknown device partition property %d>")
-                        for v in info_value]))
+                if (info_cls == cl.device_info and info_name ==
+                        "PARTITION_TYPES_EXT" and isinstance(info_value, list)):
+                    print(
+                        "%s: %s" %
+                        (info_name, [
+                            cl.device_partition_property_ext.to_string(
+                                v, "<unknown device partition property %d>") for v in info_value]))
                 else:
                     try:
                         print("%s: %s" % (info_name, info_value))
-                    except:
+                    except BaseException:
                         print("%s: <error>" % info_name)
 
     short = False
@@ -1069,13 +1169,14 @@ def helpme():
                         cl.mem_object_type.IMAGE3D
                     ]:
                         try:
-                            formats = cl.get_supported_image_formats(ctx, mf, itype)
-                        except:
+                            formats = cl.get_supported_image_formats(
+                                ctx, mf, itype)
+                        except BaseException:
                             formats = "<error>"
                         else:
                             def str_chd_type(chdtype):
-                                result = cl.channel_type.to_string(chdtype,
-                                                                   "<unknown channel data type %d>")
+                                result = cl.channel_type.to_string(
+                                    chdtype, "<unknown channel data type %d>")
 
                                 result = result.replace("_INT", "")
                                 result = result.replace("UNSIGNED", "U")
@@ -1085,11 +1186,10 @@ def helpme():
                                 return result
 
                             formats = ", ".join(
-                                "%s-%s" % (
-                                    cl.channel_order.to_string(iform.channel_order,
-                                                               "<unknown channel order 0x%x>"),
-                                    str_chd_type(iform.channel_data_type))
-                                for iform in formats)
+                                "%s-%s" %
+                                (cl.channel_order.to_string(
+                                    iform.channel_order, "<unknown channel order 0x%x>"), str_chd_type(
+                                    iform.channel_data_type)) for iform in formats)
 
                         print("%s %s FORMATS: %s\n" % (
                             cl.mem_object_type.to_string(itype),
@@ -1121,8 +1221,8 @@ def helpme():
 def test():
     import pkg_resources
     from bornagain import Molecule
-    pdb = pkg_resources.resource_filename('bornagain', '').replace('bornagain/bornagain',
-                                                                   'bornagain/examples/data/pdb/2LYZ.pdb')
+    pdb = pkg_resources.resource_filename('bornagain', '').replace(
+        'bornagain/bornagain', 'bornagain/examples/data/pdb/2LYZ.pdb')
     mol = Molecule(pdb)
     form_facts = np.ones(mol.atom_vecs.shape[0], np.complex64)
 
@@ -1151,7 +1251,7 @@ def test():
 
     #   now test the cromermann simulation
     print("Testing cromermann")
-    core.prime_cromermann_simulator( D.Q, None)
+    core.prime_cromermann_simulator(D.Q, None)
     q = core.get_q_cromermann()
 
     t = time.time()
@@ -1162,7 +1262,8 @@ def test():
     _ = D.readout(A2)
     D.display()
 
-    #   there is slightttt difference between the two methods at low q, not sure why...
+    # there is slightttt difference between the two methods at low q, not sure
+    # why...
     _ = D.readout(A - A2)
     D.display()
 

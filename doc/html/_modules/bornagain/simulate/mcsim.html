@@ -163,8 +163,6 @@
 <span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">from</span> <span class="nn">glob</span> <span class="k">import</span> <span class="n">glob</span>
 <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="k">import</span> <span class="n">erf</span>
-
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">)</span>  <span class="c1"># This path setting won&#39;t be needed once bornagain is properly installed</span>
 <span class="kn">import</span> <span class="nn">bornagain</span> <span class="k">as</span> <span class="nn">ba</span>
 <span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="k">import</span> <span class="n">solutions</span>
 <span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="k">import</span> <span class="n">simutils</span>
@@ -172,78 +170,104 @@
 <span class="kn">from</span> <span class="nn">bornagain.units</span> <span class="k">import</span> <span class="n">r_e</span><span class="p">,</span> <span class="n">hc</span><span class="p">,</span> <span class="n">keV</span>
 <span class="kn">import</span> <span class="nn">bornagain.simulate.clcore</span> <span class="k">as</span> <span class="nn">core</span>
 
+<span class="c1"># This path setting won&#39;t be needed once bornagain is properly installed</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="mcsim"><a class="viewcode-back" href="../../../bornagain.simulate.mcsim.html#bornagain.simulate.mcsim.mcsim">[docs]</a><span class="k">def</span> <span class="nf">mcsim</span><span class="p">(</span><span class="n">detector_distance</span><span class="o">=</span><span class="mi">100</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">pixel_size</span><span class="o">=</span><span class="mi">110</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="n">n_pixels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> \
-          <span class="n">beam_diameter</span><span class="o">=</span><span class="mi">10</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="n">photon_energy</span><span class="o">=</span><span class="mf">12.0</span><span class="p">,</span> <span class="n">n_photons</span><span class="o">=</span><span class="mi">1</span><span class="n">e8</span><span class="p">,</span> <span class="n">transmission</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> \
-          <span class="n">mosaicity_fwhm</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">beam_divergence_fwhm</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="n">beam_spatial_profile</span><span class="o">=</span><span class="s1">&#39;tophat&#39;</span><span class="p">,</span> \
-          <span class="n">photon_energy_fwhm</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">crystal_size</span><span class="o">=</span><span class="mi">10</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="n">crystal_size_fwhm</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> \
-          <span class="n">mosaic_domain_size</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="n">mosaic_domain_size_fwhm</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> \
-          <span class="n">water_radius</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">298.16</span><span class="p">,</span> \
-          <span class="n">n_monte_carlo_iterations</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">num_patterns</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">random_rotation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> \
-          <span class="n">approximate_shape_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cromer_mann</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">expand_symm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> \
-          <span class="n">fix_rot_seq</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overlay_wigner_cells</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mask_direct_beam</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> \
-          <span class="n">pdb_file</span><span class="o">=</span><span class="s1">&#39;../../examples/data/pdb/2LYZ-P1.pdb&#39;</span><span class="p">,</span> \
-          <span class="n">write_hdf5</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">write_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">write_crystal_sizes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> \
-          <span class="n">write_ideal_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">results_dir</span><span class="o">=</span><span class="s1">&#39;/data/temp/&#39;</span><span class="p">,</span> \
-          <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cl_double_precision</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="mcsim"><a class="viewcode-back" href="../../../bornagain.simulate.mcsim.html#bornagain.simulate.mcsim.mcsim">[docs]</a><span class="k">def</span> <span class="nf">mcsim</span><span class="p">(</span>
+        <span class="n">detector_distance</span><span class="o">=</span><span class="mi">100</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">pixel_size</span><span class="o">=</span><span class="mi">110</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span>
+        <span class="n">n_pixels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">beam_diameter</span><span class="o">=</span><span class="mi">10</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span>
+        <span class="n">photon_energy</span><span class="o">=</span><span class="mf">12.0</span><span class="p">,</span>
+        <span class="n">n_photons</span><span class="o">=</span><span class="mi">1</span><span class="n">e8</span><span class="p">,</span>
+        <span class="n">transmission</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">mosaicity_fwhm</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">beam_divergence_fwhm</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">beam_spatial_profile</span><span class="o">=</span><span class="s1">&#39;tophat&#39;</span><span class="p">,</span>
+        <span class="n">photon_energy_fwhm</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">crystal_size</span><span class="o">=</span><span class="mi">10</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span>
+        <span class="n">crystal_size_fwhm</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">mosaic_domain_size</span><span class="o">=</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span>
+        <span class="n">mosaic_domain_size_fwhm</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">water_radius</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="mf">298.16</span><span class="p">,</span>
+        <span class="n">n_monte_carlo_iterations</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">num_patterns</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">random_rotation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">approximate_shape_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">cromer_mann</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">expand_symm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">fix_rot_seq</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">overlay_wigner_cells</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">mask_direct_beam</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">pdb_file</span><span class="o">=</span><span class="s1">&#39;../../examples/data/pdb/2LYZ-P1.pdb&#39;</span><span class="p">,</span>
+        <span class="n">write_hdf5</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_crystal_sizes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_ideal_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">results_dir</span><span class="o">=</span><span class="s1">&#39;/data/temp/&#39;</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">compression</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cl_double_precision</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    TODO: Write docstring.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-        
+
     <span class="c1"># Beam parameters</span>
-    <span class="n">photon_energy</span>                   <span class="o">=</span> <span class="n">photon_energy</span> <span class="o">/</span> <span class="n">keV</span>
-    <span class="n">wavelength</span>                      <span class="o">=</span> <span class="n">hc</span> <span class="o">/</span> <span class="n">photon_energy</span> <span class="c1"># pulse_energy = 0.0024</span>
-    <span class="n">wavelength_fwhm</span>                 <span class="o">=</span> <span class="n">wavelength</span> <span class="o">*</span> <span class="n">photon_energy_fwhm</span>
-    <span class="n">n_photons</span>                       <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_photons</span><span class="p">)</span> <span class="c1"># pulse_energy / photon energy </span>
-    <span class="n">I0</span>                              <span class="o">=</span> <span class="n">transmission</span> <span class="o">*</span> <span class="n">n_photons</span> <span class="o">/</span> <span class="p">(</span><span class="n">beam_diameter</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="c1"># Square beam</span>
+    <span class="n">photon_energy</span> <span class="o">=</span> <span class="n">photon_energy</span> <span class="o">/</span> <span class="n">keV</span>
+    <span class="n">wavelength</span> <span class="o">=</span> <span class="n">hc</span> <span class="o">/</span> <span class="n">photon_energy</span>  <span class="c1"># pulse_energy = 0.0024</span>
+    <span class="n">wavelength_fwhm</span> <span class="o">=</span> <span class="n">wavelength</span> <span class="o">*</span> <span class="n">photon_energy_fwhm</span>
+    <span class="n">n_photons</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_photons</span><span class="p">)</span>  <span class="c1"># pulse_energy / photon energy</span>
+    <span class="n">I0</span> <span class="o">=</span> <span class="n">transmission</span> <span class="o">*</span> <span class="n">n_photons</span> <span class="o">/</span> <span class="p">(</span><span class="n">beam_diameter</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Square beam</span>
 
     <span class="c1"># Crystal parameters</span>
-    <span class="n">crystal_size_fwhm</span>               <span class="o">=</span> <span class="n">crystal_size</span> <span class="o">*</span> <span class="n">crystal_size_fwhm</span>
-    <span class="n">mosaic_domain_size_fwhm</span>         <span class="o">=</span> <span class="n">mosaic_domain_size</span> <span class="o">*</span> <span class="n">mosaic_domain_size_fwhm</span>
+    <span class="n">crystal_size_fwhm</span> <span class="o">=</span> <span class="n">crystal_size</span> <span class="o">*</span> <span class="n">crystal_size_fwhm</span>
+    <span class="n">mosaic_domain_size_fwhm</span> <span class="o">=</span> <span class="n">mosaic_domain_size</span> <span class="o">*</span> <span class="n">mosaic_domain_size_fwhm</span>
 
     <span class="c1"># Rotation parameters</span>
-    <span class="n">rotation_axis</span>                   <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="n">rotation_angle</span>                  <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">rotation_axis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">rotation_angle</span> <span class="o">=</span> <span class="mf">0.1</span>
 
     <span class="c1"># Misc. parameters</span>
-    <span class="n">n_pixels</span>                        <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_pixels</span><span class="p">)</span>
-    <span class="n">n_monte_carlo_iterations</span>        <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_monte_carlo_iterations</span><span class="p">)</span>
-    <span class="n">num_patterns</span>                    <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_patterns</span><span class="p">)</span>
+    <span class="n">n_pixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_pixels</span><span class="p">)</span>
+    <span class="n">n_monte_carlo_iterations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_monte_carlo_iterations</span><span class="p">)</span>
+    <span class="n">num_patterns</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_patterns</span><span class="p">)</span>
 
     <span class="c1"># Handle argument errors before computing</span>
-    <span class="k">if</span> <span class="n">temperature</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">mosaicity_fwhm</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">photon_energy_fwhm</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">or</span> \
-        <span class="n">beam_divergence_fwhm</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">crystal_size_fwhm</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">or</span> \
-        <span class="n">mosaic_domain_size_fwhm</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">water_radius</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">temperature</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">mosaicity_fwhm</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">photon_energy_fwhm</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
+            <span class="n">beam_divergence_fwhm</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">crystal_size_fwhm</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> \
+            <span class="n">mosaic_domain_size_fwhm</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">water_radius</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: one or more of you parameters is an invalid negative value&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">n_monte_carlo_iterations</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: iterations must be an integer larger than zero&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">beam_diameter</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">beam_diameter</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: beam diameter must be greater than zero&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">detector_distance</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">detector_distance</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: detector distance must be greater than zero&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">pixel_size</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">pixel_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: pixel_size must be greater than zero&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">n_pixels</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">n_pixels</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: n_pixels must be greater than zero&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">mosaic_domain_size</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">mosaic_domain_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: mosaic_domain_size must be greater than zero&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">crystal_size</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">crystal_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: crystal size must be greater than zero&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">photon_energy</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">photon_energy</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: photon_energy must be greater than zero&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">num_patterns</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: num_patterns must be greater than zero&#39;</span><span class="p">)</span> 
+    <span class="k">if</span> <span class="n">num_patterns</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: num_patterns must be greater than zero&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">n_photons</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">n_photons</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: n_photons must be greater than zero&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">transmission</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">transmission</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
@@ -251,29 +275,94 @@
 
     <span class="k">if</span> <span class="n">beam_spatial_profile</span> <span class="o">!=</span> <span class="s1">&#39;tophat&#39;</span> <span class="ow">and</span> <span class="n">beam_spatial_profile</span> <span class="o">!=</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: beam_spatial_profile must be either gaussian or tophat&#39;</span><span class="p">)</span>
-    
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pdb_file</span><span class="p">):</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: pdb file does not exist&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">compression</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">compression</span> <span class="o">==</span> <span class="s1">&#39;lzf&#39;</span> <span class="ow">or</span> <span class="n">compression</span> <span class="o">==</span> <span class="s1">&#39;gzip&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">compression</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">compression</span> <span class="o">==</span>
+            <span class="s1">&#39;lzf&#39;</span> <span class="ow">or</span> <span class="n">compression</span> <span class="o">==</span> <span class="s1">&#39;gzip&#39;</span><span class="p">):</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;ERROR: compression format must be either lzf or gzip&#39;</span><span class="p">)</span>
 
     <span class="c1"># Creating text file with output parameters</span>
-    <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">detector_distance</span><span class="p">,</span> <span class="n">pixel_size</span><span class="p">,</span> <span class="n">n_pixels</span><span class="p">,</span> <span class="n">beam_diameter</span><span class="p">,</span> <span class="n">photon_energy</span> <span class="o">*</span> <span class="n">keV</span><span class="p">,</span> <span class="n">n_photons</span><span class="p">,</span> <span class="n">transmission</span><span class="p">,</span> <span class="n">mosaicity_fwhm</span><span class="p">,</span>
-              <span class="n">beam_divergence_fwhm</span><span class="p">,</span> <span class="n">beam_spatial_profile</span><span class="p">,</span> <span class="n">photon_energy_fwhm</span><span class="p">,</span> <span class="n">crystal_size</span><span class="p">,</span> <span class="n">crystal_size_fwhm</span> <span class="o">/</span> <span class="n">crystal_size</span><span class="p">,</span> <span class="n">mosaic_domain_size</span><span class="p">,</span>
-              <span class="n">mosaic_domain_size_fwhm</span> <span class="o">/</span> <span class="n">mosaic_domain_size</span><span class="p">,</span> <span class="n">water_radius</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">n_monte_carlo_iterations</span><span class="p">,</span> <span class="n">num_patterns</span><span class="p">,</span> <span class="n">random_rotation</span><span class="p">,</span> 
-              <span class="n">approximate_shape_transform</span><span class="p">,</span> <span class="n">cromer_mann</span><span class="p">,</span> <span class="n">expand_symm</span><span class="p">,</span> <span class="n">fix_rot_seq</span><span class="p">,</span> <span class="n">overlay_wigner_cells</span><span class="p">,</span> <span class="n">mask_direct_beam</span><span class="p">,</span>
-              <span class="n">pdb_file</span><span class="p">,</span> <span class="n">write_hdf5</span><span class="p">,</span> <span class="n">write_geom</span><span class="p">,</span> <span class="n">write_crystal_sizes</span><span class="p">,</span> <span class="n">write_ideal_only</span><span class="p">,</span> <span class="n">results_dir</span><span class="p">,</span> <span class="n">quiet</span><span class="p">,</span> <span class="n">compression</span><span class="p">,</span> <span class="n">cl_double_precision</span><span class="p">]</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">detector_distance</span><span class="p">,</span>
+        <span class="n">pixel_size</span><span class="p">,</span>
+        <span class="n">n_pixels</span><span class="p">,</span>
+        <span class="n">beam_diameter</span><span class="p">,</span>
+        <span class="n">photon_energy</span> <span class="o">*</span>
+        <span class="n">keV</span><span class="p">,</span>
+        <span class="n">n_photons</span><span class="p">,</span>
+        <span class="n">transmission</span><span class="p">,</span>
+        <span class="n">mosaicity_fwhm</span><span class="p">,</span>
+        <span class="n">beam_divergence_fwhm</span><span class="p">,</span>
+        <span class="n">beam_spatial_profile</span><span class="p">,</span>
+        <span class="n">photon_energy_fwhm</span><span class="p">,</span>
+        <span class="n">crystal_size</span><span class="p">,</span>
+        <span class="n">crystal_size_fwhm</span> <span class="o">/</span>
+        <span class="n">crystal_size</span><span class="p">,</span>
+        <span class="n">mosaic_domain_size</span><span class="p">,</span>
+        <span class="n">mosaic_domain_size_fwhm</span> <span class="o">/</span>
+        <span class="n">mosaic_domain_size</span><span class="p">,</span>
+        <span class="n">water_radius</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="p">,</span>
+        <span class="n">n_monte_carlo_iterations</span><span class="p">,</span>
+        <span class="n">num_patterns</span><span class="p">,</span>
+        <span class="n">random_rotation</span><span class="p">,</span>
+        <span class="n">approximate_shape_transform</span><span class="p">,</span>
+        <span class="n">cromer_mann</span><span class="p">,</span>
+        <span class="n">expand_symm</span><span class="p">,</span>
+        <span class="n">fix_rot_seq</span><span class="p">,</span>
+        <span class="n">overlay_wigner_cells</span><span class="p">,</span>
+        <span class="n">mask_direct_beam</span><span class="p">,</span>
+        <span class="n">pdb_file</span><span class="p">,</span>
+        <span class="n">write_hdf5</span><span class="p">,</span>
+        <span class="n">write_geom</span><span class="p">,</span>
+        <span class="n">write_crystal_sizes</span><span class="p">,</span>
+        <span class="n">write_ideal_only</span><span class="p">,</span>
+        <span class="n">results_dir</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="p">,</span>
+        <span class="n">compression</span><span class="p">,</span>
+        <span class="n">cl_double_precision</span><span class="p">]</span>
 
-    <span class="n">names</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;detector_distance&#39;</span><span class="p">,</span> <span class="s1">&#39;pixel_size&#39;</span><span class="p">,</span> <span class="s1">&#39;n_pixels&#39;</span><span class="p">,</span> <span class="s1">&#39;beam_diameter&#39;</span><span class="p">,</span> <span class="s1">&#39;photon_energy&#39;</span><span class="p">,</span> <span class="s1">&#39;n_photons&#39;</span><span class="p">,</span> <span class="s1">&#39;transmission&#39;</span><span class="p">,</span>
-              <span class="s1">&#39;mosaicity_fwhm&#39;</span><span class="p">,</span> <span class="s1">&#39;beam_divergence_fwhm&#39;</span><span class="p">,</span> <span class="s1">&#39;beam_spatial_profile&#39;</span><span class="p">,</span> <span class="s1">&#39;photon_energy_fwhm&#39;</span><span class="p">,</span> <span class="s1">&#39;crystal_size&#39;</span><span class="p">,</span> <span class="s1">&#39;crystal_size_fwhm&#39;</span><span class="p">,</span>
-              <span class="s1">&#39;mosaic_domain_size&#39;</span><span class="p">,</span> <span class="s1">&#39;mosaic_domain_size_fwhm&#39;</span><span class="p">,</span> <span class="s1">&#39;water_radius&#39;</span><span class="p">,</span> <span class="s1">&#39;temperature&#39;</span><span class="p">,</span> <span class="s1">&#39;n_monte_carlo_iterations&#39;</span><span class="p">,</span> <span class="s1">&#39;num_patterns&#39;</span><span class="p">,</span>
-              <span class="s1">&#39;random_rotation&#39;</span><span class="p">,</span> <span class="s1">&#39;approximate_shape_transform&#39;</span><span class="p">,</span> <span class="s1">&#39;cromer_mann&#39;</span><span class="p">,</span> <span class="s1">&#39;expand_symm&#39;</span><span class="p">,</span> <span class="s1">&#39;fix_rot_sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;overlay_wigner_cells&#39;</span><span class="p">,</span> <span class="s1">&#39;mask_direct_beam&#39;</span><span class="p">,</span>
-              <span class="s1">&#39;pdb_file&#39;</span><span class="p">,</span> <span class="s1">&#39;write_hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;write_geom&#39;</span><span class="p">,</span> <span class="s1">&#39;write_crystal_sizes&#39;</span><span class="p">,</span> <span class="s1">&#39;write_ideal_only&#39;</span><span class="p">,</span> <span class="s1">&#39;results_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;quiet&#39;</span><span class="p">,</span> <span class="s1">&#39;compression&#39;</span><span class="p">,</span> <span class="s1">&#39;cl_double_precision&#39;</span><span class="p">]</span>
-
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;detector_distance&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;pixel_size&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;n_pixels&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;beam_diameter&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;photon_energy&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;n_photons&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;transmission&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mosaicity_fwhm&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;beam_divergence_fwhm&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;beam_spatial_profile&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;photon_energy_fwhm&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;crystal_size&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;crystal_size_fwhm&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mosaic_domain_size&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mosaic_domain_size_fwhm&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;water_radius&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;temperature&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;n_monte_carlo_iterations&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;num_patterns&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;random_rotation&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;approximate_shape_transform&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;cromer_mann&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;expand_symm&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;fix_rot_sequence&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;overlay_wigner_cells&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mask_direct_beam&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;pdb_file&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;write_hdf5&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;write_geom&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;write_crystal_sizes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;write_ideal_only&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;results_dir&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;quiet&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;compression&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;cl_double_precision&#39;</span><span class="p">]</span>
 
     <span class="n">pseudo_dict</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
-    <span class="n">dictionary</span>  <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pseudo_dict</span><span class="p">)</span>
+    <span class="n">dictionary</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pseudo_dict</span><span class="p">)</span>
     <span class="n">file_name</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s1">&#39;used_params.txt&#39;</span>
     <span class="n">used_params</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file_name</span><span class="p">),</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span>
 
@@ -288,7 +377,8 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
         <span class="n">write</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">write</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+        <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">x</span>
 
     <span class="n">section</span> <span class="o">=</span> <span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">70</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
@@ -300,10 +390,13 @@
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Photon energy: </span><span class="si">%g</span><span class="s1"> keV</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">photon_energy</span> <span class="o">*</span> <span class="n">keV</span><span class="p">))</span>
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Beam divergence: </span><span class="si">%g</span><span class="s1"> mrad FWHM</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">beam_divergence_fwhm</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e3</span><span class="p">))</span>
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Beam diameter: </span><span class="si">%g</span><span class="s1"> microns tophat</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">beam_diameter</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e6</span><span class="p">))</span>
-    <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Spectral width: </span><span class="si">%g%%</span><span class="s1"> FWHM dlambda/lambda</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">wavelength_fwhm</span> <span class="o">/</span> <span class="n">wavelength</span><span class="p">))</span>
+    <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Spectral width: </span><span class="si">%g%%</span><span class="s1"> FWHM dlambda/lambda</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span>
+          <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">wavelength_fwhm</span> <span class="o">/</span> <span class="n">wavelength</span><span class="p">))</span>
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Crystal size: </span><span class="si">%g</span><span class="s1"> microns</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crystal_size</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e6</span><span class="p">))</span>
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Crystal mosaicity: </span><span class="si">%g</span><span class="s1"> radian FWHM</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mosaicity_fwhm</span><span class="p">))</span>
-    <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Crystal mosaic domain size: </span><span class="si">%g</span><span class="s1"> microns</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mosaic_domain_size</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e6</span><span class="p">))</span>
+    <span class="n">write</span><span class="p">(</span>
+        <span class="s1">&#39;Crystal mosaic domain size: </span><span class="si">%g</span><span class="s1"> microns</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span>
+        <span class="p">(</span><span class="n">mosaic_domain_size</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e6</span><span class="p">))</span>
     <span class="n">write</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
 
     <span class="c1"># Things we probably don&#39;t want to think about</span>
@@ -311,24 +404,32 @@
 
     <span class="c1"># Setup simulation engine</span>
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Setting up simulation engine... &#39;</span><span class="p">)</span>
-    <span class="n">clcore</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">ClCore</span><span class="p">(</span><span class="n">group_size</span><span class="o">=</span><span class="n">cl_group_size</span><span class="p">,</span> <span class="n">double_precision</span><span class="o">=</span><span class="n">cl_double_precision</span><span class="p">)</span>
+    <span class="n">clcore</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">ClCore</span><span class="p">(</span>
+        <span class="n">group_size</span><span class="o">=</span><span class="n">cl_group_size</span><span class="p">,</span>
+        <span class="n">double_precision</span><span class="o">=</span><span class="n">cl_double_precision</span><span class="p">)</span>
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;done</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Will run </span><span class="si">%d</span><span class="s1"> Monte Carlo iterations</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n_monte_carlo_iterations</span><span class="p">))</span>
 
     <span class="c1"># Setup source info</span>
-    <span class="n">beam_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">polarization_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">polarization_weight</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1"># Fraction of polarization in this vector</span>
+    <span class="n">beam_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">polarization_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">polarization_weight</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># Fraction of polarization in this vector</span>
 
     <span class="c1"># Setup detector geometry</span>
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Configuring detector... &#39;</span><span class="p">)</span>
     <span class="n">pad</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">PADGeometry</span><span class="p">()</span>
-    <span class="n">pad</span><span class="o">.</span><span class="n">simple_setup</span><span class="p">(</span><span class="n">n_pixels</span><span class="o">=</span><span class="n">n_pixels</span><span class="p">,</span> <span class="n">pixel_size</span><span class="o">=</span><span class="n">pixel_size</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">detector_distance</span><span class="p">)</span>
+    <span class="n">pad</span><span class="o">.</span><span class="n">simple_setup</span><span class="p">(</span>
+        <span class="n">n_pixels</span><span class="o">=</span><span class="n">n_pixels</span><span class="p">,</span>
+        <span class="n">pixel_size</span><span class="o">=</span><span class="n">pixel_size</span><span class="p">,</span>
+        <span class="n">distance</span><span class="o">=</span><span class="n">detector_distance</span><span class="p">)</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">q_vecs</span><span class="p">(</span><span class="n">beam_vec</span><span class="o">=</span><span class="n">beam_vec</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">)</span>
     <span class="n">qmag</span> <span class="o">=</span> <span class="n">vec_mag</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
     <span class="n">sa</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">solid_angles</span><span class="p">()</span>
-    <span class="n">P</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">polarization_factors</span><span class="p">(</span><span class="n">polarization_vec</span><span class="o">=</span><span class="n">polarization_vec</span><span class="p">,</span><span class="n">beam_vec</span><span class="o">=</span><span class="n">beam_vec</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="n">polarization_weight</span><span class="p">)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">polarization_factors</span><span class="p">(</span>
+        <span class="n">polarization_vec</span><span class="o">=</span><span class="n">polarization_vec</span><span class="p">,</span>
+        <span class="n">beam_vec</span><span class="o">=</span><span class="n">beam_vec</span><span class="p">,</span>
+        <span class="n">weight</span><span class="o">=</span><span class="n">polarization_weight</span><span class="p">)</span>
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;done</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># Get atomic coordinates and scattering factors from pdb file</span>
@@ -337,7 +438,7 @@
         <span class="n">cryst</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span><span class="n">pdb_file</span><span class="p">)</span>
         <span class="n">monomers</span> <span class="o">=</span> <span class="n">cryst</span><span class="o">.</span><span class="n">get_monomers</span><span class="p">()</span>
         <span class="n">all_atoms</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">Atoms</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">monomers</span><span class="p">)</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">all_atoms</span><span class="o">.</span><span class="n">xyz</span><span class="o">*</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">10</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">all_atoms</span><span class="o">.</span><span class="n">xyz</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">10</span>
         <span class="n">Z</span> <span class="o">=</span> <span class="n">all_atoms</span><span class="o">.</span><span class="n">Z</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">cryst</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">structure</span><span class="p">(</span><span class="n">pdb_file</span><span class="p">)</span>
@@ -349,16 +450,21 @@
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> atoms per unit cell</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)))</span>
 
     <span class="c1"># Determine number of unit cells in whole crystal and mosaic domains</span>
-    <span class="n">n_cells_whole_crystal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">crystal_size</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
-    <span class="n">n_cells_mosaic_domain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">mosaic_domain_size</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
+    <span class="n">n_cells_whole_crystal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span>
+        <span class="n">crystal_size</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
+    <span class="n">n_cells_mosaic_domain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span>
+        <span class="n">mosaic_domain_size</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
     <span class="k">if</span><span class="p">(</span><span class="n">crystal_size</span> <span class="o">&gt;</span> <span class="n">beam_diameter</span><span class="p">):</span>
-        <span class="n">n_cells_whole_crystal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">beam_diameter</span><span class="p">,</span> <span class="n">beam_diameter</span><span class="p">,</span> <span class="n">crystal_size</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
+        <span class="n">n_cells_whole_crystal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">beam_diameter</span><span class="p">,</span> <span class="n">beam_diameter</span><span class="p">,</span> <span class="n">crystal_size</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
     <span class="k">if</span><span class="p">(</span><span class="n">mosaic_domain_size</span> <span class="o">&gt;</span> <span class="n">beam_diameter</span><span class="p">):</span>
-        <span class="n">n_cells_mosaic_domain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">beam_diameter</span><span class="p">,</span> <span class="n">beam_diameter</span><span class="p">,</span> <span class="n">mosaic_domain_size</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
+        <span class="n">n_cells_mosaic_domain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">beam_diameter</span><span class="p">,</span> <span class="n">beam_diameter</span><span class="p">,</span> <span class="n">mosaic_domain_size</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
 
     <span class="c1"># Make a mask for the direct beam</span>
     <span class="n">direct_beam_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span> <span class="o">*</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">)))</span>
-    <span class="n">direct_beam_mask</span><span class="p">[</span><span class="n">qmag</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">])))]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">direct_beam_mask</span><span class="p">[</span><span class="n">qmag</span> <span class="o">&lt;</span> <span class="p">(</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">])))]</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1"># Setup function for shape transform calculations</span>
     <span class="k">if</span> <span class="n">approximate_shape_transform</span><span class="p">:</span>
@@ -390,57 +496,75 @@
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Allocating GPU device memory... &#39;</span><span class="p">)</span>
     <span class="n">r_dev</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">clcore</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
     <span class="n">f_dev</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">clcore</span><span class="o">.</span><span class="n">complex_t</span><span class="p">)</span>
-    <span class="n">F_dev</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span> <span class="o">*</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">clcore</span><span class="o">.</span><span class="n">complex_t</span><span class="p">))</span>
-    <span class="n">S2_dev</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">clcore</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+    <span class="n">F_dev</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span> <span class="o">*</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">clcore</span><span class="o">.</span><span class="n">complex_t</span><span class="p">))</span>
+    <span class="n">S2_dev</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">clcore</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;done</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">crystal_size_original</span> <span class="o">=</span> <span class="n">crystal_size</span>
     <span class="n">mosaic_domain_size_original</span> <span class="o">=</span> <span class="n">mosaic_domain_size</span>
 
     <span class="c1"># Write text file containing crystal and mosaic domain sizes</span>
-    <span class="k">if</span> <span class="n">write_crystal_sizes</span><span class="p">:</span> 
-        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">results_dir</span><span class="p">,</span> <span class="s1">&#39;crystal_sizes&#39;</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">write_crystal_sizes</span><span class="p">:</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="s1">&#39;crystal_sizes&#39;</span><span class="p">)</span>
         <span class="n">cryst_size_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span>
-        <span class="n">cryst_size_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Crystal size (meters) : Mosaic domain size (meters) : Pattern file</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cryst_size_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;Crystal size (meters) : Mosaic domain size (meters) : Pattern file</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">num_patterns</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
         <span class="k">if</span><span class="p">(</span><span class="n">mosaic_domain_size_fwhm</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">mosaic_domain_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mosaic_domain_size_original</span><span class="p">,</span> <span class="n">mosaic_domain_size_fwhm</span> <span class="o">/</span> <span class="mf">2.354820045</span><span class="p">)</span>
+            <span class="n">mosaic_domain_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span>
+                <span class="n">mosaic_domain_size_original</span><span class="p">,</span>
+                <span class="n">mosaic_domain_size_fwhm</span> <span class="o">/</span> <span class="mf">2.354820045</span><span class="p">)</span>
         <span class="k">if</span><span class="p">(</span><span class="n">crystal_size_fwhm</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">crystal_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">crystal_size_original</span><span class="p">,</span> <span class="n">crystal_size_fwhm</span> <span class="o">/</span> <span class="mf">2.354820045</span><span class="p">)</span>
+            <span class="n">crystal_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span>
+                <span class="n">crystal_size_original</span><span class="p">,</span> <span class="n">crystal_size_fwhm</span> <span class="o">/</span> <span class="mf">2.354820045</span><span class="p">)</span>
 
-            <span class="c1"># Doesn&#39;t make sense if mosaic domain size is larger than the whole crystal...</span>
-            <span class="k">if</span> <span class="n">mosaic_domain_size</span> <span class="o">&gt;</span> <span class="n">crystal_size</span><span class="p">:</span> <span class="n">mosaic_domain_size</span> <span class="o">=</span> <span class="n">crystal_size</span>
+            <span class="c1"># Doesn&#39;t make sense if mosaic domain size is larger than the whole</span>
+            <span class="c1"># crystal...</span>
+            <span class="k">if</span> <span class="n">mosaic_domain_size</span> <span class="o">&gt;</span> <span class="n">crystal_size</span><span class="p">:</span>
+                <span class="n">mosaic_domain_size</span> <span class="o">=</span> <span class="n">crystal_size</span>
 
-            <span class="c1"># Determine number of unit cells in whole crystal and mosaic domains</span>
-            <span class="n">n_cells_whole_crystal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">crystal_size</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
-            <span class="n">n_cells_mosaic_domain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">mosaic_domain_size</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
+            <span class="c1"># Determine number of unit cells in whole crystal and mosaic</span>
+            <span class="c1"># domains</span>
+            <span class="n">n_cells_whole_crystal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span>
+                <span class="n">crystal_size</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
+            <span class="n">n_cells_mosaic_domain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span>
+                <span class="n">mosaic_domain_size</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
             <span class="k">if</span><span class="p">(</span><span class="n">crystal_size</span> <span class="o">&gt;</span> <span class="n">beam_diameter</span><span class="p">):</span>
-                <span class="n">n_cells_whole_crystal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">beam_diameter</span><span class="p">,</span> <span class="n">beam_diameter</span><span class="p">,</span> <span class="n">crystal_size</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
+                <span class="n">n_cells_whole_crystal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">beam_diameter</span><span class="p">,</span> <span class="n">beam_diameter</span><span class="p">,</span> <span class="n">crystal_size</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
             <span class="k">if</span><span class="p">(</span><span class="n">mosaic_domain_size</span> <span class="o">&gt;</span> <span class="n">beam_diameter</span><span class="p">):</span>
-                <span class="n">n_cells_mosaic_domain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">beam_diameter</span><span class="p">,</span> <span class="n">beam_diameter</span><span class="p">,</span> <span class="n">mosaic_domain_size</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
+                <span class="n">n_cells_mosaic_domain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">beam_diameter</span><span class="p">,</span> <span class="n">beam_diameter</span><span class="p">,</span> <span class="n">mosaic_domain_size</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">]))</span>
 
         <span class="c1"># In case mosaic domain varied to be larger than fixed size crystal</span>
         <span class="k">if</span> <span class="n">mosaic_domain_size</span> <span class="o">&gt;</span> <span class="n">crystal_size</span><span class="p">:</span>
             <span class="n">mosaic_domain_size</span> <span class="o">=</span> <span class="n">crystal_size</span>
 
         <span class="c1"># Do water scattering</span>
-        <span class="k">if</span> <span class="n">water_radius</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">water_radius</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Simulating water scattering... &#39;</span><span class="p">)</span>
             <span class="n">water_number_density</span> <span class="o">=</span> <span class="mf">33.3679e27</span>
-            <span class="n">illuminated_water_volume</span> <span class="o">=</span> <span class="n">simutils</span><span class="o">.</span><span class="n">volume_solvent</span><span class="p">(</span><span class="n">beam_diameter</span><span class="p">,</span> <span class="n">crystal_size</span><span class="p">,</span> <span class="n">water_radius</span><span class="p">)</span>
+            <span class="n">illuminated_water_volume</span> <span class="o">=</span> <span class="n">simutils</span><span class="o">.</span><span class="n">volume_solvent</span><span class="p">(</span>
+                <span class="n">beam_diameter</span><span class="p">,</span> <span class="n">crystal_size</span><span class="p">,</span> <span class="n">water_radius</span><span class="p">)</span>
             <span class="n">n_water_molecules</span> <span class="o">=</span> <span class="n">illuminated_water_volume</span> <span class="o">*</span> <span class="n">water_number_density</span>
-            <span class="n">F_water</span> <span class="o">=</span> <span class="n">solutions</span><span class="o">.</span><span class="n">get_water_profile</span><span class="p">(</span><span class="n">qmag</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">)</span> <span class="c1"># Get water scattering intensity radial profile</span>
+            <span class="c1"># Get water scattering intensity radial profile</span>
+            <span class="n">F_water</span> <span class="o">=</span> <span class="n">solutions</span><span class="o">.</span><span class="n">get_water_profile</span><span class="p">(</span>
+                <span class="n">qmag</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">)</span>
             <span class="n">F2_water</span> <span class="o">=</span> <span class="n">F_water</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_water_molecules</span>
             <span class="n">I_water</span> <span class="o">=</span> <span class="n">I0</span> <span class="o">*</span> <span class="n">r_e</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">P</span> <span class="o">*</span> <span class="n">sa</span> <span class="o">*</span> <span class="n">F2_water</span>
             <span class="k">if</span><span class="p">(</span><span class="n">illuminated_water_volume</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning: No solvent was illuminated, water scattering not performed.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">write</span><span class="p">(</span>
+                    <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning: No solvent was illuminated, water scattering not performed.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="n">I_water</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">write</span><span class="p">(</span><span class="s1">&#39;done</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">R</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">rotation_about_axis</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">,</span> <span class="n">rotation_axis</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">random_rotation</span><span class="p">:</span> <span class="n">R</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">random_rotation</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">random_rotation</span><span class="p">:</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">random_rotation</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">random_rotation</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fix_rot_seq</span><span class="p">:</span>
@@ -449,8 +573,19 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cromer_mann</span><span class="p">:</span>
             <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Simulating molecular transform from Henke tables... &#39;</span><span class="p">)</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-            <span class="n">clcore</span><span class="o">.</span><span class="n">phase_factor_pad</span><span class="p">(</span><span class="n">r_dev</span><span class="p">,</span> <span class="n">f_dev</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">t_vec</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">,</span>
-                <span class="n">pad</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">,</span> <span class="n">beam_vec</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">F_dev</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">clcore</span><span class="o">.</span><span class="n">phase_factor_pad</span><span class="p">(</span>
+                <span class="n">r_dev</span><span class="p">,</span>
+                <span class="n">f_dev</span><span class="p">,</span>
+                <span class="n">pad</span><span class="o">.</span><span class="n">t_vec</span><span class="p">,</span>
+                <span class="n">pad</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">,</span>
+                <span class="n">pad</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">,</span>
+                <span class="n">beam_vec</span><span class="p">,</span>
+                <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">,</span>
+                <span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span>
+                <span class="n">wavelength</span><span class="p">,</span>
+                <span class="n">R</span><span class="p">,</span>
+                <span class="n">F_dev</span><span class="p">,</span>
+                <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">F2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">F_dev</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="o">**</span> <span class="mi">2</span>
             <span class="n">tf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span>
             <span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%g</span><span class="s1"> s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tf</span><span class="p">))</span>
@@ -458,7 +593,6 @@
             <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Simulating molecular transform with cromer mann... &#39;</span><span class="p">)</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
             <span class="n">clcore</span><span class="o">.</span><span class="n">prime_cromermann_simulator</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">Z</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-            <span class="c1">#clcore.prime_cromermann_simulator(q.copy(), cryst.Z.copy())</span>
             <span class="n">q_cm</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">get_q_cromermann</span><span class="p">()</span>
             <span class="n">r_cm</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">get_r_cromermann</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">sub_com</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">clcore</span><span class="o">.</span><span class="n">run_cromermann</span><span class="p">(</span><span class="n">q_cm</span><span class="p">,</span> <span class="n">r_cm</span><span class="p">,</span> <span class="n">rand_rot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="n">R</span><span class="p">)</span>
@@ -477,42 +611,59 @@
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">n_monte_carlo_iterations</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
 
             <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">wavelength_fwhm</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">mosaicity_fwhm</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">beam_divergence_fwhm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">wavelength_fwhm</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">mosaicity_fwhm</span> <span class="o">&gt;</span>
+                    <span class="mi">0</span> <span class="ow">or</span> <span class="n">beam_divergence_fwhm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
                 <span class="n">B</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">random_beam_vector</span><span class="p">(</span><span class="n">beam_divergence_fwhm</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">wavelength_fwhm</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
                     <span class="n">w</span> <span class="o">=</span> <span class="n">wavelength</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">wavelength_fwhm</span> <span class="o">/</span> <span class="mf">2.354820045</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span>
+                        <span class="n">wavelength</span><span class="p">,</span> <span class="n">wavelength_fwhm</span> <span class="o">/</span> <span class="mf">2.354820045</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">Rm</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">random_mosaic_rotation</span><span class="p">(</span><span class="n">mosaicity_fwhm</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
-                <span class="n">T</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">t_vec</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">fs_vec</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">ss_vec</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">t_vec</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">fs_vec</span> <span class="o">*</span> \
+                    <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">ss_vec</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">B</span> <span class="o">=</span> <span class="n">beam_vec</span>
                 <span class="n">w</span> <span class="o">=</span> <span class="n">wavelength</span>
                 <span class="n">Rm</span> <span class="o">=</span> <span class="n">R</span>
                 <span class="n">T</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">t_vec</span>
 
-            <span class="n">shape_transform</span><span class="p">(</span><span class="n">abc</span><span class="p">,</span> <span class="n">n_cells_mosaic_domain</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">Rm</span><span class="p">,</span> <span class="n">S2_dev</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">shape_transform</span><span class="p">(</span>
+                <span class="n">abc</span><span class="p">,</span>
+                <span class="n">n_cells_mosaic_domain</span><span class="p">,</span>
+                <span class="n">T</span><span class="p">,</span>
+                <span class="n">pad</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">,</span>
+                <span class="n">pad</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">,</span>
+                <span class="n">B</span><span class="p">,</span>
+                <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">,</span>
+                <span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span>
+                <span class="n">w</span><span class="p">,</span>
+                <span class="n">Rm</span><span class="p">,</span>
+                <span class="n">S2_dev</span><span class="p">,</span>
+                <span class="n">add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="n">tf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">%</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\b</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%3.0f%%</span><span class="s1"> (</span><span class="si">%5d</span><span class="s1">; </span><span class="si">%7.03f</span><span class="s1"> ms)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">n_monte_carlo_iterations</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">tf</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e3</span><span class="p">)</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%3.0f%%</span><span class="s1"> (</span><span class="si">%5d</span><span class="s1">; </span><span class="si">%7.03f</span><span class="s1"> ms)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">n</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">n_monte_carlo_iterations</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">tf</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e3</span><span class="p">)</span>
                 <span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\b</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
         <span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%g</span><span class="s1"> s                </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">tt</span><span class="p">))</span>
         <span class="c1"># Average the shape transforms over MC iterations</span>
         <span class="n">S2</span> <span class="o">=</span> <span class="n">S2_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">/</span> <span class="n">n</span>
         <span class="c1"># Convert into useful photon units</span>
-        <span class="n">I</span> <span class="o">=</span> <span class="n">I0</span> <span class="o">*</span> <span class="n">r_e</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">F2</span> <span class="o">*</span> <span class="n">S2</span> <span class="o">*</span>  <span class="n">sa</span> <span class="o">*</span> <span class="n">P</span> 
-        <span class="k">if</span><span class="p">(</span><span class="n">crystal_size</span> <span class="o">&lt;</span> <span class="n">beam_diameter</span><span class="p">):</span> <span class="c1"># Correct for lower incident intensity</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">I0</span> <span class="o">*</span> <span class="n">r_e</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">F2</span> <span class="o">*</span> <span class="n">S2</span> <span class="o">*</span> <span class="n">sa</span> <span class="o">*</span> <span class="n">P</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">crystal_size</span> <span class="o">&lt;</span> <span class="n">beam_diameter</span><span class="p">):</span>  <span class="c1"># Correct for lower incident intensity</span>
             <span class="k">if</span><span class="p">(</span><span class="n">beam_spatial_profile</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">):</span>
-                <span class="n">sig</span> <span class="o">=</span> <span class="n">beam_diameter</span> <span class="o">/</span> <span class="mf">3.0</span> <span class="c1"># Let beam_diameter be 3 sigmas</span>
-                <span class="n">I</span> <span class="o">*=</span> <span class="n">erf</span><span class="p">(</span><span class="n">crystal_size</span><span class="o">/</span><span class="p">(</span><span class="n">sig</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+                <span class="n">sig</span> <span class="o">=</span> <span class="n">beam_diameter</span> <span class="o">/</span> <span class="mf">3.0</span>  <span class="c1"># Let beam_diameter be 3 sigmas</span>
+                <span class="n">I</span> <span class="o">*=</span> <span class="n">erf</span><span class="p">(</span><span class="n">crystal_size</span> <span class="o">/</span> <span class="p">(</span><span class="n">sig</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">I</span> <span class="o">*=</span> <span class="p">(</span><span class="n">crystal_size</span><span class="o">/</span><span class="n">beam_diameter</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+                <span class="n">I</span> <span class="o">*=</span> <span class="p">(</span><span class="n">crystal_size</span> <span class="o">/</span> <span class="n">beam_diameter</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
 
         <span class="c1"># Scale up according to mosaic domain</span>
-        <span class="n">n_domains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">n_cells_whole_crystal</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">n_cells_mosaic_domain</span><span class="p">)</span>
+        <span class="n">n_domains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">n_cells_whole_crystal</span><span class="p">)</span> <span class="o">/</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">n_cells_mosaic_domain</span><span class="p">)</span>
         <span class="n">I_ideal</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">*</span> <span class="n">n_domains</span>
 
         <span class="k">if</span><span class="p">(</span><span class="n">water_radius</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
@@ -521,33 +672,49 @@
         <span class="n">I_noisy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">I_ideal</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">write_hdf5</span><span class="p">:</span>
-            <span class="n">n_patterns</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results_dir</span> <span class="p">,</span> <span class="s1">&#39;pattern-*.h5&#39;</span><span class="p">)))</span>
-            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">results_dir</span> <span class="p">,</span> <span class="s1">&#39;pattern-</span><span class="si">%06d</span><span class="s1">.h5&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n_patterns</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">n_patterns</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results_dir</span><span class="p">,</span> <span class="s1">&#39;pattern-*.h5&#39;</span><span class="p">)))</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">results_dir</span><span class="p">,</span> <span class="s1">&#39;pattern-</span><span class="si">%06d</span><span class="s1">.h5&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">n_patterns</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
             <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Writing file </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">file_name</span><span class="p">)</span>
             <span class="n">fid</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-            <span class="n">fid</span><span class="p">[</span><span class="s1">&#39;/data/ideal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_ideal</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span>
-            <span class="n">fid</span><span class="p">[</span><span class="s1">&#39;/data/noisy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_noisy</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span>
+            <span class="n">fid</span><span class="p">[</span><span class="s1">&#39;/data/ideal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_ideal</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span>
+            <span class="n">fid</span><span class="p">[</span><span class="s1">&#39;/data/noisy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_noisy</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span>
             <span class="k">if</span><span class="p">(</span><span class="n">water_radius</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="n">fid</span><span class="p">[</span><span class="s1">&#39;/data/water&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_water</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span>
+                <span class="n">fid</span><span class="p">[</span><span class="s1">&#39;/data/water&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">I_water</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span>
             <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span> <span class="n">file_name</span><span class="p">,</span>  <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
                 <span class="n">sh</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span>
                 <span class="n">fid</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/ideal&quot;</span><span class="p">,</span>
-                    <span class="n">data</span><span class="o">=</span> <span class="n">I_ideal</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sh</span><span class="p">),</span>
-                    <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">sh</span><span class="p">)</span>
+                                   <span class="n">data</span><span class="o">=</span><span class="n">I_ideal</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sh</span><span class="p">),</span>
+                                   <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">sh</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">write_ideal_only</span><span class="p">:</span>
-                    <span class="n">fid</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data/noisy&quot;</span><span class="p">,</span>
-                        <span class="n">data</span><span class="o">=</span> <span class="n">I_noisy</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sh</span><span class="p">),</span>
-                        <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">sh</span><span class="p">)</span>
+                    <span class="n">fid</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
+                        <span class="s2">&quot;data/noisy&quot;</span><span class="p">,</span>
+                        <span class="n">data</span><span class="o">=</span><span class="n">I_noisy</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sh</span><span class="p">),</span>
+                        <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
+                        <span class="n">shape</span><span class="o">=</span><span class="n">sh</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">water_radius</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">fid</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data/water&#39;</span><span class="p">,</span>
-                        <span class="n">data</span><span class="o">=</span><span class="n">I_water</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sh</span><span class="p">),</span>
-                        <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">sh</span><span class="p">)</span>
+                    <span class="n">fid</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
+                        <span class="s1">&#39;data/water&#39;</span><span class="p">,</span>
+                        <span class="n">data</span><span class="o">=</span><span class="n">I_water</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">sh</span><span class="p">),</span>
+                        <span class="n">compression</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
+                        <span class="n">shape</span><span class="o">=</span><span class="n">sh</span><span class="p">)</span>
                 <span class="n">fid</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;rotation_matrix&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">R</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">write_crystal_sizes</span><span class="p">:</span>
-            <span class="n">cryst_size_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%g</span><span class="s1">:</span><span class="si">%g</span><span class="s1">:pattern-</span><span class="si">%06d</span><span class="s1">.h5</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crystal_size</span><span class="p">,</span> <span class="n">mosaic_domain_size</span><span class="p">,</span> <span class="p">(</span><span class="n">n_patterns</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+            <span class="n">cryst_size_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">%g</span><span class="s1">:</span><span class="si">%g</span><span class="s1">:pattern-</span><span class="si">%06d</span><span class="s1">.h5</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">crystal_size</span><span class="p">,</span> <span class="n">mosaic_domain_size</span><span class="p">,</span> <span class="p">(</span><span class="n">n_patterns</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
 
         <span class="c1"># F2mean = np.mean(F2.flat[direct_beam_mask &gt; 0])</span>
         <span class="c1"># Ncells = np.prod(n_cells_whole_crystal)</span>

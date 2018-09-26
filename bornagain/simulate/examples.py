@@ -8,13 +8,15 @@ from bornagain.target.crystal import Structure
 from bornagain.simulate.clcore import ClCore
 
 
-lysozyme_pdb_file = pkg_resources.resource_filename('bornagain.simulate', 'data/pdb/2LYZ.pdb')
-pnccd_geom_file = pkg_resources.resource_filename('bornagain.simulate', 'data/geom/pnccd_front.geom')
-cspad_geom_file = pkg_resources.resource_filename('bornagain.simulate', 'data/geom/cspad.geom')
+lysozyme_pdb_file = pkg_resources.resource_filename(
+    'bornagain.simulate', 'data/pdb/2LYZ.pdb')
+pnccd_geom_file = pkg_resources.resource_filename(
+    'bornagain.simulate', 'data/geom/pnccd_front.geom')
+cspad_geom_file = pkg_resources.resource_filename(
+    'bornagain.simulate', 'data/geom/cspad.geom')
 
 
 def pnccd_pads():
-
     r"""
 
     Generate a list of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances that are inspired by
@@ -28,7 +30,6 @@ def pnccd_pads():
 
 
 def cspad_pads():
-
     r"""
 
     Generate a list of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances that are inspired by
@@ -42,7 +43,6 @@ def cspad_pads():
 
 
 def lysozyme_molecule(pads=None, wavelength=None):
-
     r"""
 
     Simple simulation of lysozyme molecule using :class:`ClCore <bornagain.simulate.clcore.ClCore>`.

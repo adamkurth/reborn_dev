@@ -4,7 +4,8 @@ from bornagain.utils import memoize
 # import matplotlib.pyplot as plt
 
 file_name = pkg_resources.resource_filename('bornagain.simulate',
-                                                  'data/water_scattering_data.txt')
+                                            'data/water_scattering_data.txt')
+
 
 @memoize
 def load_data():
@@ -19,11 +20,10 @@ def load_data():
     errors = d[:, -1]
     intensities = d[:, 1:-1]
 
-    return 1e10*Q, intensities, temperatures
+    return 1e10 * Q, intensities, temperatures
 
 
 def get_water_profile(q, temperature=298):
-
     """
     Get water scattering profile from Greg Hura's PhD thesis data.  Interpolates the data for given
     q-vector magnitudes and temperature.  Temperatures range from 1, 11, 25, 44, 55, 66, 77 degrees
@@ -52,14 +52,14 @@ def get_water_profile(q, temperature=298):
     if i == 0:
         Iavg = I[:, 0]
     elif out_of_range:
-        Iavg = I[:, n-1]
+        Iavg = I[:, n - 1]
     else:
-        Tl = T[i-1]
+        Tl = T[i - 1]
         Tr = T[i]
         DT = Tr - Tl
-        dl = (temperature - Tl)/DT
-        dr = (Tr - temperature)/DT
-        Iavg = dr*I[:, i-1] + dl*I[:, i]
+        dl = (temperature - Tl) / DT
+        dr = (Tr - temperature) / DT
+        Iavg = dr * I[:, i - 1] + dl * I[:, i]
 
     II = np.interp(q, Q, Iavg)
     return II

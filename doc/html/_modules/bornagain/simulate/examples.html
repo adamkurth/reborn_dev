@@ -164,13 +164,15 @@
 <span class="kn">from</span> <span class="nn">bornagain.simulate.clcore</span> <span class="k">import</span> <span class="n">ClCore</span>
 
 
-<span class="n">lysozyme_pdb_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/pdb/2LYZ.pdb&#39;</span><span class="p">)</span>
-<span class="n">pnccd_geom_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/geom/pnccd_front.geom&#39;</span><span class="p">)</span>
-<span class="n">cspad_geom_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/geom/cspad.geom&#39;</span><span class="p">)</span>
+<span class="n">lysozyme_pdb_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
+    <span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/pdb/2LYZ.pdb&#39;</span><span class="p">)</span>
+<span class="n">pnccd_geom_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
+    <span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/geom/pnccd_front.geom&#39;</span><span class="p">)</span>
+<span class="n">cspad_geom_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
+    <span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/geom/cspad.geom&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="pnccd_pads"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.pnccd_pads">[docs]</a><span class="k">def</span> <span class="nf">pnccd_pads</span><span class="p">():</span>
-
     <span class="sd">r&quot;&quot;&quot;</span>
 
 <span class="sd">    Generate a list of :class:`PADGeometry &lt;bornagain.detector.PADGeometry&gt;` instances that are inspired by</span>
@@ -184,7 +186,6 @@
 
 
 <div class="viewcode-block" id="cspad_pads"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.cspad_pads">[docs]</a><span class="k">def</span> <span class="nf">cspad_pads</span><span class="p">():</span>
-
     <span class="sd">r&quot;&quot;&quot;</span>
 
 <span class="sd">    Generate a list of :class:`PADGeometry &lt;bornagain.detector.PADGeometry&gt;` instances that are inspired by</span>
@@ -198,7 +199,6 @@
 
 
 <div class="viewcode-block" id="lysozyme_molecule"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.lysozyme_molecule">[docs]</a><span class="k">def</span> <span class="nf">lysozyme_molecule</span><span class="p">(</span><span class="n">pads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
     <span class="sd">r&quot;&quot;&quot;</span>
 
 <span class="sd">    Simple simulation of lysozyme molecule using :class:`ClCore &lt;bornagain.simulate.clcore.ClCore&gt;`.</span>

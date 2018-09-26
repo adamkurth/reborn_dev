@@ -11,6 +11,9 @@ import numpy as np
 #     from PyQt4.QtGui import QShortcut, QKeySequence, QTransform, QInputDialog, QLineEdit
 
 import pkg_resources
+import bornagain.external.pyqtgraph as bpg
+from bornagain.utils import vec_norm, vec_mag
+import bornagain as ba
 
 import pyqtgraph as pg
 from pyqtgraph.Qt import uic, QtGui, QtCore
@@ -21,11 +24,9 @@ QInputDialog = QtGui.QInputDialog
 QLineEdit = QtGui.QLineEdit
 
 pg.setConfigOptions(imageAxisOrder='row-major')
-import bornagain.external.pyqtgraph as bpg
-from bornagain.utils import vec_norm, vec_mag
-import bornagain as ba
 
-padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
+padviewui = pkg_resources.resource_filename(
+    'bornagain.viewers.qtviews', 'padview.ui')
 
 
 class PADView(object):
@@ -67,24 +68,30 @@ class PADView(object):
         self.setup_pads()
         self.setup_histogram_tool()
         self.main_window.show()
-        self.proxy = pg.SignalProxy(self.viewbox.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved)
+        self.proxy = pg.SignalProxy(
+            self.viewbox.scene().sigMouseMoved,
+            rateLimit=60,
+            slot=self.mouse_moved)
         # self.label = pg.LabelItem(justify='right')
         # self.viewbox.addItem(self.label)
         self.main_window.actionGrid.triggered.connect(self.toggle_grid)
         self.main_window.actionRings.triggered.connect(self.edit_ring_radii)
 
-        self.grid_shortcut = QShortcut(QKeySequence("Ctrl+g"), self.main_window)
+        self.grid_shortcut = QShortcut(
+            QKeySequence("Ctrl+g"), self.main_window)
         self.grid_shortcut.activated.connect(self.toggle_grid)
 
-        self.rings_shortcut = QShortcut(QKeySequence("Ctrl+r"), self.main_window)
+        self.rings_shortcut = QShortcut(
+            QKeySequence("Ctrl+r"), self.main_window)
         self.rings_shortcut.activated.connect(self.edit_ring_radii)
 
-        self.coords_shortcut = QShortcut(QKeySequence("Ctrl+a"), self.main_window)
+        self.coords_shortcut = QShortcut(
+            QKeySequence("Ctrl+a"), self.main_window)
         self.coords_shortcut.activated.connect(self.toggle_coordinate_axes)
 
-        self.label_shortcut = QShortcut(QKeySequence("Ctrl+l"), self.main_window)
+        self.label_shortcut = QShortcut(
+            QKeySequence("Ctrl+l"), self.main_window)
         self.label_shortcut.activated.connect(self.toggle_pad_labels)
-
 
         # self.main_window.setWindowState(self.main_window.windowState()
         #                                 & ~pg.QtCore.Qt.WindowMinimized
@@ -105,9 +112,29 @@ class PADView(object):
     def show_coordinate_axes(self):
 
         if self.coord_axes is None:
-            x = pg.ArrowItem(pos=(30, 0), brush=pg.mkBrush('r'), pxMode=False, angle=180, pen=None)
-            y = pg.ArrowItem(pos=(0, 30), brush=pg.mkBrush('g'), pxMode=False, angle=-90, pen=None)
-            z = pg.ScatterPlotItem([0], [0], pen=None, brush=pg.mkBrush('b'), pxMode=False, size=15)
+            x = pg.ArrowItem(
+                pos=(
+                    30,
+                    0),
+                brush=pg.mkBrush('r'),
+                pxMode=False,
+                angle=180,
+                pen=None)
+            y = pg.ArrowItem(
+                pos=(
+                    0,
+                    30),
+                brush=pg.mkBrush('g'),
+                pxMode=False,
+                angle=-90,
+                pen=None)
+            z = pg.ScatterPlotItem(
+                [0],
+                [0],
+                pen=None,
+                brush=pg.mkBrush('b'),
+                pxMode=False,
+                size=15)
             self.coord_axes = [x, y, z]
             self.viewbox.addItem(z)
             self.viewbox.addItem(x)
@@ -137,8 +164,14 @@ class PADView(object):
 
                 f = p.fs_vec.ravel()
                 t = p.t_vec.ravel()
-                ang = np.arctan2(f[1], f[0])*180/np.pi
-                a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None)
+                ang = np.arctan2(f[1], f[0]) * 180 / np.pi
+                a = pg.ArrowItem(
+                    pos=(
+                        t[0],
+                        t[1]),
+                    angle=ang,
+                    brush=pg.mkBrush('r'),
+                    pen=None)
 
                 self.scan_arrows.append(a)
                 self.viewbox.addItem(a)
@@ -184,13 +217,20 @@ class PADView(object):
 
             for i in range(0, self.n_pads):
 
-                lab = pg.TextItem(text="%d" % i, fill=pg.mkBrush('b'), color='y', anchor=(0.5, 0.5))
+                lab = pg.TextItem(
+                    text="%d" %
+                    i,
+                    fill=pg.mkBrush('b'),
+                    color='y',
+                    anchor=(
+                        0.5,
+                        0.5))
                 g = self.pad_geometry[i]
-                fs = g.fs_vec.ravel()*g.n_fs/2
-                ss = g.ss_vec.ravel()*g.n_ss/2
+                fs = g.fs_vec.ravel() * g.n_fs / 2
+                ss = g.ss_vec.ravel() * g.n_ss / 2
                 t = g.t_vec.ravel()
-                x = (fs[0] + ss[0] + t[0])/g.pixel_size()
-                y = (fs[1] + ss[1] + t[1])/g.pixel_size()
+                x = (fs[0] + ss[0] + t[0]) / g.pixel_size()
+                y = (fs[1] + ss[1] + t[1]) / g.pixel_size()
                 lab.setPos(x, y)
                 self.pad_labels.append(lab)
                 self.viewbox.addItem(lab)
@@ -213,7 +253,8 @@ class PADView(object):
 
         # This is really aweful.  I don't know if this is the best way to do the transforms, but it's the best
         # I could do given the fact that I'm not able to track down all the needed info on how all of these
-        # transforms are applied.  I can only say that a physicist did not invent this system.
+        # transforms are applied.  I can only say that a physicist did not
+        # invent this system.
 
         # 3D basis vectors of panel (length encodes pixel size):
         f = p.fs_vec.ravel()
@@ -223,7 +264,8 @@ class PADView(object):
         t = p.t_vec.ravel()
 
         # Normalize all vectors to pixel size.  This is a hack that needs to be fixed later.  Obviously, we cannot
-        # show multiple detectors at different distances using this stupid pixel-based convention.
+        # show multiple detectors at different distances using this stupid
+        # pixel-based convention.
         ps = p.pixel_size()
         f /= ps
         s /= ps
@@ -244,13 +286,16 @@ class PADView(object):
         im.scale(1, -1)
         im.rotate(-90)
 
-        # Scale the axes.  This is a phony way to deal with detector tilts.  Better than nothing I guess.
+        # Scale the axes.  This is a phony way to deal with detector tilts.
+        # Better than nothing I guess.
         scf = np.sqrt(np.sum(f * f))
         scs = np.sqrt(np.sum(s * s))
 
         # Note that the *sign* of this scale factor takes care of the fact that 2D rotations alone
-        # cannot deal with a transpose operation.  What follows is a confusing hack... must be a better way.
-        sign = np.sign(np.cross(np.array([f[0], f[1], 0]), np.array([s[0], s[1], 0]))[2])
+        # cannot deal with a transpose operation.  What follows is a confusing
+        # hack... must be a better way.
+        sign = np.sign(
+            np.cross(np.array([f[0], f[1], 0]), np.array([s[0], s[1], 0]))[2])
 
         # Here goes the re-scaling
         im.scale(sign * scs, scf)
@@ -264,7 +309,8 @@ class PADView(object):
 
         # Translate the scaled/rotated image.  Turns out we need to flip the sign of the translation vector
         # coordinate corresponding to the axis we flipped.  I don't know why, but I've completely given up on the
-        # idea of understanding the many layers of coordinate systems and transformations...
+        # idea of understanding the many layers of coordinate systems and
+        # transformations...
         im.translate(sign * t[1], t[0])
         im.rotate(-sign * ang * 180 / np.pi)
 
@@ -291,7 +337,7 @@ class PADView(object):
                 d = np.log10(d)
 
             if show_scans:  # For testing - show fast scan axis
-                d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
+                d[0, 0:int(np.floor(self.pad_geometry[i].n_fs / 2))] = mx
 
             im = bpg.ImageItem(d)
 
@@ -324,17 +370,19 @@ class PADView(object):
                     intensity = self.pad_data[pid][ss, fs]
 
             if pid >= 0:
-                status = 'Panel %2d; ss=%4d; fs=%4d; I=%8g' % (pid, ss, fs, intensity)
+                status = 'Panel %2d; ss=%4d; fs=%4d; I=%8g' % (
+                    pid, ss, fs, intensity)
             else:
                 status = ''
             self.main_window.statusbar.showMessage(status)
-            #self.label.setText(
+            # self.label.setText(
             #    "<span style='font-size: 12pt'>x=%0.1f,   <span style='color: red'>y1=%0.1f</span>" % (
             #    pnt.x(), pnt.y()))
 
     def edit_ring_radii(self):
 
-        text, ok = QInputDialog.getText(self.main_window, "Enter ring radii (comma separated)", "Ring radii", QLineEdit.Normal, "100,200")
+        text, ok = QInputDialog.getText(
+            self.main_window, "Enter ring radii (comma separated)", "Ring radii", QLineEdit.Normal, "100,200")
         if ok:
             if text == '':
                 self.remove_rings()
@@ -344,7 +392,7 @@ class PADView(object):
             for i in range(0, len(r)):
                 try:
                     rad.append(float(r[i].strip()))
-                except:
+                except BaseException:
                     pass
             self.remove_rings()
             self.add_rings(rad)
@@ -357,10 +405,11 @@ class PADView(object):
         n = len(radii)
 
         if pens is None:
-            pens = [pg.mkPen([255, 255, 255], width=2)]*n
+            pens = [pg.mkPen([255, 255, 255], width=2)] * n
 
         for i in range(0, n):
-            circ = pg.CircleROI(pos=[-radii[i]*0.5]*2, size=radii[i], pen=pens[i])
+            circ = pg.CircleROI(pos=[-radii[i] * 0.5] *
+                                2, size=radii[i], pen=pens[i])
             circ.translatable = False
             circ.removable = True
             self.rings.append(circ)

@@ -21,14 +21,13 @@ class CrystalMeshTool(object):
     elegant in that basis.
     '''
 
-    sym_luts = None  #:  Cached lookup tables
+    sym_luts = None  # :  Cached lookup tables
     # n_vecs = None
     # x_vecs = None
     # r_vecs = None
     # h_vecs = None
 
     def __init__(self, cryst, resolution, oversampling):
-
         r'''
         This should intelligently pick the limits of a map.
 
@@ -48,26 +47,29 @@ class CrystalMeshTool(object):
         m = 1
         for T in cryst.symTs:
             for mp in np.arange(1, 10):
-                Tp = T*mp
-                if np.round(np.max(Tp % 1.0)*100)/100 == 0:
+                Tp = T * mp
+                if np.round(np.max(Tp % 1.0) * 100) / 100 == 0:
                     if mp > m:
                         m = mp
                     break
 
         Nc = np.max(np.ceil(abc / (d * m)) * m)
 
-        self.cryst = cryst  #:  crystal.target class object used to initiate the map
-        # self.m = np.int(m)  #:  Due to symmetry translations, map must consit of integer multiple of this number
-        self.s = np.int(s)  #:  Oversampling ratio
-        self.d = abc / Nc   #:  Length-3 array of "actual" resolutions (different from "requested" resolution)
-        self.dx = 1 / Nc    #:  Crystal basis length increment
-        self.Nc = np.int(Nc)  #:  Number of samples along edge of unit cell
-        self.N = np.int(Nc * s)  #:  Number of samples along edge of whole map (includes oversampling)
-        self.P = np.int(self.N**3)  #:  Linear length fo map (=N^3)
-        self.w = np.array([self.N**2, self.N, 1])  #:  The stride vector (mostly for internal use)
+        self.cryst = cryst  # :  crystal.target class object used to initiate the map
+        # self.m = np.int(m)  #:  Due to symmetry translations, map must consit
+        # of integer multiple of this number
+        self.s = np.int(s)  # :  Oversampling ratio
+        # :  Length-3 array of "actual" resolutions (different from "requested" resolution)
+        self.d = abc / Nc
+        self.dx = 1 / Nc  # :  Crystal basis length increment
+        self.Nc = np.int(Nc)  # :  Number of samples along edge of unit cell
+        # :  Number of samples along edge of whole map (includes oversampling)
+        self.N = np.int(Nc * s)
+        self.P = np.int(self.N**3)  # :  Linear length fo map (=N^3)
+        # :  The stride vector (mostly for internal use)
+        self.w = np.array([self.N**2, self.N, 1])
 
     def get_n_vecs(self):
-
         r"""
 
         Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:
@@ -89,7 +91,6 @@ class CrystalMeshTool(object):
         return n_vecs
 
     def get_x_vecs(self):
-
         r"""
 
         Get an Nx3 array of vectors in the crystal basis.  If there were four samples per unit cell, the array looks a
@@ -106,7 +107,6 @@ class CrystalMeshTool(object):
         return x_vecs
 
     def get_r_vecs(self):
-
         r"""
 
         Creates an Nx3 array of 3-vectors contain the Cartesian-basis vectors of each voxel in the map.  This is done
@@ -121,7 +121,6 @@ class CrystalMeshTool(object):
         return np.dot(self.cryst.O, x.T).T
 
     def get_h_vecs(self):
-
         r"""
 
         This provides an Nx3 array of Fourier-space vectors "h".  These coordinates can be understood as "fractional
@@ -134,25 +133,22 @@ class CrystalMeshTool(object):
 
         h = self.get_n_vecs()
         h = h / self.dx / self.N
-        f = np.where(h.ravel() > (self.Nc/2))
+        f = np.where(h.ravel() > (self.Nc / 2))
         h.flat[f] = h.flat[f] - self.Nc
         return h
 
     def get_q_vecs(self):
-
         r"""
 
-		This provides an Nx3 array of momentum-transfer vectors (with the usual 2 pi factor).
+                This provides an Nx3 array of momentum-transfer vectors (with the usual 2 pi factor).
 
-		Returns: numpy array
+                Returns: numpy array
 
-		"""
+                """
 
-        return 2*np.pi*np.dot(self.cryst.A, self.get_h_vecs().T).T
-
+        return 2 * np.pi * np.dot(self.cryst.A, self.get_h_vecs().T).T
 
     def get_sym_luts(self):
-
         r"""
 
         This provides a list of "symmetry transform lookup tables".  These are the linearized array indices. For a
@@ -181,7 +177,6 @@ class CrystalMeshTool(object):
         return self.sym_luts
 
     def symmetry_transform(self, i, j, data):
-
         r"""
 
         This applies symmetry transformations to a data array (i.e. density map).  The crystal spacegroup gives rise
@@ -205,7 +200,6 @@ class CrystalMeshTool(object):
         return data_trans
 
     def shape(self):
-
         r"""
 
         For convenience, return the map shape [N,N,N]
@@ -217,7 +211,6 @@ class CrystalMeshTool(object):
         return np.array([self.N, self.N, self.N])
 
     def reshape(self, data):
-
         r"""
 
         For convenience, this will reshape a data array to the shape NxNxN.
@@ -233,7 +226,6 @@ class CrystalMeshTool(object):
         return data.reshape([N, N, N])
 
     def reshape3(self, data):
-
         r"""
 
         Args:
@@ -247,7 +239,6 @@ class CrystalMeshTool(object):
         return data.reshape([N, N, N, 3])
 
     def zeros(self):
-
         r"""
 
         A convenience function: simply returns an array of zeros of shape NxNxN
@@ -260,7 +251,6 @@ class CrystalMeshTool(object):
         return np.zeros([N, N, N])
 
     def place_atoms_in_map(self, x, f):
-
         r"""
 
         This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
@@ -277,12 +267,13 @@ class CrystalMeshTool(object):
         """
         mm = [0, self.s]
         rng = [mm, mm, mm]
-        a, _, _ = binned_statistic_dd(x, f, statistic='sum', bins=[self.N] * 3, range=rng)
+        a, _, _ = binned_statistic_dd(
+            x, f, statistic='sum', bins=[
+                self.N] * 3, range=rng)
 
         return a
 
     def place_intensities_in_map(self, h, f):
-
         r"""
 
         This will take a list of Miller index vectors and intensities and place them in a 3D map.
@@ -296,8 +287,10 @@ class CrystalMeshTool(object):
         """
 
         hh = self.get_h_vecs()
-        mm = [np.min(hh)-0.5, np.max(hh)+0.5]
+        mm = [np.min(hh) - 0.5, np.max(hh) + 0.5]
         rng = [mm, mm, mm]
-        a, _, _ = binned_statistic_dd(h, f, statistic='mean', bins=[self.N] * 3, range=rng)
+        a, _, _ = binned_statistic_dd(
+            h, f, statistic='mean', bins=[
+                self.N] * 3, range=rng)
 
         return a

@@ -29,7 +29,8 @@ class ImageItem(GraphicsObject):
     """
 
     sigImageChanged = QtCore.Signal()
-    sigRemoveRequested = QtCore.Signal(object)  # self; emitted when 'remove' is selected from context menu
+    # self; emitted when 'remove' is selected from context menu
+    sigRemoveRequested = QtCore.Signal(object)
 
     def __init__(self, image=None, **kargs):
         """
@@ -37,12 +38,12 @@ class ImageItem(GraphicsObject):
         """
         GraphicsObject.__init__(self)
         self.menu = None
-        self.image = None  ## original image data
-        self.qimage = None  ## rendered image for display
+        self.image = None  # original image data
+        self.qimage = None  # rendered image for display
 
         self.paintMode = None
 
-        self.levels = None  ## [min, max] or [[redMin, redMax], ...]
+        self.levels = None  # [min, max] or [[redMin, redMax], ...]
         self.lut = None
         self.autoDownsample = False
 
@@ -74,7 +75,7 @@ class ImageItem(GraphicsObject):
         self.paintMode = mode
         self.update()
 
-        ## use setOpacity instead.
+        # use setOpacity instead.
         # def setAlpha(self, alpha):
         # self.setOpacity(alpha)
         # self.updateImage()
@@ -220,9 +221,11 @@ class ImageItem(GraphicsObject):
                 return
         else:
             gotNewData = True
-            shapeChanged = (self.image is None or image.shape != self.image.shape)
+            shapeChanged = (
+                self.image is None or image.shape != self.image.shape)
             self.image = image.view(np.ndarray)
-            if self.image.shape[0] > 2 ** 15 - 1 or self.image.shape[1] > 2 ** 15 - 1:
+            if self.image.shape[0] > 2 ** 15 - \
+                    1 or self.image.shape[1] > 2 ** 15 - 1:
                 if 'autoDownsample' not in kargs:
                     kargs['autoDownsample'] = True
             if shapeChanged:
@@ -261,10 +264,10 @@ class ImageItem(GraphicsObject):
             self.sigImageChanged.emit()
 
     def updateImage(self, *args, **kargs):
-        ## used for re-rendering qimage from self.image.
+        # used for re-rendering qimage from self.image.
 
-        ## can we make any assumptions here that speed things up?
-        ## dtype, range, size are all the same?
+        # can we make any assumptions here that speed things up?
+        # dtype, range, size are all the same?
         defaults = {
             'autoLevels': False,
         }
@@ -297,7 +300,10 @@ class ImageItem(GraphicsObject):
         else:
             image = self.image
 
-        argb, alpha = fn.makeARGB(image.transpose((1, 0, 2)[:image.ndim]), lut=lut, levels=self.levels)
+        argb, alpha = fn.makeARGB(
+            image.transpose(
+                (1, 0, 2)[
+                    :image.ndim]), lut=lut, levels=self.levels)
         self.qimage = fn.makeQImage(argb, alpha, transpose=False)
 
     def paint(self, p, *args):
@@ -313,7 +319,13 @@ class ImageItem(GraphicsObject):
             p.setCompositionMode(self.paintMode)
             profile('set comp mode')
 
-        p.drawImage(QtCore.QRectF(0, 0, self.image.shape[0], self.image.shape[1]), self.qimage)
+        p.drawImage(
+            QtCore.QRectF(
+                0,
+                0,
+                self.image.shape[0],
+                self.image.shape[1]),
+            self.qimage)
         profile('p.drawImage')
         if self.border is not None:
             p.setPen(self.border)
@@ -325,7 +337,13 @@ class ImageItem(GraphicsObject):
             self.render()
         self.qimage.save(fileName, *args)
 
-    def getHistogram(self, bins='auto', step='auto', targetImageSize=200, targetHistogramSize=500, **kwds):
+    def getHistogram(
+            self,
+            bins='auto',
+            step='auto',
+            targetImageSize=200,
+            targetHistogramSize=500,
+            **kwds):
         """Returns x and y arrays containing the histogram values for the current image.
         For an explanation of the return format, see numpy.histogram().
 
@@ -407,7 +425,7 @@ class ImageItem(GraphicsObject):
             # ev.ignore()
 
             # def mouseMoveEvent(self, ev):
-            ##print "mouse move", ev.pos()
+            # print "mouse move", ev.pos()
             # if self.drawKernel is not None:
             # self.drawAt(ev.pos(), ev)
 
@@ -451,13 +469,16 @@ class ImageItem(GraphicsObject):
         return self.menu
 
     def hoverEvent(self, ev):
-        if not ev.isExit() and self.drawKernel is not None and ev.acceptDrags(QtCore.Qt.LeftButton):
-            ev.acceptClicks(
-                QtCore.Qt.LeftButton)  ## we don't use the click, but we also don't want anyone else to use it.
+        if not ev.isExit() and self.drawKernel is not None and ev.acceptDrags(
+                QtCore.Qt.LeftButton):
+            # we don't use the click, but we also don't want anyone else to use
+            # it.
+            ev.acceptClicks(QtCore.Qt.LeftButton)
             ev.acceptClicks(QtCore.Qt.RightButton)
             # self.box.setBrush(fn.mkBrush('w'))
         elif not ev.isExit() and self.removable:
-            ev.acceptClicks(QtCore.Qt.RightButton)  ## accept context menu clicks
+            # accept context menu clicks
+            ev.acceptClicks(QtCore.Qt.RightButton)
             # else:
             # self.box.setBrush(self.brush)
             # self.update()
@@ -515,7 +536,7 @@ class ImageItem(GraphicsObject):
         self.drawMask = mask
 
     def removeClicked(self):
-        ## Send remove event only after we have exited the menu event handler
+        # Send remove event only after we have exited the menu event handler
         self.removeTimer = QtCore.QTimer()
         self.removeTimer.timeout.connect(self.emitRemoveRequested)
         self.removeTimer.start(0)

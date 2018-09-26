@@ -4,7 +4,6 @@ import pyqtgraph as pg
 
 
 def keep_open():
-
     r"""
     Simple helper that keeps qtgraph window open when you run a script from the terminal.
     """
@@ -22,14 +21,19 @@ class MultiHistogramLUTWidget(pg.GraphicsView):
 
     def __init__(self, parent=None, *args, **kargs):
         background = kargs.get('background', 'default')
-        pg.GraphicsView.__init__(self, parent, useOpenGL=False, background=background)
+        pg.GraphicsView.__init__(
+            self,
+            parent,
+            useOpenGL=False,
+            background=background)
         self.item = MultiHistogramLUTItem(*args, **kargs)
         self.setCentralItem(self.item)
-        self.setSizePolicy(pg.QtGui.QSizePolicy.Preferred, pg.QtGui.QSizePolicy.Expanding)
+        self.setSizePolicy(
+            pg.QtGui.QSizePolicy.Preferred,
+            pg.QtGui.QSizePolicy.Expanding)
         self.setMinimumWidth(95)
 
     def sizeHint(self):
-
         r"""
         Undocumented pyqtgraph method.
         """
@@ -73,15 +77,12 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
         set of levels is drawn for each channel.
     """
 
-
     def __init__(self, *args, **kwargs):
-
         r"""
         Undocumented pyqtgraph method.
         """
 
         pg.HistogramLUTItem.__init__(self, *args, **kwargs)
-
 
     def setImageItems(self, imgs):
         r"""
@@ -93,12 +94,13 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
         for img in imgs:
             self.imageItems.append(img)
             img.sigImageChanged.connect(self.imageChanged)
-            img.setLookupTable(self.getLookupTable)  ## send function pointer, not the result
+            # send function pointer, not the result
+            img.setLookupTable(self.getLookupTable)
             i += 1
 
         phonyarray = np.ravel([im.image for im in imgs])
         phonyarray = phonyarray[0:(len(phonyarray) - (len(phonyarray) % 2))]
-        phonyarray = phonyarray.reshape([2, int(len(phonyarray)/2)])
+        phonyarray = phonyarray.reshape([2, int(len(phonyarray) / 2)])
 
         self.imageItemStrong = pg.ImageItem(phonyarray)
         self.imageItem = weakref.ref(self.imageItemStrong)  # TODO: fix this up
@@ -106,7 +108,6 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
         self.imageChanged(autoLevel=True)
 
     def gradientChanged(self):
-
         r"""
         Undocumented pyqtgraph method.
         """
@@ -117,13 +118,13 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
                     im.setLookupTable(None)  # lambda x: x.astype(np.uint8))
             else:
                 for im in self.imageItems:
-                    im.setLookupTable(self.getLookupTable)  ## send function pointer, not the result
+                    # send function pointer, not the result
+                    im.setLookupTable(self.getLookupTable)
 
         self.lut = None
         self.sigLookupTableChanged.emit(self)
 
     def regionChanged(self):
-
         r"""
         Undocumented pyqtgraph method.
         """
@@ -135,7 +136,6 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
         self.sigLevelChangeFinished.emit(self)
 
     def regionChanging(self):
-
         r"""
         Undocumented pyqtgraph method.
         """
@@ -147,7 +147,6 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
         self.update()
 
     def setLevelMode(self, mode):
-
         r"""
         Set the method of controlling the image levels offered to the user.
         Options are 'mono' or 'rgba'.
