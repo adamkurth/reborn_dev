@@ -4,35 +4,73 @@ Installation
 System-wide installation
 ------------------------
 
-Currently, there are no install that will automatically add bornagain to your python installation.  It makes a lot of sense to simply keep a local copy of bornagain where you are doing your analysis or simulations so that you can reproduce them in the future if need be, especially since bornagain continues to change often.  Archiving code alongside results is good practice anyways.  
+There are no install scripts (e.g. setup.py) that will automatically add bornagain to your python installation.
+Since bornagain is changing frequently at this time, it is recommended that you keep a local copy of bornagain
+where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving
+code alongside results is good practice anyways.
 
-If the bornagain directory is not in your working directory, you might need to add bornagain to your python path by doing something like this:
+If the bornagain package directory is not in your working directory, you might need to add bornagain to your python path
+ by doing something like this:
 
 .. code-block:: python
 
 	import sys
 	sys.path.append("../example/path/to/bornagain")
 
-
-Python 3
---------
-
-There has been recent success with Python 3.6.4, installed via `Miniconda <https://conda.io/miniconda.html>`_.  The following has worked on both Mac and Linux computers:
+Another option is to make a symbolic link to the bornagain package, like this:
 
 .. code-block:: bash
 
- conda install ipython
- conda install pytest
- conda install sphinx
- conda install scipy
- conda install scikit-image
- conda install matplotlib
- conda install h5py
- conda install pyqtgraph
- conda install pyopengl
- conda install -c conda-forge pyopencl
- conda install -c conda-forge pocl
-    
+    ln -s path/to/bornagain/bornagain path/where/your/script/is
+
+If you use a symbolic link as above, you can simply add an import statement in your script
+
+.. code-block:: python
+
+    import bornagain
+
+
+Dependencies
+------------
+
+We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
+compatibility with both pyqt4 and pyqt5 (which is proving to be somewhat difficult...).
+If you're deciding on which version to use, here are a couple things to consider:
+
+- At the time of this writing, the LCLS psana module requires Python 2.7.
+- It doesn't appear to be easy to install both pyqt4 and pyqt5 in the same Python installation
+- `Anaconda and Miniconda <https://conda.io/miniconda.html>`_ python do not support pyqt4 in Python 3.7.
+
+It's hard to say what's best for you, but hopefully things work no matter what versions of software you use.
+
+Example setup with Python 3
+---------------------------
+
+Supposing we want python 3 and pyqt4, we can use go with Python 3.6 installed via
+`Miniconda <https://conda.io/miniconda.html>`_.
+
+The best thing to do is probably to make a new
+`conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_  like this:
+
+.. code-block:: bash
+
+  conda create -n bornagain34 -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image matplotlib ipython pytest \
+  sphinx pyqtgraph pyopencl pyopengl
+
+The only downside to the conda environment is that you need to remember to activate that environment every time you use
+bornagain, like this:
+
+.. code-block:: bash
+
+    source activate bornagain34
+
+If you don't want to use a conda environment you can just install the modules you need in the default environment:
+
+.. code-block:: bash
+
+ conda install -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image matplotlib ipython pytest \
+  sphinx pyqtgraph pyopencl pyopengl
+
 In order to check if the installation worked, run the following:
 
 .. code-block:: bash

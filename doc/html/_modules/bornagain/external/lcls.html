@@ -24,26 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="../../../index.html"/>
-        <link rel="up" title="bornagain" href="../../bornagain.html"/> 
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -91,11 +82,13 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">PAD data and geometry formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../bornagain.html">bornagain package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../simulations.html">Diffration simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
 </ul>
 
             
@@ -107,7 +100,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">bornagain</a>
@@ -115,9 +108,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -149,8 +143,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -163,7 +155,10 @@
             
   <h1>Source code for bornagain.external.lcls</h1><div class="highlight"><pre>
 <span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Utilities to convert</span>
+<span class="sd">Utilities for working with LCLS data.  Most of what you need is already in the psana package.  I don&#39;t know where the</span>
+<span class="sd">official psana documentation is but if you work with LCLS data you should at least skim through all of the material in</span>
+<span class="sd">the `LCLS Data Analysis Confluence pages &lt;https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis&gt;`_.</span>
+<span class="sd">Note that there is documentation on `LCLS PAD geometry &lt;https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry&gt;`_.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -171,10 +166,9 @@
 
 <div class="viewcode-block" id="reshape_psana_cspad_array_to_cheetah_array"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">[docs]</a><span class="k">def</span> <span class="nf">reshape_psana_cspad_array_to_cheetah_array</span><span class="p">(</span><span class="n">psana_array</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Transform psana cspad numpy array of shape (32,185,388) into array to Cheetah array of shape (1480, 1552).</span>
-<span class="sd">    Unfortunately, the Cheetah format requires a re-write of the data in memory, and one result of this re-write is that</span>
-<span class="sd">    each detector panel is no longer stored contiguously in memory.  A second result is that newcomers will of course</span>
-<span class="sd">    be very confused when they first encounter this undocumented aspect of Cheetah.</span>
+<span class="sd">    Transform  a native psana cspad numpy array of shape (32,185,388) into a &quot;Cheetah array&quot; of shape (1480, 1552).</span>
+<span class="sd">    Conversion to Cheetah format requires a re-write of the data in memory, and each detector panel is no longer stored</span>
+<span class="sd">    contiguously in memory.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        psana_array (numpy array) :</span>
@@ -199,7 +193,8 @@
 <div class="viewcode-block" id="cheetah_cspad_array_to_pad_list"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.cheetah_cspad_array_to_pad_list">[docs]</a><span class="k">def</span> <span class="nf">cheetah_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">psana_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with</span>
-<span class="sd">    data in the native psana format.  First you should create a crystfel geometry dictionary.</span>
+<span class="sd">    data in the native psana format.  First you should create a crystfel geometry dictionary using the function</span>
+<span class="sd">    :func:`geometry_file_to_pad_geometry_list() &lt;bornagain.external.crystfel.geometry_file_to_pad_geometry_list&gt;`.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        psana_array (numpy array) :</span>
@@ -221,9 +216,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -236,7 +229,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -255,6 +248,7 @@
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
             VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -268,19 +262,13 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

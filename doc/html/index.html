@@ -24,26 +24,18 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="#"/>
-        <link rel="next" title="Overview" href="overview.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Overview" href="overview.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -91,11 +83,13 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="geometry.html">PAD data and geometry formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bornagain.html">bornagain package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 
             
@@ -107,7 +101,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="#">bornagain</a>
@@ -115,9 +109,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -163,46 +158,20 @@
 <h1>bornagain’s documentation<a class="headerlink" href="#bornagain-s-documentation" title="Permalink to this headline">¶</a></h1>
 <p>The bornagain python package is meant to be used for the simulation and analysis of
 x-ray diffraction under the Born approximation.  It is not the first attempt to create
-such a package, hence the name.  So far, nothing is finished in bornagain…</p>
+such a package, hence the double-meaning of the name.  Bornagain is under continuous development at this time.  Don’t be surprised if the API changes somewhat.</p>
 </div>
 <div class="section" id="contents">
 <h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#some-basics">Some basics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#x-ray-beams">X-ray beams</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#pixel-array-detectors">Pixel-Array Detectors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#simulation">Simulation</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="geometry.html">PAD data and geometry formats</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="geometry.html#generic-description-of-data-layout">Generic description of data layout</a></li>
-<li class="toctree-l2"><a class="reference internal" href="geometry.html#working-with-crystfel-geometry-files">Working with CrystFEL geometry files</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#system-wide-installation">System-wide installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#python-3">Python 3</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#python-2">Python 2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-on-scientific-linux-6">Installation on Scientific Linux 6</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="bornagain.html">bornagain package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.html">bornagain package</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="coding.html#overview-of-bornagain">Overview of bornagain</a></li>
-<li class="toctree-l2"><a class="reference internal" href="coding.html#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="coding.html#generation-of-documentation">Generation of documentation</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 </div>
 </div>
@@ -217,9 +186,7 @@ such a package, hence the name.  So far, nothing is finished in bornagain…</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -239,7 +206,7 @@ such a package, hence the name.  So far, nothing is finished in bornagain…</p>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -258,6 +225,7 @@ such a package, hence the name.  So far, nothing is finished in bornagain…</p>
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -271,19 +239,13 @@ such a package, hence the name.  So far, nothing is finished in bornagain…</p>
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

@@ -24,27 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="bornagain 0.2018.9.9 documentation" href="index.html"/>
-        <link rel="next" title="bornagain package" href="bornagain.html"/>
-        <link rel="prev" title="PAD data and geometry formats" href="geometry.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="X-ray beams" href="beams.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -92,17 +84,20 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="geometry.html">PAD data and geometry formats</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#system-wide-installation">System-wide installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#python-3">Python 3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-setup-with-python-3">Example setup with Python 3</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#python-2">Python 2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation-on-scientific-linux-6">Installation on Scientific Linux 6</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="bornagain.html">bornagain package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Diffration simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 
             
@@ -114,7 +109,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">bornagain</a>
@@ -122,9 +117,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -170,27 +166,57 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="system-wide-installation">
 <h2>System-wide installation<a class="headerlink" href="#system-wide-installation" title="Permalink to this headline">¶</a></h2>
-<p>Currently, there are no install that will automatically add bornagain to your python installation.  It makes a lot of sense to simply keep a local copy of bornagain where you are doing your analysis or simulations so that you can reproduce them in the future if need be, especially since bornagain continues to change often.  Archiving code alongside results is good practice anyways.</p>
-<p>If the bornagain directory is not in your working directory, you might need to add bornagain to your python path by doing something like this:</p>
+<p>There are no install scripts (e.g. setup.py) that will automatically add bornagain to your python installation.
+Since bornagain is changing frequently at this time, it is recommended that you keep a local copy of bornagain
+where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving
+code alongside results is good practice anyways.</p>
+<dl class="docutils">
+<dt>If the bornagain package directory is not in your working directory, you might need to add bornagain to your python path</dt>
+<dd>by doing something like this:</dd>
+</dl>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;../example/path/to/bornagain&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Another option is to make a symbolic link to the bornagain package, like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ln -s path/to/bornagain/bornagain path/where/your/script/is
+</pre></div>
 </div>
-<div class="section" id="python-3">
-<h2>Python 3<a class="headerlink" href="#python-3" title="Permalink to this headline">¶</a></h2>
-<p>There has been recent success with Python 3.6.4, installed via <a class="reference external" href="https://conda.io/miniconda.html">Miniconda</a>.  The following has worked on both Mac and Linux computers:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install ipython
-conda install pytest
-conda install sphinx
-conda install scipy
-conda install scikit-image
-conda install matplotlib
-conda install h5py
-conda install pyqtgraph
-conda install pyopengl
-conda install -c conda-forge pyopencl
-conda install -c conda-forge pocl
+<p>If you use a symbolic link as above, you can simply add an import statement in your script</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bornagain</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
+compatibility with both pyqt4 and pyqt5 (which is proving to be somewhat difficult…).
+If you’re deciding on which version to use, here are a couple things to consider:</p>
+<ul class="simple">
+<li>At the time of this writing, the LCLS psana module requires Python 2.7.</li>
+<li>It doesn’t appear to be easy to install both pyqt4 and pyqt5 in the same Python installation</li>
+<li><a class="reference external" href="https://conda.io/miniconda.html">Anaconda and Miniconda</a> python do not support pyqt4 in Python 3.7.</li>
+</ul>
+<p>It’s hard to say what’s best for you, but hopefully things work no matter what versions of software you use.</p>
+</div>
+<div class="section" id="example-setup-with-python-3">
+<h2>Example setup with Python 3<a class="headerlink" href="#example-setup-with-python-3" title="Permalink to this headline">¶</a></h2>
+<p>Supposing we want python 3 and pyqt4, we can use go with Python 3.6 installed via
+<a class="reference external" href="https://conda.io/miniconda.html">Miniconda</a>.</p>
+<p>The best thing to do is probably to make a new
+<a class="reference external" href="https://conda.io/docs/user-guide/tasks/manage-environments.html">conda environment</a>  like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create -n bornagain34 -c conda-forge <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6 <span class="nv">pyqt</span><span class="o">=</span><span class="m">5</span> h5py numpy scipy scikit-image matplotlib ipython pytest <span class="se">\</span>
+sphinx pyqtgraph pyopencl pyopengl
+</pre></div>
+</div>
+<p>The only downside to the conda environment is that you need to remember to activate that environment every time you use
+bornagain, like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> activate bornagain34
+</pre></div>
+</div>
+<p>If you don’t want to use a conda environment you can just install the modules you need in the default environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install -c conda-forge <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6 <span class="nv">pyqt</span><span class="o">=</span><span class="m">5</span> h5py numpy scipy scikit-image matplotlib ipython pytest <span class="se">\</span>
+ sphinx pyqtgraph pyopencl pyopengl
 </pre></div>
 </div>
 <p>In order to check if the installation worked, run the following:</p>
@@ -236,18 +262,16 @@ make install
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.html" class="btn btn-neutral float-right" title="bornagain package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="beams.html" class="btn btn-neutral float-right" title="X-ray beams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="geometry.html" class="btn btn-neutral" title="PAD data and geometry formats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="overview.html" class="btn btn-neutral" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -260,7 +284,7 @@ make install
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -279,6 +303,7 @@ make install
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -292,19 +317,13 @@ make install
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
