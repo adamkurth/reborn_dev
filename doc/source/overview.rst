@@ -1,43 +1,53 @@
 Overview
 ========
 
+The bornagain Python package is meant to be used for the simulation and analysis of
+x-ray diffraction under the Born approximation.  It is not the first attempt to create
+such a package, hence the double-meaning of the name.
+
+For clarity, bornagain is not a "program".  To use a *Python package* such as bornagain, you must
+write your own custom python scripts or programs.
+
+**Beware**: bornagain is under continuous development; there might still be some large
+changes to the API in the near future.
+
 What's in bornagain?
 --------------------
 
-In a nutshell, the basic elements of the bornagain package consist of:
+In a nutshell, the basic elements of the bornagain package are:
 
-- Source classes for describing incident x-ray beams.
-- Detector classes for specifying detector geometry.
-- Target classes that describe objects that we shoot with x-rays.
+- Classes for describing incident x-ray beams.
+- Classes for describing detector geometries.
+- Classes for describing objects that we shoot with x-rays.
 - GPU-based simulation utilities.
 
 In the future, we will add a few more utilities to bornagain:
 
-- Tools for dealing with reading/writing of a few file formats.
-- Tools displaying diffraction data.
+- Tools for reading/writing a few file formats.
+- Tools for displaying diffraction data.
 - Analysis algorithms.
 
 
 I don't know anything about programming...
 ------------------------------------------
 
-If you are new to programming, read the following:
+If you are new to programming, the following might help:
 
-- In order to make good use of bornagain, you must learn the `Python <https://www.python.org/>`_ language.  You probably also need to learn the basics of object-oriented programming.
-- There are some example scripts to help you get started.  Look in the bornagain/examples directory.
-- `iPython <https://ipython.org/>`_ (and its `tab-completion feature <https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion>`_ is a good way to explore bornagain.
-- The `numpy <http://www.numpy.org/#>`_ package is central to bornagain.  You must learn to use numpy along with the basic principles of `array programming <https://en.wikipedia.org/wiki/Array_programming>`_.
+* You *must* learn the `Python <https://www.python.org/>`_ language.
+* You *should* learn the basics of object-oriented programming.
+* You should master the use of the `numpy <http://www.numpy.org/#>`_ package.
+* There are some example scripts to help you get started.  Look in the bornagain/examples directory.
+* `iPython <https://ipython.org/>`_ (and its
+  `tab-completion feature <https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion>`_)
+  is a great way to explore bornagain.
 
+Before you start using bornagain
+--------------------------------
 
-Before you get started...
--------------------------
-
-- The Python language is the interface to bornagin.  It's very readable if you `try <https://www.python.org/dev/peps/pep-0020/>`_ to make it so.
-- All units in bornagain are SI, for simplicity.  Angles are radians.
-- We must be consistent in the way that we specify vectors using numpy arrays.  Same goes for rotation matrices.  We therefore have utilities like vec_check() and rotate_vecs() to make sure we shape arrays consistently and operate on vectors in a consistent way.  Use these utilities.
-- We never hard-code the direction the x-ray beam.  You specify the direction that *you* want.
-- We adhere to `PEP8 <https://www.python.org/dev/peps/pep-0008/?>`_ Python style guide.
 - If documentation is missing or confusing, please fix it or tell someone who can.
+- *All* units in bornagain are SI.  Angles are radians.
+- We never hard-code the direction the x-ray beam.  *You* choose the direction of the x-ray beam.
+- We must be consistent in the way that we specify vectors using numpy arrays.  Same goes for rotation matrices.  We therefore have utilities like vec_check() and rotate_vecs() to make sure we shape arrays consistently and operate on vectors in a consistent way.  Use these utilities.
 
 
 If you plan to develop bornagain

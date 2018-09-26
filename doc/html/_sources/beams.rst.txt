@@ -1,4 +1,4 @@
-X-ray beams
+Beams
 ===========
 
 The bornagain :mod:`source <bornagain.source>` package provides the :class:`Beam <bornagain.source.Beam>` class for describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of parameters that are needed to describe a beam are:
@@ -12,7 +12,6 @@ and
 Wavelength might be accompanied by a FWHM spread in photon energy :math:`\Delta E/E`, and the nominal beam direction might be accompanied by the beam divergence FWHM.  The bornagain package does not make a general assumption about the beam direction, but the [0,0,1] direction is most commonly used so far.
 
 Beam polarization can also be important:
-
 
    :math:`\hat{u}` is the polarization vector for the x-ray beam.
 

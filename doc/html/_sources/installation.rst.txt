@@ -10,7 +10,7 @@ where you are doing your analysis or simulations so that you can reproduce them 
 code alongside results is good practice anyways.
 
 If the bornagain package directory is not in your working directory, you might need to add bornagain to your python path
- by doing something like this:
+by doing something like this:
 
 .. code-block:: python
 
