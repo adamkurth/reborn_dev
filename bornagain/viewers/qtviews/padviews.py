@@ -1,10 +1,25 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
-from PyQt5 import uic
-from PyQt5.QtWidgets import QInputDialog, QLineEdit
-from PyQt5.QtGui import QShortcut, QKeySequence, QTransform
+# try:
+#     from PyQt5 import uic
+#     from PyQt5.QtWidgets import QInputDialog, QLineEdit
+#     from PyQt5.QtGui import QShortcut, QKeySequence, QTransform
+# except ImportError:
+#     from PyQt4 import uic
+#     # from PyQt4.QtWidgets import
+#     from PyQt4.QtGui import QShortcut, QKeySequence, QTransform, QInputDialog, QLineEdit
+
 import pkg_resources
 
 import pyqtgraph as pg
+from pyqtgraph.Qt import uic, QtGui, QtCore
+QShortcut = QtGui.QShortcut
+QKeySequence = QtGui.QKeySequence
+QTransform = QtGui.QTransform
+QInputDialog = QtGui.QInputDialog
+QLineEdit = QtGui.QLineEdit
+
 pg.setConfigOptions(imageAxisOrder='row-major')
 import bornagain.external.pyqtgraph as bpg
 from bornagain.utils import vec_norm, vec_mag
@@ -31,9 +46,11 @@ class PADView(object):
     pad_labels = None
     rois = []
     images = []
+    scatter_plots = []
     rings = []
     grid = None
     coord_axes = None
+    scan_arrows = None
 
     def __init__(self, pad_geometry=[], pad_data=[], logscale=False):
 
@@ -88,10 +105,9 @@ class PADView(object):
     def show_coordinate_axes(self):
 
         if self.coord_axes is None:
-            L = 100
-            x = pg.PlotDataItem(np.array([0, 1])*L, np.array([0, 0])*L, pen=pg.mkPen('r'), width=5)
-            y = pg.PlotDataItem(np.array([0, 0]) * L, np.array([0, 1]) * L, pen=pg.mkPen('g'), width=5)
-            z = pg.ScatterPlotItem([0], [0], pen=None, brush=pg.mkBrush('b'))
+            x = pg.ArrowItem(pos=(30, 0), brush=pg.mkBrush('r'), pxMode=False, angle=180, pen=None)
+            y = pg.ArrowItem(pos=(0, 30), brush=pg.mkBrush('g'), pxMode=False, angle=-90, pen=None)
+            z = pg.ScatterPlotItem([0], [0], pen=None, brush=pg.mkBrush('b'), pxMode=False, size=15)
             self.coord_axes = [x, y, z]
             self.viewbox.addItem(z)
             self.viewbox.addItem(x)
@@ -111,6 +127,55 @@ class PADView(object):
         else:
             self.hide_coordinate_axes()
 
+    def show_fast_scan_directions(self):
+
+        if self.scan_arrows is None:
+
+            self.scan_arrows = []
+
+            for p in self.pad_geometry:
+
+                f = p.fs_vec.ravel()
+                t = p.t_vec.ravel()
+                ang = np.arctan2(f[1], f[0])*180/np.pi
+                a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None)
+
+                self.scan_arrows.append(a)
+                self.viewbox.addItem(a)
+
+    def hide_fast_scan_directions(self):
+
+        if self.scan_arrows is not None:
+
+            for a in self.scan_arrows:
+
+                self.viewbox.removeItem(a)
+
+            self.scan_arrows = None
+
+    def toggle_fast_scan_directions(self):
+
+        if self.scan_arros is None:
+            self.show_fast_scan_directions()
+        else:
+            self.hide_fast_scan_directions()
+
+    def show_all_geom_info(self):
+
+        self.show_pad_frames()
+        self.show_grid()
+        self.show_pad_labels()
+        self.show_fast_scan_directions()
+        self.show_coordinate_axes()
+
+    def hide_all_geom_info(self):
+
+        self.hide_pad_frames()
+        self.hide_grid()
+        self.hide_pad_labels()
+        self.hide_fast_scan_directions()
+        self.show_coordinate_axes()
+
     def show_pad_labels(self):
 
         if self.pad_labels is None:
@@ -119,7 +184,7 @@ class PADView(object):
 
             for i in range(0, self.n_pads):
 
-                lab = pg.TextItem(text="%d" % i, fill=pg.mkBrush('b'), anchor=(0.5, 0.5))
+                lab = pg.TextItem(text="%d" % i, fill=pg.mkBrush('b'), color='y', anchor=(0.5, 0.5))
                 g = self.pad_geometry[i]
                 fs = g.fs_vec.ravel()*g.n_fs/2
                 ss = g.ss_vec.ravel()*g.n_ss/2
@@ -212,8 +277,9 @@ class PADView(object):
         # trans.translate(t[0], t[1])
         # im.setTransform(trans)
 
+    def setup_pads(self, show_scans=True):
 
-    def setup_pads(self, show_scans=False):
+        mx = np.ravel(self.pad_data).max()
 
         for i in range(0, self.n_pads):
 
@@ -225,8 +291,7 @@ class PADView(object):
                 d = np.log10(d)
 
             if show_scans:  # For testing - show fast scan axis
-                d[0:np.ceil(d.shape[0]*0.005).astype(np.int),
-                  0:np.ceil(d.shape[1]*0.1).astype(np.int)] *= 0.1
+                d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
 
             im = bpg.ImageItem(d)
 
@@ -350,6 +415,12 @@ class PADView(object):
             pen = pg.mkPen([0, 255, 0], width=1)
         for image in self.images:
             image.setBorder(pen)
+
+    def add_scatter_plot(self, *args, **kargs):
+
+        scat = pg.ScatterPlotItem(*args, **kargs)
+        self.scatter_plots.append(scat)
+        self.viewbox.addItem(scat)
 
     def start(self):
 
