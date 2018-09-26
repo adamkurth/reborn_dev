@@ -8,14 +8,17 @@ accessed using :func:`get_symmetry_operators_from_space_group
 The data were taken from the `spglib <https://atztogo.github.io/spglib/>`_ package.
 
 This module defines the following lists:
-   _spgrp_ops: The list of dictionaries containing the symmetry operations
-               (translations and rotations).
-       _hmsym: The list of Hermann–Mauguin symbols (python strings)
-       _sgnum: The list of space group numbers (ranging from 1-230) corresponding to
+
+_spgrp_ops: The list of dictionaries containing the symmetry operations (translations and rotations).
+
+_hmsym: The list of Hermann–Mauguin symbols (python strings)
+
+_sgnum: The list of space group numbers (ranging from 1-230) corresponding to
                each of the Hall numbers (ranging from 1-530).  I don't yet understand
                what the Hall numbers are... but there is a useful table here:
                http://pmsl.planet.sci.kobe-u.ac.jp/~seto/?page_id=37&lang=en
 """
+
 
 from numpy import array
 
