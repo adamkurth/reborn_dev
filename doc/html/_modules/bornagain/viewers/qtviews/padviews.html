@@ -433,7 +433,7 @@
         <span class="c1"># trans.translate(t[0], t[1])</span>
         <span class="c1"># im.setTransform(trans)</span>
 
-<div class="viewcode-block" id="PADView.setup_pads"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.setup_pads">[docs]</a>    <span class="k">def</span> <span class="nf">setup_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show_scans</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="PADView.setup_pads"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.setup_pads">[docs]</a>    <span class="k">def</span> <span class="nf">setup_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show_scans</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
@@ -455,6 +455,24 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">im</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PADView.update_pad_data"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.update_pad_data">[docs]</a>    <span class="k">def</span> <span class="nf">update_pad_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_data</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span> <span class="o">=</span> <span class="n">pad_data</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pads</span><span class="p">):</span>
+
+            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logscale</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">d</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+            <span class="n">im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">im</span><span class="o">.</span><span class="n">setImage</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">regionChanged</span><span class="p">()</span></div>
+
+
 
 <div class="viewcode-block" id="PADView.mouse_moved"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.mouse_moved">[docs]</a>    <span class="k">def</span> <span class="nf">mouse_moved</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">):</span>
 

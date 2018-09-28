@@ -25,7 +25,7 @@ Helpful tools
 * Programs such as `pep8 <https://pypi.python.org/pypi/pep8/>`_ can be used to check for PEP8 compliance.
 * Consider using an integrated development environment such as pycharm.
 
-About git
+Using git
 ---------
 
 * We will follow the branching scheme discussed here.
@@ -33,6 +33,17 @@ About git
 * When your branch is ready to be tested by others, first merge the develop branch into your branch, check that
   everything works (using pytest), then merge your branch into develop.
 * When the develop branch seems to be working well, it will be merged into the master branch.
+
+Python 2/3 compatibility
+------------------------
+
+To ensure compatibility with both Python 2 and 3, include the following at the beginning of each python file:
+
+.. code-block:: python
+
+    from __future__ import (absolute_import, division, print_function, unicode_literals)
+    from builtins import *
+
 
 Checking for PEP8 compliance
 ----------------------------

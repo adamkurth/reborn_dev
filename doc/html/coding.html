@@ -92,7 +92,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Coding guidelines</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#before-you-modify-any-code">Before you modify any code:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpful-tools">Helpful tools</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#about-git">About git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-git">Using git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-2-3-compatibility">Python 2/3 compatibility</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generation-of-documentation">Generation of documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#outstanding-issues">Outstanding issues</a></li>
@@ -190,8 +191,8 @@ fix the many inconsistencies.  Please contribute to this effort!!!</p>
 <li>Consider using an integrated development environment such as pycharm.</li>
 </ul>
 </div>
-<div class="section" id="about-git">
-<h2>About git<a class="headerlink" href="#about-git" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-git">
+<h2>Using git<a class="headerlink" href="#using-git" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>We will follow the branching scheme discussed here.</li>
 <li>Make your own branch to develop your ideas.</li>
@@ -199,6 +200,14 @@ fix the many inconsistencies.  Please contribute to this effort!!!</p>
 everything works (using pytest), then merge your branch into develop.</li>
 <li>When the develop branch seems to be working well, it will be merged into the master branch.</li>
 </ul>
+</div>
+<div class="section" id="python-2-3-compatibility">
+<h2>Python 2/3 compatibility<a class="headerlink" href="#python-2-3-compatibility" title="Permalink to this headline">¶</a></h2>
+<p>To ensure compatibility with both Python 2 and 3, include the following at the beginning of each python file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="checking-for-pep8-compliance">
 <h2>Checking for PEP8 compliance<a class="headerlink" href="#checking-for-pep8-compliance" title="Permalink to this headline">¶</a></h2>

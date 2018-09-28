@@ -54,3 +54,12 @@ If you plan to develop bornagain
 --------------------------------
 
 See the page for developers.
+
+Acknowledgements
+----------------
+
+There are numerous contributions to bornagain made by Derek Mendez, Rick Hewitt, and Cameron Howard.
+
+Code found in bornagain has been inspired by numerous open-source software packages such as Thor, psana, OnDA, CrystFEL,
+Cheetah, cctbx.  In some cases, code has been copied or paraphrased from other open-source Python modules such as spglib
+and cfelpyutils.
