@@ -277,7 +277,7 @@ class PADView(object):
         # trans.translate(t[0], t[1])
         # im.setTransform(trans)
 
-    def setup_pads(self, show_scans=True):
+    def setup_pads(self, show_scans=False):
 
         mx = np.ravel(self.pad_data).max()
 
@@ -299,6 +299,24 @@ class PADView(object):
 
             self.images.append(im)
             self.viewbox.addItem(im)
+
+    def update_pad_data(self, pad_data):
+
+        self.pad_data = pad_data
+        for i in range(0, self.n_pads):
+
+            d = self.pad_data[i]
+
+            if self.logscale:
+                d[d < 0] = 0
+                d = np.log10(d)
+
+            im = self.images[i]
+            im.setImage(d)
+
+        self.main_window.histogram.regionChanged()
+
+
 
     def mouse_moved(self, evt):
 

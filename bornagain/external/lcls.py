@@ -57,3 +57,13 @@ def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
         pad_list.append(cheetah_array[p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)])
 
     return pad_list
+
+
+def cheetah_remapped_cspad_array_to_pad_list(cheetah_array, geom_dict):
+
+    pad_list = []
+    for pn in geom_dict['panels']:
+        p = geom_dict['panels'][pn]
+        pad_list.append(cheetah_array[p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)])
+
+    return pad_list
