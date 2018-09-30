@@ -6,8 +6,7 @@ Note that there is documentation on `LCLS PAD geometry <https://confluence.slac.
 """
 
 import numpy as np
-import bornagain
-from bornagain import utils
+
 
 def reshape_psana_cspad_array_to_cheetah_array(psana_array):
     r"""
@@ -23,9 +22,6 @@ def reshape_psana_cspad_array_to_cheetah_array(psana_array):
         cheetah_array (numpy array) :
             A numpy array of shape (1480, 1552); same data as the psana array but mangled as done within Cheetah
     """
-
-    utils.depreciate("Function reshape_psana_cspad_array_to_cheetah_array() is now "
-                     "in external.cheetah.  Don't import it from external.lcls")
 
     imlist = []
     for i in range(0, 4):
@@ -54,9 +50,6 @@ def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
         pad_list (list) :
             A list containing data from each pixel array
     """
-    
-    utils.depreciate("Function cheetah_cspad_array_to_pad_list() is now in external.cheetah."
-                     "  Don't import it from external.lcls")
 
     cheetah_array = reshape_psana_cspad_array_to_cheetah_array(psana_array)
     
@@ -64,10 +57,6 @@ def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
 
 
 def cheetah_remapped_cspad_array_to_pad_list(cheetah_array, geom_dict):
-
-
-    utils.depreciate("Function cheetah_remapped_cspad_array_to_pad_list() is now in external.cheetah."
-                     "  Don't import it from external.lcls")
 
     pad_list = []
     for pn in geom_dict['panels']:

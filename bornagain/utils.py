@@ -6,6 +6,7 @@ from functools import wraps
 import sys
 import numpy as np
 from numpy import sin, cos
+import bornagain as ba
 
 # not sure where to seed
 np.random.seed()
@@ -104,6 +105,14 @@ def vec_mag(V):
     if V.ndim != 2:
         raise ValueError("V must have one or two dimensions.")
     return np.sqrt(np.sum(V * V, axis=1))
+
+
+def depreciate(message):
+
+    if ba.get_global('force_depreciated') is True:
+        error(message)
+    elif ba.get_global('warn_depreciated') is True:
+        warn(message)
 
 
 def warn(message):
