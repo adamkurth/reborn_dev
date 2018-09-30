@@ -8,6 +8,9 @@ otherwise be 32.  If you are using a CPU you might want to set
 BORNAGAIN_CL_GROUPSIZE=1 .
 """
 
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+from builtins import *
+
 import os
 import sys
 
@@ -334,7 +337,8 @@ class ClCore(object):
 
 
     def phase_factor_qrf_chunk(self, q, r, f, Nchunk, q_is_qdev=False):
-        '''
+
+        r"""
         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
 
         Arguments:
@@ -348,7 +352,8 @@ class ClCore(object):
         Returns:
             (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
               if there are input cl arrays.
-        '''
+        """
+
         # this is an inplace method, so we add amplitudes 
         add=self.int_t(1) # inplace 
         
@@ -386,7 +391,8 @@ class ClCore(object):
 
     
     def phase_factor_qrf_inplace(self, q, r, f, R=None, q_is_qdev=False):
-        '''
+
+        r"""
         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
 
         Arguments:
@@ -400,7 +406,7 @@ class ClCore(object):
         Returns:
             (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
               if there are input cl arrays.
-        '''
+        """
 
         if R is None:
             R = np.eye(3, dtype=self.real_t)
@@ -446,7 +452,8 @@ class ClCore(object):
         return amps
 
     def phase_factor_qrf(self, q, r, f, R=None, a=None, add=False):
-        '''
+
+        r"""
         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
 
         Arguments:
@@ -460,7 +467,7 @@ class ClCore(object):
         Returns:
             (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
               if there are input cl arrays.
-        '''
+        """
 
         if R is None:
             R = np.eye(3)
@@ -493,7 +500,8 @@ class ClCore(object):
             return a_dev
 
     def phase_factor_pad(self, r, f, T, F, S, B, nF, nS, w, R=None, a=None, add=False):
-        '''
+
+        r"""
         This should simulate detector panels.
 
         Arguments:
@@ -520,7 +528,7 @@ class ClCore(object):
         Returns:
             A: A numpy array of length nF*nS containing complex scattering
         amplitudes
-        '''
+        """
 
         if R is None:
             R = np.eye(3)
@@ -559,7 +567,8 @@ class ClCore(object):
             return a_dev
 
     def phase_factor_mesh(self, r, f, N, q_min, q_max, a=None):
-        '''
+
+        r"""
         Compute phase factors on a regular 3D mesh of q-space samples.
 
         Arguments:
@@ -575,7 +584,7 @@ class ClCore(object):
         Returns:
             An array of complex scattering amplitudes.  By default this is a normal
                numpy array.  Optionally, this may be an opencl buffer.
-        '''
+        """
 
         N = np.array(N, dtype=self.int_t)
         q_max = np.array(q_max, dtype=self.real_t)

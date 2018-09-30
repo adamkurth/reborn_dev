@@ -2,6 +2,9 @@ r"""
 Classes related to x-ray "scattering", which loosely means diffraction from many objects in random orientations.
 """
 
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+from builtins import *
+
 import numpy as np
 
 

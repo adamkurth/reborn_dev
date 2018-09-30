@@ -2,6 +2,9 @@ r"""
 This is the documentation for the bornagain package.
 """
 
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+from builtins import *
+
 from . import detector
 from . import scatter
 # from . import simulate

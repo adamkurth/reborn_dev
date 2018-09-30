@@ -4,3 +4,6 @@ These functions (and corresponding documentation) were shamelessly stolen from o
 More details are found here:
 https://github.com/ondateam/cfelpyutils
 """
+
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+from builtins import *

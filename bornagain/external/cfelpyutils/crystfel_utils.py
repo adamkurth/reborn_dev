@@ -19,8 +19,8 @@ This module contains the python implementation of some functions from
 the
 `CrystFEL software package <http://www.desy.de/~twhite/crystfel/>`_.
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+from builtins import *
 
 import collections
 import copy

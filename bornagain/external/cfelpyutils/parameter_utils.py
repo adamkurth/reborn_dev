@@ -19,8 +19,8 @@ This module contains the implementation of functions that are used to
 parse and manipulate options and parameters, as extracted by the
 python :obj:`configparse` module.
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+from builtins import *
 
 import ast
 
