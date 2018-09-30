@@ -3,7 +3,7 @@ Some utility functions that might be useful throughout bornagain.  Don't put hig
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-from builtins import *
+# from builtins import *
 
 from functools import wraps
 import sys
@@ -91,26 +91,64 @@ def vec_check(vec, hardcheck=False, dimension=3):
     return vec
 
 
-def vec_norm(V):
+def vec_norm(vec):
 
+    r"""
 
+    Compute the normal vector, which has a length of one.
 
-    V = vec_check(V)
-    if V.ndim != 2:
+    Args:
+        vec: input vector, usually of shape (3) of (N, 3)
+
+    Returns: new vector of length 1.
+
+    """
+
+    vec = vec_check(vec)
+    if vec.ndim != 2:
         raise ValueError("V must have one or two dimensions.")
-    n = np.sqrt(np.sum(V * V, axis=1))
-    return (V.T / n).T
+    vecnorm = np.sqrt(np.sum(vec * vec, axis=1))
+    return (vec.T / vecnorm).T
 
 
-def vec_mag(V):
+def vec_mag(vec):
 
-    V = vec_check(V)
-    if V.ndim != 2:
+    r"""
+
+    Compute the scalar magnitude sqrt(sum(x^2)) of an array of vectors, usually shape (N, 3)
+
+    Args:
+        vec: input vector or array of vectors
+
+    Returns: scalar vector magnitudes
+
+    """
+
+    vec = vec_check(vec)
+    if vec.ndim != 2:
         raise ValueError("V must have one or two dimensions.")
-    return np.sqrt(np.sum(V * V, axis=1))
+    return np.sqrt(np.sum(vec * vec, axis=1))
 
 
 def depreciate(message):
+
+    r"""
+
+    Utility for sending warnings when some class, method, function, etc. is depreciated.  By default, a message of the
+    form "WARNING: blah blah blah" will be printed with sys.stdout.write().  You get to choose the "blah blah blah" part
+    of the message, which is the input to this function.
+
+    The output can be silenced with the function bornagain.set_global('warn_depreciated', False), or you can force
+    an error to occur if you do bornagain.set_global('force_depreciated', True).
+
+    TODO: we need to formally raise a depreciated exception
+
+    Args:
+        message: whatever you want to have printed to the screen
+
+    Returns: nothing
+
+    """
 
     if ba.get_global('force_depreciated') is True:
         error(message)
@@ -119,13 +157,43 @@ def depreciate(message):
 
 
 def warn(message):
-    """ Simple warning message """
+
+    r"""
+
+    Standard way of sending a warning message.  As of now this simply results in a function call
+
+    sys.stdout.write("WARNING: %s\n" % message)
+
+    The purpose of this function is that folks can search for "WARNING:" to find all warning messages, e.g. with grep.
+
+
+    Args:
+        message: the message you want to have printed.
+
+    Returns: nothing
+
+    """
 
     sys.stdout.write("WARNING: %s\n" % message)
 
 
 def error(message):
-    """ Simple error message (to be replaced later...) """
+
+    r"""
+
+    Standard way of sending an error message.  As of now this simply results in a function call
+
+    sys.stdout.write("ERROR: %s\n" % message)
+
+    TODO: need to raise an exception intead of simply printing something...
+
+
+    Args:
+        message: the message you want to have printed.
+
+    Returns: nothing
+    """
+
 
     sys.stderr.write("ERROR: %s\n" % message)
 
@@ -233,13 +301,15 @@ def error(message):
 
 
 def random_rotation(deflection=1.0, randnums=None):
-    """
+
+    r"""
     Creates a random rotation matrix.
 
     deflection: the magnitude of the rotation. For 0, no rotation; for 1, competely random
     rotation. Small deflection => small perturbation.
     randnums: 3 random numbers in the range [0, 1]. If `None`, they will be auto-generated.
     """
+
     # from
     # http://www.realtimerendering.com/resources/GraphicsGems/gemsiii/rand_rotation.c
     if randnums is None:
@@ -282,9 +352,15 @@ def rotation_about_axis(theta, u):
     https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python
     """
 
-    return np.array([[cos(theta) + u[0]**2 * (1-cos(theta)), u[0] * u[1] * (1-cos(theta)) - u[2] * sin(theta), u[0] * u[2] * (1 - cos(theta)) + u[1] * sin(theta)],
-                     [u[0] * u[1] * (1-cos(theta)) + u[2] * sin(theta), cos(theta) + u[1]**2 * (1-cos(theta)), u[1] * u[2] * (1 - cos(theta)) - u[0] * sin(theta)],
-                     [u[0] * u[2] * (1-cos(theta)) - u[1] * sin(theta), u[1] * u[2] * (1-cos(theta)) + u[0] * sin(theta), cos(theta) + u[2]**2 * (1-cos(theta))]])
+    return np.array([[cos(theta) + u[0]**2 * (1-cos(theta)),
+                      u[0] * u[1] * (1-cos(theta)) - u[2] * sin(theta),
+                      u[0] * u[2] * (1 - cos(theta)) + u[1] * sin(theta)],
+                     [u[0] * u[1] * (1-cos(theta)) + u[2] * sin(theta),
+                      cos(theta) + u[1]**2 * (1-cos(theta)),
+                      u[1] * u[2] * (1 - cos(theta)) - u[0] * sin(theta)],
+                     [u[0] * u[2] * (1-cos(theta)) - u[1] * sin(theta),
+                      u[1] * u[2] * (1-cos(theta)) + u[0] * sin(theta),
+                      cos(theta) + u[2]**2 * (1-cos(theta))]])
 
 
 def random_beam_vector(div_fwhm):
@@ -342,7 +418,8 @@ def random_mosaic_rotation(mosaicity_fwhm):
 
 
 def memoize(function):
-    """
+
+    r"""
     This is a function decorator for caching results from a function, to avoid
     excessive computation or reading from disk.  Search the web for more
     details of how this works.

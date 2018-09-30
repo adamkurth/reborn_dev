@@ -42,13 +42,19 @@ To ensure compatibility with both Python 2 and 3, include the following at the b
 .. code-block:: python
 
     from __future__ import (absolute_import, division, print_function, unicode_literals)
-    from builtins import *
 
 
 Checking for PEP8 compliance
 ----------------------------
 
-As an example, you can use the pep8 program to check for inconsistencies (install pep8 with pip if need be).  In the
+We are now using pylint for code formatting.  Install pylint with conda or pip if need be.  You should check that your
+code conforms to standards as follows:
+
+.. code-block:: bash
+
+    pylint --max-line-length=120 filename.py
+
+You can also use the pep8 program to check for inconsistencies (install pep8 with pip if need be).  In the
 base directory of the git repo, do this
 
 .. code-block:: bash
@@ -62,6 +68,21 @@ For simple errors like whitespace, you can use autopep8:
     autopep8 -i -a filename.py
     
 For other problems you'll need to fix things by hand.  We aim to have no errors coming from the `pep8` program.
+
+
+Testing
+-------
+
+We strive to test all code in bornagain, since we obviously want it to work in various environments rather than having
+a quick hack that only works briefly, in one environment.
+
+We use pytest to test the bornagain codebase.  It is simple to make a new test.  Just create a file
+that has a name that beginning with "test_", and within this file write functions that begin with "test_", and within
+those functions you include assert() statements.  These functions go into the test directory.  We then run pytest from
+within the test directory, and all tests will be ran.
+
+This isn't so hard, but it takes a lot of time.  Perhaps 25% of the code you write should be tests.  It is time
+well-spent.
 
 
 Generation of documentation
