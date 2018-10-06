@@ -372,18 +372,18 @@ kernel void buffer_mesh_lookup(
 
 kernel void lattice_transform_intensities_pad(
     const dsfloat16 abc,   // Real-space lattice vectors a,b,c, each contiguous in memory
-    const int4 N,        // Number of unit cells along each axis
+    const int4 N,          // Number of unit cells along each axis
     const dsfloat16 R,     // Rotation matrix
     global dsfloat *I,     // Lattice transform intensities (output)
-    const int n_pixels,  // Number of pixels
-    const int nF,        // Refer to phase_factor_pad
-    const int nS,        // Refer to phase_factor_pad
+    const int n_pixels,    // Number of pixels
+    const int nF,          // Refer to phase_factor_pad
+    const int nS,          // Refer to phase_factor_pad
     const dsfloat w,       // Refer to phase_factor_pad
     const dsfloat4 T,      // Refer to phase_factor_pad
     const dsfloat4 F,      // Refer to phase_factor_pad
     const dsfloat4 S,      // Refer to phase_factor_pad
     const dsfloat4 B,      // Refer to phase_factor_pad
-    const int add        // Refer to phase_factor_pad
+    const int add          // Refer to phase_factor_pad
 ){
 
     const int gi = get_global_id(0); /* Global index */
