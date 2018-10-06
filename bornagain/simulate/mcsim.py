@@ -36,7 +36,21 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     """
     TODO: Write docstring.
     """
-        
+
+# FIXME: In general, the code within the bornagain/bornagain directory should consist of a library of classes, functions, etc. that we use to write programs.  AS it stands, this code is more like a program than a library.  We need to separate the core simulator from all the print statements, file reading/writing, etc.  The mcsim program should go into the programs directory.
+
+# FIXME: the transmission parameter is redundant with n_photons - remove it
+
+# FIXME: I think we should separate the water background since it can be added separately.  It usually only needs to be computed once.
+
+# FIXME: check that the hdf5 file conforms to cxidb format.
+
+# FIXME: remove overlay_wigner_cells -- it doesn't seem to do anything.
+
+
+
+
+
     # Beam parameters
     photon_energy                   = photon_energy / keV
     wavelength                      = hc / photon_energy # pulse_energy = 0.0024
@@ -121,6 +135,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
 
     pseudo_dict = zip(names, values)
     dictionary  = dict(pseudo_dict)
+# FIXME: Just create the above dictionary directly; why make the two lists first?
     file_name = results_dir + 'used_params.txt'
     used_params = open(str(file_name), 'w+')
 
@@ -181,6 +196,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     # Get atomic coordinates and scattering factors from pdb file
     write('Getting atomic coordinates and scattering factors... ')
     if expand_symm:
+        # TODO: eventually move the expand symmetry functionality to the crystal structure class
         cryst = ba.target.crystal.Molecule(pdb_file)
         monomers = cryst.get_monomers()
         all_atoms = ba.target.crystal.Atoms.aggregate(monomers)
@@ -251,6 +267,8 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         cryst_size_file.write('Crystal size (meters) : Mosaic domain size (meters) : Pattern file\n')
 
     for i in np.arange(1, (num_patterns + 1)):
+        # FIXME: the stuff within this loop should probably be made into a separate class, along with the ClCore() instance at the top.
+        #        that way we can do monte-carlo simulations within various programs, not just for crystallography.
         if(mosaic_domain_size_fwhm != 0):
             mosaic_domain_size = np.random.normal(mosaic_domain_size_original, mosaic_domain_size_fwhm / 2.354820045)
         if(crystal_size_fwhm != 0):
@@ -272,6 +290,8 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
             mosaic_domain_size = crystal_size
 
         # Do water scattering
+        # FIXME: do the water parameters vary, or is the below calculation redundant?
+        # FIXME: we could probably move the background scatter stuff into a separate module.
         if water_radius!=0:
             write('Simulating water scattering... ')
             water_number_density = 33.3679e27
@@ -287,10 +307,13 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
                 write('done\n')
 
         R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
+# FIXME: next few lines override this one, yes?
         if random_rotation: R = ba.utils.random_rotation()
+
 
         if random_rotation:
             if fix_rot_seq:
+# FIXME: good to set the seed on request, but I think this should be done at the very top so it affects all random numbers
                 np.random.seed(i)
             R = ba.utils.random_rotation()
         if not cromer_mann:

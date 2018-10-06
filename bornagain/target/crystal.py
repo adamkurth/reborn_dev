@@ -325,7 +325,12 @@ class Atoms:
         self.elem = elem
 
 
-class Molecule(structure):
+class Molecule(Structure):
+
+    # FIXME: the units here are not SI!!
+
+    # FIXME: no documentation here.
+
     def __init__(self, *args, **kwargs):
         structure.__init__(self, *args, **kwargs)
 
@@ -395,7 +400,7 @@ class Lattice:
 
         Also, the input are in units that break the bornagain convention, which will
         be changed eventually.
-        TODO: fix the units
+        TODO: fix the units - everything should be SI and radians
 
         Args:
             a: Lattice constant in angstroms
@@ -429,6 +434,7 @@ class Lattice:
                            self.V / (a * b * sin(gamma))])
         self.O = np.array([self.a, self.b, self.c]).T
         self.Oinv = np.linalg.inv(self.O)
+        # FIXME: much of the above is redundant code - see crystal.Structure class.
 
     def assemble(self, n_unit=10, spherical=False):
 
