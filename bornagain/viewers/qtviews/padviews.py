@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-from builtins import *
 
+import sys
+from time import time
 import numpy as np
 # try:
 #     from PyQt5 import uic
@@ -54,6 +55,8 @@ class PADView(object):
     grid = None
     coord_axes = None
     scan_arrows = None
+    frame_getter = None
+    _shortcuts = None
 
     def __init__(self, pad_geometry=[], pad_data=[], logscale=False):
 
@@ -70,11 +73,36 @@ class PADView(object):
         self.setup_pads()
         self.setup_histogram_tool()
         self.main_window.show()
-        self.proxy = pg.SignalProxy(self.viewbox.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved)
         # self.label = pg.LabelItem(justify='right')
         # self.viewbox.addItem(self.label)
+        self._setup_mouse_interactions()
+        self._setup_shortcuts()
+
+        # self.main_window.setWindowState(self.main_window.windowState()
+        #                                 & ~pg.QtCore.Qt.WindowMinimized
+        #                                 | pg.QtCore.Qt.WindowActive)
+        # self.main_window.activateWindow()
+        # self.main_window.showMaximized()
+
+    def _setup_mouse_interactions(self):
+
+        self.proxy = pg.SignalProxy(self.viewbox.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved)
+
+    def _setup_menu(self):
+
         self.main_window.actionGrid.triggered.connect(self.toggle_grid)
         self.main_window.actionRings.triggered.connect(self.edit_ring_radii)
+
+    def _set_simple_keyboard_shortcut(self, key, func):
+
+        if self._shortcuts is None:
+            self._shortcuts = []
+
+        self._shortcuts.append(QShortcut(QKeySequence(key), self.main_window).activated.connect(func))
+
+    def _setup_shortcuts(self):
+
+        self._set_simple_keyboard_shortcut(QtCore.Qt.Key_Right, self.show_next_frame)
 
         self.grid_shortcut = QShortcut(QKeySequence("Ctrl+g"), self.main_window)
         self.grid_shortcut.activated.connect(self.toggle_grid)
@@ -87,13 +115,6 @@ class PADView(object):
 
         self.label_shortcut = QShortcut(QKeySequence("Ctrl+l"), self.main_window)
         self.label_shortcut.activated.connect(self.toggle_pad_labels)
-
-
-        # self.main_window.setWindowState(self.main_window.windowState()
-        #                                 & ~pg.QtCore.Qt.WindowMinimized
-        #                                 | pg.QtCore.Qt.WindowActive)
-        # self.main_window.activateWindow()
-        # self.main_window.showMaximized()
 
     @property
     def n_pads(self):
@@ -303,7 +324,7 @@ class PADView(object):
             self.images.append(im)
             self.viewbox.addItem(im)
 
-    def update_pad_data(self, pad_data):
+    def update_pads(self, pad_data):
 
         self.pad_data = pad_data
         for i in range(0, self.n_pads):
@@ -318,8 +339,6 @@ class PADView(object):
             im.setImage(d)
 
         self.main_window.histogram.regionChanged()
-
-
 
     def mouse_moved(self, evt):
 
@@ -355,7 +374,8 @@ class PADView(object):
 
     def edit_ring_radii(self):
 
-        text, ok = QInputDialog.getText(self.main_window, "Enter ring radii (comma separated)", "Ring radii", QLineEdit.Normal, "100,200")
+        text, ok = QInputDialog.getText(self.main_window, "Enter ring radii (comma separated)", "Ring radii",
+                                        QLineEdit.Normal, "100,200")
         if ok:
             if text == '':
                 self.remove_rings()
@@ -442,6 +462,22 @@ class PADView(object):
         scat = pg.ScatterPlotItem(*args, **kargs)
         self.scatter_plots.append(scat)
         self.viewbox.addItem(scat)
+
+    def show_next_frame(self):
+
+        print('next')
+
+        if self.frame_getter is None:
+            print('no getter')
+            return
+
+        t = time()
+        dat = self.frame_getter.next_frame()
+        print(time()-t)
+
+        if 'pad_data' in dat.keys():
+            self.update_pads(dat['pad_data'])
+
 
     def start(self):
 
