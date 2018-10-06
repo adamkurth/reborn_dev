@@ -19,7 +19,8 @@ from .target.crystal import Molecule
 
 CONFIG_OPTIONS = {'warn_depreciated': True,
                   'force_depreciated': False,
-                  'verbose': False}
+                  'verbose': False,
+                  'debug': 0}
 
 
 def set_global(option, value):
