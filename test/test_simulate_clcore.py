@@ -6,6 +6,7 @@ If you want to view results just add the keyword "view"
 > python test_simulate_clcore.py view
 """
 
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import sys
 
