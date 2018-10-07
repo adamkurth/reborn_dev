@@ -1,31 +1,30 @@
 r"""
-Method for working with CrystFEL geometry files.
+Method for working with CrystFEL geometry files.  Note that you can convert a CrystFEL geometry file to a Python
+dictionary object with the cfelpyutils.crystfel_utils.load_crystfel_geometry() function.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-from builtins import *
 
-import re
 import numpy as np
 
 from .. import detector
-from .cfelpyutils.crystfel_utils import load_crystfel_geometry
+from cfelpyutils.crystfel_utils import load_crystfel_geometry
 
 
-def geometry_file_to_dict(geometry_file):
-
-    """
-    Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame
-    Valerio if it's broken :)
-
-    Args:
-        geometry_file (str): Path to geometry file
-
-    Returns: Dict
-
-    """
-
-    return load_crystfel_geometry(geometry_file)
+#
+# def geometry_file_to_dict(geometry_file):
+#
+#     """
+#     Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame
+#     Valerio if it's broken :)
+#
+#     Args:
+#         geometry_file (str): Path to geometry file
+#
+#     Returns: Dict
+#     """
+#
+#     return load_crystfel_geometry(geometry_file)
 
 
 def geometry_dict_to_pad_geometry_list(geometry_dict):
@@ -69,10 +68,9 @@ def geometry_file_to_pad_geometry_list(geometry_file):
         geometry_file (str): Path to geometry file
 
     Returns: List of PADGeometry instances
-
     """
 
-    geometry_dict = geometry_file_to_dict(geometry_file)
+    geometry_dict = load_crystfel_geometry(geometry_file)
     pad_list = geometry_dict_to_pad_geometry_list(geometry_dict)
 
     return pad_list
