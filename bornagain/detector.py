@@ -21,6 +21,7 @@ from . import units
 
 
 class PADGeometry(object):
+
     r"""
     This is a simplified version of the Panel class.  Hopefully it replaces Panel.  One main difference is that it does
     not include any information about the source, which makes a lot more sense and removes several headaches that I
