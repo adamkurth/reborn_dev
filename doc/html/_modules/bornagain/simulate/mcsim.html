@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
 </ul>
 
@@ -156,6 +157,9 @@
   <h1>Source code for bornagain.simulate.mcsim</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="o">*</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
@@ -189,7 +193,21 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    TODO: Write docstring.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-        
+
+<span class="c1"># FIXME: In general, the code within the bornagain/bornagain directory should consist of a library of classes, functions, etc. that we use to write programs.  AS it stands, this code is more like a program than a library.  We need to separate the core simulator from all the print statements, file reading/writing, etc.  The mcsim program should go into the programs directory.</span>
+
+<span class="c1"># FIXME: the transmission parameter is redundant with n_photons - remove it</span>
+
+<span class="c1"># FIXME: I think we should separate the water background since it can be added separately.  It usually only needs to be computed once.</span>
+
+<span class="c1"># FIXME: check that the hdf5 file conforms to cxidb format.</span>
+
+<span class="c1"># FIXME: remove overlay_wigner_cells -- it doesn&#39;t seem to do anything.</span>
+
+
+
+
+
     <span class="c1"># Beam parameters</span>
     <span class="n">photon_energy</span>                   <span class="o">=</span> <span class="n">photon_energy</span> <span class="o">/</span> <span class="n">keV</span>
     <span class="n">wavelength</span>                      <span class="o">=</span> <span class="n">hc</span> <span class="o">/</span> <span class="n">photon_energy</span> <span class="c1"># pulse_energy = 0.0024</span>
@@ -274,6 +292,7 @@
 
     <span class="n">pseudo_dict</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
     <span class="n">dictionary</span>  <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pseudo_dict</span><span class="p">)</span>
+<span class="c1"># FIXME: Just create the above dictionary directly; why make the two lists first?</span>
     <span class="n">file_name</span> <span class="o">=</span> <span class="n">results_dir</span> <span class="o">+</span> <span class="s1">&#39;used_params.txt&#39;</span>
     <span class="n">used_params</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file_name</span><span class="p">),</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span>
 
@@ -334,6 +353,7 @@
     <span class="c1"># Get atomic coordinates and scattering factors from pdb file</span>
     <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Getting atomic coordinates and scattering factors... &#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">expand_symm</span><span class="p">:</span>
+        <span class="c1"># TODO: eventually move the expand symmetry functionality to the crystal structure class</span>
         <span class="n">cryst</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span><span class="n">pdb_file</span><span class="p">)</span>
         <span class="n">monomers</span> <span class="o">=</span> <span class="n">cryst</span><span class="o">.</span><span class="n">get_monomers</span><span class="p">()</span>
         <span class="n">all_atoms</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">crystal</span><span class="o">.</span><span class="n">Atoms</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">monomers</span><span class="p">)</span>
@@ -404,6 +424,8 @@
         <span class="n">cryst_size_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Crystal size (meters) : Mosaic domain size (meters) : Pattern file</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">num_patterns</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
+        <span class="c1"># FIXME: the stuff within this loop should probably be made into a separate class, along with the ClCore() instance at the top.</span>
+        <span class="c1">#        that way we can do monte-carlo simulations within various programs, not just for crystallography.</span>
         <span class="k">if</span><span class="p">(</span><span class="n">mosaic_domain_size_fwhm</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">mosaic_domain_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mosaic_domain_size_original</span><span class="p">,</span> <span class="n">mosaic_domain_size_fwhm</span> <span class="o">/</span> <span class="mf">2.354820045</span><span class="p">)</span>
         <span class="k">if</span><span class="p">(</span><span class="n">crystal_size_fwhm</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
@@ -425,6 +447,8 @@
             <span class="n">mosaic_domain_size</span> <span class="o">=</span> <span class="n">crystal_size</span>
 
         <span class="c1"># Do water scattering</span>
+        <span class="c1"># FIXME: do the water parameters vary, or is the below calculation redundant?</span>
+        <span class="c1"># FIXME: we could probably move the background scatter stuff into a separate module.</span>
         <span class="k">if</span> <span class="n">water_radius</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
             <span class="n">write</span><span class="p">(</span><span class="s1">&#39;Simulating water scattering... &#39;</span><span class="p">)</span>
             <span class="n">water_number_density</span> <span class="o">=</span> <span class="mf">33.3679e27</span>
@@ -440,10 +464,13 @@
                 <span class="n">write</span><span class="p">(</span><span class="s1">&#39;done</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">R</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">rotation_about_axis</span><span class="p">(</span><span class="n">rotation_angle</span><span class="p">,</span> <span class="n">rotation_axis</span><span class="p">)</span>
+<span class="c1"># FIXME: next few lines override this one, yes?</span>
         <span class="k">if</span> <span class="n">random_rotation</span><span class="p">:</span> <span class="n">R</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">random_rotation</span><span class="p">()</span>
+
 
         <span class="k">if</span> <span class="n">random_rotation</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fix_rot_seq</span><span class="p">:</span>
+<span class="c1"># FIXME: good to set the seed on request, but I think this should be done at the very top so it affects all random numbers</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="n">R</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">random_rotation</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cromer_mann</span><span class="p">:</span>
@@ -570,7 +597,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
+        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>
@@ -589,21 +616,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

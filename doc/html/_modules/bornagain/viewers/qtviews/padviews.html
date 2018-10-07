@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">bornagain</a></li>
 </ul>
 
@@ -156,6 +157,10 @@
   <h1>Source code for bornagain.viewers.qtviews.padviews</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="c1"># try:</span>
 <span class="c1">#     from PyQt5 import uic</span>
@@ -207,6 +212,8 @@
     <span class="n">grid</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">coord_axes</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">scan_arrows</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">frame_getter</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_shortcuts</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_geometry</span><span class="o">=</span><span class="p">[],</span> <span class="n">pad_data</span><span class="o">=</span><span class="p">[],</span> <span class="n">logscale</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
@@ -223,11 +230,36 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_pads</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup_histogram_tool</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">SignalProxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseMoved</span><span class="p">,</span> <span class="n">rateLimit</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">slot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mouse_moved</span><span class="p">)</span>
         <span class="c1"># self.label = pg.LabelItem(justify=&#39;right&#39;)</span>
         <span class="c1"># self.viewbox.addItem(self.label)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_mouse_interactions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_shortcuts</span><span class="p">()</span>
+
+        <span class="c1"># self.main_window.setWindowState(self.main_window.windowState()</span>
+        <span class="c1">#                                 &amp; ~pg.QtCore.Qt.WindowMinimized</span>
+        <span class="c1">#                                 | pg.QtCore.Qt.WindowActive)</span>
+        <span class="c1"># self.main_window.activateWindow()</span>
+        <span class="c1"># self.main_window.showMaximized()</span>
+
+    <span class="k">def</span> <span class="nf">_setup_mouse_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">SignalProxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseMoved</span><span class="p">,</span> <span class="n">rateLimit</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">slot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mouse_moved</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setup_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">actionGrid</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_grid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">actionRings</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_ring_radii</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_simple_keyboard_shortcut</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shortcuts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shortcuts</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shortcuts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">)</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">func</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_setup_shortcuts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_simple_keyboard_shortcut</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Right</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_next_frame</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_shortcut</span> <span class="o">=</span> <span class="n">QShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+g&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_shortcut</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_grid</span><span class="p">)</span>
@@ -240,13 +272,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">label_shortcut</span> <span class="o">=</span> <span class="n">QShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+l&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label_shortcut</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_pad_labels</span><span class="p">)</span>
-
-
-        <span class="c1"># self.main_window.setWindowState(self.main_window.windowState()</span>
-        <span class="c1">#                                 &amp; ~pg.QtCore.Qt.WindowMinimized</span>
-        <span class="c1">#                                 | pg.QtCore.Qt.WindowActive)</span>
-        <span class="c1"># self.main_window.activateWindow()</span>
-        <span class="c1"># self.main_window.showMaximized()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -456,7 +481,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">im</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PADView.update_pad_data"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.update_pad_data">[docs]</a>    <span class="k">def</span> <span class="nf">update_pad_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_data</span><span class="p">):</span>
+<div class="viewcode-block" id="PADView.update_pads"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.update_pads">[docs]</a>    <span class="k">def</span> <span class="nf">update_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_data</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span> <span class="o">=</span> <span class="n">pad_data</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pads</span><span class="p">):</span>
@@ -471,8 +496,6 @@
             <span class="n">im</span><span class="o">.</span><span class="n">setImage</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">regionChanged</span><span class="p">()</span></div>
-
-
 
 <div class="viewcode-block" id="PADView.mouse_moved"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.mouse_moved">[docs]</a>    <span class="k">def</span> <span class="nf">mouse_moved</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">):</span>
 
@@ -508,7 +531,8 @@
 
 <div class="viewcode-block" id="PADView.edit_ring_radii"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.edit_ring_radii">[docs]</a>    <span class="k">def</span> <span class="nf">edit_ring_radii</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">text</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QInputDialog</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">,</span> <span class="s2">&quot;Enter ring radii (comma separated)&quot;</span><span class="p">,</span> <span class="s2">&quot;Ring radii&quot;</span><span class="p">,</span> <span class="n">QLineEdit</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="s2">&quot;100,200&quot;</span><span class="p">)</span>
+        <span class="n">text</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QInputDialog</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">,</span> <span class="s2">&quot;Enter ring radii (comma separated)&quot;</span><span class="p">,</span> <span class="s2">&quot;Ring radii&quot;</span><span class="p">,</span>
+                                        <span class="n">QLineEdit</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="s2">&quot;100,200&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">remove_rings</span><span class="p">()</span>
@@ -596,6 +620,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scat</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">scat</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="PADView.show_next_frame"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_next_frame">[docs]</a>    <span class="k">def</span> <span class="nf">show_next_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;next&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;no getter&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">next_frame</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;pad_data&#39;</span> <span class="ow">in</span> <span class="n">dat</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_pads</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;pad_data&#39;</span><span class="p">])</span></div>
+
+
 <div class="viewcode-block" id="PADView.start"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div></div>
@@ -611,7 +651,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
+        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>
@@ -630,21 +670,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

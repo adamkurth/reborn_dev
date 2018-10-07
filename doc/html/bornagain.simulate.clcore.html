@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
@@ -176,12 +177,15 @@
             
   <div class="section" id="module-bornagain.simulate.clcore">
 <span id="bornagain-simulate-clcore-module"></span><h1>bornagain.simulate.clcore module<a class="headerlink" href="#module-bornagain.simulate.clcore" title="Permalink to this headline">¶</a></h1>
-<p>This module contains some core functions that are useful for simulating
-diffraction on GPU devices.  It is not finished yet…</p>
-<p>Some environment variables that affect this module:
-‘BORNAGAIN_CL_GROUPSIZE’ : This sets the default groupsize.  It will
-otherwise be 32.  If you are using a CPU you might want to set
-BORNAGAIN_CL_GROUPSIZE=1 .</p>
+<p>This module contains some core functions that are useful for simulating diffraction on GPU devices.  It is not
+finished yet…</p>
+<p>To get some information on compute devices (CPU/GPU) you can run the function clcore.helpme()</p>
+<p>Some environment variables that affect the behaviour of this module:</p>
+<ul class="simple">
+<li>BORNAGAIN_CL_GROUPSIZE : This sets the default groupsize.</li>
+<li>PYOPENCL_CTX: This sets the device and platform automatically.</li>
+</ul>
+<p>Using the above variables allows you to run the same code on different devices.</p>
 <dl class="function">
 <dt id="bornagain.simulate.clcore.create_some_gpu_context">
 <code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">create_some_gpu_context</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#create_some_gpu_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.create_some_gpu_context" title="Permalink to this definition">¶</a></dt>
@@ -192,8 +196,12 @@ context if possible.</p>
 
 <dl class="class">
 <dt id="bornagain.simulate.clcore.ClCore">
-<em class="property">class </em><code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">ClCore</code><span class="sig-paren">(</span><em>context=None</em>, <em>queue=None</em>, <em>group_size=None</em>, <em>double_precision=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">ClCore</code><span class="sig-paren">(</span><em>context=None</em>, <em>queue=None</em>, <em>group_size=32</em>, <em>double_precision=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A container for the elementary building blocks that GPU diffraction simulations are composed of.</p>
+<p>An instance of this class will initialize an opencl context and help maintain consistency in the
+device queue that compute jobs are sent to, along with consistency in the precision (double/single)
+when memory moves between CPU and GPU memory.</p>
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.set_groupsize">
 <code class="descname">set_groupsize</code><span class="sig-paren">(</span><em>group_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.set_groupsize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.set_groupsize" title="Permalink to this definition">¶</a></dt>
@@ -208,13 +216,15 @@ smaller (but print warning)</p>
 <code class="descname">vec4</code><span class="sig-paren">(</span><em>x</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.vec4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.vec4" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evdidently pyopencl does not deal with 3-vectors very well, so we use
 4-vectors and pad with a zero at the end.</p>
+<p>This just does a trivial operation:
+return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong><strong>, </strong><strong>np.ndarray</strong> (<em>-</em>) – </li>
-<li><strong>dtype</strong><strong>, </strong><strong>np.dtype</strong> (<em>-</em>) – default is np.float32</li>
+<li><strong>np.ndarray</strong> (<em>x</em>) – </li>
+<li><strong>np.dtype</strong> (<em>dtype</em>) – Examples: np.complex, np.double</li>
 </ul>
 </td>
 </tr>
@@ -231,15 +241,16 @@ smaller (but print warning)</p>
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.vec16">
 <code class="descname">vec16</code><span class="sig-paren">(</span><em>R</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.vec16"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.vec16" title="Permalink to this definition">¶</a></dt>
-<dd><p>The best way to pass in a rotation matrix is as a float16.  This is a helper function for preparing a numpy
-array so that it can be passed in as a float16.</p>
+<dd><p>The best way to pass in a rotation matrix is as a float16.  This is a helper function for
+preparing a numpy array so that it can be passed in as a float16.</p>
+<p>See the vec4 function documentation also.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>R</strong><strong>, </strong><strong>np.ndarray</strong> (<em>-</em>) – </li>
-<li><strong>dtype</strong><strong>, </strong><strong>np.dtype</strong> (<em>-</em>) – default is np.float32</li>
+<li><strong>numpy.ndarray</strong> (<em>R</em>) – input array</li>
+<li><strong>numpy.dtype</strong> (<em>dtype</em>) – default is np.float32</li>
 </ul>
 </td>
 </tr>
@@ -312,12 +323,18 @@ are useful here are np.float32 and np.complex64</li>
 </dd></dl>
 
 <dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.test_rotate_vec">
+<code class="descname">test_rotate_vec</code><span class="sig-paren">(</span><em>R</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.test_rotate_vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.test_rotate_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate a single vector.  CPU arrays in, CPU array out. This is just for testing the consistency of memory
+allocation.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real">
 <code class="descname">mod_squared_complex_to_real</code><span class="sig-paren">(</span><em>A</em>, <em>I</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.mod_squared_complex_to_real"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the real-valued modulus square of complex numbers.
-Good example of a function that shouldn’t exist, but I needed to add
-it here because the pyopencl.array.Array class fails at this seemingly
-simple task.</p>
+<dd><p>Compute the real-valued modulus square of complex numbers.  Good example of a function that
+shouldn’t exist, but I needed to add it here because the pyopencl.array.Array class fails to
+do this operation correctly on some computers.</p>
 </dd></dl>
 
 <dl class="method">
@@ -389,17 +406,47 @@ amplitudes.</li>
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.next_multiple_groupsize">
 <code class="descname">next_multiple_groupsize</code><span class="sig-paren">(</span><em>N</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.next_multiple_groupsize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.next_multiple_groupsize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>What does this do?</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>N</strong> – </td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.init_amps">
 <code class="descname">init_amps</code><span class="sig-paren">(</span><em>Npix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.init_amps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.init_amps" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Hey Derek - what does this do?</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Npix</strong> – </td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.release_amps">
 <code class="descname">release_amps</code><span class="sig-paren">(</span><em>reset=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.release_amps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.release_amps" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Derek - what does this do?</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reset</strong> – </td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.phase_factor_qrf">
@@ -571,14 +618,15 @@ an idealized parallelepiped crystal (usually not very realistic…).</p>
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.gaussian_lattice_transform_intensities_pad">
 <code class="descname">gaussian_lattice_transform_intensities_pad</code><span class="sig-paren">(</span><em>abc</em>, <em>N</em>, <em>T</em>, <em>F</em>, <em>S</em>, <em>B</em>, <em>nF</em>, <em>nS</em>, <em>w</em>, <em>R=None</em>, <em>I=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.gaussian_lattice_transform_intensities_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.gaussian_lattice_transform_intensities_pad" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian approximation
-to the lattice transform.</p>
+<dd><p>Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian
+approximation to the lattice transform.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>abc</strong> (<em>numpy array</em>) – A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.</li>
+<li><strong>abc</strong> (<em>numpy array</em>) – A 3x3 array containing real-space basis vectors.  Vectors are contiguous
+in memory.</li>
 <li><strong>N</strong> (<em>numpy array</em>) – An array containing number of unit cells along each of three axes.</li>
 <li><strong>T</strong> (<em>numpy array</em>) – Translation to center of corner pixel.</li>
 <li><strong>F</strong> (<em>numpy array</em>) – Fast-scan basis vector.</li>
@@ -589,7 +637,8 @@ to the lattice transform.</p>
 <li><strong>w</strong> (<em>float</em>) – Wavelength.</li>
 <li><strong>R</strong> (<em>numpy array</em>) – Rotation matrix acting on q vectors.</li>
 <li><strong>(</strong> (<em>I</em>) – class:pyopencl.array.Array) : OpenCL device array containing intensities.</li>
-<li><strong>add</strong> (<em>bool</em>) – If true, the function will add to the input I buffer, else the buffer is overwritten.</li>
+<li><strong>add</strong> (<em>bool</em>) – If true, the function will add to the input I buffer, else the buffer is
+overwritten.</li>
 </ul>
 </td>
 </tr>
@@ -623,8 +672,7 @@ to the atoms in the target</li>
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.get_r_cromermann">
 <code class="descname">get_r_cromermann</code><span class="sig-paren">(</span><em>atom_vecs</em>, <em>sub_com=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.get_r_cromermann"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.get_r_cromermann" title="Permalink to this definition">¶</a></dt>
-<dd><p>combine atomic vectors and atomic flux factors
-into an openCL buffer</p>
+<dd><p>combine atomic vectors and atomic flux factors into an openCL buffer</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -740,11 +788,6 @@ I know it is confusing, but it’s efficient.</p>
 available for running simulations.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="bornagain.simulate.clcore.test">
-<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.test" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </div>
 
 
@@ -767,7 +810,7 @@ available for running simulations.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
+        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>
@@ -786,21 +829,14 @@ available for running simulations.</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

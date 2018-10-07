@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain" href="modules.html" />
+    <link rel="next" title="Numpy, vectors, rotations, etc." href="numpy.html" />
     <link rel="prev" title="Simulations" href="simulations.html" /> 
 
   
@@ -95,10 +95,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#using-git">Using git</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#python-2-3-compatibility">Python 2/3 compatibility</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generation-of-documentation">Generation of documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#outstanding-issues">Outstanding issues</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 
@@ -205,13 +207,17 @@ everything works (using pytest), then merge your branch into develop.</li>
 <h2>Python 2/3 compatibility<a class="headerlink" href="#python-2-3-compatibility" title="Permalink to this headline">¶</a></h2>
 <p>To ensure compatibility with both Python 2 and 3, include the following at the beginning of each python file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">builtins</span> <span class="kn">import</span> <span class="o">*</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="checking-for-pep8-compliance">
 <h2>Checking for PEP8 compliance<a class="headerlink" href="#checking-for-pep8-compliance" title="Permalink to this headline">¶</a></h2>
-<p>As an example, you can use the pep8 program to check for inconsistencies (install pep8 with pip if need be).  In the
+<p>We are now using pylint for code formatting.  Install pylint with conda or pip if need be.  You should check that your
+code conforms to standards as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint --max-line-length<span class="o">=</span><span class="m">120</span> filename.py
+</pre></div>
+</div>
+<p>You can also use the pep8 program to check for inconsistencies (install pep8 with pip if need be).  In the
 base directory of the git repo, do this</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pep8 bornagain
 </pre></div>
@@ -221,6 +227,17 @@ base directory of the git repo, do this</p>
 </pre></div>
 </div>
 <p>For other problems you’ll need to fix things by hand.  We aim to have no errors coming from the <cite>pep8</cite> program.</p>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>We strive to test all code in bornagain, since we obviously want it to work in various environments rather than having
+a quick hack that only works briefly, in one environment.</p>
+<p>We use pytest to test the bornagain codebase.  It is simple to make a new test.  Just create a file
+that has a name that beginning with <cite>test_</cite>, and within this file write functions that begin with <cite>test_</cite>, and within
+those functions you include assert() statements.  These functions go into the test directory.  We then run pytest from
+within the test directory, and all tests will be ran.</p>
+<p>This isn’t so hard, but it takes a lot of time.  Perhaps 25% of the code you write should be tests.  It is time
+well-spent.</p>
 </div>
 <div class="section" id="generation-of-documentation">
 <h2>Generation of documentation<a class="headerlink" href="#generation-of-documentation" title="Permalink to this headline">¶</a></h2>
@@ -259,7 +276,7 @@ throughout</li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="modules.html" class="btn btn-neutral float-right" title="bornagain" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="numpy.html" class="btn btn-neutral float-right" title="Numpy, vectors, rotations, etc." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="simulations.html" class="btn btn-neutral" title="Simulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -271,7 +288,7 @@ throughout</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
+        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>
@@ -290,21 +307,14 @@ throughout</li>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

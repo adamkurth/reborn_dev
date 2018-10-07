@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
@@ -407,7 +408,8 @@ to make sense of the ways in which space groups are specified…</p>
 <dl class="class">
 <dt id="bornagain.target.crystal.Atoms">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">Atoms</code><span class="sig-paren">(</span><em>xyz</em>, <em>atomic_num</em>, <em>elem=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Atoms" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="classmethod">
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="classmethod">
 <dt id="bornagain.target.crystal.Atoms.aggregate">
 <em class="property">classmethod </em><code class="descname">aggregate</code><span class="sig-paren">(</span><em>atoms_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Atoms.aggregate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Atoms.aggregate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -428,7 +430,7 @@ to make sense of the ways in which space groups are specified…</p>
 <dl class="class">
 <dt id="bornagain.target.crystal.Molecule">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">Molecule</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#bornagain.target.crystal.structure" title="bornagain.target.crystal.structure"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.target.crystal.structure</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#bornagain.target.crystal.Structure" title="bornagain.target.crystal.Structure"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.target.crystal.Structure</span></code></a></p>
 <dl class="method">
 <dt id="bornagain.target.crystal.Molecule.get_1d_coords">
 <code class="descname">get_1d_coords</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Molecule.get_1d_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Molecule.get_1d_coords" title="Permalink to this definition">¶</a></dt>
@@ -466,7 +468,8 @@ to make sense of the ways in which space groups are specified…</p>
 <dl class="class">
 <dt id="bornagain.target.crystal.Lattice">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">Lattice</code><span class="sig-paren">(</span><em>a=281.0</em>, <em>b=281.0</em>, <em>c=165.2</em>, <em>alpha=90.0</em>, <em>beta=90.0</em>, <em>gamma=120.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Lattice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Lattice" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
 <dt id="bornagain.target.crystal.Lattice.assemble">
 <code class="descname">assemble</code><span class="sig-paren">(</span><em>n_unit=10</em>, <em>spherical=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Lattice.assemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Lattice.assemble" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a finite lattice (self.vecs)
@@ -505,7 +508,7 @@ to make sense of the ways in which space groups are specified…</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
+        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>
@@ -524,21 +527,14 @@ to make sense of the ways in which space groups are specified…</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

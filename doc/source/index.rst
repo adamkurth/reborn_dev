@@ -14,6 +14,7 @@ Contents
    geometry
    simulations
    coding
+   numpy
    modules
 
 Indices and tables

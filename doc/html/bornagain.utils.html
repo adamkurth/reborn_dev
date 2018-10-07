@@ -89,6 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
@@ -221,24 +222,110 @@ return a modified numpy ndarray with the correct shape.</p>
 
 <dl class="function">
 <dt id="bornagain.utils.vec_norm">
-<code class="descclassname">bornagain.utils.</code><code class="descname">vec_norm</code><span class="sig-paren">(</span><em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_norm" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_norm</code><span class="sig-paren">(</span><em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the normal vector, which has a length of one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vec</strong> – input vector, usually of shape (3) of (N, 3)</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: new vector of length 1.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="bornagain.utils.vec_mag">
-<code class="descclassname">bornagain.utils.</code><code class="descname">vec_mag</code><span class="sig-paren">(</span><em>V</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_mag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_mag" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descclassname">bornagain.utils.</code><code class="descname">vec_mag</code><span class="sig-paren">(</span><em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#vec_mag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.vec_mag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the scalar magnitude sqrt(sum(x^2)) of an array of vectors, usually shape (N, 3)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vec</strong> – input vector or array of vectors</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: scalar vector magnitudes</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.rotate">
+<code class="descclassname">bornagain.utils.</code><code class="descname">rotate</code><span class="sig-paren">(</span><em>rot</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#rotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.rotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This defines a consistent way to rotate vectors.  It is a wrapper that does a simple operation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+<p>Note the bornagain package generally assumes that a set of N vectors of dimension D will be stored as a numpy array
+of shape of N x D.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rot</strong> (<em>numpy array</em>) – The rotation matrix.</li>
+<li><strong>vec</strong> (<em>numpy array</em>) – The vector(s).  For N vectors of dimension D, this should be a NxD array.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: numpy array of same shape as input vec</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.utils.depreciate">
+<code class="descclassname">bornagain.utils.</code><code class="descname">depreciate</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#depreciate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.depreciate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility for sending warnings when some class, method, function, etc. is depreciated.  By default, a message of the
+form “WARNING: blah blah blah” will be printed with sys.stdout.write().  You get to choose the “blah blah blah” part
+of the message, which is the input to this function.</p>
+<p>The output can be silenced with the function bornagain.set_global(‘warn_depreciated’, False), or you can force
+an error to occur if you do bornagain.set_global(‘force_depreciated’, True).</p>
+<p>TODO: we need to formally raise a depreciated exception</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> – whatever you want to have printed to the screen</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: nothing</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="bornagain.utils.warn">
 <code class="descclassname">bornagain.utils.</code><code class="descname">warn</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#warn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.warn" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple warning message</p>
+<dd><p>Standard way of sending a warning message.  As of now this simply results in a function call</p>
+<p>sys.stdout.write(“WARNING: %sn” % message)</p>
+<p>The purpose of this function is that folks can search for “WARNING:” to find all warning messages, e.g. with grep.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> – the message you want to have printed.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: nothing</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="bornagain.utils.error">
 <code class="descclassname">bornagain.utils.</code><code class="descname">error</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple error message (to be replaced later…)</p>
+<dd><p>Standard way of sending an error message.  As of now this simply results in a function call</p>
+<p>sys.stdout.write(“ERROR: %sn” % message)</p>
+<p>TODO: need to raise an exception intead of simply printing something…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> – the message you want to have printed.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: nothing</p>
 </dd></dl>
 
 <dl class="function">
@@ -323,7 +410,7 @@ details of how this works.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
+        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>
@@ -342,21 +429,14 @@ details of how this works.</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

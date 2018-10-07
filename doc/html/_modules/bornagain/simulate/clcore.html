@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
 </ul>
 
@@ -154,15 +155,21 @@
            <div itemprop="articleBody">
             
   <h1>Source code for bornagain.simulate.clcore</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This module contains some core functions that are useful for simulating</span>
-<span class="sd">diffraction on GPU devices.  It is not finished yet...</span>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains some core functions that are useful for simulating diffraction on GPU devices.  It is not</span>
+<span class="sd">finished yet...</span>
 
-<span class="sd">Some environment variables that affect this module:</span>
-<span class="sd">&#39;BORNAGAIN_CL_GROUPSIZE&#39; : This sets the default groupsize.  It will</span>
-<span class="sd">otherwise be 32.  If you are using a CPU you might want to set </span>
-<span class="sd">BORNAGAIN_CL_GROUPSIZE=1 .</span>
+<span class="sd">To get some information on compute devices (CPU/GPU) you can run the function clcore.helpme()</span>
+
+<span class="sd">Some environment variables that affect the behaviour of this module:</span>
+
+<span class="sd">* BORNAGAIN_CL_GROUPSIZE : This sets the default groupsize.</span>
+<span class="sd">* PYOPENCL_CTX: This sets the device and platform automatically.</span>
+
+<span class="sd">Using the above variables allows you to run the same code on different devices.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -174,12 +181,9 @@
 
 <span class="kn">import</span> <span class="nn">bornagain</span> <span class="k">as</span> <span class="nn">ba</span>
 <span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="k">import</span> <span class="n">refdata</span>
-<span class="c1"># import refdata</span>
 
-<span class="c1"># from __builtin__ import None    # this is causing problems for some reason...</span>
+<span class="n">clcore_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;clcore.cpp&#39;</span><span class="p">)</span>
 
-<span class="n">clcore_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span>
-    <span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;clcore.cpp&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="create_some_gpu_context"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.create_some_gpu_context">[docs]</a><span class="k">def</span> <span class="nf">create_some_gpu_context</span><span class="p">():</span>
 
@@ -201,9 +205,42 @@
 
     <span class="k">return</span> <span class="n">context</span></div>
 
+
 <div class="viewcode-block" id="ClCore"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore">[docs]</a><span class="k">class</span> <span class="nc">ClCore</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">double_precision</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    A container for the elementary building blocks that GPU diffraction simulations are composed of.</span>
+
+<span class="sd">    An instance of this class will initialize an opencl context and help maintain consistency in the</span>
+<span class="sd">    device queue that compute jobs are sent to, along with consistency in the precision (double/single)</span>
+<span class="sd">    when memory moves between CPU and GPU memory.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">double_precision</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        An instance of this class will attempt to help you manage an opencl context and command queue.</span>
+<span class="sd">        You may choose the precision that you desire from the beginning, and this will be taken care of</span>
+<span class="sd">        so that you don&#39;t need to think about it when you move arrays between CPU and GPU memory.</span>
+
+<span class="sd">        An opencl context and queue will be created if you do not provide them.  This is the most common</span>
+<span class="sd">        mode of operation.</span>
+
+<span class="sd">        You may choose the group size, which is the number of compute units that have shared local</span>
+<span class="sd">        memory.  The environment variable BORNAGAIN_CL_GROUPSIZE can be used to set the default group</span>
+<span class="sd">        size for a given machine if you want your code to be the same on multiple different machines.</span>
+
+<span class="sd">        The raw opencl kernel code will be compiled when an instance of this class is created.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context: An opencl context</span>
+<span class="sd">            queue: An opencl queue</span>
+<span class="sd">            group_size (int): The desired opencl group size (most common is 32, and this is default).</span>
+<span class="sd">            double_precision (bool): True if double-precision is desired</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">programs</span> <span class="o">=</span> <span class="kc">None</span>
@@ -243,15 +280,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BORNAGAIN_CL_GROUPSIZE&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">group_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;BORNAGAIN_CL_GROUPSIZE&#39;</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">group_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">group_size</span> <span class="o">=</span> <span class="mi">32</span>
         <span class="n">max_group_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">max_work_group_size</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">double_precision</span><span class="p">:</span>
             <span class="n">max_group_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_group_size</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">group_size</span> <span class="o">&gt;</span> <span class="n">max_group_size</span><span class="p">:</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Changing group size from </span><span class="si">%d</span><span class="s1"> to </span><span class="si">%d</span><span class="s1">.</span><span class="se">\n</span><span class="s1">&#39;</span>
-                             <span class="s1">&#39;Set BORNAGAIN_CL_GROUPSIZE=</span><span class="si">%d</span><span class="s1"> to avoid this error.</span><span class="se">\n</span><span class="s1">&#39;</span>
-                             <span class="o">%</span> <span class="p">(</span><span class="n">group_size</span><span class="p">,</span> <span class="n">max_group_size</span><span class="p">,</span> <span class="n">max_group_size</span><span class="p">))</span>
+            <span class="c1"># FIXME: messages of the type below should be printed only in debug mode.</span>
+            <span class="c1"># sys.stderr.write(&#39;Changing group size from %d to %d.\n&#39;</span>
+            <span class="c1">#                  &#39;Set BORNAGAIN_CL_GROUPSIZE=%d to avoid this error.\n&#39;</span>
+            <span class="c1">#                  % (group_size, max_group_size, max_group_size))</span>
             <span class="n">group_size</span> <span class="o">=</span> <span class="n">max_group_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">=</span> <span class="n">group_size</span></div>
 
@@ -297,6 +333,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_phase_factor_pad</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_phase_factor_mesh</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_buffer_mesh_lookup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_test_rotate_vec</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_mod_squared_complex_to_real</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_qrf_default</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_qrf_kam</span><span class="p">()</span>
@@ -310,7 +347,6 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">double_precision</span><span class="p">:</span>
             <span class="n">build_opts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-D&#39;</span><span class="p">)</span>
             <span class="n">build_opts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;CONFIG_USE_DOUBLE=1&#39;</span><span class="p">)</span>
-            <span class="c1"># kern_str = kern_str.replace(&quot;float&quot;, &quot;double&quot;)</span>
         <span class="n">build_opts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-D&#39;</span><span class="p">)</span>
         <span class="n">build_opts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;GROUP_SIZE=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">programs</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">Program</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">kern_str</span><span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">build_opts</span><span class="p">)</span>
@@ -321,15 +357,14 @@
 
     <span class="k">def</span> <span class="nf">_load_phase_factor_qrf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_qrf_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">phase_factor_qrf</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_qrf_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> 
-            <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> 
-            <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_qrf_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">(</span>
+            <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_load_phase_factor_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_pad_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">phase_factor_pad</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_pad_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">(</span>
-            <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
-             <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
+            <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">,</span>
+             <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_load_phase_factor_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_mesh_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">phase_factor_mesh</span>
@@ -342,14 +377,18 @@
     <span class="k">def</span> <span class="nf">_load_lattice_transform_intensities_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lattice_transform_intensities_pad_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">lattice_transform_intensities_pad</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lattice_transform_intensities_pad_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">(</span>
-            <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_load_gaussian_lattice_transform_intensities_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gaussian_lattice_transform_intensities_pad_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">gaussian_lattice_transform_intensities_pad</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gaussian_lattice_transform_intensities_pad_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">(</span>
-            <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_load_test_rotate_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_rotate_vec_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">test_rotate_vec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_rotate_vec_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_load_mod_squared_complex_to_real</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mod_squared_complex_to_real_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">mod_squared_complex_to_real</span>
@@ -364,15 +403,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">qrf_kam_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
 
 <div class="viewcode-block" id="ClCore.vec4"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.vec4">[docs]</a>    <span class="k">def</span> <span class="nf">vec4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evdidently pyopencl does not deal with 3-vectors very well, so we use</span>
 <span class="sd">        4-vectors and pad with a zero at the end.</span>
+
+<span class="sd">        This just does a trivial operation:</span>
+<span class="sd">        return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)</span>
 <span class="sd">            </span>
-<span class="sd">        Arguments:</span>
-<span class="sd">            - x, np.ndarray </span>
+<span class="sd">        Args:</span>
+<span class="sd">            x np.ndarray:</span>
 <span class="sd">            </span>
-<span class="sd">            - dtype, np.dtype </span>
-<span class="sd">                default is np.float32</span>
+<span class="sd">            dtype np.dtype: Examples: np.complex, np.double</span>
 <span class="sd">            </span>
 <span class="sd">        Returns:</span>
 <span class="sd">            - numpy array of length 4</span>
@@ -383,15 +425,17 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ClCore.vec16"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.vec16">[docs]</a>    <span class="k">def</span> <span class="nf">vec16</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The best way to pass in a rotation matrix is as a float16.  This is a helper function for preparing a numpy</span>
-<span class="sd">        array so that it can be passed in as a float16.</span>
 
-<span class="sd">        Arguments:</span>
-<span class="sd">            - R, np.ndarray</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The best way to pass in a rotation matrix is as a float16.  This is a helper function for</span>
+<span class="sd">        preparing a numpy array so that it can be passed in as a float16.</span>
 
-<span class="sd">            - dtype, np.dtype</span>
-<span class="sd">                default is np.float32</span>
+<span class="sd">        See the vec4 function documentation also.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            R numpy.ndarray: input array</span>
+
+<span class="sd">            dtype numpy.dtype: default is np.float32</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            - numpy array of length 16</span>
@@ -425,11 +469,11 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">cl</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">Array</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">array</span>
 
-        <span class="k">return</span> <span class="n">cl</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span>
-                                  <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)))</span></div>
+        <span class="k">return</span> <span class="n">cl</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)))</span></div>
 
 <div class="viewcode-block" id="ClCore.to_device"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.to_device">[docs]</a>    <span class="k">def</span> <span class="nf">to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy </span>
 <span class="sd">        array into a pyopencl.array and send it to the device memory.  So far this only</span>
 <span class="sd">        deals with float and comlex arrays, and it should figure out which type it is.</span>
@@ -461,36 +505,56 @@
                                   <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)))</span></div>
 
 <div class="viewcode-block" id="ClCore.get_group_size"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.get_group_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_group_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        retrieve the currently set group_size</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">group_size_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">)</span>
+
+        <span class="n">group_size_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_group_size_cl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span>
                                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">group_size_dev</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">group_size_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span></div>
 
+<div class="viewcode-block" id="ClCore.test_rotate_vec"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.test_rotate_vec">[docs]</a>    <span class="k">def</span> <span class="nf">test_rotate_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">vec</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rotate a single vector.  CPU arrays in, CPU array out. This is just for testing the consistency of memory</span>
+<span class="sd">        allocation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+        <span class="n">vec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+        <span class="n">vec_out</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">vec_out_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">vec_out</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">global_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_rotate_vec_cl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">global_size</span><span class="p">,),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">R</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="n">vec_out_dev</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">vec_out_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span></div>
+
 <div class="viewcode-block" id="ClCore.mod_squared_complex_to_real"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real">[docs]</a>    <span class="k">def</span> <span class="nf">mod_squared_complex_to_real</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">I</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Compute the real-valued modulus square of complex numbers.</span>
-<span class="sd">        Good example of a function that shouldn&#39;t exist, but I needed to add </span>
-<span class="sd">        it here because the pyopencl.array.Array class fails at this seemingly</span>
-<span class="sd">        simple task.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the real-valued modulus square of complex numbers.  Good example of a function that</span>
+<span class="sd">        shouldn&#39;t exist, but I needed to add it here because the pyopencl.array.Array class fails to</span>
+<span class="sd">        do this operation correctly on some computers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">A_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complex_t</span><span class="p">)</span>
         <span class="n">I_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
 
-        <span class="n">global_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">))</span>
-                             <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
+        <span class="n">global_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mod_squared_complex_to_real_cl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">global_size</span><span class="p">,),</span>
-                                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">A</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">I</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span></div>
-
+                                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">A_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">I_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ClCore.phase_factor_qrf_chunk"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_qrf_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">Nchunk</span><span class="p">,</span> <span class="n">q_is_qdev</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</span>
 
 <span class="sd">        Arguments:</span>
@@ -504,7 +568,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array </span>
 <span class="sd">              if there are input cl arrays.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># this is an inplace method, so we add amplitudes </span>
         <span class="n">add</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># inplace </span>
         
@@ -540,9 +605,9 @@
                                      <span class="n">n_atoms</span><span class="p">,</span>
                                      <span class="n">n_pixels</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span></div>
 
-    
 <div class="viewcode-block" id="ClCore.phase_factor_qrf_inplace"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf_inplace">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_qrf_inplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_is_qdev</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</span>
 
 <span class="sd">        Arguments:</span>
@@ -556,7 +621,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array </span>
 <span class="sd">              if there are input cl arrays.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">R</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
@@ -585,24 +650,60 @@
                                  <span class="n">n_atoms</span><span class="p">,</span>
                                  <span class="n">n_pixels</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span></div>
 
-
 <div class="viewcode-block" id="ClCore.next_multiple_groupsize"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.next_multiple_groupsize">[docs]</a>    <span class="k">def</span> <span class="nf">next_multiple_groupsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        What does this do?</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            N:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="n">N</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span> <span class="o">-</span> <span class="n">N</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="ClCore.init_amps"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.init_amps">[docs]</a>    <span class="k">def</span> <span class="nf">init_amps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Npix</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Hey Derek - what does this do?</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Npix:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Npix</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complex_t</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">Npix</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="ClCore.release_amps"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.release_amps">[docs]</a>    <span class="k">def</span> <span class="nf">release_amps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Derek - what does this do?</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            reset:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">amps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">reset</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">init_amps</span><span class="p">(</span><span class="n">amps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">amps</span></div>
 
 <div class="viewcode-block" id="ClCore.phase_factor_qrf"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_qrf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</span>
 
 <span class="sd">        Arguments:</span>
@@ -616,7 +717,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array </span>
 <span class="sd">              if there are input cl arrays.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">R</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -649,7 +750,8 @@
             <span class="k">return</span> <span class="n">a_dev</span></div>
 
 <div class="viewcode-block" id="ClCore.phase_factor_pad"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_pad">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This should simulate detector panels.</span>
 
 <span class="sd">        Arguments:</span>
@@ -676,7 +778,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            A: A numpy array of length nF*nS containing complex scattering</span>
 <span class="sd">        amplitudes</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">R</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -693,15 +795,14 @@
         <span class="n">r_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="n">f_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complex_t</span><span class="p">)</span>
 
-        <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="n">F</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="n">S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec4</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
         <span class="n">a_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complex_t</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_pixels</span><span class="p">))</span>
 
-        <span class="n">global_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_pixels</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">))</span> <span class="o">*</span>
-                             <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
+        <span class="n">global_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_pixels</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_pad_cl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">global_size</span><span class="p">,),</span>
                                  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">r_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
@@ -715,7 +816,8 @@
             <span class="k">return</span> <span class="n">a_dev</span></div>
 
 <div class="viewcode-block" id="ClCore.phase_factor_mesh"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">q_min</span><span class="p">,</span> <span class="n">q_max</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute phase factors on a regular 3D mesh of q-space samples.</span>
 
 <span class="sd">        Arguments:</span>
@@ -731,7 +833,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            An array of complex scattering amplitudes.  By default this is a normal</span>
 <span class="sd">               numpy array.  Optionally, this may be an opencl buffer.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">)</span>
         <span class="n">q_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q_max</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
@@ -773,7 +875,8 @@
             <span class="k">return</span> <span class="n">a_dev</span></div>
 
 <div class="viewcode-block" id="ClCore.buffer_mesh_lookup"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">buffer_mesh_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_map</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">q_min</span><span class="p">,</span> <span class="n">q_max</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This is supposed to lookup intensities from a 3d mesh of amplitudes.</span>
 
 <span class="sd">        Arguments:</span>
@@ -832,7 +935,7 @@
 
 <div class="viewcode-block" id="ClCore.lattice_transform_intensities_pad"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.lattice_transform_intensities_pad">[docs]</a>    <span class="k">def</span> <span class="nf">lattice_transform_intensities_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abc</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span>
                                           <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">I</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate crystal lattice transform intensities for a pixel-array detector.  This is the usual transform for</span>
 <span class="sd">        an idealized parallelepiped crystal (usually not very realistic...).</span>
 
@@ -890,12 +993,13 @@
 
 <div class="viewcode-block" id="ClCore.gaussian_lattice_transform_intensities_pad"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.gaussian_lattice_transform_intensities_pad">[docs]</a>    <span class="k">def</span> <span class="nf">gaussian_lattice_transform_intensities_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abc</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">nF</span><span class="p">,</span> <span class="n">nS</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span>
                                                    <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">I</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian approximation</span>
-<span class="sd">        to the lattice transform.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian</span>
+<span class="sd">        approximation to the lattice transform.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            abc (numpy array) : A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.</span>
+<span class="sd">            abc (numpy array) : A 3x3 array containing real-space basis vectors.  Vectors are contiguous</span>
+<span class="sd">                                in memory.</span>
 <span class="sd">            N (numpy array)   : An array containing number of unit cells along each of three axes.</span>
 <span class="sd">            T (numpy array)   : Translation to center of corner pixel.</span>
 <span class="sd">            F (numpy array)   : Fast-scan basis vector.</span>
@@ -906,7 +1010,8 @@
 <span class="sd">            w (float)         : Wavelength.</span>
 <span class="sd">            R (numpy array)   : Rotation matrix acting on q vectors.</span>
 <span class="sd">            I (:class:pyopencl.array.Array) : OpenCL device array containing intensities.</span>
-<span class="sd">            add (bool)        : If true, the function will add to the input I buffer, else the buffer is overwritten.</span>
+<span class="sd">            add (bool)        : If true, the function will add to the input I buffer, else the buffer is</span>
+<span class="sd">                                overwritten.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            If I == None, then the output is a numpy array.  Otherwise, it is an opencl array.</span>
@@ -946,7 +1051,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">I_dev</span></div>
 
-
 <div class="viewcode-block" id="ClCore.prime_cromermann_simulator"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.prime_cromermann_simulator">[docs]</a>    <span class="k">def</span> <span class="nf">prime_cromermann_simulator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_vecs</span><span class="p">,</span> <span class="n">atomic_nums</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incoherent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare special array data for cromermann simulation</span>
@@ -972,7 +1076,8 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">incoherent</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">form_facts_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">form_facts_arr</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">form_facts_arr</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> \
+                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Nspecies</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_load_amp_buffer</span><span class="p">()</span>
@@ -1005,9 +1110,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">primed_cromermann</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="ClCore.get_r_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.get_r_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">get_r_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_vecs</span><span class="p">,</span> <span class="n">sub_com</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        combine atomic vectors and atomic flux factors</span>
-<span class="sd">        into an openCL buffer</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        combine atomic vectors and atomic flux factors into an openCL buffer</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            atom_vecs (np.ndarray):</span>
@@ -1042,7 +1147,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_vecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r_vecs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
-
 
 <div class="viewcode-block" id="ClCore.get_q_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.get_q_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">get_q_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
@@ -1086,7 +1190,8 @@
 
 <div class="viewcode-block" id="ClCore.run_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.run_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">run_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span> 
                     <span class="n">rand_rot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the qrf kam simulator.</span>
 
 <span class="sd">        Arguments</span>
@@ -1152,13 +1257,32 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_A_buff_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_set_rand_rot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Derek - please document.</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_com_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Derek - please document.</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ClCore.release_amplitudes"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.release_amplitudes">[docs]</a>    <span class="k">def</span> <span class="nf">release_amplitudes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Releases the amplitude buffer from the GPU</span>
 <span class="sd">        </span>
 <span class="sd">        Arguments:</span>
@@ -1166,13 +1290,16 @@
 
 <span class="sd">        Returns (np.ndarray) : Scattering amplitudes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">Amps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span><span class="o">.</span><span class="n">get</span><span class="p">()[:</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">reset</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_load_amp_buffer</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">Amps</span></div></div>
 
+
 <div class="viewcode-block" id="helpme"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.helpme">[docs]</a><span class="k">def</span> <span class="nf">helpme</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Print out some useful information about platforms and devices that are</span>
 <span class="sd">    available for running simulations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1190,7 +1317,7 @@
                     <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info_value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">info_name</span><span class="p">,</span> <span class="p">[</span>
                         <span class="n">cl</span><span class="o">.</span><span class="n">device_partition_property_ext</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">v</span><span class="p">,</span>
-                                                                   <span class="s2">&quot;&lt;unknown device partition property </span><span class="si">%d</span><span class="s2">&gt;&quot;</span><span class="p">)</span>
+                                                    <span class="s2">&quot;&lt;unknown device partition property </span><span class="si">%d</span><span class="s2">&gt;&quot;</span><span class="p">)</span>
                         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">info_value</span><span class="p">]))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
@@ -1274,59 +1401,63 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; export PYOPENCL_CTX=&#39;1&#39;&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="test"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.test">[docs]</a><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
-    <span class="kn">import</span> <span class="nn">pkg_resources</span>
-    <span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">Molecule</span>
-    <span class="n">pdb</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;bornagain/bornagain&#39;</span><span class="p">,</span>
-                                                                   <span class="s1">&#39;bornagain/examples/data/pdb/2LYZ.pdb&#39;</span><span class="p">)</span>
-    <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="n">pdb</span><span class="p">)</span>
-    <span class="n">form_facts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">atom_vecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+<span class="c1"># def test():</span>
+<span class="c1">#</span>
+<span class="c1">#     # FIXME: this should go into the test directory.</span>
+<span class="c1">#</span>
+<span class="c1">#     import pkg_resources</span>
+<span class="c1">#     from bornagain import Molecule</span>
+<span class="c1">#     pdb = pkg_resources.resource_filename(&#39;bornagain&#39;, &#39;&#39;).replace(&#39;bornagain/bornagain&#39;,</span>
+<span class="c1">#                                                                    &#39;bornagain/examples/data/pdb/2LYZ.pdb&#39;)</span>
+<span class="c1">#     mol = Molecule(pdb)</span>
+<span class="c1">#     form_facts = np.ones(mol.atom_vecs.shape[0], np.complex64)</span>
+<span class="c1">#</span>
+<span class="c1">#     import time</span>
+<span class="c1">#     n_pixels = 2048</span>
+<span class="c1">#     # FIXME: the simpledetector class no longer exists</span>
+<span class="c1">#     D = ba.detector.SimpleDetector(n_pixels=n_pixels)</span>
+<span class="c1">#     print (&quot;\tSimulating into %d pixels&quot; % D.Q.shape[0])</span>
+<span class="c1">#</span>
+<span class="c1">#     #   test q-independent</span>
+<span class="c1">#     core = ClCore(double_precision=True)</span>
+<span class="c1">#     Npix = D.n_pixels</span>
+<span class="c1">#     q = core.to_device(D.Q)</span>
+<span class="c1">#     r = core.to_device(mol.atom_vecs, dtype=core.real_t)</span>
+<span class="c1">#     ff = np.zeros(mol.atom_vecs.shape[0], dtype=core.complex_t)</span>
+<span class="c1">#     ff.real = 1</span>
+<span class="c1">#     f = core.to_device(ff, dtype=core.complex_t)</span>
+<span class="c1">#</span>
+<span class="c1">#     core.init_amps(Npix)</span>
+<span class="c1">#     print(&quot;Testing phase_factor_qrf&quot;)</span>
+<span class="c1">#     t = time.time()</span>
+<span class="c1">#     core.phase_factor_qrf_inplace(q, r, f)</span>
+<span class="c1">#     A = core.release_amps(reset=True)</span>
+<span class="c1">#     print (&quot;\tTook %f.4 seconds&quot; % (time.time() - t))</span>
+<span class="c1">#     _ = D.readout(A)</span>
+<span class="c1">#     D.display()</span>
+<span class="c1">#</span>
+<span class="c1">#     #   now test the cromermann simulation</span>
+<span class="c1">#     print(&quot;Testing cromermann&quot;)</span>
+<span class="c1">#     core.prime_cromermann_simulator( D.Q, None)</span>
+<span class="c1">#     q = core.get_q_cromermann()</span>
+<span class="c1">#</span>
+<span class="c1">#     t = time.time()</span>
+<span class="c1">#     r = core.get_r_cromermann(mol.atom_vecs, sub_com=False)</span>
+<span class="c1">#     core.run_cromermann(q, r, rand_rot=False)</span>
+<span class="c1">#     A2 = core.release_amplitudes()</span>
+<span class="c1">#     print (&quot;\tTook %f.4 seconds&quot; % (time.time() - t))</span>
+<span class="c1">#     _ = D.readout(A2)</span>
+<span class="c1">#     D.display()</span>
+<span class="c1">#</span>
+<span class="c1">#     #   there is slightttt difference between the two methods at low q, not sure why...</span>
+<span class="c1">#     _ = D.readout(A - A2)</span>
+<span class="c1">#     D.display()</span>
+<span class="c1">#</span>
+<span class="c1">#     print(&quot;Passed testing mode!&quot;)</span>
 
-    <span class="kn">import</span> <span class="nn">time</span>
-    <span class="n">n_pixels</span> <span class="o">=</span> <span class="mi">2048</span>
-    <span class="n">D</span> <span class="o">=</span> <span class="n">ba</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">SimpleDetector</span><span class="p">(</span><span class="n">n_pixels</span><span class="o">=</span><span class="n">n_pixels</span><span class="p">)</span>
-    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Simulating into </span><span class="si">%d</span><span class="s2"> pixels&quot;</span> <span class="o">%</span> <span class="n">D</span><span class="o">.</span><span class="n">Q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-    <span class="c1">#   test q-independent</span>
-    <span class="n">core</span> <span class="o">=</span> <span class="n">ClCore</span><span class="p">(</span><span class="n">double_precision</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">Npix</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">n_pixels</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
-    <span class="n">ff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">atom_vecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">complex_t</span><span class="p">)</span>
-    <span class="n">ff</span><span class="o">.</span><span class="n">real</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">complex_t</span><span class="p">)</span>
-
-    <span class="n">core</span><span class="o">.</span><span class="n">init_amps</span><span class="p">(</span><span class="n">Npix</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Testing phase_factor_qrf&quot;</span><span class="p">)</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">core</span><span class="o">.</span><span class="n">phase_factor_qrf_inplace</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">release_amps</span><span class="p">(</span><span class="n">reset</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Took </span><span class="si">%f</span><span class="s2">.4 seconds&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">))</span>
-    <span class="n">_</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">readout</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
-    <span class="n">D</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
-
-    <span class="c1">#   now test the cromermann simulation</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Testing cromermann&quot;</span><span class="p">)</span>
-    <span class="n">core</span><span class="o">.</span><span class="n">prime_cromermann_simulator</span><span class="p">(</span> <span class="n">D</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">get_q_cromermann</span><span class="p">()</span>
-
-    <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">get_r_cromermann</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">atom_vecs</span><span class="p">,</span> <span class="n">sub_com</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">core</span><span class="o">.</span><span class="n">run_cromermann</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">rand_rot</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">A2</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">release_amplitudes</span><span class="p">()</span>
-    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Took </span><span class="si">%f</span><span class="s2">.4 seconds&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">))</span>
-    <span class="n">_</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">readout</span><span class="p">(</span><span class="n">A2</span><span class="p">)</span>
-    <span class="n">D</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
-
-    <span class="c1">#   there is slightttt difference between the two methods at low q, not sure why...</span>
-    <span class="n">_</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">readout</span><span class="p">(</span><span class="n">A</span> <span class="o">-</span> <span class="n">A2</span><span class="p">)</span>
-    <span class="n">D</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed testing mode!&quot;</span><span class="p">)</span></div>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">test</span><span class="p">()</span>
+<span class="c1">#</span>
+<span class="c1"># if __name__ == &quot;__main__&quot;:</span>
+<span class="c1">#     test()</span>
 </pre></div>
 
            </div>
@@ -1339,7 +1470,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
+        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>
@@ -1358,21 +1489,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
