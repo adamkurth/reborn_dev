@@ -4,22 +4,19 @@ detectors (PADs).
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-from builtins import *
 
 import sys
 
 import numpy as np
-from numpy.linalg import norm
 import h5py
 
-try:
-    import matplotlib
-    import pylab as plt
-except ImportError:
-    pass
+# try:
+#     import matplotlib
+#     import pylab as plt
+# except ImportError:
+#     pass
 
 from .utils import vec_norm, vec_mag, vec_check
-from . import source
 from . import units
 
 
@@ -43,7 +40,7 @@ class PADGeometry(object):
     @property
     def n_pixels(self):
 
-        return self.n_fs*self.n_ss
+        return self.n_fs * self.n_ss
 
     @property
     def fs_vec(self):
@@ -78,24 +75,23 @@ class PADGeometry(object):
     def t_vec(self, t_vec):
         self._t_vec = vec_check(t_vec)
 
-
-    def save( self, save_fname):
+    def save(self, save_fname):
         """Saves an hdf5 file with class attributes for later use"""
         with h5py.File(save_fname, "w") as h:
-            for name, data in vars( self).items():
-                h.create_dataset(name,data=data)
+            for name, data in vars(self).items():
+                h.create_dataset(name, data=data)
 
     @classmethod
     def load(cls, fname):
         """ load a PAD object from fname"""
         pad = cls()
-        with h5py.File( fname, "r") as h:
+        with h5py.File(fname, "r") as h:
             for name in h.keys():
                 data = h[name].value
                 setattr(pad, name, data)
         return pad
 
-    def simple_setup(self, n_pixels = 1000, pixel_size = 100e-6, distance = 0.1):
+    def simple_setup(self, n_pixels=1000, pixel_size=100e-6, distance=0.1):
         r""" Make this a square PAD with beam at center.
 
         Returns:
@@ -176,7 +172,6 @@ class PADGeometry(object):
 
         return (2 * np.pi / wavelength) * self.ds_vecs(beam_vec=beam_vec)
 
-
     def solid_angles2(self):
         """
         this should be sped up by vectorizing, but its more readable for now
@@ -187,43 +182,46 @@ class PADGeometry(object):
         each triangle. Sum them to get the solid angle of pixel.
         """
         k = self.position_vecs()
-        R1 = k-self.fs_vec*.5 - self.ss_vec*.5
-        R2 = k+self.fs_vec*.5 - self.ss_vec*.5
-        R3 = k-self.fs_vec*.5 + self.ss_vec*.5
-        R4 = k+self.fs_vec*.5 + self.ss_vec*.5
-        sa_1 = np.array( [self._comp_solid_ang(r1,r2,r3) 
-            for r1,r2,r3 in zip( R1,R2,R3) ])
-        sa_2 = np.array( [self._comp_solid_ang(r4,r2,r3) 
-            for r4,r2,r3 in zip( R4,R2,R3) ])
+        R1 = k - self.fs_vec * .5 - self.ss_vec * .5
+        R2 = k + self.fs_vec * .5 - self.ss_vec * .5
+        R3 = k - self.fs_vec * .5 + self.ss_vec * .5
+        R4 = k + self.fs_vec * .5 + self.ss_vec * .5
+        sa_1 = np.array([self._comp_solid_ang(r1, r2, r3)
+                         for r1, r2, r3 in zip(R1, R2, R3)])
+        sa_2 = np.array([self._comp_solid_ang(r4, r2, r3)
+                         for r4, r2, r3 in zip(R4, R2, R3)])
         return sa_1 + sa_2
 
-    def _comp_solid_ang(self, r1,r2,r3):
-        """ 
+    def _comp_solid_ang(self, r1, r2, r3):
+
+        r"""
         compute solid angle of a triangle whose vertices are r1,r2,r3
         Ref:thanks Jonas ...  
         Van Oosterom, A. & Strackee, J. 
         The Solid Angle of a Plane Triangle. Biomedical Engineering, 
         IEEE Transactions on BME-30, 125-126 (1983).
         """
-        numer = np.abs( np.dot( r1, np.cross(r2,r3) ) )
-        
-        r1_n = np.linalg.norm( r1)
-        r2_n = np.linalg.norm( r2)
-        r3_n = np.linalg.norm( r3)
-        denom =r1_n*r2_n*r2_n
-        denom += np.dot( r1,r2) * r3_n
-        denom += np.dot( r2,r3) * r1_n
-        denom += np.dot( r3,r1) * r2_n
-        s_ang = np.arctan2( numer, denom) * 2
+
+        numer = np.abs(np.dot(r1, np.cross(r2, r3)))
+
+        r1_n = np.linalg.norm(r1)
+        r2_n = np.linalg.norm(r2)
+        r3_n = np.linalg.norm(r3)
+        denom = r1_n * r2_n * r2_n
+        denom += np.dot(r1, r2) * r3_n
+        denom += np.dot(r2, r3) * r1_n
+        denom += np.dot(r3, r1) * r2_n
+        s_ang = np.arctan2(numer, denom) * 2
 
         return s_ang
 
-
     def solid_angles(self):
+
         r"""
         Calculate solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:
 
-            :math:`\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}`.
+            :math:`\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) =
+                      \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}`.
 
         Returns: numpy array
         """
@@ -231,12 +229,12 @@ class PADGeometry(object):
         v = self.position_vecs()
         n = self.norm_vec()
 
-        A = vec_mag(np.cross(self.fs_vec, self.ss_vec))  # Area of the pixel
-        R2 = vec_mag(v) ** 2  # Distance to the pixel, squared
+        a = vec_mag(np.cross(self.fs_vec, self.ss_vec))  # Area of the pixel
+        r2 = vec_mag(v) ** 2  # Distance to the pixel, squared
         cs = np.dot(n, vec_norm(v).T)  # Inclination factor: cos(theta)
-        sa = (A / R2) * cs  # Solid angle
+        sa = (a / r2) * cs  # Solid angle
 
-        return np.abs(sa.ravel() )
+        return np.abs(sa.ravel())
 
     def polarization_factors(self, polarization_vec, beam_vec, weight=None):
         r"""
@@ -291,8 +289,7 @@ class PADGeometry(object):
         return dat.reshape(self.shape())
 
 
-def split_pad_data(pad_list=[], data=None):
-
+def split_pad_data(pad_list=None, data=None):
     r"""
 
     Given a contiguous block of data, split it up into individual PAD panels
@@ -306,12 +303,13 @@ def split_pad_data(pad_list=[], data=None):
 
     """
 
+    if pad_list is None:
+        pad_list = []
     data_list = []
 
     offset = 0
     for pad in pad_list:
-
-        data_list.append(pad.reshape(data[offset:(offset+pad.n_pixels)]))
+        data_list.append(pad.reshape(data[offset:(offset + pad.n_pixels)]))
         offset += pad.n_pixels
 
     return data_list
@@ -400,35 +398,34 @@ class SimplePAD(PADGeometry):
     """
 
     def __init__(self, n_pixels=1000, pixsize=0.00005, detdist=0.05, wavelen=1., center=None,
-                    *args, **kwargs):
+                 *args, **kwargs):
 
         PADGeometry.__init__(self, *args, **kwargs)
-
 
         self.detector_distance = detdist
         self.wavelength = wavelen
         self.si_energy = units.hc / (wavelen * 1e-10)
 
-        self.simple_setup(n_pixels=n_pixels, 
-                pixel_size=pixsize, 
-                distance=detdist)
+        self.simple_setup(n_pixels=n_pixels,
+                          pixel_size=pixsize,
+                          distance=detdist)
 
         self.fig = None
 
         # shape of the 2D det panel (2D image)
-        self.img_sh = self.shape() 
-        
+        self.img_sh = self.shape()
+
         if center is not None:
-            assert( len( center)==2)
-            assert( center[0]  < pad.n_fs )
-            assert( center[1] <  pad.n_ss)
+            assert (len(center) == 2)
+            assert (center[0] < self.n_fs)
+            assert (center[1] < self.n_ss)
             self.center = center
         else:
             self.center = map(lambda x: x / 2., self.img_sh)
 
-        self.SOLID_ANG = self.solid_angles() 
+        self.SOLID_ANG = self.solid_angles()
 
-        self._make_Qmag()
+        self._make_qmag()
 
         # useful functions fr converting between pixel radii and momentum transfer
         self.rad2q = lambda rad: 4 * np.pi * np.sin(.5 * np.arctan(rad * pixsize / detdist)) / wavelen
@@ -436,17 +433,16 @@ class SimplePAD(PADGeometry):
 
         self.intens = None
 
-    
-    def _make_Qmag(self):
-        """
+    def _make_qmag(self):
+
+        r"""
         Makes the momentum transfer of each Q
         """
-        beam_vector = np.array( [ 0,0,1 ] )
-        
-        self.Q_vectors = self.q_vecs( 
-                    beam_vec=np.array([0,0,1]), 
-                    wavelength=self.wavelength)
-        self.Qmag = np.sqrt( np.sum( self.Q_vectors**2 , axis=1 ))
+
+        self.Q_vectors = self.q_vecs(
+            beam_vec=np.array([0, 0, 1]),
+            wavelength=self.wavelength)
+        self.Qmag = np.sqrt(np.sum(self.Q_vectors ** 2, axis=1))
 
     def readout(self, amplitudes):
         """
@@ -570,13 +566,16 @@ class SimplePAD(PADGeometry):
             plt.draw()
             plt.pause(pause)
 
-class IcosphereGeometry():
-    """
+
+class IcosphereGeometry(object):
+    r"""
+
     Experimental class for a spherical detector that follows the "icosphere" geometry.
     The Icosphere is generated by sub-dividing the vertices of an icosahedron.
     The following blog was helpful:
     http://sinestesia.co/blog/tutorials/python-icospheres/
     The code is quite slow; needs to be vectorized with numpy...
+
     """
 
     n_subdivisions = 1
@@ -628,23 +627,23 @@ class IcosphereGeometry():
         middle_point_cache = {}
 
         # Golden ratio
-        PHI = (1 + np.sqrt(5)) / 2
+        phi = (1 + np.sqrt(5)) / 2
 
         verts = [
-            vertex(-1, PHI, 0),
-            vertex(1, PHI, 0),
-            vertex(-1, -PHI, 0),
-            vertex(1, -PHI, 0),
+            vertex(-1, phi, 0),
+            vertex(1, phi, 0),
+            vertex(-1, -phi, 0),
+            vertex(1, -phi, 0),
 
-            vertex(0, -1, PHI),
-            vertex(0, 1, PHI),
-            vertex(0, -1, -PHI),
-            vertex(0, 1, -PHI),
+            vertex(0, -1, phi),
+            vertex(0, 1, phi),
+            vertex(0, -1, -phi),
+            vertex(0, 1, -phi),
 
-            vertex(PHI, 0, -1),
-            vertex(PHI, 0, 1),
-            vertex(-PHI, 0, -1),
-            vertex(-PHI, 0, 1),
+            vertex(phi, 0, -1),
+            vertex(phi, 0, 1),
+            vertex(-phi, 0, -1),
+            vertex(-phi, 0, 1),
         ]
 
         faces = [
