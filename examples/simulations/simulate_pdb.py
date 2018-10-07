@@ -34,7 +34,7 @@ tstart = time.time()
 pl = ba.detector.PADGeometry()
 nPixels = 1001
 pixelSize = 100e-6
-detectorDistance = 0.05
+detectorDistance = 0.5
 wavelength = 1.5e-10
 beam_vec = np.array([0, 0, 1])
 pl.simple_setup(n_pixels=nPixels, pixel_size=pixelSize, distance=detectorDistance)
@@ -180,7 +180,7 @@ if 1:
     print("Use a 3D lookup table on the GPU")
     print(lin)
 
-    res = 1e-10  # Resolution
+    res = 10e-10  # Resolution
     qmax = 2 * np.pi / (res)
     qmin = -qmax
     N = 200  # Number of samples
@@ -199,12 +199,8 @@ if 1:
     print("Interpolate patterns from GPU lookup table")
     print("Amplitudes passed as GPU array")
 
-    # t = time.time()
     q_dev = clcore.to_device(q, dtype=clcore.real_t)
-    # a_map_dev = clcore.to_device(A, dtype=clcore.complex_t)
     a_out_dev = clcore.to_device(dtype=clcore.complex_t, shape=(pl.n_fs*pl.n_ss))
-    # tf = time.time() - t
-    # print('As above, but first move arrays to device memory (%7.03f ms)' % (tf * 1e3))
     n_atoms = 0
     n_pixels = q.shape[0]
     for i in range(0, n_trials):

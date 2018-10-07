@@ -1,15 +1,18 @@
-"""
-This module contains some core functions that are useful for simulating
-diffraction on GPU devices.  It is not finished yet...
+r"""
+This module contains some core functions that are useful for simulating diffraction on GPU devices.  It is not
+finished yet...
 
-Some environment variables that affect this module:
-'BORNAGAIN_CL_GROUPSIZE' : This sets the default groupsize.  It will
-otherwise be 32.  If you are using a CPU you might want to set 
-BORNAGAIN_CL_GROUPSIZE=1 .
+To get some information on compute devices (CPU/GPU) you can run the function clcore.helpme()
+
+Some environment variables that affect the behaviour of this module:
+
+* BORNAGAIN_CL_GROUPSIZE : This sets the default groupsize.
+* PYOPENCL_CTX: This sets the device and platform automatically.
+
+Using the above variables allows you to run the same code on different devices.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-from builtins import *
 
 import os
 import sys
@@ -21,12 +24,9 @@ import pyopencl.array
 
 import bornagain as ba
 from bornagain.simulate import refdata
-# import refdata
 
-# from __builtin__ import None    # this is causing problems for some reason...
+clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
 
-clcore_file = pkg_resources.resource_filename(
-    'bornagain.simulate', 'clcore.cpp')
 
 def create_some_gpu_context():
 
@@ -48,9 +48,43 @@ def create_some_gpu_context():
 
     return context
 
+
 class ClCore(object):
-    def __init__(self, context=None, queue=None, group_size=None,
+
+    r"""
+
+    A container for the elementary building blocks that GPU diffraction simulations are composed of.
+
+    An instance of this class will initialize an opencl context and help maintain consistency in the
+    device queue that compute jobs are sent to, along with consistency in the precision (double/single)
+    when memory moves between CPU and GPU memory.
+
+    """
+
+    def __init__(self, context=None, queue=None, group_size=32,
                  double_precision=False):
+
+        r"""
+
+        An instance of this class will attempt to help you manage an opencl context and command queue.
+        You may choose the precision that you desire from the beginning, and this will be taken care of
+        so that you don't need to think about it when you move arrays between CPU and GPU memory.
+
+        An opencl context and queue will be created if you do not provide them.  This is the most common
+        mode of operation.
+
+        You may choose the group size, which is the number of compute units that have shared local
+        memory.  The environment variable BORNAGAIN_CL_GROUPSIZE can be used to set the default group
+        size for a given machine if you want your code to be the same on multiple different machines.
+
+        The raw opencl kernel code will be compiled when an instance of this class is created.
+
+        Args:
+            context: An opencl context
+            queue: An opencl queue
+            group_size (int): The desired opencl group size (most common is 32, and this is default).
+            double_precision (bool): True if double-precision is desired
+        """
 
         self.group_size = None
         self.programs = None
@@ -90,15 +124,14 @@ class ClCore(object):
         """
         if os.environ.get('BORNAGAIN_CL_GROUPSIZE') is not None:
             group_size = np.int(os.environ.get('BORNAGAIN_CL_GROUPSIZE'))
-        if group_size is None:
-            group_size = 32
         max_group_size = self.queue.device.max_work_group_size
         if self.double_precision:
             max_group_size = int(max_group_size / 2)
         if group_size > max_group_size:
-            sys.stderr.write('Changing group size from %d to %d.\n'
-                             'Set BORNAGAIN_CL_GROUPSIZE=%d to avoid this error.\n'
-                             % (group_size, max_group_size, max_group_size))
+            # FIXME: messages of the type below should be printed only in debug mode.
+            # sys.stderr.write('Changing group size from %d to %d.\n'
+            #                  'Set BORNAGAIN_CL_GROUPSIZE=%d to avoid this error.\n'
+            #                  % (group_size, max_group_size, max_group_size))
             group_size = max_group_size
         self.group_size = group_size
 
@@ -211,15 +244,18 @@ class ClCore(object):
         self.qrf_kam_cl.set_scalar_arg_dtypes([None, None, None, None, None, self.int_t])
 
     def vec4(self, x, dtype=None):
-        """
+
+        r"""
         Evdidently pyopencl does not deal with 3-vectors very well, so we use
         4-vectors and pad with a zero at the end.
+
+        This just does a trivial operation:
+        return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
             
-        Arguments:
-            - x, np.ndarray 
+        Args:
+            x np.ndarray:
             
-            - dtype, np.dtype 
-                default is np.float32
+            dtype np.dtype: Examples: np.complex, np.double
             
         Returns:
             - numpy array of length 4
@@ -230,15 +266,17 @@ class ClCore(object):
         return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
 
     def vec16(self, R, dtype=None):
-        """
-        The best way to pass in a rotation matrix is as a float16.  This is a helper function for preparing a numpy
-        array so that it can be passed in as a float16.
 
-        Arguments:
-            - R, np.ndarray
+        r"""
+        The best way to pass in a rotation matrix is as a float16.  This is a helper function for
+        preparing a numpy array so that it can be passed in as a float16.
 
-            - dtype, np.dtype
-                default is np.float32
+        See the vec4 function documentation also.
+
+        Args:
+            R numpy.ndarray: input array
+
+            dtype numpy.dtype: default is np.float32
 
         Returns:
             - numpy array of length 16
@@ -272,11 +310,11 @@ class ClCore(object):
         if isinstance(array, cl.array.Array):
             return array
 
-        return cl.array.to_device(queue,
-                                  np.ascontiguousarray(array.astype(dtype)))
+        return cl.array.to_device(queue, np.ascontiguousarray(array.astype(dtype)))
 
     def to_device(self, array=None, shape=None, dtype=None):
-        """
+
+        r"""
         This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy 
         array into a pyopencl.array and send it to the device memory.  So far this only
         deals with float and comlex arrays, and it should figure out which type it is.
@@ -308,33 +346,33 @@ class ClCore(object):
                                   np.ascontiguousarray(array.astype(dtype)))
 
     def get_group_size(self):
-        """
+
+        r"""
         retrieve the currently set group_size
         """
-        group_size_dev = self.to_device(np.zeros((1)), dtype=self.int_t)
+
+        group_size_dev = self.to_device(np.zeros(1), dtype=self.int_t)
         self.get_group_size_cl(self.queue, (self.group_size,),
                                (self.group_size,), group_size_dev.data)
 
         return group_size_dev.get()[0]
 
     def mod_squared_complex_to_real(self, A, I):
-        '''
-        Compute the real-valued modulus square of complex numbers.
-        Good example of a function that shouldn't exist, but I needed to add 
-        it here because the pyopencl.array.Array class fails at this seemingly
-        simple task.
-        '''
+
+        r"""
+        Compute the real-valued modulus square of complex numbers.  Good example of a function that
+        shouldn't exist, but I needed to add it here because the pyopencl.array.Array class fails to
+        do this operation correctly on some computers.
+        """
 
         A_dev = self.to_device(A, dtype=self.complex_t)
         I_dev = self.to_device(I, dtype=self.real_t)
         n = self.int_t(np.prod(A.shape))
 
-        global_size = np.int(np.ceil(n / np.float(self.group_size))
-                             * self.group_size)
+        global_size = np.int(np.ceil(n / np.float(self.group_size)) * self.group_size)
 
         self.mod_squared_complex_to_real_cl(self.queue, (global_size,),
-                                            (self.group_size,), A.data, I.data, n)
-
+                                            (self.group_size,), A_dev.data, I_dev.data, n)
 
     def phase_factor_qrf_chunk(self, q, r, f, Nchunk, q_is_qdev=False):
 
@@ -389,7 +427,6 @@ class ClCore(object):
                                      n_atoms,
                                      n_pixels, add)
 
-    
     def phase_factor_qrf_inplace(self, q, r, f, R=None, q_is_qdev=False):
 
         r"""
@@ -435,17 +472,52 @@ class ClCore(object):
                                  n_atoms,
                                  n_pixels, add)
 
-
     def next_multiple_groupsize(self, N):
+
+        r"""
+
+        What does this do?
+
+        Args:
+            N:
+
+        Returns:
+
+        """
+
         if N % self.group_size > 0:
             return self.int_t(self.group_size - N % self.group_size)
         else:
             return 0
 
     def init_amps(self, Npix):
+
+        r"""
+
+        Hey Derek - what does this do?
+
+        Args:
+            Npix:
+
+        Returns:
+
+        """
+
         self.a_dev = self.to_device(np.zeros(Npix), dtype=self.complex_t, shape=(Npix))
 
     def release_amps(self, reset=False):
+
+        r"""
+
+        Derek - what does this do?
+
+        Args:
+            reset:
+
+        Returns:
+
+        """
+
         amps = self.a_dev.get()
         if reset:
             self.init_amps(amps.shape[0])
@@ -626,7 +698,8 @@ class ClCore(object):
             return a_dev
 
     def buffer_mesh_lookup(self, a_map, N, q_min, q_max, q, R=None, a=None):
-        """
+
+        r"""
         This is supposed to lookup intensities from a 3d mesh of amplitudes.
 
         Arguments:
@@ -685,7 +758,7 @@ class ClCore(object):
 
     def lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w,
                                           R=None, I=None, add=False):
-        """
+        r"""
         Calculate crystal lattice transform intensities for a pixel-array detector.  This is the usual transform for
         an idealized parallelepiped crystal (usually not very realistic...).
 
@@ -743,12 +816,13 @@ class ClCore(object):
 
     def gaussian_lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w,
                                                    R=None, I=None, add=False):
-        """
-        Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian approximation
-        to the lattice transform.
+        r"""
+        Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian
+        approximation to the lattice transform.
 
         Arguments:
-            abc (numpy array) : A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.
+            abc (numpy array) : A 3x3 array containing real-space basis vectors.  Vectors are contiguous
+                                in memory.
             N (numpy array)   : An array containing number of unit cells along each of three axes.
             T (numpy array)   : Translation to center of corner pixel.
             F (numpy array)   : Fast-scan basis vector.
@@ -759,7 +833,8 @@ class ClCore(object):
             w (float)         : Wavelength.
             R (numpy array)   : Rotation matrix acting on q vectors.
             I (:class:pyopencl.array.Array) : OpenCL device array containing intensities.
-            add (bool)        : If true, the function will add to the input I buffer, else the buffer is overwritten.
+            add (bool)        : If true, the function will add to the input I buffer, else the buffer is
+                                overwritten.
 
         Returns:
             If I == None, then the output is a numpy array.  Otherwise, it is an opencl array.
@@ -799,7 +874,6 @@ class ClCore(object):
         else:
             return I_dev
 
-
     def prime_cromermann_simulator(self, q_vecs, atomic_nums=None, incoherent=False):
         """
         Prepare special array data for cromermann simulation
@@ -825,7 +899,8 @@ class ClCore(object):
             if not incoherent:
                 self.form_facts_arr = np.ones((self.Npix + self.Nextra_pix, 1), dtype=self.real_t)
             else:
-                self.form_facts_arr = 2*np.pi * np.random.random((self.Npix + self.Nextra_pix, 1)).astype( dtype=self.real_t)
+                self.form_facts_arr = 2*np.pi * \
+                        np.random.random((self.Npix + self.Nextra_pix, 1)).astype( dtype=self.real_t)
             self.atomIDs = None
             self.Nspecies = 1
             self._load_amp_buffer()
@@ -858,9 +933,9 @@ class ClCore(object):
         self.primed_cromermann = True
 
     def get_r_cromermann(self, atom_vecs, sub_com=False):
-        """
-        combine atomic vectors and atomic flux factors
-        into an openCL buffer
+
+        r"""
+        combine atomic vectors and atomic flux factors into an openCL buffer
 
         Arguments:
             atom_vecs (np.ndarray):
@@ -895,7 +970,6 @@ class ClCore(object):
         self.Nato = self.r_vecs.shape[0]
 
         self.r_buff = self.to_device(self.r_vecs, dtype=self.real_t)
-
 
     def get_q_cromermann(self):
         """ 
@@ -939,7 +1013,8 @@ class ClCore(object):
 
     def run_cromermann(self, q_buff_data, r_buff_data, 
                     rand_rot=False, force_rot_mat=None, com=None):
-        """
+
+        r"""
         Run the qrf kam simulator.
 
         Arguments
@@ -1005,13 +1080,32 @@ class ClCore(object):
             self._A_buff_data, self.Nato)
 
     def _set_rand_rot(self):
+
+        r"""
+
+        Derek - please document.
+
+        Returns:
+
+        """
+
         self.rot_buff = self.to_device(self.rot_mat, dtype=self.real_t)
 
     def _set_com_vec(self):
+
+        r"""
+
+        Derek - please document.
+
+        Returns:
+
+        """
+
         self.com_buff = self.to_device(self.com_vec, dtype=self.real_t)
 
     def release_amplitudes(self, reset=False):
-        """
+
+        r"""
         Releases the amplitude buffer from the GPU
         
         Arguments:
@@ -1019,13 +1113,16 @@ class ClCore(object):
 
         Returns (np.ndarray) : Scattering amplitudes
         """
+
         Amps = self.A_buff.get()[:-self.Nextra_pix]
         if reset:
             self._load_amp_buffer()
         return Amps
 
+
 def helpme():
-    """
+
+    r"""
     Print out some useful information about platforms and devices that are
     available for running simulations.
     """
@@ -1043,7 +1140,7 @@ def helpme():
                     and isinstance(info_value, list)):
                     print("%s: %s" % (info_name, [
                         cl.device_partition_property_ext.to_string(v,
-                                                                   "<unknown device partition property %d>")
+                                                    "<unknown device partition property %d>")
                         for v in info_value]))
                 else:
                     try:
@@ -1127,56 +1224,60 @@ def helpme():
     print("> export PYOPENCL_CTX='1'")
 
 
-def test():
-    import pkg_resources
-    from bornagain import Molecule
-    pdb = pkg_resources.resource_filename('bornagain', '').replace('bornagain/bornagain',
-                                                                   'bornagain/examples/data/pdb/2LYZ.pdb')
-    mol = Molecule(pdb)
-    form_facts = np.ones(mol.atom_vecs.shape[0], np.complex64)
+# def test():
+#
+#     # FIXME: this should go into the test directory.
+#
+#     import pkg_resources
+#     from bornagain import Molecule
+#     pdb = pkg_resources.resource_filename('bornagain', '').replace('bornagain/bornagain',
+#                                                                    'bornagain/examples/data/pdb/2LYZ.pdb')
+#     mol = Molecule(pdb)
+#     form_facts = np.ones(mol.atom_vecs.shape[0], np.complex64)
+#
+#     import time
+#     n_pixels = 2048
+#     # FIXME: the simpledetector class no longer exists
+#     D = ba.detector.SimpleDetector(n_pixels=n_pixels)
+#     print ("\tSimulating into %d pixels" % D.Q.shape[0])
+#
+#     #   test q-independent
+#     core = ClCore(double_precision=True)
+#     Npix = D.n_pixels
+#     q = core.to_device(D.Q)
+#     r = core.to_device(mol.atom_vecs, dtype=core.real_t)
+#     ff = np.zeros(mol.atom_vecs.shape[0], dtype=core.complex_t)
+#     ff.real = 1
+#     f = core.to_device(ff, dtype=core.complex_t)
+#
+#     core.init_amps(Npix)
+#     print("Testing phase_factor_qrf")
+#     t = time.time()
+#     core.phase_factor_qrf_inplace(q, r, f)
+#     A = core.release_amps(reset=True)
+#     print ("\tTook %f.4 seconds" % (time.time() - t))
+#     _ = D.readout(A)
+#     D.display()
+#
+#     #   now test the cromermann simulation
+#     print("Testing cromermann")
+#     core.prime_cromermann_simulator( D.Q, None)
+#     q = core.get_q_cromermann()
+#
+#     t = time.time()
+#     r = core.get_r_cromermann(mol.atom_vecs, sub_com=False)
+#     core.run_cromermann(q, r, rand_rot=False)
+#     A2 = core.release_amplitudes()
+#     print ("\tTook %f.4 seconds" % (time.time() - t))
+#     _ = D.readout(A2)
+#     D.display()
+#
+#     #   there is slightttt difference between the two methods at low q, not sure why...
+#     _ = D.readout(A - A2)
+#     D.display()
+#
+#     print("Passed testing mode!")
 
-    import time
-    n_pixels = 2048
-    D = ba.detector.SimpleDetector(n_pixels=n_pixels)
-    print ("\tSimulating into %d pixels" % D.Q.shape[0])
-
-    #   test q-independent
-    core = ClCore(double_precision=True)
-    Npix = D.n_pixels
-    q = core.to_device(D.Q)
-    r = core.to_device(mol.atom_vecs, dtype=core.real_t)
-    ff = np.zeros(mol.atom_vecs.shape[0], dtype=core.complex_t)
-    ff.real = 1
-    f = core.to_device(ff, dtype=core.complex_t)
-
-    core.init_amps(Npix)
-    print("Testing phase_factor_qrf")
-    t = time.time()
-    core.phase_factor_qrf_inplace(q, r, f)
-    A = core.release_amps(reset=True)
-    print ("\tTook %f.4 seconds" % (time.time() - t))
-    _ = D.readout(A)
-    D.display()
-
-    #   now test the cromermann simulation
-    print("Testing cromermann")
-    core.prime_cromermann_simulator( D.Q, None)
-    q = core.get_q_cromermann()
-
-    t = time.time()
-    r = core.get_r_cromermann(mol.atom_vecs, sub_com=False)
-    core.run_cromermann(q, r, rand_rot=False)
-    A2 = core.release_amplitudes()
-    print ("\tTook %f.4 seconds" % (time.time() - t))
-    _ = D.readout(A2)
-    D.display()
-
-    #   there is slightttt difference between the two methods at low q, not sure why...
-    _ = D.readout(A - A2)
-    D.display()
-
-    print("Passed testing mode!")
-
-
-if __name__ == "__main__":
-    test()
+#
+# if __name__ == "__main__":
+#     test()
