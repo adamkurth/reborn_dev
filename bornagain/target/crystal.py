@@ -4,7 +4,6 @@ Basic utilities for dealing with crystalline objects.
 '''
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-from builtins import *
 
 import numpy as np
 from numpy import sin, cos, sqrt
@@ -20,6 +19,8 @@ class Structure(object):
     r"""
     A container class for stuff needed when dealing with crystal structures.
     """
+    # TODO: Needs documentation!
+
     r = None  #: Atomic coordinates (3xN array)
     _x = None  #: Fractional coordinates (3xN array)
     O = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
