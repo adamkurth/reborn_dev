@@ -16,10 +16,10 @@ try:
     from bornagain.simulate import clcore
     import pyopencl
     import bornagain as ba
+    from bornagain import utils
     havecl = True
     # Check for double precision:
-    core = clcore.ClCore(context=None, queue=None, group_size=1,
-                         double_precision=True)
+    core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
     if core.double_precision:
         have_double = True
     else:
@@ -32,24 +32,23 @@ view = False
 if len(sys.argv) > 1:
     view = True
 
-def test_ClCore_float():
+def test_clcore_float():
 
     if havecl:
-        _ClCore(double_precision=False)
+        _clcore(double_precision=False)
 
-def test_ClCore_double():
+def test_clcore_double():
 
     if havecl and have_double:
-        _ClCore(double_precision=True)
+        _clcore(double_precision=True)
 
-def _ClCore(double_precision=False):
+def _clcore(double_precision=False):
 
     ###########################################################################
     # Setup the simulation core
     ###########################################################################
 
-    core = clcore.ClCore(context=None, queue=None, group_size=1,
-                         double_precision=double_precision)
+    core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 
     assert(core.get_group_size() == core.group_size)
    
@@ -68,25 +67,25 @@ def _ClCore(double_precision=False):
     r = np.random.random([N,3])
     f = np.random.random([N])*1j
 
-    A = core.phase_factor_qrf(q,r,f,R)
+    A = core.phase_factor_qrf(q, r, f, R)
     assert(type(A) is np.ndarray)
     
     # make device arrays first
     q = core.to_device(q) 
     r = core.to_device(r)
-    f = core.to_device(f,dtype=core.complex_t)
-    a = core.to_device(shape=[q.shape[0]],dtype=core.complex_t)
+    f = core.to_device(f, dtype=core.complex_t)
+    a = core.to_device(shape=[q.shape[0]], dtype=core.complex_t)
     R = None
     
-    core.phase_factor_qrf(q,r,f,R,a)
+    core.phase_factor_qrf(q, r, f, R, a)
     A1 = a.get()
 
     for _ in range(9):
-        core.phase_factor_qrf(q,r,f,R,a,add=True)
+        core.phase_factor_qrf(q, r, f, R, a, add=True)
     
     A10 = a.get()
     
-    assert( np.allclose(10*A1,A10))
+    assert( np.allclose(10*A1, A10))
 
     del q, r, f, R, N
     
@@ -217,8 +216,52 @@ def _ClCore(double_precision=False):
 #    core.run_cromermann(q, r, rand_rot=True)
 #    A = core.release_amplitudes()
 
+def test_rotations():
+
+    if havecl:
+
+        theta = 25*np.pi/180.
+        sin = np.sin(theta)
+        cos = np.cos(theta)
+
+        R = np.array([[cos, sin, 0],
+                      [-sin, cos, 0],
+                      [0, 0, 1]])
+
+        core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=False)
+
+        vec1 = np.array([1, 2, 0], dtype=core.real_t)
+        vec2 = core.test_rotate_vec(R, vec1)
+        vec3 = utils.rotate(R, vec1)
+
+        # Rotation on gpu and rotation with utils.rotate should do the same thing
+        assert(np.max(np.abs(vec2-vec3)) <= 1e-6)
+
+        vec1 = np.array([1, 2, 0], dtype=core.real_t)
+        vec2 = core.test_rotate_vec(R, vec1)
+        vec4 = np.random.rand(10, 3).astype(core.real_t)
+        vec4[0, :] = vec1
+        vec3 = utils.rotate(R, vec4)
+        vec3 = vec3[0, :]
+
+        # Rotation on gpu and rotation with utils.rotate should do the same thing (even for many vectors; shape Nx3)
+        assert(np.max(np.abs(vec2-vec3)) <= 1e-6)
+
+        R = np.array([[0, 1.0, 0],
+                      [-1.0, 0, 0],
+                      [0, 0, 1.0]])
+
+        vec1 = np.array([1.0, 0, 0], dtype=core.real_t)
+        vec2 = core.test_rotate_vec(R, vec1)
+        vec3 = utils.rotate(R, vec1)
+        vec_pred = np.array([0, -1.0, 0])
+
+        # Check that results are as expected
+        assert(np.allclose(vec2, vec3))
+        assert (np.allclose(vec2, vec_pred))
+
 
 if __name__ == '__main__':
 
-    test_ClCore_float()
-
+    test_clcore_float()
+    test_rotations()
