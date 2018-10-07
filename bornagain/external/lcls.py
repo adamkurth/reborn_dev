@@ -6,15 +6,15 @@ Note that there is documentation on `LCLS PAD geometry <https://confluence.slac.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-from builtins import *
 
 import numpy as np
-import bornagain
 from bornagain import utils
 
+
 def reshape_psana_cspad_array_to_cheetah_array(psana_array):
+
     r"""
-    Transform  a native psana cspad numpy array of shape (32,185,388) into a "Cheetah array" of shape (1480, 1552).
+    Transform a native psana cspad numpy array of shape (32,185,388) into a "Cheetah array" of shape (1480, 1552).
     Conversion to Cheetah format requires a re-write of the data in memory, and each detector panel is no longer stored
     contiguously in memory.
 
@@ -42,6 +42,7 @@ def reshape_psana_cspad_array_to_cheetah_array(psana_array):
 
 
 def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
+
     r"""
     This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with
     data in the native psana format.  First you should create a crystfel geometry dictionary using the function
@@ -68,6 +69,19 @@ def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
 
 def cheetah_remapped_cspad_array_to_pad_list(cheetah_array, geom_dict):
 
+    r"""
+
+    This will make a list of PAD data arrays, provided a data array that is in the form that Cheetah works with.  This
+    is needed because people mostly make geom files that work with the Cheetah format.  See the function
+    :func:`reshape_psana_cspad_array_to_cheetah_array <bornagain.external.cheetah.reshape_psana_cspad_array_to_cheetah_array>` for more details on array shapes.
+
+    Args:
+        cheetah_array: The data in Cheetah format
+        geom_dict: The dictionary created from a CrystFEL geom file via :func:``
+
+    Returns:
+
+    """
 
     utils.depreciate("Function cheetah_remapped_cspad_array_to_pad_list() is now in external.cheetah."
                      "  Don't import it from external.lcls")
