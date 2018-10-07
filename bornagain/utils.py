@@ -130,6 +130,30 @@ def vec_mag(vec):
     return np.sqrt(np.sum(vec * vec, axis=1))
 
 
+def rotate(rot, vec):
+
+    r"""
+
+    This defines a consistent way to rotate vectors.  It is a wrapper that does a simple operation:
+
+    .. code-block:: python
+
+        return np.matmul(rot, vec.T).T
+
+    Note the bornagain package generally assumes that a set of N vectors of dimension D will be stored as a numpy array
+    of shape of N x D.
+
+    Args:
+        rot (numpy array): The rotation matrix.
+        vec (numpy array): The vector(s).  For N vectors of dimension D, this should be a NxD array.
+
+    Returns: numpy array of same shape as input vec
+
+    """
+
+    # return np.matmul(rot, vec)
+    return np.matmul(rot, vec.T).T
+
 def depreciate(message):
 
     r"""
