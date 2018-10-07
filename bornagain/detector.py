@@ -219,10 +219,7 @@ class PADGeometry(object):
     def solid_angles(self):
 
         r"""
-        Calculate solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:
-
-            :math:`\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) =
-                      \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}`.
+        Calculate solid angles of pixels, assuming the pixels have small angular extent.
 
         Returns: numpy array
         """
