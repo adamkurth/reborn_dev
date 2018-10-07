@@ -51,4 +51,4 @@ How to store many 3D density/intensity maps in numpy arrays
 -----------------------------------------------------------
 
 For 3D density/intensity maps, we choose to index such that the "z" coordinate corresponds to the right-most numpy
-index.
+index.  More notes are needed on this topic.

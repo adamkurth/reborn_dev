@@ -163,15 +163,15 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">bornagain</span>
 <span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">utils</span>
 
+
 <div class="viewcode-block" id="reshape_psana_cspad_array_to_cheetah_array"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">[docs]</a><span class="k">def</span> <span class="nf">reshape_psana_cspad_array_to_cheetah_array</span><span class="p">(</span><span class="n">psana_array</span><span class="p">):</span>
+
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Transform  a native psana cspad numpy array of shape (32,185,388) into a &quot;Cheetah array&quot; of shape (1480, 1552).</span>
+<span class="sd">    Transform a native psana cspad numpy array of shape (32,185,388) into a &quot;Cheetah array&quot; of shape (1480, 1552).</span>
 <span class="sd">    Conversion to Cheetah format requires a re-write of the data in memory, and each detector panel is no longer stored</span>
 <span class="sd">    contiguously in memory.</span>
 
@@ -199,6 +199,7 @@
 
 
 <div class="viewcode-block" id="cheetah_cspad_array_to_pad_list"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.cheetah_cspad_array_to_pad_list">[docs]</a><span class="k">def</span> <span class="nf">cheetah_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">psana_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
+
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with</span>
 <span class="sd">    data in the native psana format.  First you should create a crystfel geometry dictionary using the function</span>
@@ -225,6 +226,19 @@
 
 <div class="viewcode-block" id="cheetah_remapped_cspad_array_to_pad_list"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.cheetah_remapped_cspad_array_to_pad_list">[docs]</a><span class="k">def</span> <span class="nf">cheetah_remapped_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">cheetah_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
 
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    This will make a list of PAD data arrays, provided a data array that is in the form that Cheetah works with.  This</span>
+<span class="sd">    is needed because people mostly make geom files that work with the Cheetah format.  See the function</span>
+<span class="sd">    :func:`reshape_psana_cspad_array_to_cheetah_array &lt;bornagain.external.cheetah.reshape_psana_cspad_array_to_cheetah_array&gt;` for more details on array shapes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cheetah_array: The data in Cheetah format</span>
+<span class="sd">        geom_dict: The dictionary created from a CrystFEL geom file via :func:``</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">utils</span><span class="o">.</span><span class="n">depreciate</span><span class="p">(</span><span class="s2">&quot;Function cheetah_remapped_cspad_array_to_pad_list() is now in external.cheetah.&quot;</span>
                      <span class="s2">&quot;  Don&#39;t import it from external.lcls&quot;</span><span class="p">)</span>

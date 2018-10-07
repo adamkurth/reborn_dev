@@ -327,9 +327,7 @@ each triangle. Sum them to get the solid angle of pixel.</p>
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.solid_angles">
 <code class="descname">solid_angles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.solid_angles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.solid_angles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate solid angles of pixels.   Assuming the pixel is small, the approximation to the solid angle is:</p>
-<blockquote>
-<div><span class="math notranslate nohighlight">\(\Delta \Omega_{ij} \approx \frac{\text{Area}}{R^2}\cos(\theta) = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}\)</span>.</div></blockquote>
+<dd><p>Calculate solid angles of pixels, assuming the pixels have small angular extent.</p>
 <p>Returns: numpy array</p>
 </dd></dl>
 
@@ -377,7 +375,7 @@ each triangle. Sum them to get the solid angle of pixel.</p>
 
 <dl class="function">
 <dt id="bornagain.detector.split_pad_data">
-<code class="descclassname">bornagain.detector.</code><code class="descname">split_pad_data</code><span class="sig-paren">(</span><em>pad_list=[]</em>, <em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#split_pad_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.split_pad_data" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.detector.</code><code class="descname">split_pad_data</code><span class="sig-paren">(</span><em>pad_list=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#split_pad_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.split_pad_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a contiguous block of data, split it up into individual PAD panels</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

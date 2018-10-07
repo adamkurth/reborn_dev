@@ -45,4 +45,10 @@ Also noteworthy is the fact that the `np.dot` function is fastest if we could av
 we can do that, but I don't see how.
 
 Note that the :func:`rotate <bornagain.utils.rotate>` function carried out via numpy is consistent with rotation
-operations performed on GPU divices within the :mod:`simulate.clcore <bornagain.simulate.clcore>` module.
+operations performed on GPU devices within the :mod:`simulate.clcore <bornagain.simulate.clcore>` module.
+
+How to store many 3D density/intensity maps in numpy arrays
+-----------------------------------------------------------
+
+For 3D density/intensity maps, we choose to index such that the "z" coordinate corresponds to the right-most numpy
+index.  More notes are needed on this topic.

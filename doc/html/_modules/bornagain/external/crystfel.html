@@ -156,33 +156,32 @@
             
   <h1>Source code for bornagain.external.crystfel</h1><div class="highlight"><pre>
 <span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Method for working with CrystFEL geometry files.</span>
+<span class="sd">Method for working with CrystFEL geometry files.  Note that you can convert a CrystFEL geometry file to a Python</span>
+<span class="sd">dictionary object with the cfelpyutils.crystfel_utils.load_crystfel_geometry() function.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="o">*</span>
 
-<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">detector</span>
-<span class="kn">from</span> <span class="nn">.cfelpyutils.crystfel_utils</span> <span class="k">import</span> <span class="n">load_crystfel_geometry</span>
+<span class="kn">from</span> <span class="nn">cfelpyutils.crystfel_utils</span> <span class="k">import</span> <span class="n">load_crystfel_geometry</span>
 
 
-<div class="viewcode-block" id="geometry_file_to_dict"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_dict">[docs]</a><span class="k">def</span> <span class="nf">geometry_file_to_dict</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">):</span>
-
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame</span>
-<span class="sd">    Valerio if it&#39;s broken :)</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        geometry_file (str): Path to geometry file</span>
-
-<span class="sd">    Returns: Dict</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">return</span> <span class="n">load_crystfel_geometry</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">)</span></div>
+<span class="c1">#</span>
+<span class="c1"># def geometry_file_to_dict(geometry_file):</span>
+<span class="c1">#</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame</span>
+<span class="c1">#     Valerio if it&#39;s broken :)</span>
+<span class="c1">#</span>
+<span class="c1">#     Args:</span>
+<span class="c1">#         geometry_file (str): Path to geometry file</span>
+<span class="c1">#</span>
+<span class="c1">#     Returns: Dict</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#     return load_crystfel_geometry(geometry_file)</span>
 
 
 <div class="viewcode-block" id="geometry_dict_to_pad_geometry_list"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_dict_to_pad_geometry_list">[docs]</a><span class="k">def</span> <span class="nf">geometry_dict_to_pad_geometry_list</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">):</span>
@@ -226,10 +225,9 @@
 <span class="sd">        geometry_file (str): Path to geometry file</span>
 
 <span class="sd">    Returns: List of PADGeometry instances</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">geometry_dict</span> <span class="o">=</span> <span class="n">geometry_file_to_dict</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">)</span>
+    <span class="n">geometry_dict</span> <span class="o">=</span> <span class="n">load_crystfel_geometry</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">)</span>
     <span class="n">pad_list</span> <span class="o">=</span> <span class="n">geometry_dict_to_pad_geometry_list</span><span class="p">(</span><span class="n">geometry_dict</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">pad_list</span></div>

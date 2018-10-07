@@ -260,6 +260,7 @@
     <span class="k">def</span> <span class="nf">_setup_shortcuts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_simple_keyboard_shortcut</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Right</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_next_frame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_simple_keyboard_shortcut</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Left</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_previous_frame</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_shortcut</span> <span class="o">=</span> <span class="n">QShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+g&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_shortcut</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_grid</span><span class="p">)</span>
@@ -484,6 +485,7 @@
 <div class="viewcode-block" id="PADView.update_pads"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.update_pads">[docs]</a>    <span class="k">def</span> <span class="nf">update_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_data</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span> <span class="o">=</span> <span class="n">pad_data</span>
+
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pads</span><span class="p">):</span>
 
             <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
@@ -492,8 +494,7 @@
                 <span class="n">d</span><span class="p">[</span><span class="n">d</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
-            <span class="n">im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">im</span><span class="o">.</span><span class="n">setImage</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setImage</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">regionChanged</span><span class="p">()</span></div>
 
@@ -622,19 +623,26 @@
 
 <div class="viewcode-block" id="PADView.show_next_frame"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_next_frame">[docs]</a>    <span class="k">def</span> <span class="nf">show_next_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;next&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;no getter&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">get_next_frame</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s1">&#39;pad_data&#39;</span> <span class="ow">in</span> <span class="n">dat</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_pads</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;pad_data&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PADView.show_previous_frame"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_previous_frame">[docs]</a>    <span class="k">def</span> <span class="nf">show_previous_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;no getter&#39;</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-        <span class="n">dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">next_frame</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">get_previous_frame</span><span class="p">()</span>
+        <span class="c1"># dat = self.frame_getter.get_next_frame()</span>
 
         <span class="k">if</span> <span class="s1">&#39;pad_data&#39;</span> <span class="ow">in</span> <span class="n">dat</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_pads</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;pad_data&#39;</span><span class="p">])</span></div>
-
 
 <div class="viewcode-block" id="PADView.start"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 

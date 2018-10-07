@@ -93,6 +93,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Numpy, vectors, rotations, etc.</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-store-many-vectors-in-a-numpy-array">How to store many vectors in a numpy array</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-rotate-vectors">How to rotate vectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-store-many-3d-density-intensity-maps-in-numpy-arrays">How to store many 3D density/intensity maps in numpy arrays</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
@@ -196,7 +197,12 @@ simulations.</p>
 Also noteworthy is the fact that the <cite>np.dot</cite> function is fastest if we could avoid all transpose operations.  Maybe
 we can do that, but I don’t see how.</p>
 <p>Note that the <a class="reference internal" href="bornagain.utils.html#bornagain.utils.rotate" title="bornagain.utils.rotate"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate</span></code></a> function carried out via numpy is consistent with rotation
-operations performed on GPU divices within the <a class="reference internal" href="bornagain.simulate.clcore.html#module-bornagain.simulate.clcore" title="bornagain.simulate.clcore"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulate.clcore</span></code></a> module.</p>
+operations performed on GPU devices within the <a class="reference internal" href="bornagain.simulate.clcore.html#module-bornagain.simulate.clcore" title="bornagain.simulate.clcore"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulate.clcore</span></code></a> module.</p>
+</div>
+<div class="section" id="how-to-store-many-3d-density-intensity-maps-in-numpy-arrays">
+<h2>How to store many 3D density/intensity maps in numpy arrays<a class="headerlink" href="#how-to-store-many-3d-density-intensity-maps-in-numpy-arrays" title="Permalink to this headline">¶</a></h2>
+<p>For 3D density/intensity maps, we choose to index such that the “z” coordinate corresponds to the right-most numpy
+index.  More notes are needed on this topic.</p>
 </div>
 </div>
 
