@@ -103,6 +103,7 @@ class PADView(object):
     def _setup_shortcuts(self):
 
         self._set_simple_keyboard_shortcut(QtCore.Qt.Key_Right, self.show_next_frame)
+        self._set_simple_keyboard_shortcut(QtCore.Qt.Key_Left, self.show_previous_frame)
 
         self.grid_shortcut = QShortcut(QKeySequence("Ctrl+g"), self.main_window)
         self.grid_shortcut.activated.connect(self.toggle_grid)
@@ -327,6 +328,7 @@ class PADView(object):
     def update_pads(self, pad_data):
 
         self.pad_data = pad_data
+
         for i in range(0, self.n_pads):
 
             d = self.pad_data[i]
@@ -335,8 +337,7 @@ class PADView(object):
                 d[d < 0] = 0
                 d = np.log10(d)
 
-            im = self.images[i]
-            im.setImage(d)
+            self.images[i].setImage(d)
 
         self.main_window.histogram.regionChanged()
 
@@ -465,19 +466,26 @@ class PADView(object):
 
     def show_next_frame(self):
 
-        print('next')
+        if self.frame_getter is None:
+            print('no getter')
+            return
+
+        dat = self.frame_getter.get_next_frame()
+
+        if 'pad_data' in dat.keys():
+            self.update_pads(dat['pad_data'])
+
+    def show_previous_frame(self):
 
         if self.frame_getter is None:
             print('no getter')
             return
 
-        t = time()
-        dat = self.frame_getter.next_frame()
-        print(time()-t)
+        dat = self.frame_getter.get_previous_frame()
+        # dat = self.frame_getter.get_next_frame()
 
         if 'pad_data' in dat.keys():
             self.update_pads(dat['pad_data'])
-
 
     def start(self):
 

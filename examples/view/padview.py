@@ -30,7 +30,7 @@ class FrameGetter(object):
         self.pads = pads
         self.simulator = examples.PDBMoleculeSimulator(pdb_file=None, pads=pads, wavelength=None, random_rotation=True)
 
-    def next_frame(self):
+    def get_next_frame(self):
 
         I = np.double(self.simulator.next())
         tot = np.sum(I.ravel())
@@ -46,7 +46,7 @@ class FrameGetter(object):
 
 frame_getter = FrameGetter(pads)
 
-pad_data = frame_getter.next_frame()['pad_data']
+pad_data = frame_getter.get_next_frame()['pad_data']
 
 padgui = PADView(pad_data=pad_data, pad_geometry=pads, logscale=True)
 padgui.frame_getter = frame_getter
