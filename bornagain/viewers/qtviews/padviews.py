@@ -62,6 +62,11 @@ class PADView(object):
             self.frame_getter = frame_getter
             self.pad_geometry = frame_getter.pad_geometry
             dat = frame_getter.get_frame(0)
+            while dat is None:
+                print('searching for data...')
+                dat = frame_getter.get_next_frame()
+            if dat is None:
+                raise Exception("Can't find any data!")
             self.pad_data = dat['pad_data']
 
         self.app = pg.mkQApp()
@@ -109,6 +114,8 @@ class PADView(object):
 
         self._set_simple_keyboard_shortcut(QtCore.Qt.Key_Right, self.show_next_frame)
         self._set_simple_keyboard_shortcut(QtCore.Qt.Key_Left, self.show_previous_frame)
+        self._set_simple_keyboard_shortcut("n", self.show_next_frame)
+        self._set_simple_keyboard_shortcut("p", self.show_previous_frame)
         self._set_simple_keyboard_shortcut("Ctrl+g", self.toggle_all_geom_info)
         self._set_simple_keyboard_shortcut("Ctrl+r", self.edit_ring_radii)
         self._set_simple_keyboard_shortcut("Ctrl+a", self.toggle_coordinate_axes)
