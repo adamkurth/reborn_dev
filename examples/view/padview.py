@@ -9,6 +9,7 @@ ba.set_global('debug', 0)
 from bornagain.simulate import examples
 from bornagain.viewers.qtviews import PADView
 from bornagain import detector
+from bornagain.fileio.getters import FrameGetter
 import numpy as np
 import pyqtgraph as pg
 
@@ -21,27 +22,21 @@ for pad in pads:
 sim = examples.lysozyme_molecule(pads=pads)
 
 
-class FrameGetter(object):
-
-    n_frames = 1000
-    current_frame = 1
+class MyFrameGetter(FrameGetter):
 
     def __init__(self, pads):
+
+        FrameGetter.__init__(self)
+
+        self.n_frames = 1
+        self.current_frame = 0
 
         self.pads = pads
         self.simulator = examples.PDBMoleculeSimulator(pdb_file=None, pads=pads, wavelength=None, random_rotation=True)
 
-    def get_frame(self, frame_number=None):
+    def get_frame(self, frame_number=0):
 
-        return self.get_next_frame()
-
-    def get_previous_frame(self):
-
-        return self.get_next_frame()
-
-    def get_next_frame(self):
-
-        self.current_frame += 1
+        self.current_frame = frame_number
 
         I = np.double(self.simulator.next())
         tot = np.sum(I.ravel())
@@ -54,7 +49,8 @@ class FrameGetter(object):
 
         return dat
 
-frame_getter = FrameGetter(pads)
+
+frame_getter = MyFrameGetter(pads)
 
 pad_data = frame_getter.get_next_frame()['pad_data']
 

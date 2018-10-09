@@ -508,8 +508,12 @@ class PADView(object):
 
     def remove_scatter_plots(self):
 
+        if self.scatter_plots is None:
+            return
+
         for scat in self.scatter_plots:
             self.viewbox.removeItem(scat)
+
         self.scatter_plots = None
 
     def show_next_frame(self):
@@ -562,6 +566,9 @@ class PADView(object):
             self.update_pads(dat['pad_data'])
 
         if 'peaks' in dat.keys():
+
+            self.remove_scatter_plots()
+
             peaks = dat['peaks']
             if peaks is not None:
                 n_peaks = peaks['n_peaks']
