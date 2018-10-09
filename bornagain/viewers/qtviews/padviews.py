@@ -114,12 +114,17 @@ class PADView(object):
 
         self._set_simple_keyboard_shortcut(QtCore.Qt.Key_Right, self.show_next_frame)
         self._set_simple_keyboard_shortcut(QtCore.Qt.Key_Left, self.show_previous_frame)
-        self._set_simple_keyboard_shortcut("n", self.show_next_frame)
-        self._set_simple_keyboard_shortcut("p", self.show_previous_frame)
+        self._set_simple_keyboard_shortcut("f", self.show_next_frame)
+        self._set_simple_keyboard_shortcut("b", self.show_previous_frame)
+        self._set_simple_keyboard_shortcut("r", self.show_random_frame)
+        self._set_simple_keyboard_shortcut("n", self.show_history_next)
+        self._set_simple_keyboard_shortcut("p", self.show_history_previous)
         self._set_simple_keyboard_shortcut("Ctrl+g", self.toggle_all_geom_info)
         self._set_simple_keyboard_shortcut("Ctrl+r", self.edit_ring_radii)
         self._set_simple_keyboard_shortcut("Ctrl+a", self.toggle_coordinate_axes)
         self._set_simple_keyboard_shortcut("Ctrl+l", self.toggle_pad_labels)
+        self._set_simple_keyboard_shortcut("Ctrl+s", self.increase_skip)
+        self._set_simple_keyboard_shortcut("Shift+s", self.decrease_skip)
 
     def _update_status_string(self, frame_number=None, n_frames=None):
 
@@ -139,6 +144,14 @@ class PADView(object):
 
         self.main_window.histogram.gradient.loadPreset('flame')
         self.main_window.histogram.setImageItems(self.images)
+
+    def increase_skip(self):
+
+        self.frame_getter.skip = 10**np.floor(np.log10(self.frame_getter.skip)+1)
+
+    def decrease_skip(self):
+
+        self.frame_getter.skip = np.max([10**(np.floor(np.log10(self.frame_getter.skip))-1), 1]) 
 
     def show_coordinate_axes(self):
 
@@ -523,6 +536,26 @@ class PADView(object):
 
         self.scatter_plots = None
 
+    def show_history_next(self):
+
+        if self.frame_getter is None:
+            print('no getter')
+            return
+
+        dat = self.frame_getter.get_history_next()
+
+        self.load_frame_dat(dat)
+
+    def show_history_previous(self):
+
+        if self.frame_getter is None:
+            print('no getter')
+            return
+
+        dat = self.frame_getter.get_history_previous()
+
+        self.load_frame_dat(dat)
+
     def show_next_frame(self):
 
         if self.frame_getter is None:
@@ -540,6 +573,12 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_previous_frame()
+
+        self.load_frame_dat(dat)
+
+    def show_random_frame(self):
+
+        dat = self.frame_getter.get_random_frame()
 
         self.load_frame_dat(dat)
 
