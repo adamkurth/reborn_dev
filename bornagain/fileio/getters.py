@@ -32,7 +32,7 @@ class FrameGetter(object):
     def __init__(self):
 
         n_frames = 1
-        current_frame = 1
+        current_frame = 0
         geom_dict = None
 
     def get_frame(self, frame_number=None):
@@ -41,11 +41,17 @@ class FrameGetter(object):
 
     def get_next_frame(self, skip=1):
 
-        return None
+        self.current_frame = (self.current_frame + skip) % self.n_frames
+        dat = self.get_frame(self.current_frame)
+
+        return dat
 
     def get_previous_frame(self, skip=1):
 
-        return None
+        self.current_frame = (self.current_frame - skip) % self.n_frames
+        dat = self.get_frame(self.current_frame)
+
+        return dat
 
 
 class CheetahFrameGetter(FrameGetter):
@@ -135,16 +141,3 @@ class CheetahFrameGetter(FrameGetter):
 
         return dat
 
-    def get_next_frame(self, skip=1):
-
-        self.current_frame = (self.current_frame + skip) % self.n_frames
-        dat = self.get_frame(self.current_frame)
-
-        return dat
-
-    def get_previous_frame(self, skip=1):
-
-        self.current_frame = (self.current_frame - skip) % self.n_frames
-        dat = self.get_frame(self.current_frame)
-
-        return dat
