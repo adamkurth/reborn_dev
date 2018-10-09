@@ -12,25 +12,36 @@ from bornagain import detector
 import numpy as np
 import pyqtgraph as pg
 
-# pads = examples.cspad_pads()
-# p = pads[0]
-# p.t_vec = p.t_vec.ravel()*np.array([0, 0, 1])
-
-pads = examples.pnccd_pads()
+pads = examples.cspad_pads()
+# pads = examples.pnccd_pads()
 
 for pad in pads:
     pad.t_vec.flat[2] = 0.3
 
 sim = examples.lysozyme_molecule(pads=pads)
 
+
 class FrameGetter(object):
+
+    n_frames = 1000
+    current_frame = 1
 
     def __init__(self, pads):
 
         self.pads = pads
         self.simulator = examples.PDBMoleculeSimulator(pdb_file=None, pads=pads, wavelength=None, random_rotation=True)
 
+    def get_frame(self, frame_number=None):
+
+        return self.get_next_frame()
+
+    def get_previous_frame(self):
+
+        return self.get_next_frame()
+
     def get_next_frame(self):
+
+        self.current_frame += 1
 
         I = np.double(self.simulator.next())
         tot = np.sum(I.ravel())
@@ -39,8 +50,7 @@ class FrameGetter(object):
         I += 1
         I = detector.split_pad_data(pads, I)
 
-        dat = {}
-        dat['pad_data'] = I
+        dat = {'pad_data': I}
 
         return dat
 
@@ -60,4 +70,3 @@ padgui.show_all_geom_info()
 # padgui.add_rings([200, 400, 600, 800], pens=[pg.mkPen([255, 0, 0], width=2)]*4)
 
 padgui.start()
-
