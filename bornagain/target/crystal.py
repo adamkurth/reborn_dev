@@ -327,14 +327,15 @@ class Atoms:
 
 class Molecule(Structure):
 
-    # FIXME: the units here are not SI!!
-
-    # FIXME: no documentation here.
-
     def __init__(self, *args, **kwargs):
-        structure.__init__(self, *args, **kwargs)
+        """
+        This class inherits from Structure
 
-        self.atom_vecs = self.r * 1e10  # atom positions!
+        There are no additional args. 
+        """
+        Structure.__init__(self, *args, **kwargs)
+
+        self.atom_vecs = self.r 
 
         self.lat = Lattice(self.a * 1e10, self.b * 1e10, self.c * 1e10,
                            self.alpha * 180 / np.pi, self.beta * 180 / np.pi, self.gamma * 180 / np.pi)
@@ -396,7 +397,7 @@ class Lattice:
     def __init__(self, a=281., b=281., c=165.2,
                  alpha=90., beta=90., gamma=120.):
         r"""
-        Needs explanation from Derek.
+        I made this when I first started with bornagain because I hated working in meters 
 
         Also, the input are in units that break the bornagain convention, which will
         be changed eventually.
