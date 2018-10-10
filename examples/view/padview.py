@@ -9,28 +9,34 @@ ba.set_global('debug', 0)
 from bornagain.simulate import examples
 from bornagain.viewers.qtviews import PADView
 from bornagain import detector
+from bornagain.fileio.getters import FrameGetter
 import numpy as np
 import pyqtgraph as pg
 
-# pads = examples.cspad_pads()
-# p = pads[0]
-# p.t_vec = p.t_vec.ravel()*np.array([0, 0, 1])
-
-pads = examples.pnccd_pads()
+pads = examples.cspad_pads()
+# pads = examples.pnccd_pads()
 
 for pad in pads:
     pad.t_vec.flat[2] = 0.3
 
 sim = examples.lysozyme_molecule(pads=pads)
 
-class FrameGetter(object):
+
+class MyFrameGetter(FrameGetter):
 
     def __init__(self, pads):
+
+        FrameGetter.__init__(self)
+
+        self.n_frames = 1
+        self.current_frame = 0
 
         self.pads = pads
         self.simulator = examples.PDBMoleculeSimulator(pdb_file=None, pads=pads, wavelength=None, random_rotation=True)
 
-    def next_frame(self):
+    def get_frame(self, frame_number=0):
+
+        self.current_frame = frame_number
 
         I = np.double(self.simulator.next())
         tot = np.sum(I.ravel())
@@ -39,14 +45,14 @@ class FrameGetter(object):
         I += 1
         I = detector.split_pad_data(pads, I)
 
-        dat = {}
-        dat['pad_data'] = I
+        dat = {'pad_data': I}
 
         return dat
 
-frame_getter = FrameGetter(pads)
 
-pad_data = frame_getter.next_frame()['pad_data']
+frame_getter = MyFrameGetter(pads)
+
+pad_data = frame_getter.get_next_frame()['pad_data']
 
 padgui = PADView(pad_data=pad_data, pad_geometry=pads, logscale=True)
 padgui.frame_getter = frame_getter
@@ -60,4 +66,3 @@ padgui.show_all_geom_info()
 # padgui.add_rings([200, 400, 600, 800], pens=[pg.mkPen([255, 0, 0], width=2)]*4)
 
 padgui.start()
-

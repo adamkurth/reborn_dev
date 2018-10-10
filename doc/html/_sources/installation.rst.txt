@@ -46,6 +46,8 @@ The current dependencies of bornagain are:
 * pyqtgraph
 * pyopencl
 * pyopengl
+* future
+* cfelpyutils
 
 You can use bornagain with only a subset of of the above dependencies (e.g. skip pyopencl if you don't want to simulate,
 and skip sphinx if you won't be modifying the documentation, etc.), but it's usually not difficult to install all of
@@ -72,24 +74,32 @@ requirments.  Here's an example of how to set up a new conda environment:
 
 .. code-block:: bash
 
-  conda create -n bornagain34 -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image \
-  matplotlib ipython pytest sphinx pyqtgraph pyopencl pyopengl
+  conda create -n bornagain -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image \
+  matplotlib ipython pytest sphinx pyqtgraph pyopencl pyopengl future
 
 The only downside to the conda environment is that you need to remember to activate the environment every time you use
 bornagain, like this:
 
 .. code-block:: bash
 
-    source activate bornagain34
+    source activate bornagain
+
+Note that cfelpyutils currently requires that you use pip to install.  It can be installed (after activating your
+environment) as follows:
+
+.. code-block:: bash
+
+    pip install cfelpyutils
 
 If you don't want to use a conda environment you can just install the modules in the current environment.  For example:
 
 .. code-block:: bash
 
- conda install -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image matplotlib ipython pytest \
-  sphinx pyqtgraph pyopencl pyopengl
+  conda install -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image matplotlib ipython pytest \
+  sphinx pyqtgraph pyopencl pyopengl future
+  pip instlall cfelpyutils
 
-In order to check if the installation worked, run the following:
+You can check if you've got all the dependencies sorted out by running the following:
 
 .. code-block:: bash
 

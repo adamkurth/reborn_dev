@@ -4,7 +4,6 @@ Basic utilities for dealing with crystalline objects.
 '''
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-from builtins import *
 
 import numpy as np
 from numpy import sin, cos, sqrt
@@ -20,6 +19,8 @@ class Structure(object):
     r"""
     A container class for stuff needed when dealing with crystal structures.
     """
+    # TODO: Needs documentation!
+
     r = None  #: Atomic coordinates (3xN array)
     _x = None  #: Fractional coordinates (3xN array)
     O = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
@@ -147,11 +148,10 @@ class structure(Structure):
 
     def __init__(self, *args, **kwargs):
 
+        utils.depreciate('The class "structure" is depreciated.  Use "Structure" instead.')
+
         Structure.__init__(self, *args, **kwargs)
 
-        if ba.get_global('warn_depreciated'):
-            utils.warn('The class "structure" is depreciated.  Use "Structure" instead.'
-                       ' (This change was made for PEP8 compliance.)')
 
 
 
@@ -159,14 +159,14 @@ class structure(Structure):
 
 def parse_pdb(pdbFilePath, crystalStruct=None):
 
-    r"""Return a :class:`structure` object with PDB information. """
+    r"""Return a :class:`Structure` object with PDB information. """
 
     maxAtoms = int(1e5)
     r = np.zeros([3, maxAtoms])
     elements = []
     atomIndex = int(0)
     if crystalStruct is None:
-        cryst = structure()
+        cryst = Structure()
     else:
         cryst = crystalStruct
     SCALE = np.zeros([3, 4])
@@ -277,6 +277,15 @@ def get_symmetry_operators_from_space_group(hm_symbol):
 
 
 class Atoms:
+
+    r"""
+
+    Needs documentation from Derek.
+
+    """
+
+    # FIXME: needs a docstring
+
     def __init__(self, xyz, atomic_num, elem=None):
         self.xyz = xyz
         self.x = self.xyz[:, 0]
@@ -327,6 +336,19 @@ class Atoms:
 
 class Molecule(Structure):
 
+<<<<<<< HEAD
+=======
+    r"""
+
+    Needs documentation from Derek.
+
+    """
+
+    # FIXME: needs a docstring
+
+    # FIXME: the units here are not SI!!
+
+>>>>>>> 6446abffdfde570e5146913ba4b243abab416d19
     def __init__(self, *args, **kwargs):
         """
         This class inherits from Structure

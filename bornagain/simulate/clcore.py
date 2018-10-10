@@ -61,8 +61,7 @@ class ClCore(object):
 
     """
 
-    def __init__(self, context=None, queue=None, group_size=32,
-                 double_precision=False):
+    def __init__(self, context=None, queue=None, group_size=32, double_precision=False):
 
         r"""
 
@@ -177,6 +176,7 @@ class ClCore(object):
         self._load_phase_factor_pad()
         self._load_phase_factor_mesh()
         self._load_buffer_mesh_lookup()
+        self._load_test_rotate_vec()
         self._load_mod_squared_complex_to_real()
         self._load_qrf_default()
         self._load_qrf_kam()
@@ -190,7 +190,6 @@ class ClCore(object):
         if self.double_precision:
             build_opts.append('-D')
             build_opts.append('CONFIG_USE_DOUBLE=1')
-            # kern_str = kern_str.replace("float", "double")
         build_opts.append('-D')
         build_opts.append('GROUP_SIZE=%d' % (self.group_size))
         self.programs = cl.Program(self.context, kern_str).build(options=build_opts)
@@ -201,15 +200,14 @@ class ClCore(object):
 
     def _load_phase_factor_qrf(self):
         self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
-        self.phase_factor_qrf_cl.set_scalar_arg_dtypes([None, 
-            None, None, None, None, 
-            self.int_t, self.int_t,self.int_t])
+        self.phase_factor_qrf_cl.set_scalar_arg_dtypes(
+            [None, None, None, None, None, self.int_t, self.int_t, self.int_t])
 
     def _load_phase_factor_pad(self):
         self.phase_factor_pad_cl = self.programs.phase_factor_pad
         self.phase_factor_pad_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t,self.real_t, None, None, None,
-             None, self.int_t])
+            [None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t,self.real_t,
+             None, None, None, None, self.int_t])
 
     def _load_phase_factor_mesh(self):
         self.phase_factor_mesh_cl = self.programs.phase_factor_mesh
@@ -222,14 +220,18 @@ class ClCore(object):
     def _load_lattice_transform_intensities_pad(self):
         self.lattice_transform_intensities_pad_cl = self.programs.lattice_transform_intensities_pad
         self.lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, self.int_t, self.int_t, self.int_t,self.real_t, None, None, None, None,
+            [None, None, None, None, self.int_t, self.int_t, self.int_t, self.real_t, None, None, None, None,
              self.int_t])
 
     def _load_gaussian_lattice_transform_intensities_pad(self):
         self.gaussian_lattice_transform_intensities_pad_cl = self.programs.gaussian_lattice_transform_intensities_pad
         self.gaussian_lattice_transform_intensities_pad_cl.set_scalar_arg_dtypes(
-            [None, None, None, None, self.int_t, self.int_t, self.int_t,self.real_t, None, None, None, None,
+            [None, None, None, None, self.int_t, self.int_t, self.int_t, self.real_t, None, None, None, None,
              self.int_t])
+
+    def _load_test_rotate_vec(self):
+        self.test_rotate_vec_cl = self.programs.test_rotate_vec
+        self.test_rotate_vec_cl.set_scalar_arg_dtypes([None, None, None])
 
     def _load_mod_squared_complex_to_real(self):
         self.mod_squared_complex_to_real_cl = self.programs.mod_squared_complex_to_real
@@ -356,6 +358,25 @@ class ClCore(object):
                                (self.group_size,), group_size_dev.data)
 
         return group_size_dev.get()[0]
+
+    def test_rotate_vec(self, R, vec):
+
+        r"""
+        Rotate a single vector.  CPU arrays in, CPU array out. This is just for testing the consistency of memory
+        allocation.
+        """
+
+        R = self.vec16(R)
+        vec = self.vec4(vec)
+        vec_out = vec.copy()
+        vec_out_dev = self.to_device(vec_out, dtype=self.real_t)
+        n = 1
+
+        global_size = np.int(np.ceil(n / np.float(self.group_size)) * self.group_size)
+
+        self.test_rotate_vec_cl(self.queue, (global_size,), (self.group_size,), R, vec, vec_out_dev.data)
+
+        return vec_out_dev.get()[0:3]
 
     def mod_squared_complex_to_real(self, A, I):
 
@@ -617,15 +638,14 @@ class ClCore(object):
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
 
-        T = self.vec4(T,dtype=self.real_t)
+        T = self.vec4(T, dtype=self.real_t)
         F = self.vec4(F, dtype=self.real_t)
         S = self.vec4(S, dtype=self.real_t)
         B = self.vec4(B, dtype=self.real_t)
 
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
-                             self.group_size)
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
 
         self.phase_factor_pad_cl(self.queue, (global_size,),
                                  (self.group_size,), r_dev.data,

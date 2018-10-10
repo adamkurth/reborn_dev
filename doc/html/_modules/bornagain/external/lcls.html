@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
 </ul>
 
@@ -161,12 +162,16 @@
 <span class="sd">Note that there is documentation on `LCLS PAD geometry &lt;https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry&gt;`_.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">utils</span>
 
 
 <div class="viewcode-block" id="reshape_psana_cspad_array_to_cheetah_array"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">[docs]</a><span class="k">def</span> <span class="nf">reshape_psana_cspad_array_to_cheetah_array</span><span class="p">(</span><span class="n">psana_array</span><span class="p">):</span>
+
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Transform  a native psana cspad numpy array of shape (32,185,388) into a &quot;Cheetah array&quot; of shape (1480, 1552).</span>
+<span class="sd">    Transform a native psana cspad numpy array of shape (32,185,388) into a &quot;Cheetah array&quot; of shape (1480, 1552).</span>
 <span class="sd">    Conversion to Cheetah format requires a re-write of the data in memory, and each detector panel is no longer stored</span>
 <span class="sd">    contiguously in memory.</span>
 
@@ -178,6 +183,9 @@
 <span class="sd">        cheetah_array (numpy array) :</span>
 <span class="sd">            A numpy array of shape (1480, 1552); same data as the psana array but mangled as done within Cheetah</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">utils</span><span class="o">.</span><span class="n">depreciate</span><span class="p">(</span><span class="s2">&quot;Function reshape_psana_cspad_array_to_cheetah_array() is now &quot;</span>
+                     <span class="s2">&quot;in external.cheetah.  Don&#39;t import it from external.lcls&quot;</span><span class="p">)</span>
 
     <span class="n">imlist</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
@@ -191,6 +199,7 @@
 
 
 <div class="viewcode-block" id="cheetah_cspad_array_to_pad_list"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.cheetah_cspad_array_to_pad_list">[docs]</a><span class="k">def</span> <span class="nf">cheetah_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">psana_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
+
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with</span>
 <span class="sd">    data in the native psana format.  First you should create a crystfel geometry dictionary using the function</span>
@@ -206,16 +215,33 @@
 <span class="sd">        pad_list (list) :</span>
 <span class="sd">            A list containing data from each pixel array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">utils</span><span class="o">.</span><span class="n">depreciate</span><span class="p">(</span><span class="s2">&quot;Function cheetah_cspad_array_to_pad_list() is now in external.cheetah.&quot;</span>
+                     <span class="s2">&quot;  Don&#39;t import it from external.lcls&quot;</span><span class="p">)</span>
 
     <span class="n">cheetah_array</span> <span class="o">=</span> <span class="n">reshape_psana_cspad_array_to_cheetah_array</span><span class="p">(</span><span class="n">psana_array</span><span class="p">)</span>
-    <span class="n">pad_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
-        <span class="n">pad_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cheetah_array</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
-
-    <span class="k">return</span> <span class="n">pad_list</span></div>
+    
+    <span class="k">return</span> <span class="n">cheetah_remapped_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">cheetah_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="cheetah_remapped_cspad_array_to_pad_list"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.cheetah_remapped_cspad_array_to_pad_list">[docs]</a><span class="k">def</span> <span class="nf">cheetah_remapped_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">cheetah_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    This will make a list of PAD data arrays, provided a data array that is in the form that Cheetah works with.  This</span>
+<span class="sd">    is needed because people mostly make geom files that work with the Cheetah format.  See the function</span>
+<span class="sd">    :func:`reshape_psana_cspad_array_to_cheetah_array &lt;bornagain.external.cheetah.reshape_psana_cspad_array_to_cheetah_array&gt;` for more details on array shapes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cheetah_array: The data in Cheetah format</span>
+<span class="sd">        geom_dict: The dictionary created from a CrystFEL geom file via :func:``</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">utils</span><span class="o">.</span><span class="n">depreciate</span><span class="p">(</span><span class="s2">&quot;Function cheetah_remapped_cspad_array_to_pad_list() is now in external.cheetah.&quot;</span>
+                     <span class="s2">&quot;  Don&#39;t import it from external.lcls&quot;</span><span class="p">)</span>
 
     <span class="n">pad_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">pn</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
@@ -235,7 +261,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
+        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>
@@ -254,21 +280,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

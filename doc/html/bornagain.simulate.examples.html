@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
@@ -176,6 +177,8 @@
             
   <div class="section" id="module-bornagain.simulate.examples">
 <span id="bornagain-simulate-examples-module"></span><h1>bornagain.simulate.examples module<a class="headerlink" href="#module-bornagain.simulate.examples" title="Permalink to this headline">¶</a></h1>
+<p>Some simple examples for testing purposes.</p>
+<p>Don’t build any of this into your code.</p>
 <dl class="function">
 <dt id="bornagain.simulate.examples.pnccd_pads">
 <code class="descclassname">bornagain.simulate.examples.</code><code class="descname">pnccd_pads</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#pnccd_pads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.pnccd_pads" title="Permalink to this definition">¶</a></dt>
@@ -194,7 +197,7 @@ the <a class="reference external" href="http://www.slac.stanford.edu/cgi-wrap/ge
 
 <dl class="function">
 <dt id="bornagain.simulate.examples.lysozyme_molecule">
-<code class="descclassname">bornagain.simulate.examples.</code><code class="descname">lysozyme_molecule</code><span class="sig-paren">(</span><em>pads=None</em>, <em>wavelength=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#lysozyme_molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.lysozyme_molecule" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.simulate.examples.</code><code class="descname">lysozyme_molecule</code><span class="sig-paren">(</span><em>pads=None</em>, <em>wavelength=None</em>, <em>random_rotation=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#lysozyme_molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.lysozyme_molecule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple simulation of lysozyme molecule using <a class="reference internal" href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore" title="bornagain.simulate.clcore.ClCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClCore</span></code></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -209,6 +212,21 @@ the <a class="reference external" href="http://www.slac.stanford.edu/cgi-wrap/ge
 </tbody>
 </table>
 <p>Returns: dictionary with {‘pad_geometry’: pads, ‘intensity’: data_list}</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.simulate.examples.PDBMoleculeSimulator">
+<em class="property">class </em><code class="descclassname">bornagain.simulate.examples.</code><code class="descname">PDBMoleculeSimulator</code><span class="sig-paren">(</span><em>pdb_file=None</em>, <em>pads=None</em>, <em>wavelength=None</em>, <em>random_rotation=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#PDBMoleculeSimulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.PDBMoleculeSimulator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A simple generator of simulated single-molecule intensities, from a pdb file.  Defaults to lysozyme at 1.5 A
+wavelength, on a pnccd detector layout.</p>
+<dl class="method">
+<dt id="bornagain.simulate.examples.PDBMoleculeSimulator.next">
+<code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#PDBMoleculeSimulator.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.PDBMoleculeSimulator.next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate another simulated pattern.  No scaling or noise added.</p>
+<p>Returns: Flat array of diffraction intensities.</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -233,7 +251,7 @@ the <a class="reference external" href="http://www.slac.stanford.edu/cgi-wrap/ge
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
+        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>
@@ -252,21 +270,14 @@ the <a class="reference external" href="http://www.slac.stanford.edu/cgi-wrap/ge
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

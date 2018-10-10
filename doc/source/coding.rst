@@ -77,7 +77,7 @@ We strive to test all code in bornagain, since we obviously want it to work in v
 a quick hack that only works briefly, in one environment.
 
 We use pytest to test the bornagain codebase.  It is simple to make a new test.  Just create a file
-that has a name that beginning with "test_", and within this file write functions that begin with "test_", and within
+that has a name that beginning with `test_`, and within this file write functions that begin with `test_`, and within
 those functions you include assert() statements.  These functions go into the test directory.  We then run pytest from
 within the test directory, and all tests will be ran.
 

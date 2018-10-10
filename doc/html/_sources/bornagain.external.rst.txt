@@ -19,6 +19,7 @@ Submodules
 
 .. toctree::
 
+   bornagain.external.cheetah
    bornagain.external.crystfel
    bornagain.external.lcls
 

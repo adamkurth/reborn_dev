@@ -1,0 +1,7 @@
+bornagain.external.cheetah module
+=================================
+
+.. automodule:: bornagain.external.cheetah
+    :members:
+    :undoc-members:
+    :show-inheritance:

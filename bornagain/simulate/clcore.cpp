@@ -58,6 +58,23 @@ static dsfloat4 rotate_vec(
     return v_rot;
 }
 
+// Test rotate vector
+
+kernel void test_rotate_vec(
+    const dsfloat16 R,
+    const dsfloat4 v,
+    global dsfloat4 *v_out)
+{
+    const int gi = get_global_id(0); /* Global index */
+
+    if (gi == 0){
+        dsfloat4 v_temp = rotate_vec(R, v);
+        v_out[0].x = v_temp.x;
+        v_out[0].y = v_temp.y;
+        v_out[0].z = v_temp.z;
+    }
+}
+
 
 // Calculate the scattering vectors for a pixel-array detector
 
@@ -194,7 +211,7 @@ kernel void phase_factor_qrf(
         q4r = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
 
         // Rotate the scattering vector
-        q4r = rotate_vec(R,q4r);
+        q4r = rotate_vec(R, q4r);
 
     } else { q4r = (dsfloat4)(0.0f,0.0f,0.0f,0.0f); }
 
