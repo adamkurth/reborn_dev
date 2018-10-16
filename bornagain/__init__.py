@@ -14,7 +14,6 @@ from . import units
 from . import utils
 
 from .detector import SimplePAD
-from .target.crystal import Molecule
 
 
 CONFIG_OPTIONS = {'warn_depreciated': True,
