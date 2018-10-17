@@ -11,7 +11,6 @@ except:
     has_cfelpyutils = False
 
 
-
 def test_crystfel():
 
     if has_cfelpyutils:
