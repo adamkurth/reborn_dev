@@ -25,6 +25,7 @@ import pyopencl.array
 import bornagain as ba
 from bornagain.simulate import refdata
 
+
 clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
 
 
@@ -179,7 +180,7 @@ class ClCore(object):
         self._load_test_rotate_vec()
         self._load_mod_squared_complex_to_real()
         self._load_qrf_default()
-        self._load_qrf_kam()
+        self._load_qrf_cromer_mann()
         self._load_lattice_transform_intensities_pad()
         self._load_gaussian_lattice_transform_intensities_pad()
 
@@ -241,15 +242,17 @@ class ClCore(object):
         self.qrf_default_cl = self.programs.qrf_default
         self.qrf_default_cl.set_scalar_arg_dtypes([None, None, None, None, self.int_t])
 
-    def _load_qrf_kam(self):
-        self.qrf_kam_cl = self.programs.qrf_kam
-        self.qrf_kam_cl.set_scalar_arg_dtypes([None, None, None, None, None, self.int_t])
+    def _load_qrf_cromer_mann(self):
+        self.qrf_cromer_mann_cl = self.programs.qrf_cromer_mann
+        self.qrf_cromer_mann_cl.set_scalar_arg_dtypes([None, None, None, None, None, self.int_t])
 
     def vec4(self, x, dtype=None):
 
         r"""
         Evdidently pyopencl does not deal with 3-vectors very well, so we use
         4-vectors and pad with a zero at the end.
+
+        From Derek: I tested this at one point and found no difference... maybe newer pyopenCL is better.. 
 
         This just does a trivial operation:
         return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
@@ -272,6 +275,8 @@ class ClCore(object):
         r"""
         The best way to pass in a rotation matrix is as a float16.  This is a helper function for
         preparing a numpy array so that it can be passed in as a float16.
+
+        From Derek: I had tested this and found no difference
 
         See the vec4 function documentation also.
 
@@ -515,13 +520,13 @@ class ClCore(object):
 
         r"""
 
-        Hey Derek - what does this do?
+        Initialize amplitudes for cromer-mann simulator as zeros
 
         Args:
             Npix:
 
         Returns:
-
+            None
         """
 
         self.a_dev = self.to_device(np.zeros(Npix), dtype=self.complex_t, shape=(Npix))
@@ -530,10 +535,11 @@ class ClCore(object):
 
         r"""
 
-        Derek - what does this do?
-
+        retrieve scattering amplitudes from cromer-mann simulator
+        
         Args:
             reset:
+                whether to reset the amplitudes to zeros 
 
         Returns:
 
@@ -979,7 +985,11 @@ class ClCore(object):
         return self.r_buff.data
 
     def _load_r_buffer(self, atom_vecs):
-
+        """
+        makes the r buffer for use in the cromer-mann simulator, where
+        r-vector is Nx4, the last dimension being atomic number
+        used for lookup of form factor
+        """
         if self.atomIDs is not None:
             self.r_vecs = np.concatenate(
                 (atom_vecs, self.atomIDs[:, None]), axis=1)
@@ -1019,13 +1029,20 @@ class ClCore(object):
         return self.q_buff.data
 
     def _load_q_buffer(self):
+        """
+        makes the q_buffer so that is it integer mutiple of group size
+        this is for the cromer-mann simnulator
+        """
         q_zeros = np.zeros((self.Npix + self.Nextra_pix, 16))
         q_zeros[:self.Npix, :3] = self.q_vecs
         q_zeros[:, 3:3 + self.Nspecies] = self.form_facts_arr
         self.q_buff = self.to_device(q_zeros, dtype=self.real_t)
 
     def _load_amp_buffer(self):
-        #       make output buffer; initialize as 0s
+        """
+        makes the amplitude buffer so that it is integer multiple of groupsize
+        """
+        #make output buffer; initialize as 0s
         self.A_buff = self.to_device(
             np.zeros(self.Npix + self.Nextra_pix), dtype=self.complex_t)
 
@@ -1035,7 +1052,7 @@ class ClCore(object):
                     rand_rot=False, force_rot_mat=None, com=None):
 
         r"""
-        Run the qrf kam simulator.
+        Run the cromer-mann form-factor simulator.
 
         Arguments
             q_buff_data (pyopenCL buffer data) :
@@ -1094,37 +1111,21 @@ class ClCore(object):
         self._set_com_vec()
 
         #       run the program
-        self.qrf_kam_cl( self.queue, (int(self.Npix + self.Nextra_pix),), 
+        self.qrf_cromer_mann_cl( self.queue, (int(self.Npix + self.Nextra_pix),), 
             (self.group_size,), q_buff_data, r_buff_data, 
             self.rot_buff.data, self.com_buff.data, 
             self._A_buff_data, self.Nato)
 
     def _set_rand_rot(self):
-
-        r"""
-
-        Derek - please document.
-
-        Returns:
-
-        """
+        r"""Sets the random rotation matrix on device"""
 
         self.rot_buff = self.to_device(self.rot_mat, dtype=self.real_t)
 
     def _set_com_vec(self):
-
-        r"""
-
-        Derek - please document.
-
-        Returns:
-
-        """
-
+        """sets the center-of mass vectors on the device""" 
         self.com_buff = self.to_device(self.com_vec, dtype=self.real_t)
 
     def release_amplitudes(self, reset=False):
-
         r"""
         Releases the amplitude buffer from the GPU
         
@@ -1243,61 +1244,3 @@ def helpme():
     print("device and platform automatically.  For example,")
     print("> export PYOPENCL_CTX='1'")
 
-
-# def test():
-#
-#     # FIXME: this should go into the test directory.
-#
-#     import pkg_resources
-#     from bornagain import Molecule
-#     pdb = pkg_resources.resource_filename('bornagain', '').replace('bornagain/bornagain',
-#                                                                    'bornagain/examples/data/pdb/2LYZ.pdb')
-#     mol = Molecule(pdb)
-#     form_facts = np.ones(mol.atom_vecs.shape[0], np.complex64)
-#
-#     import time
-#     n_pixels = 2048
-#     # FIXME: the simpledetector class no longer exists
-#     D = ba.detector.SimpleDetector(n_pixels=n_pixels)
-#     print ("\tSimulating into %d pixels" % D.Q.shape[0])
-#
-#     #   test q-independent
-#     core = ClCore(double_precision=True)
-#     Npix = D.n_pixels
-#     q = core.to_device(D.Q)
-#     r = core.to_device(mol.atom_vecs, dtype=core.real_t)
-#     ff = np.zeros(mol.atom_vecs.shape[0], dtype=core.complex_t)
-#     ff.real = 1
-#     f = core.to_device(ff, dtype=core.complex_t)
-#
-#     core.init_amps(Npix)
-#     print("Testing phase_factor_qrf")
-#     t = time.time()
-#     core.phase_factor_qrf_inplace(q, r, f)
-#     A = core.release_amps(reset=True)
-#     print ("\tTook %f.4 seconds" % (time.time() - t))
-#     _ = D.readout(A)
-#     D.display()
-#
-#     #   now test the cromermann simulation
-#     print("Testing cromermann")
-#     core.prime_cromermann_simulator( D.Q, None)
-#     q = core.get_q_cromermann()
-#
-#     t = time.time()
-#     r = core.get_r_cromermann(mol.atom_vecs, sub_com=False)
-#     core.run_cromermann(q, r, rand_rot=False)
-#     A2 = core.release_amplitudes()
-#     print ("\tTook %f.4 seconds" % (time.time() - t))
-#     _ = D.readout(A2)
-#     D.display()
-#
-#     #   there is slightttt difference between the two methods at low q, not sure why...
-#     _ = D.readout(A - A2)
-#     D.display()
-#
-#     print("Passed testing mode!")
-
-#
-# if __name__ == "__main__":
-#     test()

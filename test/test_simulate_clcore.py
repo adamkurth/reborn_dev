@@ -9,7 +9,7 @@ If you want to view results just add the keyword "view"
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import sys
-
+import time
 import numpy as np
 
 sys.path.append('..')
@@ -89,7 +89,7 @@ def _clcore(double_precision=False):
     assert( np.allclose(10*A1, A10))
 
     del q, r, f, R, N
-    
+
     ###########################################################################
     # Check for errors in phase_factor_pad
     # TODO: check that amplitudes are correct

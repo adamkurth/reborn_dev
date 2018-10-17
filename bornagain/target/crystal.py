@@ -21,7 +21,6 @@ from bornagain.simulate import atoms, simutils
 
 
 class Structure(object):
-
     r"""
     A container class for stuff needed when dealing with crystal structures.
     """
@@ -306,15 +305,3 @@ def assemble( O,  n_unit=10, spherical=False):
 
     return vecs
 
-def test_load_pdb_and_assemble():
-    pdb_struct = Structure("../../examples/data/pdb/2LYZ.pdb")
-    lat_vecs = assemble(pdb_struct.O, 10)
-
-    print ("Made cubic lattice with bounds %.2f-%.2f, %.2f-%.2f, %.2f-%.2f Angstrom" %\
-        tuple( np.ravel( [ (i,j) for i,j in zip( lat_vecs.min(0)*1e10, lat_vecs.max(0)*1e10 )]) ))
-    lat_vecs_rect = assemble(pdb_struct.O, (10,10,20))
-    print ("Made rectangular lattice with bounds %.2f-%.2f, %.2f-%.2f, %.2f-%.2f Angstrom" %\
-        tuple( np.ravel( [ (i,j) for i,j in zip( lat_vecs_rect.min(0)*1e10, lat_vecs_rect.max(0)*1e10 )]) ))
-
-if __name__ =="__main__":
-    test_load_pdb_and_assemble()

@@ -10,11 +10,11 @@ import sys
 import numpy as np
 import h5py
 
-# try:
-#     import matplotlib
-#     import pylab as plt
-# except ImportError:
-#     pass
+try:
+    import matplotlib
+    import pylab as plt
+except ImportError:
+    pass
 
 from .utils import vec_norm, vec_mag, vec_check
 from . import units
@@ -155,14 +155,14 @@ class PADGeometry(object):
 
         return vec_norm(np.cross(self.fs_vec, self.ss_vec))
 
-    def ds_vecs(self, beam_vec=None):
+    def ds_vecs(self, beam_vec):
         r""" Normalized scattering vectors s - s0 where s0 is the incident beam direction
-        and s is the outgoing vector for a given pixel.  This does **not** have
+        (`beam_vec`) and  s is the outgoing vector for a given pixel.  This does **not** have
         the 2*pi/lambda factor included."""
 
         return vec_norm(self.position_vecs()) - vec_check(beam_vec)
 
-    def q_vecs(self, beam_vec=None, wavelength=None):
+    def q_vecs(self, beam_vec, wavelength):
         r"""
         Calculate scattering vectors:
 
@@ -267,7 +267,7 @@ class PADGeometry(object):
 
         return p.ravel()
 
-    def scattering_angles(self, beam_vec=None):
+    def scattering_angles(self, beam_vec):
         """
         Scattering angles (i.e. half the Bragg angles).
 
@@ -285,7 +285,6 @@ class PADGeometry(object):
     def reshape(self, dat):
 
         return dat.reshape(self.shape())
-
 
 def split_pad_data(pad_list=None, data=None):
     r"""
@@ -701,3 +700,4 @@ class IcosphereGeometry(object):
             face_centers[i, :] = (verts[faces[i, 0], :] + verts[faces[i, 1], :] + verts[faces[i, 2], :]) / 3
 
         return verts, faces, face_centers
+

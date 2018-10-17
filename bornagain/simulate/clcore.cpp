@@ -614,7 +614,7 @@ __kernel void qrf_default(
 }
 
 
-__kernel void qrf_kam(
+__kernel void qrf_cromer_mann(
     __global dsfloat16 *q_vecs,
     __global dsfloat4 *r_vecs,
     __constant dsfloat *R,
