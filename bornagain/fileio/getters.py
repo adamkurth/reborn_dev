@@ -99,7 +99,6 @@ class FrameGetter(object):
 
         return dat
 
-    
 
 class CheetahFrameGetter(FrameGetter):
 
@@ -114,8 +113,10 @@ class CheetahFrameGetter(FrameGetter):
         FrameGetter.__init__(self)
         self.geom_dict = load_crystfel_geometry(geom_file_name)
         self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file_name)
+        # p = self.pad_geometry[0]
+        # p.t_vec = np.array([0, 0, p.t_vec.flat[2]])
         self.n_pads = len(self.pad_geometry)
-        print(self.n_pads)
+        # print(self.n_pads)
         self.h5file = h5py.File(cxi_file_name, 'r')
         self.h5_data = self.h5file['/entry_1/data_1/data']
         self.n_frames = self.h5_data.shape[0]

@@ -34,7 +34,10 @@ class PADView(object):
     pad_geometry = []
     pad_data = []
     pad_labels = None
-    rois = []
+    mask_data = None
+    mask_images = None
+    mask_color = None
+    _rois = None
     images = None
     scatter_plots = None
     rings = []
@@ -42,15 +45,20 @@ class PADView(object):
     coord_axes = None
     scan_arrows = None
     frame_getter = FrameGetter()
+    _px_mode = True
     _shortcuts = None
-    _status_string_mouse=""
-    _status_string_getter=" Frame 1 of 1 | "
+    _status_string_mouse = ""
+    _status_string_getter = " Frame 1 of 1 | "
     evt = None
     show_true_fast_scans = False
+    peak_finders = None
+    data_filters = None
 
-    def __init__(self, pad_geometry=None, pad_data=None, logscale=False, frame_getter=None):
+
+    def __init__(self, pad_geometry=None, pad_data=None, mask_data=None, logscale=False, frame_getter=None):
 
         self.logscale = logscale
+        self.mask_data = mask_data
 
         if frame_getter is None:
             if pad_geometry is None or pad_data is None:
@@ -62,9 +70,9 @@ class PADView(object):
             self.frame_getter = frame_getter
             self.pad_geometry = frame_getter.pad_geometry
             dat = frame_getter.get_frame(0)
-            while dat is None:
-                print('searching for data...')
-                dat = frame_getter.get_next_frame()
+            # while dat is None:
+            #     print('searching for data...')
+            #     dat = frame_getter.get_next_frame()
             if dat is None:
                 raise Exception("Can't find any data!")
             self.pad_data = dat['pad_data']
@@ -76,6 +84,7 @@ class PADView(object):
         self.viewbox.setAspectLocked()
         self.main_window.graphics_view.setCentralItem(self.viewbox)
         self.setup_pads()
+        self.setup_masks()
         self.setup_histogram_tool()
         self.main_window.show()
         # self.label = pg.LabelItem(justify='right')
@@ -145,6 +154,29 @@ class PADView(object):
         self.main_window.histogram.gradient.loadPreset('flame')
         self.main_window.histogram.setImageItems(self.images)
 
+    def add_roi(self, type='rect', pos=None, size=None):
+
+        if type == 'rect':
+            if pos is None:
+                pos = (0, 0)
+            if size is None:
+                size = (100, 100)
+            roi = pg.RectROI(pos=pos, size=size, centered=True, sideScalers=True)
+            roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
+            if self._rois is None:
+                self._rois = []
+            self._rois.append(roi)
+            self.viewbox.addItem(roi)
+        else:
+            pass
+
+    def hide_rois(self):
+
+        if self._rois is not None:
+            for roi in self._rois:
+                self.viewbox.removeItem(roi)
+            self._rois = None
+
     def increase_skip(self):
 
         self.frame_getter.skip = 10**np.floor(np.log10(self.frame_getter.skip)+1)
@@ -156,9 +188,9 @@ class PADView(object):
     def show_coordinate_axes(self):
 
         if self.coord_axes is None:
-            x = pg.ArrowItem(pos=(30, 0), brush=pg.mkBrush('r'), pxMode=False, angle=180, pen=None)
-            y = pg.ArrowItem(pos=(0, 30), brush=pg.mkBrush('g'), pxMode=False, angle=-90, pen=None)
-            z = pg.ScatterPlotItem([0], [0], pen=None, brush=pg.mkBrush('b'), pxMode=False, size=15)
+            x = pg.ArrowItem(pos=(30, 0), brush=pg.mkBrush('r'), pxMode=self._px_mode, angle=180, pen=None)
+            y = pg.ArrowItem(pos=(0, 30), brush=pg.mkBrush('g'), pxMode=self._px_mode, angle=-90, pen=None)
+            z = pg.ScatterPlotItem([0], [0], pen=None, brush=pg.mkBrush('b'), pxMode=self._px_mode, size=15)
             self.coord_axes = [x, y, z]
             self.viewbox.addItem(z)
             self.viewbox.addItem(x)
@@ -189,7 +221,7 @@ class PADView(object):
                 f = p.fs_vec.ravel()
                 t = p.t_vec.ravel()
                 ang = np.arctan2(f[1], f[0])*180/np.pi + 180
-                a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None, pxMode=False)
+                a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None, pxMode=self._px_mode)
 
                 self.scan_arrows.append(a)
                 self.viewbox.addItem(a)
@@ -274,11 +306,11 @@ class PADView(object):
         # transforms are applied.  I can only say that a physicist did not invent this system.
 
         # 3D basis vectors of panel (length encodes pixel size):
-        f = p.fs_vec.ravel()
-        s = p.ss_vec.ravel()
+        f = p.fs_vec.ravel().copy()
+        s = p.ss_vec.ravel().copy()
 
         # 3D translation to *center* of corner pixel (first pixel in memory):
-        t = p.t_vec.ravel()
+        t = p.t_vec.ravel().copy()
 
         # Normalize all vectors to pixel size.  This is a hack that needs to be fixed later.  Obviously, we cannot
         # show multiple detectors at different distances using this stupid pixel-based convention.
@@ -293,7 +325,7 @@ class PADView(object):
         t = t[0:2]
 
         # Offset translation since pixel should be centered.
-        t -= np.array([0.5, 0.5])
+        t += np.array([0.5, -0.5])
 
         # These two operations set the "home" position of the panel such that the fast-scan direction
         # is along the viewbox "x" axis.  I don't know if this is the corret thing to do -- needs further
@@ -335,6 +367,79 @@ class PADView(object):
         # trans.translate(t[0], t[1])
         # im.setTransform(trans)
 
+    def setup_masks(self, mask_data=None):
+
+        if mask_data is None:
+            mask_data = self.mask_data
+        else:
+            self.mask_data = mask_data
+
+        if self.mask_data is None:
+            return
+
+        if self.mask_color is None:
+            self.mask_color = np.array([255, 0, 0])
+
+        for i in range(0, self.n_pads):
+
+            d = self.mask_data[i]
+
+            if True: # Mask fast-scan pixels
+                d[0, 0: int(np.floor(self.pad_geometry[i].n_fs / 2))] = 1
+
+            mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
+            r = np.zeros_like(d)
+            r[d > 0] = self.mask_color[0]
+            g = np.zeros_like(d)
+            g[d > 0] = self.mask_color[1]
+            b = np.zeros_like(d)
+            b[d > 0] = self.mask_color[2]
+            t = np.zeros_like(d)
+            t[d > 0] = 255
+            mask_rgba[:, :, 0] = r
+            mask_rgba[:, :, 1] = g
+            mask_rgba[:, :, 2] = b
+            mask_rgba[:, :, 3] = t
+
+            im = bpg.ImageItem(mask_rgba)
+
+            self._apply_pad_transform(im, self.pad_geometry[i])
+
+            if self.mask_images is None:
+                self.mask_images = []
+
+            self.mask_images.append(im)
+            self.viewbox.addItem(im)
+
+            self.main_window.histogram.regionChanged()
+
+    def update_masks(self, mask_data):
+
+        self.mask_data = mask_data
+
+        if self.mask_images is None:
+            self.setup_masks()
+
+        for i in range(0, self.n_pads):
+
+            d = self.mask_data[i]
+
+            mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
+            r = np.zeros_like(d)
+            r[d > 0] = self.mask_color[0]
+            g = np.zeros_like(d)
+            g[d > 0] = self.mask_color[1]
+            b = np.zeros_like(d)
+            b[d > 0] = self.mask_color[2]
+            t = np.zeros_like(d)
+            t[d > 0] = 255
+            mask_rgba[:, :, 0] = r
+            mask_rgba[:, :, 1] = g
+            mask_rgba[:, :, 2] = b
+            mask_rgba[:, :, 3] = t
+
+            self.mask_images[i].setImage(mask_rgba)
+
     def setup_pads(self, pad_data=None):
 
         if pad_data is None:
@@ -344,7 +449,6 @@ class PADView(object):
 
         for i in range(0, self.n_pads):
 
-            # p = self.pad_geometry[i]
             d = self.pad_data[i]
 
             if self.logscale:
@@ -605,33 +709,54 @@ class PADView(object):
 
         """
 
+        self.remove_scatter_plots()
+
         if dat is None:
             return
+            # TODO: handle None more wisely
 
         if 'pad_data' in dat.keys():
-            self.update_pads(dat['pad_data'])
 
-        if 'peaks' in dat.keys():
+            if self.data_filters is None:
+                pad_data = dat['pad_data']
+            else:
+                pad_data = dat['pad_data']
+                if hasattr(self.data_filters, '__call__'):
+                    pad_data = [self.data_filters(d) for d in pad_data]
 
-            self.remove_scatter_plots()
+            self.update_pads(pad_data)
 
-            peaks = dat['peaks']
-            if peaks is not None:
-                n_peaks = peaks['n_peaks']
-                pad_numbers = peaks['pad_numbers']
-                fs_pos = peaks['fs_pos']
-                ss_pos = peaks['ss_pos']
 
-                pad_geom = self.pad_geometry
-                gl_fs_pos = np.zeros(n_peaks)
-                gl_ss_pos = np.zeros(n_peaks)
-                for i in range(0, n_peaks):
-                    pad_num = pad_numbers[i]
-                    vec = pad_geom[pad_num].indices_to_vectors(ss_pos[i], fs_pos[i]).ravel()
-                    gl_fs_pos[i] = vec[0]
-                    gl_ss_pos[i] = vec[1]
-                self.add_scatter_plot(gl_fs_pos, gl_ss_pos, pen=pg.mkPen('g'), brush=None, width=5, size=10, pxMode=False)
-                print('scattered')
+        # if self.peak_finders is not None:
+        #
+        #     pads = dat['pad_data']
+        #
+        #     new_pads = []
+        #
+        #     for pad, peak_finder in zip(pads, self.peak_finders):
+        #         # new_pads.append(peak_finder.get_signal_above_background(pad))
+        #         new_pads.append(peak_finder.get_snr(pad))
+        #
+        #     self.update_pads(new_pads)
+        #
+        # elif 'peaks' in dat.keys():
+        #
+        #     peaks = dat['peaks']
+        #     if peaks is not None:
+        #         n_peaks = peaks['n_peaks']
+        #         pad_numbers = peaks['pad_numbers']
+        #         fs_pos = peaks['fs_pos']
+        #         ss_pos = peaks['ss_pos']
+        #
+        #         pad_geom = self.pad_geometry
+        #         gl_fs_pos = np.zeros(n_peaks)
+        #         gl_ss_pos = np.zeros(n_peaks)
+        #         for i in range(0, n_peaks):
+        #             pad_num = pad_numbers[i]
+        #             vec = pad_geom[pad_num].indices_to_vectors(ss_pos[i], fs_pos[i]).ravel()
+        #             gl_fs_pos[i] = vec[0]
+        #             gl_ss_pos[i] = vec[1]
+        #         self.add_scatter_plot(gl_fs_pos, gl_ss_pos, pen=pg.mkPen('g'), brush=None, width=5, size=10, pxMode=False)
 
         self._update_status_string(frame_number=self.frame_getter.current_frame, n_frames=self.frame_getter.n_frames)
 
@@ -639,4 +764,5 @@ class PADView(object):
 
     def start(self):
 
+        self.show_frame(0)
         self.app.exec_()
