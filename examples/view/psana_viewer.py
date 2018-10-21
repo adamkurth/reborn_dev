@@ -1,9 +1,9 @@
-
-print("\nLoading python modules...")
+print("Loading python modules...")
+import h5py
 import re
 import os
 import sys
-sys.path.append('../../bornagain')
+sys.path.append('../..')
 import argparse
 import psana
 import numpy as np
@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import pyqtgraph as pg
 import bornagain as ba
 from bornagain.viewers.qtviews import PADView
-from bornagain.external.cheetah import cheetah_cspad_array_to_pad_list
+from bornagain.external.cheetah import cheetah_cspad_array_to_pad_list, cheetah_remapped_cspad_array_to_pad_list 
 from bornagain.external import crystfel
 from bornagain.fileio.getters import FrameGetter
 
@@ -22,12 +22,14 @@ parser.add_argument('-r', dest='run', type=int, nargs=1, help='Run number', defa
 parser.add_argument('-e', dest='exp', type=str, nargs=1, help='Experiment ID', default=[''])
 parser.add_argument('-g', dest='geom', type=str, nargs=1, help='CrystFEL geomfile', default=['calib/default.geom'])
 parser.add_argument('-d', dest='det', type=str, nargs=1, help='Detector name', default=[''])
+parser.add_argument('-m', dest='mask', type=str, nargs=1, help='Mask file (hdf5)', default=[''])
 args = parser.parse_args()
 
 run = args.run[0]
 experiment = args.exp[0]
 geom_file = args.geom[0]
 detector_id = args.det[0]
+mask_file = args.mask[0]
 
 def error(message):
     sys.stderr.write(message + '\n')
@@ -80,22 +82,31 @@ if not os.path.isfile(geom_file):
 
 geom_dict = crystfel.load_crystfel_geometry(geom_file)
 pad_geometry = crystfel.geometry_file_to_pad_geometry_list(geom_file)
-      
+
+
+
 print("Experiment ID: %s" % (experiment))
 print("Run: %d" % (run))
 print("Detector: %s" % (detector_id))
 print("Geometry: %s" % (geom_file))
 
 data_source = psana.DataSource("exp=%s:run=%d:idx" % (experiment, run))
-
 detector = psana.Detector(detector_id)
 
 if re.match(r'.*CsPad', detector_id) is not None:
+    detector_type = 'cspad'
+elif re.match(r'pnccd.*', detector_id) is not None:
+    detector_type = 'pnccd'
+else:
+    detector_type = 'unknown'
+
+
+if detector_type == 'cspad':
 
     def split_pads(psana_array, geom_dict):
         return cheetah_cspad_array_to_pad_list(psana_array, geom_dict)
 
-elif re.match(r'pnccd.*', detector_id) is not None:
+elif detector_type == 'pnccd':
 
     def split_pads(psana_array, geom_dict):
        slab = np.zeros((1024,1024), dtype=psana_array.dtype)
@@ -110,13 +121,25 @@ elif re.match(r'pnccd.*', detector_id) is not None:
            data_list.append(d)   
        return data_list
 
-else:
+elif detector_type == 'unknown':
 
     def split_pads(psana_array, geom_dict):
         if len(psana_array) != 2:
             error("I don't know how to transform this PAD data...")
         return [psana_array]
 
+
+if mask_file == "":
+    print("No mask specified")
+    mask_data = Non
+else:
+    with h5py.File(mask_file, 'r') as fid:
+        mask = np.array(fid['/data/data'])
+        if detector_type == 'cspad' and mask.ndim == 2:
+            # This is probably in the cheetah format
+            mask_data = cheetah_remapped_cspad_array_to_pad_list(mask, geom_dict)  
+        else:
+            mask_data = None
 
 class MyFrameGetter(FrameGetter):
 
@@ -150,6 +173,6 @@ class MyFrameGetter(FrameGetter):
 
 
 frame_getter = MyFrameGetter()
-padview = PADView(frame_getter=frame_getter)
+padview = PADView(frame_getter=frame_getter, mask_data=mask_data)
 padview.main_window.setWindowTitle('%s - run %d - %s' % (experiment, run, detector_id))
 padview.start()
