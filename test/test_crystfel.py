@@ -6,7 +6,7 @@ sys.path.append('..')
 
 try:
     import cfelpyutils
-    has_cfelpyutile= True
+    has_cfelpyutils = True
 except:
     has_cfelpyutils = False
 
