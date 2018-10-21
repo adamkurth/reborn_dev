@@ -384,18 +384,18 @@ class PADView(object):
 
             d = self.mask_data[i]
 
-            if True: # Mask fast-scan pixels
-                d[0, 0: int(np.floor(self.pad_geometry[i].n_fs / 2))] = 1
+#            if True: # Mask fast-scan pixels
+#                d[0, 0: int(np.floor(self.pad_geometry[i].n_fs / 2))] = 1
 
             mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
             r = np.zeros_like(d)
-            r[d > 0] = self.mask_color[0]
+            r[d == 0] = self.mask_color[0]
             g = np.zeros_like(d)
-            g[d > 0] = self.mask_color[1]
+            g[d == 0] = self.mask_color[1]
             b = np.zeros_like(d)
-            b[d > 0] = self.mask_color[2]
+            b[d == 0] = self.mask_color[2]
             t = np.zeros_like(d)
-            t[d > 0] = 255
+            t[d == 0] = 255
             mask_rgba[:, :, 0] = r
             mask_rgba[:, :, 1] = g
             mask_rgba[:, :, 2] = b
