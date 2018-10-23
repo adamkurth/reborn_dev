@@ -45,7 +45,7 @@ class PADView(object):
     coord_axes = None
     scan_arrows = None
     frame_getter = FrameGetter()
-    _px_mode = True
+    _px_mode = False
     _shortcuts = None
     _status_string_mouse = ""
     _status_string_getter = " Frame 1 of 1 | "
@@ -134,6 +134,9 @@ class PADView(object):
         self._set_simple_keyboard_shortcut("Ctrl+l", self.toggle_pad_labels)
         self._set_simple_keyboard_shortcut("Ctrl+s", self.increase_skip)
         self._set_simple_keyboard_shortcut("Shift+s", self.decrease_skip)
+        self._set_simple_keyboard_shortcut("m", self.toggle_masks)
+        self._set_simple_keyboard_shortcut("t", self._print_roi_coords)
+
 
     def _update_status_string(self, frame_number=None, n_frames=None):
 
@@ -176,6 +179,12 @@ class PADView(object):
             for roi in self._rois:
                 self.viewbox.removeItem(roi)
             self._rois = None
+
+    def _print_roi_coords(self):
+
+        for roi in self._rois:
+            for (im, dat) in zip(self.images, self.pad_data):
+                print(roi.getArrayRegion(dat, im, axes=(0, 1), returnMappedCoords=True))
 
     def increase_skip(self):
 
@@ -369,13 +378,8 @@ class PADView(object):
 
     def setup_masks(self, mask_data=None):
 
-        if mask_data is None:
-            mask_data = self.mask_data
-        else:
+        if mask_data is not None:
             self.mask_data = mask_data
-
-        if self.mask_data is None:
-            return
 
         if self.mask_color is None:
             self.mask_color = np.array([255, 0, 0])
@@ -439,6 +443,24 @@ class PADView(object):
             mask_rgba[:, :, 3] = t
 
             self.mask_images[i].setImage(mask_rgba)
+
+    def hide_masks(self):
+
+        if self.mask_images is not None:
+            for im in self.mask_images:
+                im.setVisible(False)
+
+    def show_masks(self):
+
+        if self.mask_images is not None:
+            for im in self.mask_images:
+                im.setVisible(True)
+
+    def toggle_masks(self):
+
+        if self.mask_images is not None:
+            for im in self.mask_images:
+                im.setVisible(not im.isVisible())
 
     def setup_pads(self, pad_data=None):
 
