@@ -7,7 +7,7 @@ import numpy as np
 import pkg_resources
 
 import pyqtgraph as pg
-pg.setConfigOptions(imageAxisOrder='row-major')
+# pg.setConfigOptions(imageAxisOrder='row-major')
 
 from pyqtgraph.Qt import uic, QtGui, QtCore
 
@@ -97,11 +97,10 @@ class PADView(object):
 
         self.show_frame()
 
-        # self.main_window.setWindowState(self.main_window.windowState()
-        #                                 & ~pg.QtCore.Qt.WindowMinimized
-        #                                 | pg.QtCore.Qt.WindowActive)
-        # self.main_window.activateWindow()
-        # self.main_window.showMaximized()
+        self.main_window.setWindowState(self.main_window.windowState() & ~pg.QtCore.Qt.WindowMinimized
+                                        | pg.QtCore.Qt.WindowActive)
+        #self.main_window.activateWindow()
+        #self.main_window.showMaximized()
 
     def _setup_mouse_interactions(self):
 
@@ -180,11 +179,27 @@ class PADView(object):
                 self.viewbox.removeItem(roi)
             self._rois = None
 
-    def _print_roi_coords(self):
+    def mask_all_rois(self):
+
+        noslice = (0, 1, None)
+        mask_updated = False
 
         for roi in self._rois:
-            for (im, dat) in zip(self.images, self.pad_data):
-                print(roi.getArrayRegion(dat, im, axes=(0, 1), returnMappedCoords=True))
+            for (ind, im, dat) in zip(range(self.n_pads), self.images, self.pad_data):
+                pslice = roi.getArraySlice(dat, im, axes=(0, 1), returnSlice=True)
+                # What follows is ridiculous - is there an easier way to compare two slices?
+                pslice = pslice[0]
+                pslicet0 = (pslice[0].start, pslice[0].stop, pslice[0].step)
+                pslicet1 = (pslice[1].start, pslice[1].stop, pslice[1].step)
+                if all([(a == b) for a, b, in zip(pslicet0, noslice)]) and all([(a == b) for a, b, in zip(pslicet1, noslice)]):
+                    continue
+                mask_updated = True
+                m = self.mask_data[ind]
+                m[pslice] = 0
+                self.mask_data[ind] = m
+
+        if mask_updated is True:
+            self.update_masks()
 
     def increase_skip(self):
 
@@ -227,10 +242,10 @@ class PADView(object):
 
             for p in self.pad_geometry:
 
-                f = p.fs_vec.ravel()
-                t = p.t_vec.ravel()
+                f = p.fs_vec.ravel()/p.pixel_size()
+                t = p.t_vec.ravel()/p.pixel_size()
                 ang = np.arctan2(f[1], f[0])*180/np.pi + 180
-                a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None, pxMode=self._px_mode)
+                a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None, pxMode=False)
 
                 self.scan_arrows.append(a)
                 self.viewbox.addItem(a)
@@ -376,6 +391,25 @@ class PADView(object):
         # trans.translate(t[0], t[1])
         # im.setTransform(trans)
 
+    def _make_mask_rgba(self, mask):
+
+        d = mask
+        mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
+        r = np.zeros_like(d)
+        r[d == 0] = self.mask_color[0]
+        g = np.zeros_like(d)
+        g[d == 0] = self.mask_color[1]
+        b = np.zeros_like(d)
+        b[d == 0] = self.mask_color[2]
+        t = np.zeros_like(d)
+        t[d == 0] = 255
+        mask_rgba[:, :, 0] = r
+        mask_rgba[:, :, 1] = g
+        mask_rgba[:, :, 2] = b
+        mask_rgba[:, :, 3] = t
+
+        return mask_rgba
+
     def setup_masks(self, mask_data=None):
 
         if mask_data is not None:
@@ -391,21 +425,22 @@ class PADView(object):
 #            if True: # Mask fast-scan pixels
 #                d[0, 0: int(np.floor(self.pad_geometry[i].n_fs / 2))] = 1
 
-            mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
-            r = np.zeros_like(d)
-            r[d == 0] = self.mask_color[0]
-            g = np.zeros_like(d)
-            g[d == 0] = self.mask_color[1]
-            b = np.zeros_like(d)
-            b[d == 0] = self.mask_color[2]
-            t = np.zeros_like(d)
-            t[d == 0] = 255
-            mask_rgba[:, :, 0] = r
-            mask_rgba[:, :, 1] = g
-            mask_rgba[:, :, 2] = b
-            mask_rgba[:, :, 3] = t
+            mask_rgba = self._make_mask_rgba(d)
+            # mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
+            # r = np.zeros_like(d)
+            # r[d == 0] = self.mask_color[0]
+            # g = np.zeros_like(d)
+            # g[d == 0] = self.mask_color[1]
+            # b = np.zeros_like(d)
+            # b[d == 0] = self.mask_color[2]
+            # t = np.zeros_like(d)
+            # t[d == 0] = 255
+            # mask_rgba[:, :, 0] = r
+            # mask_rgba[:, :, 1] = g
+            # mask_rgba[:, :, 2] = b
+            # mask_rgba[:, :, 3] = t
 
-            im = bpg.ImageItem(mask_rgba)
+            im = pg.ImageItem(mask_rgba)
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 
@@ -417,9 +452,10 @@ class PADView(object):
 
             self.main_window.histogram.regionChanged()
 
-    def update_masks(self, mask_data):
+    def update_masks(self, mask_data=None):
 
-        self.mask_data = mask_data
+        if mask_data is not None:
+            self.mask_data = mask_data
 
         if self.mask_images is None:
             self.setup_masks()
@@ -428,19 +464,21 @@ class PADView(object):
 
             d = self.mask_data[i]
 
-            mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
-            r = np.zeros_like(d)
-            r[d > 0] = self.mask_color[0]
-            g = np.zeros_like(d)
-            g[d > 0] = self.mask_color[1]
-            b = np.zeros_like(d)
-            b[d > 0] = self.mask_color[2]
-            t = np.zeros_like(d)
-            t[d > 0] = 255
-            mask_rgba[:, :, 0] = r
-            mask_rgba[:, :, 1] = g
-            mask_rgba[:, :, 2] = b
-            mask_rgba[:, :, 3] = t
+            mask_rgba = self._make_mask_rgba(d)
+
+            # mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
+            # r = np.zeros_like(d)
+            # r[d > 0] = self.mask_color[0]
+            # g = np.zeros_like(d)
+            # g[d > 0] = self.mask_color[1]
+            # b = np.zeros_like(d)
+            # b[d > 0] = self.mask_color[2]
+            # t = np.zeros_like(d)
+            # t[d > 0] = 255
+            # mask_rgba[:, :, 0] = r
+            # mask_rgba[:, :, 1] = g
+            # mask_rgba[:, :, 2] = b
+            # mask_rgba[:, :, 3] = t
 
             self.mask_images[i].setImage(mask_rgba)
 
@@ -480,7 +518,7 @@ class PADView(object):
             if self.show_true_fast_scans:  # For testing - show fast scan axis
                 d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
 
-            im = bpg.ImageItem(d)
+            im = pg.ImageItem(d)
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 
