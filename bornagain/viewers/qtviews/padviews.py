@@ -13,6 +13,7 @@ from pyqtgraph.Qt import uic, QtGui, QtCore
 
 import bornagain.external.pyqtgraph as bpg
 from bornagain.fileio.getters import FrameGetter
+from bornagain.utils import rotate
 
 padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
 
@@ -134,7 +135,7 @@ class PADView(object):
         self._set_simple_keyboard_shortcut("Ctrl+s", self.increase_skip)
         self._set_simple_keyboard_shortcut("Shift+s", self.decrease_skip)
         self._set_simple_keyboard_shortcut("m", self.toggle_masks)
-        self._set_simple_keyboard_shortcut("t", self._print_roi_coords)
+        self._set_simple_keyboard_shortcut("t", self.mask_all_rois)
 
 
     def _update_status_string(self, frame_number=None, n_frames=None):
@@ -178,28 +179,6 @@ class PADView(object):
             for roi in self._rois:
                 self.viewbox.removeItem(roi)
             self._rois = None
-
-    def mask_all_rois(self):
-
-        noslice = (0, 1, None)
-        mask_updated = False
-
-        for roi in self._rois:
-            for (ind, im, dat) in zip(range(self.n_pads), self.images, self.pad_data):
-                pslice = roi.getArraySlice(dat, im, axes=(0, 1), returnSlice=True)
-                # What follows is ridiculous - is there an easier way to compare two slices?
-                pslice = pslice[0]
-                pslicet0 = (pslice[0].start, pslice[0].stop, pslice[0].step)
-                pslicet1 = (pslice[1].start, pslice[1].stop, pslice[1].step)
-                if all([(a == b) for a, b, in zip(pslicet0, noslice)]) and all([(a == b) for a, b, in zip(pslicet1, noslice)]):
-                    continue
-                mask_updated = True
-                m = self.mask_data[ind]
-                m[pslice] = 0
-                self.mask_data[ind] = m
-
-        if mask_updated is True:
-            self.update_masks()
 
     def increase_skip(self):
 
@@ -323,6 +302,10 @@ class PADView(object):
         else:
             self.hide_pad_labels()
 
+    def scale_factor(self):
+
+        return 1/self.pad_geometry[0].pixel_size()
+
     def _apply_pad_transform(self, im, p):
 
         # This is really aweful.  I don't know if this is the best way to do the transforms, but it's the best
@@ -338,10 +321,11 @@ class PADView(object):
 
         # Normalize all vectors to pixel size.  This is a hack that needs to be fixed later.  Obviously, we cannot
         # show multiple detectors at different distances using this stupid pixel-based convention.
-        ps = p.pixel_size()
-        f /= ps
-        s /= ps
-        t /= ps
+        # ps = p.pixel_size()
+        scl = self.scale_factor()
+        f *= scl
+        s *= scl
+        t *= scl
 
         # Strip off the z component.  Another dumb move.
         f = f[0:2]
@@ -426,19 +410,6 @@ class PADView(object):
 #                d[0, 0: int(np.floor(self.pad_geometry[i].n_fs / 2))] = 1
 
             mask_rgba = self._make_mask_rgba(d)
-            # mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
-            # r = np.zeros_like(d)
-            # r[d == 0] = self.mask_color[0]
-            # g = np.zeros_like(d)
-            # g[d == 0] = self.mask_color[1]
-            # b = np.zeros_like(d)
-            # b[d == 0] = self.mask_color[2]
-            # t = np.zeros_like(d)
-            # t[d == 0] = 255
-            # mask_rgba[:, :, 0] = r
-            # mask_rgba[:, :, 1] = g
-            # mask_rgba[:, :, 2] = b
-            # mask_rgba[:, :, 3] = t
 
             im = pg.ImageItem(mask_rgba)
 
@@ -466,20 +437,6 @@ class PADView(object):
 
             mask_rgba = self._make_mask_rgba(d)
 
-            # mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
-            # r = np.zeros_like(d)
-            # r[d > 0] = self.mask_color[0]
-            # g = np.zeros_like(d)
-            # g[d > 0] = self.mask_color[1]
-            # b = np.zeros_like(d)
-            # b[d > 0] = self.mask_color[2]
-            # t = np.zeros_like(d)
-            # t[d > 0] = 255
-            # mask_rgba[:, :, 0] = r
-            # mask_rgba[:, :, 1] = g
-            # mask_rgba[:, :, 2] = b
-            # mask_rgba[:, :, 3] = t
-
             self.mask_images[i].setImage(mask_rgba)
 
     def hide_masks(self):
@@ -500,10 +457,43 @@ class PADView(object):
             for im in self.mask_images:
                 im.setVisible(not im.isVisible())
 
+    def mask_all_rois(self):
+
+        noslice = slice(0, 1, None)
+
+        for roi in self._rois:
+            for (ind, im, dat, geom) in zip(range(self.n_pads), self.images, self.pad_data, self.pad_geometry):
+
+                # Using builtin function of pyqtgraph ROI to identify panels associated with the ROI...
+                pslice = roi.getArraySlice(dat, im, axes=(0, 1), returnSlice=True)[0]
+                if pslice[0] == noslice and pslice[1] == noslice:
+                    continue
+
+                # To find pixels in the rectangular ROI, project pixel coordinates onto the two basis vectors of
+                # the ROI.  I couldn't figure out how to do this directly with the ROI class methods.
+                sides = [roi.size()[1], roi.size()[0]]
+                corner = np.array([roi.pos()[0], roi.pos()[1]])
+                angle = roi.angle() * np.pi / 180
+                pix_pos = (geom.position_vecs() * self.scale_factor()).reshape(geom.n_ss, geom.n_fs, 3)
+                pix_pos = pix_pos[:, :, 0:2] - corner
+                v1 = np.array([-np.sin(angle), np.cos(angle)])
+                v2 = np.array([np.cos(angle), np.sin(angle)])
+                ind1 = np.dot(pix_pos, v1)
+                ind2 = np.dot(pix_pos, v2)
+                ind1 = (ind1 >= 0) * (ind1 <= sides[0])
+                ind2 = (ind2 >= 0) * (ind2 <= sides[1])
+                inds = ind1*ind2
+
+                # Here comes the mask update for this pad:
+                m = self.mask_data[ind]
+                m[inds] = 0
+                self.mask_data[ind] = m
+                self.mask_images[ind].setImage(self._make_mask_rgba(m))
+
     def setup_pads(self, pad_data=None):
 
-        if pad_data is None:
-            pad_data = self.pad_data
+        if pad_data is not None:
+            self.pad_data = pad_data
 
         mx = np.ravel(self.pad_data).max()
 
