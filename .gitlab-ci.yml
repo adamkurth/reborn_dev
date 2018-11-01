@@ -1,0 +1,10 @@
+image: continuumio/miniconda3:latest
+
+before_script:
+  - conda env create -f environment.yml
+  - source activate bornagain
+
+tests:
+  stage: test
+  script:
+    - pytest

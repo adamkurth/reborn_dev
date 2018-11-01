@@ -13,7 +13,6 @@ from pyqtgraph.Qt import uic, QtGui, QtCore
 
 import bornagain.external.pyqtgraph as bpg
 from bornagain.fileio.getters import FrameGetter
-from bornagain.utils import rotate
 
 padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
 
@@ -54,7 +53,7 @@ class PADView(object):
     show_true_fast_scans = False
     peak_finders = None
     data_filters = None
-
+    show_peaks = True
 
     def __init__(self, pad_geometry=None, pad_data=None, mask_data=None, logscale=False, frame_getter=None):
 
@@ -399,6 +398,9 @@ class PADView(object):
         if mask_data is not None:
             self.mask_data = mask_data
 
+        if self.mask_data is None:
+            self.mask_data = [np.ones_like(d) for d in self.pad_data]
+
         if self.mask_color is None:
             self.mask_color = np.array([255, 0, 0])
 
@@ -462,6 +464,10 @@ class PADView(object):
         noslice = slice(0, 1, None)
 
         for roi in self._rois:
+
+            if not roi.mouseHovering:
+                continue
+
             for (ind, im, dat, geom) in zip(range(self.n_pads), self.images, self.pad_data, self.pad_geometry):
 
                 # Using builtin function of pyqtgraph ROI to identify panels associated with the ROI...
@@ -776,7 +782,6 @@ class PADView(object):
 
             self.update_pads(pad_data)
 
-
         # if self.peak_finders is not None:
         #
         #     pads = dat['pad_data']
@@ -789,24 +794,27 @@ class PADView(object):
         #
         #     self.update_pads(new_pads)
         #
-        # elif 'peaks' in dat.keys():
-        #
-        #     peaks = dat['peaks']
-        #     if peaks is not None:
-        #         n_peaks = peaks['n_peaks']
-        #         pad_numbers = peaks['pad_numbers']
-        #         fs_pos = peaks['fs_pos']
-        #         ss_pos = peaks['ss_pos']
-        #
-        #         pad_geom = self.pad_geometry
-        #         gl_fs_pos = np.zeros(n_peaks)
-        #         gl_ss_pos = np.zeros(n_peaks)
-        #         for i in range(0, n_peaks):
-        #             pad_num = pad_numbers[i]
-        #             vec = pad_geom[pad_num].indices_to_vectors(ss_pos[i], fs_pos[i]).ravel()
-        #             gl_fs_pos[i] = vec[0]
-        #             gl_ss_pos[i] = vec[1]
-        #         self.add_scatter_plot(gl_fs_pos, gl_ss_pos, pen=pg.mkPen('g'), brush=None, width=5, size=10, pxMode=False)
+
+        if self.show_peaks is True:
+
+            if 'peaks' in dat.keys():
+
+                peaks = dat['peaks']
+                if peaks is not None:
+                    n_peaks = peaks['n_peaks']
+                    pad_numbers = peaks['pad_numbers']
+                    fs_pos = peaks['fs_pos']
+                    ss_pos = peaks['ss_pos']
+
+                    pad_geom = self.pad_geometry
+                    gl_fs_pos = np.zeros(n_peaks)
+                    gl_ss_pos = np.zeros(n_peaks)
+                    for i in range(0, n_peaks):
+                        pad_num = pad_numbers[i]
+                        vec = pad_geom[pad_num].indices_to_vectors(ss_pos[i], fs_pos[i]).ravel()
+                        gl_fs_pos[i] = vec[0]*self.scale_factor()
+                        gl_ss_pos[i] = vec[1]*self.scale_factor()
+                    self.add_scatter_plot(gl_fs_pos, gl_ss_pos, pen=pg.mkPen('g'), brush=None, width=5, size=10, pxMode=False)
 
         self._update_status_string(frame_number=self.frame_getter.current_frame, n_frames=self.frame_getter.n_frames)
 
