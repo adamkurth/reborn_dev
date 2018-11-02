@@ -1,3 +1,6 @@
+import sys
+sys.path.append('..')
+
 from bornagain import target
 
 def test_load_pdb_and_assemble():

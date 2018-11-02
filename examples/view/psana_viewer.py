@@ -131,7 +131,7 @@ elif detector_type == 'unknown':
 
 if mask_file == "":
     print("No mask specified")
-    mask_data = Non
+    mask_data = None
 else:
     with h5py.File(mask_file, 'r') as fid:
         mask = np.array(fid['/data/data'])
