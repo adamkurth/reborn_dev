@@ -2,12 +2,14 @@
 Under dev, this is a simple class for viewing PAD geometries
 """
 
-
+import numpy as np
+import sys
 try:
+    import matplotlib
     import pylab as plt
 except ImportError:
     pass
-
+from bornagain import units
 from bornagain.detector import PADGeometry
 
 class SimplePAD(PADGeometry):
