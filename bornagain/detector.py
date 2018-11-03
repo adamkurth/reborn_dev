@@ -156,30 +156,60 @@ class PADGeometry(object):
 
         return vec_norm(np.cross(self.fs_vec, self.ss_vec))
 
-    def ds_vecs(self, beam_vec):
-        r""" Normalized scattering vectors s - s0 where s0 is the incident beam direction
+    def ds_vecs(self, beam_vec=None, beam=None):
+        r"""
+        Normalized scattering vectors s - s0 where s0 is the incident beam direction
         (`beam_vec`) and  s is the outgoing vector for a given pixel.  This does **not** have
-        the 2*pi/lambda factor included."""
+        the 2*pi/lambda factor included.
+
+        Args:
+            beam_vec (tuple or numpy array): specify the unit vector of the incident beam
+            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.
+
+        Returns: numpy array
+
+        """
+
+        if beam is not None:
+            beam_vec = beam.beam_vec
 
         return vec_norm(self.position_vecs()) - vec_check(beam_vec)
 
-    def q_vecs(self, beam_vec, wavelength):
+    def q_vecs(self, beam_vec=None, wavelength=None, beam=None):
         r"""
         Calculate scattering vectors:
 
             :math:`\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)`
 
+        Args:
+            beam_vec (tuple or numpy array): specify the unit vector of the incident beam
+            wavelength (float): wavelength
+            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.
+
         Returns: numpy array
         """
+
+        if beam is not None:
+            beam_vec = beam.beam_vec
+            wavelength = beam.wavelength
 
         return (2 * np.pi / wavelength) * self.ds_vecs(beam_vec=beam_vec)
 
-    def q_mags(self, beam_vec, wavelength):
+    def q_mags(self, beam_vec=None, wavelength=None, beam=None):
         r"""
         Calculate scattering vector magnitudes:
 
+        Args:
+            beam_vec (tuple or numpy array): specify the unit vector of the incident beam
+            wavelength (float): wavelength
+            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.
+
         Returns: numpy array
         """
+
+        if beam is not None:
+            beam_vec = beam.beam_vec
+            wavelength = beam.wavelength
 
         return vec_mag(self.q_vecs(beam_vec=beam_vec, wavelength=wavelength))
 
@@ -244,7 +274,7 @@ class PADGeometry(object):
 
         return np.abs(sa.ravel())
 
-    def polarization_factors(self, polarization_vec, beam_vec, weight=None):
+    def polarization_factors(self, polarization_vec=None, beam_vec=None, weight=None, beam=None):
         r"""
         The scattering polarization factors.
 
@@ -255,9 +285,15 @@ class PADGeometry(object):
                 Incident beam vector
             weight (float) :
                 The weight of the first polarization component (second is one minus this weight)
+            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.
 
         Returns:  numpy array
         """
+
+        if beam is not None:
+            beam_vec = beam.beam_vec
+            polarization_vec = beam.polarization_vec
+            weight = beam.polarization_weight
 
         v = vec_norm(self.position_vecs())
         u = vec_norm(vec_check(polarization_vec))
@@ -277,20 +313,24 @@ class PADGeometry(object):
 
         return p.ravel()
 
-    def scattering_angles(self, beam_vec):
+    def scattering_angles(self, beam_vec=None, beam=None):
         """
         Scattering angles (i.e. half the Bragg angles).
 
         Arguments:
             beam_vec (numpy array) :
                 Incident beam vector.
+            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.
 
         Returns: numpy array
         """
 
+        if beam is not None:
+            beam_vec = beam.beam_vec
+
         v = self.position_vecs()
 
-        return np.arccos(vec_check(beam_vec), v.T)
+        return np.arccos(vec_check(beam_vec), v)
 
     def reshape(self, dat):
 

@@ -5,6 +5,7 @@ import sys
 sys.path.append('..')
 import bornagain as ba
 from bornagain import detector
+from bornagain import source
 import numpy as np
 
 
@@ -34,6 +35,29 @@ def test_PADGeometry():
 
     pad = ba.detector.PADGeometry()
     assert(pad.t_vec is None)
+
+def test_beam():
+
+    beam = source.Beam()
+    beam.wavelength = 1.5e-10
+    beam.beam_vec = np.array([0, 0, 1])
+
+    pad_geom = detector.PADGeometry()
+    pad_geom.simple_setup()
+
+    # TODO: put some thought into these tests...
+
+    out = pad_geom.scattering_angles(beam=beam)
+    assert(np.min(out >= 0))
+    out = pad_geom.polarization_factors(beam=beam)
+    assert(np.min(out > 0))
+    out = pad_geom.ds_vecs(beam=beam)
+    assert(np.min(np.abs(out) >= 0))
+    out = pad_geom.q_mags(beam=beam)
+    assert(np.min(out >= 0))
+    out = pad_geom.q_vecs(beam=beam)
+    assert(np.min(np.abs(out) >= 0))
+
 
 def test_PADAssembler():
 
