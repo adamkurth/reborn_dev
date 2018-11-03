@@ -11,6 +11,12 @@ cause problems...
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+# Python 2 and 3 compatibility...
+try:
+  basestring
+except NameError:
+  basestring = str
+
 import numpy as np
 from numpy import sin, cos, sqrt
 
@@ -255,26 +261,28 @@ def get_symmetry_operators_from_space_group(hm_symbol):
 
     # Simply iterate through all HM symbols until we find one that matches:
     symbol_found = False
-    if isinstance(hm_symbol, str):
+    idx = None
+    if isinstance(hm_symbol, basestring):
         hm_symbol = hm_symbol.strip()
-        for i in range(0, 530):
-            if hm_symbol == spgrp._hmsym[i].strip():
+        for idx in range(0, 530):
+            if hm_symbol == spgrp._hmsym[idx].strip():
                 symbol_found = True
                 break
     else:
-        i = hm_symbol
-        if i < 530:
+        idx = hm_symbol
+        if idx < 530:
             symbol_found = True
 
     if not symbol_found:
         return None, None
 
-    Rs = spgrp._spgrp_ops[i]["rotations"]
-    Ts = [utils.vec_check(T) for T in spgrp._spgrp_ops[i]['translations']]
+    Rs = spgrp._spgrp_ops[idx]["rotations"]
+    Ts = [utils.vec_check(T) for T in spgrp._spgrp_ops[idx]['translations']]
 
     return Rs, Ts
 
-def assemble( O,  n_unit=10, spherical=False):
+
+def assemble(O, n_unit=10, spherical=False):
     r"""
     From Derek: assemble and assemble3 are identical functions, hence the try/except at the start
         n_unit can be a tuple or an integer
@@ -294,7 +302,7 @@ def assemble( O,  n_unit=10, spherical=False):
         n_unit_a = n_unit_b = n_unit_c = n_unit
       
     a_vec, b_vec, c_vec = O.T
-    vecs = np.array([i * a_vec + j *b_vec + k * c_vec
+    vecs = np.array([i * a_vec + j * b_vec + k * c_vec
                           for i in range(n_unit_a)
                           for j in range(n_unit_b)
                           for k in range(n_unit_c)])
@@ -304,4 +312,3 @@ def assemble( O,  n_unit=10, spherical=False):
         vecs = simutils.sphericalize(vecs)
 
     return vecs
-
