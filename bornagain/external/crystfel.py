@@ -92,7 +92,7 @@ def split_image(data, geom_dict):
 
     split_data = []
     for panel_name in geom_dict['panels']:
-        p = geom_dict[panel_name]
+        p = geom_dict['panels'][panel_name]
         split_data.append(data[p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)])
 
     return split_data
