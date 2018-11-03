@@ -179,7 +179,6 @@ class ClCore(object):
         self._load_buffer_mesh_lookup()
         self._load_test_rotate_vec()
         self._load_mod_squared_complex_to_real()
-        self._load_qrf_default()
         self._load_qrf_cromer_mann()
         self._load_lattice_transform_intensities_pad()
         self._load_gaussian_lattice_transform_intensities_pad()
@@ -237,10 +236,6 @@ class ClCore(object):
     def _load_mod_squared_complex_to_real(self):
         self.mod_squared_complex_to_real_cl = self.programs.mod_squared_complex_to_real
         self.mod_squared_complex_to_real_cl.set_scalar_arg_dtypes([None, None, self.int_t])
-
-    def _load_qrf_default(self):
-        self.qrf_default_cl = self.programs.qrf_default
-        self.qrf_default_cl.set_scalar_arg_dtypes([None, None, None, None, self.int_t])
 
     def _load_qrf_cromer_mann(self):
         self.qrf_cromer_mann_cl = self.programs.qrf_cromer_mann
@@ -403,6 +398,9 @@ class ClCore(object):
     def phase_factor_qrf_chunk(self, q, r, f, Nchunk, q_is_qdev=False):
 
         r"""
+
+        This needs to be tested, made for really big atom-vectors (e.g. a virus or rhibosome)
+
         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
 
         Arguments:
@@ -462,7 +460,8 @@ class ClCore(object):
             q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
             r (numpy/cl float array [M,3]): Atomic coordinates.
             f (numpy/cl complex array [M]): Complex scattering factors.
-            R (numpy array [3,3]): Rotation matrix acting on q vectors.
+            R (numpy array [3,3]): Rotation matrix acting on atom vectors 
+                (we quietly transpose R and let it operate on q-vectors for speedups)
             a (cl complex array [N]): Optional container for complex scattering 
               amplitudes.
 
@@ -473,7 +472,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3, dtype=self.real_t)
-        R = self.vec16(R, dtype=self.real_t)
+        R = self.vec16(R.T, dtype=self.real_t)
 
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
@@ -558,7 +557,8 @@ class ClCore(object):
         Arguments:
             q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
             r (numpy/cl float array [M,3]): Atomic coordinates.
-            R (numpy array [3,3]): Rotation matrix acting on q vectors.
+            R (numpy array [3,3]): Rotation matrix acting on atom vectors.
+                (we quietly transpose R and let it operate on q-vectors for speedups)
             f (numpy/cl complex array [M]): Complex scattering factors.
             a (cl complex array [N]): Optional container for complex scattering 
               amplitudes.
@@ -570,7 +570,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
-        R = self.vec16(R, dtype=self.real_t)
+        R = self.vec16(R.T, dtype=self.real_t)
 
         if add:
             add = 1
@@ -621,7 +621,8 @@ class ClCore(object):
             nS: Number of slow-scan pixels (corresponding to S vector) in the
                 detector panel
             w: The photon wavelength in meters
-            R: Optional numpy array [3x3] specifying rotation of q vectors
+            R: Optional numpy array [3x3] specifying rotation of atom vectors
+                (we quietly transpose R and let it operate on q-vectors for speedups)
             a: Optional output complex scattering amplitude cl array
 
         Returns:
@@ -631,7 +632,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
-        R = self.vec16(R,dtype=self.real_t)
+        R = self.vec16(R.T,dtype=self.real_t)
         if add:
             add = 1
         else:
@@ -736,7 +737,8 @@ class ClCore(object):
             q_max (float): As defined in phase_factor_mesh()
             q (Nx3 numpy array): q-space coordinates at which we want to interpolate
                the complex amplitudes in a_dev
-            R (3x3 numpy array): Rotation matrix that will act on the q vectors
+            R (3x3 numpy array): Rotation matrix that will act on the atom vectors
+                (we quietly transpose R and let it operate on q-vectors for speedups)
             a: (clarray) The output array (optional)
 
         Returns:
@@ -745,7 +747,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
-        R = self.vec16(R, dtype=self.real_t)
+        R = self.vec16(R.T, dtype=self.real_t)
 
         N = np.array(N, dtype=self.int_t)
         q_max = np.array(q_max, dtype=self.real_t)
@@ -798,7 +800,8 @@ class ClCore(object):
             nF (int)          : Number of fast-scan pixels.
             nS (int)          : Number of slow-scan pixels.
             w (float)         : Wavelength.
-            R (numpy array)   : Rotation matrix acting on q vectors.
+            R (numpy array)   : Rotation matrix acting on atom vectors.
+                (we quietly transpose R and let it operate on q-vectors for speedups)
             I (:class:pyopencl.array.Array) : OpenCL device array containing intensities.
             add (bool)        : If true, the function will add to the input I buffer, else the buffer is overwritten.
 
@@ -808,7 +811,7 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
-        R = self.vec16(R, dtype=self.real_t)
+        R = self.vec16(R.T, dtype=self.real_t)
 
         nF = self.int_t(nF)
         nS = self.int_t(nS)
@@ -857,7 +860,8 @@ class ClCore(object):
             nF (int)          : Number of fast-scan pixels.
             nS (int)          : Number of slow-scan pixels.
             w (float)         : Wavelength.
-            R (numpy array)   : Rotation matrix acting on q vectors.
+            R (numpy array)   : Rotation matrix acting on atom vectors.
+                (we quietly transpose R and let it operate on q-vectors for speedups)
             I (:class:pyopencl.array.Array) : OpenCL device array containing intensities.
             add (bool)        : If true, the function will add to the input I buffer, else the buffer is
                                 overwritten.
@@ -1080,7 +1084,7 @@ class ClCore(object):
                 Randomly rotate the molecule
             
             force_rand_rot (np.ndarray) :
-                Supply a specific rotation matrix
+                Supply a specific rotation matrix that operates on molecules
             
             com (np.ndarray) :
                 Offset the center of mass of the molecule

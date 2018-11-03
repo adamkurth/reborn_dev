@@ -12,8 +12,6 @@ from . import source
 from . import units
 from . import utils
 
-from .detector import SimplePAD
-
 
 CONFIG_OPTIONS = {'warn_depreciated': True,
                   'force_depreciated': False,
