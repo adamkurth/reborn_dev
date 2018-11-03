@@ -286,6 +286,15 @@ class PADGeometry(object):
 
         return dat.reshape(self.shape())
 
+    def zeros(self):
+
+        return np.zeros((self.n_ss, self.n_fs))
+
+    def ones(self):
+
+        return np.ones((self.n_ss, self.n_fs))
+
+
 def split_pad_data(pad_list=None, data=None):
     r"""
 
@@ -333,6 +342,7 @@ class PADAssembler(object):
         self.a = a
 
     def assemble_data(self, data):
+
         r"""
         Given a contiguous block of data, create the fake single-panel PAD.
 
@@ -344,12 +354,17 @@ class PADAssembler(object):
             assembled_data (numpy array):
                 Assembled PAD image
         """
+
+        data = np.ravel(data)
+
         a = self.a
         v = self.v
         a[v[:, 0], v[:, 1]] = data
+
         return a.copy()
 
     def assemble_data_list(self, data_list):
+
         r"""
         Same as assemble_data() method, but accepts a list of individual panels in the form of a list.
 
@@ -361,10 +376,12 @@ class PADAssembler(object):
             assembled_data (numpy array):
                 Assembled PAD image
         """
+
         return self.assemble_data(np.ravel(data_list))
 
 
 class SimplePAD(PADGeometry):
+
     """
     A simple child class to PADGeometry with some higher level functionality
     
