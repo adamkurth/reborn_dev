@@ -8,7 +8,8 @@ Note that there is documentation on `LCLS PAD geometry <https://confluence.slac.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-
+from bornagain.external import crystfel
+from bornagain import utils
 
 def reshape_psana_cspad_array_to_cheetah_array(psana_array):
     r"""
@@ -60,9 +61,7 @@ def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
 
 def cheetah_remapped_cspad_array_to_pad_list(cheetah_array, geom_dict):
 
-    pad_list = []
-    for pn in geom_dict['panels']:
-        p = geom_dict['panels'][pn]
-        pad_list.append(cheetah_array[p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)])
+    utils.depreciate('Dont use cheetah_remapped_cspad_array_to_pad_list() function.  Instead, use'
+                     'crystfel.split_image()')
 
-    return pad_list
+    return crystfel.split_image(cheetah_array, geom_dict)
