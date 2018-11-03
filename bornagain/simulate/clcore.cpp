@@ -542,86 +542,15 @@ kernel void gaussian_lattice_transform_intensities_pad(
     }
 }
 
-__kernel void qrf_default(
-    __global dsfloat16 *q_vecs,
-    __global dsfloat4 *r_vecs,
-    __constant dsfloat *R,
-    __global dsfloat2 *A,
-    const int n_atoms)
-// TODO: Derek will add documentation to this one.
-{
-
-    int q_idx = get_global_id(0);
-    int l_idx = get_local_id(0);
-
-    dsfloat Areal;
-    dsfloat Aimag;
-
-    dsfloat ff[16];
-    
-    Areal=A[q_idx].x;
-    Aimag=A[q_idx].y;
-
-    dsfloat qx = q_vecs[q_idx].s0;
-    dsfloat qy = q_vecs[q_idx].s1;
-    dsfloat qz = q_vecs[q_idx].s2;
-
-    dsfloat qRx = R[0]*qx + R[3]*qy + R[6]*qz;
-    dsfloat qRy = R[1]*qx + R[4]*qy + R[7]*qz;
-    dsfloat qRz = R[2]*qx + R[5]*qy + R[8]*qz;
-    
-    ff[0] = q_vecs[q_idx].s3;
-    ff[1] = q_vecs[q_idx].s4;
-    ff[2] = q_vecs[q_idx].s5;
-    ff[3] = q_vecs[q_idx].s6;
-    ff[4] = q_vecs[q_idx].s7;
-    ff[5] = q_vecs[q_idx].s8;
-    ff[6] = q_vecs[q_idx].s9;
-    ff[7] = q_vecs[q_idx].sA;
-    ff[8] = q_vecs[q_idx].sB;
-    ff[9] = q_vecs[q_idx].sC;
-    ff[10] = q_vecs[q_idx].sD;
-    ff[11] = q_vecs[q_idx].sE;
-    ff[12] = q_vecs[q_idx].sF;
-    ff[13] = 0.0f;
-    ff[14] = 0.0f;
-    ff[15] = 0.0f;
-
-    
-    __local dsfloat4 LOC_ATOMS[GROUP_SIZE];
-    for (int g=0; g<n_atoms; g+=GROUP_SIZE){
-        int ai = g + l_idx;
-        if (ai < n_atoms)
-            LOC_ATOMS[l_idx] = r_vecs[ai];
-        if( !(ai < n_atoms))
-            LOC_ATOMS[l_idx] = (dsfloat4)(1.0f, 1.0f, 1.0f, 15.0f); // make atom ID 15, s.t. ff=0
-
-        barrier(CLK_LOCAL_MEM_FENCE);
-        
-        for (int i=0; i< GROUP_SIZE; i++){
-
-            dsfloat phase = qRx*LOC_ATOMS[i].x + qRy*LOC_ATOMS[i].y + qRz*LOC_ATOMS[i].z;
-            int species_id = (int) (LOC_ATOMS[i].w);
-            
-            Areal += native_cos(-phase)*ff[species_id];
-            Aimag += native_sin(-phase)*ff[species_id];
-        }
-        barrier(CLK_LOCAL_MEM_FENCE);
-        }
-   
-    A[q_idx].x = Areal;
-    A[q_idx].y = Aimag;
-}
-
 
 __kernel void qrf_cromer_mann(
-    __global dsfloat16 *q_vecs,
-    __global dsfloat4 *r_vecs,
-    __constant dsfloat *R,
-    __constant dsfloat *T,
-    __global dsfloat2 *A,
+    __global dsfloat16 *q_vecs, // reciprocal space vectors, followed by cromer mann lookups, see clcore.py for details
+    __global dsfloat4 *r_vecs, // atom vectors and atomic number
+    __constant dsfloat *R, // rotation matrix acting on molecules (note it is transposed and used to rotate q for speed)
+    __constant dsfloat *T, // translation vector of molecule moving its center of mass
+    __global dsfloat2 *A, // amplitudes output vector
     const int n_atoms)
-// TODO: Derek will add documentation to this one.
+// 
 {
 
     int q_idx = get_global_id(0);
