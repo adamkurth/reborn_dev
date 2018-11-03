@@ -295,7 +295,8 @@ class PADGeometry(object):
         return np.ones((self.n_ss, self.n_fs))
 
 
-def split_pad_data(pad_list=None, data=None):
+def split_pad_data(pad_list, data):
+
     r"""
 
     Given a contiguous block of data, split it up into individual PAD panels
@@ -309,8 +310,6 @@ def split_pad_data(pad_list=None, data=None):
 
     """
 
-    if pad_list is None:
-        pad_list = []
     data_list = []
 
     offset = 0
@@ -322,6 +321,7 @@ def split_pad_data(pad_list=None, data=None):
 
 
 class PADAssembler(object):
+
     r"""
     Assemble PAD data into a fake single-panel PAD.  This is done in a lazy way.  The resulting image is not
     centered in any way; the fake detector is a snug fit to the individual PADs.
