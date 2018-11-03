@@ -13,9 +13,9 @@ def test_no_atomic_form_factor():
     f = np.ones( Natom, dtype=np.complex64)
     A = core.phase_factor_qrf(q,r,f)
 
-    print (A[0])
+    # print (A[0])
 #   now test the cromermann simulation
-    print("Testing cromermann")
+#     print("Testing cromermann")
     core.init_amps(Npix)
     core.prime_cromermann_simulator( q, None)
     q_cm = core.get_q_cromermann()

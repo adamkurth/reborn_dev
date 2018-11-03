@@ -5,6 +5,7 @@ Classes related to x-ray "scattering", which loosely means diffraction from many
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
+from bornagain import utils
 
 
 class RadialProfile(object):
@@ -13,6 +14,8 @@ class RadialProfile(object):
     """
 
     def __init__(self):
+
+        utils.depreciate('dont use scatter.RadialProfile() - use detector.RadialProfiler() instead')
 
         self.n_bins = None
         self.bins = None

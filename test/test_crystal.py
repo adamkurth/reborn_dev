@@ -4,7 +4,7 @@ sys.path.append('..')
 from bornagain import target
 
 def test_load_pdb_and_assemble():
-    print("\n Entering quick test:")
+    # print("\n Entering quick test:")
     pdb_struct = target.crystal.Structure("../examples/data/pdb/2LYZ.pdb")
     lat_vecs = target.crystal.assemble(pdb_struct.O, 10) 
 

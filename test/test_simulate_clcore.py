@@ -53,7 +53,7 @@ def _clcore(double_precision=False):
 
     assert(core.get_group_size() == core.group_size)
    
-    print("Using group size: %d" %core.group_size)
+    # print("Using group size: %d" %core.group_size)
     ###########################################################################
     # Check that there are no errors in phase_factor_qrf_inplace
     # TODO: check that the amplitudes are correct
