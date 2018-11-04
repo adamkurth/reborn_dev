@@ -1,0 +1,15 @@
+bornagain.analysis package
+==========================
+
+.. automodule:: bornagain.analysis
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.analysis.peaks
+

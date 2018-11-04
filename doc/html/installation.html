@@ -192,7 +192,6 @@ by doing something like this:</p>
 <li>h5py</li>
 <li>numpy</li>
 <li>scipy</li>
-<li>scikit-image</li>
 <li>matplotlib</li>
 <li>ipython</li>
 <li>pytest</li>
@@ -204,8 +203,8 @@ by doing something like this:</p>
 <li>cfelpyutils</li>
 </ul>
 <p>You can use bornagain with only a subset of of the above dependencies (e.g. skip pyopencl if you don’t want to simulate,
-and skip sphinx if you won’t be modifying the documentation, etc.), but it’s usually not difficult to install all of
-them for completeness.</p>
+and skip sphinx if you won’t be modifying the documentation, skip pyqtgraph if you won’t use those GUIs, etc.),
+but it’s usually not difficult to install all of them for completeness.</p>
 <p>We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
 compatibility with both pyqt4 and pyqt5 (which is proving to be somewhat difficult…). If you’re deciding on which
 version to use, here are a couple things to consider:</p>
@@ -222,7 +221,8 @@ version to use, here are a couple things to consider:</p>
 <a class="reference external" href="https://conda.io/docs/">Conda</a> package manager that comes with it makes it fast and easy to set up Python.  You might
 consider making a <a class="reference external" href="https://conda.io/docs/user-guide/tasks/manage-environments.html">conda environment</a> to check that
 everything works well, since packages like opengl, opencl, pyqt seem to have complicated, and occasionally conflicting
-requirments.  Here’s an example of how to set up a new conda environment:</p>
+requirments.</p>
+<p>Assuming that you’ve installed conda, here’s an example of how to set up a new conda environment:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create -n bornagain -c conda-forge <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6 <span class="nv">pyqt</span><span class="o">=</span><span class="m">5</span> h5py numpy scipy scikit-image <span class="se">\</span>
 matplotlib ipython pytest sphinx pyqtgraph pyopencl pyopengl future
 </pre></div>
@@ -235,6 +235,11 @@ bornagain, like this:</p>
 <p>Note that cfelpyutils currently requires that you use pip to install.  It can be installed (after activating your
 environment) as follows:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install cfelpyutils
+</pre></div>
+</div>
+<p>An even easier way to setup your environment is to use the provided environmen files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env create -f bornagain3-env.yml
+conda activate bornagain3
 </pre></div>
 </div>
 <p>If you don’t want to use a conda environment you can just install the modules in the current environment.  For example:</p>

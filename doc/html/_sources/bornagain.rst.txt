@@ -11,7 +11,9 @@ Subpackages
 
 .. toctree::
 
+    bornagain.analysis
     bornagain.external
+    bornagain.fileio
     bornagain.simulate
     bornagain.target
     bornagain.viewers

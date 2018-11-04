@@ -2,6 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+from time import time
 import numpy as np
 
 import pkg_resources
@@ -11,8 +12,10 @@ import pyqtgraph as pg
 
 from pyqtgraph.Qt import uic, QtGui, QtCore
 
+import bornagain
 import bornagain.external.pyqtgraph as bpg
 from bornagain.fileio.getters import FrameGetter
+from bornagain import analysis
 
 padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
 
@@ -37,7 +40,7 @@ class PADView(object):
     mask_data = None
     mask_images = None
     mask_color = None
-    _rois = None
+    _mask_rois = None
     images = None
     scatter_plots = None
     rings = []
@@ -165,19 +168,19 @@ class PADView(object):
                 size = (100, 100)
             roi = pg.RectROI(pos=pos, size=size, centered=True, sideScalers=True)
             roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
-            if self._rois is None:
-                self._rois = []
-            self._rois.append(roi)
+            if self._mask_rois is None:
+                self._mask_rois = []
+            self._mask_rois.append(roi)
             self.viewbox.addItem(roi)
         else:
             pass
 
     def hide_rois(self):
 
-        if self._rois is not None:
-            for roi in self._rois:
+        if self._mask_rois is not None:
+            for roi in self._mask_rois:
                 self.viewbox.removeItem(roi)
-            self._rois = None
+            self._mask_rois = None
 
     def increase_skip(self):
 
@@ -463,7 +466,7 @@ class PADView(object):
 
         noslice = slice(0, 1, None)
 
-        for roi in self._rois:
+        for roi in self._mask_rois:
 
             if not roi.mouseHovering:
                 continue
@@ -773,12 +776,33 @@ class PADView(object):
 
         if 'pad_data' in dat.keys():
 
-            if self.data_filters is None:
-                pad_data = dat['pad_data']
-            else:
-                pad_data = dat['pad_data']
-                if hasattr(self.data_filters, '__call__'):
-                    pad_data = [self.data_filters(d) for d in pad_data]
+            pad_data = dat['pad_data']
+
+            # if bornagain.get_global('debug'):
+
+            # pad_data = dat['pad_data']
+            # t = time()
+            # pad_data = analysis.peaks.snr_filter_pool(pad_data)
+            # print((time() - t), ' ms (mp)')
+            #
+            # pad_data = dat['pad_data']
+            # t = time()
+            # for i in range(0, len(pad_data)):
+            #     pad_data[i] = analysis.peaks.snr_filter(pad_data[i])
+            # print((time() - t), ' ms')
+
+            # if self.data_filters is None:
+            #     pad_data = dat['pad_data']
+            # else:
+            #     pad_data =
+            # else:
+            #     pad_data = dat['pad_data']
+            #     print(type(pad_data))
+            #     if hasattr(self.data_filters, '__call__'):
+            #         t = time()
+            #         for i in range(0, len(pad_data)):
+            #             pad_data[i] = self.data_filters(pad_data[i])
+            #         print((time() - t)/len(pad_data), ' ms')
 
             self.update_pads(pad_data)
 

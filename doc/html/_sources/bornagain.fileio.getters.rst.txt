@@ -1,0 +1,7 @@
+bornagain.fileio.getters module
+===============================
+
+.. automodule:: bornagain.fileio.getters
+    :members:
+    :undoc-members:
+    :show-inheritance:

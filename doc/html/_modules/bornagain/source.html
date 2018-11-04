@@ -161,6 +161,8 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 <div class="viewcode-block" id="Beam"><a class="viewcode-back" href="../../bornagain.source.html#bornagain.source.Beam">[docs]</a><span class="k">class</span> <span class="nc">Beam</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A minimal containor to gather x-ray beam properties.</span>
@@ -179,8 +181,11 @@
     <span class="n">fluence</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">fluence_jitter_fwhm</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="p">):</span>
-        <span class="k">pass</span></div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">wavelength</span><span class="o">=</span><span class="mf">1.5e-10</span><span class="p">,</span> <span class="n">polarization_vec</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam_vec</span> <span class="o">=</span> <span class="n">beam_vec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">polarization_vec</span> <span class="o">=</span> <span class="n">polarization_vec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelength</span></div>
 </pre></div>
 
            </div>

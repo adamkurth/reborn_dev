@@ -153,6 +153,7 @@ def rotate(rot, vec):
     # return np.matmul(rot, vec)
     return np.matmul(rot, vec.T).T
 
+
 def depreciate(message):
 
     r"""

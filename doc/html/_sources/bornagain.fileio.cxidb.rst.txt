@@ -1,0 +1,7 @@
+bornagain.fileio.cxidb module
+=============================
+
+.. automodule:: bornagain.fileio.cxidb
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import h5py
 import numpy as np
+from bornagain.external import crystfel
 from bornagain.external.crystfel import load_crystfel_geometry, geometry_file_to_pad_geometry_list
 from bornagain.external.cheetah import cheetah_remapped_cspad_array_to_pad_list
 
@@ -108,6 +109,8 @@ class CheetahFrameGetter(FrameGetter):
 
     """
 
+    skip_peaks = False
+
     def __init__(self, cxi_file_name=None, geom_file_name=None):
 
         FrameGetter.__init__(self)
@@ -181,9 +184,10 @@ class CheetahFrameGetter(FrameGetter):
     def get_frame(self, frame_number=0):
 
         dat = np.array(self.h5_data[frame_number, :, :]).astype(np.double)
-        pad_data = cheetah_remapped_cspad_array_to_pad_list(dat, self.geom_dict)
+        pad_data = crystfel.split_image(dat, self.geom_dict) #cheetah_remapped_cspad_array_to_pad_list(dat, self.geom_dict)
 
-        peaks = self.get_peaks(self.h5file, frame_number)
+        if not self.skip_peaks:
+            peaks = self.get_peaks(self.h5file, frame_number)
 
         dat = {'pad_data': pad_data, 'peaks': peaks}
 

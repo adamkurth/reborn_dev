@@ -165,7 +165,8 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
+<span class="kn">from</span> <span class="nn">bornagain.external</span> <span class="k">import</span> <span class="n">crystfel</span>
+<span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">utils</span>
 
 <div class="viewcode-block" id="reshape_psana_cspad_array_to_cheetah_array"><a class="viewcode-back" href="../../../bornagain.external.cheetah.html#bornagain.external.cheetah.reshape_psana_cspad_array_to_cheetah_array">[docs]</a><span class="k">def</span> <span class="nf">reshape_psana_cspad_array_to_cheetah_array</span><span class="p">(</span><span class="n">psana_array</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -217,12 +218,10 @@
 
 <div class="viewcode-block" id="cheetah_remapped_cspad_array_to_pad_list"><a class="viewcode-back" href="../../../bornagain.external.cheetah.html#bornagain.external.cheetah.cheetah_remapped_cspad_array_to_pad_list">[docs]</a><span class="k">def</span> <span class="nf">cheetah_remapped_cspad_array_to_pad_list</span><span class="p">(</span><span class="n">cheetah_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">):</span>
 
-    <span class="n">pad_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">pn</span> <span class="ow">in</span> <span class="n">geom_dict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">]:</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="n">geom_dict</span><span class="p">[</span><span class="s1">&#39;panels&#39;</span><span class="p">][</span><span class="n">pn</span><span class="p">]</span>
-        <span class="n">pad_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cheetah_array</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_ss&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_ss&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_fs&#39;</span><span class="p">]:(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;max_fs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">depreciate</span><span class="p">(</span><span class="s1">&#39;Dont use cheetah_remapped_cspad_array_to_pad_list() function.  Instead, use&#39;</span>
+                     <span class="s1">&#39;crystfel.split_image()&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">pad_list</span></div>
+    <span class="k">return</span> <span class="n">crystfel</span><span class="o">.</span><span class="n">split_image</span><span class="p">(</span><span class="n">cheetah_array</span><span class="p">,</span> <span class="n">geom_dict</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

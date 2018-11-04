@@ -2,70 +2,179 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 
 import numpy as np
-from time import time
-from numpy.fft import fft2, ifft2, fftshift, ifftshift
+# from time import time
+from numpy.fft import fft2, ifft2, ifftshift
 from scipy.signal import convolve2d
 
-
-from skimage.morphology import disk
-from skimage.filters.rank import median as median_filter
-
-
-def annulus(inner, outer):
-
-    return disk(outer) - np.pad(disk(inner), outer-inner, mode='constant')
+# from skimage.morphology import disk
+# from skimage.filters.rank import median as median_filter
 
 
-class PeakFinderA(object):
-
-    def __init__(self, shape=None):
-
-        self.annulus = annulus(8, 12)
-        self.shape = shape
-
-    def median_filter(self, dat):
-
-        scl = np.max(np.abs(dat))
-
-        return median_filter(dat/scl, self.annulus)*scl
+# def annulus(inner, outer):
+#
+#     return disk(outer) - np.pad(disk(inner), outer-inner, mode='constant')
 
 
-class PeakFinderB(object):
-
-    def __init__(self, shape=None, radii=(4, 8, 12)):
-
-        self.tophat = disk(radii[0])
-        self.tophat = np.pad(self.tophat, radii[2] - radii[0], mode='constant')
-        self.n_tophat = np.sum(self.tophat)
-        self.annulus = annulus(radii[1], radii[2])
-        self.n_annulus = np.sum(self.annulus)
-        self.annulus = self.annulus / self.n_annulus
-        self.tophat_annulus = self.tophat - self.annulus * self.n_tophat
-        self.shape = shape
-
-    def get_snr(self, dat):
-
-        # t = time()
-        bak = convolve2d(dat, self.annulus, mode='full', boundary='symm')
-        bak2 = convolve2d(dat**2, self.annulus, mode='full', boundary='symm')
-        sigma = np.sqrt(bak2 - bak**2)
-
-        signal = convolve2d(dat, self.tophat_annulus, mode='full', boundary='symm')
-
-        snr = signal/sigma
-        snr[~np.isfinite(snr)] = 0
-
-        # print(bak2 - bak**2)
-        # print(time() - t)
-
-        return snr
+# class PeakFinderA(object):
+#
+#     def __init__(self, shape=None):
+#
+#         self.annulus = annulus(8, 12)
+#         self.shape = shape
+#
+#     def median_filter(self, dat):
+#
+#         scl = np.max(np.abs(dat))
+#
+#         return median_filter(dat/scl, self.annulus)*scl
 
 
+# class PeakFinderB(object):
+#
+#     def __init__(self, shape=None, radii=(4, 8, 12)):
+#
+#         self.tophat = disk(radii[0])
+#         self.tophat = np.pad(self.tophat, radii[2] - radii[0], mode='constant')
+#         self.n_tophat = np.sum(self.tophat)
+#         self.annulus = annulus(radii[1], radii[2])
+#         self.n_annulus = np.sum(self.annulus)
+#         self.annulus = self.annulus / self.n_annulus
+#         self.tophat_annulus = self.tophat - self.annulus * self.n_tophat
+#         self.shape = shape
+#
+#     def get_snr(self, dat):
+#
+#         # t = time()
+#         bak = convolve2d(dat, self.annulus, mode='full', boundary='symm')
+#         bak2 = convolve2d(dat**2, self.annulus, mode='full', boundary='symm')
+#         sigma = np.sqrt(bak2 - bak**2)
+#
+#         signal = convolve2d(dat, self.tophat_annulus, mode='full', boundary='symm')
+#
+#         snr = signal/sigma
+#         snr[~np.isfinite(snr)] = 0
+#
+#         # print(bak2 - bak**2)
+#         # print(time() - t)
+#
+#         return snr
 
+# from numba import jit
+# from multiprocessing import Pool
 
+# def snr_filter_pool(data):
+#
+#     pool = Pool(2)
+#     return pool.map(snr_filter, data)
+#
+#
 
+# def snr_filter(data, radii=(1, 18, 20), mask=None, local_max_only=1):
+#
+#     data = data.astype(np.double)
+#     a = int(radii[0])
+#     b = int(radii[1])
+#     c = int(radii[2])
+#     if mask is None:
+#         mask = np.ones_like(data)
+#     mask = mask.astype(np.int)
+#     local_max_only = int(local_max_only)
+#
+#     return _snr_filter(data, a, b, c, mask, local_max_only)
 
-
+# @jit(nopython=True)
+# def _snr_filter(data, a, b, c, mask, local_max_only):
+#
+#     nf = data.shape[1]
+#     ns = data.shape[0]
+#
+#     snr = np.zeros_like(data)
+#     signal = np.zeros_like(data)
+#
+#     for i in range(1, ns-1):
+#         for j in range(1, nf-1):
+#
+#             # Skip masked pixels
+#             if mask[i, j] == 0:
+#                 continue
+#
+#             if local_max_only == 1:
+#                 # Skip pixels that aren't local maxima
+#                 this_val = data[i, j]
+#                 if data[i-1, j] > this_val:
+#                     continue
+#                 if data[i+1, j] > this_val:
+#                     continue
+#                 if data[i, j-1] > this_val:
+#                     continue
+#                 if data[i, j+1] > this_val:
+#                     continue
+#                 if data[i-1, j-1] > this_val:
+#                     continue
+#                 if data[i-1, j+1] > this_val:
+#                     continue
+#                 if data[i+1, j-1] > this_val:
+#                     continue
+#                 if data[i+1, j+1] > this_val:
+#                     continue
+#
+#             # Now we will compute the locally integrated signal, and the locally integrated signal squared
+#
+#             local_signal = 0
+#             local_signal2 = 0
+#             n_local = 0
+#
+#             annulus_signal = 0
+#             annulus_signal2 = 0
+#             n_annulus = 0
+#
+#             for q in range(-c, c+1):
+#
+#                 ii = i + q
+#
+#                 if ii < 0:
+#                     continue
+#                 if ii >= ns:
+#                     continue
+#
+#                 q2 = q**2
+#
+#                 for r in range(-c, c+1):
+#
+#                     jj = j+r
+#
+#                     if jj < 0:
+#                         continue
+#                     if jj >= nf:
+#                         continue
+#
+#                     if mask[ii, jj] == 0:
+#                         continue
+#
+#                     rad = np.sqrt(q2 + r**2)
+#
+#                     if rad <= a:
+#
+#                         n_local += 1
+#                         local_signal += data[ii, jj]
+#                         local_signal2 += data[ii, jj]**2
+#
+#                     if rad >= b and rad <= c:
+#
+#                         n_annulus += 1
+#                         annulus_signal += data[ii, jj]
+#                         annulus_signal2 += data[ii, jj] ** 2
+#
+#             if n_local == 0 or n_annulus == 0:
+#                 continue
+#
+#             # We subtract the local background from the signal
+#             signal[i, j] = local_signal/n_local - annulus_signal/n_annulus
+#
+#             noise = np.sqrt(annulus_signal2/n_annulus - (annulus_signal/n_annulus)**2)
+#             snr[i, j] = signal[i, j]/noise
+#
+#     return snr
 
 
 class PeakFinderV1(object):

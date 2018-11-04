@@ -18,5 +18,4 @@ Submodules
    bornagain.simulate.refdata
    bornagain.simulate.simutils
    bornagain.simulate.solutions
-   bornagain.simulate.thorn
 

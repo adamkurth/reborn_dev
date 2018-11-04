@@ -38,7 +38,6 @@ The current dependencies of bornagain are:
 * h5py
 * numpy
 * scipy
-* scikit-image
 * matplotlib
 * ipython
 * pytest
@@ -50,8 +49,8 @@ The current dependencies of bornagain are:
 * cfelpyutils
 
 You can use bornagain with only a subset of of the above dependencies (e.g. skip pyopencl if you don't want to simulate,
-and skip sphinx if you won't be modifying the documentation, etc.), but it's usually not difficult to install all of
-them for completeness.
+and skip sphinx if you won't be modifying the documentation, skip pyqtgraph if you won't use those GUIs, etc.),
+but it's usually not difficult to install all of them for completeness.
 
 We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
 compatibility with both pyqt4 and pyqt5 (which is proving to be somewhat difficult...). If you're deciding on which
@@ -70,7 +69,9 @@ Example setup
 `Conda <https://conda.io/docs/>`_ package manager that comes with it makes it fast and easy to set up Python.  You might
 consider making a `conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_ to check that
 everything works well, since packages like opengl, opencl, pyqt seem to have complicated, and occasionally conflicting
-requirments.  Here's an example of how to set up a new conda environment:
+requirments.
+
+Assuming that you've installed conda, here's an example of how to set up a new conda environment:
 
 .. code-block:: bash
 
@@ -90,6 +91,13 @@ environment) as follows:
 .. code-block:: bash
 
     pip install cfelpyutils
+
+An even easier way to setup your environment is to use the provided environmen files:
+
+.. code-block:: bash
+
+    conda env create -f bornagain3-env.yml
+    conda activate bornagain3
 
 If you don't want to use a conda environment you can just install the modules in the current environment.  For example:
 

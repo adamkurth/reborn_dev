@@ -11,12 +11,6 @@ Subpackages
 
 .. toctree::
 
+    bornagain.viewers.mplviews
     bornagain.viewers.qtviews
-
-Submodules
-----------
-
-.. toctree::
-
-   bornagain.viewers.joesviews
 

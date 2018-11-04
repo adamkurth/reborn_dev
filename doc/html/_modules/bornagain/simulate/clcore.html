@@ -182,6 +182,7 @@
 <span class="kn">import</span> <span class="nn">bornagain</span> <span class="k">as</span> <span class="nn">ba</span>
 <span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="k">import</span> <span class="n">refdata</span>
 
+
 <span class="n">clcore_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;clcore.cpp&#39;</span><span class="p">)</span>
 
 
@@ -335,8 +336,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_buffer_mesh_lookup</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_test_rotate_vec</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_mod_squared_complex_to_real</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_load_qrf_default</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_load_qrf_kam</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_qrf_cromer_mann</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_lattice_transform_intensities_pad</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_gaussian_lattice_transform_intensities_pad</span><span class="p">()</span>
 
@@ -394,19 +394,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mod_squared_complex_to_real_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">mod_squared_complex_to_real</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mod_squared_complex_to_real_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">_load_qrf_default</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_default_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">qrf_default</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_default_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
-
-    <span class="k">def</span> <span class="nf">_load_qrf_kam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_kam_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">qrf_kam</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_kam_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">_load_qrf_cromer_mann</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_cromer_mann_cl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">programs</span><span class="o">.</span><span class="n">qrf_cromer_mann</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_cromer_mann_cl</span><span class="o">.</span><span class="n">set_scalar_arg_dtypes</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">])</span>
 
 <div class="viewcode-block" id="ClCore.vec4"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.vec4">[docs]</a>    <span class="k">def</span> <span class="nf">vec4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evdidently pyopencl does not deal with 3-vectors very well, so we use</span>
 <span class="sd">        4-vectors and pad with a zero at the end.</span>
+
+<span class="sd">        From Derek: I tested this at one point and found no difference... maybe newer pyopenCL is better.. </span>
 
 <span class="sd">        This just does a trivial operation:</span>
 <span class="sd">        return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)</span>
@@ -429,6 +427,8 @@
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The best way to pass in a rotation matrix is as a float16.  This is a helper function for</span>
 <span class="sd">        preparing a numpy array so that it can be passed in as a float16.</span>
+
+<span class="sd">        From Derek: I had tested this and found no difference</span>
 
 <span class="sd">        See the vec4 function documentation also.</span>
 
@@ -555,6 +555,9 @@
 <div class="viewcode-block" id="ClCore.phase_factor_qrf_chunk"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk">[docs]</a>    <span class="k">def</span> <span class="nf">phase_factor_qrf_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">Nchunk</span><span class="p">,</span> <span class="n">q_is_qdev</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        This needs to be tested, made for really big atom-vectors (e.g. a virus or rhibosome)</span>
+
 <span class="sd">        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</span>
 
 <span class="sd">        Arguments:</span>
@@ -614,7 +617,8 @@
 <span class="sd">            q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).</span>
 <span class="sd">            r (numpy/cl float array [M,3]): Atomic coordinates.</span>
 <span class="sd">            f (numpy/cl complex array [M]): Complex scattering factors.</span>
-<span class="sd">            R (numpy array [3,3]): Rotation matrix acting on q vectors.</span>
+<span class="sd">            R (numpy array [3,3]): Rotation matrix acting on atom vectors </span>
+<span class="sd">                (we quietly transpose R and let it operate on q-vectors for speedups)</span>
 <span class="sd">            a (cl complex array [N]): Optional container for complex scattering </span>
 <span class="sd">              amplitudes.</span>
 
@@ -625,7 +629,7 @@
 
         <span class="k">if</span> <span class="n">R</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
-        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
         <span class="n">n_pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">n_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -672,13 +676,13 @@
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        Hey Derek - what does this do?</span>
+<span class="sd">        Initialize amplitudes for cromer-mann simulator as zeros</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            Npix:</span>
 
 <span class="sd">        Returns:</span>
-
+<span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Npix</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complex_t</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">Npix</span><span class="p">))</span></div>
@@ -687,10 +691,11 @@
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        Derek - what does this do?</span>
-
+<span class="sd">        retrieve scattering amplitudes from cromer-mann simulator</span>
+<span class="sd">        </span>
 <span class="sd">        Args:</span>
 <span class="sd">            reset:</span>
+<span class="sd">                whether to reset the amplitudes to zeros </span>
 
 <span class="sd">        Returns:</span>
 
@@ -709,7 +714,8 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).</span>
 <span class="sd">            r (numpy/cl float array [M,3]): Atomic coordinates.</span>
-<span class="sd">            R (numpy array [3,3]): Rotation matrix acting on q vectors.</span>
+<span class="sd">            R (numpy array [3,3]): Rotation matrix acting on atom vectors.</span>
+<span class="sd">                (we quietly transpose R and let it operate on q-vectors for speedups)</span>
 <span class="sd">            f (numpy/cl complex array [M]): Complex scattering factors.</span>
 <span class="sd">            a (cl complex array [N]): Optional container for complex scattering </span>
 <span class="sd">              amplitudes.</span>
@@ -721,7 +727,7 @@
 
         <span class="k">if</span> <span class="n">R</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">add</span><span class="p">:</span>
             <span class="n">add</span> <span class="o">=</span> <span class="mi">1</span>
@@ -772,7 +778,8 @@
 <span class="sd">            nS: Number of slow-scan pixels (corresponding to S vector) in the</span>
 <span class="sd">                detector panel</span>
 <span class="sd">            w: The photon wavelength in meters</span>
-<span class="sd">            R: Optional numpy array [3x3] specifying rotation of q vectors</span>
+<span class="sd">            R: Optional numpy array [3x3] specifying rotation of atom vectors</span>
+<span class="sd">                (we quietly transpose R and let it operate on q-vectors for speedups)</span>
 <span class="sd">            a: Optional output complex scattering amplitude cl array</span>
 
 <span class="sd">        Returns:</span>
@@ -782,7 +789,7 @@
 
         <span class="k">if</span> <span class="n">R</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">add</span><span class="p">:</span>
             <span class="n">add</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
@@ -887,7 +894,8 @@
 <span class="sd">            q_max (float): As defined in phase_factor_mesh()</span>
 <span class="sd">            q (Nx3 numpy array): q-space coordinates at which we want to interpolate</span>
 <span class="sd">               the complex amplitudes in a_dev</span>
-<span class="sd">            R (3x3 numpy array): Rotation matrix that will act on the q vectors</span>
+<span class="sd">            R (3x3 numpy array): Rotation matrix that will act on the atom vectors</span>
+<span class="sd">                (we quietly transpose R and let it operate on q-vectors for speedups)</span>
 <span class="sd">            a: (clarray) The output array (optional)</span>
 
 <span class="sd">        Returns:</span>
@@ -896,7 +904,7 @@
 
         <span class="k">if</span> <span class="n">R</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
         <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">)</span>
         <span class="n">q_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q_max</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
@@ -949,7 +957,8 @@
 <span class="sd">            nF (int)          : Number of fast-scan pixels.</span>
 <span class="sd">            nS (int)          : Number of slow-scan pixels.</span>
 <span class="sd">            w (float)         : Wavelength.</span>
-<span class="sd">            R (numpy array)   : Rotation matrix acting on q vectors.</span>
+<span class="sd">            R (numpy array)   : Rotation matrix acting on atom vectors.</span>
+<span class="sd">                (we quietly transpose R and let it operate on q-vectors for speedups)</span>
 <span class="sd">            I (:class:pyopencl.array.Array) : OpenCL device array containing intensities.</span>
 <span class="sd">            add (bool)        : If true, the function will add to the input I buffer, else the buffer is overwritten.</span>
 
@@ -959,7 +968,7 @@
 
         <span class="k">if</span> <span class="n">R</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
         <span class="n">nF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="n">nF</span><span class="p">)</span>
         <span class="n">nS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="n">nS</span><span class="p">)</span>
@@ -1008,7 +1017,8 @@
 <span class="sd">            nF (int)          : Number of fast-scan pixels.</span>
 <span class="sd">            nS (int)          : Number of slow-scan pixels.</span>
 <span class="sd">            w (float)         : Wavelength.</span>
-<span class="sd">            R (numpy array)   : Rotation matrix acting on q vectors.</span>
+<span class="sd">            R (numpy array)   : Rotation matrix acting on atom vectors.</span>
+<span class="sd">                (we quietly transpose R and let it operate on q-vectors for speedups)</span>
 <span class="sd">            I (:class:pyopencl.array.Array) : OpenCL device array containing intensities.</span>
 <span class="sd">            add (bool)        : If true, the function will add to the input I buffer, else the buffer is</span>
 <span class="sd">                                overwritten.</span>
@@ -1136,7 +1146,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span><span class="o">.</span><span class="n">data</span></div>
 
     <span class="k">def</span> <span class="nf">_load_r_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_vecs</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        makes the r buffer for use in the cromer-mann simulator, where</span>
+<span class="sd">        r-vector is Nx4, the last dimension being atomic number</span>
+<span class="sd">        used for lookup of form factor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">r_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
                 <span class="p">(</span><span class="n">atom_vecs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomIDs</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1176,13 +1190,20 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_buff</span><span class="o">.</span><span class="n">data</span></div>
 
     <span class="k">def</span> <span class="nf">_load_q_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        makes the q_buffer so that is it integer mutiple of group size</span>
+<span class="sd">        this is for the cromer-mann simnulator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">q_zeros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
         <span class="n">q_zeros</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span>
         <span class="n">q_zeros</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">3</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nspecies</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_facts_arr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">q_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">q_zeros</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_load_amp_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1">#       make output buffer; initialize as 0s</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        makes the amplitude buffer so that it is integer multiple of groupsize</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#make output buffer; initialize as 0s</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complex_t</span><span class="p">)</span>
 
@@ -1192,7 +1213,7 @@
                     <span class="n">rand_rot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Run the qrf kam simulator.</span>
+<span class="sd">        Run the cromer-mann form-factor simulator.</span>
 
 <span class="sd">        Arguments</span>
 <span class="sd">            q_buff_data (pyopenCL buffer data) :</span>
@@ -1220,7 +1241,7 @@
 <span class="sd">                Randomly rotate the molecule</span>
 <span class="sd">            </span>
 <span class="sd">            force_rand_rot (np.ndarray) :</span>
-<span class="sd">                Supply a specific rotation matrix</span>
+<span class="sd">                Supply a specific rotation matrix that operates on molecules</span>
 <span class="sd">            </span>
 <span class="sd">            com (np.ndarray) :</span>
 <span class="sd">                Offset the center of mass of the molecule</span>
@@ -1251,37 +1272,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_com_vec</span><span class="p">()</span>
 
         <span class="c1">#       run the program</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_kam_cl</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">),),</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_cromer_mann_cl</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">),),</span> 
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span> 
             <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
             <span class="bp">self</span><span class="o">.</span><span class="n">_A_buff_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_set_rand_rot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        Derek - please document.</span>
-
-<span class="sd">        Returns:</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sets the random rotation matrix on device&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_com_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        Derek - please document.</span>
-
-<span class="sd">        Returns:</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
+        <span class="sd">&quot;&quot;&quot;sets the center-of mass vectors on the device&quot;&quot;&quot;</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ClCore.release_amplitudes"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.release_amplitudes">[docs]</a>    <span class="k">def</span> <span class="nf">release_amplitudes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Releases the amplitude buffer from the GPU</span>
 <span class="sd">        </span>
@@ -1400,64 +1405,6 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;device and platform automatically.  For example,&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; export PYOPENCL_CTX=&#39;1&#39;&quot;</span><span class="p">)</span></div>
 
-
-<span class="c1"># def test():</span>
-<span class="c1">#</span>
-<span class="c1">#     # FIXME: this should go into the test directory.</span>
-<span class="c1">#</span>
-<span class="c1">#     import pkg_resources</span>
-<span class="c1">#     from bornagain import Molecule</span>
-<span class="c1">#     pdb = pkg_resources.resource_filename(&#39;bornagain&#39;, &#39;&#39;).replace(&#39;bornagain/bornagain&#39;,</span>
-<span class="c1">#                                                                    &#39;bornagain/examples/data/pdb/2LYZ.pdb&#39;)</span>
-<span class="c1">#     mol = Molecule(pdb)</span>
-<span class="c1">#     form_facts = np.ones(mol.atom_vecs.shape[0], np.complex64)</span>
-<span class="c1">#</span>
-<span class="c1">#     import time</span>
-<span class="c1">#     n_pixels = 2048</span>
-<span class="c1">#     # FIXME: the simpledetector class no longer exists</span>
-<span class="c1">#     D = ba.detector.SimpleDetector(n_pixels=n_pixels)</span>
-<span class="c1">#     print (&quot;\tSimulating into %d pixels&quot; % D.Q.shape[0])</span>
-<span class="c1">#</span>
-<span class="c1">#     #   test q-independent</span>
-<span class="c1">#     core = ClCore(double_precision=True)</span>
-<span class="c1">#     Npix = D.n_pixels</span>
-<span class="c1">#     q = core.to_device(D.Q)</span>
-<span class="c1">#     r = core.to_device(mol.atom_vecs, dtype=core.real_t)</span>
-<span class="c1">#     ff = np.zeros(mol.atom_vecs.shape[0], dtype=core.complex_t)</span>
-<span class="c1">#     ff.real = 1</span>
-<span class="c1">#     f = core.to_device(ff, dtype=core.complex_t)</span>
-<span class="c1">#</span>
-<span class="c1">#     core.init_amps(Npix)</span>
-<span class="c1">#     print(&quot;Testing phase_factor_qrf&quot;)</span>
-<span class="c1">#     t = time.time()</span>
-<span class="c1">#     core.phase_factor_qrf_inplace(q, r, f)</span>
-<span class="c1">#     A = core.release_amps(reset=True)</span>
-<span class="c1">#     print (&quot;\tTook %f.4 seconds&quot; % (time.time() - t))</span>
-<span class="c1">#     _ = D.readout(A)</span>
-<span class="c1">#     D.display()</span>
-<span class="c1">#</span>
-<span class="c1">#     #   now test the cromermann simulation</span>
-<span class="c1">#     print(&quot;Testing cromermann&quot;)</span>
-<span class="c1">#     core.prime_cromermann_simulator( D.Q, None)</span>
-<span class="c1">#     q = core.get_q_cromermann()</span>
-<span class="c1">#</span>
-<span class="c1">#     t = time.time()</span>
-<span class="c1">#     r = core.get_r_cromermann(mol.atom_vecs, sub_com=False)</span>
-<span class="c1">#     core.run_cromermann(q, r, rand_rot=False)</span>
-<span class="c1">#     A2 = core.release_amplitudes()</span>
-<span class="c1">#     print (&quot;\tTook %f.4 seconds&quot; % (time.time() - t))</span>
-<span class="c1">#     _ = D.readout(A2)</span>
-<span class="c1">#     D.display()</span>
-<span class="c1">#</span>
-<span class="c1">#     #   there is slightttt difference between the two methods at low q, not sure why...</span>
-<span class="c1">#     _ = D.readout(A - A2)</span>
-<span class="c1">#     D.display()</span>
-<span class="c1">#</span>
-<span class="c1">#     print(&quot;Passed testing mode!&quot;)</span>
-
-<span class="c1">#</span>
-<span class="c1"># if __name__ == &quot;__main__&quot;:</span>
-<span class="c1">#     test()</span>
 </pre></div>
 
            </div>
