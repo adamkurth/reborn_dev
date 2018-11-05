@@ -9,7 +9,7 @@ If you want to view results just add the keyword "view"
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import sys
-import time
+import pytest
 import numpy as np
 
 sys.path.append('..')
@@ -25,6 +25,7 @@ try:
         have_double = True
     else:
         have_double = False
+    ctx = clcore.create_some_gpu_context()
 except ImportError:
     havecl = False
 
@@ -33,11 +34,13 @@ view = False
 if len(sys.argv) > 1:
     view = True
 
+@pytest.mark.cl
 def test_clcore_float():
 
     if havecl:
         _clcore(double_precision=False)
 
+@pytest.mark.cl
 def test_clcore_double():
 
     if havecl and have_double:
@@ -217,6 +220,7 @@ def _clcore(double_precision=False):
 #    core.run_cromermann(q, r, rand_rot=True)
 #    A = core.release_amplitudes()
 
+@pytest.mark.cl
 def test_rotations():
 
     if havecl:

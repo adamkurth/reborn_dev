@@ -8,4 +8,4 @@ tests:
   stage: test
   script:
     - cd test
-    - pytest
+    - pytest -m 'not gui and not cl'
