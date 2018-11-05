@@ -1,7 +1,7 @@
 image: continuumio/miniconda3:latest
 
 before_script:
-  - conda env create -f bornagain3-env.yml
+  - conda env create -f gitlab-ci-env3.yml
   - source activate bornagain3
 
 tests:
