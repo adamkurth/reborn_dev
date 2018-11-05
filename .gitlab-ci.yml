@@ -7,4 +7,5 @@ before_script:
 tests:
   stage: test
   script:
+    - cd test
     - pytest
