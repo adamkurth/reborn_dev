@@ -8,4 +8,4 @@ tests:
   stage: test
   script:
     - cd test
-    - pytest --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py -m 'not gui'
+    - pytest --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py
