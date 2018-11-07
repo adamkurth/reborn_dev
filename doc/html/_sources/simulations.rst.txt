@@ -3,8 +3,11 @@ Simulations
 
 TODO: Document the simulation code...
 
-Currently, all GPU simulation utilities in bornagain utilize the pyopencl package.  You can check if opencl is working
-and find out information with the :func:`help() <bornagain.simulate.clcore.help>` function.
+Currently, all GPU simulation utilities in bornagain utilize the pyopencl package.  You can check if opencl is installed correctly 
+and find specific information about available compute devices with the :func:`help() <bornagain.simulate.clcore.help>` function.  
+In principle, the pyopencl package also allows the use of CPU computing, but
+none of the code has been written with that in mind thus far.  If it is needed
+we can explore that option. 
 
 The basic simulation functions are accessed by creating an instance of the
 :class:`ClCore <bornagain.simulate.clcore.ClCore>` class.  This class is meant to do some of the following
@@ -39,10 +42,16 @@ grid.  In the case that you compute :math:`F(\vec{q})` on a 3D grid, there is a 
 interpolations such that you can sample :math:`F(\vec{q})` at any :math:`\vec{q}` that lies within the grid.
 
 The methods in :class:`ClCore <bornagain.simulate.clcore.ClCore>` allow you to pass in CPU arrays and retrieve CPU
-arrays in return.  Alternatively, you might want to do faster computations by copying/creating some arrays on the GPU device
-ahead of the function call.  This alternative is especially useful if you plan to use the same array of :math:`\vec{q}`
-vectors many times over.  You can move a numpy array to the GPU device with the :func:`to_device` method, and you can
-also move the data from the GPU to the CPU with the :func:`get` method.
+arrays in return.  
+That is the simplest way to to GPU compuations since you can just use the methods without ever
+thinking about memory.  However, the bottleneck in GPU computations is often due to moving memory between devices.
+You can reduce computation time by copying/creating some or all of your arrays to the GPU device
+ahead of the function call.  Likewise, you can retrieve the output in the form of pyopencl Array objects, which contain your data in GPU memory.  This alternative is especially useful if you plan to use the same array of :math:`\vec{q}`
+vectors many times over - you obviously don't want to move your vectors between CPU and GPU many times over.  
+Moving a numpy array to the GPU device is easy with the :func:`to_device` method, which is just a wrapper for the equivalent in the pyopencl package.  You can easily move the data from the GPU to the CPU with the :func:`get` method (this is just a built-in method of the pyopencl Array class).
 
 At a much higher level, there is a Monte Carlo simulator that generates crystal diffraction patterns.  This will be
-documented by Rick and Cameron some day.
+documented by Rick and Cameron some day.  The basic idea is that we have an engine that serves up diffraction intensities
+in a Monte Carlo fashion, by jittering the incident beam direction, pixel positions, crystal orientations, and so on.
+
+Other simulation engines might be built soon.  For example, an engine for solution scattering will come along soon.
