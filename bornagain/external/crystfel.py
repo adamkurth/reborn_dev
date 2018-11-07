@@ -8,23 +8,22 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import numpy as np
 
 from .. import detector
-from cfelpyutils.crystfel_utils import load_crystfel_geometry
+from cfelpyutils import crystfel_utils
 
 
-#
-# def geometry_file_to_dict(geometry_file):
-#
-#     """
-#     Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame
-#     Valerio if it's broken :)
-#
-#     Args:
-#         geometry_file (str): Path to geometry file
-#
-#     Returns: Dict
-#     """
-#
-#     return load_crystfel_geometry(geometry_file)
+def load_crystfel_geometry(geometry_file):
+
+    r"""
+    Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blamm
+    Valerio if it's broken :)
+
+    Args:
+        geometry_file (str): Path to geometry file
+
+    Returns: Dict
+    """
+
+    return crystfel_utils.load_crystfel_geometry(geometry_file)
 
 
 def geometry_dict_to_pad_geometry_list(geometry_dict):

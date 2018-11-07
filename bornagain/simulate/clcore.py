@@ -1148,6 +1148,16 @@ class ClCore(object):
 def helpme():
 
     r"""
+
+    Same as helpme() function.
+
+    """
+
+    help()
+
+def help():
+
+    r"""
     Print out some useful information about platforms and devices that are
     available for running simulations.
     """

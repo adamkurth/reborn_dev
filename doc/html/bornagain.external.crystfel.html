@@ -182,6 +182,22 @@
 <p>Method for working with CrystFEL geometry files.  Note that you can convert a CrystFEL geometry file to a Python
 dictionary object with the cfelpyutils.crystfel_utils.load_crystfel_geometry() function.</p>
 <dl class="function">
+<dt id="bornagain.external.crystfel.load_crystfel_geometry">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">load_crystfel_geometry</code><span class="sig-paren">(</span><em>geometry_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#load_crystfel_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.load_crystfel_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blamm
+Valerio if it’s broken :)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry_file</strong> (<em>str</em>) – Path to geometry file</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: Dict</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="bornagain.external.crystfel.geometry_dict_to_pad_geometry_list">
 <code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geometry_dict_to_pad_geometry_list</code><span class="sig-paren">(</span><em>geometry_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geometry_dict_to_pad_geometry_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geometry_dict_to_pad_geometry_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a CrystFEL geometry dictionary, create a list of :class:&lt;bornagain.geometry.PADGeometry` objects.

@@ -90,7 +90,6 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Detectors</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pixel-array-detectors">Pixel-Array Detectors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#data-and-geometry-formats">Data and geometry formats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generic-description-of-data-layout">Generic description of data layout</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#working-with-crystfel-geometry-files">Working with CrystFEL geometry files</a></li>
 </ul>
 </li>
@@ -170,9 +169,9 @@
 <a class="reference internal image-reference" href="_images/pad.jpg"><img alt="Pixel-array detector schematic" src="_images/pad.jpg" style="width: 1062.4px; height: 493.6px;" /></a>
 <p class="caption"><span class="caption-text">Schematic of a Pixel-Array Detector.</span></p>
 </div>
-<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> class contains the data and methods needed to deal with “pixel-array detectors”.  This detector
-is like a CCD and is assumed to consist of an orthogonal 2D grid of pixels.  The 2D grid is described by the following
-vectors:</p>
+<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> class contains the data and methods needed to deal with “pixel-array detectors” (PADs).  This
+detector is like a CCD and is assumed to consist of an orthogonal 2D grid of pixels.  The 2D grid is described by the
+following vectors:</p>
 <blockquote>
 <div><p><span class="math notranslate nohighlight">\(\vec{t}\)</span> is the vector pointing from the origin to the center of the corner detector pixel that is assumed to
 be the first in memory.</p>
@@ -212,8 +211,7 @@ one:</p>
 <p>where the vector normal to the PAD is</p>
 <blockquote>
 <div><span class="math notranslate nohighlight">\(\hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}\)</span></div></blockquote>
-<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> class can currently generate the above quantities for you.  More can be added if they are
-necessary.</p>
+<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref any py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> class can currently generate the above quantities for you, along with other helpful functions.</p>
 </div>
 <div class="section" id="data-and-geometry-formats">
 <h2>Data and geometry formats<a class="headerlink" href="#data-and-geometry-formats" title="Permalink to this headline">¶</a></h2>
@@ -221,45 +219,16 @@ necessary.</p>
 Actually, our task is two-fold:</p>
 <ol class="arabic simple">
 <li>Transform the data found on disk or in RAM to a useful numpy arrays.</li>
-<li>Create a mapping from each pair numpy array indices to the corresponding position 3-vector.</li>
+<li>Determine the vectors that specify 3D positions corresonding to the elements of the numpy arrays.</li>
 </ol>
-<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> contains the needed information to perform step (2).  This
-class also includes convenience methods that calculate commonly used quantities such as pixel solid angles, scattering
-vectors, and so on.  Once you have a <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instance and a corresponding
-numpy array, the standardized interface will make it easier to re-use code.</p>
-<p>The main hurdle usually lies in step (1), for which we need layer of code to transplant raw data from a facility into
-standard numpy arrays.  This is discussed in the next section.</p>
-<p>Before moving on, there is one caveat that needs to be mentioned.  Since XFELs tend to use multiple PADs, you should
-plan to work with lists of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances rather than a single one.
-You can still do vectorized operations on all panels at once with the numpy ravel function, as shown in some example
-somewhere (TODO:rickk).</p>
-</div>
-<div class="section" id="generic-description-of-data-layout">
-<h2>Generic description of data layout<a class="headerlink" href="#generic-description-of-data-layout" title="Permalink to this headline">¶</a></h2>
-<p>It’s not likely that bornagain will have some generalized class for reading in data in arbitrary formats.  We’ll
-eventually support the <a class="reference external" href="http://www.cxidb.org/">cxidb</a> file format, and for any other format someone must write a
-custom function.  But it’s nonetheless worthwile to think a little bit about the task at hand.</p>
-<p>Data stored on disk may be thought of as a finite 1D array, and our task is to chop it up into chunks of data
-corresponding to individual pixel-array detectors.  The first step is probably to convert data on disk or RAM into a
-numpy array, and usually there is a package such as
-<a class="reference external" href="https://confluence.slac.stanfor.edu/display/PSDM/LCLS+Data+Analysis">psana</a> that does this work for you, or the data
-comes in a well-documented and well-supported format like <a class="reference external" href="https://support.hdfgroup.org/HDF5/">hdf5</a> in which case
-we may use a package like <a class="reference external" href="https://www.h5py.org/">h5py</a>.</p>
-<p>In the best of situations, we get a numpy array with some reasonable shape, and it’s then easy to split up the block of
-contiguous data into a list of individual panels.  You don’t need to copy memory; you can instead use numpy
-<a class="reference external" href="https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.ndarray.view.html">views</a> of the initial array.</p>
-<p>In the most generic case, where we have a 1D data array that we wish to convert into individual 2D PAD data arrays, we
-need a few things:</p>
-<ol class="arabic simple">
-<li>The size of the 2D array we intend to extract, which we refer to as <span class="math notranslate nohighlight">\(n_{fs}\)</span> and <span class="math notranslate nohighlight">\(n_{ss}\)</span> for fast-scan
-and slow-scan directions.</li>
-<li>The index <span class="math notranslate nohighlight">\(a\)</span> of the first datapoint in memory, assumed to correspond to a corner pixel.</li>
-<li>The fast-scan stride, <span class="math notranslate nohighlight">\(S_f\)</span>, and the slow-scan stride <span class="math notranslate nohighlight">\(S_s\)</span>.</li>
-</ol>
-<p>From the above, we can get the intensity value of pixel <span class="math notranslate nohighlight">\(i,j\)</span> from the raw data array as follows:</p>
-<p><span class="math notranslate nohighlight">\(PAD[i,j] = RAW[a + i*S_f + j*S_s]\)</span></p>
-<p>We’ve not had to deal with this general case yet, but when we do we can probably just use the numpy methods of dealing
-with arbitrary strides.</p>
+<p>The <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> class contains the needed information to perform step (2), but
+does not have any involvement in step (1).  Step (1) is often a messy process that requires specialized code, and
+therefore we make no effort to standardize that process.  However, once you have a
+<a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instance along with corresponding numpy arrays, your analsis code
+can hopefully be written in a source-agnostic way.</p>
+<p>Since XFELs tend to use multiple PADs, you should plan to work with lists of
+<a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances rather than a single one. You can still do vectorized
+operations on all panels at once with the numpy ravel function.</p>
 </div>
 <div class="section" id="working-with-crystfel-geometry-files">
 <h2>Working with CrystFEL geometry files<a class="headerlink" href="#working-with-crystfel-geometry-files" title="Permalink to this headline">¶</a></h2>
@@ -274,11 +243,12 @@ deposited x-ray energy),</li>
 <li>how programs like indexamajig should treat the data (e.g. the no_index card)</li>
 </ul>
 <p>If you want to read in the complete information from a geom file you can convert it to a python dictionary using the
-<code class="xref py py-func docutils literal notranslate"><span class="pre">geometry_file_to_dict()</span></code> function, which is just a wrapper
+<a class="reference internal" href="bornagain.external.crystfel.html#bornagain.external.crystfel.load_crystfel_geometry" title="bornagain.external.crystfel.load_crystfel_geometry"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_crystfel_geometry()</span></code></a> function, which is just a wrapper
 for the corresponding function in the <a class="reference external" href="https://pypi.org/project/cfelpyutils/">cfelpyutils</a> package.</p>
 <p>Most importantly, geom files contain the three principal vectors that bornagain utilizes, albeit it may not be obvious
 at first glance when you look into the geom file.  If you just want this information, then you can simply use a geom
-file to generate a list of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances for use in bornagain.</p>
+file to generate a list of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances via the
+<a class="reference internal" href="bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_pad_geometry_list" title="bornagain.external.crystfel.geometry_file_to_pad_geometry_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">geometry_file_to_pad_geometry_list()</span></code></a> function.</p>
 </div>
 </div>
 
