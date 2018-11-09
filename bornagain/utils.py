@@ -13,24 +13,24 @@ import bornagain as ba
 # not sure where to seed
 np.random.seed()
 
-def vec_check2(vec, *args, **kwargs):
 
+def vec_check2(vec, *args, **kwargs):
     r"""
     Same as vec_check(vec, dimension=2).  See :func:`vec_check <bornagain.utils.vec_check>`
     """
 
     return vec_check(vec, dimension=2, *args, **kwargs)
 
-def vec_check3(vec, *args, **kwargs):
 
+def vec_check3(vec, *args, **kwargs):
     r"""
     Same as vec_check(vec, dimension=2)
     """
 
     return vec_check(vec, dimension=3, *args, **kwargs)
 
-def vec_check(vec, hardcheck=False, dimension=3):
 
+def vec_check(vec, hardcheck=False, dimension=3):
     r"""
     Check that a vector meets our assumptions, and correct it if it doesn't.
 
@@ -91,7 +91,6 @@ def vec_check(vec, hardcheck=False, dimension=3):
 
 
 def vec_norm(vec):
-
     r"""
 
     Compute the normal vector, which has a length of one.
@@ -111,7 +110,6 @@ def vec_norm(vec):
 
 
 def vec_mag(vec):
-
     r"""
 
     Compute the scalar magnitude sqrt(sum(x^2)) of an array of vectors, usually shape (N, 3)
@@ -130,7 +128,6 @@ def vec_mag(vec):
 
 
 def rotate(rot, vec):
-
     r"""
 
     This defines a consistent way to rotate vectors.  It is a wrapper that does a simple operation:
@@ -155,7 +152,6 @@ def rotate(rot, vec):
 
 
 def depreciate(message):
-
     r"""
 
     Utility for sending warnings when some class, method, function, etc. is depreciated.  By default, a message of the
@@ -181,7 +177,6 @@ def depreciate(message):
 
 
 def warn(message):
-
     r"""
 
     Standard way of sending a warning message.  As of now this simply results in a function call
@@ -202,7 +197,6 @@ def warn(message):
 
 
 def error(message):
-
     r"""
 
     Standard way of sending an error message.  As of now this simply results in a function call
@@ -218,9 +212,7 @@ def error(message):
     Returns: nothing
     """
 
-
     sys.stderr.write("ERROR: %s\n" % message)
-
 
 
 # def axisAndAngleToMatrix(axis, angle):
@@ -325,7 +317,6 @@ def error(message):
 
 
 def random_rotation(deflection=1.0, randnums=None):
-
     r"""
     Creates a random rotation matrix.
 
@@ -370,25 +361,23 @@ def random_rotation(deflection=1.0, randnums=None):
 
 
 def rotation_about_axis(theta, u):
-
     """
     This needs to be tested.  It was taken from
     https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python
     """
 
-    return np.array([[cos(theta) + u[0]**2 * (1-cos(theta)),
-                      u[0] * u[1] * (1-cos(theta)) - u[2] * sin(theta),
+    return np.array([[cos(theta) + u[0]**2 * (1 - cos(theta)),
+                      u[0] * u[1] * (1 - cos(theta)) - u[2] * sin(theta),
                       u[0] * u[2] * (1 - cos(theta)) + u[1] * sin(theta)],
-                     [u[0] * u[1] * (1-cos(theta)) + u[2] * sin(theta),
-                      cos(theta) + u[1]**2 * (1-cos(theta)),
+                     [u[0] * u[1] * (1 - cos(theta)) + u[2] * sin(theta),
+                      cos(theta) + u[1]**2 * (1 - cos(theta)),
                       u[1] * u[2] * (1 - cos(theta)) - u[0] * sin(theta)],
-                     [u[0] * u[2] * (1-cos(theta)) - u[1] * sin(theta),
-                      u[1] * u[2] * (1-cos(theta)) + u[0] * sin(theta),
-                      cos(theta) + u[2]**2 * (1-cos(theta))]])
+                     [u[0] * u[2] * (1 - cos(theta)) - u[1] * sin(theta),
+                      u[1] * u[2] * (1 - cos(theta)) + u[0] * sin(theta),
+                      cos(theta) + u[2]**2 * (1 - cos(theta))]])
 
 
 def random_beam_vector(div_fwhm):
-
     """
     A random vector for emulating beam divergence.
     Generates a random normal vector that is nominally along the [0,0,1] direction
@@ -406,21 +395,21 @@ def random_beam_vector(div_fwhm):
         return B
 
     # First rotate around the x axis with Gaussian prob. dist.
-    sig = div_fwhm/2.354820045
+    sig = div_fwhm / 2.354820045
     theta = np.random.normal(0, sig, [1])[0]
     Rtheta = rotation_about_axis(theta, [1.0, 0, 0])
     B = np.dot(Rtheta, B)
 
     # Next rotate around z axis with uniform dist [0,2*pi)
-    phi = np.random.random(1)[0]*2*np.pi
+    phi = np.random.random(1)[0] * 2 * np.pi
     Rphi = rotation_about_axis(phi, [0, 0, 1.0])
     B = np.dot(Rphi, B)
     B /= np.sqrt(np.sum(B**2))
 
     return B
 
-def random_mosaic_rotation(mosaicity_fwhm):
 
+def random_mosaic_rotation(mosaicity_fwhm):
     """
     Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.
     We take the matrix product of three rotations, each of the same FWHM, about the three
@@ -442,7 +431,6 @@ def random_mosaic_rotation(mosaicity_fwhm):
 
 
 def memoize(function):
-
     r"""
     This is a function decorator for caching results from a function, to avoid
     excessive computation or reading from disk.  Search the web for more

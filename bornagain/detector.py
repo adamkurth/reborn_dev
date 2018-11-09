@@ -122,7 +122,6 @@ class PADGeometry(object):
         return (self.n_ss, self.n_fs)
 
     def indices_to_vectors(self, j, i):
-
         r"""
         Convert pixel indices to translation vectors pointing from origin to position on panel.
         The positions need not lie on the actual panel; this assums an infinite plane.
@@ -225,8 +224,8 @@ class PADGeometry(object):
     def solid_angles2(self):
         r"""
         this should be sped up by vectorizing, but its more readable for now
-        and only has to be done once per PAD geometry... 
-        
+        and only has to be done once per PAD geometry...
+
         Divide each pixel up into two triangles with vertices R1,R2,R3
         and R2,R3,R4. Then use analytical form to find the solid angle of
         each triangle. Sum them to get the solid angle of pixel.
@@ -243,12 +242,11 @@ class PADGeometry(object):
         return sa_1 + sa_2
 
     def _comp_solid_ang(self, r1, r2, r3):
-
         r"""
         compute solid angle of a triangle whose vertices are r1,r2,r3
-        Ref:thanks Jonas ...  
-        Van Oosterom, A. & Strackee, J. 
-        The Solid Angle of a Plane Triangle. Biomedical Engineering, 
+        Ref:thanks Jonas ...
+        Van Oosterom, A. & Strackee, J.
+        The Solid Angle of a Plane Triangle. Biomedical Engineering,
         IEEE Transactions on BME-30, 125-126 (1983).
         """
 
@@ -266,7 +264,6 @@ class PADGeometry(object):
         return s_ang
 
     def solid_angles(self):
-
         r"""
         Calculate solid angles of pixels, assuming the pixels have small angular extent.
 
@@ -344,7 +341,6 @@ class PADGeometry(object):
         return np.arccos(vec_check(beam_vec), v)
 
     def reshape(self, dat):
-
         r"""
 
         Re-shape a flattened array to a 2D array.
@@ -372,7 +368,6 @@ class PADGeometry(object):
 
 
 def split_pad_data(pad_list, data):
-
     r"""
 
     Given a contiguous block of data, split it up into individual PAD panels
@@ -418,7 +413,6 @@ class PADAssembler(object):
         self.a = a
 
     def assemble_data(self, data):
-
         r"""
         Given a contiguous block of data, create the fake single-panel PAD.
 
@@ -440,7 +434,6 @@ class PADAssembler(object):
         return a.copy()
 
     def assemble_data_list(self, data_list):
-
         r"""
         Same as assemble_data() method, but accepts a list of individual panels in the form of a list.
 
@@ -454,8 +447,6 @@ class PADAssembler(object):
         """
 
         return self.assemble_data(np.ravel(data_list))
-
-
 
 
 class IcosphereGeometry(object):
@@ -685,5 +676,3 @@ class RadialProfiler(object):
             profile.flat[self.counts_non_zero] /= self.counts.flat[self.counts_non_zero]
 
         return profile
-
-
