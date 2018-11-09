@@ -14,7 +14,8 @@ Before you modify any code:
 * One exception to PEP8: we allow lines to be 120 characters in length.
 * Strive to write `pytest <http://doc.pytest.org/>`_ unit tests for any functionality you add.
 * *Always* write docstrings.  Follow the `Google format <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/>`_.
-* Learn how to use git, and then read the bornagain-specific notes on git below.
+* Learn how to use `git <https://git-scm.com/book/en/v2>`_.
+* Familiarize yourself with our usage of git; we emulate `these ideas <https://nvie.com/posts/a-successful-git-branching-model/>`_.
 * Use four spaces, not tabs.
 * All units are SI (angles in radians) unless there is a *very* good reason to do something different.
 * Just because you *can* do something clever, doesn't mean you should.  Don't confuse people.
@@ -26,15 +27,6 @@ Helpful tools
 * Look in the developer directory for helpful scripts such as "update-documentation.sh", which does what you guessed.
 * Programs such as `pep8 <https://pypi.python.org/pypi/pep8/>`_ can be used to check for PEP8 compliance.
 * Consider using an integrated development environment such as pycharm.
-
-Using git
----------
-
-* We will follow the branching scheme discussed here.
-* Make your own branch to develop your ideas.
-* When your branch is ready to be tested by others, first merge the develop branch into your branch, check that
-  everything works (using pytest), then merge your branch into develop.
-* When the develop branch seems to be working well, it will be merged into the master branch.
 
 Python 2/3 compatibility
 ------------------------

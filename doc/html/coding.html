@@ -92,7 +92,6 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Notes for Developers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#before-you-modify-any-code">Before you modify any code:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#helpful-tools">Helpful tools</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-git">Using git</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#python-2-3-compatibility">Python 2/3 compatibility</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a></li>
@@ -178,7 +177,8 @@ fix the many inconsistencies.  Please contribute to this effort!!!</p>
 <li>One exception to PEP8: we allow lines to be 120 characters in length.</li>
 <li>Strive to write <a class="reference external" href="http://doc.pytest.org/">pytest</a> unit tests for any functionality you add.</li>
 <li><em>Always</em> write docstrings.  Follow the <a class="reference external" href="https://sphinxcontrib-napoleon.readthedocs.io/en/latest/">Google format</a>.</li>
-<li>Learn how to use git, and then read the bornagain-specific notes on git below.</li>
+<li>Learn how to use <a class="reference external" href="https://git-scm.com/book/en/v2">git</a>.</li>
+<li>Familiarize yourself with our usage of git; we emulate <a class="reference external" href="https://nvie.com/posts/a-successful-git-branching-model/">these ideas</a>.</li>
 <li>Use four spaces, not tabs.</li>
 <li>All units are SI (angles in radians) unless there is a <em>very</em> good reason to do something different.</li>
 <li>Just because you <em>can</em> do something clever, doesn’t mean you should.  Don’t confuse people.</li>
@@ -191,16 +191,6 @@ fix the many inconsistencies.  Please contribute to this effort!!!</p>
 <li>Look in the developer directory for helpful scripts such as “update-documentation.sh”, which does what you guessed.</li>
 <li>Programs such as <a class="reference external" href="https://pypi.python.org/pypi/pep8/">pep8</a> can be used to check for PEP8 compliance.</li>
 <li>Consider using an integrated development environment such as pycharm.</li>
-</ul>
-</div>
-<div class="section" id="using-git">
-<h2>Using git<a class="headerlink" href="#using-git" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>We will follow the branching scheme discussed here.</li>
-<li>Make your own branch to develop your ideas.</li>
-<li>When your branch is ready to be tested by others, first merge the develop branch into your branch, check that
-everything works (using pytest), then merge your branch into develop.</li>
-<li>When the develop branch seems to be working well, it will be merged into the master branch.</li>
 </ul>
 </div>
 <div class="section" id="python-2-3-compatibility">
