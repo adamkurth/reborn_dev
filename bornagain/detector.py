@@ -5,7 +5,7 @@ detectors (PADs).
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import sys
+#import sys
 
 import numpy as np
 import h5py
@@ -17,7 +17,7 @@ except ImportError:
     pass
 
 from .utils import vec_norm, vec_mag, vec_check
-from . import units
+#from . import units
 
 
 class PADGeometry(object):
@@ -170,7 +170,8 @@ class PADGeometry(object):
 
         Args:
             beam_vec (tuple or numpy array): specify the unit vector of the incident beam
-            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.
+            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
+                                         of beam_vec ect.
 
         Returns: numpy array
 
@@ -190,7 +191,8 @@ class PADGeometry(object):
         Args:
             beam_vec (tuple or numpy array): specify the unit vector of the incident beam
             wavelength (float): wavelength
-            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.
+            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
+                                         of beam_vec ect.
 
         Returns: numpy array
         """
@@ -208,7 +210,8 @@ class PADGeometry(object):
         Args:
             beam_vec (tuple or numpy array): specify the unit vector of the incident beam
             wavelength (float): wavelength
-            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.
+            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
+                                        of beam_vec ect.
 
         Returns: numpy array
         """
@@ -291,7 +294,8 @@ class PADGeometry(object):
                 Incident beam vector
             weight (float) :
                 The weight of the first polarization component (second is one minus this weight)
-            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.
+            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
+                                         of beam_vec ect.
 
         Returns:  numpy array
         """
@@ -326,7 +330,8 @@ class PADGeometry(object):
         Arguments:
             beam_vec (numpy array) :
                 Incident beam vector.
-            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.
+            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
+                                         of beam_vec ect.
 
         Returns: numpy array
         """
