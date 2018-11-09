@@ -24,7 +24,6 @@ Submodules
 .. toctree::
 
    bornagain.detector
-   bornagain.scatter
    bornagain.source
    bornagain.units
    bornagain.utils

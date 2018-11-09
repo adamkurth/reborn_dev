@@ -610,12 +610,14 @@
 
     <span class="nd">@wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+
         <span class="k">if</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">memo</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">memo</span><span class="p">[</span><span class="n">args</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">rv</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-            <span class="n">memo</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="n">rv</span>
-            <span class="k">return</span> <span class="n">rv</span>
+
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">memo</span><span class="p">[</span><span class="n">args</span><span class="p">]</span> <span class="o">=</span> <span class="n">rv</span>
+        <span class="k">return</span> <span class="n">rv</span>
+
     <span class="k">return</span> <span class="n">wrapper</span></div>
 </pre></div>
 
@@ -629,7 +631,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>

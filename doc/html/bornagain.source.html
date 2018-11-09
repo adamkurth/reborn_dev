@@ -29,7 +29,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain.units module" href="bornagain.units.html" />
-    <link rel="prev" title="bornagain.scatter module" href="bornagain.scatter.html" /> 
+    <link rel="prev" title="bornagain.detector module" href="bornagain.detector.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -96,7 +96,6 @@
 <li class="toctree-l3"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#submodules">Submodules</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="bornagain.detector.html">bornagain.detector module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.scatter.html">bornagain.scatter module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">bornagain.source module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.units.html">bornagain.units module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.utils.html">bornagain.utils module</a></li>
@@ -183,6 +182,24 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A minimal containor to gather x-ray beam properties.</p>
 <dl class="attribute">
+<dt id="bornagain.source.Beam.wavelength">
+<code class="descname">wavelength</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nominal photon wavelength</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.beam_vec">
+<code class="descname">beam_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.beam_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nominal direction of incident beam</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.source.Beam.polarization_vec">
+<code class="descname">polarization_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.polarization_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Direction of the first polarization vector</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="bornagain.source.Beam.polarization_weight">
 <code class="descname">polarization_weight</code><em class="property"> = 1</em><a class="headerlink" href="#bornagain.source.Beam.polarization_weight" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weight of the first polarization vector</p>
@@ -228,24 +245,6 @@
 <code class="descname">fluence_jitter_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.source.Beam.fluence_jitter_fwhm" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="bornagain.source.Beam.beam_vec">
-<code class="descname">beam_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.beam_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Nominal direction of incident beam</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.polarization_vec">
-<code class="descname">polarization_vec</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.polarization_vec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Direction of the first polarization vector</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.source.Beam.wavelength">
-<code class="descname">wavelength</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.source.Beam.wavelength" title="Permalink to this definition">¶</a></dt>
-<dd><p>Nominal photon wavelength</p>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -261,7 +260,7 @@
         <a href="bornagain.units.html" class="btn btn-neutral float-right" title="bornagain.units module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.scatter.html" class="btn btn-neutral" title="bornagain.scatter module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.detector.html" class="btn btn-neutral" title="bornagain.detector module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -270,7 +269,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>

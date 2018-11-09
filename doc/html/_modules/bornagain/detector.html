@@ -162,7 +162,7 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
 
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="c1">#import sys</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
@@ -174,7 +174,7 @@
     <span class="k">pass</span>
 
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">vec_norm</span><span class="p">,</span> <span class="n">vec_mag</span><span class="p">,</span> <span class="n">vec_check</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">units</span>
+<span class="c1">#from . import units</span>
 
 
 <div class="viewcode-block" id="PADGeometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry">[docs]</a><span class="k">class</span> <span class="nc">PADGeometry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -327,7 +327,8 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            beam_vec (tuple or numpy array): specify the unit vector of the incident beam</span>
-<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.</span>
+<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification</span>
+<span class="sd">                                         of beam_vec ect.</span>
 
 <span class="sd">        Returns: numpy array</span>
 
@@ -347,7 +348,8 @@
 <span class="sd">        Args:</span>
 <span class="sd">            beam_vec (tuple or numpy array): specify the unit vector of the incident beam</span>
 <span class="sd">            wavelength (float): wavelength</span>
-<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.</span>
+<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification</span>
+<span class="sd">                                         of beam_vec ect.</span>
 
 <span class="sd">        Returns: numpy array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -365,7 +367,8 @@
 <span class="sd">        Args:</span>
 <span class="sd">            beam_vec (tuple or numpy array): specify the unit vector of the incident beam</span>
 <span class="sd">            wavelength (float): wavelength</span>
-<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.</span>
+<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification</span>
+<span class="sd">                                        of beam_vec ect.</span>
 
 <span class="sd">        Returns: numpy array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -448,7 +451,8 @@
 <span class="sd">                Incident beam vector</span>
 <span class="sd">            weight (float) :</span>
 <span class="sd">                The weight of the first polarization component (second is one minus this weight)</span>
-<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.</span>
+<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification</span>
+<span class="sd">                                         of beam_vec ect.</span>
 
 <span class="sd">        Returns:  numpy array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -483,7 +487,8 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            beam_vec (numpy array) :</span>
 <span class="sd">                Incident beam vector.</span>
-<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification of beam_vec ect.</span>
+<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification</span>
+<span class="sd">                                         of beam_vec ect.</span>
 
 <span class="sd">        Returns: numpy array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -851,7 +856,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian
 
     </p>
   </div>

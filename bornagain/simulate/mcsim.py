@@ -38,6 +38,14 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
 
 # FIXME: In general, the code within the bornagain/bornagain directory should consist of a library of classes, functions, etc. that we use to write programs.  AS it stands, this code is more like a program than a library.  We need to separate the core simulator from all the print statements, file reading/writing, etc.  The mcsim program should go into the programs directory.
 
+# FIXME: we want "mcsim core"  - should be a class, which holds clcore instance.
+    # Input : r (atomic pos.), f (structure factors), PADGeometry, Beam class instance.
+    # Should not do any writing to terminal.
+    # class called McCore
+    # Start with does not do crystals
+    # Output: intensities
+    # Eventually: allow for repeats of the molecule.  one case is a set of translations.  Special case: crystals.
+
 # FIXME: the transmission parameter is redundant with n_photons - remove it
 
 # FIXME: I think we should separate the water background since it can be added separately.  It usually only needs to be computed once.
