@@ -96,7 +96,7 @@
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
@@ -167,14 +167,25 @@
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
 <p>The bornagain Python package is meant to be used for the simulation and analysis of
 x-ray diffraction under the Born approximation.  It is not the first attempt to create
-such a package, hence the double-meaning of the name.</p>
-<p>For clarity, bornagain is not a “program”.  To use a <em>Python package</em> such as bornagain, you must
-write your own custom python scripts or programs.</p>
-<p><strong>Beware</strong>: bornagain is under continuous development; there might still be some large
-changes to the API in the near future.</p>
+such a package, hence the name.</p>
+<p>It turns out that there is another Python package called “<a class="reference external" href="www.bornagainproject.org">BornAgain</a>”… and it is for
+simulating diffraction under the Born approximation.  Since they were first (and their software looks really impressive)
+this package will probably be re-named…</p>
+<p>Since bornagain is under continuous development, there might still be some large changes to the API in the near future.</p>
+<p>There are lots of other Python packages that provide utilities that overlap with bornagain:</p>
+<ul class="simple">
+<li>DIALS</li>
+<li>cctbx</li>
+<li>psgeom</li>
+<li>poppy</li>
+<li>xrayutilities</li>
+<li>xraylib</li>
+<li>and so on</li>
+</ul>
 <div class="section" id="what-s-in-bornagain">
 <h2>What’s in bornagain?<a class="headerlink" href="#what-s-in-bornagain" title="Permalink to this headline">¶</a></h2>
-<p>In a nutshell, the basic elements of the bornagain package are:</p>
+<p>For clarity, bornagain is not a “program” - in order to use it you must write Python code.  In a nutshell, the basic
+elements of the bornagain package are:</p>
 <ul class="simple">
 <li>Classes for describing incident x-ray beams.</li>
 <li>Classes for describing detector geometries.</li>
@@ -190,29 +201,29 @@ changes to the API in the near future.</p>
 </div>
 <div class="section" id="i-don-t-know-anything-about-programming">
 <h2>I don’t know anything about programming…<a class="headerlink" href="#i-don-t-know-anything-about-programming" title="Permalink to this headline">¶</a></h2>
-<p>If you are new to programming, the following might help:</p>
+<p>If you are new to programming, you should first:</p>
 <ul class="simple">
-<li>You <em>must</em> learn the <a class="reference external" href="https://www.python.org/">Python</a> language.</li>
-<li>You <em>should</em> learn the basics of object-oriented programming.</li>
-<li>You should master the use of the <a class="reference external" href="http://www.numpy.org/#">numpy</a> package.</li>
-<li>There are some example scripts to help you get started.  Look in the bornagain/examples directory.</li>
-<li><a class="reference external" href="https://ipython.org/">iPython</a> (and its
-<a class="reference external" href="https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion">tab-completion feature</a>)
-is a great way to explore bornagain.</li>
+<li>Learn to program in the <a class="reference external" href="https://www.python.org/">Python</a> language,</li>
+<li>Learn the basics of object-oriented programming,</li>
+<li>Master the use of the <a class="reference external" href="http://www.numpy.org/#">numpy</a> package.</li>
 </ul>
+<p>There are some example scripts in the bornagain/examples directory that might help you get started. You should
+tinker with those scripts using <a class="reference external" href="https://ipython.org/">iPython</a> and its
+<a class="reference external" href="https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion">tab-completion feature</a>.</p>
 </div>
 <div class="section" id="before-you-start-using-bornagain">
 <h2>Before you start using bornagain<a class="headerlink" href="#before-you-start-using-bornagain" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>If documentation is missing or confusing, please fix it or tell someone who can.</li>
-<li><em>All</em> units in bornagain are SI.  Angles are radians.</li>
-<li>We never hard-code the direction the x-ray beam.  <em>You</em> choose the direction of the x-ray beam.</li>
-<li>We must be consistent in the way that we specify vectors using numpy arrays.  Same goes for rotation matrices.  We therefore have utilities like vec_check() and rotate_vecs() to make sure we shape arrays consistently and operate on vectors in a consistent way.  Use these utilities.</li>
+<li><em>All</em> units in bornagain are SI.  Angles are radians.  No exceptions.</li>
+<li>There is no special x-ray beam direction.  <em>You</em> get to choose the direction of the x-ray beam.</li>
+<li>We must be consistent in the way that we specify vectors and rotation matrices using numpy arrays.  There are
+utilities to ensure consistency.</li>
 </ul>
 </div>
 <div class="section" id="if-you-plan-to-develop-bornagain">
 <h2>If you plan to develop bornagain<a class="headerlink" href="#if-you-plan-to-develop-bornagain" title="Permalink to this headline">¶</a></h2>
-<p>See the page for developers.</p>
+<p>See the page for developers <a class="reference internal" href="coding.html#developers-anchor"><span class="std std-ref">Notes for Developers</span></a>.  We aim to keep things reasonably consistent.</p>
 </div>
 <div class="section" id="acknowledgements">
 <h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>

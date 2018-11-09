@@ -87,7 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../coding.html">Notes for Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">bornagain</a></li>
 </ul>
@@ -180,11 +180,17 @@
 <div class="viewcode-block" id="PADGeometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry">[docs]</a><span class="k">class</span> <span class="nc">PADGeometry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is a simplified version of the Panel class.  Hopefully it replaces Panel.  One main difference is that it does</span>
-<span class="sd">    not include any information about the source, which makes a lot more sense and removes several headaches that I</span>
-<span class="sd">    dealt with previously.  Another big difference is the emphasis on simplicity.  So far, there is no cache for</span>
-<span class="sd">    derived arrays, but maybe that will be added later (but only on an as-needed basis...).</span>
-<span class="sd">    As a result of simplifications, there are no checks; the programmer must think.</span>
+<span class="sd">    A container for pixel-array detector (PAD) geometry specification, with hepful methods for generating:</span>
+
+<span class="sd">    - Vectors from sample to pixel</span>
+<span class="sd">    - Scattering vectors (i.e. &quot;q&quot; vectors... provided beam information)</span>
+<span class="sd">    - Scattering vector magnitudes.</span>
+<span class="sd">    - Scattering angles (twice the Bragg angle).</span>
+<span class="sd">    - Polarization factors</span>
+
+<span class="sd">    There are also a few methods for generating new arrays (zeros, ones, random) and re-shaping flattened arrays to 2D</span>
+<span class="sd">    arrays.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># These are the configurable parameters.  No defaults.  One must think.</span>
@@ -234,14 +240,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span> <span class="o">=</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">t_vec</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PADGeometry.save"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_fname</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Saves an hdf5 file with class attributes for later use&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Saves an hdf5 file with class attributes for later use&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">save_fname</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">h</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADGeometry.load"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.load">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; load a PAD object from fname&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; load a PAD object from fname&quot;&quot;&quot;</span>
         <span class="n">pad</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">h</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -371,7 +377,7 @@
         <span class="k">return</span> <span class="n">vec_mag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span><span class="p">(</span><span class="n">beam_vec</span><span class="o">=</span><span class="n">beam_vec</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="PADGeometry.solid_angles2"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.solid_angles2">[docs]</a>    <span class="k">def</span> <span class="nf">solid_angles2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        this should be sped up by vectorizing, but its more readable for now</span>
 <span class="sd">        and only has to be done once per PAD geometry... </span>
 <span class="sd">        </span>
@@ -471,7 +477,7 @@
         <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PADGeometry.scattering_angles"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.scattering_angles">[docs]</a>    <span class="k">def</span> <span class="nf">scattering_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Scattering angles (i.e. half the Bragg angles).</span>
 
 <span class="sd">        Arguments:</span>
@@ -491,6 +497,17 @@
 
 <div class="viewcode-block" id="PADGeometry.reshape"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.reshape">[docs]</a>    <span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dat</span><span class="p">):</span>
 
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Re-shape a flattened array to a 2D array.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dat (numpy array): The flattened data array</span>
+
+<span class="sd">        Returns: a 2D numpy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">return</span> <span class="n">dat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="PADGeometry.zeros"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -499,7 +516,11 @@
 
 <div class="viewcode-block" id="PADGeometry.ones"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.ones">[docs]</a>    <span class="k">def</span> <span class="nf">ones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span></div></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PADGeometry.random"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.random">[docs]</a>    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span></div></div>
 
 
 <div class="viewcode-block" id="split_pad_data"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.split_pad_data">[docs]</a><span class="k">def</span> <span class="nf">split_pad_data</span><span class="p">(</span><span class="n">pad_list</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -592,11 +613,12 @@
 <div class="viewcode-block" id="IcosphereGeometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.IcosphereGeometry">[docs]</a><span class="k">class</span> <span class="nc">IcosphereGeometry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">    Experimental class for a spherical detector that follows the &quot;icosphere&quot; geometry.</span>
-<span class="sd">    The Icosphere is generated by sub-dividing the vertices of an icosahedron.</span>
-<span class="sd">    The following blog was helpful:</span>
+<span class="sd">    Experimental class for a spherical detector that follows the &quot;icosphere&quot; geometry. The Icosphere is generated by</span>
+<span class="sd">    sub-dividing the vertices of an icosahedron.  The following blog was helpful:</span>
 <span class="sd">    http://sinestesia.co/blog/tutorials/python-icospheres/</span>
-<span class="sd">    The code is quite slow; needs to be vectorized with numpy...</span>
+
+<span class="sd">    The code is quite slow; needs to be vectorized with numpy.  There are definitely better spherical detectors - the</span>
+<span class="sd">    solid angles of these pixels are not very uniform.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -609,14 +631,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
 
     <span class="k">def</span> <span class="nf">_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Return vertex coordinates fixed to the unit sphere &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Return vertex coordinates fixed to the unit sphere &quot;&quot;&quot;</span>
 
         <span class="n">length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">z</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">[(</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span> <span class="o">/</span> <span class="n">length</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
 
     <span class="k">def</span> <span class="nf">_middle_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point_1</span><span class="p">,</span> <span class="n">point_2</span><span class="p">,</span> <span class="n">verts</span><span class="p">,</span> <span class="n">middle_point_cache</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Find a middle point and project to the unit sphere &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Find a middle point and project to the unit sphere &quot;&quot;&quot;</span>
 
         <span class="c1"># We check if we have already cut this edge first</span>
         <span class="c1"># to avoid duplicated verts</span>

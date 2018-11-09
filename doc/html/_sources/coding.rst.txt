@@ -1,5 +1,7 @@
-Coding guidelines
-=================
+.. _developers_anchor:
+
+Notes for Developers
+====================
 
 First and foremost, the bornagain package does not presently follow the guidelines below, but we are presently trying to
 fix the many inconsistencies.  Please contribute to this effort!!!

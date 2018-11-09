@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
@@ -182,11 +182,16 @@ detectors (PADs).</p>
 <dt id="bornagain.detector.PADGeometry">
 <em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">PADGeometry</code><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This is a simplified version of the Panel class.  Hopefully it replaces Panel.  One main difference is that it does
-not include any information about the source, which makes a lot more sense and removes several headaches that I
-dealt with previously.  Another big difference is the emphasis on simplicity.  So far, there is no cache for
-derived arrays, but maybe that will be added later (but only on an as-needed basis…).
-As a result of simplifications, there are no checks; the programmer must think.</p>
+<p>A container for pixel-array detector (PAD) geometry specification, with hepful methods for generating:</p>
+<ul class="simple">
+<li>Vectors from sample to pixel</li>
+<li>Scattering vectors (i.e. “q” vectors… provided beam information)</li>
+<li>Scattering vector magnitudes.</li>
+<li>Scattering angles (twice the Bragg angle).</li>
+<li>Polarization factors</li>
+</ul>
+<p>There are also a few methods for generating new arrays (zeros, ones, random) and re-shaping flattened arrays to 2D
+arrays.</p>
 <dl class="attribute">
 <dt id="bornagain.detector.PADGeometry.n_fs">
 <code class="descname">n_fs</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.detector.PADGeometry.n_fs" title="Permalink to this definition">¶</a></dt>
@@ -420,7 +425,17 @@ each triangle. Sum them to get the solid angle of pixel.</p>
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.reshape">
 <code class="descname">reshape</code><span class="sig-paren">(</span><em>dat</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.reshape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.reshape" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Re-shape a flattened array to a 2D array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dat</strong> (<em>numpy array</em>) – The flattened data array</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: a 2D numpy array</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.zeros">
@@ -430,6 +445,11 @@ each triangle. Sum them to get the solid angle of pixel.</p>
 <dl class="method">
 <dt id="bornagain.detector.PADGeometry.ones">
 <code class="descname">ones</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.ones"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.ones" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.detector.PADGeometry.random">
+<code class="descname">random</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry.random"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry.random" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -505,11 +525,11 @@ centered in any way; the fake detector is a snug fit to the individual PADs.</p>
 <dt id="bornagain.detector.IcosphereGeometry">
 <em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">IcosphereGeometry</code><span class="sig-paren">(</span><em>n_subdivisions=1</em>, <em>radius=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#IcosphereGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.IcosphereGeometry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Experimental class for a spherical detector that follows the “icosphere” geometry.
-The Icosphere is generated by sub-dividing the vertices of an icosahedron.
-The following blog was helpful:
-<a class="reference external" href="http://sinestesia.co/blog/tutorials/python-icospheres/">http://sinestesia.co/blog/tutorials/python-icospheres/</a>
-The code is quite slow; needs to be vectorized with numpy…</p>
+<p>Experimental class for a spherical detector that follows the “icosphere” geometry. The Icosphere is generated by
+sub-dividing the vertices of an icosahedron.  The following blog was helpful:
+<a class="reference external" href="http://sinestesia.co/blog/tutorials/python-icospheres/">http://sinestesia.co/blog/tutorials/python-icospheres/</a></p>
+<p>The code is quite slow; needs to be vectorized with numpy.  There are definitely better spherical detectors - the
+solid angles of these pixels are not very uniform.</p>
 <dl class="attribute">
 <dt id="bornagain.detector.IcosphereGeometry.n_subdivisions">
 <code class="descname">n_subdivisions</code><em class="property"> = 1</em><a class="headerlink" href="#bornagain.detector.IcosphereGeometry.n_subdivisions" title="Permalink to this definition">¶</a></dt>
