@@ -188,7 +188,7 @@ class PADView(object):
 
     def decrease_skip(self):
 
-        self.frame_getter.skip = np.max([10**(np.floor(np.log10(self.frame_getter.skip))-1), 1]) 
+        self.frame_getter.skip = np.max([10**(np.floor(np.log10(self.frame_getter.skip))-1), 1])
 
     def show_coordinate_axes(self):
 

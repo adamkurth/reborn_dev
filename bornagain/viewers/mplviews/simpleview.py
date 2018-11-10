@@ -16,11 +16,11 @@ class SimplePAD(PADGeometry):
 
     """
     A simple child class to PADGeometry with some higher level functionality
-    
+
     This will return a detector object representing a
     square pixel array detector
-    
-    .. note:: 
+
+    .. note::
         - One can readout pixel intensities using :func:`readout`
         - After reading out amplitudes, one can display pixels using :func:`display`
 
@@ -32,7 +32,7 @@ class SimplePAD(PADGeometry):
             the edge length of the square pixels in meters
 
         - detdist (float)
-            the distance from the interaction region to the point where 
+            the distance from the interaction region to the point where
             the forward beam intersects the detector (in meters)
 
         - wavelen (float)
@@ -64,12 +64,12 @@ class SimplePAD(PADGeometry):
             the fast-scan, slow-scan coordinate of the beam center
             Not used currently..
 
-        args and kwargs passed to The bornagain PAGeometry method 
-        
+        args and kwargs passed to The bornagain PAGeometry method
+
         Returns
         =======
-        SimplePAD object with a simple viewing method            
-        
+        SimplePAD object with a simple viewing method
+
         """
         n_pixels = int( n_pixels)
         PADGeometry.__init__(self, *args, **kwargs)
@@ -122,7 +122,7 @@ class SimplePAD(PADGeometry):
 
         Arguments
             amplitudes (complex np.ndarray) : Scattering amplitudes same shape as `self.Q`
-            
+
         Returns
             np.ndarray : Scattering intensities as a 2-D image.
         """
@@ -131,7 +131,7 @@ class SimplePAD(PADGeometry):
 
     def readout_finite(self, amplitudes, qmin, qmax, flux=1e20):
         """
-        Get scattering intensities as a 2D image considering 
+        Get scattering intensities as a 2D image considering
         finite scattered photons
 
         Arguments:
@@ -175,12 +175,12 @@ class SimplePAD(PADGeometry):
         """
         Displays a detector. Extra kwargs are passed
         to matplotlib.figure
-        
+
         .. note::
             - Requires matplotlib.
             - Must first run :func:`readout` or :func:`readout_finite`
                 at least one time
-        
+
         Arguments
             - use_log (bool)
                 whether to use log-scaling when displaying the intensity image.

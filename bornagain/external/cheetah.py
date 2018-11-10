@@ -55,7 +55,7 @@ def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
     """
 
     cheetah_array = reshape_psana_cspad_array_to_cheetah_array(psana_array)
-    
+
     return cheetah_remapped_cspad_array_to_pad_list(cheetah_array, geom_dict)
 
 

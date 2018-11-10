@@ -3,7 +3,7 @@
 Basic utilities for dealing with crystalline objects.
 
 from Derek: Is using meters really the best here, given the PDB standard is Angstrom
-and we will likey always deal with Angstrom scale coordinates? 
+and we will likey always deal with Angstrom scale coordinates?
 
 for example print( "Lattice dim is %.3f"%(0.0000008)) will print 0.000, which can
 cause problems...
@@ -235,7 +235,7 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
     cryst.nAtoms = nAtoms
 
     cryst.set_spacegroup(hermann_mauguin_symbol)
-    
+
     return cryst
 
 
@@ -286,27 +286,27 @@ def assemble(O, n_unit=10, spherical=False):
     r"""
     From Derek: assemble and assemble3 are identical functions, hence the try/except at the start
         n_unit can be a tuple or an integer
-    
-    Creates a finite lattice 
+
+    Creates a finite lattice
     Args:
-        O, Structure attribute O (3x3 ndarray), orientation matrix of crystal 
+        O, Structure attribute O (3x3 ndarray), orientation matrix of crystal
             (columns are the lattice vectors a,b,c)
         n_unit (int or 3-tuple): Number of unit cells along each crystal axis
         spherical (bool): If true, apply a spherical boundary to the crystal.
     """
-    
+
     #lattice coordinates
     try:
         n_unit_a, n_unit_b, n_unit_c = n_unit
     except TypeError:
         n_unit_a = n_unit_b = n_unit_c = n_unit
-      
+
     a_vec, b_vec, c_vec = O.T
     vecs = np.array([i * a_vec + j * b_vec + k * c_vec
                           for i in range(n_unit_a)
                           for j in range(n_unit_b)
                           for k in range(n_unit_c)])
-    
+
     # sphericalize the lattice..
     if spherical:
         vecs = simutils.sphericalize(vecs)

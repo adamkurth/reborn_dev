@@ -20,15 +20,15 @@ def get_cmann_form_factors(cman, q):
     """
 
     form_facts = {}
-    
+
     q = np.array(q)
-     
+
     if len(q.shape) == 1:
         q_mag_squared = q**2
-    
+
     elif len( q.shape)==2:
         q_mag_squared = np.sum( q**2 ,1) # magnitude of momentum transfer squared
-    
+
     expo_terms = np.exp( -q_mag_squared / (16 * np.pi*np.pi) )
 
     for z, coefs in cman.iteritems():
@@ -36,22 +36,22 @@ def get_cmann_form_factors(cman, q):
         b_vals = coefs[4:8]
         c = coefs[-1]
 #       make the form factors for each q for atomic number z
-        z_ff = np.sum( [a * (expo_terms**b) 
-            for a,b in zip(a_vals, b_vals)], 0) 
+        z_ff = np.sum( [a * (expo_terms**b)
+            for a,b in zip(a_vals, b_vals)], 0)
         z_ff += c
 
         form_facts[z] = z_ff
-    return form_facts   
+    return form_facts
 
 
-def get_cromermann_parameters(atomic_numbers): 
+def get_cromermann_parameters(atomic_numbers):
     """
     Modified from tjlane/thor.git
     Get cromer-mann parameters for each atom type
-    
+
     Arguments:
         atomic_numbers (ndarray, int) : A numpy array of the atomic numbers of each atom in the system.
-        
+
     Returns:
         cromermann (dict) :
             The Cromer-Mann parameters for the system. The dictionary
@@ -60,9 +60,9 @@ def get_cromermann_parameters(atomic_numbers):
     """
 
     atom_types = np.unique(atomic_numbers)
-    
+
     cromermann = {}
-    
+
     for i,a in enumerate(atom_types):
         try:
             cromermann[a] = np.array(cromer_mann_params[(a,0)], dtype=np.float32)
@@ -70,14 +70,14 @@ def get_cromermann_parameters(atomic_numbers):
             print('Element number %d not in Cromer-Mann form factor parameter database' % a)
             raise RuntimeError('Could not get critical parameters for computation')
 
-    return cromermann 
+    return cromermann
 
 
 def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
     """
-    Get cromer-mann parameters for each atom type and renumber the atom 
+    Get cromer-mann parameters for each atom type and renumber the atom
     types to 0, 1, 2, ... to point to their CM params.
-    
+
     Arguments:
 
         atomic_numbers (ndarray, int) :
@@ -85,7 +85,7 @@ def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
 
         max_num_atom_types (int) :
             The maximium number of atom types allowable
-    
+
     Returns:
 
         cromermann (c-array, float) :
@@ -126,9 +126,9 @@ def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
         aid[ atomic_numbers == a ] = np.int32(i)
 
     return cromermann, aid
-    
 
-    
+
+
 # ------------------------------------------------------------------------------
 # REFERENCE TABLES (Taken from tjlane/thor.git)
 # ------------------------------------------------------------------------------
@@ -142,21 +142,21 @@ def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
 # GENERATION OF THIS TABLE: odin/data/cromer-mann.py
 #
 # Recall the Cromer-Mann formula:
-# 
+#
 #     f0[k] = c + [SUM a_i*EXP(-b_i*(k^2)) ]
 #                 i=1,4
-#     
+#
 # where k = sin(theta) / lambda = |q| / (4*pi)
-# and c, a_i and b_i are the so called Cromer-Mann coefficients 
+# and c, a_i and b_i are the so called Cromer-Mann coefficients
 # (International Tables vol. 4 or vol C; in vol. C refer to pg 500-502)
-# 
+#
 # cromer_mann_params : dict
 #     A dictionary such that
-#     
+#
 #     cromer_mann_params[(atomic_number, ionization_state)] =
 #         [a_1, a_2, a_3, a_4, b_1, b_2, b_3, b_4, c]
-#         
-#     where `ionization_state` is a 
+#
+#     where `ionization_state` is a
 #       -- positive int for a cation
 #       -- negative int for an anion
 #       -- '.' for a radical
@@ -586,8 +586,8 @@ cromer_mann_params = {'Ac' : [35.6597, 23.1032, 12.5977, 4.08655, 0.589092, 3.65
                       (97, 0) : [36.7881, 24.7736, 17.8919, 4.23284, 0.451018, 3.04619, 12.8946, 86.003, 13.2754],
                       (98, 0) : [36.9185, 25.1995, 18.3317, 4.24391, 0.437533, 3.00775, 12.4044, 83.7881, 13.2674],
                       }
-                      
-                      
+
+
 # A PERIODIC TABLE
 # source: https://github.com/pkienzle/periodictable
 

@@ -1,4 +1,5 @@
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 
 import numpy as np
@@ -243,11 +244,14 @@ class PeakFinderV1(object):
     def get_snr2(self, dat):
 
         # t = time()
-        bak = convolve2d(dat, self.outer, mode='valid', boundary='symm')/self.n_outer
-        bak2 = convolve2d(dat**2, self.outer, mode='valid', boundary='symm')/self.n_outer
+        bak = convolve2d(dat, self.outer, mode='valid',
+                         boundary='symm')/self.n_outer
+        bak2 = convolve2d(dat**2, self.outer, mode='valid',
+                          boundary='symm')/self.n_outer
         sigma = np.sqrt(bak2 - bak**2)
 
-        signal = convolve2d(dat, self.inner_outer, mode='valid', boundary='symm')
+        signal = convolve2d(dat, self.inner_outer,
+                            mode='valid', boundary='symm')
 
         snr = signal/sigma
         # print(np.max(signal), np.max(bak), np.max(bak2), np.max(snr), np.min(snr))
@@ -256,4 +260,3 @@ class PeakFinderV1(object):
         # print(time() - t)
 
         return snr
-

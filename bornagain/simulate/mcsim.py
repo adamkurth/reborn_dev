@@ -62,7 +62,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     photon_energy                   = photon_energy / keV
     wavelength                      = hc / photon_energy # pulse_energy = 0.0024
     wavelength_fwhm                 = wavelength * photon_energy_fwhm
-    n_photons                       = int(n_photons) # pulse_energy / photon energy 
+    n_photons                       = int(n_photons) # pulse_energy / photon energy
     I0                              = transmission * n_photons / (beam_diameter ** 2) # Square beam
 
     # Crystal parameters
@@ -109,7 +109,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         sys.exit('ERROR: photon_energy must be greater than zero')
 
     if num_patterns<=0:
-        sys.exit('ERROR: num_patterns must be greater than zero') 
+        sys.exit('ERROR: num_patterns must be greater than zero')
 
     if n_photons<=0:
         sys.exit('ERROR: n_photons must be greater than zero')
@@ -119,7 +119,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
 
     if beam_spatial_profile != 'tophat' and beam_spatial_profile != 'gaussian':
         sys.exit('ERROR: beam_spatial_profile must be either gaussian or tophat')
-    
+
     if not os.path.isfile(pdb_file):
         sys.exit('ERROR: pdb file does not exist')
 
@@ -129,7 +129,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     # Creating text file with output parameters
     values = [detector_distance, pixel_size, n_pixels, beam_diameter, photon_energy * keV, n_photons, transmission, mosaicity_fwhm,
               beam_divergence_fwhm, beam_spatial_profile, photon_energy_fwhm, crystal_size, crystal_size_fwhm / crystal_size, mosaic_domain_size,
-              mosaic_domain_size_fwhm / mosaic_domain_size, water_radius, temperature, n_monte_carlo_iterations, num_patterns, random_rotation, 
+              mosaic_domain_size_fwhm / mosaic_domain_size, water_radius, temperature, n_monte_carlo_iterations, num_patterns, random_rotation,
               approximate_shape_transform, cromer_mann, expand_symm, fix_rot_seq, overlay_wigner_cells, mask_direct_beam,
               pdb_file, write_hdf5, write_geom, write_crystal_sizes, write_ideal_only, results_dir, quiet, compression, cl_double_precision]
 
@@ -268,7 +268,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     mosaic_domain_size_original = mosaic_domain_size
 
     # Write text file containing crystal and mosaic domain sizes
-    if write_crystal_sizes: 
+    if write_crystal_sizes:
         file_name = os.path.join( results_dir, 'crystal_sizes' )
         cryst_size_file = open(file_name, 'w+')
         cryst_size_file.write('Crystal size (meters) : Mosaic domain size (meters) : Pattern file\n')
@@ -380,7 +380,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         # Average the shape transforms over MC iterations
         S2 = S2_dev.get().ravel() / n
         # Convert into useful photon units
-        I = I0 * r_e ** 2 * F2 * S2 *  sa * P 
+        I = I0 * r_e ** 2 * F2 * S2 *  sa * P
         if(crystal_size < beam_diameter): # Correct for lower incident intensity
             if(beam_spatial_profile == 'gaussian'):
                 sig = beam_diameter / 3.0 # Let beam_diameter be 3 sigmas

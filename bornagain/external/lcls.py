@@ -58,12 +58,12 @@ def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
         pad_list (list) :
             A list containing data from each pixel array
     """
-    
+
     utils.depreciate("Function cheetah_cspad_array_to_pad_list() is now in external.cheetah."
                      "  Don't import it from external.lcls")
 
     cheetah_array = reshape_psana_cspad_array_to_cheetah_array(psana_array)
-    
+
     return cheetah_remapped_cspad_array_to_pad_list(cheetah_array, geom_dict)
 
 

@@ -8,7 +8,7 @@ class Place(cKDTree):
     def __init__(self, box_edge, min_dist, max_try=10000, *args, **kwargs):
         """
         Place points into a box of edge length box_edge, and don't let any two points
-        
+
         Parameters
         ==========
         get with    t0 = time()in min_dist from one another.
@@ -18,9 +18,9 @@ class Place(cKDTree):
         min_dist, float
             minimum distance between two points in the box
         max_try, int
-            number of times to try placing a new point such 
+            number of times to try placing a new point such
             that is does not overlap
-        
+
         """
         np.random.seed()
         a = np.random.uniform(0, box_edge, (1, 3))

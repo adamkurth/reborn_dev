@@ -3,7 +3,8 @@ Classes for analyzing/simulating diffraction data contained in pixel array
 detectors (PADs).
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 import numpy as np
 import h5py
@@ -100,7 +101,8 @@ class PADGeometry(object):
         self.n_ss = n_pixels
         self.fs_vec = [pixel_size, 0, 0]
         self.ss_vec = [0, pixel_size, 0]
-        self.t_vec = [-pixel_size * (n_pixels / 2.0 - 0.5), -pixel_size * (n_pixels / 2.0 - 0.5), distance]
+        self.t_vec = [-pixel_size * (n_pixels / 2.0 - 0.5), -
+                      pixel_size * (n_pixels / 2.0 - 0.5), distance]
 
     def pixel_size(self):
         r""" Return pixel size, assuming square pixels. """
@@ -574,7 +576,8 @@ class IcosphereGeometry(object):
 
         face_centers = np.zeros([n_faces, 3])
         for i in range(0, n_faces):
-            face_centers[i, :] = (verts[faces[i, 0], :] + verts[faces[i, 1], :] + verts[faces[i, 2], :]) / 3
+            face_centers[i, :] = (
+                verts[faces[i, 0], :] + verts[faces[i, 1], :] + verts[faces[i, 2], :]) / 3
 
         return verts, faces, face_centers
 
@@ -662,7 +665,8 @@ class RadialProfiler(object):
                 The requested radial profile.
         """
 
-        profile = np.bincount(self.bin_indices, data.ravel() * self.mask, self.n_bins)
+        profile = np.bincount(self.bin_indices, data.ravel()
+                              * self.mask, self.n_bins)
         if average:
             profile.flat[self.counts_non_zero] /= self.counts.flat[self.counts_non_zero]
 

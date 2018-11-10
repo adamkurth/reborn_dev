@@ -1,4 +1,5 @@
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 import h5py
 import numpy as np
@@ -52,20 +53,23 @@ class FrameGetter(object):
     def log_history(self):
 
         self.history[self.history_index] = self.current_frame
-        self.history_index = int((self.history_index + 1) % self.history_length)
+        self.history_index = int(
+            (self.history_index + 1) % self.history_length)
 
     def get_history_previous(self):
-       
-        self.history_index = int((self.history_index - 1) % self.history_length)
-        self.current_frame = self.history[self.history_index]       
+
+        self.history_index = int(
+            (self.history_index - 1) % self.history_length)
+        self.current_frame = self.history[self.history_index]
         dat = self.get_frame(self.current_frame)
 
         return dat
 
     def get_history_next(self):
 
-        self.history_index = int((self.history_index + 1) % self.history_length)
-        self.current_frame = self.history[self.history_index]       
+        self.history_index = int(
+            (self.history_index + 1) % self.history_length)
+        self.current_frame = self.history[self.history_index]
         dat = self.get_frame(self.current_frame)
 
         return dat
@@ -167,8 +171,8 @@ class CheetahFrameGetter(FrameGetter):
         ss_pos = pad_numbers.copy()
 
         for i in range(0, self.n_pads):
-            indices = np.argwhere( (fs_pos_raw > fs_min[i]) * (fs_pos_raw <=  fs_max[i]) * \
-                                   (ss_pos_raw > ss_min[i]) * (ss_pos_raw <=  ss_max[i]) )
+            indices = np.argwhere((fs_pos_raw > fs_min[i]) * (fs_pos_raw <= fs_max[i]) *
+                                  (ss_pos_raw > ss_min[i]) * (ss_pos_raw <= ss_max[i]))
             if len(indices > 0):
                 pad_numbers[indices] = i
                 fs_pos[indices] = fs_pos_raw[indices] - fs_min[i]
@@ -184,7 +188,8 @@ class CheetahFrameGetter(FrameGetter):
     def get_frame(self, frame_number=0):
 
         dat = np.array(self.h5_data[frame_number, :, :]).astype(np.double)
-        pad_data = crystfel.split_image(dat, self.geom_dict) #cheetah_remapped_cspad_array_to_pad_list(dat, self.geom_dict)
+        # cheetah_remapped_cspad_array_to_pad_list(dat, self.geom_dict)
+        pad_data = crystfel.split_image(dat, self.geom_dict)
 
         if not self.skip_peaks:
             peaks = self.get_peaks(self.h5file, frame_number)
@@ -192,4 +197,3 @@ class CheetahFrameGetter(FrameGetter):
         dat = {'pad_data': pad_data, 'peaks': peaks}
 
         return dat
-

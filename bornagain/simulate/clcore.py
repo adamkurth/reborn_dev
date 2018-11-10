@@ -118,7 +118,7 @@ class ClCore(object):
         """
         If the environment variable BORNAGAIN_CL_GROUPSIZE is set then use
         that value.
-        
+
         If the group size exceeds the max allowed group size, then make it
         smaller (but print warning)
         """
@@ -247,16 +247,16 @@ class ClCore(object):
         Evdidently pyopencl does not deal with 3-vectors very well, so we use
         4-vectors and pad with a zero at the end.
 
-        From Derek: I tested this at one point and found no difference... maybe newer pyopenCL is better.. 
+        From Derek: I tested this at one point and found no difference... maybe newer pyopenCL is better..
 
         This just does a trivial operation:
         return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
-            
+
         Args:
             x np.ndarray:
-            
+
             dtype np.dtype: Examples: np.complex, np.double
-            
+
         Returns:
             - numpy array of length 4
         """
@@ -295,13 +295,13 @@ class ClCore(object):
         """
         Static method
 
-        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy 
+        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
         array into a pyopencl.array and send it to the device memory.  So far this only
         deals with float and comlex arrays, and it should figure out which type it is.
 
         Arguments:
             array (numpy/cl array; float/complex type): Input array.
-            dtype (np.dtype): Specify the desired type in opencl.  The two types that 
+            dtype (np.dtype): Specify the desired type in opencl.  The two types that
                                are useful here are np.float32 and np.complex64
             queue, CL queue
         Returns:
@@ -317,15 +317,15 @@ class ClCore(object):
     def to_device(self, array=None, shape=None, dtype=None):
 
         r"""
-        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy 
+        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
         array into a pyopencl.array and send it to the device memory.  So far this only
         deals with float and comlex arrays, and it should figure out which type it is.
 
         Arguments:
             array (numpy/cl array; float/complex type): Input array.
-            shape (tuple): Optionally specify the shape of the desired array.  This is 
-                            ignored if array is not None. 
-            dtype (np.dtype): Specify the desired type in opencl.  The two types that 
+            shape (tuple): Optionally specify the shape of the desired array.  This is
+                            ignored if array is not None.
+            dtype (np.dtype): Specify the desired type in opencl.  The two types that
                                are useful here are np.float32 and np.complex64
 
         Returns:
@@ -407,47 +407,47 @@ class ClCore(object):
             q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
             r (numpy/cl float array [M,3]): Atomic coordinates.
             f (numpy/cl complex array [M]): Complex scattering factors.
-            Nchunk, number of chunks to split up atoms.. 
-            a (cl complex array [N]): Optional container for complex scattering 
+            Nchunk, number of chunks to split up atoms..
+            a (cl complex array [N]): Optional container for complex scattering
               amplitudes.
 
         Returns:
-            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
+            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
               if there are input cl arrays.
         """
 
-        # this is an inplace method, so we add amplitudes 
-        add=self.int_t(1) # inplace 
-        
+        # this is an inplace method, so we add amplitudes
+        add=self.int_t(1) # inplace
+
         #if R is None:
         R = np.eye(3, dtype=self.real_t)
         R = self.vec16(R, dtype=self.real_t)
-        
+
         n_pixels = self.int_t(q.shape[0])
-        
+
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
                              * self.group_size)
-        
+
         if not q_is_qdev:
             q_dev = self.to_device(q, dtype=self.real_t)
         else:
             q_dev = q
 
         n_atoms = self.int_t(r.shape[0])
-        
+
         r_split = np.array_split( np.arange( n_atoms), Nchunk)
         for r_rng in r_split:
             r_chunk = r[r_rng]
             f_chunk = f[r_rng]
             r_dev = self.to_device(r_chunk, dtype=self.real_t)
             f_dev = self.to_device(f_chunk, dtype=self.complex_t)
-            
+
             self.phase_factor_qrf_cl(self.queue, (global_size,),
-                                     (self.group_size,), q_dev.data, 
+                                     (self.group_size,), q_dev.data,
                                      r_dev.data,
-                                     f_dev.data, 
-                                     R, 
-                                     self.a_dev.data, 
+                                     f_dev.data,
+                                     R,
+                                     self.a_dev.data,
                                      n_atoms,
                                      n_pixels, add)
 
@@ -460,13 +460,13 @@ class ClCore(object):
             q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
             r (numpy/cl float array [M,3]): Atomic coordinates.
             f (numpy/cl complex array [M]): Complex scattering factors.
-            R (numpy array [3,3]): Rotation matrix acting on atom vectors 
+            R (numpy array [3,3]): Rotation matrix acting on atom vectors
                 (we quietly transpose R and let it operate on q-vectors for speedups)
-            a (cl complex array [N]): Optional container for complex scattering 
+            a (cl complex array [N]): Optional container for complex scattering
               amplitudes.
 
         Returns:
-            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
+            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
               if there are input cl arrays.
         """
 
@@ -489,11 +489,11 @@ class ClCore(object):
 
         add=self.int_t(1) # inplace always adds...
         self.phase_factor_qrf_cl(self.queue, (global_size,),
-                                 (self.group_size,), q_dev.data, 
+                                 (self.group_size,), q_dev.data,
                                  r_dev.data,
-                                 f_dev.data, 
-                                 R, 
-                                 self.a_dev.data, 
+                                 f_dev.data,
+                                 R,
+                                 self.a_dev.data,
                                  n_atoms,
                                  n_pixels, add)
 
@@ -535,10 +535,10 @@ class ClCore(object):
         r"""
 
         retrieve scattering amplitudes from cromer-mann simulator
-        
+
         Args:
             reset:
-                whether to reset the amplitudes to zeros 
+                whether to reset the amplitudes to zeros
 
         Returns:
 
@@ -560,11 +560,11 @@ class ClCore(object):
             R (numpy array [3,3]): Rotation matrix acting on atom vectors.
                 (we quietly transpose R and let it operate on q-vectors for speedups)
             f (numpy/cl complex array [M]): Complex scattering factors.
-            a (cl complex array [N]): Optional container for complex scattering 
+            a (cl complex array [N]): Optional container for complex scattering
               amplitudes.
 
         Returns:
-            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array 
+            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
               if there are input cl arrays.
         """
 
@@ -673,11 +673,11 @@ class ClCore(object):
         Arguments:
             r (Nx3 numpy array): Atomic coordinates
             f (numpy array): A numpy array of complex atomic scattering factors
-            N (numpy array length 3): Number of q-space samples in each of the three 
+            N (numpy array length 3): Number of q-space samples in each of the three
                dimensions
-            q_min (numpy array length 3): Minimum q-space magnitudes in the 3d mesh.  
+            q_min (numpy array length 3): Minimum q-space magnitudes in the 3d mesh.
                These values specify the *center* of the first voxel.
-            q_max (numpy array length 3): Naximum q-space magnitudes in the 3d mesh.  
+            q_max (numpy array length 3): Naximum q-space magnitudes in the 3d mesh.
                These values specify the *center* of the voxel.
 
         Returns:
@@ -730,7 +730,7 @@ class ClCore(object):
         This is supposed to lookup intensities from a 3d mesh of amplitudes.
 
         Arguments:
-            a_map (numpy array): Complex scattering amplitudes (usually generated from 
+            a_map (numpy array): Complex scattering amplitudes (usually generated from
                the function phase_factor_mesh())
             N (int): As defined in phase_factor_mesh()
             q_min (float): As defined in phase_factor_mesh()
@@ -955,7 +955,7 @@ class ClCore(object):
 
         assert (self.Nspecies < 13)  # can easily change this later if necessary...
         # ^ this assertion is so we can pass inputs to GPU as a float16, 3 q vectors and 13 atom species
-        # where one is reserved to be a dummie 
+        # where one is reserved to be a dummie
 
         #       load the amplitudes
         self._load_amp_buffer()
@@ -973,7 +973,7 @@ class ClCore(object):
 
             sub_com (bool):
                 Whether to sub the center of mass from the atom vecs
-        
+
         Returns:
             pyopenCL buffer data :
                 Natoms x 4 contiguous openCL buffer array
@@ -1006,9 +1006,9 @@ class ClCore(object):
         self.r_buff = self.to_device(self.r_vecs, dtype=self.real_t)
 
     def get_q_cromermann(self):
-        """ 
+        """
         combine form factors and q-vectors and load onto a CL buffer
-        
+
         Arguments:
 
             q_vecs (np.ndarray) :
@@ -1016,11 +1016,11 @@ class ClCore(object):
 
             atomic_nums (np.ndarray) :
                 Natoms x 1 array of atomic numbers
-        
+
         Returns:
             pyopenCL buffer data :
                 Npixelbuff x 16 contiguous openCL buffer array
-                where Npixel buff is the first multiple of 
+                where Npixel buff is the first multiple of
                 group_size that is greater than Npixels
 
         """
@@ -1052,7 +1052,7 @@ class ClCore(object):
 
         self._A_buff_data = self.A_buff.data
 
-    def run_cromermann(self, q_buff_data, r_buff_data, 
+    def run_cromermann(self, q_buff_data, r_buff_data,
                     rand_rot=False, force_rot_mat=None, com=None):
 
         r"""
@@ -1060,40 +1060,40 @@ class ClCore(object):
 
         Arguments
             q_buff_data (pyopenCL buffer data) :
-                should have shape NpixelsCLx16 where 
+                should have shape NpixelsCLx16 where
                 NpixelsCL is the first multiple of group_size greater than
-                Npixels. 
-                Use :func:`get_group_size` to check the currently 
+                Npixels.
+                Use :func:`get_group_size` to check the currently
                 set group_size. The data stored in
-                q[Npixels,:3] should be the q-vectors. 
+                q[Npixels,:3] should be the q-vectors.
                 The data stored in q[Npixels,3:Nspecies] should be the
-                q-dependent atomic form factors for up to Nspecies=13 
+                q-dependent atomic form factors for up to Nspecies=13
                 atom species See :func:`prime_comermann_simulator`
-                for details regarding the form factor storage and atom 
+                for details regarding the form factor storage and atom
                 species identifier
-            
+
             r_buff_data (pyopenCL buffer data) :
-                Should have shape Natomsx4. The data stored in 
+                Should have shape Natomsx4. The data stored in
                 r_buff_data[:,:3] are the atomic positions in cartesian
-                (x,y,z).  The data stored in r_buff_data[:,3] are 
+                (x,y,z).  The data stored in r_buff_data[:,3] are
                 the atom species identifiers (0,1,..Nspecies-1)
-                mapping the atom species here to the form factor value 
+                mapping the atom species here to the form factor value
                 in q_buff_data.
-            
+
             rand_rot (bool) :
                 Randomly rotate the molecule
-            
+
             force_rand_rot (np.ndarray) :
                 Supply a specific rotation matrix that operates on molecules
-            
+
             com (np.ndarray) :
                 Offset the center of mass of the molecule
-                
+
         .. note::
-            For atom r_i the atom species identifier is sp_i = 
+            For atom r_i the atom species identifier is sp_i =
             r_buff_data[r_i,3].
-            Then, for pixel q_i, the simulator can find the corresponding 
-            form factor in q_buff_dat[q_i,3+sp_i]. 
+            Then, for pixel q_i, the simulator can find the corresponding
+            form factor in q_buff_dat[q_i,3+sp_i].
             I know it is confusing, but it's efficient.
         """
 
@@ -1115,9 +1115,9 @@ class ClCore(object):
         self._set_com_vec()
 
         #       run the program
-        self.qrf_cromer_mann_cl( self.queue, (int(self.Npix + self.Nextra_pix),), 
-            (self.group_size,), q_buff_data, r_buff_data, 
-            self.rot_buff.data, self.com_buff.data, 
+        self.qrf_cromer_mann_cl( self.queue, (int(self.Npix + self.Nextra_pix),),
+            (self.group_size,), q_buff_data, r_buff_data,
+            self.rot_buff.data, self.com_buff.data,
             self._A_buff_data, self.Nato)
 
     def _set_rand_rot(self):
@@ -1126,13 +1126,13 @@ class ClCore(object):
         self.rot_buff = self.to_device(self.rot_mat, dtype=self.real_t)
 
     def _set_com_vec(self):
-        """sets the center-of mass vectors on the device""" 
+        """sets the center-of mass vectors on the device"""
         self.com_buff = self.to_device(self.com_vec, dtype=self.real_t)
 
     def release_amplitudes(self, reset=False):
         r"""
         Releases the amplitude buffer from the GPU
-        
+
         Arguments:
             reset (bool) : Reset the amplitude buffer to 0's on the GPU
 
