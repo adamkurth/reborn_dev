@@ -6,5 +6,6 @@
 # R0205: useless object inheritance 
 
 pylint --disable C0103 \
-       --disable R0903 \
+       --disable R0903,R0205 \
+       --disable R0205 \
        --max-line-length=120 $1

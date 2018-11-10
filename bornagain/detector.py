@@ -5,19 +5,10 @@ detectors (PADs).
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-#import sys
-
 import numpy as np
 import h5py
 
-try:
-    import matplotlib
-    import pylab as plt
-except ImportError:
-    pass
-
 from .utils import vec_norm, vec_mag, vec_check
-#from . import units
 
 
 class PADGeometry(object):
