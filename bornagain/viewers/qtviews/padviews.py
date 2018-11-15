@@ -791,10 +791,15 @@ class PADView(object):
             #     pad_data[i] = analysis.peaks.snr_filter(pad_data[i])
             # print((time() - t), ' ms')
 
-            # if self.data_filters is None:
-            #     pad_data = dat['pad_data']
-            # else:
-            #     pad_data =
+            if self.data_filters is not None:
+                t = time()
+                pad_data = [self.data_filters(d) for d in pad_data]
+                # pad_data2 = []
+                # for i in range(0, len(pad_data)):
+                #     # print('panel', i, pad_data[i].shape)
+                #     pad_data2.append(self.data_filters(pad_data[i]))
+                print(time()-t)
+                # pad_data = pad_data2
             # else:
             #     pad_data = dat['pad_data']
             #     print(type(pad_data))
