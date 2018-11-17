@@ -72,9 +72,9 @@ def snr_filter_pool(data):
 
 
 
-def snr_filter(data, radii=(1, 18, 20), mask=None, local_max_only=1):
+def snr_filter_numba(data, radii=(1, 18, 20), mask=None, local_max_only=1):
 
-    data = data.astype(np.double)
+    data = data.astype(np.float32)
     a = int(radii[0])
     b = int(radii[1])
     c = int(radii[2])
@@ -83,10 +83,10 @@ def snr_filter(data, radii=(1, 18, 20), mask=None, local_max_only=1):
     mask = mask.astype(np.int)
     local_max_only = int(local_max_only)
 
-    return _snr_filter(data, a, b, c, mask, local_max_only)
+    return _snr_filter_numba(data, a, b, c, mask, local_max_only)
 
 @jit(nopython=True)
-def _snr_filter(data, a, b, c, mask, local_max_only):
+def _snr_filter_numba(data, a, b, c, mask, local_max_only):
 
     nf = data.shape[1]
     ns = data.shape[0]
@@ -180,21 +180,16 @@ def _snr_filter(data, a, b, c, mask, local_max_only):
     return snr
 
 
-def peak_snr_filter(data, radii=(1, 18, 20), mask=None, local_max_only=1):
+def snr_filter_fortran(data, radii=(1, 18, 20), mask=None, local_max_only=1):
 
-    nf = data.shape[1]
-    ns = data.shape[0]
     data = data.copy('f')
     if mask is None:
         mask = np.ones_like(data, order='f')
     a = radii[0]
     b = radii[1]
     c = radii[2]
-
-    # output
     snr = np.zeros_like(data, order='f')
     signal = np.zeros_like(data, order='f')
-    # print('hello')
     peak_snr_filter_f(data, a, b, c, mask, local_max_only, snr, signal)
 
     return snr
@@ -202,10 +197,7 @@ def peak_snr_filter(data, radii=(1, 18, 20), mask=None, local_max_only=1):
 
 class PeakFinderV1(object):
 
-    def __init__(self, shape=None, radii=None):
-
-        if radii is None:
-            radii = (1, 4, 7)
+    def __init__(self, shape=None, radii=(1, 18, 20)):
 
         nx = shape[1]
         ny = shape[0]
@@ -232,7 +224,7 @@ class PeakFinderV1(object):
         inner_ft = fft2(inner)
         outer_ft = fft2(outer)
 
-        self.inner = inner
+        self.inner = inner.astype(np.float32)
         self.outer = outer
         self.n_inner = n_inner
         self.n_outer = n_outer
@@ -245,7 +237,7 @@ class PeakFinderV1(object):
 
         return np.real(ifft2(fft2(dat)*(self.inner_ft / self.n_inner - self.outer_ft / self.n_outer)))
 
-    def get_snr(self, dat):
+    def snr_filter(self, dat):
 
         # t = time()
         bak = np.real(ifft2(fft2(dat)*(self.outer_ft))) / self.n_outer
@@ -259,26 +251,14 @@ class PeakFinderV1(object):
         snr[np.isinf(snr)] = 0
         snr[np.isnan(snr)] = 0
 
-        # print(time() - t)
-
         return snr
 
-    def get_snr2(self, dat):
-
-        # t = time()
-        bak = convolve2d(dat, self.outer, mode='valid',
-                         boundary='symm')/self.n_outer
-        bak2 = convolve2d(dat**2, self.outer, mode='valid',
-                          boundary='symm')/self.n_outer
-        sigma = np.sqrt(bak2 - bak**2)
-
-        signal = convolve2d(dat, self.inner_outer,
-                            mode='valid', boundary='symm')
-
-        snr = signal/sigma
-        # print(np.max(signal), np.max(bak), np.max(bak2), np.max(snr), np.min(snr))
-
-        # print(bak2 - bak**2)
-        # print(time() - t)
-
-        return snr
+    # def get_snr2(self, dat):
+    #
+    #     bak = convolve2d(dat, self.outer, mode='valid', boundary='symm')/self.n_outer
+    #     bak2 = convolve2d(dat**2, self.outer, mode='valid', boundary='symm')/self.n_outer
+    #     sigma = np.sqrt(bak2 - bak**2)
+    #     signal = convolve2d(dat, self.inner_outer, mode='valid', boundary='symm')
+    #     snr = signal/sigma
+    #
+    #     return snr

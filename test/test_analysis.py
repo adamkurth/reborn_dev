@@ -1,11 +1,7 @@
 import sys
 sys.path.append('..')
 import numpy as np
-from bornagain.analysis.peaks_f import peak_snr_filter
-# f2py -c peaks.f90 -m peaks_f
-# for arrays, do data.copy('f')
-
-
+from bornagain.analysis.peaks_f import peak_snr_filter, squarediff
 
 
 def test_peak_snr_filter():
@@ -26,7 +22,19 @@ def test_peak_snr_filter():
     snr = np.zeros_like(data, order='f')
     signal = np.zeros_like(data, order='f')
 
-    peak_snr_filter(data, a, b, c, ns, nf, mask, local_max_only, snr, signal)
+    peak_snr_filter(data, a, b, c, mask, local_max_only, snr, signal)
 
     assert(snr[4, 6] == 0)
+
+
+def test_peaker():
+
+    npx = 100
+    npy = 200
+    p = np.random.rand(npx, npy)
+    p0 = p.copy('f')
+    nin = 20
+    nout = 30
+    squarediff(p0, npx, npy, nout, nout, nin, nin)
+
 
