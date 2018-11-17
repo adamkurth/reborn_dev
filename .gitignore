@@ -18,5 +18,4 @@ temp
 .adxv*
 .pytest_cache
 __pycache__
-ignore*
 doc/source/bornagain.*
