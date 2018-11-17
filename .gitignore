@@ -12,9 +12,10 @@ temp
 .*.csv
 *.swp
 ._*
+*.dSYM
+*.so
 .idea
 .adxv*
 .pytest_cache
 __pycache__
-ignore*
 doc/source/bornagain.*
