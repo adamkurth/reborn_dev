@@ -7,5 +7,7 @@ before_script:
 tests:
   stage: test
   script:
-    - cd test
+    - cd developer
+    - ./compiler-fortran.sh
+    - cd ../test
     - pytest --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py  --ignore=test_mplviews.py
