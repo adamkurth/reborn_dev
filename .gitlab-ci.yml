@@ -1,12 +1,15 @@
 image: continuumio/miniconda3:latest
 
 before_script:
+  - apt install gfortran
   - conda env create -f gitlab-ci-env3.yml
   - source activate bornagain3
 
 tests:
   stage: test
   script:
+    - echo $PATH
+    - find /opt/conda -n python -t f
     - cd developer
     - ./compile-fortran.sh
     - cd ../test
