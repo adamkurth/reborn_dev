@@ -1,7 +1,6 @@
 image: continuumio/miniconda3:latest
 
 before_script:
-  - docker info
   - pwd
   - uname -a
   - echo $PATH
