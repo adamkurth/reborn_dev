@@ -8,6 +8,6 @@ tests:
   stage: test
   script:
     - cd developer
-    - ./compiler-fortran.sh
+    - ./compile-fortran.sh
     - cd ../test
     - pytest --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py  --ignore=test_mplviews.py
