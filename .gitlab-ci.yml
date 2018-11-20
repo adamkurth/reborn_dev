@@ -1,7 +1,6 @@
 image: continuumio/miniconda3:latest
 
 before_script:
-  - apt install gfortran
   - conda env create -f gitlab-ci-env3.yml
   - source activate bornagain3
 
