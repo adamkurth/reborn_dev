@@ -1,14 +1,16 @@
 image: continuumio/miniconda3:latest
 
 before_script:
+  - apt-get install build-essential
   - conda env create -f gitlab-ci-env3.yml
   - source activate bornagain3
 
 tests:
   stage: test
   script:
+    - pwd
+    - uname -a
     - echo $PATH
-    - find /opt/conda -n python -t f
     - cd developer
     - ./compile-fortran.sh
     - cd ../test
