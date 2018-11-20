@@ -1,10 +1,11 @@
 image: continuumio/miniconda3:latest
 
 before_script:
+  - docker info
   - pwd
   - uname -a
   - echo $PATH
-  - apt-get install build-essential
+  - apt search fortran
   - conda env create -f gitlab-ci-env3.yml
   - source activate bornagain3
 
