@@ -15,4 +15,4 @@ def test_simpleview():
 
     amps = cl.phase_factor_qrf(pad.Q_vectors, rs, np.ones(rs.shape[0])*(1 + 0j))
     pad.readout(amps)
-    pad.display()
+    #pad.display()
