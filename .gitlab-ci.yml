@@ -4,7 +4,6 @@ before_script:
   - pwd
   - uname -a
   - echo $PATH
-  - apt search fortran
   - conda env create -f gitlab-ci-env3.yml
   - source activate bornagain3
 
