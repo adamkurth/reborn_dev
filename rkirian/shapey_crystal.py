@@ -8,7 +8,7 @@ sys.path.append("../..")
 import bornagain as ba
 import bornagain.target.crystal as crystal
 import bornagain.simulate.clcore as core
-
+import bornagain.viewers.qtviews.qtviews as qtviews
 
 show = False  # Display the simulated patterns
 double = False  # Use double precision if available
@@ -60,16 +60,21 @@ f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 
 
 # Atomic coordinates
-N_latt = 20
-tmp = np.arange(0, N) * 10e-10
+N_latt = 5
+latt_len = 20e-10
+tmp = np.arange(0, N_latt) * latt_len
 [xx, yy, zz] = np.meshgrid(tmp, tmp, tmp, indexing='ij')
-r_latt = np.zeros([N ** 3, 3])
+r_latt = np.zeros([N_latt ** 3, 3])
 r_latt[:, 0] = zz.flatten()
 r_latt[:, 1] = yy.flatten()
-r_latt[:, 2] = xx.flatten()
+r_latt[:, 2] = xx.flatten() + np.random.rand(len(xx.flatten()))*latt_len*0.2
+
+
+
+
 
 # Scattering factors
-f_latt = np.ones([N ** 3])
+f_latt = np.ones([N_latt ** 3])
 
 
 
@@ -82,98 +87,43 @@ if rotate:
 else:
     R = np.eye(3)
 
-# print(lin)
-# print("Compute q vectors directly on GPU instead of CPU")
-# print("Amplitudes passed in/out as GPU array")
-# print(lin)
-#
-# n_pixels = pl.n_fs * pl.n_ss
-# n_atoms = r.shape[0]
-# a_dev = clcore.to_device(shape=(n_pixels), dtype=clcore.complex_t)
-#
-# t = time.time()
-# clcore.phase_factor_pad(r, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=R, a=a_dev)
-#
-# tf = time.time() - t
-# print('phase_factor_pad: %7.03f ms' % (tf * 1e3))
-#
-# t = time.time()
-# a = a_dev.get()
-# tt = time.time() - t
-# print("Moving amplitudes back to CPU memory in %7.03f ms"%(tt*1e3))
-
-
-
-
-
-# # Compute diffraction amplitudes
-# t = time.time()
-# a_dev_latt = clcore.to_device(shape=(n_pixels), dtype=clcore.complex_t)
-# clcore.phase_factor_pad(r_latt, f_latt, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=R, a=a_dev_latt)
-# print(time.time() - t)
-#
-#
-# I = np.abs( a_dev.get() * a_dev_latt.get() )**2
-# I = pl.reshape(I)
-#
-#
-#
-# # Display pattern
-# if False:
-#     # imdisp = np.abs(a) ** 2
-#     # imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
-#     # imdisp = np.log(imdisp + 0.1)
-#     plt.imshow(np.log(I + 0.1), interpolation='nearest', cmap='gray', origin='lower')
-#     plt.title('y: up, x: right, z: beam (towards you)')
-#     plt.show()
-# print("")
-
-
-
-
-
-
-
-
-
-
-# ==============================================================
-# 3d mesh
-
-
 
 
 res = 5e-10  # Resolution
 qmax = 2 * np.pi / (res)
 qmin = -qmax
-N = 128  # Number of samples
-n_atoms = r.shape[0]
-n_pixels = N ** 3
+N_mesh = 128  # Number of samples
+# n_atoms = r.shape[0]
+n_pixels = N_mesh ** 3
 
 a_map_dev = clcore.to_device(shape=(n_pixels), dtype=clcore.complex_t)
 
 t = time.time()
-clcore.phase_factor_mesh(r, f, N, qmin, qmax, a_map_dev)
+clcore.phase_factor_mesh(r, f, N_mesh, qmin, qmax, a_map_dev)
 tf = time.time() - t
-#print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' % (tf * 1e3, n_atoms, n_pixels))
+print('phase_factor_mesh (molecule): %7.03f ms (%d atoms; %d pixels)' % (tf * 1e3, n_atoms, n_pixels))
 
 
 a_map_latt = clcore.to_device(shape=(n_pixels), dtype=clcore.complex_t)
 
 t = time.time()
-clcore.phase_factor_mesh(r_latt, f_latt, N, qmin, qmax, a_map_latt)
+clcore.phase_factor_mesh(r_latt, f_latt, N_mesh, qmin, qmax, a_map_latt)
 tf = time.time() - t
-#print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' % (tf * 1e3, n_atoms, n_pixels))
+print('phase_factor_mesh (lattice; %d points): %7.03f ms (%d atoms; %d pixels)' % (n_pixels, tf * 1e3, n_atoms, n_pixels))
 
 I = np.abs(a_map_dev.get() * a_map_latt.get() )**2
-I = I.reshape((N_latt)*3)
+I = I.reshape((N_mesh, N_mesh, N_mesh))
 
 if show_all and show:
     # imdisp = np.abs(a) ** 2
     # imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
     # imdisp = np.log(imdisp + 0.1)
-    plt.imshow(np.log(I[int(np.floor(N_latt/2)), :, :] + 0.1), interpolation='nearest', cmap='gray', origin='lower')
-    plt.title('y: up, x: right, z: beam (towards you)')
+    qtviews.MapSlices(np.log(I + 0.01))
+    scat = qtviews.Scatter3D()
+    scat.add_points(r_latt, size=5)
+    scat.show()
+    # plt.imshow(np.log(I[int(np.floor(N_latt/2)), :, :] + 0.1), interpolation='nearest', cmap='gray', origin='lower')
+    # plt.title('y: up, x: right, z: beam (towards you)')
     plt.show()
 print("")
 
