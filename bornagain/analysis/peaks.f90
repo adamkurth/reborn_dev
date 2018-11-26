@@ -106,6 +106,95 @@ contains
 
    end subroutine squarediff
 
+
+    subroutine boxsnr(dat,mask,out,npx,npy,nin,ncent,nout)
+!
+! p(npx,npy) input array, overwritten to give output array
+! sums pixels in outer square from i-nosx to i+nosx, j-nosy to j+nosy
+! not contained in inner square from i-nisx to i+nisx, j-nisy to j+nisy
+!
+        real(kind=8), intent(in) :: dat(npx,npy), mask(npx,npy)
+        real(kind=8), intent(inout) :: out(npx,npy)
+        integer(kind=4), intent(in) :: npx, npy, nin, ncent, nout
+        real(kind=8) :: cumx(0:npx,npy), cum2x(0:npx,npy), cummx(0:npx,npy), &
+                        sqix(npx,npy), sq2ix(npx,npy), sqmix(npx,npy), &
+                        sqcx(npx,npy), sq2cx(npx,npy), sqmcx(npx,npy), &
+                        sqox(npx,npy), sq2ox(npx,npy), sqmox(npx,npy), &
+                        cumiy(npx,0:npy), cum2iy(npx,0:npy), cummiy(npx,0:npy), &
+                        cumcy(npx,0:npy), cum2cy(npx,0:npy), cummcy(npx,0:npy), &
+                        cumoy(npx,0:npy), cum2oy(npx,0:npy), cummoy(npx,0:npy)
+        real(kind=8) :: small
+        integer(kind=4) :: ix,iy,mn,mx
+        small=1.0e-15_8
+        cumx(0,:)=0.0_8
+        cum2x(0,:)=0.0_8
+        cummx(0,:)=0.0_8
+        do ix=1,npx  ! cumulative sums
+            cumx(ix,:)=cumx(ix-1,:)+dat(ix,:)*mask(ix,:)
+            cum2x(ix,:)=cum2x(ix-1,:)+(dat(ix,:)*mask(ix,:))**2
+            cummx(ix,:)=cummx(ix-1,:)+mask(ix,:)
+        enddo
+        do ix=1,npx  ! windowed sums on one axis
+            mn=min(npx,ix+nin)
+            mx=max(0,ix-nin-1)
+            sqix(ix,:) =cumx(mn,:)-cumx(mx,:)
+            sq2ix(ix,:)=cum2x(mn,:)-cum2x(mx,:)
+            sqmix(ix,:)=cummx(mn,:)-cummx(mx,:)
+            mn=min(npx,ix+ncent)
+            mx=max(0,ix-ncent-1)
+            sqcx(ix,:) =cumx(mn,:) -cumx(mx,:)
+            sq2cx(ix,:)=cum2x(mn,:)-cum2x(mx,:)
+            sqmcx(ix,:)=cummx(mn,:)-cummx(mx,:)
+            mn=min(npx,ix+nout)
+            mx=max(0,ix-nout-1)
+            sqox(ix,:) =cumx(mn,:) -cumx(mx,:)
+            sq2ox(ix,:)=cum2x(mn,:)-cum2x(mx,:)
+            sqmox(ix,:)=cummx(mn,:)-cummx(mx,:)
+        enddo
+        cumiy(:,0)=0.0_8
+        cum2iy(:,0)=0.0_8
+        cummiy(:,0)=0.0_8
+        cumcy(:,0)=0.0_8
+        cum2cy(:,0)=0.0_8
+        cummcy(:,0)=0.0_8
+        cumoy(:,0)=0.0_8
+        cum2oy(:,0)=0.0_8
+        cummoy(:,0)=0.0_8
+        do iy=1,npy
+            cumiy(:,iy) =cumiy(:,iy-1) +sqix(1:npx,iy)
+            cum2iy(:,iy) =cum2iy(:,iy-1)+sq2ix(1:npx,iy)
+            cummiy(:,iy)=cummiy(:,iy-1)+sqmix(1:npx,iy)
+            cumcy(:,iy) =cumcy(:,iy-1) +sqcx(1:npx,iy)
+            cum2cy(:,iy)=cum2cy(:,iy-1)+sq2cx(1:npx,iy)
+            cummcy(:,iy)=cummcy(:,iy-1)+sqmcx(1:npx,iy)
+            cumoy(:,iy) =cumoy(:,iy-1) +sqox(1:npx,iy)
+            cum2oy(:,iy)=cum2oy(:,iy-1)+sq2ox(1:npx,iy)
+            cummoy(:,iy)=cummoy(:,iy-1)+sqmox(1:npx,iy)
+        enddo
+        do iy=1,npy
+            mn=min(npy,iy+nin)
+            mx=max(0,iy-nin-1)
+            sqix(:,iy) =cumiy (:,mn)-cumiy(:,mx)
+            sq2ix(:,iy) =cum2iy (:,mn)-cum2iy(:,mx)
+            sqmix(:,iy)=cummiy(:,mn)-cummiy(:,mx)
+            mn=min(npy,iy+ncent)
+            mx=max(0,iy-ncent-1)
+            sqcx(:,iy) =cumcy (:,mn)-cumcy(:,mx)
+            sq2cx(:,iy) =cum2cy (:,mn)-cum2cy(:,mx)
+            sqmcx(:,iy)=cummcy(:,mn)-cummcy(:,mx)
+            mn=min(npy,iy+nout)
+            mx=max(0,iy-nout-1)
+            sqox(:,iy) =cumoy (:,mn)-cumoy(:,mx)
+            sq2ox(:,iy)=cum2oy(:,mn)-cum2oy(:,mx)
+            sqmox(:,iy)=cummoy(:,mn)-cummoy(:,mx)
+        enddo
+        sqox = sqox - sqcx
+        sq2ox = sq2ox - sq2cx
+        sqmox = sqmox - sqmcx + small ! avoid divide by zero
+        sqmix = sqmix + small         ! avoid divide by zero
+        out = (sqix-sqox*sqmix/sqmox)/(sqrt(sqmix)*(sqrt(sq2ox/sqmox - (sqox/sqmox)**2)+small))
+    end subroutine boxsnr
+
 end module peaker
 
 

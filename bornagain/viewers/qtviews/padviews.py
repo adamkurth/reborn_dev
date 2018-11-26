@@ -405,7 +405,7 @@ class PADView(object):
             self.mask_data = [np.ones_like(d) for d in self.pad_data]
 
         if self.mask_color is None:
-            self.mask_color = np.array([255, 0, 0])
+            self.mask_color = np.array([128, 0, 0])
 
         for i in range(0, self.n_pads):
 
@@ -457,14 +457,21 @@ class PADView(object):
                 im.setVisible(True)
 
     def toggle_masks(self):
+        print('toggle masks')
 
         if self.mask_images is not None:
             for im in self.mask_images:
+                print('set visible')
                 im.setVisible(not im.isVisible())
+        else:
+            print('no mask images')
 
     def mask_all_rois(self):
 
         noslice = slice(0, 1, None)
+
+        if self._mask_rois is None:
+            return
 
         for roi in self._mask_rois:
 
@@ -529,9 +536,10 @@ class PADView(object):
 
             self.main_window.histogram.regionChanged()
 
-    def update_pads(self, pad_data):
+    def update_pads(self, pad_data=None):
 
-        self.pad_data = pad_data
+        if pad_data is not None:
+            self.pad_data = pad_data
 
         mx = np.ravel(self.pad_data).max()
 
@@ -776,7 +784,7 @@ class PADView(object):
 
         if 'pad_data' in dat.keys():
 
-            pad_data = dat['pad_data']
+            self.pad_data = dat['pad_data']
 
             # if bornagain.get_global('debug'):
 
@@ -793,7 +801,10 @@ class PADView(object):
 
             if self.data_filters is not None:
                 t = time()
-                pad_data = [self.data_filters(d) for d in pad_data]
+
+                for filter in self.data_filters:
+                    filter(self)
+                # pad_data = [self.data_filters(d) for d in pad_data]
                 # pad_data2 = []
                 # for i in range(0, len(pad_data)):
                 #     # print('panel', i, pad_data[i].shape)
@@ -809,7 +820,8 @@ class PADView(object):
             #             pad_data[i] = self.data_filters(pad_data[i])
             #         print((time() - t)/len(pad_data), ' ms')
 
-            self.update_pads(pad_data)
+            #self.update_pads(pad_data)
+            self.update_pads()
 
         # if self.peak_finders is not None:
         #

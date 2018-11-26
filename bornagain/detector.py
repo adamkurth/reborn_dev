@@ -384,6 +384,29 @@ def split_pad_data(pad_list, data):
     return data_list
 
 
+def edge_mask(data, n):
+
+    r"""
+    Make an "edge mask"; an array of ones with zeros around the edges.
+    The mask will be the same type as the data (e.g. double).
+
+    Args:
+        data (2D numpy array): a data array (for shape reference)
+        n (int): number of pixels to mask around edges
+
+    Returns: numpy array
+    """
+    n = int(n)
+    mask = np.ones_like(data)
+    ns, nf = data.shape
+    mask[0:n, :] = 0
+    mask[(ns-n):ns, :] = 0
+    mask[:, 0:n] = 0
+    mask[:, (nf-n):nf] = 0
+
+    return mask
+
+
 class PADAssembler(object):
 
     r"""
