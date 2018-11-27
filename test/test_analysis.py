@@ -18,7 +18,6 @@ def test_peak_snr_filter():
     c = 3
     local_max_only = 1
 
-    # output
     snr = np.zeros_like(data, order='f')
     signal = np.zeros_like(data, order='f')
 

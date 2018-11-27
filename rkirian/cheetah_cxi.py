@@ -29,8 +29,7 @@ aft = np.asfortranarray
 def peak_filter(self):
     for i in range(len(self.pad_data)):
         dat = self.pad_data[i].astype(np.float64)
-        mask = self.mask_data[i].astype(np.float64) #np.ones_like(dat)
-        # print(mask[0, 0], mask[10, 10])
+        mask = self.mask_data[i].astype(np.float64)
         out = np.ones_like(dat)
         out = aft(out)
         nin = 3

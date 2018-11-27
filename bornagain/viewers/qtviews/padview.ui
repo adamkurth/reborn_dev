@@ -18,7 +18,16 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <property name="spacing">
@@ -94,10 +103,32 @@
     <property name="title">
      <string>View</string>
     </property>
+    <widget class="QMenu" name="menuViewPeaks">
+     <property name="title">
+      <string>Peaks</string>
+     </property>
+     <addaction name="actionPeaksVisible"/>
+    </widget>
+    <widget class="QMenu" name="menuMask">
+     <property name="title">
+      <string>Mask</string>
+     </property>
+     <addaction name="actionRectangleROIVisible"/>
+     <addaction name="actionMaskVisible"/>
+    </widget>
+    <widget class="QMenu" name="menuCustomFilters">
+     <property name="title">
+      <string>Filters</string>
+     </property>
+     <addaction name="actionCustomFilter"/>
+    </widget>
     <addaction name="actionPanel_IDs"/>
     <addaction name="actionGrid"/>
     <addaction name="actionRings"/>
     <addaction name="actionBeam_position"/>
+    <addaction name="menuViewPeaks"/>
+    <addaction name="menuMask"/>
+    <addaction name="menuCustomFilters"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -157,6 +188,26 @@
   <action name="actionBeam_position">
    <property name="text">
     <string>Beam position</string>
+   </property>
+  </action>
+  <action name="actionRectangleROIVisible">
+   <property name="text">
+    <string>Rectangle ROI</string>
+   </property>
+  </action>
+  <action name="actionMaskVisible">
+   <property name="text">
+    <string>Visible</string>
+   </property>
+  </action>
+  <action name="actionPeaksVisible">
+   <property name="text">
+    <string>Visible</string>
+   </property>
+  </action>
+  <action name="actionCustomFilter">
+   <property name="text">
+    <string>Apply Custom</string>
    </property>
   </action>
  </widget>

@@ -57,6 +57,8 @@ class PADView(object):
     peak_finders = None
     data_filters = None
     show_peaks = True
+    peaks = None
+    apply_filters = True
 
     def __init__(self, pad_geometry=None, pad_data=None, mask_data=None, logscale=False, frame_getter=None):
 
@@ -94,14 +96,15 @@ class PADView(object):
         # self.viewbox.addItem(self.label)
         self._setup_mouse_interactions()
         self._setup_shortcuts()
+        self._setup_menu()
 
         self.main_window.statusbar.setStyleSheet("background-color:rgb(30, 30, 30);color:rgb(255,0,255);"
                                                  "font-weight:bold;font-family:monospace;")
 
         self.show_frame()
 
-        self.main_window.setWindowState(self.main_window.windowState() & ~pg.QtCore.Qt.WindowMinimized
-                                        | pg.QtCore.Qt.WindowActive)
+        # self.main_window.setWindowState(self.main_window.windowState() & ~pg.QtCore.Qt.WindowMinimized
+        #                                 | pg.QtCore.Qt.WindowActive)
         #self.main_window.activateWindow()
         #self.main_window.showMaximized()
 
@@ -111,8 +114,13 @@ class PADView(object):
 
     def _setup_menu(self):
 
-        self.main_window.actionGrid.triggered.connect(self.toggle_grid)
-        self.main_window.actionRings.triggered.connect(self.edit_ring_radii)
+        mw = self.main_window
+        mw.actionGrid.triggered.connect(self.toggle_grid)
+        mw.actionRings.triggered.connect(self.edit_ring_radii)
+        mw.actionMaskVisible.triggered.connect(self.toggle_masks)
+        mw.actionRectangleROIVisible.triggered.connect(self.toggle_rois)
+        mw.actionPeaksVisible.triggered.connect(self.toggle_peaks)
+        mw.actionCustomFilter.triggered.connect(self.toggle_filter)
 
     def _set_simple_keyboard_shortcut(self, key, func):
 
@@ -181,6 +189,13 @@ class PADView(object):
             for roi in self._mask_rois:
                 self.viewbox.removeItem(roi)
             self._mask_rois = None
+
+    def toggle_rois(self):
+
+        if self._mask_rois is None:
+            self.add_roi()
+        else:
+            self.hide_rois()
 
     def increase_skip(self):
 
@@ -457,14 +472,10 @@ class PADView(object):
                 im.setVisible(True)
 
     def toggle_masks(self):
-        print('toggle masks')
 
         if self.mask_images is not None:
             for im in self.mask_images:
-                print('set visible')
                 im.setVisible(not im.isVisible())
-        else:
-            print('no mask images')
 
     def mask_all_rois(self):
 
@@ -688,25 +699,6 @@ class PADView(object):
         for image in self.images:
             image.setBorder(None)
 
-    def add_scatter_plot(self, *args, **kargs):
-
-        if self.scatter_plots is None:
-            self.scatter_plots = []
-
-        scat = pg.ScatterPlotItem(*args, **kargs)
-        self.scatter_plots.append(scat)
-        self.viewbox.addItem(scat)
-
-    def remove_scatter_plots(self):
-
-        if self.scatter_plots is None:
-            return
-
-        for scat in self.scatter_plots:
-            self.viewbox.removeItem(scat)
-
-        self.scatter_plots = None
-
     def show_history_next(self):
 
         if self.frame_getter is None:
@@ -786,80 +778,83 @@ class PADView(object):
 
             self.pad_data = dat['pad_data']
 
-            # if bornagain.get_global('debug'):
-
-            # pad_data = dat['pad_data']
-            # t = time()
-            # pad_data = analysis.peaks.snr_filter_pool(pad_data)
-            # print((time() - t), ' ms (mp)')
-            #
-            # pad_data = dat['pad_data']
-            # t = time()
-            # for i in range(0, len(pad_data)):
-            #     pad_data[i] = analysis.peaks.snr_filter(pad_data[i])
-            # print((time() - t), ' ms')
-
+        if self.apply_filters is True:
             if self.data_filters is not None:
-                t = time()
-
                 for filter in self.data_filters:
                     filter(self)
-                # pad_data = [self.data_filters(d) for d in pad_data]
-                # pad_data2 = []
-                # for i in range(0, len(pad_data)):
-                #     # print('panel', i, pad_data[i].shape)
-                #     pad_data2.append(self.data_filters(pad_data[i]))
-                print(time()-t)
-                # pad_data = pad_data2
-            # else:
-            #     pad_data = dat['pad_data']
-            #     print(type(pad_data))
-            #     if hasattr(self.data_filters, '__call__'):
-            #         t = time()
-            #         for i in range(0, len(pad_data)):
-            #             pad_data[i] = self.data_filters(pad_data[i])
-            #         print((time() - t)/len(pad_data), ' ms')
 
-            #self.update_pads(pad_data)
-            self.update_pads()
+        self.update_pads()
 
-        # if self.peak_finders is not None:
-        #
-        #     pads = dat['pad_data']
-        #
-        #     new_pads = []
-        #
-        #     for pad, peak_finder in zip(pads, self.peak_finders):
-        #         # new_pads.append(peak_finder.get_signal_above_background(pad))
-        #         new_pads.append(peak_finder.get_snr(pad))
-        #
-        #     self.update_pads(new_pads)
-        #
+        if 'peaks' in dat.keys():
+
+            self.peaks = dat['peaks']
 
         if self.show_peaks is True:
-
-            if 'peaks' in dat.keys():
-
-                peaks = dat['peaks']
-                if peaks is not None:
-                    n_peaks = peaks['n_peaks']
-                    pad_numbers = peaks['pad_numbers']
-                    fs_pos = peaks['fs_pos']
-                    ss_pos = peaks['ss_pos']
-
-                    pad_geom = self.pad_geometry
-                    gl_fs_pos = np.zeros(n_peaks)
-                    gl_ss_pos = np.zeros(n_peaks)
-                    for i in range(0, n_peaks):
-                        pad_num = pad_numbers[i]
-                        vec = pad_geom[pad_num].indices_to_vectors(ss_pos[i], fs_pos[i]).ravel()
-                        gl_fs_pos[i] = vec[0]*self.scale_factor()
-                        gl_ss_pos[i] = vec[1]*self.scale_factor()
-                    self.add_scatter_plot(gl_fs_pos, gl_ss_pos, pen=pg.mkPen('g'), brush=None, width=5, size=10, pxMode=False)
+            self.display_peaks(self.peaks)
 
         self._update_status_string(frame_number=self.frame_getter.current_frame, n_frames=self.frame_getter.n_frames)
 
         self._mouse_moved(self.evt)
+
+    def add_scatter_plot(self, *args, **kargs):
+
+        if self.scatter_plots is None:
+            self.scatter_plots = []
+
+        scat = pg.ScatterPlotItem(*args, **kargs)
+        self.scatter_plots.append(scat)
+        self.viewbox.addItem(scat)
+
+    def remove_scatter_plots(self):
+
+        if self.scatter_plots is not None:
+            for scat in self.scatter_plots:
+                self.viewbox.removeItem(scat)
+
+        self.scatter_plots = None
+
+    def display_peaks(self, peaks=None):
+
+        if peaks is None:
+            peaks = self.peaks
+
+        if peaks is None:
+            return
+
+        n_peaks = peaks['n_peaks']
+        pad_numbers = peaks['pad_numbers']
+        fs_pos = peaks['fs_pos']
+        ss_pos = peaks['ss_pos']
+
+        pad_geom = self.pad_geometry
+        gl_fs_pos = np.zeros(n_peaks)
+        gl_ss_pos = np.zeros(n_peaks)
+        for i in range(0, n_peaks):
+            pad_num = pad_numbers[i]
+            vec = pad_geom[pad_num].indices_to_vectors(ss_pos[i], fs_pos[i]).ravel()
+            gl_fs_pos[i] = vec[0] * self.scale_factor()
+            gl_ss_pos[i] = vec[1] * self.scale_factor()
+        self.add_scatter_plot(gl_fs_pos, gl_ss_pos, pen=pg.mkPen('g'), brush=None, width=5, size=10, pxMode=False)
+
+    def toggle_peaks(self):
+
+        if self.scatter_plots is None:
+            self.display_peaks()
+            self.show_peaks = True
+        else:
+            self.remove_scatter_plots()
+            self.show_peaks = False
+
+        self.update_pads()
+
+    def toggle_filter(self):
+
+        if self.apply_filters is True:
+            self.apply_filters = False
+        else:
+            self.apply_filters = True
+
+
 
     def start(self):
 
