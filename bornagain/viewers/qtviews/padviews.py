@@ -12,10 +12,10 @@ import pyqtgraph as pg
 
 from pyqtgraph.Qt import uic, QtGui, QtCore
 
-import bornagain
-import bornagain.external.pyqtgraph as bpg
+# import bornagain
+# import bornagain.external.pyqtgraph as bpg
 from bornagain.fileio.getters import FrameGetter
-from bornagain import analysis
+# from bornagain import analysis
 
 padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
 
@@ -780,8 +780,10 @@ class PADView(object):
 
         if self.apply_filters is True:
             if self.data_filters is not None:
+                t = time()
                 for filter in self.data_filters:
                     filter(self)
+                print(time() - t)
 
         self.update_pads()
 

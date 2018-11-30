@@ -8,6 +8,7 @@ from bornagain.viewers.qtviews import PADView
 from bornagain.fileio.getters import CheetahFrameGetter
 from bornagain.analysis import peaks
 from bornagain.analysis import peaks_f
+from bornagain.analysis.peaks import boxsnr
 
 geom_file_name = 'data/cxin5016-oy-v1.geom'
 cxi_file_name = 'data/cxilu5617-r0149-c00.cxi'
@@ -30,11 +31,12 @@ def peak_filter(self):
     for i in range(len(self.pad_data)):
         dat = self.pad_data[i].astype(np.float64)
         mask = self.mask_data[i].astype(np.float64)
-        out = np.ones_like(dat)
-        out = aft(out)
         nin = 3
         ncent = 6
         nout = 9
+        # out = boxsnr(dat, mask, nin, ncent, nout)
+        out = np.ones_like(dat)
+        out = aft(out)
         peaks_f.peaker.boxsnr(aft(dat), aft(mask), out, nin, ncent, nout)
         self.pad_data[i] = out
 

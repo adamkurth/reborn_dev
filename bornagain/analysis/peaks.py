@@ -8,6 +8,7 @@ from numpy.fft import fft2, ifft2, ifftshift
 from scipy.signal import convolve2d
 from bornagain.analysis.peaks_f import peak_snr_filter as peak_snr_filter_f
 
+from numba import jit
 
 # from skimage.morphology import disk
 # from skimage.filters.rank import median as median_filter
@@ -262,3 +263,102 @@ class PeakFinderV1(object):
     #     snr = signal/sigma
     #
     #     return snr
+
+@jit(nopython=True)
+def boxsnr(dat, mask, nin, ncent, nout):
+
+    dtype = np.float64
+    npx = dat.shape[1]
+    npy = dat.shape[0]
+    cumx = np.empty((npy, npx + 1), dtype=dtype)
+    cum2x = np.empty((npy, npx + 1), dtype=dtype)
+    cummx = np.empty((npy, npx + 1), dtype=dtype)
+    sqix = np.empty((npy, npx), dtype=dtype)
+    sq2ix = np.empty((npy, npx), dtype=dtype)
+    sqmix = np.empty((npy, npx), dtype=dtype)
+    sqcx = np.empty((npy, npx), dtype=dtype)
+    sq2cx = np.empty((npy, npx), dtype=dtype)
+    sqmcx = np.empty((npy, npx), dtype=dtype)
+    sqox = np.empty((npy, npx), dtype=dtype)
+    sq2ox = np.empty((npy, npx), dtype=dtype)
+    sqmox = np.empty((npy, npx), dtype=dtype)
+    cumiy = np.empty((npy + 1, npx), dtype=dtype)
+    cum2iy = np.empty((npy + 1, npx), dtype=dtype)
+    cummiy = np.empty((npy + 1, npx), dtype=dtype)
+    cumcy = np.empty((npy + 1, npx), dtype=dtype)
+    cum2cy = np.empty((npy + 1, npx), dtype=dtype)
+    cummcy = np.empty((npy + 1, npx), dtype=dtype)
+    cumoy = np.empty((npy + 1, npx), dtype=dtype)
+    cum2oy = np.empty((npy + 1, npx), dtype=dtype)
+    cummoy = np.empty((npy + 1, npx), dtype=dtype)
+
+    cumx[:, 0] = 0
+    cum2x[:, 0] = 0
+    cummx[:, 0] = 0
+
+    for ix in range(0, npx):
+        cumx[:, ix+1] = cumx[:, ix-1] + dat[:, ix] * mask[:, ix]
+        cum2x[:, ix+1] = cum2x[:, ix - 1] + dat[:, ix] * mask[:, ix]
+        cummx[:, ix+1] = cummx[:, ix - 1] + mask[:, ix]
+
+    for ix in range(0, npx):
+        mn = min(npx, ix + nin)
+        mx = max(0, ix - nin - 1)
+        sqix[:, ix] = cumx[:, mn] - cumx[:, mx]
+        sq2ix[:, ix] = cum2x[:, mn] - cum2x[:, mx]
+        sqmix[:, ix] = cummx[:, mn] - cummx[:, mx]
+        mn = min(npx, ix + ncent)
+        mx = max(0, ix - ncent - 1)
+        sqcx[:, ix] = cumx[:, mn] - cumx[:, mx]
+        sq2cx[:, ix] = cum2x[:, mn] - cum2x[:, mx]
+        sqmcx[:, ix] = cummx[:, mn] - cummx[:, mx]
+        mn = min(npx, ix + nout)
+        mx = max(0, ix - nout - 1)
+        sqox[:, ix] = cumx[:, mn] - cumx[:, mx]
+        sq2ox[:, ix] = cum2x[:, mn] - cum2x[:, mx]
+        sqmox[:, ix] = cummx[:, mn] - cummx[:, mx]
+
+    cumiy[0, :] = 0
+    cum2iy[0, :] = 0
+    cummiy[0, :] = 0
+    cumcy[0, :] = 0
+    cum2cy[0, :] = 0
+    cummcy[0, :] = 0
+    cumoy[0, :] = 0
+    cum2oy[0, :] = 0
+    cummoy[0, :] = 0
+
+    for iy in range(1, npy + 1):
+        cumiy[iy, :] = cumiy[iy-1, :] + sqix[iy, :]
+        cum2iy[iy, :] = cum2iy[iy-1, :] + sq2ix[iy, :]
+        cummiy[iy, :] = cummiy[iy-1, :] + sqmix[iy, :]
+        cumcy[iy, :] = cumcy[iy-1, :] + sqcx[iy, :]
+        cum2cy[iy, :] = cum2cy[iy-1, :] + sq2cx[iy, :]
+        cummcy[iy, :] = cummcy[iy-1, :] + sqmcx[iy, :]
+        cumoy[iy, :] = cumoy[iy-1, :] + sqox[iy, :]
+        cum2oy[iy, :] = cum2oy[iy-1, :] + sq2ox[iy, :]
+        cummoy[iy, :] = cummoy[iy-1, :] + sqmox[iy, :]
+
+    for iy in range(0, npy):
+        mn = min(npy, iy + nin)
+        mx = max(0, iy - nin - 1)
+        sqix[iy, :] = cumiy[mn, :] - cumiy[mx, :]
+        sq2ix[iy, :] = cum2iy[mn, :] - cum2iy[mx, :]
+        sqmix[iy, :] = cummiy[mn, :] - cummiy[mx, :]
+        mn = min(npy, iy + ncent)
+        mx = max(0, iy - ncent - 1)
+        sqcx[iy, :] = cumcy[mn, :] - cumcy[mx, :]
+        sq2cx[iy, :] = cum2cy[mn, :] - cum2cy[mx, :]
+        sqmcx[iy, :] = cummcy[mn, :] - cummcy[mx, :]
+        mn = min(npy, iy + nout)
+        mx = max(0, iy - nout - 1)
+        sqox[iy, :] = cumoy[mn, :] - cumoy[mx, :]
+        sq2ox[iy, :] = cum2oy[mn, :] - cum2oy[mx, :]
+        sqmox[iy, :] = cummoy[mn, :] - cummoy[mx, :]
+
+    small = 1.0e-15
+    sqox = sqox - sqcx
+    sq2ox = sq2ox - sq2cx
+    sqmox = sqmox - sqmcx + small
+    sqmix = sqmix + small
+    return (sqix - sqox * sqmix / sqmox) / (np.sqrt(sqmix) * (np.sqrt(sq2ox / sqmox - (sqox / sqmox) ** 2) + small))
