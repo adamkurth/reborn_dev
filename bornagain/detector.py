@@ -36,6 +36,22 @@ class PADGeometry(object):
     _ss_vec = None  #: The slow-scan basis vector.
     _t_vec = None  #: The overall translation vector.
 
+    def __init__(self, n_pixels=None, distance=None, pixel_size=None):
+
+        """
+
+        High-level initialization.  Centers the detector in the x-y plane.
+
+        Args:
+            n_pixels (int):
+            distance (float):
+            pixel_size (float):
+        """
+
+        if n_pixels is not None and distance is not None and pixel_size is not None:
+
+            self.simple_setup(n_pixels=n_pixels, distance=distance, pixel_size=pixel_size)
+
     @property
     def n_pixels(self):
 
@@ -326,12 +342,14 @@ class PADGeometry(object):
         Returns: numpy array
         """
 
-        if beam is not None:
+        if beam is not None and beam_vec is None:
             beam_vec = beam.beam_vec
+        elif beam_vec is not None and beam is None:
+            pass
+        else:
+            raise ValueError('Scattering angles cannot be computed without knowing the incident beam direction')
 
-        v = self.position_vecs()
-
-        return np.arccos(vec_check(beam_vec), v)
+        return np.arccos(vec_norm(self.position_vecs()).dot(beam_vec.ravel()))
 
     def reshape(self, dat):
         r"""

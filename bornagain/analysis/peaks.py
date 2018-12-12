@@ -12,8 +12,8 @@ from numba import jit
 def boxsnr_fortran(dat, mask, nin, ncent, nout):
 
     out = np.ones_like(dat)
-    out = aft(out)
-    peaks_f.peaker.boxsnr(aft(dat), aft(mask), out, nin, ncent, nout)
+    out = np.asfortranarray(out)
+    peaks_f.peaker.boxsnr(np.asfortranarray(dat), np.asfortranarray(mask), out, nin, ncent, nout)
     return out
 
 

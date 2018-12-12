@@ -13,14 +13,23 @@ class Beam(object):
     A minimal containor to gather x-ray beam properties.
     """
 
+    wavelength = None  #: Nominal photon wavelength
+    _beam_vec = None  #: Nominal direction of incident beam
+
     def __init__(self, beam_vec=np.array([0, 0, 1]), wavelength=1.5e-10, polarization_vec=np.array([1, 0, 0])):
 
         self.beam_vec = beam_vec
         self.polarization_vec = polarization_vec
         self.wavelength = wavelength
 
-    wavelength = None  #: Nominal photon wavelength
-    beam_vec = None  #: Nominal direction of incident beam
+    @property
+    def beam_vec(self):
+        return self._beam_vec
+
+    @beam_vec.setter
+    def beam_vec(self, vec):
+        self._beam_vec = np.array(vec)
+
     polarization_vec = None  #: Direction of the first polarization vector
     polarization_weight = 1  #: Weight of the first polarization vector
     photon_energy = 0  # This should be a function

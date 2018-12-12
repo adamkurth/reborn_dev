@@ -25,8 +25,6 @@ padview = PADView(frame_getter=frame_getter, mask_data=masks)
 # padview.data_filters = pfind.snr_filter
 #padview.data_filters = peaks.snr_filter_fortran
 
-aft = np.asfortranarray
-
 def peak_filter(self):
     for i in range(len(self.pad_data)):
         dat = self.pad_data[i].astype(np.float64)
@@ -34,7 +32,7 @@ def peak_filter(self):
         nin = 3
         ncent = 6
         nout = 9
-        if True:
+        if False:
             out = boxsnr_numba(dat, mask, nin, ncent, nout)
         else:
             out = boxsnr_fortran(dat, mask, nin, ncent, nout)
