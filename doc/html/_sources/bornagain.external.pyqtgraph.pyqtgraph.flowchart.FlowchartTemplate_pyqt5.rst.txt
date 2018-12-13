@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartTemplate\_pyqt5 module
-================================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.flowchart.FlowchartTemplate_pyqt5
-    :members:
-    :undoc-members:
-    :show-inheritance:

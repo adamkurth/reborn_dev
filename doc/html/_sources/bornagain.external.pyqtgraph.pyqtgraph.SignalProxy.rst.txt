@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.SignalProxy module
-=========================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.SignalProxy
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.opengl.MeshData module
-=============================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl.MeshData
-    :members:
-    :undoc-members:
-    :show-inheritance:

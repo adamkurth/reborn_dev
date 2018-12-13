@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.HistogramLUTWidget module
-========================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.HistogramLUTWidget
-    :members:
-    :undoc-members:
-    :show-inheritance:

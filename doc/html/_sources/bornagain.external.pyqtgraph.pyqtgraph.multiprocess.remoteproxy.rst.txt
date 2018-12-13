@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.multiprocess.remoteproxy module
-======================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.multiprocess.remoteproxy
-    :members:
-    :undoc-members:
-    :show-inheritance:

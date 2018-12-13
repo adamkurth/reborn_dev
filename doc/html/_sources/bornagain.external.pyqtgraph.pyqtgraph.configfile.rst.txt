@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.configfile module
-========================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.configfile
-    :members:
-    :undoc-members:
-    :show-inheritance:

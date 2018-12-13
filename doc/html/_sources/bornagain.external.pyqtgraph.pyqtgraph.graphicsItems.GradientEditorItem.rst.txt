@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GradientEditorItem module
-==============================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GradientEditorItem
-    :members:
-    :undoc-members:
-    :show-inheritance:

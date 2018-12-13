@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.exceptionHandling module
-===============================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.exceptionHandling
-    :members:
-    :undoc-members:
-    :show-inheritance:

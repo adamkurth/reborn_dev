@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.ProgressDialog module
-====================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.ProgressDialog
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -1,7 +1,0 @@
-bornagain.simulate.examples module
-==================================
-
-.. automodule:: bornagain.simulate.examples
-    :members:
-    :undoc-members:
-    :show-inheritance:

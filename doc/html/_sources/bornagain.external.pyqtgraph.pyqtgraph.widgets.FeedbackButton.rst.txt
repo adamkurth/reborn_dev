@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.FeedbackButton module
-====================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.FeedbackButton
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.JoystickButton module
-====================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.JoystickButton
-    :members:
-    :undoc-members:
-    :show-inheritance:

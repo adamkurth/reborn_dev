@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.ValueLabel module
-================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.ValueLabel
-    :members:
-    :undoc-members:
-    :show-inheritance:

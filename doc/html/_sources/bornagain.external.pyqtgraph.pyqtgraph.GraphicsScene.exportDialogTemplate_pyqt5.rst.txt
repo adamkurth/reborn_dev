@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.exportDialogTemplate\_pyqt5 module
-=======================================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.GraphicsScene.exportDialogTemplate_pyqt5
-    :members:
-    :undoc-members:
-    :show-inheritance:

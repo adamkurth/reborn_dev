@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.ThreadsafeTimer module
-=============================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.ThreadsafeTimer
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -1,7 +1,0 @@
-bornagain.external.cfelpyutils.geometry\_utils module
-=====================================================
-
-.. automodule:: bornagain.external.cfelpyutils.geometry_utils
-    :members:
-    :undoc-members:
-    :show-inheritance:

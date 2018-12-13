@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.console.Console module
-=============================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.console.Console
-    :members:
-    :undoc-members:
-    :show-inheritance:

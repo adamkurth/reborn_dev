@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.canvas.TransformGuiTemplate\_pyside module
-=================================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.canvas.TransformGuiTemplate_pyside
-    :members:
-    :undoc-members:
-    :show-inheritance:

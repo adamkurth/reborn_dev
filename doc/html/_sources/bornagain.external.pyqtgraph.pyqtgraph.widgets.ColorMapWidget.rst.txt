@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.ColorMapWidget module
-====================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.ColorMapWidget
-    :members:
-    :undoc-members:
-    :show-inheritance:

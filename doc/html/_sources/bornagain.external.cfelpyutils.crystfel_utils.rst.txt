@@ -1,7 +1,0 @@
-bornagain.external.cfelpyutils.crystfel\_utils module
-=====================================================
-
-.. automodule:: bornagain.external.cfelpyutils.crystfel_utils
-    :members:
-    :undoc-members:
-    :show-inheritance:

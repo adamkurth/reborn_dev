@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.ptime module
-===================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.ptime
-    :members:
-    :undoc-members:
-    :show-inheritance:

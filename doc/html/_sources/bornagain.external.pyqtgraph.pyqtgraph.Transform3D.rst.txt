@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.Transform3D module
-=========================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.Transform3D
-    :members:
-    :undoc-members:
-    :show-inheritance:

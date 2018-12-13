@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.frozenSupport module
-===========================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.frozenSupport
-    :members:
-    :undoc-members:
-    :show-inheritance:

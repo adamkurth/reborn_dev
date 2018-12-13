@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLMeshItem module
-=====================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLMeshItem
-    :members:
-    :undoc-members:
-    :show-inheritance:

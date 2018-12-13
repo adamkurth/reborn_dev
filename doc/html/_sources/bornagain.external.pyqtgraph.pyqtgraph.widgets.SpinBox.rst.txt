@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.SpinBox module
-=============================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.SpinBox
-    :members:
-    :undoc-members:
-    :show-inheritance:

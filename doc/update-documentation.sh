@@ -14,5 +14,8 @@ rm source/bornagain.*rst
 [ "$1" = "noapi" ] || sphinx-apidoc -o source -e -M ../bornagain ../bornagain/scatter*
 make clean
 make html
-cp -r build/html/* html
+mv -r build/html/* html
 rm source/bornagain*.rst # modules.rst
+cd html
+perl -p -i -e 's{<head>\n}{<head>\n  <meta name="robots" content="noindex, nofollow" />\n}' *.html
+

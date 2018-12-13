@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.parametertree.parameterTypes module
-==========================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.parametertree.parameterTypes
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLScatterPlotItem module
-============================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLScatterPlotItem
-    :members:
-    :undoc-members:
-    :show-inheritance:
