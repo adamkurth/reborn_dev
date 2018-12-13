@@ -1,30 +1,27 @@
 image: continuumio/miniconda3:latest
 
 before_script:
-- pwd
-- uname -a
-- echo $PATH
-- conda env create -f gitlab-ci-env3.yml
-- source activate bornagain3
+	- pwd
+	- uname -a
+	- echo $PATH
+	- conda env create -f gitlab-ci-env3.yml
+	- source activate bornagain3
 
 tests:
  	stage: test
  	script:
-#    - cd developer
-#    - ./compile-fortran.sh
-#    - cd ../test
-	- cd test
-	- pytest --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py  --ignore=test_mplviews.py
+		- cd test
+		- pytest --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py  --ignore=test_mplviews.py
 
 pages:
 	script:
-	- cd doc
-	- ./update-documentation.sh
-	- cd ..
-	- mkdir public
-	- cp doc/html/* public
+		- cd doc
+		- ./update-documentation.sh
+		- cd ..
+		- mkdir public
+		- cp doc/html/* public
 	artifacts:
 		paths:
-		- public
+			- public
 	only:
-	- master
+		- master
