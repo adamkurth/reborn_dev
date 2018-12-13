@@ -321,7 +321,7 @@ class ClCore(object):
 
         self.mod_squared_complex_to_real_cl(self.queue, (global_size,), (self.group_size,), A_dev.data, I_dev.data, n)
 
-    def phase_factor_qrf_chunk(self, q, r, f, Nchunk, q_is_qdev=False):
+    def phase_factor_qrf_chunk_r(self, q, r, f, R=None, a=None, add=False, n_chunks=1):
 
         r"""
 
@@ -333,61 +333,53 @@ class ClCore(object):
             q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
             r (numpy/cl float array [M,3]): Atomic coordinates.
             f (numpy/cl complex array [M]): Complex scattering factors.
-            Nchunk, number of chunks to split up atoms..
-            a (cl complex array [N]): Optional container for complex scattering
-              amplitudes.
+            a (cl complex array [N]): Optional container for complex scattering amplitudes.
+            R (numpy array [3,3]): Rotation matrix acting on atom vectors.
+                (we quietly transpose R and let it operate on q-vectors for speedups)
+            add (bool): Set to true if you want to add to the input amplitude array "a".  Else it is overwritten.
+            n_chunks (int): Number of chunks to split up atoms.
+
 
         Returns:
             (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
               if there are input cl arrays.
         """
 
-        # this is an inplace method, so we add amplitudes
-        add=self.int_t(1) # inplace
-
-        #if R is None:
-        R = np.eye(3, dtype=self.real_t)
+        if R is None:
+            R = np.eye(3, dtype=self.real_t)
         R = self.vec16(R, dtype=self.real_t)
 
         n_pixels = self.int_t(q.shape[0])
 
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
 
-        if not q_is_qdev:
-            q_dev = self.to_device(q, dtype=self.real_t)
-        else:
-            q_dev = q
-
+        n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
+        q_dev = self.to_device(q, dtype=self.real_t)
+        a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        r_split = np.array_split( np.arange( n_atoms), Nchunk)
-        for r_rng in r_split:
+        r_split = np.array_split(np.arange(n_atoms), Nchunk)
+        for i in range(0, len(r_split)): #r_rng in r_split:
+            r_rng = r_split[i]
             r_chunk = r[r_rng]
             f_chunk = f[r_rng]
             r_dev = self.to_device(r_chunk, dtype=self.real_t)
             f_dev = self.to_device(f_chunk, dtype=self.complex_t)
 
-            self.phase_factor_qrf_cl(self.queue, (global_size,),
-                                     (self.group_size,), q_dev.data,
-                                     r_dev.data,
-                                     f_dev.data,
-                                     R,
-                                     self.a_dev.data,
-                                     n_atoms,
-                                     n_pixels, add)
+            # On the first iteration, we decide if we should add to an existing amplitude array based on the input
+            # keyword argument "add".  On the following iterations, we definitely want to add.
+            if i == 0:
+                if add:
+                    add = self.int_t(1)
+                else:
+                    add = self.int_t(0)
+            else:
+                add = self.int_t(1)
 
-    def next_multiple_groupsize(self, N):
+            self.phase_factor_qrf_cl(self.queue, (global_size,), (self.group_size,), q_dev.data, r_dev.data, f_dev.data,
+                                     R, self.a_dev.data, n_atoms, n_pixels, add)
 
-        r"""
-
-        What does this do?
-
-        Args:
-            N:
-
-        Returns:
-
-        """
+    def _next_multiple_groupsize(self, N):
 
         if N % self.group_size > 0:
             return self.int_t(self.group_size - N % self.group_size)
