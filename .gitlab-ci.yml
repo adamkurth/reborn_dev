@@ -1,4 +1,4 @@
-image: continuumio/miniconda3:latest
+image: continuumio/miniconda3:latest # Annoyingly, this image doesn't seem to have make or gfortran
 
 before_script:
   - pwd
@@ -15,9 +15,9 @@ tests:
 
 pages:
   script:
-  - cd doc
-  - ./update-documentation.sh
-  - cd ..
+#  - cd doc
+#  - ./update-documentation.sh
+#  - cd ..
   - mkdir public
   - cp -r doc/html/* public
   artifacts:

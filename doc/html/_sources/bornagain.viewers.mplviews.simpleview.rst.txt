@@ -1,0 +1,7 @@
+bornagain.viewers.mplviews.simpleview module
+============================================
+
+.. automodule:: bornagain.viewers.mplviews.simpleview
+    :members:
+    :undoc-members:
+    :show-inheritance:

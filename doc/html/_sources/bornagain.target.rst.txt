@@ -1,0 +1,18 @@
+bornagain.target package
+========================
+
+.. automodule:: bornagain.target
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.target.crystal
+   bornagain.target.density
+   bornagain.target.placer
+   bornagain.target.spgrp
+

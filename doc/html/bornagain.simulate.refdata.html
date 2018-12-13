@@ -1,0 +1,309 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.simulate.refdata module &mdash; bornagain 0.2018.9.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="bornagain.simulate.simutils module" href="bornagain.simulate.simutils.html" />
+    <link rel="prev" title="bornagain.simulate.mcsim module" href="bornagain.simulate.mcsim.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2018.9.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">bornagain</a> &raquo;</li>
+        
+          <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
+        
+          <li><a href="bornagain.simulate.html">bornagain.simulate package</a> &raquo;</li>
+        
+      <li>bornagain.simulate.refdata module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/bornagain.simulate.refdata.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-bornagain.simulate.refdata">
+<span id="bornagain-simulate-refdata-module"></span><h1>bornagain.simulate.refdata module<a class="headerlink" href="#module-bornagain.simulate.refdata" title="Permalink to this headline">¶</a></h1>
+<p>refdata.py – reference data and tables used in computations</p>
+<dl class="function">
+<dt id="bornagain.simulate.refdata.get_cmann_form_factors">
+<code class="descclassname">bornagain.simulate.refdata.</code><code class="descname">get_cmann_form_factors</code><span class="sig-paren">(</span><em>cman</em>, <em>q</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/refdata.html#get_cmann_form_factors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.refdata.get_cmann_form_factors" title="Permalink to this definition">¶</a></dt>
+<dd><p>cman is a dict of {atomic_number : array of cman parameters}</p>
+<p>q is either  a Nq x 3 , or a 1x3 vector of reciprocal space points, magnitudes respectively</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.refdata.get_cromermann_parameters">
+<code class="descclassname">bornagain.simulate.refdata.</code><code class="descname">get_cromermann_parameters</code><span class="sig-paren">(</span><em>atomic_numbers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/refdata.html#get_cromermann_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.refdata.get_cromermann_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modified from tjlane/thor.git
+Get cromer-mann parameters for each atom type</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>atomic_numbers</strong> (<em>ndarray</em><em>, </em><em>int</em>) – A numpy array of the atomic numbers of each atom in the system.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The Cromer-Mann parameters for the system. The dictionary
+key corresponds to the atomic number, and the parameters
+are listed in order as a_1,a_2,a_3,a_4,b_1,b_2,b_3,b_4,c</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">cromermann (dict)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.refdata.get_cromermann_parameters_legacy">
+<code class="descclassname">bornagain.simulate.refdata.</code><code class="descname">get_cromermann_parameters_legacy</code><span class="sig-paren">(</span><em>atomic_numbers</em>, <em>max_num_atom_types=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/refdata.html#get_cromermann_parameters_legacy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.refdata.get_cromermann_parameters_legacy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get cromer-mann parameters for each atom type and renumber the atom
+types to 0, 1, 2, … to point to their CM params.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atomic_numbers</strong> (<em>ndarray</em><em>, </em><em>int</em>) – A numpy array of the atomic numbers of each atom in the system.</li>
+<li><strong>max_num_atom_types</strong> (<em>int</em>) – The maximium number of atom types allowable</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>The Cromer-Mann parameters for the system. Positions [(0-8) * aid] are</dt>
+<dd><p class="first last">reserved for each atom type in the system (see <cite>aid</cite> below).</p>
+</dd>
+<dt>aid (c-array, int) :</dt>
+<dd><p class="first last">The indicies of the atomic ids of each atom in the system. This is an
+arbitrary compressed index for use within the scattering code. Really
+this is just a renumbering so that each atom type recieves an index
+0, 1, 2, … corresponding to the position of that atom’s type in
+the <cite>cromermann</cite> array.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">cromermann (c-array, float)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="bornagain.simulate.simutils.html" class="btn btn-neutral float-right" title="bornagain.simulate.simutils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bornagain.simulate.mcsim.html" class="btn btn-neutral" title="bornagain.simulate.mcsim module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

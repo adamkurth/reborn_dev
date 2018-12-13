@@ -1,0 +1,16 @@
+bornagain.viewers package
+=========================
+
+.. automodule:: bornagain.viewers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bornagain.viewers.mplviews
+    bornagain.viewers.qtviews
+

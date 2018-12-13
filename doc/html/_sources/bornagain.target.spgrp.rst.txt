@@ -1,0 +1,7 @@
+bornagain.target.spgrp module
+=============================
+
+.. automodule:: bornagain.target.spgrp
+    :members:
+    :undoc-members:
+    :show-inheritance:

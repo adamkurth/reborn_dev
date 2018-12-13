@@ -1,0 +1,320 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Notes for Developers &mdash; bornagain 0.2018.9.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Numpy, vectors, rotations, etc." href="numpy.html" />
+    <link rel="prev" title="Simulations" href="simulations.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2018.9.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Notes for Developers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#before-you-modify-any-code">Before you modify any code:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helpful-tools">Helpful tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-2-3-compatibility">Python 2/3 compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generation-of-documentation">Generation of documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#outstanding-issues">Outstanding issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Notes for Developers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/coding.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="notes-for-developers">
+<span id="developers-anchor"></span><h1>Notes for Developers<a class="headerlink" href="#notes-for-developers" title="Permalink to this headline">¶</a></h1>
+<p>First and foremost, the bornagain package does not presently follow the guidelines below, but we are presently trying to
+fix the many inconsistencies.  Please contribute to this effort!!!</p>
+<div class="section" id="before-you-modify-any-code">
+<h2>Before you modify any code:<a class="headerlink" href="#before-you-modify-any-code" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Read the “<a class="reference external" href="https://www.python.org/dev/peps/pep-0020/">Zen of Python</a>”.</li>
+<li>Follow the <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/?">PEP8 guidelines</a>.</li>
+<li>One exception to PEP8: we allow lines to be 120 characters in length.</li>
+<li>Strive to write <a class="reference external" href="http://doc.pytest.org/">pytest</a> unit tests for any functionality you add.</li>
+<li><em>Always</em> write docstrings.  Follow the <a class="reference external" href="https://sphinxcontrib-napoleon.readthedocs.io/en/latest/">Google format</a>.</li>
+<li>Learn how to use <a class="reference external" href="https://git-scm.com/book/en/v2">git</a>.</li>
+<li>Familiarize yourself with our usage of git; we emulate <a class="reference external" href="https://nvie.com/posts/a-successful-git-branching-model/">these ideas</a>.</li>
+<li>Use four spaces, not tabs.</li>
+<li>All units are SI (angles in radians) unless there is a <em>very</em> good reason to do something different.</li>
+<li>Just because you <em>can</em> do something clever, doesn’t mean you should.  Don’t confuse people.</li>
+<li>The scope of this project is diffraction under the Born approximation.  Don’t stray far from this.</li>
+</ul>
+</div>
+<div class="section" id="helpful-tools">
+<h2>Helpful tools<a class="headerlink" href="#helpful-tools" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Look in the developer directory for helpful scripts such as “update-documentation.sh”, which does what you guessed.</li>
+<li>Programs such as <a class="reference external" href="https://pypi.python.org/pypi/pep8/">pep8</a> can be used to check for PEP8 compliance.</li>
+<li>Consider using an integrated development environment such as pycharm.</li>
+</ul>
+</div>
+<div class="section" id="python-2-3-compatibility">
+<h2>Python 2/3 compatibility<a class="headerlink" href="#python-2-3-compatibility" title="Permalink to this headline">¶</a></h2>
+<p>To ensure compatibility with both Python 2 and 3, include the following at the beginning of each python file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="checking-for-pep8-compliance">
+<h2>Checking for PEP8 compliance<a class="headerlink" href="#checking-for-pep8-compliance" title="Permalink to this headline">¶</a></h2>
+<p>We are now using pylint for code formatting.  Install pylint with conda or pip if need be.  You should check that your
+code conforms to standards as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint --max-line-length<span class="o">=</span><span class="m">120</span> filename.py
+</pre></div>
+</div>
+<p>You can also use the pep8 program to check for inconsistencies (install pep8 with pip if need be).  In the
+base directory of the git repo, do this</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pep8 bornagain
+</pre></div>
+</div>
+<p>For simple errors like whitespace, you can use autopep8:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>autopep8 -i -a filename.py
+</pre></div>
+</div>
+<p>For other problems you’ll need to fix things by hand.  We aim to have no errors coming from the <cite>pep8</cite> program.</p>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>We strive to test all code in bornagain, since we obviously want it to work in various environments rather than having
+a quick hack that only works briefly, in one environment.</p>
+<p>We use pytest to test the bornagain codebase.  It is simple to make a new test.  Just create a file
+that has a name that beginning with <cite>test_</cite>, and within this file write functions that begin with <cite>test_</cite>, and within
+those functions you include assert() statements.  These functions go into the test directory.  We then run pytest from
+within the test directory, and all tests will be ran.</p>
+<p>This isn’t so hard, but it takes a lot of time.  Perhaps 25% of the code you write should be tests.  It is time
+well-spent.</p>
+</div>
+<div class="section" id="generation-of-documentation">
+<h2>Generation of documentation<a class="headerlink" href="#generation-of-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Docstrings from within the python code automatically find their way into this documentation via Sphinx.  Please keep
+the formatting consistent by adhering to the Google-style doc strings.</p>
+<p>If you modify code and wish to update this documentation, the easiest way to do so is to run the script
+“update-documentation.sh” from within the doc directory.  First make sure you have all of the appropriate dependencies,
+because sphinx must be able to import all of the bornagain modules in order to auto-generate module/package
+documentation.</p>
+</div>
+<div class="section" id="outstanding-issues">
+<h2>Outstanding issues<a class="headerlink" href="#outstanding-issues" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>We need a better way to manage documentation.  Ideally it would be available on the web, but I don’t
+want it to be
+public until the API is reasonably stable.  At presently, nobody seems to read the documentation.</li>
+<li>We need a standardized way to test bornagain in the various combinations of Python 2, Python 3, pyqt4,
+pyqt5.  This may be possible with GitLab or GitHub.</li>
+<li>There are some classes, functions, methods that don’t adhere to PEP8.  They will be changed, and old
+scripts will be
+broken.</li>
+<li>We need a good way to present example scripts in the documentation, which also shows output such as images.  The
+pyqtgraph package has a neat GUI demo when you do pyqtgraph.examples.run(), which we might emulate.</li>
+<li>We must revisit the way that we define vectors and rotation operations, and check for consistency
+throughout</li>
+<li>There are many more issues that need to be discussed.</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="numpy.html" class="btn btn-neutral float-right" title="Numpy, vectors, rotations, etc." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="simulations.html" class="btn btn-neutral" title="Simulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

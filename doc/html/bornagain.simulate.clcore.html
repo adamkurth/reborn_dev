@@ -1,0 +1,870 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bornagain.simulate.clcore module &mdash; bornagain 0.2018.9.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="bornagain.simulate.examples module" href="bornagain.simulate.examples.html" />
+    <link rel="prev" title="bornagain.simulate.atoms module" href="bornagain.simulate.atoms.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2018.9.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">bornagain</a> &raquo;</li>
+        
+          <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
+        
+          <li><a href="bornagain.simulate.html">bornagain.simulate package</a> &raquo;</li>
+        
+      <li>bornagain.simulate.clcore module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/bornagain.simulate.clcore.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-bornagain.simulate.clcore">
+<span id="bornagain-simulate-clcore-module"></span><h1>bornagain.simulate.clcore module<a class="headerlink" href="#module-bornagain.simulate.clcore" title="Permalink to this headline">¶</a></h1>
+<p>This module contains some core functions that are useful for simulating diffraction on GPU devices.  It is not
+finished yet…</p>
+<p>To get some information on compute devices (CPU/GPU) you can run the function clcore.helpme()</p>
+<p>Some environment variables that affect the behaviour of this module:</p>
+<ul class="simple">
+<li>BORNAGAIN_CL_GROUPSIZE : This sets the default groupsize.</li>
+<li>PYOPENCL_CTX: This sets the device and platform automatically.</li>
+</ul>
+<p>Using the above variables allows you to run the same code on different devices.</p>
+<dl class="function">
+<dt id="bornagain.simulate.clcore.create_some_gpu_context">
+<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">create_some_gpu_context</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#create_some_gpu_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.create_some_gpu_context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since cl.create_some_context() sometimes forces a CPU on macs, this function will attempt to use a GPU
+context if possible.</p>
+<p>Returns: opencl context</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.simulate.clcore.ClCore">
+<em class="property">class </em><code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">ClCore</code><span class="sig-paren">(</span><em>context=None</em>, <em>queue=None</em>, <em>group_size=32</em>, <em>double_precision=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A container for the elementary building blocks that GPU diffraction simulations are composed of.</p>
+<p>An instance of this class will initialize an opencl context and help maintain consistency in the
+device queue that compute jobs are sent to, along with consistency in the precision (double/single)
+when memory moves between CPU and GPU memory.</p>
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.set_groupsize">
+<code class="descname">set_groupsize</code><span class="sig-paren">(</span><em>group_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.set_groupsize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.set_groupsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the environment variable BORNAGAIN_CL_GROUPSIZE is set then use
+that value.</p>
+<p>If the group size exceeds the max allowed group size, then make it
+smaller (but print warning)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.vec4">
+<code class="descname">vec4</code><span class="sig-paren">(</span><em>x</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.vec4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.vec4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evdidently pyopencl does not deal with 3-vectors very well, so we use
+4-vectors and pad with a zero at the end.</p>
+<p>From Derek: I tested this at one point and found no difference… maybe newer pyopenCL is better..</p>
+<p>This just does a trivial operation:
+return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>np.ndarray</strong> (<em>x</em>) – </li>
+<li><strong>np.dtype</strong> (<em>dtype</em>) – Examples: np.complex, np.double</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li>numpy array of length 4</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.vec16">
+<code class="descname">vec16</code><span class="sig-paren">(</span><em>R</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.vec16"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.vec16" title="Permalink to this definition">¶</a></dt>
+<dd><p>The best way to pass in a rotation matrix is as a float16.  This is a helper function for
+preparing a numpy array so that it can be passed in as a float16.</p>
+<p>From Derek: I had tested this and found no difference</p>
+<p>See the vec4 function documentation also.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>numpy.ndarray</strong> (<em>R</em>) – input array</li>
+<li><strong>numpy.dtype</strong> (<em>dtype</em>) – default is np.float32</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li>numpy array of length 16</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="bornagain.simulate.clcore.ClCore.to_device_static">
+<em class="property">static </em><code class="descname">to_device_static</code><span class="sig-paren">(</span><em>array</em>, <em>dtype</em>, <em>queue</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.to_device_static"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.to_device_static" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static method</p>
+<p>This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
+array into a pyopencl.array and send it to the device memory.  So far this only
+deals with float and comlex arrays, and it should figure out which type it is.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>array</strong> (<em>numpy/cl array; float/complex type</em>) – Input array.</li>
+<li><strong>dtype</strong> (<em>np.dtype</em>) – Specify the desired type in opencl.  The two types that
+are useful here are np.float32 and np.complex64</li>
+<li><strong>CL queue</strong> (<em>queue</em><em>,</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pyopencl array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.to_device">
+<code class="descname">to_device</code><span class="sig-paren">(</span><em>array=None</em>, <em>shape=None</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.to_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.to_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
+array into a pyopencl.array and send it to the device memory.  So far this only
+deals with float and comlex arrays, and it should figure out which type it is.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>array</strong> (<em>numpy/cl array; float/complex type</em>) – Input array.</li>
+<li><strong>shape</strong> (<em>tuple</em>) – Optionally specify the shape of the desired array.  This is
+ignored if array is not None.</li>
+<li><strong>dtype</strong> (<em>np.dtype</em>) – Specify the desired type in opencl.  The two types that
+are useful here are np.float32 and np.complex64</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pyopencl array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.get_group_size">
+<code class="descname">get_group_size</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.get_group_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.get_group_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>retrieve the currently set group_size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.test_rotate_vec">
+<code class="descname">test_rotate_vec</code><span class="sig-paren">(</span><em>R</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.test_rotate_vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.test_rotate_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate a single vector.  CPU arrays in, CPU array out. This is just for testing the consistency of memory
+allocation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real">
+<code class="descname">mod_squared_complex_to_real</code><span class="sig-paren">(</span><em>A</em>, <em>I</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.mod_squared_complex_to_real"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the real-valued modulus square of complex numbers.  Good example of a function that
+shouldn’t exist, but I needed to add it here because the pyopencl.array.Array class fails to
+do this operation correctly on some computers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk">
+<code class="descname">phase_factor_qrf_chunk</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f</em>, <em>Nchunk</em>, <em>q_is_qdev=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_qrf_chunk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>This needs to be tested, made for really big atom-vectors (e.g. a virus or rhibosome)</p>
+<p>Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><em>N</em><em>,</em><em>3</em><em>]</em>) – Scattering vectors (2pi/lambda).</li>
+<li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em>) – Atomic coordinates.</li>
+<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em>) – Complex scattering factors.</li>
+<li><strong>number of chunks to split up atoms..</strong> (<em>Nchunk</em><em>,</em>) – </li>
+<li><strong>a</strong> (<em>cl complex array</em><em> [</em><em>N</em><em>]</em>) – Optional container for complex scattering
+amplitudes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>Diffraction amplitudes.  Will be a cl array</dt>
+<dd><p class="first last">if there are input cl arrays.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [N])</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.phase_factor_qrf_inplace">
+<code class="descname">phase_factor_qrf_inplace</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f</em>, <em>R=None</em>, <em>q_is_qdev=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_qrf_inplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_qrf_inplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><em>N</em><em>,</em><em>3</em><em>]</em>) – Scattering vectors (2pi/lambda).</li>
+<li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em>) – Atomic coordinates.</li>
+<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em>) – Complex scattering factors.</li>
+<li><strong>R</strong> (<em>numpy array</em><em> [</em><em>3</em><em>,</em><em>3</em><em>]</em>) – Rotation matrix acting on atom vectors
+(we quietly transpose R and let it operate on q-vectors for speedups)</li>
+<li><strong>a</strong> (<em>cl complex array</em><em> [</em><em>N</em><em>]</em>) – Optional container for complex scattering
+amplitudes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>Diffraction amplitudes.  Will be a cl array</dt>
+<dd><p class="first last">if there are input cl arrays.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [N])</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.next_multiple_groupsize">
+<code class="descname">next_multiple_groupsize</code><span class="sig-paren">(</span><em>N</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.next_multiple_groupsize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.next_multiple_groupsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>What does this do?</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>N</strong> – </td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.init_amps">
+<code class="descname">init_amps</code><span class="sig-paren">(</span><em>Npix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.init_amps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.init_amps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize amplitudes for cromer-mann simulator as zeros</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Npix</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.release_amps">
+<code class="descname">release_amps</code><span class="sig-paren">(</span><em>reset=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.release_amps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.release_amps" title="Permalink to this definition">¶</a></dt>
+<dd><p>retrieve scattering amplitudes from cromer-mann simulator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reset</strong> – whether to reset the amplitudes to zeros</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.phase_factor_qrf">
+<code class="descname">phase_factor_qrf</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f</em>, <em>R=None</em>, <em>a=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_qrf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_qrf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> (<em>numpy/cl float array</em><em> [</em><em>N</em><em>,</em><em>3</em><em>]</em>) – Scattering vectors (2pi/lambda).</li>
+<li><strong>r</strong> (<em>numpy/cl float array</em><em> [</em><em>M</em><em>,</em><em>3</em><em>]</em>) – Atomic coordinates.</li>
+<li><strong>R</strong> (<em>numpy array</em><em> [</em><em>3</em><em>,</em><em>3</em><em>]</em>) – Rotation matrix acting on atom vectors.
+(we quietly transpose R and let it operate on q-vectors for speedups)</li>
+<li><strong>f</strong> (<em>numpy/cl complex array</em><em> [</em><em>M</em><em>]</em>) – Complex scattering factors.</li>
+<li><strong>a</strong> (<em>cl complex array</em><em> [</em><em>N</em><em>]</em>) – Optional container for complex scattering
+amplitudes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>Diffraction amplitudes.  Will be a cl array</dt>
+<dd><p class="first last">if there are input cl arrays.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(numpy/cl complex array [N])</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.phase_factor_pad">
+<code class="descname">phase_factor_pad</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>T</em>, <em>F</em>, <em>S</em>, <em>B</em>, <em>nF</em>, <em>nS</em>, <em>w</em>, <em>R=None</em>, <em>a=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_pad" title="Permalink to this definition">¶</a></dt>
+<dd><p>This should simulate detector panels.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>r</strong> – An Nx3 numpy array with atomic coordinates (meters)</li>
+<li><strong>f</strong> – A numpy array with complex scattering factors</li>
+<li><strong>T</strong> – A 1x3 numpy array with vector components pointing from sample to
+the center of the first pixel in memory</li>
+<li><strong>F</strong> – A 1x3 numpy array containing the basis vector components pointing
+in the direction corresponding to contiguous pixels in memory
+(“fast scan”).</li>
+<li><strong>S</strong> – A 1x3 numpy array containing the basis vector components pointing
+in the direction corresponding to non-contiguous pixels in
+memory (“slow scan”).</li>
+<li><strong>B</strong> – A 1x3 numpy array with unit-vector components corresponding to the
+incident x-ray beam direction</li>
+<li><strong>nF</strong> – Number of fast-scan pixels (corresponding to F vector) in the
+detector panel</li>
+<li><strong>nS</strong> – Number of slow-scan pixels (corresponding to S vector) in the
+detector panel</li>
+<li><strong>w</strong> – The photon wavelength in meters</li>
+<li><strong>R</strong> – Optional numpy array [3x3] specifying rotation of atom vectors
+(we quietly transpose R and let it operate on q-vectors for speedups)</li>
+<li><strong>a</strong> – Optional output complex scattering amplitude cl array</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A numpy array of length nF*nS containing complex scattering</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">A</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>amplitudes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.phase_factor_mesh">
+<code class="descname">phase_factor_mesh</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>a=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute phase factors on a regular 3D mesh of q-space samples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>r</strong> (<em>Nx3 numpy array</em>) – Atomic coordinates</li>
+<li><strong>f</strong> (<em>numpy array</em>) – A numpy array of complex atomic scattering factors</li>
+<li><strong>N</strong> (<em>numpy array length 3</em>) – Number of q-space samples in each of the three
+dimensions</li>
+<li><strong>q_min</strong> (<em>numpy array length 3</em>) – Minimum q-space magnitudes in the 3d mesh.
+These values specify the <em>center</em> of the first voxel.</li>
+<li><strong>q_max</strong> (<em>numpy array length 3</em>) – Naximum q-space magnitudes in the 3d mesh.
+These values specify the <em>center</em> of the voxel.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>An array of complex scattering amplitudes.  By default this is a normal</dt>
+<dd><p class="first last">numpy array.  Optionally, this may be an opencl buffer.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.buffer_mesh_lookup">
+<code class="descname">buffer_mesh_lookup</code><span class="sig-paren">(</span><em>a_map</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>q</em>, <em>R=None</em>, <em>a=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.buffer_mesh_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is supposed to lookup intensities from a 3d mesh of amplitudes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a_map</strong> (<em>numpy array</em>) – Complex scattering amplitudes (usually generated from
+the function phase_factor_mesh())</li>
+<li><strong>N</strong> (<em>int</em>) – As defined in phase_factor_mesh()</li>
+<li><strong>q_min</strong> (<em>float</em>) – As defined in phase_factor_mesh()</li>
+<li><strong>q_max</strong> (<em>float</em>) – As defined in phase_factor_mesh()</li>
+<li><strong>q</strong> (<em>Nx3 numpy array</em>) – q-space coordinates at which we want to interpolate
+the complex amplitudes in a_dev</li>
+<li><strong>R</strong> (<em>3x3 numpy array</em>) – Rotation matrix that will act on the atom vectors
+(we quietly transpose R and let it operate on q-vectors for speedups)</li>
+<li><strong>a</strong> – (clarray) The output array (optional)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">numpy array of complex amplitudes</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.lattice_transform_intensities_pad">
+<code class="descname">lattice_transform_intensities_pad</code><span class="sig-paren">(</span><em>abc</em>, <em>N</em>, <em>T</em>, <em>F</em>, <em>S</em>, <em>B</em>, <em>nF</em>, <em>nS</em>, <em>w</em>, <em>R=None</em>, <em>I=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.lattice_transform_intensities_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.lattice_transform_intensities_pad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate crystal lattice transform intensities for a pixel-array detector.  This is the usual transform for
+an idealized parallelepiped crystal (usually not very realistic…).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>abc</strong> (<em>numpy array</em>) – A 3x3 array containing real-space basis vectors.  Vectors are contiguous in memory.</li>
+<li><strong>N</strong> (<em>numpy array</em>) – An array containing number of unit cells along each of three axes.</li>
+<li><strong>T</strong> (<em>numpy array</em>) – Translation to center of corner pixel.</li>
+<li><strong>F</strong> (<em>numpy array</em>) – Fast-scan basis vector.</li>
+<li><strong>S</strong> (<em>numpy array</em>) – Slow-scan basis vector.</li>
+<li><strong>B</strong> (<em>numpy array</em>) – Incident beam vector.</li>
+<li><strong>nF</strong> (<em>int</em>) – Number of fast-scan pixels.</li>
+<li><strong>nS</strong> (<em>int</em>) – Number of slow-scan pixels.</li>
+<li><strong>w</strong> (<em>float</em>) – Wavelength.</li>
+<li><strong>R</strong> (<em>numpy array</em>) – Rotation matrix acting on atom vectors.
+(we quietly transpose R and let it operate on q-vectors for speedups)</li>
+<li><strong>(</strong> (<em>I</em>) – class:pyopencl.array.Array) : OpenCL device array containing intensities.</li>
+<li><strong>add</strong> (<em>bool</em>) – If true, the function will add to the input I buffer, else the buffer is overwritten.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">If I == None, then the output is a numpy array.  Otherwise, it is an opencl array.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.gaussian_lattice_transform_intensities_pad">
+<code class="descname">gaussian_lattice_transform_intensities_pad</code><span class="sig-paren">(</span><em>abc</em>, <em>N</em>, <em>T</em>, <em>F</em>, <em>S</em>, <em>B</em>, <em>nF</em>, <em>nS</em>, <em>w</em>, <em>R=None</em>, <em>I=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.gaussian_lattice_transform_intensities_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.gaussian_lattice_transform_intensities_pad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate crystal lattice transform intensities for a pixel-array detector.  Uses a Gaussian
+approximation to the lattice transform.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>abc</strong> (<em>numpy array</em>) – A 3x3 array containing real-space basis vectors.  Vectors are contiguous
+in memory.</li>
+<li><strong>N</strong> (<em>numpy array</em>) – An array containing number of unit cells along each of three axes.</li>
+<li><strong>T</strong> (<em>numpy array</em>) – Translation to center of corner pixel.</li>
+<li><strong>F</strong> (<em>numpy array</em>) – Fast-scan basis vector.</li>
+<li><strong>S</strong> (<em>numpy array</em>) – Slow-scan basis vector.</li>
+<li><strong>B</strong> (<em>numpy array</em>) – Incident beam vector.</li>
+<li><strong>nF</strong> (<em>int</em>) – Number of fast-scan pixels.</li>
+<li><strong>nS</strong> (<em>int</em>) – Number of slow-scan pixels.</li>
+<li><strong>w</strong> (<em>float</em>) – Wavelength.</li>
+<li><strong>R</strong> (<em>numpy array</em>) – Rotation matrix acting on atom vectors.
+(we quietly transpose R and let it operate on q-vectors for speedups)</li>
+<li><strong>(</strong> (<em>I</em>) – class:pyopencl.array.Array) : OpenCL device array containing intensities.</li>
+<li><strong>add</strong> (<em>bool</em>) – If true, the function will add to the input I buffer, else the buffer is
+overwritten.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">If I == None, then the output is a numpy array.  Otherwise, it is an opencl array.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.prime_cromermann_simulator">
+<code class="descname">prime_cromermann_simulator</code><span class="sig-paren">(</span><em>q_vecs</em>, <em>atomic_nums=None</em>, <em>incoherent=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.prime_cromermann_simulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.prime_cromermann_simulator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare special array data for cromermann simulation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q_vecs</strong> (<em>np.ndarray</em>) – Npixels x 3 array of cartesian pixels qx, qy, qz</li>
+<li><strong>atomic_num</strong> (<em>np.ndarray</em>) – Natoms x 1 array of atomic numbers corresponding
+to the atoms in the target</li>
+<li><strong>bool</strong> (<em>incoherent</em>) – Whether to make form factors random</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.get_r_cromermann">
+<code class="descname">get_r_cromermann</code><span class="sig-paren">(</span><em>atom_vecs</em>, <em>sub_com=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.get_r_cromermann"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.get_r_cromermann" title="Permalink to this definition">¶</a></dt>
+<dd><p>combine atomic vectors and atomic flux factors into an openCL buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atom_vecs</strong> (<em>np.ndarray</em>) – Atomic positions</li>
+<li><strong>sub_com</strong> (<em>bool</em>) – Whether to sub the center of mass from the atom vecs</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Natoms x 4 contiguous openCL buffer array</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pyopenCL buffer data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.get_q_cromermann">
+<code class="descname">get_q_cromermann</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.get_q_cromermann"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.get_q_cromermann" title="Permalink to this definition">¶</a></dt>
+<dd><p>combine form factors and q-vectors and load onto a CL buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>q_vecs</strong> (<em>np.ndarray</em>) – Npixels x 3 array (inverse angstroms)</li>
+<li><strong>atomic_nums</strong> (<em>np.ndarray</em>) – Natoms x 1 array of atomic numbers</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Npixelbuff x 16 contiguous openCL buffer array
+where Npixel buff is the first multiple of
+group_size that is greater than Npixels</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pyopenCL buffer data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.run_cromermann">
+<code class="descname">run_cromermann</code><span class="sig-paren">(</span><em>q_buff_data</em>, <em>r_buff_data</em>, <em>rand_rot=False</em>, <em>force_rot_mat=None</em>, <em>com=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.run_cromermann"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.run_cromermann" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the cromer-mann form-factor simulator.</p>
+<dl class="docutils">
+<dt>Arguments</dt>
+<dd><dl class="first last docutils">
+<dt>q_buff_data (pyopenCL buffer data) :</dt>
+<dd>should have shape NpixelsCLx16 where
+NpixelsCL is the first multiple of group_size greater than
+Npixels.
+Use <a class="reference internal" href="#bornagain.simulate.clcore.ClCore.get_group_size" title="bornagain.simulate.clcore.ClCore.get_group_size"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_group_size()</span></code></a> to check the currently
+set group_size. The data stored in
+q[Npixels,:3] should be the q-vectors.
+The data stored in q[Npixels,3:Nspecies] should be the
+q-dependent atomic form factors for up to Nspecies=13
+atom species See <code class="xref py py-func docutils literal notranslate"><span class="pre">prime_comermann_simulator()</span></code>
+for details regarding the form factor storage and atom
+species identifier</dd>
+<dt>r_buff_data (pyopenCL buffer data) :</dt>
+<dd>Should have shape Natomsx4. The data stored in
+r_buff_data[:,:3] are the atomic positions in cartesian
+(x,y,z).  The data stored in r_buff_data[:,3] are
+the atom species identifiers (0,1,..Nspecies-1)
+mapping the atom species here to the form factor value
+in q_buff_data.</dd>
+<dt>rand_rot (bool) :</dt>
+<dd>Randomly rotate the molecule</dd>
+<dt>force_rand_rot (np.ndarray) :</dt>
+<dd>Supply a specific rotation matrix that operates on molecules</dd>
+<dt>com (np.ndarray) :</dt>
+<dd>Offset the center of mass of the molecule</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For atom r_i the atom species identifier is sp_i =
+r_buff_data[r_i,3].
+Then, for pixel q_i, the simulator can find the corresponding
+form factor in q_buff_dat[q_i,3+sp_i].
+I know it is confusing, but it’s efficient.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.release_amplitudes">
+<code class="descname">release_amplitudes</code><span class="sig-paren">(</span><em>reset=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.release_amplitudes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.release_amplitudes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Releases the amplitude buffer from the GPU</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reset</strong> (<em>bool</em>) – Reset the amplitude buffer to 0’s on the GPU</td>
+</tr>
+</tbody>
+</table>
+<p>Returns (np.ndarray) : Scattering amplitudes</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.clcore.helpme">
+<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">helpme</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#helpme"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.helpme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as helpme() function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.clcore.help">
+<code class="descclassname">bornagain.simulate.clcore.</code><code class="descname">help</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#help"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.help" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print out some useful information about platforms and devices that are
+available for running simulations.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="bornagain.simulate.examples.html" class="btn btn-neutral float-right" title="bornagain.simulate.examples module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bornagain.simulate.atoms.html" class="btn btn-neutral" title="bornagain.simulate.atoms module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

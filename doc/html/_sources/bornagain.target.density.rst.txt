@@ -1,0 +1,7 @@
+bornagain.target.density module
+===============================
+
+.. automodule:: bornagain.target.density
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,342 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Installation &mdash; bornagain 0.2018.9.9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Beams" href="beams.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> bornagain
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2018.9.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#system-wide-installation">System-wide installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-setup">Example setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#possible-installation-issues">Possible installation issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bornagain</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="system-wide-installation">
+<h2>System-wide installation<a class="headerlink" href="#system-wide-installation" title="Permalink to this headline">¶</a></h2>
+<p>There are no install scripts (e.g. setup.py) that will automatically add bornagain to your python installation.
+Since bornagain is changing frequently at this time, it is recommended that you keep a local copy of bornagain
+where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving
+code alongside results is good practice anyways.</p>
+<p>If the bornagain package directory is not in your working directory, you might need to add bornagain to your python path
+by doing something like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;../example/path/to/bornagain&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Another option is to make a symbolic link to the bornagain package, like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ln -s path/to/bornagain/bornagain path/where/your/script/is
+</pre></div>
+</div>
+<p>If you use a symbolic link as above, you can simply add an import statement in your script</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bornagain</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>The current dependencies of bornagain are:</p>
+<ul class="simple">
+<li>h5py</li>
+<li>numpy</li>
+<li>scipy</li>
+<li>matplotlib</li>
+<li>ipython</li>
+<li>pytest</li>
+<li>sphinx</li>
+<li>pyqtgraph</li>
+<li>pyopencl</li>
+<li>pyopengl</li>
+<li>future</li>
+<li>numba</li>
+<li>cfelpyutils</li>
+</ul>
+<p>You can use bornagain with only a subset of of the above dependencies (e.g. skip pyopencl if you don’t want to simulate,
+and skip sphinx if you won’t be modifying the documentation, skip pyqtgraph if you won’t use those GUIs, etc.),
+but it’s usually not difficult to install all of them for completeness.</p>
+<p>We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
+compatibility with both pyqt4 and pyqt5 (which is proving to be somewhat difficult…). If you’re deciding on which
+version to use, here are a couple things to consider:</p>
+<ul class="simple">
+<li>At the time of this writing, the LCLS psana module requires Python 2.7.</li>
+<li>It doesn’t appear to be easy to install both pyqt4 and pyqt5 in the same Python installation</li>
+<li><a class="reference external" href="https://conda.io/miniconda.html">Anaconda and Miniconda</a> python do not support pyqt4 in Python 3.7.</li>
+</ul>
+<p>It’s hard to say what’s best for you, but hopefully things work no matter what versions of software you use.</p>
+</div>
+<div class="section" id="example-setup">
+<h2>Example setup<a class="headerlink" href="#example-setup" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://conda.io/miniconda.html">Miniconda</a> is a reliable and lightweight distribution of python.  The
+<a class="reference external" href="https://conda.io/docs/">Conda</a> package manager that comes with it makes it fast and easy to set up Python.  You might
+consider making a <a class="reference external" href="https://conda.io/docs/user-guide/tasks/manage-environments.html">conda environment</a> to check that
+everything works well, since packages like opengl, opencl, pyqt seem to have complicated, and occasionally conflicting
+requirments.</p>
+<p>Assuming that you’ve installed conda, here’s an example of how to set up a new conda environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create -n bornagain -c conda-forge <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6 <span class="nv">pyqt</span><span class="o">=</span><span class="m">5</span> h5py numpy scipy scikit-image <span class="se">\</span>
+matplotlib ipython pytest sphinx pyqtgraph pyopencl pyopengl future
+</pre></div>
+</div>
+<p>The only downside to the conda environment is that you need to remember to activate the environment every time you use
+bornagain, like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> activate bornagain
+</pre></div>
+</div>
+<p>Note that cfelpyutils currently requires that you use pip to install.  It can be installed (after activating your
+environment) as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install cfelpyutils
+</pre></div>
+</div>
+<p>An even easier way to setup your environment is to use the provided environmen files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env create -f bornagain3-env.yml
+conda activate bornagain3
+</pre></div>
+</div>
+<p>If you don’t want to use a conda environment you can just install the modules in the current environment.  For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install -c conda-forge <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.6 <span class="nv">pyqt</span><span class="o">=</span><span class="m">5</span> h5py numpy scipy scikit-image matplotlib ipython pytest <span class="se">\</span>
+sphinx pyqtgraph pyopencl pyopengl future
+pip instlall cfelpyutils
+</pre></div>
+</div>
+<p>You can check if you’ve got all the dependencies sorted out by running the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bornagain/test
+pytest
+</pre></div>
+</div>
+<p>You can uninstall a conda environment as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env remove -n bornagain3
+</pre></div>
+</div>
+</div>
+<div class="section" id="possible-installation-issues">
+<h2>Possible installation issues<a class="headerlink" href="#possible-installation-issues" title="Permalink to this headline">¶</a></h2>
+<p><strong>OpenCL</strong></p>
+<p>If you get a runtime error involving <code class="code docutils literal notranslate"><span class="pre">pyopencl.cffi_cl.LogicError:</span> <span class="pre">clGetPlatformIDs</span> <span class="pre">failed:</span></code> it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple as doing the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp /etc/OpenCL/vendors/nvidia.icd ~/miniconda3/etc/OpenCL/vendors
+</pre></div>
+</div>
+<p>For any further issues with pyopencl, there are some helpful notes <a class="reference external" href="https://documen.tician.de/pyopencl/misc.html">here</a>.</p>
+<p><strong>Scientific Linux 6</strong></p>
+<p>To install <cite>pyopencl</cite> on SL6 I found it necessary to download the pyopencl-201X.X.X source, and then from within the
+directory I did something along these lines:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo
+sudo yum install devtoolset-2
+scl <span class="nb">enable</span> devtoolset-2 bash
+./configure.py --cl-inc-dir<span class="o">=</span>/usr/local/cuda/include --cl-lib-dir<span class="o">=</span>/usr/local/cuda/lib64
+make install
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="beams.html" class="btn btn-neutral float-right" title="Beams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="overview.html" class="btn btn-neutral" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

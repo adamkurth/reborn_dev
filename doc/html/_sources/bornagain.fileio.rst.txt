@@ -1,0 +1,15 @@
+bornagain.fileio package
+========================
+
+.. automodule:: bornagain.fileio
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.fileio.getters
+

@@ -1,0 +1,22 @@
+bornagain.simulate package
+==========================
+
+.. automodule:: bornagain.simulate
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   bornagain.simulate.atoms
+   bornagain.simulate.clcore
+   bornagain.simulate.examples
+   bornagain.simulate.form_factors
+   bornagain.simulate.mcsim
+   bornagain.simulate.refdata
+   bornagain.simulate.simutils
+   bornagain.simulate.solutions
+
