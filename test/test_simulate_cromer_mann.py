@@ -4,7 +4,7 @@ from bornagain.simulate import clcore
 
 def test_no_atomic_form_factor():
     
-    core = clcore.ClCore(double_precision=False)
+    core = clcore.ClCoreDerek(double_precision=False)
 
     Npix = 512*512
     Natom = 1000
