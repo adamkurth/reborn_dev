@@ -46,6 +46,7 @@ The current dependencies of bornagain are:
 * pyopencl
 * pyopengl
 * future
+* numba
 * cfelpyutils
 
 You can use bornagain with only a subset of of the above dependencies (e.g. skip pyopencl if you don't want to simulate,
@@ -113,6 +114,12 @@ You can check if you've got all the dependencies sorted out by running the follo
 
     cd bornagain/test
     pytest
+
+You can uninstall a conda environment as follows:
+
+.. code-block:: bash
+
+    conda env remove -n bornagain3
 
 
 Possible installation issues

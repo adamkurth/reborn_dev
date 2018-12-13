@@ -14,5 +14,6 @@ dependencies:
   - future
   - sphinx
   - pytest
+  - numba
   - pip:
     - cfelpyutils
