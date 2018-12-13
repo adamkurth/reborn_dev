@@ -15,5 +15,7 @@ dependencies:
   - sphinx
   - pytest
   - numba
+  - make
   - pip:
     - cfelpyutils
+    - sphinx_rtd_theme
