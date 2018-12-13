@@ -19,7 +19,7 @@ pages:
   - ./update-documentation.sh
   - cd ..
   - mkdir public
-  - cp doc/html/* public
+  - cp -r doc/html/* public
   artifacts:
     paths:
     - public
