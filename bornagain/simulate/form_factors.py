@@ -9,8 +9,9 @@ def sphere_form_factor(radius, q_mags, check_divide_by_zero=True):
 
     Form factor for a sphere of given radius, at given q magnitudes.  Assumes the scattering density is unity inside.
 
-    Formula from Table A.1 in Guinier "X-ray diffraction in crystals, imperfect crystals, and amorphous bodies".  Rick
-    confirms there are no approximations in this formula, and radius is correct (no it's not diameter by mistake).
+    Formula can be cound, for example, in Table A.1 in Guinier's "X-ray diffraction in crystals, imperfect crystals, and
+    amorphous bodies".  There are no approximations in this formula beyond the 1st Born approximation; it is not a
+    small-angle formula.
 
     Args:
         radius (float): In SI units of course
