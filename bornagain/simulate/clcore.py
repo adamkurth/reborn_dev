@@ -278,6 +278,13 @@ class ClCore(object):
 
         return group_size_dev.get()[0]
 
+    def _next_multiple_groupsize(self, N):
+
+        if N % self.group_size > 0:
+            return self.int_t(self.group_size - N % self.group_size)
+        else:
+            return 0
+
     def test_rotate_vec(self, R, vec):
 
         r"""
@@ -345,46 +352,30 @@ class ClCore(object):
               if there are input cl arrays.
         """
 
-        if R is None:
-            R = np.eye(3, dtype=self.real_t)
-        R = self.vec16(R, dtype=self.real_t)
+        # We must do this because pyopencl Array objects do not allow array slicing.
+        if type(r) is pyopencl.array.Array or type(f) is pyopencl.array.Array:
+            raise ValueError('phase_factor_qrf_chunk_r requires that r and f are numpy arrays.')
 
-        n_pixels = self.int_t(q.shape[0])
-
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
+        add = self.int_t(add)
 
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
         q_dev = self.to_device(q, dtype=self.real_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        r_split = np.array_split(np.arange(n_atoms), Nchunk)
-        for i in range(0, len(r_split)): #r_rng in r_split:
+        r_split = np.array_split(np.arange(n_atoms), n_chunks)
+        for i in range(0, len(r_split)):
             r_rng = r_split[i]
-            r_chunk = r[r_rng]
-            f_chunk = f[r_rng]
-            r_dev = self.to_device(r_chunk, dtype=self.real_t)
-            f_dev = self.to_device(f_chunk, dtype=self.complex_t)
-
-            # On the first iteration, we decide if we should add to an existing amplitude array based on the input
-            # keyword argument "add".  On the following iterations, we definitely want to add.
-            if i == 0:
-                if add:
-                    add = self.int_t(1)
-                else:
-                    add = self.int_t(0)
-            else:
+            r_chunk = r[r_rng[0]:(r_rng[-1]+1), :]
+            f_chunk = f[r_rng[0]:(r_rng[-1]+1)]
+            if i > 0:
                 add = self.int_t(1)
+            self.phase_factor_qrf(q_dev, r_chunk, f_chunk, R, a_dev, add)
 
-            self.phase_factor_qrf_cl(self.queue, (global_size,), (self.group_size,), q_dev.data, r_dev.data, f_dev.data,
-                                     R, self.a_dev.data, n_atoms, n_pixels, add)
-
-    def _next_multiple_groupsize(self, N):
-
-        if N % self.group_size > 0:
-            return self.int_t(self.group_size - N % self.group_size)
+        if a is None:
+            return a_dev.get()
         else:
-            return 0
+            return a_dev
 
     def phase_factor_qrf(self, q, r, f, R=None, a=None, add=False):
 
