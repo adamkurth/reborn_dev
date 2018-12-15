@@ -52,6 +52,16 @@ class PADGeometry(object):
 
             self.simple_setup(n_pixels=n_pixels, distance=distance, pixel_size=pixel_size)
 
+    def __str__(self):
+
+        s = ''
+        s += 'n_fs: %s\n' % self.n_fs.__str__()
+        s += 'n_ss: %s\n' % self.n_ss.__str__()
+        s += 'fs_vec: %s\n' % self.fs_vec.__str__()
+        s += 'ss_vec: %s\n' % self.ss_vec.__str__()
+        s += 't_vec: %s' % self.t_vec.__str__()
+        return s
+
     @property
     def n_pixels(self):
 
