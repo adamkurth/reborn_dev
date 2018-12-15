@@ -60,6 +60,8 @@ class PADView(object):
     peaks = None
     apply_filters = True
 
+    peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': False}
+
     def __init__(self, pad_geometry=None, pad_data=None, mask_data=None, logscale=False, frame_getter=None):
 
         self.logscale = logscale
@@ -778,18 +780,18 @@ class PADView(object):
 
             self.pad_data = dat['pad_data']
 
-        if self.apply_filters is True:
-            if self.data_filters is not None:
-                t = time()
-                for filter in self.data_filters:
-                    filter(self)
-                print(time() - t)
-
-        self.update_pads()
-
         if 'peaks' in dat.keys():
 
             self.peaks = dat['peaks']
+
+        if self.apply_filters is True:
+            if self.data_filters is not None:
+                t = time()
+                for filt in self.data_filters:
+                    filt(self)
+                print(time() - t)
+
+        self.update_pads()
 
         if self.show_peaks is True:
             self.display_peaks(self.peaks)
@@ -824,19 +826,37 @@ class PADView(object):
             return
 
         n_peaks = peaks['n_peaks']
-        pad_numbers = peaks['pad_numbers']
-        fs_pos = peaks['fs_pos']
-        ss_pos = peaks['ss_pos']
+        centroids = peaks['centroids']
+        gl_fs_pos = np.empty(n_peaks)
+        gl_ss_pos = np.empty(n_peaks)
+        n = 0
+        for i in range(self.n_pads):
+            c = centroids[i]
+            if c is None:
+                continue
+            nc = c.shape[0]
+            vec = self.pad_geometry[i].indices_to_vectors(c[:, 1], c[:, 0])#.ravel()
+            gl_fs_pos[n:(n + nc)] = vec[:, 0].ravel()
+            gl_ss_pos[n:(n + nc)] = vec[:, 1].ravel()
+            n += nc
+        gl_fs_pos *= self.scale_factor()
+        gl_ss_pos *= self.scale_factor()
+        self.add_scatter_plot(gl_fs_pos, gl_ss_pos, **self.peak_style)
 
-        pad_geom = self.pad_geometry
-        gl_fs_pos = np.zeros(n_peaks)
-        gl_ss_pos = np.zeros(n_peaks)
-        for i in range(0, n_peaks):
-            pad_num = pad_numbers[i]
-            vec = pad_geom[pad_num].indices_to_vectors(ss_pos[i], fs_pos[i]).ravel()
-            gl_fs_pos[i] = vec[0] * self.scale_factor()
-            gl_ss_pos[i] = vec[1] * self.scale_factor()
-        self.add_scatter_plot(gl_fs_pos, gl_ss_pos, pen=pg.mkPen('g'), brush=None, width=5, size=10, pxMode=False)
+        # n_peaks = peaks['n_peaks']
+        # pad_numbers = peaks['pad_numbers']
+        # fs_pos = peaks['fs_pos']
+        # ss_pos = peaks['ss_pos']
+        # pad_geom = self.pad_geometry
+        # gl_fs_pos = np.zeros(n_peaks)
+        # gl_ss_pos = np.zeros(n_peaks)
+        # for i in range(0, n_peaks):
+        #     pad_num = int(pad_numbers[i])
+        #     vec = pad_geom[pad_num].indices_to_vectors(ss_pos[i], fs_pos[i]).ravel()
+        #     gl_fs_pos[i] = vec[0] * self.scale_factor()
+        #     gl_ss_pos[i] = vec[1] * self.scale_factor()
+        #
+        # self.add_scatter_plot(gl_fs_pos, gl_ss_pos, pen=pg.mkPen('g'), brush=None, width=5, size=10, pxMode=False)
 
     def toggle_peaks(self):
 

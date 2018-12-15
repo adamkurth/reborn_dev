@@ -20,6 +20,7 @@ class PeakFinder(object):
     radii = None
 
     snr = None
+    signal = None
     labels = None
     n_labels = 0
     centroids = None
@@ -42,19 +43,24 @@ class PeakFinder(object):
                 self.mask = np.ones_like(data)
             mask = self.mask
 
-        self.snr = self.snr_transform(data, mask, self.radii[0], self.radii[1], self.radii[2])
+        self.snr, self.signal = self.snr_transform(data, mask, self.radii[0], self.radii[1], self.radii[2])
         self.labels, self.n_labels = measurements.label(self.snr > self.snr_threshold)
-        self.centroids = measurements.center_of_mass(data, labels=self.labels)
+        if self.n_labels > 0:
+            cent = measurements.center_of_mass(self.signal, labels=self.labels, index=np.arange(self.n_labels))
+            self.centroids = np.array(cent)
+        else:
+            self.centroids = None
 
         return self.centroids
 
 
 def boxsnr_fortran(dat, mask, nin, ncent, nout):
 
-    out = np.ones_like(dat)
-    out = np.asfortranarray(out)
-    peaks_f.peaker.boxsnr(np.asfortranarray(dat), np.asfortranarray(mask), out, nin, ncent, nout)
-    return out
+    snr = np.asfortranarray(np.ones_like(dat))
+    signal = np.asfortranarray(np.ones_like(dat))
+
+    peaks_f.peaker.boxsnr(np.asfortranarray(dat), np.asfortranarray(mask), snr, signal, nin, ncent, nout)
+    return snr, signal
 
 
 @jit(nopython=True)
@@ -164,7 +170,11 @@ def boxsnr_numba(dat, mask, nin, ncent, nout):
     sq2ox = sq2ox - sq2cx
     sqmox = sqmox - sqmcx + small
     sqmix = sqmix + small
-    return (sqix - sqox * sqmix / sqmox) / (np.sqrt(sqmix) * (np.sqrt(sq2ox / sqmox - (sqox / sqmox) ** 2) + small))
+
+    signal = sqix - sqox * sqmix / sqmox
+    snr = signal / (np.sqrt(sqmix) * (np.sqrt(sq2ox / sqmox - (sqox / sqmox) ** 2) + small))
+
+    return snr, signal
 
 # def snr_filter_pool(data):
 #

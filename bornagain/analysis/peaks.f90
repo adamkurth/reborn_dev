@@ -107,14 +107,14 @@ contains
    end subroutine squarediff
 
 
-    subroutine boxsnr(dat,mask,out,npx,npy,nin,ncent,nout)
+    subroutine boxsnr(dat,mask,snr,signal,npx,npy,nin,ncent,nout)
 !
 ! p(npx,npy) input array, overwritten to give output array
 ! sums pixels in outer square from i-nosx to i+nosx, j-nosy to j+nosy
 ! not contained in inner square from i-nisx to i+nisx, j-nisy to j+nisy
 !
         real(kind=8), intent(in) :: dat(npx,npy), mask(npx,npy)
-        real(kind=8), intent(inout) :: out(npx,npy)
+        real(kind=8), intent(inout) :: snr(npx,npy), signal(npx,npy)
         integer(kind=4), intent(in) :: npx, npy, nin, ncent, nout
         real(kind=8) :: cumx(0:npx,npy), cum2x(0:npx,npy), cummx(0:npx,npy), &
                         sqix(npx,npy), sq2ix(npx,npy), sqmix(npx,npy), &
@@ -192,7 +192,8 @@ contains
         sq2ox = sq2ox - sq2cx
         sqmox = sqmox - sqmcx + small ! avoid divide by zero
         sqmix = sqmix + small         ! avoid divide by zero
-        out = (sqix-sqox*sqmix/sqmox)/(sqrt(sqmix)*(sqrt(sq2ox/sqmox - (sqox/sqmox)**2)+small))
+        signal = sqix-sqox*sqmix/sqmox
+        snr = signal/(sqrt(sqmix)*(sqrt(sq2ox/sqmox - (sqox/sqmox)**2)+small))
     end subroutine boxsnr
 
 end module peaker

@@ -44,11 +44,13 @@ def test_fortran():
     mask = np.asfortranarray(mask)
     out = np.empty_like(dat)
     out = np.asfortranarray(out)
+    signal = np.empty_like(dat)
+    signal = np.asfortranarray(out)
     nin = 0
     ncent = 0
     nout = 1
     # peaks_f.peaker.squarediff(dat, nout, nout, nin, nin)
-    peaks_f.peaker.boxsnr(dat, mask, out, nin, ncent, nout)
+    peaks_f.peaker.boxsnr(dat, mask, out, signal, nin, ncent, nout)
     noise = np.sqrt(((0+1+16)*3-1)/8. - (((0+1+4)*3-1)/8.)**2)
     sig = 1 - ((0+1+4)*3-1)/8.
     # print(dat[0:3, 0:3])
@@ -79,7 +81,7 @@ def test_numba():
     ncent = 0
     nout = 1
     # peaks_f.peaker.squarediff(dat, nout, nout, nin, nin)
-    out = boxsnr_numba(dat, mask, nin, ncent, nout)
+    out, signal = boxsnr_numba(dat, mask, nin, ncent, nout)
     noise = np.sqrt(((0+1+16)*3-1)/8. - (((0+1+4)*3-1)/8.)**2)
     sig = 1 - ((0+1+4)*3-1)/8.
     # print(dat[0:3, 0:3])
