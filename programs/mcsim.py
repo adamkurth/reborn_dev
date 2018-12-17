@@ -16,46 +16,105 @@ from bornagain.simulate import solutions
 from bornagain.simulate import simutils
 from bornagain.utils import vec_mag
 from bornagain.units import r_e, hc, keV
+from bornagain import target
 import bornagain.simulate.clcore as core
 
 
 def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
-          beam_diameter=10e-6, photon_energy=12.0, n_photons=1e8, transmission=1.0, \
+          beam_diameter=10e-6, photon_energy=12.0, n_photons=1e8, \
           mosaicity_fwhm=1e-4, beam_divergence_fwhm=1e-2, beam_spatial_profile='tophat', \
           photon_energy_fwhm=0.02, crystal_size=10e-6, crystal_size_fwhm=0.0, \
           mosaic_domain_size=1e-6, mosaic_domain_size_fwhm=0.0, \
           water_radius=0.0, temperature=298.16, \
-          n_monte_carlo_iterations=1000, num_patterns=1, random_rotation=True, \
+          n_monte_carlo_iterations=1000, num_patterns=1, seed=0, random_rotation=True, \
           approximate_shape_transform=True, cromer_mann=False, expand_symm=False, \
-          fix_rot_seq=False, overlay_wigner_cells=False, mask_direct_beam=False, \
-          pdb_file='../../examples/data/pdb/2LYZ-P1.pdb', \
+          fix_rot_seq=False, mask_direct_beam=False, \
+          pdb_file='../examples/data/pdb/2LYZ-P1.pdb', \
           write_hdf5=True, write_geom=True, write_crystal_sizes=True, \
           write_ideal_only=False, results_dir='/data/temp/', \
           quiet=False, compression=None, cl_double_precision=False):
     """
-    TODO: Write docstring.
+    This is a program to compute x-ray diffraction patterns using crystals.
+	It can handle water scattering and uses a GPU to compute the diffraction pattern.
+	The program can write geometry files, hdf5 files, and a file for the crystal sizes per pattern.
+	Poisson noise is calculated per pattern in /data/noisy.
+	All units are SI unless otherwise noted.
+	
+	Arguments:
+		detector_distance (float) :
+			Distance of detector from sample.
+		pixel_size (float) :
+			Side length of a pixel on the detector.
+		n_pixels (int) :
+			Number of pixels along side of detector.
+		beam_diameter (float) :
+			Diameter of direct beam.
+		photon_energy (float) :
+			Energy of incoming photons in keV.
+		n_photons : 
+			Number of photons in direct beam.
+		mosaicity_fwhm (float) :
+			FWHM of crystal mosaicity.
+		beam_divergence_fwhm (float) :
+			FWHM of direct beam divergence angle.
+		beam_spatial_profile (string) :
+			Spatial profile of intensities in direct beam. Options are 'tophat' and 'gaussian'.
+		photon_energy_fwhm (float) :
+			FWHM of photon energies.
+		crystal_size (float) :
+			Average side length of crystals.
+		crystal_size_fwhm (float) :
+			FWHM of crystal side lengths.
+		mosaic_domain_size (float) :
+			Average side length of mosaic domains.
+		mosaic_domain_size_fwhm (float) : 
+			FWHM of mosaic domain side lengths.
+		water_radius (float) :
+			Radius of water jet delivering crystals.
+		temperature (float) :
+			Temperature of water jet in Kelvin.
+		n_monte_carlo_iterations (int) :
+			Number of Monte Carlo iterations (>1000 recommended).
+		num_patterns (int) :
+			Number of patterns to simulate.
+		seed (int) : 
+			If the seed is fixed, this is the seed.
+		random_rotation (bool) :
+			Whether to do random rotations of the crystal per pattern.
+		approximate_shape_transform (bool) :
+			Whether to use a gaussian shape transform or a parallelepiped.
+		cromer_mann (bool) : 
+			Whether to use cromer_mann for molecular transform.
+		expand_symmetry (bool) : 
+			Whether to expand crystal symmetry.
+		fix_rot_seq (bool) :
+			Fixes the rotation sequence and seed.
+		mask_direct_beam (bool) : 
+			Whether to mask the direct beam on the patterns.
+		pdb_file (string) :
+			Path to PDB file to use for generating a crystal.
+		write_hdf5 (bool) : 
+			Whether to write intensities to an HDF5 file.
+		write_geom (bool) :
+			Whether to write detector geometry file.
+		write_crystal_size (bool) :
+			Whether to write crystal sizes per pattern to a text file.
+		write_ideal_only (bool) : 
+			Whether to write only the ideal pattern or include the noisy pattern.
+		results_dir (string) : 
+			Path to directory to store results.
+		quiet (bool) : 
+			Whether to suppress text output to screen.
+		compression (bool) : 
+			Whether to compress HDF5 files.
+		cl_double_precision (bool) :
+			Whether to use double-precision for GPU calculations.
+
+	Returns:
+		None
     """
 
-# FIXME: In general, the code within the bornagain/bornagain directory should consist of a library of classes, functions, etc. that we use to write programs.  AS it stands, this code is more like a program than a library.  We need to separate the core simulator from all the print statements, file reading/writing, etc.  The mcsim program should go into the programs directory.
-
-# FIXME: we want "mcsim core"  - should be a class, which holds clcore instance.
-    # Input : r (atomic pos.), f (structure factors), PADGeometry, Beam class instance.
-    # Should not do any writing to terminal.
-    # class called McCore
-    # Start with does not do crystals
-    # Output: intensities
-    # Eventually: allow for repeats of the molecule.  one case is a set of translations.  Special case: crystals.
-
-# FIXME: the transmission parameter is redundant with n_photons - remove it
-
-# FIXME: I think we should separate the water background since it can be added separately.  It usually only needs to be computed once.
-
 # FIXME: check that the hdf5 file conforms to cxidb format.
-
-# FIXME: remove overlay_wigner_cells -- it doesn't seem to do anything.
-
-
-
 
 
     # Beam parameters
@@ -63,7 +122,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     wavelength                      = hc / photon_energy # pulse_energy = 0.0024
     wavelength_fwhm                 = wavelength * photon_energy_fwhm
     n_photons                       = int(n_photons) # pulse_energy / photon energy
-    I0                              = transmission * n_photons / (beam_diameter ** 2) # Square beam
+    I0                              = n_photons / (beam_diameter ** 2) # Square beam
 
     # Crystal parameters
     crystal_size_fwhm               = crystal_size * crystal_size_fwhm
@@ -114,9 +173,6 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     if n_photons<=0:
         sys.exit('ERROR: n_photons must be greater than zero')
 
-    if transmission < 0.0 or transmission > 1.0:
-        sys.exit('ERROR: transmission must be between 0 and 1')
-
     if beam_spatial_profile != 'tophat' and beam_spatial_profile != 'gaussian':
         sys.exit('ERROR: beam_spatial_profile must be either gaussian or tophat')
 
@@ -127,16 +183,16 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         sys.exit('ERROR: compression format must be either lzf or gzip')
 
     # Creating text file with output parameters
-    values = [detector_distance, pixel_size, n_pixels, beam_diameter, photon_energy * keV, n_photons, transmission, mosaicity_fwhm,
+    values = [detector_distance, pixel_size, n_pixels, beam_diameter, photon_energy * keV, n_photons, mosaicity_fwhm,
               beam_divergence_fwhm, beam_spatial_profile, photon_energy_fwhm, crystal_size, crystal_size_fwhm / crystal_size, mosaic_domain_size,
               mosaic_domain_size_fwhm / mosaic_domain_size, water_radius, temperature, n_monte_carlo_iterations, num_patterns, random_rotation,
-              approximate_shape_transform, cromer_mann, expand_symm, fix_rot_seq, overlay_wigner_cells, mask_direct_beam,
+              approximate_shape_transform, cromer_mann, expand_symm, fix_rot_seq, mask_direct_beam,
               pdb_file, write_hdf5, write_geom, write_crystal_sizes, write_ideal_only, results_dir, quiet, compression, cl_double_precision]
 
-    names  = ['detector_distance', 'pixel_size', 'n_pixels', 'beam_diameter', 'photon_energy', 'n_photons', 'transmission',
+    names  = ['detector_distance', 'pixel_size', 'n_pixels', 'beam_diameter', 'photon_energy', 'n_photons', 
               'mosaicity_fwhm', 'beam_divergence_fwhm', 'beam_spatial_profile', 'photon_energy_fwhm', 'crystal_size', 'crystal_size_fwhm',
               'mosaic_domain_size', 'mosaic_domain_size_fwhm', 'water_radius', 'temperature', 'n_monte_carlo_iterations', 'num_patterns',
-              'random_rotation', 'approximate_shape_transform', 'cromer_mann', 'expand_symm', 'fix_rot_sequence', 'overlay_wigner_cells', 'mask_direct_beam',
+              'random_rotation', 'approximate_shape_transform', 'cromer_mann', 'expand_symm', 'fix_rot_sequence', 'mask_direct_beam',
               'pdb_file', 'write_hdf5', 'write_geom', 'write_crystal_sizes', 'write_ideal_only', 'results_dir', 'quiet', 'compression', 'cl_double_precision']
 
 
@@ -177,6 +233,8 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
 
     # Things we probably don't want to think about
     cl_group_size = 32
+    if(fix_rot_seq):
+		np.random.seed(seed)
 
     # Setup simulation engine
     write('Setting up simulation engine... ')
@@ -204,19 +262,34 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     write('Getting atomic coordinates and scattering factors... ')
     if expand_symm:
         # TODO: eventually move the expand symmetry functionality to the crystal structure class
-        cryst = ba.target.crystal.Molecule(pdb_file)
+        cryst = target.crystal.Molecule(pdb_file)
         monomers = cryst.get_monomers()
         all_atoms = ba.target.crystal.Atoms.aggregate(monomers)
         r = all_atoms.xyz*1e-10
         Z = all_atoms.Z
     else:
-        cryst = ba.target.crystal.structure(pdb_file)
+        cryst = target.crystal.structure(pdb_file)
         r = cryst.r
         Z = cryst.Z
 
     f = ba.simulate.atoms.get_scattering_factors(Z, ba.units.hc / wavelength)
     write('done\n')
     write('%d atoms per unit cell\n' % (len(f)))
+
+    # Do water scattering
+    if water_radius!=0:
+        write('Simulating water scattering... ')
+        water_number_density = 33.3679e27
+        illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
+        n_water_molecules = illuminated_water_volume * water_number_density
+        F_water = solutions.get_water_profile(qmag, temperature=temperature) # Get water scattering intensity radial profile
+        F2_water = F_water**2 * n_water_molecules
+        I_water = I0 * r_e**2 * P * sa * F2_water
+        if(illuminated_water_volume <= 0):
+            write('\nWarning: No solvent was illuminated, water scattering not performed.\n')
+            I_water = 0
+        else:
+            write('done\n')
 
     # Determine number of unit cells in whole crystal and mosaic domains
     n_cells_whole_crystal = np.ceil(crystal_size / np.array([cryst.a, cryst.b, cryst.c]))
@@ -226,9 +299,6 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     if(mosaic_domain_size > beam_diameter):
         n_cells_mosaic_domain = np.ceil(np.array([beam_diameter, beam_diameter, mosaic_domain_size]) / np.array([cryst.a, cryst.b, cryst.c]))
 
-    # Make a mask for the direct beam
-    direct_beam_mask = np.ones((int(pad.n_ss * pad.n_fs)))
-    direct_beam_mask[qmag < (2 * np.pi / np.max(np.array([cryst.a, cryst.b, cryst.c])))] = 0
 
     # Setup function for shape transform calculations
     if approximate_shape_transform:
@@ -274,8 +344,6 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         cryst_size_file.write('Crystal size (meters) : Mosaic domain size (meters) : Pattern file\n')
 
     for i in np.arange(1, (num_patterns + 1)):
-        # FIXME: the stuff within this loop should probably be made into a separate class, along with the ClCore() instance at the top.
-        #        that way we can do monte-carlo simulations within various programs, not just for crystallography.
         if(mosaic_domain_size_fwhm != 0):
             mosaic_domain_size = np.random.normal(mosaic_domain_size_original, mosaic_domain_size_fwhm / 2.354820045)
         if(crystal_size_fwhm != 0):
@@ -296,32 +364,9 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         if mosaic_domain_size > crystal_size:
             mosaic_domain_size = crystal_size
 
-        # Do water scattering
-        # FIXME: do the water parameters vary, or is the below calculation redundant?
-        # FIXME: we could probably move the background scatter stuff into a separate module.
-        if water_radius!=0:
-            write('Simulating water scattering... ')
-            water_number_density = 33.3679e27
-            illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
-            n_water_molecules = illuminated_water_volume * water_number_density
-            F_water = solutions.get_water_profile(qmag, temperature=temperature) # Get water scattering intensity radial profile
-            F2_water = F_water**2 * n_water_molecules
-            I_water = I0 * r_e**2 * P * sa * F2_water
-            if(illuminated_water_volume <= 0):
-                write('\nWarning: No solvent was illuminated, water scattering not performed.\n')
-                I_water = 0
-            else:
-                write('done\n')
-
         R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
-# FIXME: next few lines override this one, yes?
-        if random_rotation: R = ba.utils.random_rotation()
-
 
         if random_rotation:
-            if fix_rot_seq:
-# FIXME: good to set the seed on request, but I think this should be done at the very top so it affects all random numbers
-                np.random.seed(i)
             R = ba.utils.random_rotation()
         if not cromer_mann:
             write('Simulating molecular transform from Henke tables... ')
@@ -335,7 +380,6 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
             write('Simulating molecular transform with cromer mann... ')
             t = time.time()
             clcore.prime_cromermann_simulator(q.copy(), Z.copy())
-            #clcore.prime_cromermann_simulator(q.copy(), cryst.Z.copy())
             q_cm = clcore.get_q_cromermann()
             r_cm = clcore.get_r_cromermann(r.copy(), sub_com=False)
             clcore.run_cromermann(q_cm, r_cm, rand_rot=False, force_rot_mat=R)
@@ -387,6 +431,12 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
                 I *= erf(crystal_size/(sig * np.sqrt(2)))
             else:
                 I *= (crystal_size/beam_diameter)**2
+
+		# Make a mask for the direct beam
+        if(mask_direct_beam):
+            direct_beam_mask = np.ones((int(pad.n_ss * pad.n_fs)))
+            direct_beam_mask[qmag < (2 * np.pi / np.max(np.array([cryst.a, cryst.b, cryst.c])))] = 0
+            I *= direct_beam_mask
 
         # Scale up according to mosaic domain
         n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
