@@ -34,15 +34,87 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
           write_ideal_only=False, results_dir='/data/temp/', \
           quiet=False, compression=None, cl_double_precision=False):
     """
-    TODO: Write docstring.
+    This is a program to compute x-ray diffraction patterns using crystals.
+	It can handle water scattering and uses a GPU to compute the diffraction pattern.
+	The program can write geometry files, hdf5 files, and a file for the crystal sizes per pattern.
+	Poisson noise is calculated per pattern in /data/noisy.
+	All units are SI unless otherwise noted.
+	
+	Arguments:
+		detector_distance (float) :
+			Distance of detector from sample.
+		pixel_size (float) :
+			Side length of a pixel on the detector.
+		n_pixels (int) :
+			Number of pixels along side of detector.
+		beam_diameter (float) :
+			Diameter of direct beam.
+		photon_energy (float) :
+			Energy of incoming photons in keV.
+		n_photons : 
+			Number of photons in direct beam.
+		mosaicity_fwhm (float) :
+			FWHM of crystal mosaicity.
+		beam_divergence_fwhm (float) :
+			FWHM of direct beam divergence angle.
+		beam_spatial_profile (string) :
+			Spatial profile of intensities in direct beam. Options are 'tophat' and 'gaussian'.
+		photon_energy_fwhm (float) :
+			FWHM of photon energies.
+		crystal_size (float) :
+			Average side length of crystals.
+		crystal_size_fwhm (float) :
+			FWHM of crystal side lengths.
+		mosaic_domain_size (float) :
+			Average side length of mosaic domains.
+		mosaic_domain_size_fwhm (float) : 
+			FWHM of mosaic domain side lengths.
+		water_radius (float) :
+			Radius of water jet delivering crystals.
+		temperature (float) :
+			Temperature of water jet in Kelvin.
+		n_monte_carlo_iterations (int) :
+			Number of Monte Carlo iterations (>1000 recommended).
+		num_patterns (int) :
+			Number of patterns to simulate.
+		seed (int) : 
+			If the seed is fixed, this is the seed.
+		random_rotation (bool) :
+			Whether to do random rotations of the crystal per pattern.
+		approximate_shape_transform (bool) :
+			Whether to use a gaussian shape transform or a parallelepiped.
+		cromer_mann (bool) : 
+			Whether to use cromer_mann for molecular transform.
+		expand_symmetry (bool) : 
+			Whether to expand crystal symmetry.
+		fix_rot_seq (bool) :
+			Fixes the rotation sequence and seed.
+		mask_direct_beam (bool) : 
+			Whether to mask the direct beam on the patterns.
+		pdb_file (string) :
+			Path to PDB file to use for generating a crystal.
+		write_hdf5 (bool) : 
+			Whether to write intensities to an HDF5 file.
+		write_geom (bool) :
+			Whether to write detector geometry file.
+		write_crystal_size (bool) :
+			Whether to write crystal sizes per pattern to a text file.
+		write_ideal_only (bool) : 
+			Whether to write only the ideal pattern or include the noisy pattern.
+		results_dir (string) : 
+			Path to directory to store results.
+		quiet (bool) : 
+			Whether to suppress text output to screen.
+		compression (bool) : 
+			Whether to compress HDF5 files.
+		cl_double_precision (bool) :
+			Whether to use double-precision for GPU calculations.
+
+	Returns:
+		None
     """
 
-# FIXME: I think we should separate the water background since it can be added separately.  It usually only needs to be computed once.
-
 # FIXME: check that the hdf5 file conforms to cxidb format.
-
-
-
 
 
     # Beam parameters
@@ -205,7 +277,6 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     write('%d atoms per unit cell\n' % (len(f)))
 
     # Do water scattering
-    # FIXME: we could probably move the background scatter stuff into a separate module.
     if water_radius!=0:
         write('Simulating water scattering... ')
         water_number_density = 33.3679e27
