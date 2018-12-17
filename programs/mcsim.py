@@ -25,7 +25,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
           photon_energy_fwhm=0.02, crystal_size=10e-6, crystal_size_fwhm=0.0, \
           mosaic_domain_size=1e-6, mosaic_domain_size_fwhm=0.0, \
           water_radius=0.0, temperature=298.16, \
-          n_monte_carlo_iterations=1000, num_patterns=1, random_rotation=True, \
+          n_monte_carlo_iterations=1000, num_patterns=1, seed=0, random_rotation=True, \
           approximate_shape_transform=True, cromer_mann=False, expand_symm=False, \
           fix_rot_seq=False, mask_direct_beam=False, \
           pdb_file='../examples/data/pdb/2LYZ-P1.pdb', \
@@ -160,6 +160,8 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
 
     # Things we probably don't want to think about
     cl_group_size = 32
+	if(fix_rot_seq):
+		np.random.seed(seed)
 
     # Setup simulation engine
     write('Setting up simulation engine... ')
@@ -257,8 +259,6 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         cryst_size_file.write('Crystal size (meters) : Mosaic domain size (meters) : Pattern file\n')
 
     for i in np.arange(1, (num_patterns + 1)):
-        # FIXME: the stuff within this loop should probably be made into a separate class, along with the ClCore() instance at the top.
-        #        that way we can do monte-carlo simulations within various programs, not just for crystallography.
         if(mosaic_domain_size_fwhm != 0):
             mosaic_domain_size = np.random.normal(mosaic_domain_size_original, mosaic_domain_size_fwhm / 2.354820045)
         if(crystal_size_fwhm != 0):
@@ -297,14 +297,8 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
                 write('done\n')
 
         R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
-# FIXME: next few lines override this one, yes?
-        if random_rotation: R = ba.utils.random_rotation()
-
 
         if random_rotation:
-            if fix_rot_seq:
-# FIXME: good to set the seed on request, but I think this should be done at the very top so it affects all random numbers
-                np.random.seed(i)
             R = ba.utils.random_rotation()
         if not cromer_mann:
             write('Simulating molecular transform from Henke tables... ')
