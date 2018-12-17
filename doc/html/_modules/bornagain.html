@@ -244,7 +244,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Can&#39;t open docs because you need to install the webbrowser Python package.&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;If using conda, perhaps you could run &#39;conda install webbrowser?&#39;&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;You can otherwise point your webbrowser to the directory </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">docs_file_path</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;On Mac OS, you can do that from the terminal using the command &#39;open the/path/above&#39;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;On Mac OS, you can do that from the terminal using the command &#39;open </span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">docs_file_path</span><span class="p">))</span>
         <span class="k">return</span>
 
     <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;file://&#39;</span> <span class="o">+</span> <span class="n">docs_file_path</span><span class="p">)</span></div>

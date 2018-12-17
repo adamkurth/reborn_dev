@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.ColorButton module
-=================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.ColorButton
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -4,6 +4,7 @@
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
+  <meta name="robots" content="noindex, nofollow" />
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -260,6 +261,16 @@ along with a list of data arrays.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.peaks">
+<code class="descname">peaks</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.peaks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.apply_filters">
+<code class="descname">apply_filters</code><em class="property"> = True</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.apply_filters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="bornagain.viewers.qtviews.padviews.PADView.logscale">
 <code class="descname">logscale</code><em class="property"> = False</em><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.logscale" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -302,6 +313,11 @@ along with a list of data arrays.</p>
 <dl class="method">
 <dt id="bornagain.viewers.qtviews.padviews.PADView.hide_rois">
 <code class="descname">hide_rois</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.hide_rois"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.hide_rois" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.toggle_rois">
+<code class="descname">toggle_rois</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.toggle_rois"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.toggle_rois" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -416,7 +432,7 @@ along with a list of data arrays.</p>
 
 <dl class="method">
 <dt id="bornagain.viewers.qtviews.padviews.PADView.update_pads">
-<code class="descname">update_pads</code><span class="sig-paren">(</span><em>pad_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.update_pads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.update_pads" title="Permalink to this definition">¶</a></dt>
+<code class="descname">update_pads</code><span class="sig-paren">(</span><em>pad_data=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.update_pads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.update_pads" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -470,16 +486,6 @@ along with a list of data arrays.</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="bornagain.viewers.qtviews.padviews.PADView.add_scatter_plot">
-<code class="descname">add_scatter_plot</code><span class="sig-paren">(</span><em>*args</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.add_scatter_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.add_scatter_plot" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="bornagain.viewers.qtviews.padviews.PADView.remove_scatter_plots">
-<code class="descname">remove_scatter_plots</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.remove_scatter_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.remove_scatter_plots" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="bornagain.viewers.qtviews.padviews.PADView.show_history_next">
 <code class="descname">show_history_next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.show_history_next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.show_history_next" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -523,6 +529,31 @@ along with a list of data arrays.</p>
 </table>
 <p>Returns:</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.add_scatter_plot">
+<code class="descname">add_scatter_plot</code><span class="sig-paren">(</span><em>*args</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.add_scatter_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.add_scatter_plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.remove_scatter_plots">
+<code class="descname">remove_scatter_plots</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.remove_scatter_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.remove_scatter_plots" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.display_peaks">
+<code class="descname">display_peaks</code><span class="sig-paren">(</span><em>peaks=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.display_peaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.display_peaks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.toggle_peaks">
+<code class="descname">toggle_peaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.toggle_peaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.toggle_peaks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.viewers.qtviews.padviews.PADView.toggle_filter">
+<code class="descname">toggle_filter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/viewers/qtviews/padviews.html#PADView.toggle_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.viewers.qtviews.padviews.PADView.toggle_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="bornagain.viewers.qtviews.padviews.PADView.start">

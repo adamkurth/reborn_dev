@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.colormap module
-======================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.colormap
-    :members:
-    :undoc-members:
-    :show-inheritance:

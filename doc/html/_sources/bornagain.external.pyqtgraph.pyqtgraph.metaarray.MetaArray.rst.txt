@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.metaarray.MetaArray module
-=================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.metaarray.MetaArray
-    :members:
-    :undoc-members:
-    :show-inheritance:

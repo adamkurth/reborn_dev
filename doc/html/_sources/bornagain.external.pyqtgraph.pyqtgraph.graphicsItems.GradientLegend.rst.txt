@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GradientLegend module
-==========================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GradientLegend
-    :members:
-    :undoc-members:
-    :show-inheritance:

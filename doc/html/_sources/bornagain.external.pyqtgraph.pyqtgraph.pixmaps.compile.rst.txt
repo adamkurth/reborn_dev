@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.pixmaps.compile module
-=============================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.pixmaps.compile
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GridItem module
-====================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GridItem
-    :members:
-    :undoc-members:
-    :show-inheritance:

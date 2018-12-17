@@ -169,10 +169,10 @@
 
 <span class="kn">from</span> <span class="nn">pyqtgraph.Qt</span> <span class="k">import</span> <span class="n">uic</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
 
-<span class="kn">import</span> <span class="nn">bornagain</span>
-<span class="kn">import</span> <span class="nn">bornagain.external.pyqtgraph</span> <span class="k">as</span> <span class="nn">bpg</span>
+<span class="c1"># import bornagain</span>
+<span class="c1"># import bornagain.external.pyqtgraph as bpg</span>
 <span class="kn">from</span> <span class="nn">bornagain.fileio.getters</span> <span class="k">import</span> <span class="n">FrameGetter</span>
-<span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">analysis</span>
+<span class="c1"># from bornagain import analysis</span>
 
 <span class="n">padviewui</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.viewers.qtviews&#39;</span><span class="p">,</span> <span class="s1">&#39;padview.ui&#39;</span><span class="p">)</span>
 
@@ -214,6 +214,8 @@
     <span class="n">peak_finders</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">data_filters</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">show_peaks</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">peaks</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">apply_filters</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logscale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">frame_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
@@ -251,14 +253,15 @@
         <span class="c1"># self.viewbox.addItem(self.label)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_mouse_interactions</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_shortcuts</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_menu</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">statusbar</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color:rgb(30, 30, 30);color:rgb(255,0,255);&quot;</span>
                                                  <span class="s2">&quot;font-weight:bold;font-family:monospace;&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">show_frame</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">setWindowState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">windowState</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pg</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowMinimized</span>
-                                        <span class="o">|</span> <span class="n">pg</span><span class="o">.</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowActive</span><span class="p">)</span>
+        <span class="c1"># self.main_window.setWindowState(self.main_window.windowState() &amp; ~pg.QtCore.Qt.WindowMinimized</span>
+        <span class="c1">#                                 | pg.QtCore.Qt.WindowActive)</span>
         <span class="c1">#self.main_window.activateWindow()</span>
         <span class="c1">#self.main_window.showMaximized()</span>
 
@@ -268,8 +271,13 @@
 
     <span class="k">def</span> <span class="nf">_setup_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">actionGrid</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_grid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">actionRings</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_ring_radii</span><span class="p">)</span>
+        <span class="n">mw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span>
+        <span class="n">mw</span><span class="o">.</span><span class="n">actionGrid</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_grid</span><span class="p">)</span>
+        <span class="n">mw</span><span class="o">.</span><span class="n">actionRings</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_ring_radii</span><span class="p">)</span>
+        <span class="n">mw</span><span class="o">.</span><span class="n">actionMaskVisible</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_masks</span><span class="p">)</span>
+        <span class="n">mw</span><span class="o">.</span><span class="n">actionRectangleROIVisible</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_rois</span><span class="p">)</span>
+        <span class="n">mw</span><span class="o">.</span><span class="n">actionPeaksVisible</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_peaks</span><span class="p">)</span>
+        <span class="n">mw</span><span class="o">.</span><span class="n">actionCustomFilter</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_filter</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_simple_keyboard_shortcut</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
 
@@ -339,13 +347,20 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">roi</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_mask_rois</span> <span class="o">=</span> <span class="kc">None</span></div>
 
+<div class="viewcode-block" id="PADView.toggle_rois"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_rois">[docs]</a>    <span class="k">def</span> <span class="nf">toggle_rois</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask_rois</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_roi</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide_rois</span><span class="p">()</span></div>
+
 <div class="viewcode-block" id="PADView.increase_skip"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.increase_skip">[docs]</a>    <span class="k">def</span> <span class="nf">increase_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">skip</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">skip</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADView.decrease_skip"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.decrease_skip">[docs]</a>    <span class="k">def</span> <span class="nf">decrease_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">skip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">skip</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">])</span> </div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">skip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">skip</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="PADView.show_coordinate_axes"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_coordinate_axes">[docs]</a>    <span class="k">def</span> <span class="nf">show_coordinate_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -562,7 +577,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mask_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">mask_color</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_color</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">128</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pads</span><span class="p">):</span>
 
@@ -622,6 +637,9 @@
 <div class="viewcode-block" id="PADView.mask_all_rois"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.mask_all_rois">[docs]</a>    <span class="k">def</span> <span class="nf">mask_all_rois</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">noslice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask_rois</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
 
         <span class="k">for</span> <span class="n">roi</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask_rois</span><span class="p">:</span>
 
@@ -686,9 +704,10 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">main_window</span><span class="o">.</span><span class="n">histogram</span><span class="o">.</span><span class="n">regionChanged</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PADView.update_pads"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.update_pads">[docs]</a>    <span class="k">def</span> <span class="nf">update_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_data</span><span class="p">):</span>
+<div class="viewcode-block" id="PADView.update_pads"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.update_pads">[docs]</a>    <span class="k">def</span> <span class="nf">update_pads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span> <span class="o">=</span> <span class="n">pad_data</span>
+        <span class="k">if</span> <span class="n">pad_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span> <span class="o">=</span> <span class="n">pad_data</span>
 
         <span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
@@ -837,25 +856,6 @@
         <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">:</span>
             <span class="n">image</span><span class="o">.</span><span class="n">setBorder</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PADView.add_scatter_plot"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.add_scatter_plot">[docs]</a>    <span class="k">def</span> <span class="nf">add_scatter_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="n">scat</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">ScatterPlotItem</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scat</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">scat</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="PADView.remove_scatter_plots"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.remove_scatter_plots">[docs]</a>    <span class="k">def</span> <span class="nf">remove_scatter_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span>
-
-        <span class="k">for</span> <span class="n">scat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">scat</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span> <span class="o">=</span> <span class="kc">None</span></div>
-
 <div class="viewcode-block" id="PADView.show_history_next"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_history_next">[docs]</a>    <span class="k">def</span> <span class="nf">show_history_next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -933,73 +933,87 @@
 
         <span class="k">if</span> <span class="s1">&#39;pad_data&#39;</span> <span class="ow">in</span> <span class="n">dat</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
 
-            <span class="n">pad_data</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;pad_data&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;pad_data&#39;</span><span class="p">]</span>
 
-            <span class="c1"># if bornagain.get_global(&#39;debug&#39;):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_filters</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="k">for</span> <span class="nb">filter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_filters</span><span class="p">:</span>
+                    <span class="nb">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span>
 
-            <span class="c1"># pad_data = dat[&#39;pad_data&#39;]</span>
-            <span class="c1"># t = time()</span>
-            <span class="c1"># pad_data = analysis.peaks.snr_filter_pool(pad_data)</span>
-            <span class="c1"># print((time() - t), &#39; ms (mp)&#39;)</span>
-            <span class="c1">#</span>
-            <span class="c1"># pad_data = dat[&#39;pad_data&#39;]</span>
-            <span class="c1"># t = time()</span>
-            <span class="c1"># for i in range(0, len(pad_data)):</span>
-            <span class="c1">#     pad_data[i] = analysis.peaks.snr_filter(pad_data[i])</span>
-            <span class="c1"># print((time() - t), &#39; ms&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_pads</span><span class="p">()</span>
 
-            <span class="c1"># if self.data_filters is None:</span>
-            <span class="c1">#     pad_data = dat[&#39;pad_data&#39;]</span>
-            <span class="c1"># else:</span>
-            <span class="c1">#     pad_data =</span>
-            <span class="c1"># else:</span>
-            <span class="c1">#     pad_data = dat[&#39;pad_data&#39;]</span>
-            <span class="c1">#     print(type(pad_data))</span>
-            <span class="c1">#     if hasattr(self.data_filters, &#39;__call__&#39;):</span>
-            <span class="c1">#         t = time()</span>
-            <span class="c1">#         for i in range(0, len(pad_data)):</span>
-            <span class="c1">#             pad_data[i] = self.data_filters(pad_data[i])</span>
-            <span class="c1">#         print((time() - t)/len(pad_data), &#39; ms&#39;)</span>
+        <span class="k">if</span> <span class="s1">&#39;peaks&#39;</span> <span class="ow">in</span> <span class="n">dat</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">update_pads</span><span class="p">(</span><span class="n">pad_data</span><span class="p">)</span>
-
-        <span class="c1"># if self.peak_finders is not None:</span>
-        <span class="c1">#</span>
-        <span class="c1">#     pads = dat[&#39;pad_data&#39;]</span>
-        <span class="c1">#</span>
-        <span class="c1">#     new_pads = []</span>
-        <span class="c1">#</span>
-        <span class="c1">#     for pad, peak_finder in zip(pads, self.peak_finders):</span>
-        <span class="c1">#         # new_pads.append(peak_finder.get_signal_above_background(pad))</span>
-        <span class="c1">#         new_pads.append(peak_finder.get_snr(pad))</span>
-        <span class="c1">#</span>
-        <span class="c1">#     self.update_pads(new_pads)</span>
-        <span class="c1">#</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;peaks&#39;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_peaks</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-
-            <span class="k">if</span> <span class="s1">&#39;peaks&#39;</span> <span class="ow">in</span> <span class="n">dat</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-
-                <span class="n">peaks</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;peaks&#39;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">peaks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">n_peaks</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="s1">&#39;n_peaks&#39;</span><span class="p">]</span>
-                    <span class="n">pad_numbers</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="s1">&#39;pad_numbers&#39;</span><span class="p">]</span>
-                    <span class="n">fs_pos</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="s1">&#39;fs_pos&#39;</span><span class="p">]</span>
-                    <span class="n">ss_pos</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="s1">&#39;ss_pos&#39;</span><span class="p">]</span>
-
-                    <span class="n">pad_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span>
-                    <span class="n">gl_fs_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_peaks</span><span class="p">)</span>
-                    <span class="n">gl_ss_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_peaks</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_peaks</span><span class="p">):</span>
-                        <span class="n">pad_num</span> <span class="o">=</span> <span class="n">pad_numbers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                        <span class="n">vec</span> <span class="o">=</span> <span class="n">pad_geom</span><span class="p">[</span><span class="n">pad_num</span><span class="p">]</span><span class="o">.</span><span class="n">indices_to_vectors</span><span class="p">(</span><span class="n">ss_pos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fs_pos</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-                        <span class="n">gl_fs_pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">()</span>
-                        <span class="n">gl_ss_pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">add_scatter_plot</span><span class="p">(</span><span class="n">gl_fs_pos</span><span class="p">,</span> <span class="n">gl_ss_pos</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="n">brush</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pxMode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">display_peaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_status_string</span><span class="p">(</span><span class="n">frame_number</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">current_frame</span><span class="p">,</span> <span class="n">n_frames</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">n_frames</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_mouse_moved</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evt</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PADView.add_scatter_plot"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.add_scatter_plot">[docs]</a>    <span class="k">def</span> <span class="nf">add_scatter_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">scat</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">ScatterPlotItem</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scat</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">scat</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PADView.remove_scatter_plots"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.remove_scatter_plots">[docs]</a>    <span class="k">def</span> <span class="nf">remove_scatter_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">scat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">viewbox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">scat</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PADView.display_peaks"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.display_peaks">[docs]</a>    <span class="k">def</span> <span class="nf">display_peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">peaks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peaks</span>
+
+        <span class="k">if</span> <span class="n">peaks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">n_peaks</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="s1">&#39;n_peaks&#39;</span><span class="p">]</span>
+        <span class="n">pad_numbers</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="s1">&#39;pad_numbers&#39;</span><span class="p">]</span>
+        <span class="n">fs_pos</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="s1">&#39;fs_pos&#39;</span><span class="p">]</span>
+        <span class="n">ss_pos</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="s1">&#39;ss_pos&#39;</span><span class="p">]</span>
+
+        <span class="n">pad_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span>
+        <span class="n">gl_fs_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_peaks</span><span class="p">)</span>
+        <span class="n">gl_ss_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_peaks</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_peaks</span><span class="p">):</span>
+            <span class="n">pad_num</span> <span class="o">=</span> <span class="n">pad_numbers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">vec</span> <span class="o">=</span> <span class="n">pad_geom</span><span class="p">[</span><span class="n">pad_num</span><span class="p">]</span><span class="o">.</span><span class="n">indices_to_vectors</span><span class="p">(</span><span class="n">ss_pos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fs_pos</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">gl_fs_pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">()</span>
+            <span class="n">gl_ss_pos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_scatter_plot</span><span class="p">(</span><span class="n">gl_fs_pos</span><span class="p">,</span> <span class="n">gl_ss_pos</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="n">brush</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">pxMode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PADView.toggle_peaks"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_peaks">[docs]</a>    <span class="k">def</span> <span class="nf">toggle_peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter_plots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">display_peaks</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_peaks</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_scatter_plots</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_peaks</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_pads</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PADView.toggle_filter"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_filter">[docs]</a>    <span class="k">def</span> <span class="nf">toggle_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_filters</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_filters</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_filters</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
 
 <div class="viewcode-block" id="PADView.start"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 

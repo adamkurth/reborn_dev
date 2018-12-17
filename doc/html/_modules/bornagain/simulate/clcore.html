@@ -275,7 +275,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If the environment variable BORNAGAIN_CL_GROUPSIZE is set then use</span>
 <span class="sd">        that value.</span>
-<span class="sd">        </span>
+
 <span class="sd">        If the group size exceeds the max allowed group size, then make it</span>
 <span class="sd">        smaller (but print warning)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -404,16 +404,16 @@
 <span class="sd">        Evdidently pyopencl does not deal with 3-vectors very well, so we use</span>
 <span class="sd">        4-vectors and pad with a zero at the end.</span>
 
-<span class="sd">        From Derek: I tested this at one point and found no difference... maybe newer pyopenCL is better.. </span>
+<span class="sd">        From Derek: I tested this at one point and found no difference... maybe newer pyopenCL is better..</span>
 
 <span class="sd">        This just does a trivial operation:</span>
 <span class="sd">        return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)</span>
-<span class="sd">            </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            x np.ndarray:</span>
-<span class="sd">            </span>
+
 <span class="sd">            dtype np.dtype: Examples: np.complex, np.double</span>
-<span class="sd">            </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            - numpy array of length 4</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -452,13 +452,13 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Static method</span>
 
-<span class="sd">        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy </span>
+<span class="sd">        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy</span>
 <span class="sd">        array into a pyopencl.array and send it to the device memory.  So far this only</span>
 <span class="sd">        deals with float and comlex arrays, and it should figure out which type it is.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            array (numpy/cl array; float/complex type): Input array.</span>
-<span class="sd">            dtype (np.dtype): Specify the desired type in opencl.  The two types that </span>
+<span class="sd">            dtype (np.dtype): Specify the desired type in opencl.  The two types that</span>
 <span class="sd">                               are useful here are np.float32 and np.complex64</span>
 <span class="sd">            queue, CL queue</span>
 <span class="sd">        Returns:</span>
@@ -474,15 +474,15 @@
 <div class="viewcode-block" id="ClCore.to_device"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.to_device">[docs]</a>    <span class="k">def</span> <span class="nf">to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy </span>
+<span class="sd">        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy</span>
 <span class="sd">        array into a pyopencl.array and send it to the device memory.  So far this only</span>
 <span class="sd">        deals with float and comlex arrays, and it should figure out which type it is.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            array (numpy/cl array; float/complex type): Input array.</span>
-<span class="sd">            shape (tuple): Optionally specify the shape of the desired array.  This is </span>
-<span class="sd">                            ignored if array is not None. </span>
-<span class="sd">            dtype (np.dtype): Specify the desired type in opencl.  The two types that </span>
+<span class="sd">            shape (tuple): Optionally specify the shape of the desired array.  This is</span>
+<span class="sd">                            ignored if array is not None.</span>
+<span class="sd">            dtype (np.dtype): Specify the desired type in opencl.  The two types that</span>
 <span class="sd">                               are useful here are np.float32 and np.complex64</span>
 
 <span class="sd">        Returns:</span>
@@ -564,47 +564,47 @@
 <span class="sd">            q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).</span>
 <span class="sd">            r (numpy/cl float array [M,3]): Atomic coordinates.</span>
 <span class="sd">            f (numpy/cl complex array [M]): Complex scattering factors.</span>
-<span class="sd">            Nchunk, number of chunks to split up atoms.. </span>
-<span class="sd">            a (cl complex array [N]): Optional container for complex scattering </span>
+<span class="sd">            Nchunk, number of chunks to split up atoms..</span>
+<span class="sd">            a (cl complex array [N]): Optional container for complex scattering</span>
 <span class="sd">              amplitudes.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array </span>
+<span class="sd">            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array</span>
 <span class="sd">              if there are input cl arrays.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># this is an inplace method, so we add amplitudes </span>
-        <span class="n">add</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># inplace </span>
-        
+        <span class="c1"># this is an inplace method, so we add amplitudes</span>
+        <span class="n">add</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># inplace</span>
+
         <span class="c1">#if R is None:</span>
         <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vec16</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
-        
+
         <span class="n">n_pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        
+
         <span class="n">global_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_pixels</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">))</span>
                              <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">)</span>
-        
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">q_is_qdev</span><span class="p">:</span>
             <span class="n">q_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">q_dev</span> <span class="o">=</span> <span class="n">q</span>
 
         <span class="n">n_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        
+
         <span class="n">r_split</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span> <span class="n">n_atoms</span><span class="p">),</span> <span class="n">Nchunk</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">r_rng</span> <span class="ow">in</span> <span class="n">r_split</span><span class="p">:</span>
             <span class="n">r_chunk</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">r_rng</span><span class="p">]</span>
             <span class="n">f_chunk</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">r_rng</span><span class="p">]</span>
             <span class="n">r_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">r_chunk</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
             <span class="n">f_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">f_chunk</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">complex_t</span><span class="p">)</span>
-            
+
             <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_qrf_cl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">global_size</span><span class="p">,),</span>
-                                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+                                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                                      <span class="n">r_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-                                     <span class="n">f_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
-                                     <span class="n">R</span><span class="p">,</span> 
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+                                     <span class="n">f_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                                     <span class="n">R</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                                      <span class="n">n_atoms</span><span class="p">,</span>
                                      <span class="n">n_pixels</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span></div>
 
@@ -617,13 +617,13 @@
 <span class="sd">            q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).</span>
 <span class="sd">            r (numpy/cl float array [M,3]): Atomic coordinates.</span>
 <span class="sd">            f (numpy/cl complex array [M]): Complex scattering factors.</span>
-<span class="sd">            R (numpy array [3,3]): Rotation matrix acting on atom vectors </span>
+<span class="sd">            R (numpy array [3,3]): Rotation matrix acting on atom vectors</span>
 <span class="sd">                (we quietly transpose R and let it operate on q-vectors for speedups)</span>
-<span class="sd">            a (cl complex array [N]): Optional container for complex scattering </span>
+<span class="sd">            a (cl complex array [N]): Optional container for complex scattering</span>
 <span class="sd">              amplitudes.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array </span>
+<span class="sd">            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array</span>
 <span class="sd">              if there are input cl arrays.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -646,11 +646,11 @@
 
         <span class="n">add</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">int_t</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># inplace always adds...</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phase_factor_qrf_cl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="n">global_size</span><span class="p">,),</span>
-                                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+                                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                                  <span class="n">r_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-                                 <span class="n">f_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
-                                 <span class="n">R</span><span class="p">,</span> 
-                                 <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+                                 <span class="n">f_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                                 <span class="n">R</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">a_dev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
                                  <span class="n">n_atoms</span><span class="p">,</span>
                                  <span class="n">n_pixels</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span></div>
 
@@ -692,10 +692,10 @@
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        retrieve scattering amplitudes from cromer-mann simulator</span>
-<span class="sd">        </span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            reset:</span>
-<span class="sd">                whether to reset the amplitudes to zeros </span>
+<span class="sd">                whether to reset the amplitudes to zeros</span>
 
 <span class="sd">        Returns:</span>
 
@@ -717,11 +717,11 @@
 <span class="sd">            R (numpy array [3,3]): Rotation matrix acting on atom vectors.</span>
 <span class="sd">                (we quietly transpose R and let it operate on q-vectors for speedups)</span>
 <span class="sd">            f (numpy/cl complex array [M]): Complex scattering factors.</span>
-<span class="sd">            a (cl complex array [N]): Optional container for complex scattering </span>
+<span class="sd">            a (cl complex array [N]): Optional container for complex scattering</span>
 <span class="sd">              amplitudes.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array </span>
+<span class="sd">            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array</span>
 <span class="sd">              if there are input cl arrays.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -830,11 +830,11 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            r (Nx3 numpy array): Atomic coordinates</span>
 <span class="sd">            f (numpy array): A numpy array of complex atomic scattering factors</span>
-<span class="sd">            N (numpy array length 3): Number of q-space samples in each of the three </span>
+<span class="sd">            N (numpy array length 3): Number of q-space samples in each of the three</span>
 <span class="sd">               dimensions</span>
-<span class="sd">            q_min (numpy array length 3): Minimum q-space magnitudes in the 3d mesh.  </span>
+<span class="sd">            q_min (numpy array length 3): Minimum q-space magnitudes in the 3d mesh.</span>
 <span class="sd">               These values specify the *center* of the first voxel.</span>
-<span class="sd">            q_max (numpy array length 3): Naximum q-space magnitudes in the 3d mesh.  </span>
+<span class="sd">            q_max (numpy array length 3): Naximum q-space magnitudes in the 3d mesh.</span>
 <span class="sd">               These values specify the *center* of the voxel.</span>
 
 <span class="sd">        Returns:</span>
@@ -887,7 +887,7 @@
 <span class="sd">        This is supposed to lookup intensities from a 3d mesh of amplitudes.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            a_map (numpy array): Complex scattering amplitudes (usually generated from </span>
+<span class="sd">            a_map (numpy array): Complex scattering amplitudes (usually generated from</span>
 <span class="sd">               the function phase_factor_mesh())</span>
 <span class="sd">            N (int): As defined in phase_factor_mesh()</span>
 <span class="sd">            q_min (float): As defined in phase_factor_mesh()</span>
@@ -1112,7 +1112,7 @@
 
         <span class="k">assert</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nspecies</span> <span class="o">&lt;</span> <span class="mi">13</span><span class="p">)</span>  <span class="c1"># can easily change this later if necessary...</span>
         <span class="c1"># ^ this assertion is so we can pass inputs to GPU as a float16, 3 q vectors and 13 atom species</span>
-        <span class="c1"># where one is reserved to be a dummie </span>
+        <span class="c1"># where one is reserved to be a dummie</span>
 
         <span class="c1">#       load the amplitudes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_amp_buffer</span><span class="p">()</span>
@@ -1130,7 +1130,7 @@
 
 <span class="sd">            sub_com (bool):</span>
 <span class="sd">                Whether to sub the center of mass from the atom vecs</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            pyopenCL buffer data :</span>
 <span class="sd">                Natoms x 4 contiguous openCL buffer array</span>
@@ -1163,9 +1163,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">r_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r_vecs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ClCore.get_q_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.get_q_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">get_q_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; </span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        combine form factors and q-vectors and load onto a CL buffer</span>
-<span class="sd">        </span>
+
 <span class="sd">        Arguments:</span>
 
 <span class="sd">            q_vecs (np.ndarray) :</span>
@@ -1173,11 +1173,11 @@
 
 <span class="sd">            atomic_nums (np.ndarray) :</span>
 <span class="sd">                Natoms x 1 array of atomic numbers</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            pyopenCL buffer data :</span>
 <span class="sd">                Npixelbuff x 16 contiguous openCL buffer array</span>
-<span class="sd">                where Npixel buff is the first multiple of </span>
+<span class="sd">                where Npixel buff is the first multiple of</span>
 <span class="sd">                group_size that is greater than Npixels</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1209,7 +1209,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_A_buff_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A_buff</span><span class="o">.</span><span class="n">data</span>
 
-<div class="viewcode-block" id="ClCore.run_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.run_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">run_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span> 
+<div class="viewcode-block" id="ClCore.run_cromermann"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.run_cromermann">[docs]</a>    <span class="k">def</span> <span class="nf">run_cromermann</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span>
                     <span class="n">rand_rot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">force_rot_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -1217,40 +1217,40 @@
 
 <span class="sd">        Arguments</span>
 <span class="sd">            q_buff_data (pyopenCL buffer data) :</span>
-<span class="sd">                should have shape NpixelsCLx16 where </span>
+<span class="sd">                should have shape NpixelsCLx16 where</span>
 <span class="sd">                NpixelsCL is the first multiple of group_size greater than</span>
-<span class="sd">                Npixels. </span>
-<span class="sd">                Use :func:`get_group_size` to check the currently </span>
+<span class="sd">                Npixels.</span>
+<span class="sd">                Use :func:`get_group_size` to check the currently</span>
 <span class="sd">                set group_size. The data stored in</span>
-<span class="sd">                q[Npixels,:3] should be the q-vectors. </span>
+<span class="sd">                q[Npixels,:3] should be the q-vectors.</span>
 <span class="sd">                The data stored in q[Npixels,3:Nspecies] should be the</span>
-<span class="sd">                q-dependent atomic form factors for up to Nspecies=13 </span>
+<span class="sd">                q-dependent atomic form factors for up to Nspecies=13</span>
 <span class="sd">                atom species See :func:`prime_comermann_simulator`</span>
-<span class="sd">                for details regarding the form factor storage and atom </span>
+<span class="sd">                for details regarding the form factor storage and atom</span>
 <span class="sd">                species identifier</span>
-<span class="sd">            </span>
+
 <span class="sd">            r_buff_data (pyopenCL buffer data) :</span>
-<span class="sd">                Should have shape Natomsx4. The data stored in </span>
+<span class="sd">                Should have shape Natomsx4. The data stored in</span>
 <span class="sd">                r_buff_data[:,:3] are the atomic positions in cartesian</span>
-<span class="sd">                (x,y,z).  The data stored in r_buff_data[:,3] are </span>
+<span class="sd">                (x,y,z).  The data stored in r_buff_data[:,3] are</span>
 <span class="sd">                the atom species identifiers (0,1,..Nspecies-1)</span>
-<span class="sd">                mapping the atom species here to the form factor value </span>
+<span class="sd">                mapping the atom species here to the form factor value</span>
 <span class="sd">                in q_buff_data.</span>
-<span class="sd">            </span>
+
 <span class="sd">            rand_rot (bool) :</span>
 <span class="sd">                Randomly rotate the molecule</span>
-<span class="sd">            </span>
+
 <span class="sd">            force_rand_rot (np.ndarray) :</span>
 <span class="sd">                Supply a specific rotation matrix that operates on molecules</span>
-<span class="sd">            </span>
+
 <span class="sd">            com (np.ndarray) :</span>
 <span class="sd">                Offset the center of mass of the molecule</span>
-<span class="sd">                </span>
+
 <span class="sd">        .. note::</span>
-<span class="sd">            For atom r_i the atom species identifier is sp_i = </span>
+<span class="sd">            For atom r_i the atom species identifier is sp_i =</span>
 <span class="sd">            r_buff_data[r_i,3].</span>
-<span class="sd">            Then, for pixel q_i, the simulator can find the corresponding </span>
-<span class="sd">            form factor in q_buff_dat[q_i,3+sp_i]. </span>
+<span class="sd">            Then, for pixel q_i, the simulator can find the corresponding</span>
+<span class="sd">            form factor in q_buff_dat[q_i,3+sp_i].</span>
 <span class="sd">            I know it is confusing, but it&#39;s efficient.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1272,9 +1272,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_com_vec</span><span class="p">()</span>
 
         <span class="c1">#       run the program</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_cromer_mann_cl</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">),),</span> 
-            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span> 
-            <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">qrf_cromer_mann_cl</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Npix</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nextra_pix</span><span class="p">),),</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group_size</span><span class="p">,),</span> <span class="n">q_buff_data</span><span class="p">,</span> <span class="n">r_buff_data</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_A_buff_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nato</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_set_rand_rot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1283,13 +1283,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rot_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot_mat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_com_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;sets the center-of mass vectors on the device&quot;&quot;&quot;</span> 
+        <span class="sd">&quot;&quot;&quot;sets the center-of mass vectors on the device&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">com_buff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">com_vec</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ClCore.release_amplitudes"><a class="viewcode-back" href="../../../bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.release_amplitudes">[docs]</a>    <span class="k">def</span> <span class="nf">release_amplitudes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Releases the amplitude buffer from the GPU</span>
-<span class="sd">        </span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            reset (bool) : Reset the amplitude buffer to 0&#39;s on the GPU</span>
 

@@ -160,7 +160,7 @@
 <span class="sd">Basic utilities for dealing with crystalline objects.</span>
 
 <span class="sd">from Derek: Is using meters really the best here, given the PDB standard is Angstrom</span>
-<span class="sd">and we will likey always deal with Angstrom scale coordinates? </span>
+<span class="sd">and we will likey always deal with Angstrom scale coordinates?</span>
 
 <span class="sd">for example print( &quot;Lattice dim is %.3f&quot;%(0.0000008)) will print 0.000, which can</span>
 <span class="sd">cause problems...</span>
@@ -392,7 +392,7 @@
     <span class="n">cryst</span><span class="o">.</span><span class="n">nAtoms</span> <span class="o">=</span> <span class="n">nAtoms</span>
 
     <span class="n">cryst</span><span class="o">.</span><span class="n">set_spacegroup</span><span class="p">(</span><span class="n">hermann_mauguin_symbol</span><span class="p">)</span>
-    
+
     <span class="k">return</span> <span class="n">cryst</span></div>
 
 
@@ -443,27 +443,27 @@
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    From Derek: assemble and assemble3 are identical functions, hence the try/except at the start</span>
 <span class="sd">        n_unit can be a tuple or an integer</span>
-<span class="sd">    </span>
-<span class="sd">    Creates a finite lattice </span>
+
+<span class="sd">    Creates a finite lattice</span>
 <span class="sd">    Args:</span>
-<span class="sd">        O, Structure attribute O (3x3 ndarray), orientation matrix of crystal </span>
+<span class="sd">        O, Structure attribute O (3x3 ndarray), orientation matrix of crystal</span>
 <span class="sd">            (columns are the lattice vectors a,b,c)</span>
 <span class="sd">        n_unit (int or 3-tuple): Number of unit cells along each crystal axis</span>
 <span class="sd">        spherical (bool): If true, apply a spherical boundary to the crystal.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="c1">#lattice coordinates</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">n_unit_a</span><span class="p">,</span> <span class="n">n_unit_b</span><span class="p">,</span> <span class="n">n_unit_c</span> <span class="o">=</span> <span class="n">n_unit</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="n">n_unit_a</span> <span class="o">=</span> <span class="n">n_unit_b</span> <span class="o">=</span> <span class="n">n_unit_c</span> <span class="o">=</span> <span class="n">n_unit</span>
-      
+
     <span class="n">a_vec</span><span class="p">,</span> <span class="n">b_vec</span><span class="p">,</span> <span class="n">c_vec</span> <span class="o">=</span> <span class="n">O</span><span class="o">.</span><span class="n">T</span>
     <span class="n">vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="o">*</span> <span class="n">a_vec</span> <span class="o">+</span> <span class="n">j</span> <span class="o">*</span> <span class="n">b_vec</span> <span class="o">+</span> <span class="n">k</span> <span class="o">*</span> <span class="n">c_vec</span>
                           <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_unit_a</span><span class="p">)</span>
                           <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_unit_b</span><span class="p">)</span>
                           <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_unit_c</span><span class="p">)])</span>
-    
+
     <span class="c1"># sphericalize the lattice..</span>
     <span class="k">if</span> <span class="n">spherical</span><span class="p">:</span>
         <span class="n">vecs</span> <span class="o">=</span> <span class="n">simutils</span><span class="o">.</span><span class="n">sphericalize</span><span class="p">(</span><span class="n">vecs</span><span class="p">)</span>

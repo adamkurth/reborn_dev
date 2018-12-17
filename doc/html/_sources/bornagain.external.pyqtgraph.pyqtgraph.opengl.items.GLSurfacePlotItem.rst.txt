@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLSurfacePlotItem module
-============================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl.items.GLSurfacePlotItem
-    :members:
-    :undoc-members:
-    :show-inheritance:

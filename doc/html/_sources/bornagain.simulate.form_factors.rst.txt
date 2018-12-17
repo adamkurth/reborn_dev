@@ -1,0 +1,7 @@
+bornagain.simulate.form\_factors module
+=======================================
+
+.. automodule:: bornagain.simulate.form_factors
+    :members:
+    :undoc-members:
+    :show-inheritance:

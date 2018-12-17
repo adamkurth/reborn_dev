@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.multiprocess.processes module
-====================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.multiprocess.processes
-    :members:
-    :undoc-members:
-    :show-inheritance:

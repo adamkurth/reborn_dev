@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.LinearRegionItem module
-============================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.LinearRegionItem
-    :members:
-    :undoc-members:
-    :show-inheritance:

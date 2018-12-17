@@ -177,15 +177,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">form_facts</span> <span class="o">=</span> <span class="p">{}</span>
-    
+
     <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-     
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">q_mag_squared</span> <span class="o">=</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span>
-    
+
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
         <span class="n">q_mag_squared</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># magnitude of momentum transfer squared</span>
-    
+
     <span class="n">expo_terms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="n">q_mag_squared</span> <span class="o">/</span> <span class="p">(</span><span class="mi">16</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="n">coefs</span> <span class="ow">in</span> <span class="n">cman</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
@@ -193,22 +193,22 @@
         <span class="n">b_vals</span> <span class="o">=</span> <span class="n">coefs</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">coefs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 <span class="c1">#       make the form factors for each q for atomic number z</span>
-        <span class="n">z_ff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="p">[</span><span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">expo_terms</span><span class="o">**</span><span class="n">b</span><span class="p">)</span> 
-            <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a_vals</span><span class="p">,</span> <span class="n">b_vals</span><span class="p">)],</span> <span class="mi">0</span><span class="p">)</span> 
+        <span class="n">z_ff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="p">[</span><span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">expo_terms</span><span class="o">**</span><span class="n">b</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a_vals</span><span class="p">,</span> <span class="n">b_vals</span><span class="p">)],</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">z_ff</span> <span class="o">+=</span> <span class="n">c</span>
 
         <span class="n">form_facts</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_ff</span>
-    <span class="k">return</span> <span class="n">form_facts</span>   </div>
+    <span class="k">return</span> <span class="n">form_facts</span></div>
 
 
-<div class="viewcode-block" id="get_cromermann_parameters"><a class="viewcode-back" href="../../../bornagain.simulate.refdata.html#bornagain.simulate.refdata.get_cromermann_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">):</span> 
+<div class="viewcode-block" id="get_cromermann_parameters"><a class="viewcode-back" href="../../../bornagain.simulate.refdata.html#bornagain.simulate.refdata.get_cromermann_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Modified from tjlane/thor.git</span>
 <span class="sd">    Get cromer-mann parameters for each atom type</span>
-<span class="sd">    </span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        atomic_numbers (ndarray, int) : A numpy array of the atomic numbers of each atom in the system.</span>
-<span class="sd">        </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        cromermann (dict) :</span>
 <span class="sd">            The Cromer-Mann parameters for the system. The dictionary</span>
@@ -217,9 +217,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">atom_types</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">)</span>
-    
+
     <span class="n">cromermann</span> <span class="o">=</span> <span class="p">{}</span>
-    
+
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atom_types</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">cromermann</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cromer_mann_params</span><span class="p">[(</span><span class="n">a</span><span class="p">,</span><span class="mi">0</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
@@ -227,14 +227,14 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Element number </span><span class="si">%d</span><span class="s1"> not in Cromer-Mann form factor parameter database&#39;</span> <span class="o">%</span> <span class="n">a</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Could not get critical parameters for computation&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">cromermann</span> </div>
+    <span class="k">return</span> <span class="n">cromermann</span></div>
 
 
 <div class="viewcode-block" id="get_cromermann_parameters_legacy"><a class="viewcode-back" href="../../../bornagain.simulate.refdata.html#bornagain.simulate.refdata.get_cromermann_parameters_legacy">[docs]</a><span class="k">def</span> <span class="nf">get_cromermann_parameters_legacy</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">,</span> <span class="n">max_num_atom_types</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get cromer-mann parameters for each atom type and renumber the atom </span>
+<span class="sd">    Get cromer-mann parameters for each atom type and renumber the atom</span>
 <span class="sd">    types to 0, 1, 2, ... to point to their CM params.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Arguments:</span>
 
 <span class="sd">        atomic_numbers (ndarray, int) :</span>
@@ -242,7 +242,7 @@
 
 <span class="sd">        max_num_atom_types (int) :</span>
 <span class="sd">            The maximium number of atom types allowable</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 
 <span class="sd">        cromermann (c-array, float) :</span>
@@ -283,9 +283,9 @@
         <span class="n">aid</span><span class="p">[</span> <span class="n">atomic_numbers</span> <span class="o">==</span> <span class="n">a</span> <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">cromermann</span><span class="p">,</span> <span class="n">aid</span></div>
-    
 
-    
+
+
 <span class="c1"># ------------------------------------------------------------------------------</span>
 <span class="c1"># REFERENCE TABLES (Taken from tjlane/thor.git)</span>
 <span class="c1"># ------------------------------------------------------------------------------</span>
@@ -299,21 +299,21 @@
 <span class="c1"># GENERATION OF THIS TABLE: odin/data/cromer-mann.py</span>
 <span class="c1">#</span>
 <span class="c1"># Recall the Cromer-Mann formula:</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1">#     f0[k] = c + [SUM a_i*EXP(-b_i*(k^2)) ]</span>
 <span class="c1">#                 i=1,4</span>
-<span class="c1">#     </span>
+<span class="c1">#</span>
 <span class="c1"># where k = sin(theta) / lambda = |q| / (4*pi)</span>
-<span class="c1"># and c, a_i and b_i are the so called Cromer-Mann coefficients </span>
+<span class="c1"># and c, a_i and b_i are the so called Cromer-Mann coefficients</span>
 <span class="c1"># (International Tables vol. 4 or vol C; in vol. C refer to pg 500-502)</span>
-<span class="c1"># </span>
+<span class="c1">#</span>
 <span class="c1"># cromer_mann_params : dict</span>
 <span class="c1">#     A dictionary such that</span>
-<span class="c1">#     </span>
+<span class="c1">#</span>
 <span class="c1">#     cromer_mann_params[(atomic_number, ionization_state)] =</span>
 <span class="c1">#         [a_1, a_2, a_3, a_4, b_1, b_2, b_3, b_4, c]</span>
-<span class="c1">#         </span>
-<span class="c1">#     where `ionization_state` is a </span>
+<span class="c1">#</span>
+<span class="c1">#     where `ionization_state` is a</span>
 <span class="c1">#       -- positive int for a cation</span>
 <span class="c1">#       -- negative int for an anion</span>
 <span class="c1">#       -- &#39;.&#39; for a radical</span>
@@ -743,8 +743,8 @@
                       <span class="p">(</span><span class="mi">97</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="mf">36.7881</span><span class="p">,</span> <span class="mf">24.7736</span><span class="p">,</span> <span class="mf">17.8919</span><span class="p">,</span> <span class="mf">4.23284</span><span class="p">,</span> <span class="mf">0.451018</span><span class="p">,</span> <span class="mf">3.04619</span><span class="p">,</span> <span class="mf">12.8946</span><span class="p">,</span> <span class="mf">86.003</span><span class="p">,</span> <span class="mf">13.2754</span><span class="p">],</span>
                       <span class="p">(</span><span class="mi">98</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">:</span> <span class="p">[</span><span class="mf">36.9185</span><span class="p">,</span> <span class="mf">25.1995</span><span class="p">,</span> <span class="mf">18.3317</span><span class="p">,</span> <span class="mf">4.24391</span><span class="p">,</span> <span class="mf">0.437533</span><span class="p">,</span> <span class="mf">3.00775</span><span class="p">,</span> <span class="mf">12.4044</span><span class="p">,</span> <span class="mf">83.7881</span><span class="p">,</span> <span class="mf">13.2674</span><span class="p">],</span>
                       <span class="p">}</span>
-                      
-                      
+
+
 <span class="c1"># A PERIODIC TABLE</span>
 <span class="c1"># source: https://github.com/pkienzle/periodictable</span>
 

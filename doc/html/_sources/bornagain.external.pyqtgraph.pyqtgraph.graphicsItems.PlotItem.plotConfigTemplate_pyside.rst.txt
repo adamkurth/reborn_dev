@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem.plotConfigTemplate\_pyside module
-===============================================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.PlotItem.plotConfigTemplate_pyside
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -36,6 +36,32 @@ class PADGeometry(object):
     _ss_vec = None  #: The slow-scan basis vector.
     _t_vec = None  #: The overall translation vector.
 
+    def __init__(self, n_pixels=None, distance=None, pixel_size=None):
+
+        """
+
+        High-level initialization.  Centers the detector in the x-y plane.
+
+        Args:
+            n_pixels (int):
+            distance (float):
+            pixel_size (float):
+        """
+
+        if n_pixels is not None and distance is not None and pixel_size is not None:
+
+            self.simple_setup(n_pixels=n_pixels, distance=distance, pixel_size=pixel_size)
+
+    def __str__(self):
+
+        s = ''
+        s += 'n_fs: %s\n' % self.n_fs.__str__()
+        s += 'n_ss: %s\n' % self.n_ss.__str__()
+        s += 'fs_vec: %s\n' % self.fs_vec.__str__()
+        s += 'ss_vec: %s\n' % self.ss_vec.__str__()
+        s += 't_vec: %s' % self.t_vec.__str__()
+        return s
+
     @property
     def n_pixels(self):
 
@@ -326,12 +352,14 @@ class PADGeometry(object):
         Returns: numpy array
         """
 
-        if beam is not None:
+        if beam is not None and beam_vec is None:
             beam_vec = beam.beam_vec
+        elif beam_vec is not None and beam is None:
+            pass
+        else:
+            raise ValueError('Scattering angles cannot be computed without knowing the incident beam direction')
 
-        v = self.position_vecs()
-
-        return np.arccos(vec_check(beam_vec), v)
+        return np.arccos(vec_norm(self.position_vecs()).dot(beam_vec.ravel()))
 
     def reshape(self, dat):
         r"""
@@ -382,6 +410,29 @@ def split_pad_data(pad_list, data):
         offset += pad.n_pixels
 
     return data_list
+
+
+def edge_mask(data, n):
+
+    r"""
+    Make an "edge mask"; an array of ones with zeros around the edges.
+    The mask will be the same type as the data (e.g. double).
+
+    Args:
+        data (2D numpy array): a data array (for shape reference)
+        n (int): number of pixels to mask around edges
+
+    Returns: numpy array
+    """
+    n = int(n)
+    mask = np.ones_like(data)
+    ns, nf = data.shape
+    mask[0:n, :] = 0
+    mask[(ns-n):ns, :] = 0
+    mask[:, 0:n] = 0
+    mask[:, (nf-n):nf] = 0
+
+    return mask
 
 
 class PADAssembler(object):

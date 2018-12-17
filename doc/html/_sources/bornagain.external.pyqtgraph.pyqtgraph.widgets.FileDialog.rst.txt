@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.FileDialog module
-================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.FileDialog
-    :members:
-    :undoc-members:
-    :show-inheritance:

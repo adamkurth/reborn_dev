@@ -178,9 +178,22 @@ class CheetahFrameGetter(FrameGetter):
                 fs_pos[indices] = fs_pos_raw[indices] - fs_min[i]
                 ss_pos[indices] = ss_pos_raw[indices] - ss_min[i]
 
-        pad_numbers = pad_numbers.astype(np.int)
+        # pad_numbers = pad_numbers.astype(np.int)
 
-        peaks = {'pad_numbers': pad_numbers, 'fs_pos': fs_pos, 'ss_pos': ss_pos, 'n_peaks': n_peaks,
+        centroids = [None]*self.n_pads
+        for i in range(self.n_pads):
+            w = np.where(pad_numbers == i)[0]
+            n = len(w)
+            if n > 0:
+                p = np.zeros([n, 2])
+                p[:, 0] = fs_pos[w]
+                p[:, 1] = ss_pos[w]
+            else:
+                continue
+            centroids[i] = p
+
+        peaks = {'n_peaks': n_peaks, 'centroids': centroids,
+                 'pad_numbers': pad_numbers, 'fs_pos': fs_pos, 'ss_pos': ss_pos,
                  'peakXPosRaw': fs_pos_raw, 'peakYPosRaw': ss_pos_raw}
 
         return peaks

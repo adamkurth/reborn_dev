@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.exporters.Exporter module
-================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.exporters.Exporter
-    :members:
-    :undoc-members:
-    :show-inheritance:

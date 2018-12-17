@@ -165,7 +165,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box_edge</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">,</span> <span class="n">max_try</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Place points into a box of edge length box_edge, and don&#39;t let any two points</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ==========</span>
 <span class="sd">        get with    t0 = time()in min_dist from one another.</span>
@@ -175,9 +175,9 @@
 <span class="sd">        min_dist, float</span>
 <span class="sd">            minimum distance between two points in the box</span>
 <span class="sd">        max_try, int</span>
-<span class="sd">            number of times to try placing a new point such </span>
+<span class="sd">            number of times to try placing a new point such</span>
 <span class="sd">            that is does not overlap</span>
-<span class="sd">        </span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">()</span>
         <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">box_edge</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>

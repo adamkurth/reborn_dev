@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.dockarea.DockDrop module
-===============================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.dockarea.DockDrop
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -8,6 +8,10 @@ from bornagain.utils import memoize
 file_name = pkg_resources.resource_filename('bornagain.simulate',
                                                   'data/water_scattering_data.txt')
 
+
+def water_number_density():
+    return 33.3679e27
+
 @memoize
 def load_data():
 

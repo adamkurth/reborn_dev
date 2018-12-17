@@ -173,11 +173,11 @@
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A simple child class to PADGeometry with some higher level functionality</span>
-<span class="sd">    </span>
+
 <span class="sd">    This will return a detector object representing a</span>
 <span class="sd">    square pixel array detector</span>
-<span class="sd">    </span>
-<span class="sd">    .. note:: </span>
+
+<span class="sd">    .. note::</span>
 <span class="sd">        - One can readout pixel intensities using :func:`readout`</span>
 <span class="sd">        - After reading out amplitudes, one can display pixels using :func:`display`</span>
 
@@ -189,7 +189,7 @@
 <span class="sd">            the edge length of the square pixels in meters</span>
 
 <span class="sd">        - detdist (float)</span>
-<span class="sd">            the distance from the interaction region to the point where </span>
+<span class="sd">            the distance from the interaction region to the point where</span>
 <span class="sd">            the forward beam intersects the detector (in meters)</span>
 
 <span class="sd">        - wavelen (float)</span>
@@ -221,12 +221,12 @@
 <span class="sd">            the fast-scan, slow-scan coordinate of the beam center</span>
 <span class="sd">            Not used currently..</span>
 
-<span class="sd">        args and kwargs passed to The bornagain PAGeometry method </span>
-<span class="sd">        </span>
+<span class="sd">        args and kwargs passed to The bornagain PAGeometry method</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        =======</span>
-<span class="sd">        SimplePAD object with a simple viewing method            </span>
-<span class="sd">        </span>
+<span class="sd">        SimplePAD object with a simple viewing method</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n_pixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">n_pixels</span><span class="p">)</span>
         <span class="n">PADGeometry</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -279,7 +279,7 @@
 
 <span class="sd">        Arguments</span>
 <span class="sd">            amplitudes (complex np.ndarray) : Scattering amplitudes same shape as `self.Q`</span>
-<span class="sd">            </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">            np.ndarray : Scattering intensities as a 2-D image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -288,7 +288,7 @@
 
 <div class="viewcode-block" id="SimplePAD.readout_finite"><a class="viewcode-back" href="../../../../bornagain.viewers.mplviews.simpleview.html#bornagain.viewers.mplviews.simpleview.SimplePAD.readout_finite">[docs]</a>    <span class="k">def</span> <span class="nf">readout_finite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amplitudes</span><span class="p">,</span> <span class="n">qmin</span><span class="p">,</span> <span class="n">qmax</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="mf">1e20</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get scattering intensities as a 2D image considering </span>
+<span class="sd">        Get scattering intensities as a 2D image considering</span>
 <span class="sd">        finite scattered photons</span>
 
 <span class="sd">        Arguments:</span>
@@ -332,12 +332,12 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Displays a detector. Extra kwargs are passed</span>
 <span class="sd">        to matplotlib.figure</span>
-<span class="sd">        </span>
+
 <span class="sd">        .. note::</span>
 <span class="sd">            - Requires matplotlib.</span>
 <span class="sd">            - Must first run :func:`readout` or :func:`readout_finite`</span>
 <span class="sd">                at least one time</span>
-<span class="sd">        </span>
+
 <span class="sd">        Arguments</span>
 <span class="sd">            - use_log (bool)</span>
 <span class="sd">                whether to use log-scaling when displaying the intensity image.</span>

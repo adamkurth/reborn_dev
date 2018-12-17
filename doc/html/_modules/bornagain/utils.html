@@ -170,24 +170,24 @@
 <span class="c1"># not sure where to seed</span>
 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">()</span>
 
-<div class="viewcode-block" id="vec_check2"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_check2">[docs]</a><span class="k">def</span> <span class="nf">vec_check2</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
+<div class="viewcode-block" id="vec_check2"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_check2">[docs]</a><span class="k">def</span> <span class="nf">vec_check2</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Same as vec_check(vec, dimension=2).  See :func:`vec_check &lt;bornagain.utils.vec_check&gt;`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="vec_check3"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_check3">[docs]</a><span class="k">def</span> <span class="nf">vec_check3</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
+<div class="viewcode-block" id="vec_check3"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_check3">[docs]</a><span class="k">def</span> <span class="nf">vec_check3</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Same as vec_check(vec, dimension=2)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="vec_check"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_check">[docs]</a><span class="k">def</span> <span class="nf">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">hardcheck</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 
+<div class="viewcode-block" id="vec_check"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_check">[docs]</a><span class="k">def</span> <span class="nf">vec_check</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">hardcheck</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check that a vector meets our assumptions, and correct it if it doesn&#39;t.</span>
 
@@ -248,7 +248,6 @@
 
 
 <div class="viewcode-block" id="vec_norm"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_norm">[docs]</a><span class="k">def</span> <span class="nf">vec_norm</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
-
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Compute the normal vector, which has a length of one.</span>
@@ -268,7 +267,6 @@
 
 
 <div class="viewcode-block" id="vec_mag"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.vec_mag">[docs]</a><span class="k">def</span> <span class="nf">vec_mag</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
-
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Compute the scalar magnitude sqrt(sum(x^2)) of an array of vectors, usually shape (N, 3)</span>
@@ -287,7 +285,6 @@
 
 
 <div class="viewcode-block" id="rotate"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.rotate">[docs]</a><span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">vec</span><span class="p">):</span>
-
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    This defines a consistent way to rotate vectors.  It is a wrapper that does a simple operation:</span>
@@ -312,7 +309,6 @@
 
 
 <div class="viewcode-block" id="depreciate"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.depreciate">[docs]</a><span class="k">def</span> <span class="nf">depreciate</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
-
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Utility for sending warnings when some class, method, function, etc. is depreciated.  By default, a message of the</span>
@@ -338,7 +334,6 @@
 
 
 <div class="viewcode-block" id="warn"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.warn">[docs]</a><span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
-
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Standard way of sending a warning message.  As of now this simply results in a function call</span>
@@ -359,7 +354,6 @@
 
 
 <div class="viewcode-block" id="error"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.error">[docs]</a><span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
-
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Standard way of sending an error message.  As of now this simply results in a function call</span>
@@ -375,9 +369,7 @@
 <span class="sd">    Returns: nothing</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ERROR: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span></div>
-
 
 
 <span class="c1"># def axisAndAngleToMatrix(axis, angle):</span>
@@ -482,7 +474,6 @@
 
 
 <div class="viewcode-block" id="random_rotation"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.random_rotation">[docs]</a><span class="k">def</span> <span class="nf">random_rotation</span><span class="p">(</span><span class="n">deflection</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">randnums</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a random rotation matrix.</span>
 
@@ -527,25 +518,23 @@
 
 
 <div class="viewcode-block" id="rotation_about_axis"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.rotation_about_axis">[docs]</a><span class="k">def</span> <span class="nf">rotation_about_axis</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This needs to be tested.  It was taken from</span>
 <span class="sd">    https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)),</span>
-                      <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)),</span>
+                      <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
                       <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
-                     <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
-                      <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)),</span>
+                     <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
+                      <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)),</span>
                       <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
-                     <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
-                      <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
-                      <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))]])</span></div>
+                     <span class="p">[</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
+                      <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
+                      <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))]])</span></div>
 
 
 <div class="viewcode-block" id="random_beam_vector"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.random_beam_vector">[docs]</a><span class="k">def</span> <span class="nf">random_beam_vector</span><span class="p">(</span><span class="n">div_fwhm</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A random vector for emulating beam divergence.</span>
 <span class="sd">    Generates a random normal vector that is nominally along the [0,0,1] direction</span>
@@ -563,21 +552,21 @@
         <span class="k">return</span> <span class="n">B</span>
 
     <span class="c1"># First rotate around the x axis with Gaussian prob. dist.</span>
-    <span class="n">sig</span> <span class="o">=</span> <span class="n">div_fwhm</span><span class="o">/</span><span class="mf">2.354820045</span>
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">div_fwhm</span> <span class="o">/</span> <span class="mf">2.354820045</span>
     <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sig</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">Rtheta</span> <span class="o">=</span> <span class="n">rotation_about_axis</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Rtheta</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
 
     <span class="c1"># Next rotate around z axis with uniform dist [0,2*pi)</span>
-    <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
     <span class="n">Rphi</span> <span class="o">=</span> <span class="n">rotation_about_axis</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Rphi</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
     <span class="n">B</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">B</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">B</span></div>
 
-<div class="viewcode-block" id="random_mosaic_rotation"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.random_mosaic_rotation">[docs]</a><span class="k">def</span> <span class="nf">random_mosaic_rotation</span><span class="p">(</span><span class="n">mosaicity_fwhm</span><span class="p">):</span>
 
+<div class="viewcode-block" id="random_mosaic_rotation"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.random_mosaic_rotation">[docs]</a><span class="k">def</span> <span class="nf">random_mosaic_rotation</span><span class="p">(</span><span class="n">mosaicity_fwhm</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.</span>
 <span class="sd">    We take the matrix product of three rotations, each of the same FWHM, about the three</span>
@@ -599,7 +588,6 @@
 
 
 <div class="viewcode-block" id="memoize"><a class="viewcode-back" href="../../bornagain.utils.html#bornagain.utils.memoize">[docs]</a><span class="k">def</span> <span class="nf">memoize</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
-
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a function decorator for caching results from a function, to avoid</span>
 <span class="sd">    excessive computation or reading from disk.  Search the web for more</span>

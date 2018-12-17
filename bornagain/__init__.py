@@ -89,7 +89,7 @@ def docs():
         print("Can't open docs because you need to install the webbrowser Python package.")
         print("If using conda, perhaps you could run 'conda install webbrowser?'")
         print('You can otherwise point your webbrowser to the directory %s' % (docs_file_path))
-        print("On Mac OS, you can do that from the terminal using the command 'open the/path/above'")
+        print("On Mac OS, you can do that from the terminal using the command 'open %s'" % (docs_file_path))
         return
 
     webbrowser.open('file://' + docs_file_path)

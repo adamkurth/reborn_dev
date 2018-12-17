@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.CurvePoint module
-======================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.CurvePoint
-    :members:
-    :undoc-members:
-    :show-inheritance:

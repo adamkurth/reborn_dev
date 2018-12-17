@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.SRTTransform module
-==========================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.SRTTransform
-    :members:
-    :undoc-members:
-    :show-inheritance:

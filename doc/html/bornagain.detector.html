@@ -4,6 +4,7 @@
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
+  <meta name="robots" content="noindex, nofollow" />
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -179,7 +180,7 @@
 detectors (PADs).</p>
 <dl class="class">
 <dt id="bornagain.detector.PADGeometry">
-<em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">PADGeometry</code><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">bornagain.detector.</code><code class="descname">PADGeometry</code><span class="sig-paren">(</span><em>n_pixels=None</em>, <em>distance=None</em>, <em>pixel_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#PADGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.PADGeometry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A container for pixel-array detector (PAD) geometry specification, with hepful methods for generating:</p>
 <ul class="simple">
@@ -477,6 +478,26 @@ of beam_vec ect.</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.detector.edge_mask">
+<code class="descclassname">bornagain.detector.</code><code class="descname">edge_mask</code><span class="sig-paren">(</span><em>data</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/detector.html#edge_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.detector.edge_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make an “edge mask”; an array of ones with zeros around the edges.
+The mask will be the same type as the data (e.g. double).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>2D numpy array</em>) – a data array (for shape reference)</li>
+<li><strong>n</strong> (<em>int</em>) – number of pixels to mask around edges</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: numpy array</p>
 </dd></dl>
 
 <dl class="class">

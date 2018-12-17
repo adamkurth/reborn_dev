@@ -170,14 +170,23 @@
 <span class="sd">    A minimal containor to gather x-ray beam properties.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">wavelength</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Nominal photon wavelength</span>
+    <span class="n">_beam_vec</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Nominal direction of incident beam</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">wavelength</span><span class="o">=</span><span class="mf">1.5e-10</span><span class="p">,</span> <span class="n">polarization_vec</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">beam_vec</span> <span class="o">=</span> <span class="n">beam_vec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">polarization_vec</span> <span class="o">=</span> <span class="n">polarization_vec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelength</span>
 
-    <span class="n">wavelength</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Nominal photon wavelength</span>
-    <span class="n">beam_vec</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Nominal direction of incident beam</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">beam_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beam_vec</span>
+
+    <span class="nd">@beam_vec</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">beam_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vec</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_beam_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+
     <span class="n">polarization_vec</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Direction of the first polarization vector</span>
     <span class="n">polarization_weight</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1">#: Weight of the first polarization vector</span>
     <span class="n">photon_energy</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># This should be a function</span>

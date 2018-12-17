@@ -4,6 +4,7 @@
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
+  <meta name="robots" content="noindex, nofollow" />
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -200,6 +201,7 @@ by doing something like this:</p>
 <li>pyopencl</li>
 <li>pyopengl</li>
 <li>future</li>
+<li>numba</li>
 <li>cfelpyutils</li>
 </ul>
 <p>You can use bornagain with only a subset of of the above dependencies (e.g. skip pyopencl if you don’t want to simulate,
@@ -251,6 +253,10 @@ pip instlall cfelpyutils
 <p>You can check if you’ve got all the dependencies sorted out by running the following:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bornagain/test
 pytest
+</pre></div>
+</div>
+<p>You can uninstall a conda environment as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env remove -n bornagain3
 </pre></div>
 </div>
 </div>
