@@ -16,6 +16,7 @@ from bornagain.simulate import solutions
 from bornagain.simulate import simutils
 from bornagain.utils import vec_mag
 from bornagain.units import r_e, hc, keV
+from bornagain import target
 import bornagain.simulate.clcore as core
 
 
@@ -160,7 +161,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
 
     # Things we probably don't want to think about
     cl_group_size = 32
-	if(fix_rot_seq):
+    if(fix_rot_seq):
 		np.random.seed(seed)
 
     # Setup simulation engine
@@ -189,19 +190,35 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     write('Getting atomic coordinates and scattering factors... ')
     if expand_symm:
         # TODO: eventually move the expand symmetry functionality to the crystal structure class
-        cryst = ba.target.crystal.Molecule(pdb_file)
+        cryst = target.crystal.Molecule(pdb_file)
         monomers = cryst.get_monomers()
         all_atoms = ba.target.crystal.Atoms.aggregate(monomers)
         r = all_atoms.xyz*1e-10
         Z = all_atoms.Z
     else:
-        cryst = ba.target.crystal.structure(pdb_file)
+        cryst = target.crystal.structure(pdb_file)
         r = cryst.r
         Z = cryst.Z
 
     f = ba.simulate.atoms.get_scattering_factors(Z, ba.units.hc / wavelength)
     write('done\n')
     write('%d atoms per unit cell\n' % (len(f)))
+
+    # Do water scattering
+    # FIXME: we could probably move the background scatter stuff into a separate module.
+    if water_radius!=0:
+        write('Simulating water scattering... ')
+        water_number_density = 33.3679e27
+        illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
+        n_water_molecules = illuminated_water_volume * water_number_density
+        F_water = solutions.get_water_profile(qmag, temperature=temperature) # Get water scattering intensity radial profile
+        F2_water = F_water**2 * n_water_molecules
+        I_water = I0 * r_e**2 * P * sa * F2_water
+        if(illuminated_water_volume <= 0):
+            write('\nWarning: No solvent was illuminated, water scattering not performed.\n')
+            I_water = 0
+        else:
+            write('done\n')
 
     # Determine number of unit cells in whole crystal and mosaic domains
     n_cells_whole_crystal = np.ceil(crystal_size / np.array([cryst.a, cryst.b, cryst.c]))
@@ -279,22 +296,6 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         if mosaic_domain_size > crystal_size:
             mosaic_domain_size = crystal_size
 
-        # Do water scattering
-        # FIXME: do the water parameters vary, or is the below calculation redundant?
-        # FIXME: we could probably move the background scatter stuff into a separate module.
-        if water_radius!=0:
-            write('Simulating water scattering... ')
-            water_number_density = 33.3679e27
-            illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
-            n_water_molecules = illuminated_water_volume * water_number_density
-            F_water = solutions.get_water_profile(qmag, temperature=temperature) # Get water scattering intensity radial profile
-            F2_water = F_water**2 * n_water_molecules
-            I_water = I0 * r_e**2 * P * sa * F2_water
-            if(illuminated_water_volume <= 0):
-                write('\nWarning: No solvent was illuminated, water scattering not performed.\n')
-                I_water = 0
-            else:
-                write('done\n')
 
         R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
 
@@ -312,7 +313,6 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
             write('Simulating molecular transform with cromer mann... ')
             t = time.time()
             clcore.prime_cromermann_simulator(q.copy(), Z.copy())
-            #clcore.prime_cromermann_simulator(q.copy(), cryst.Z.copy())
             q_cm = clcore.get_q_cromermann()
             r_cm = clcore.get_r_cromermann(r.copy(), sub_com=False)
             clcore.run_cromermann(q_cm, r_cm, rand_rot=False, force_rot_mat=R)
@@ -412,3 +412,17 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         cryst_size_file.close()
 
     write("\n\nDone!\n\n")
+
+mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
+          beam_diameter=10e-6, photon_energy=12.0, n_photons=1e12, \
+          mosaicity_fwhm=1e-4, beam_divergence_fwhm=1e-2, beam_spatial_profile='tophat', \
+          photon_energy_fwhm=0.02, crystal_size=10e-6, crystal_size_fwhm=0.0, \
+          mosaic_domain_size=1e-6, mosaic_domain_size_fwhm=0.0, \
+          water_radius=0.0, temperature=298.16, \
+          n_monte_carlo_iterations=1000, num_patterns=1, seed=0, random_rotation=True, \
+          approximate_shape_transform=True, cromer_mann=False, expand_symm=False, \
+          fix_rot_seq=False, mask_direct_beam=False, \
+          pdb_file='../examples/data/pdb/2LYZ-P1.pdb', \
+          write_hdf5=True, write_geom=True, write_crystal_sizes=True, \
+          write_ideal_only=False, results_dir='./', \
+          quiet=False, compression=None, cl_double_precision=False)
