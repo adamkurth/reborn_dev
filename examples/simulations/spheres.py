@@ -1,6 +1,6 @@
 import sys
-
 sys.path.append('../..')
+from time import time
 
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
@@ -8,8 +8,23 @@ import matplotlib.pyplot as plt
 
 import bornagain
 from bornagain import simulate
-from bornagain.simulate.clcore import ClCore
 from bornagain.simulate.form_factors import sphere_form_factor
+
+use_numba = False
+try:
+    # This prepares the GPU simulation engine.  It computes this sum: Sum_n f_n exp(i q.r_n)
+    # (really fast -- overkill...)
+    from bornagain.simulate.clcore import ClCore
+    sim = simulate.clcore.ClCore()
+    phase_factor_qrf = sim.phase_factor_qrf
+except ImportError:
+    use_numba = True
+
+# use_numba = True
+if use_numba:
+    # Default to numba if pyopencl is not available
+    from bornagain.simulate import numbacore
+    phase_factor_qrf = numbacore.phase_factor_qrf
 
 
 # We simulate diffraction from an ensemble of spheres.  Specifically, we have doublets of spheres sitting in a plane
@@ -29,8 +44,7 @@ from bornagain.simulate.form_factors import sphere_form_factor
 #     - The "x" compoment completes the right-handed coordinate system
 #     - Usually beam polarization from an undulator is in the horizontal, which would be "x"
 
-# This prepares the GPU simulation engine.  It computes this sum: Sum_n f_n exp(i q.r_n)   (really fast -- overkill...)
-sim = simulate.clcore.ClCore()
+
 
 # Generic container for an x-ray beam.  Holds beam direction, polarization, wavelength, etc.
 beam = bornagain.source.Beam(wavelength=13.49e-9, beam_vec=[0, 0, 1])
@@ -61,7 +75,9 @@ if False:
     plt.show()
 
 # Compute the scattering amplitudes:
-scat = sim.phase_factor_qrf(q=detector.q_vecs(beam=beam), r=pos, f=np.ones([pos.shape[0]]))
+t = time()
+scat = phase_factor_qrf(q=detector.q_vecs(beam=beam), r=pos, f=np.ones([pos.shape[0]]))
+print(time() - t, ' seconds')
 scat *= simulate.form_factors.sphere_form_factor(radius=radius, q_mags=detector.q_mags(beam=beam))
 scat = np.abs(scat)**2
 scat /= np.max(scat) # Normalize for display purposes

@@ -29,6 +29,8 @@ try:
 except ImportError:
     havecl = False
 
+import bornagain.simulate.numbacore as numbacore
+
 view = False
 
 if len(sys.argv) > 1:
@@ -54,6 +56,10 @@ def _clcore(double_precision=False):
 
     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 
+    if double_precision is False:
+        numbacore.real_t = np.float32
+        numbacore.complex_t = np.complex64
+
     assert(core.get_group_size() == core.group_size)
    
     # print("Using group size: %d" %core.group_size)
@@ -66,13 +72,17 @@ def _clcore(double_precision=False):
     pad.simple_setup(n_pixels=4, pixel_size=1, distance=1)
     N = 10
     R = np.eye(3, dtype=core.real_t)
-    q = pad.q_vecs(beam_vec=[0,0,1], wavelength=1)
+    q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
     
-    r = np.random.random([N,3])
+    r = np.random.random([N, 3])
     f = np.random.random([N])*1j
 
     A = core.phase_factor_qrf(q, r, f, R)
     assert(type(A) is np.ndarray)
+
+    An = numbacore.phase_factor_qrf(q, r, f, R)
+
+    assert(np.max(np.abs(A - An)) < 1e-3)  # Why such a big difference between CPU and GPU?
     
     # make device arrays first
     q = core.to_device(q) 
@@ -89,7 +99,7 @@ def _clcore(double_precision=False):
     
     A10 = a.get()
     
-    assert( np.allclose(10*A1, A10))
+    assert(np.allclose(10*A1, A10))
 
     del q, r, f, R, N
 
