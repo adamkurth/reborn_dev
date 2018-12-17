@@ -228,9 +228,6 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     if(mosaic_domain_size > beam_diameter):
         n_cells_mosaic_domain = np.ceil(np.array([beam_diameter, beam_diameter, mosaic_domain_size]) / np.array([cryst.a, cryst.b, cryst.c]))
 
-    # Make a mask for the direct beam
-    direct_beam_mask = np.ones((int(pad.n_ss * pad.n_fs)))
-    direct_beam_mask[qmag < (2 * np.pi / np.max(np.array([cryst.a, cryst.b, cryst.c])))] = 0
 
     # Setup function for shape transform calculations
     if approximate_shape_transform:
@@ -295,7 +292,6 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         # In case mosaic domain varied to be larger than fixed size crystal
         if mosaic_domain_size > crystal_size:
             mosaic_domain_size = crystal_size
-
 
         R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
 
@@ -365,6 +361,12 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
             else:
                 I *= (crystal_size/beam_diameter)**2
 
+		# Make a mask for the direct beam
+        if(mask_direct_beam):
+            direct_beam_mask = np.ones((int(pad.n_ss * pad.n_fs)))
+            direct_beam_mask[qmag < (2 * np.pi / np.max(np.array([cryst.a, cryst.b, cryst.c])))] = 0
+            I *= direct_beam_mask
+
         # Scale up according to mosaic domain
         n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
         I_ideal = I.copy() * n_domains
@@ -412,17 +414,3 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         cryst_size_file.close()
 
     write("\n\nDone!\n\n")
-
-mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
-          beam_diameter=10e-6, photon_energy=12.0, n_photons=1e12, \
-          mosaicity_fwhm=1e-4, beam_divergence_fwhm=1e-2, beam_spatial_profile='tophat', \
-          photon_energy_fwhm=0.02, crystal_size=10e-6, crystal_size_fwhm=0.0, \
-          mosaic_domain_size=1e-6, mosaic_domain_size_fwhm=0.0, \
-          water_radius=0.0, temperature=298.16, \
-          n_monte_carlo_iterations=1000, num_patterns=1, seed=0, random_rotation=True, \
-          approximate_shape_transform=True, cromer_mann=False, expand_symm=False, \
-          fix_rot_seq=False, mask_direct_beam=False, \
-          pdb_file='../examples/data/pdb/2LYZ-P1.pdb', \
-          write_hdf5=True, write_geom=True, write_crystal_sizes=True, \
-          write_ideal_only=False, results_dir='./', \
-          quiet=False, compression=None, cl_double_precision=False)
