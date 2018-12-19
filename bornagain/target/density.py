@@ -265,7 +265,7 @@ class CrystalMeshTool(object):
         N = self.N
         return np.zeros([N, N, N])
 
-    def place_atoms_in_map(self, atom_x_vecs, atom_fs, mode='gaussian'):
+    def place_atoms_in_map(self, atom_x_vecs, atom_fs, mode='gaussian', fixed_atom_sigma=0.5e-10):
 
         r"""
 
@@ -282,7 +282,7 @@ class CrystalMeshTool(object):
 
         """
         if mode == 'gaussian':
-            sigma = 0.5e-10 # Gaussian sigma (i.e. atom "size"); this is a fudge factor and needs to be updated
+            sigma = fixed_atom_sigma # Gaussian sigma (i.e. atom "size"); this is a fudge factor and needs to be updated
             n_atoms = atom_x_vecs.shape[0]
             orth_mat = self.cryst.O.copy()
             map_x_vecs = self.get_x_vecs()
