@@ -36,7 +36,7 @@ class Structure(object):
     _x = None  #: Fractional coordinates (3xN array)
     O = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
     Oinv = None  #: Inverse orthogonalization matrix (3x3 array)
-    A = None  #: This is Oinv transpose (3x3 array).  Does the transform q = dot(A, h), with fractional Miller indices h.
+    A = None  #: This is Oinv transpose (3x3 array). Does the transform q = dot(A, h), with fractional Miller indices h.
     Ainv = None  #: A inverse
     T = None  #: Translation vector that goes with orthogonalization matrix (What is this used for???)
     elements = None  #: Atomic element symbols
@@ -136,7 +136,6 @@ class Structure(object):
         self.symRs, self.symTs = get_symmetry_operators_from_space_group(hermann_mauguin_symbol)
         self.symRinvs = [np.linalg.inv(R) for R in self.symRs]
         self.nMolecules = len(self.symTs)
-
 
     @property
     def x(self):
@@ -239,15 +238,26 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
     return cryst
 
 
+def get_hm_symbols():
+
+    symbols = []
+    for idx in range(0, 530):
+        symbols.append(spgrp._hmsym[idx].strip())
+
+    return symbols
+
+
 def get_symmetry_operators_from_space_group(hm_symbol):
 
     r"""
     For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
     translation and rotation operators.  These operators are in the crystal basis.
     As of now, this is a rather unreliable function.  My brain hurts badly after attempting
-    to make sense of the ways in which space groups are specified...
+    to make sense of the ways in which space groups are specified... if you are having trouble
+    finding your spacegroup check that it is contained in the output of print(crystal.get_hm_symbols()).
 
-    Input: A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)
+    Input:
+        hm_symbol (str): A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)
 
     Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy
             arrays) and translation vectors (1x3 numpy arrays)

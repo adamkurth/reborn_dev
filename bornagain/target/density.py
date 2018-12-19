@@ -30,10 +30,14 @@ class CrystalMeshTool(object):
     def __init__(self, cryst, resolution, oversampling):
 
         r'''
-        This should intelligently pick the limits of a map.
+        This should intelligently pick the limits of a map.  On initialization, you only need to provide a
+        target.crystal.Structure() class instance, along with your desired resolution and oversampling.  You can create
+        the target.crystal.Structure() class most easily if you have a pdb file as follows:
+
+        >>> cryst = target.crystal.Structure(pdbFilePath=some_path)
 
         Arguments:
-            cryst (crystal.structure) : A crystal structure that contains the spacegroup and lattice information.
+            cryst (crystal.Structure) : A crystal structure that contains the spacegroup and lattice information.
             resolution (float) : The desired resolution of the map (will be modified to suit integer samples and a
                                   square 3D mesh)
             oversampling (int) : An oversampling of 2 gives a real-space map that is twice as large as the unit cell. In
@@ -54,6 +58,8 @@ class CrystalMeshTool(object):
                         m = mp
                     break
 
+        # The idea here is that if, for example, we have a 3-fold screw axis in the spacegroup, then the number of
+        # samples in the map should be a multiple of 3.  Hopefully this works...
         Nc = np.max(np.ceil(abc / (d * m)) * m)
 
         self.cryst = cryst  #:  crystal.target class object used to initiate the map
@@ -259,7 +265,7 @@ class CrystalMeshTool(object):
         N = self.N
         return np.zeros([N, N, N])
 
-    def place_atoms_in_map(self, x, f):
+    def place_atoms_in_map(self, atom_x_vecs, atom_fs, mode='gaussian'):
 
         r"""
 
@@ -269,17 +275,28 @@ class CrystalMeshTool(object):
         voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy...
 
         Args:
-            x (numpy array):  An Nx3 array of position vectors
-            f (numpy array):  An N-length array of densities (must be real)
+            x (numpy array):  An nx3 array of position vectors
+            f (numpy array):  An n-length array of densities (must be real)
 
         Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
 
         """
-        mm = [0, self.s]
-        rng = [mm, mm, mm]
-        a, _, _ = binned_statistic_dd(x, f, statistic='sum', bins=[self.N] * 3, range=rng)
-
-        return a
+        if mode == 'gaussian':
+            sigma = 0.5e-10 # Gaussian sigma (i.e. atom "size"); this is a fudge factor and needs to be updated
+            n_atoms = atom_x_vecs.shape[0]
+            orth_mat = self.cryst.O.copy()
+            map_x_vecs = self.get_x_vecs()
+            n_map_voxels = map_x_vecs.shape[0]
+            f_map = np.zeros([n_map_voxels], dtype=np.complex)
+            f_map_tmp = np.zeros([n_map_voxels], dtype=np.double)
+            s = self.s
+            place_atoms_in_map(atom_x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp)
+            return self.reshape(f_map)
+        elif mode == 'nearest':
+            mm = [0, self.s]
+            rng = [mm, mm, mm]
+            a, _, _ = binned_statistic_dd(x, f, statistic='sum', bins=[self.N] * 3, range=rng)
+            return a
 
     def place_intensities_in_map(self, h, f):
 
@@ -301,3 +318,43 @@ class CrystalMeshTool(object):
         a, _, _ = binned_statistic_dd(h, f, statistic='mean', bins=[self.N] * 3, range=rng)
 
         return a
+
+from numba import jit
+
+@jit(nopython=True)
+def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp):
+
+        r"""
+
+        Needs documentation...
+
+        """
+
+        n_atoms = x_vecs.shape[0]
+        n_map_voxels = map_x_vecs.shape[0]
+        # f_map = np.empty([n_map_voxels], dtype=atom_fs.dtype)
+        # f_map_tmp = np.empty([n_map_voxels], dtype=x_vecs.dtype)
+        for n in range(n_atoms):
+            x = x_vecs[n, 0] % s
+            y = x_vecs[n, 1] % s
+            z = x_vecs[n, 2] % s
+            w_tot = 0
+            for i in range(n_map_voxels):
+                mx = map_x_vecs[i, 0]
+                my = map_x_vecs[i, 1]
+                mz = map_x_vecs[i, 2]
+                dx = np.abs(x - mx)
+                dy = np.abs(y - my)
+                dz = np.abs(z - mz)
+                dx = min(dx, s - dx)
+                dy = min(dy, s - dy)
+                dz = min(dz, s - dz)
+                dr2 = (orth_mat[0, 0] * dx + orth_mat[0, 1] * dy + orth_mat[0, 2] * dz)**2 + \
+                      (orth_mat[1, 0] * dx + orth_mat[1, 1] * dy + orth_mat[1, 2] * dz)**2 + \
+                      (orth_mat[2, 0] * dx + orth_mat[2, 1] * dy + orth_mat[2, 2] * dz)**2
+                w = np.exp(-dr2/(2*sigma**2))
+                f_map_tmp[i] = w
+                w_tot += w
+            f_map += atom_fs[n] * f_map_tmp/w_tot
+
+        # return f_map
