@@ -3,6 +3,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from time import time
+import pickle
 import numpy as np
 
 import pkg_resources
@@ -10,7 +11,7 @@ import pkg_resources
 import pyqtgraph as pg
 # pg.setConfigOptions(imageAxisOrder='row-major')
 
-from pyqtgraph.Qt import uic, QtGui, QtCore
+from pyqtgraph.Qt import uic, QtGui, QtCore, QtWidgets
 
 # import bornagain
 # import bornagain.external.pyqtgraph as bpg
@@ -18,6 +19,7 @@ from bornagain.fileio.getters import FrameGetter
 # from bornagain import analysis
 
 padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
+snrconfigui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'configs.ui')
 
 
 class PADView(object):
@@ -30,12 +32,13 @@ class PADView(object):
     It is a work in progress...
     """
 
-    # Note that most of the interface was created using the QT Designer tool.  Here are some important ones:
-    # self.histogram is a bornagain.external.pyqtgraph.MultiHistogramLUTWidget
+    # Note that most of the interface was created using the QT Designer tool.  There are many attributes that are
+    # not visible here.
 
     logscale = False
+    raw_dat = None
     pad_geometry = []
-    pad_data = []
+    _pad_data = []
     pad_labels = None
     mask_data = None
     mask_images = None
@@ -59,6 +62,9 @@ class PADView(object):
     show_peaks = True
     peaks = None
     apply_filters = True
+    apply_snr_filter = False
+    data_processor = None
+    widgets = {}
 
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': False}
 
@@ -77,9 +83,6 @@ class PADView(object):
             self.frame_getter = frame_getter
             self.pad_geometry = frame_getter.pad_geometry
             dat = frame_getter.get_frame(0)
-            # while dat is None:
-            #     print('searching for data...')
-            #     dat = frame_getter.get_next_frame()
             if dat is None:
                 raise Exception("Can't find any data!")
             self.pad_data = dat['pad_data']
@@ -94,21 +97,39 @@ class PADView(object):
         self.setup_masks()
         self.setup_histogram_tool()
         self.main_window.show()
-        # self.label = pg.LabelItem(justify='right')
-        # self.viewbox.addItem(self.label)
         self._setup_mouse_interactions()
         self._setup_shortcuts()
         self._setup_menu()
+        self._setup_widgets()
 
         self.main_window.statusbar.setStyleSheet("background-color:rgb(30, 30, 30);color:rgb(255,0,255);"
                                                  "font-weight:bold;font-family:monospace;")
 
         self.show_frame()
 
-        # self.main_window.setWindowState(self.main_window.windowState() & ~pg.QtCore.Qt.WindowMinimized
-        #                                 | pg.QtCore.Qt.WindowActive)
-        #self.main_window.activateWindow()
-        #self.main_window.showMaximized()
+    def _setup_widgets(self):
+
+        snr_config = SNRConfigWidget()
+        snr_config.values_changed.connect(self.apply_snr_filter)
+        self.widgets['SNR Config'] = snr_config
+
+    @property
+    def pad_data(self):
+
+        return self._pad_data
+
+    @pad_data.setter
+    def pad_data(self, dat):
+
+        self._pad_data = dat
+
+    def _do_nothing(self):
+
+        return None
+
+    def _print_something(self):
+
+        print("something happened")
 
     def _setup_mouse_interactions(self):
 
@@ -123,32 +144,33 @@ class PADView(object):
         mw.actionRectangleROIVisible.triggered.connect(self.toggle_rois)
         mw.actionPeaksVisible.triggered.connect(self.toggle_peaks)
         mw.actionCustomFilter.triggered.connect(self.toggle_filter)
+        mw.actionLocal_SNR.triggered.connect(self.open_snr_filter_widget)
+        mw.actionSave_Masks.triggered.connect(self.save_masks)
+        mw.actionLoad_Masks.triggered.connect(self.load_masks)
 
-    def _set_simple_keyboard_shortcut(self, key, func):
+    def _setup_shortcuts(self):
 
         if self._shortcuts is None:
             self._shortcuts = []
 
-        self._shortcuts.append(QtGui.QShortcut(QtGui.QKeySequence(key), self.main_window).activated.connect(func))
+        shortcut = lambda key, func: self._shortcuts.append(QtGui.QShortcut(QtGui.QKeySequence(key),
+                                                                            self.main_window).activated.connect(func))
 
-    def _setup_shortcuts(self):
-
-        self._set_simple_keyboard_shortcut(QtCore.Qt.Key_Right, self.show_next_frame)
-        self._set_simple_keyboard_shortcut(QtCore.Qt.Key_Left, self.show_previous_frame)
-        self._set_simple_keyboard_shortcut("f", self.show_next_frame)
-        self._set_simple_keyboard_shortcut("b", self.show_previous_frame)
-        self._set_simple_keyboard_shortcut("r", self.show_random_frame)
-        self._set_simple_keyboard_shortcut("n", self.show_history_next)
-        self._set_simple_keyboard_shortcut("p", self.show_history_previous)
-        self._set_simple_keyboard_shortcut("Ctrl+g", self.toggle_all_geom_info)
-        self._set_simple_keyboard_shortcut("Ctrl+r", self.edit_ring_radii)
-        self._set_simple_keyboard_shortcut("Ctrl+a", self.toggle_coordinate_axes)
-        self._set_simple_keyboard_shortcut("Ctrl+l", self.toggle_pad_labels)
-        self._set_simple_keyboard_shortcut("Ctrl+s", self.increase_skip)
-        self._set_simple_keyboard_shortcut("Shift+s", self.decrease_skip)
-        self._set_simple_keyboard_shortcut("m", self.toggle_masks)
-        self._set_simple_keyboard_shortcut("t", self.mask_all_rois)
-
+        shortcut(QtCore.Qt.Key_Right, self.show_next_frame)
+        shortcut(QtCore.Qt.Key_Left, self.show_previous_frame)
+        shortcut("f", self.show_next_frame)
+        shortcut("b", self.show_previous_frame)
+        shortcut("r", self.show_random_frame)
+        shortcut("n", self.show_history_next)
+        shortcut("p", self.show_history_previous)
+        shortcut("Ctrl+g", self.toggle_all_geom_info)
+        shortcut("Ctrl+r", self.edit_ring_radii)
+        shortcut("Ctrl+a", self.toggle_coordinate_axes)
+        shortcut("Ctrl+l", self.toggle_pad_labels)
+        shortcut("Ctrl+s", self.increase_skip)
+        shortcut("Shift+s", self.decrease_skip)
+        shortcut("m", self.toggle_masks)
+        shortcut("t", self.mask_all_rois)
 
     def _update_status_string(self, frame_number=None, n_frames=None):
 
@@ -479,6 +501,32 @@ class PADView(object):
             for im in self.mask_images:
                 im.setVisible(not im.isVisible())
 
+    def save_masks(self):
+
+        options = QtWidgets.QFileDialog.Options()
+        file_name, file_type = QtWidgets.QFileDialog.getSaveFileName(self.main_window, "Save Masks", "mask",
+                                                          "Python Pickle (*.pkl)", options=options)
+        if file_name == "":
+            return
+
+        if file_type == 'Python Pickle (*.pkl)':
+            print('Saving masks: ' + file_name)
+            pickle.dump(self.mask_data, open(file_name, "wb"))
+
+    def load_masks(self):
+
+        options = QtWidgets.QFileDialog.Options()
+        file_name, file_type = QtWidgets.QFileDialog.getOpenFileName(self.main_window, "Load Masks", "mask",
+                                                          "Python Pickle (*.pkl)", options=options)
+
+        if file_name == "":
+            return
+
+        if file_type == 'Python Pickle (*.pkl)':
+            print('Saving masks: ' + file_name)
+            self.mask_data = pickle.load(open(file_name, "rb"))
+            self.update_masks(self.mask_data)
+
     def mask_all_rois(self):
 
         noslice = slice(0, 1, None)
@@ -686,7 +734,7 @@ class PADView(object):
     def show_pad_border(self, n, pen=None):
 
         if pen is None:
-            pen = pg.mkPen([0, 255, 0], width=1)
+            pen = pg.mkPen([0, 255, 0], width=2)
         self.images[n].setBorder(pen)
 
     def show_pad_borders(self, pen=None):
@@ -708,8 +756,9 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_history_next()
+        self.raw_dat = dat
 
-        self.load_frame_dat(dat)
+        self.update_display_data(dat)
 
     def show_history_previous(self):
 
@@ -718,8 +767,9 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_history_previous()
+        self.raw_dat = dat
 
-        self.load_frame_dat(dat)
+        self.update_display_data(dat)
 
     def show_next_frame(self):
 
@@ -728,8 +778,9 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_next_frame()
+        self.raw_dat = dat
 
-        self.load_frame_dat(dat)
+        self.update_display_data(dat)
 
     def show_previous_frame(self):
 
@@ -738,14 +789,16 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_previous_frame()
+        self.raw_dat = dat
 
-        self.load_frame_dat(dat)
+        self.update_display_data(dat)
 
     def show_random_frame(self):
 
         dat = self.frame_getter.get_random_frame()
+        self.raw_dat = dat
 
-        self.load_frame_dat(dat)
+        self.update_display_data(dat)
 
     def show_frame(self, frame_number=0):
 
@@ -754,10 +807,18 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_frame(frame_number=frame_number)
+        self.raw_dat = dat
 
-        self.load_frame_dat(dat)
+        self.update_display_data(dat)
 
-    def load_frame_dat(self, dat):
+    def process_data(self):
+
+        if self.data_processor is not None:
+            self.data_processor(self)
+        else:
+            self.processed_data = self.raw_dat
+
+    def update_display_data(self, dat):
 
         r"""
 
@@ -784,12 +845,12 @@ class PADView(object):
 
             self.peaks = dat['peaks']
 
-        if self.apply_filters is True:
-            if self.data_filters is not None:
-                t = time()
-                for filt in self.data_filters:
-                    filt(self)
-                print(time() - t)
+        # if self.apply_filters is True:
+        #     if self.data_filters is not None:
+        #         t = time()
+        #         for filt in self.data_filters:
+        #             filt(self)
+        #         print(time() - t)
 
         self.update_pads()
 
@@ -876,9 +937,46 @@ class PADView(object):
         else:
             self.apply_filters = True
 
+    def open_snr_filter_widget(self):
 
+        self.widgets['SNR Config'].show()
+
+    def apply_snr_filter(self):
+
+        print('snr filter')
 
     def start(self):
 
         self.show_frame(0)
         self.app.exec_()
+
+
+class SNRConfigWidget(QtGui.QWidget):
+
+    values_changed = QtCore.pyqtSignal()
+
+    def __init__(self):
+
+        QtGui.QWidget.__init__(self)
+        uic.loadUi(snrconfigui, self)
+
+        self.updateButton.clicked.connect(self.send_values)
+
+    def send_values(self):
+
+        print('sending')
+
+        if self.activateBox.value():
+            self.values_changed.emit()
+
+    def get_values(self):
+        dat = {}
+        dat['activated'] = self.activateBox.value()
+        dat['inner'] = self.spinBoxInnerRadius.value()
+        dat['center'] = self.spinBoxCenterRadius.value()
+        dat['outer'] = self.spinBoxOuterRadius.value()
+        return dat
+
+
+
+

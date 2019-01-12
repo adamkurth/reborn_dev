@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>855</height>
+    <height>806</height>
    </rect>
   </property>
   <property name="cursor">
@@ -18,16 +18,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>0</number>
     </property>
     <property name="spacing">
@@ -115,12 +106,15 @@
      </property>
      <addaction name="actionRectangleROIVisible"/>
      <addaction name="actionMaskVisible"/>
+     <addaction name="actionSave_Masks"/>
+     <addaction name="actionLoad_Masks"/>
     </widget>
     <widget class="QMenu" name="menuCustomFilters">
      <property name="title">
       <string>Filters</string>
      </property>
      <addaction name="actionCustomFilter"/>
+     <addaction name="actionLocal_SNR"/>
     </widget>
     <addaction name="actionPanel_IDs"/>
     <addaction name="actionGrid"/>
@@ -208,6 +202,21 @@
   <action name="actionCustomFilter">
    <property name="text">
     <string>Apply Custom</string>
+   </property>
+  </action>
+  <action name="actionLocal_SNR">
+   <property name="text">
+    <string>Local SNR</string>
+   </property>
+  </action>
+  <action name="actionSave_Masks">
+   <property name="text">
+    <string>Save Mask...</string>
+   </property>
+  </action>
+  <action name="actionLoad_Masks">
+   <property name="text">
+    <string>Load Mask...</string>
    </property>
   </action>
  </widget>
