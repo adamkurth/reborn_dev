@@ -22,8 +22,8 @@ import bornagain.simulate.clcore as core
 
 def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
           beam_diameter=10e-6, photon_energy=12.0, n_photons=1e8, \
-          mosaicity_fwhm=1e-4, beam_divergence_fwhm=1e-2, beam_spatial_profile='tophat', \
-          photon_energy_fwhm=0.02, crystal_size=10e-6, crystal_size_fwhm=0.0, \
+          mosaicity_fwhm=1e-4, beam_divergence_fwhm=1e-2, photon_energy_fwhm=0.02, \
+          beam_spatial_profile='tophat', crystal_size=10e-6, crystal_size_fwhm=0.0, \
           mosaic_domain_size=1e-6, mosaic_domain_size_fwhm=0.0, \
           water_radius=0.0, temperature=298.16, \
           n_monte_carlo_iterations=1000, num_patterns=1, seed=0, random_rotation=True, \
@@ -57,10 +57,10 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
 			FWHM of crystal mosaicity.
 		beam_divergence_fwhm (float) :
 			FWHM of direct beam divergence angle.
-		beam_spatial_profile (string) :
-			Spatial profile of intensities in direct beam. Options are 'tophat' and 'gaussian'.
 		photon_energy_fwhm (float) :
 			FWHM of photon energies.
+		beam_spatial_profile (string) :
+			Spatial profile of intensities in direct beam. Options are 'tophat' and 'gaussian'.
 		crystal_size (float) :
 			Average side length of crystals.
 		crystal_size_fwhm (float) :
@@ -187,16 +187,16 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
 
     # Creating text file with output parameters
     values = [detector_distance, pixel_size, n_pixels, beam_diameter, photon_energy * keV, n_photons, mosaicity_fwhm,
-              beam_divergence_fwhm, beam_spatial_profile, photon_energy_fwhm, crystal_size, crystal_size_fwhm / crystal_size, mosaic_domain_size,
-              mosaic_domain_size_fwhm / mosaic_domain_size, water_radius, temperature, n_monte_carlo_iterations, num_patterns, random_rotation,
-              approximate_shape_transform, cromer_mann, expand_symm, fix_rot_seq, mask_direct_beam,
-              pdb_file, write_hdf5, write_geom, write_crystal_sizes, write_ideal_only, results_dir, quiet, compression, cl_double_precision, seed]
+              beam_divergence_fwhm, photon_energy_fwhm, beam_spatial_profile, crystal_size, crystal_size_fwhm / crystal_size, mosaic_domain_size,
+              mosaic_domain_size_fwhm / mosaic_domain_size, water_radius, temperature, n_monte_carlo_iterations, num_patterns, seed,
+              random_rotation, approximate_shape_transform, cromer_mann, expand_symm, fix_rot_seq, mask_direct_beam,
+              pdb_file, write_hdf5, write_geom, write_crystal_sizes, write_ideal_only, results_dir, quiet, compression, cl_double_precision]
 
     names  = ['detector_distance', 'pixel_size', 'n_pixels', 'beam_diameter', 'photon_energy', 'n_photons', 
-              'mosaicity_fwhm', 'beam_divergence_fwhm', 'beam_spatial_profile', 'photon_energy_fwhm', 'crystal_size', 'crystal_size_fwhm',
+              'mosaicity_fwhm', 'beam_divergence_fwhm', 'photon_energy_fwhm', 'beam_spatial_profile', 'crystal_size', 'crystal_size_fwhm',
               'mosaic_domain_size', 'mosaic_domain_size_fwhm', 'water_radius', 'temperature', 'n_monte_carlo_iterations', 'num_patterns',
-              'random_rotation', 'approximate_shape_transform', 'cromer_mann', 'expand_symm', 'fix_rot_sequence', 'mask_direct_beam',
-              'pdb_file', 'write_hdf5', 'write_geom', 'write_crystal_sizes', 'write_ideal_only', 'results_dir', 'quiet', 'compression', 'cl_double_precision', 'seed']
+              'seed', 'random_rotation', 'approximate_shape_transform', 'cromer_mann', 'expand_symm', 'fix_rot_sequence', 'mask_direct_beam',
+              'pdb_file', 'write_hdf5', 'write_geom', 'write_crystal_sizes', 'write_ideal_only', 'results_dir', 'quiet', 'compression', 'cl_double_precision']
 
 
     pseudo_dict = zip(names, values)
