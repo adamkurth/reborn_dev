@@ -182,6 +182,9 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     if not (compression == None or compression == 'lzf' or compression == 'gzip'):
         sys.exit('ERROR: compression format must be either lzf or gzip')
 
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+
     # Creating text file with output parameters
     values = [detector_distance, pixel_size, n_pixels, beam_diameter, photon_energy * keV, n_photons, mosaicity_fwhm,
               beam_divergence_fwhm, beam_spatial_profile, photon_energy_fwhm, crystal_size, crystal_size_fwhm / crystal_size, mosaic_domain_size,
@@ -199,16 +202,13 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
     pseudo_dict = zip(names, values)
     dictionary  = dict(pseudo_dict)
 # FIXME: Just create the above dictionary directly; why make the two lists first?
-    file_name = results_dir + 'used_params.txt'
+    file_name = os.path.join(results_dir, 'used_params.txt')
     used_params = open(str(file_name), 'w+')
 
     for k, v in dictionary.items():
         if v != str(v):
             v = str(v)
         used_params.write(k + '=' + v + '\n')
-
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
 
     if not quiet:
         write = sys.stdout.write
@@ -309,7 +309,7 @@ def mcsim(detector_distance=100e-3, pixel_size=110e-6, n_pixels=1000, \
         shape_transform = clcore.lattice_transform_intensities_pad
 
     if write_geom:
-        geom_file = results_dir + 'geom.geom'
+        geom_file = os.path.join(results_dir, 'geom.geom')
         write('Writing geometry file %s\n' % geom_file)
         fid = open(geom_file, 'w')
         fid.write("photon_energy = %g\n" % (photon_energy * ba.units.eV))
