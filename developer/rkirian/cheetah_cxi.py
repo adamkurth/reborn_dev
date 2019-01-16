@@ -12,11 +12,12 @@ geom_file_name = 'data/cxin5016-oy-v1.geom'
 cxi_file_name = 'data/cxilu5617-r0149-c00.cxi'
 
 frame_getter = CheetahFrameGetter(cxi_file_name, geom_file_name)
+pad_geometry = frame_getter.pad_geometry
 dat = frame_getter.get_frame(0)
 pads = dat['pad_data']
 shape = pads[0].shape
 masks = [edge_mask(d, 1) for d in pads]
-padview = PADView(frame_getter=frame_getter, mask_data=masks)
+padview = PADView(pad_geometry=pad_geometry, frame_getter=frame_getter, mask_data=masks)
 
 radii = (3, 6, 9)
 

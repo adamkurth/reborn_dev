@@ -54,6 +54,14 @@ class PeakFinder(object):
         return self.centroids
 
 
+def boxsnr(dat, mask, nin, ncent, nout):
+    if have_fortran:
+        snr, signal = boxsnr_fortran(dat, mask, nin, ncent, nout)
+    else:
+        snr, signal = boxsnr_numba(dat, mask, nin, ncent, nout)
+    return snr, signal
+
+
 def boxsnr_fortran(dat, mask, nin, ncent, nout):
 
     snr = np.asfortranarray(np.ones_like(dat))

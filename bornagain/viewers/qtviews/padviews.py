@@ -16,7 +16,13 @@ from pyqtgraph.Qt import uic, QtGui, QtCore, QtWidgets
 # import bornagain
 # import bornagain.external.pyqtgraph as bpg
 from bornagain.fileio.getters import FrameGetter
-# from bornagain import analysis
+from bornagain import analysis
+
+padview_debug_on = True
+
+def padview_debug(msg):
+    if padview_debug_on:
+        print(msg)
 
 padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
 snrconfigui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'configs.ui')
@@ -36,7 +42,7 @@ class PADView(object):
     # not visible here.
 
     logscale = False
-    raw_dat = None
+    raw_data = None
     pad_geometry = []
     _pad_data = []
     pad_labels = None
@@ -62,7 +68,6 @@ class PADView(object):
     show_peaks = True
     peaks = None
     apply_filters = True
-    apply_snr_filter = False
     data_processor = None
     widgets = {}
 
@@ -72,20 +77,15 @@ class PADView(object):
 
         self.logscale = logscale
         self.mask_data = mask_data
+        self.pad_geometry = pad_geometry
+        self.pad_data = pad_data
 
-        if frame_getter is None:
-            if pad_geometry is None or pad_data is None:
-                raise ValueError("Either provide a FrameGetter or provide PAD geometry and PAD data."
-                                 "One of these items is None type.")
-            self.pad_geometry = pad_geometry
-            self.pad_data = pad_data
-        else:
+        if self.frame_getter is not None:
             self.frame_getter = frame_getter
-            self.pad_geometry = frame_getter.pad_geometry
-            dat = frame_getter.get_frame(0)
-            if dat is None:
-                raise Exception("Can't find any data!")
-            self.pad_data = dat['pad_data']
+            if pad_data is not None:
+                dat = self.frame_getter.get_frame(0)
+                if dat is not None:
+                    self.pad_data = dat['pad_data']
 
         self.app = pg.mkQApp()
         self.main_window = uic.loadUi(padviewui)
@@ -93,24 +93,21 @@ class PADView(object):
         self.viewbox.invertX()
         self.viewbox.setAspectLocked()
         self.main_window.graphics_view.setCentralItem(self.viewbox)
-        self.setup_pads()
-        self.setup_masks()
-        self.setup_histogram_tool()
-        self.main_window.show()
-        self._setup_mouse_interactions()
-        self._setup_shortcuts()
-        self._setup_menu()
-        self._setup_widgets()
-
+        self.setup_mouse_interactions()
+        self.setup_shortcuts()
+        self.setup_menu()
+        self.setup_widgets()
         self.main_window.statusbar.setStyleSheet("background-color:rgb(30, 30, 30);color:rgb(255,0,255);"
                                                  "font-weight:bold;font-family:monospace;")
+        if self.pad_data is not None:
+            self.setup_pads()
+            self.show_frame()
+        self.main_window.show()
 
-        self.show_frame()
-
-    def _setup_widgets(self):
+    def setup_widgets(self):
 
         snr_config = SNRConfigWidget()
-        snr_config.values_changed.connect(self.apply_snr_filter)
+        snr_config.values_changed.connect(self.update_snr_filter)
         self.widgets['SNR Config'] = snr_config
 
     @property
@@ -131,11 +128,11 @@ class PADView(object):
 
         print("something happened")
 
-    def _setup_mouse_interactions(self):
+    def setup_mouse_interactions(self):
 
         self.proxy = pg.SignalProxy(self.viewbox.scene().sigMouseMoved, rateLimit=60, slot=self._mouse_moved)
 
-    def _setup_menu(self):
+    def setup_menu(self):
 
         mw = self.main_window
         mw.actionGrid.triggered.connect(self.toggle_grid)
@@ -144,11 +141,11 @@ class PADView(object):
         mw.actionRectangleROIVisible.triggered.connect(self.toggle_rois)
         mw.actionPeaksVisible.triggered.connect(self.toggle_peaks)
         mw.actionCustomFilter.triggered.connect(self.toggle_filter)
-        mw.actionLocal_SNR.triggered.connect(self.open_snr_filter_widget)
+        mw.actionLocal_SNR.triggered.connect(self.show_snr_filter_widget)
         mw.actionSave_Masks.triggered.connect(self.save_masks)
         mw.actionLoad_Masks.triggered.connect(self.load_masks)
 
-    def _setup_shortcuts(self):
+    def setup_shortcuts(self):
 
         if self._shortcuts is None:
             self._shortcuts = []
@@ -184,7 +181,10 @@ class PADView(object):
     @property
     def n_pads(self):
 
-        return len(self.pad_geometry)
+        if self.pad_geometry is None:
+            return 0
+        else:
+            return len(self.pad_geometry)
 
     def setup_histogram_tool(self):
 
@@ -437,6 +437,9 @@ class PADView(object):
 
     def setup_masks(self, mask_data=None):
 
+        if self.pad_geometry is None:
+            return
+
         if mask_data is not None:
             self.mask_data = mask_data
 
@@ -572,6 +575,9 @@ class PADView(object):
         if pad_data is not None:
             self.pad_data = pad_data
 
+        if self.pad_data is None:
+            return
+
         mx = np.ravel(self.pad_data).max()
 
         for i in range(0, self.n_pads):
@@ -596,6 +602,9 @@ class PADView(object):
             self.viewbox.addItem(im)
 
             self.main_window.histogram.regionChanged()
+
+        self.setup_histogram_tool()
+        self.setup_masks()
 
     def update_pads(self, pad_data=None):
 
@@ -625,6 +634,9 @@ class PADView(object):
     def _mouse_moved(self, evt):
 
         if evt is None:
+            return
+
+        if self.pad_geometry is None:
             return
 
         self.evt = evt
@@ -733,11 +745,24 @@ class PADView(object):
 
     def show_pad_border(self, n, pen=None):
 
+        if self.images is None:
+            return
+
         if pen is None:
             pen = pg.mkPen([0, 255, 0], width=2)
         self.images[n].setBorder(pen)
 
+    def hide_pad_border(self, n):
+
+        if self.images is None:
+            return
+
+        self.images[n].setBorder(None)
+
     def show_pad_borders(self, pen=None):
+
+        if self.images is None:
+            return
 
         if pen is None:
             pen = pg.mkPen([0, 255, 0], width=1)
@@ -745,6 +770,9 @@ class PADView(object):
             image.setBorder(pen)
 
     def hide_pad_borders(self):
+
+        if self.images is None:
+            return
 
         for image in self.images:
             image.setBorder(None)
@@ -756,7 +784,7 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_history_next()
-        self.raw_dat = dat
+        self.raw_data = dat
 
         self.update_display_data(dat)
 
@@ -767,7 +795,7 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_history_previous()
-        self.raw_dat = dat
+        self.raw_data = dat
 
         self.update_display_data(dat)
 
@@ -778,7 +806,7 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_next_frame()
-        self.raw_dat = dat
+        self.raw_data = dat
 
         self.update_display_data(dat)
 
@@ -789,14 +817,14 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_previous_frame()
-        self.raw_dat = dat
+        self.raw_data = dat
 
         self.update_display_data(dat)
 
     def show_random_frame(self):
 
         dat = self.frame_getter.get_random_frame()
-        self.raw_dat = dat
+        self.raw_data = dat
 
         self.update_display_data(dat)
 
@@ -807,7 +835,7 @@ class PADView(object):
             return
 
         dat = self.frame_getter.get_frame(frame_number=frame_number)
-        self.raw_dat = dat
+        self.raw_data = dat
 
         self.update_display_data(dat)
 
@@ -816,9 +844,9 @@ class PADView(object):
         if self.data_processor is not None:
             self.data_processor(self)
         else:
-            self.processed_data = self.raw_dat
+            self.processed_data = self.raw_data
 
-    def update_display_data(self, dat):
+    def update_display_data(self, dat=None):
 
         r"""
 
@@ -937,18 +965,36 @@ class PADView(object):
         else:
             self.apply_filters = True
 
-    def open_snr_filter_widget(self):
+    def show_snr_filter_widget(self):
 
         self.widgets['SNR Config'].show()
 
     def apply_snr_filter(self):
 
-        print('snr filter')
+        if self.raw_data is not None:
+            values = self.widgets['SNR Config'].get_values()
+            a = values['inner']
+            b = values['center']
+            c = values['outer']
+            raw = self.raw_data['pad_data']
+            mask = self.mask_data
+            for i in range(self.n_pads):
+                snr, signal = analysis.peaks.boxsnr(raw[i], mask[i], a, b, c)
+                self.pad_data[i] = snr
+
+    def update_snr_filter(self):
+
+        vals = self.widgets['SNR Config'].get_values()
+        if vals['activate']:
+            self.
+            self.apply_snr_filter()
+            self.update_pads()
 
     def start(self):
 
         self.show_frame(0)
         self.app.exec_()
+
 
 
 class SNRConfigWidget(QtGui.QWidget):
@@ -961,17 +1007,15 @@ class SNRConfigWidget(QtGui.QWidget):
         uic.loadUi(snrconfigui, self)
 
         self.updateButton.clicked.connect(self.send_values)
+        self.activateBox.stateChanged.connect(self.send_values)
 
     def send_values(self):
 
-        print('sending')
-
-        if self.activateBox.value():
-            self.values_changed.emit()
+        self.values_changed.emit()
 
     def get_values(self):
         dat = {}
-        dat['activated'] = self.activateBox.value()
+        dat['activate'] = self.activateBox.isChecked()
         dat['inner'] = self.spinBoxInnerRadius.value()
         dat['center'] = self.spinBoxCenterRadius.value()
         dat['outer'] = self.spinBoxOuterRadius.value()
