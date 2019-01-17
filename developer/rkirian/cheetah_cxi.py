@@ -6,7 +6,7 @@ import numpy as np
 from bornagain.detector import edge_mask
 from bornagain.viewers.qtviews import PADView
 from bornagain.fileio.getters import CheetahFrameGetter
-from bornagain.analysis.peaks import boxsnr_numba, boxsnr_fortran, PeakFinder
+from bornagain.analysis.peaks import PeakFinder
 
 geom_file_name = 'data/cxin5016-oy-v1.geom'
 cxi_file_name = 'data/cxilu5617-r0149-c00.cxi'

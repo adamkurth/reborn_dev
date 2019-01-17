@@ -11,13 +11,14 @@ import pkg_resources
 import pyqtgraph as pg
 # pg.setConfigOptions(imageAxisOrder='row-major')
 
-from pyqtgraph.Qt import uic, QtGui, QtCore, QtWidgets
+# We are using pyqtgraph's wrapper for pyqt because it helps deal with the different APIs in pyqt5 and pyqt4...
+from pyqtgraph.Qt import uic, QtGui, QtCore #, QtWidgets
 
 # import bornagain
 # import bornagain.external.pyqtgraph as bpg
 from bornagain.fileio.getters import FrameGetter, CheetahFrameGetter
 from bornagain.external.crystfel import geometry_file_to_pad_geometry_list
-from bornagain import analysis
+from bornagain.analysis.peaks import boxsnr
 
 padview_debug_on = True
 
@@ -78,6 +79,8 @@ class PADView(object):
 
     def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None):
 
+        padview_debug('__init__()')
+
         self.logscale = logscale
         self.mask_data = mask_data
         self.pad_geometry = pad_geometry
@@ -114,7 +117,17 @@ class PADView(object):
 
         print("something happened")
 
+    def close_main_window(self):
+
+        padview_debug('close_main_window()')
+
+        for key in self.widgets.keys():
+            self.widgets[key].close()
+        self.main_window.destroy()
+
     def setup_widgets(self):
+
+        padview_debug('setup_widgets()')
 
         snr_config = SNRConfigWidget()
         snr_config.values_changed.connect(self.update_snr_filter_params)
@@ -122,9 +135,13 @@ class PADView(object):
 
     def setup_mouse_interactions(self):
 
+        padview_debug('setup_mouse_interactions()')
+
         self.proxy = pg.SignalProxy(self.viewbox.scene().sigMouseMoved, rateLimit=60, slot=self._mouse_moved)
 
     def setup_menu(self):
+
+        padview_debug('setup_menu()')
 
         mw = self.main_window
         mw.actionGrid.triggered.connect(self.toggle_grid)
@@ -142,6 +159,8 @@ class PADView(object):
         mw.actionShow_scan_directions.triggered.connect(self.toggle_fast_scan_directions)
 
     def setup_shortcuts(self):
+
+        padview_debug('setup_shortcuts()')
 
         if self._shortcuts is None:
             self._shortcuts = []
@@ -183,6 +202,8 @@ class PADView(object):
             return len(self.pad_geometry)
 
     def setup_histogram_tool(self):
+
+        padview_debug('setup_histogram_tool()')
 
         self.main_window.histogram.gradient.loadPreset('flame')
         self.main_window.histogram.setImageItems(self.images)
@@ -433,6 +454,8 @@ class PADView(object):
 
     def setup_masks(self, mask_data=None):
 
+        padview_debug('setup_masks()')
+
         if self.pad_geometry is None:
             return
 
@@ -469,6 +492,8 @@ class PADView(object):
 
     def update_masks(self, mask_data=None):
 
+        padview_debug('update_masks()')
+
         if mask_data is not None:
             self.mask_data = mask_data
 
@@ -503,8 +528,8 @@ class PADView(object):
 
     def save_masks(self):
 
-        options = QtWidgets.QFileDialog.Options()
-        file_name, file_type = QtWidgets.QFileDialog.getSaveFileName(self.main_window, "Save Masks", "mask",
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Masks", "mask",
                                                           "Python Pickle (*.pkl)", options=options)
         if file_name == "":
             return
@@ -515,8 +540,8 @@ class PADView(object):
 
     def load_masks(self):
 
-        options = QtWidgets.QFileDialog.Options()
-        file_name, file_type = QtWidgets.QFileDialog.getOpenFileName(self.main_window, "Load Masks", "mask",
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load Masks", "mask",
                                                           "Python Pickle (*.pkl)", options=options)
 
         if file_name == "":
@@ -600,6 +625,8 @@ class PADView(object):
 
     def setup_pads(self):
 
+        padview_debug('setup_pads()')
+
         pad_data = self.get_pad_display_data()
 
         mx = np.ravel(pad_data).max()
@@ -630,6 +657,8 @@ class PADView(object):
         self.setup_masks()
 
     def update_pads(self):
+
+        padview_debug('update_pads()')
 
         pad_data = self.get_pad_display_data()
 
@@ -862,12 +891,14 @@ class PADView(object):
 
     def process_data(self):
 
+        padview_debug('process_data()')
+
         if self.data_processor is not None:
-            self.data_processor(self)
+            self.data_processor()
         else:
             self.processed_data = None
 
-    def update_display_data(self):
+    def update_display_data(self, ):
 
         r"""
 
@@ -879,6 +910,8 @@ class PADView(object):
         Returns:
 
         """
+
+        padview_debug('update_display_data()')
 
         self.process_data()
         self.update_pads()
@@ -970,6 +1003,8 @@ class PADView(object):
 
     def apply_snr_filter(self):
 
+        padview_debug('apply_snr_filter()')
+
         if self.snr_filter_params is None:
             return
 
@@ -988,13 +1023,13 @@ class PADView(object):
         raw = self.raw_data['pad_data']
         mask = self.mask_data
         processed_pads = [None]*self.n_pads
+        padview_debug('boxsnr()')
         for i in range(self.n_pads):
-            snr, signal = analysis.peaks.boxsnr(raw[i], mask[i], a, b, c)
+            snr, signal = boxsnr(raw[i], mask[i], a, b, c)
             processed_pads[i] = snr
         if self.processed_data is None:
             self.processed_data = {}
-        else:
-            self.processed_data['pad_data'] = processed_pads
+        self.processed_data['pad_data'] = processed_pads
 
     def update_snr_filter_params(self):
 
@@ -1003,15 +1038,17 @@ class PADView(object):
         vals = self.widgets['SNR Config'].get_values()
         if vals['activate']:
             self.snr_filter_params = vals
-            self.apply_snr_filter()
-            self.update_pads()
-
-        self.data_filters = [self.apply_snr_filter]
+            # self.apply_snr_filter()
+            self.data_processor = self.apply_snr_filter
+            self.update_display_data()
+        else:
+            self.data_processor = None
+            self.update_display_data()
 
     def load_geometry_file(self):
 
-        options = QtWidgets.QFileDialog.Options()
-        file_name, file_type = QtWidgets.QFileDialog.getOpenFileName(self.main_window, "Load geometry file", "",
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load geometry file", "",
                                                           "CrystFEL geom (*.geom)", options=options)
         if file_name == "":
             return
@@ -1022,8 +1059,8 @@ class PADView(object):
 
     def open_data_file(self):
 
-        options = QtWidgets.QFileDialog.Options()
-        file_name, file_type = QtWidgets.QFileDialog.getOpenFileName(self.main_window, "Load data file", "",
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load data file", "",
                                                           "Cheetah CXI (*.cxi)", options=options)
 
         if file_name == "":
@@ -1031,23 +1068,25 @@ class PADView(object):
 
         if file_type == 'Cheetah CXI (*.cxi)':
             if self.crystfel_geom_file_name is None:
-                msg = QtWidgets.QMessageBox()
+                msg = QtGui.QMessageBox()
                 msg.setText("You must load a CrystFEL Geometry file before loading a Cheetah CXI file.")
                 msg.exec_()
                 self.load_geometry_file()
-                self.open_data_file()
-                return
+                if self.crystfel_geom_file_name is None:
+                    return
 
             self.frame_getter = CheetahFrameGetter(file_name, self.crystfel_geom_file_name)
             self.show_frame(frame_number=0)
 
     def start(self):
 
-        self.show_frame(0)
+        padview_debug('start()')
+        # self.show_frame(0)
         self.app.exec_()
 
     def show(self):
 
+        padview_debug('show()')
         self.main_window.show()
         self.main_window.callback_pb_load()
 
@@ -1056,9 +1095,9 @@ class SNRConfigWidget(QtGui.QWidget):
 
     values_changed = QtCore.pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, parent=None):
 
-        QtGui.QWidget.__init__(self)
+        QtGui.QWidget.__init__(self, parent=parent)
         uic.loadUi(snrconfigui, self)
 
         self.updateButton.clicked.connect(self.send_values)
@@ -1066,9 +1105,11 @@ class SNRConfigWidget(QtGui.QWidget):
 
     def send_values(self):
 
+        padview_debug('send_values()')
         self.values_changed.emit()
 
     def get_values(self):
+        padview_debug('get_values()')
         dat = {}
         dat['activate'] = self.activateBox.isChecked()
         dat['inner'] = self.spinBoxInnerRadius.value()

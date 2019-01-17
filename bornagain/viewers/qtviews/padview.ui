@@ -114,6 +114,7 @@
       <string>Mask</string>
      </property>
      <addaction name="actionMaskVisible"/>
+     <addaction name="actionMask_panel_edges"/>
      <addaction name="actionRectangleROIVisible"/>
      <addaction name="actionSave_Masks"/>
      <addaction name="actionLoad_Masks"/>
@@ -215,7 +216,7 @@
   </action>
   <action name="actionRectangleROIVisible">
    <property name="text">
-    <string>Rectangle ROI</string>
+    <string>Mask rectangle</string>
    </property>
   </action>
   <action name="actionMaskVisible">
@@ -276,6 +277,11 @@
    </property>
    <property name="text">
     <string>Show scan directions</string>
+   </property>
+  </action>
+  <action name="actionMask_panel_edges">
+   <property name="text">
+    <string>Mask panel edges...</string>
    </property>
   </action>
  </widget>
