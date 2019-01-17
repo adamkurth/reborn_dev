@@ -15,10 +15,12 @@ from pyqtgraph.Qt import uic, QtGui, QtCore, QtWidgets
 
 # import bornagain
 # import bornagain.external.pyqtgraph as bpg
-from bornagain.fileio.getters import FrameGetter
+from bornagain.fileio.getters import FrameGetter, CheetahFrameGetter
+from bornagain.external.crystfel import geometry_file_to_pad_geometry_list
 from bornagain import analysis
 
 padview_debug_on = True
+
 
 def padview_debug(msg):
     if padview_debug_on:
@@ -42,9 +44,10 @@ class PADView(object):
     # not visible here.
 
     logscale = False
-    raw_data = None
+    raw_data = None   # Dictionary with 'pad_data' and 'peaks' keys
+    processed_data = None  # Dictionary with 'pad_data' and 'peaks' keys
     pad_geometry = []
-    _pad_data = []
+    crystfel_geom_file_name = None
     pad_labels = None
     mask_data = None
     mask_images = None
@@ -73,19 +76,18 @@ class PADView(object):
 
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': False}
 
-    def __init__(self, pad_geometry=None, pad_data=None, mask_data=None, logscale=False, frame_getter=None):
+    def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None):
 
         self.logscale = logscale
         self.mask_data = mask_data
         self.pad_geometry = pad_geometry
-        self.pad_data = pad_data
 
         if self.frame_getter is not None:
             self.frame_getter = frame_getter
-            if pad_data is not None:
-                dat = self.frame_getter.get_frame(0)
-                if dat is not None:
-                    self.pad_data = dat['pad_data']
+            try:
+                self.raw_data = self.frame_getter.get_frame(0)
+            except:
+                pass
 
         self.app = pg.mkQApp()
         self.main_window = uic.loadUi(padviewui)
@@ -99,26 +101,10 @@ class PADView(object):
         self.setup_widgets()
         self.main_window.statusbar.setStyleSheet("background-color:rgb(30, 30, 30);color:rgb(255,0,255);"
                                                  "font-weight:bold;font-family:monospace;")
-        if self.pad_data is not None:
+        if self.raw_data is not None:
             self.setup_pads()
             self.show_frame()
         self.main_window.show()
-
-    def setup_widgets(self):
-
-        snr_config = SNRConfigWidget()
-        snr_config.values_changed.connect(self.update_snr_filter)
-        self.widgets['SNR Config'] = snr_config
-
-    @property
-    def pad_data(self):
-
-        return self._pad_data
-
-    @pad_data.setter
-    def pad_data(self, dat):
-
-        self._pad_data = dat
 
     def _do_nothing(self):
 
@@ -127,6 +113,12 @@ class PADView(object):
     def _print_something(self):
 
         print("something happened")
+
+    def setup_widgets(self):
+
+        snr_config = SNRConfigWidget()
+        snr_config.values_changed.connect(self.update_snr_filter_params)
+        self.widgets['SNR Config'] = snr_config
 
     def setup_mouse_interactions(self):
 
@@ -144,6 +136,10 @@ class PADView(object):
         mw.actionLocal_SNR.triggered.connect(self.show_snr_filter_widget)
         mw.actionSave_Masks.triggered.connect(self.save_masks)
         mw.actionLoad_Masks.triggered.connect(self.load_masks)
+        mw.actionPanel_IDs.triggered.connect(self.toggle_pad_labels)
+        mw.actionBeam_position.triggered.connect(self.toggle_coordinate_axes)
+        mw.actionOpen_data_file.triggered.connect(self.open_data_file)
+        mw.actionShow_scan_directions.triggered.connect(self.toggle_fast_scan_directions)
 
     def setup_shortcuts(self):
 
@@ -169,7 +165,7 @@ class PADView(object):
         shortcut("m", self.toggle_masks)
         shortcut("t", self.mask_all_rois)
 
-    def _update_status_string(self, frame_number=None, n_frames=None):
+    def update_status_string(self, frame_number=None, n_frames=None):
 
         if frame_number is not None and n_frames is not None:
             n = np.int(np.ceil(np.log10(n_frames)))
@@ -443,8 +439,9 @@ class PADView(object):
         if mask_data is not None:
             self.mask_data = mask_data
 
+        pad_data = self.get_pad_display_data()
         if self.mask_data is None:
-            self.mask_data = [np.ones_like(d) for d in self.pad_data]
+            self.mask_data = [np.ones_like(d) for d in pad_data]
 
         if self.mask_color is None:
             self.mask_color = np.array([128, 0, 0])
@@ -570,19 +567,48 @@ class PADView(object):
                 self.mask_data[ind] = m
                 self.mask_images[ind].setImage(self._make_mask_rgba(m))
 
-    def setup_pads(self, pad_data=None):
+    def get_pad_display_data(self):
 
-        if pad_data is not None:
-            self.pad_data = pad_data
+        # The logic of what actually gets displayed should go here.  For now, we display processed data if it is
+        # available, else we display raw data, else we display zeros based on the pad geometry.  If none of these
+        # are available, this function returns none.
 
-        if self.pad_data is None:
-            return
+        if self.processed_data is not None:
+            if 'pad_data' in self.processed_data.keys():
+                return self.processed_data['pad_data']
 
-        mx = np.ravel(self.pad_data).max()
+        if self.raw_data is not None:
+            if 'pad_data' in self.raw_data.keys():
+                return self.raw_data['pad_data']
+
+        if self.pad_geometry is not None:
+            return [pad.zeros() for pad in self.pad_geometry]
+
+        return None
+
+    def get_peak_data(self):
+
+        if self.processed_data is not None:
+            if 'peaks' in self.processed_data.keys():
+                return self.processed_data['peaks']
+
+        if self.raw_data is not None:
+            if 'peaks' in self.raw_data.keys():
+                return self.raw_data['peaks']
+
+        return None
+
+    def setup_pads(self):
+
+        pad_data = self.get_pad_display_data()
+
+        mx = np.ravel(pad_data).max()
+
+        self.images = []
 
         for i in range(0, self.n_pads):
 
-            d = self.pad_data[i]
+            d = pad_data[i]
 
             if self.logscale:
                 d[d < 0] = 0
@@ -595,9 +621,6 @@ class PADView(object):
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 
-            if self.images is None:
-                self.images = []
-
             self.images.append(im)
             self.viewbox.addItem(im)
 
@@ -606,19 +629,18 @@ class PADView(object):
         self.setup_histogram_tool()
         self.setup_masks()
 
-    def update_pads(self, pad_data=None):
+    def update_pads(self):
 
-        if pad_data is not None:
-            self.pad_data = pad_data
+        pad_data = self.get_pad_display_data()
 
-        mx = np.ravel(self.pad_data).max()
+        mx = np.ravel(pad_data).max()
 
         if self.images is None:
             self.setup_pads()
 
         for i in range(0, self.n_pads):
 
-            d = self.pad_data[i]
+            d = pad_data[i]
 
             if self.show_true_fast_scans:  # For testing - show fast scan axis
                 d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
@@ -639,6 +661,8 @@ class PADView(object):
         if self.pad_geometry is None:
             return
 
+        pad_data = self.get_pad_display_data()
+
         self.evt = evt
         pos = evt[0]
         pid = -1
@@ -656,20 +680,17 @@ class PADView(object):
             fs = np.int(ppos[1])
             ss = np.int(ppos[0])
             if pid >= 0:
-                d = self.pad_data[pid]
+                d = pad_data[pid]
                 sh = d.shape
                 if ss < sh[0] and fs < sh[1]:
-                    intensity = self.pad_data[pid][ss, fs]
+                    intensity = pad_data[pid][ss, fs]
 
             if pid >= 0:
                 self._status_string_mouse = ' Panel %2d  |  Pixel %4d,%4d  |  Value=%8g  | ' % (pid, ss, fs, intensity)
             else:
                 self._status_string_mouse = ''
 
-            self._update_status_string()
-            #self.label.setText(
-            #    "<span style='font-size: 12pt'>x=%0.1f,   <span style='color: red'>y1=%0.1f</span>" % (
-            #    pnt.x(), pnt.y()))
+            self.update_status_string()
 
     def edit_ring_radii(self):
 
@@ -786,7 +807,7 @@ class PADView(object):
         dat = self.frame_getter.get_history_next()
         self.raw_data = dat
 
-        self.update_display_data(dat)
+        self.update_display_data()
 
     def show_history_previous(self):
 
@@ -797,7 +818,7 @@ class PADView(object):
         dat = self.frame_getter.get_history_previous()
         self.raw_data = dat
 
-        self.update_display_data(dat)
+        self.update_display_data()
 
     def show_next_frame(self):
 
@@ -808,7 +829,7 @@ class PADView(object):
         dat = self.frame_getter.get_next_frame()
         self.raw_data = dat
 
-        self.update_display_data(dat)
+        self.update_display_data()
 
     def show_previous_frame(self):
 
@@ -819,14 +840,14 @@ class PADView(object):
         dat = self.frame_getter.get_previous_frame()
         self.raw_data = dat
 
-        self.update_display_data(dat)
+        self.update_display_data()
 
     def show_random_frame(self):
 
         dat = self.frame_getter.get_random_frame()
         self.raw_data = dat
 
-        self.update_display_data(dat)
+        self.update_display_data()
 
     def show_frame(self, frame_number=0):
 
@@ -837,20 +858,20 @@ class PADView(object):
         dat = self.frame_getter.get_frame(frame_number=frame_number)
         self.raw_data = dat
 
-        self.update_display_data(dat)
+        self.update_display_data()
 
     def process_data(self):
 
         if self.data_processor is not None:
             self.data_processor(self)
         else:
-            self.processed_data = self.raw_data
+            self.processed_data = None
 
-    def update_display_data(self, dat=None):
+    def update_display_data(self):
 
         r"""
 
-        Update display with new data.
+        Update display with new data, e.g. when moving to next frame.
 
         Args:
             dat: input dictionary with keys 'pad_data', 'peaks'
@@ -859,34 +880,13 @@ class PADView(object):
 
         """
 
-        self.remove_scatter_plots()
-
-        if dat is None:
-            return
-            # TODO: handle None more wisely
-
-        if 'pad_data' in dat.keys():
-
-            self.pad_data = dat['pad_data']
-
-        if 'peaks' in dat.keys():
-
-            self.peaks = dat['peaks']
-
-        # if self.apply_filters is True:
-        #     if self.data_filters is not None:
-        #         t = time()
-        #         for filt in self.data_filters:
-        #             filt(self)
-        #         print(time() - t)
-
+        self.process_data()
         self.update_pads()
-
-        if self.show_peaks is True:
-            self.display_peaks(self.peaks)
-
-        self._update_status_string(frame_number=self.frame_getter.current_frame, n_frames=self.frame_getter.n_frames)
-
+        self.remove_scatter_plots()
+        peaks = self.get_peak_data()
+        if self.show_peaks is True and peaks is not None:
+            self.display_peaks()
+        self.update_status_string(frame_number=self.frame_getter.current_frame, n_frames=self.frame_getter.n_frames)
         self._mouse_moved(self.evt)
 
     def add_scatter_plot(self, *args, **kargs):
@@ -906,10 +906,9 @@ class PADView(object):
 
         self.scatter_plots = None
 
-    def display_peaks(self, peaks=None):
+    def display_peaks(self):
 
-        if peaks is None:
-            peaks = self.peaks
+        peaks = self.get_peak_data()
 
         if peaks is None:
             return
@@ -971,30 +970,86 @@ class PADView(object):
 
     def apply_snr_filter(self):
 
-        if self.raw_data is not None:
-            values = self.widgets['SNR Config'].get_values()
-            a = values['inner']
-            b = values['center']
-            c = values['outer']
-            raw = self.raw_data['pad_data']
-            mask = self.mask_data
-            for i in range(self.n_pads):
-                snr, signal = analysis.peaks.boxsnr(raw[i], mask[i], a, b, c)
-                self.pad_data[i] = snr
+        if self.snr_filter_params is None:
+            return
 
-    def update_snr_filter(self):
+        if self.snr_filter_params['activate'] is not True:
+            return
+
+        if self.raw_data is None:
+            return
+
+        if self.mask_data is None:
+            return
+
+        a = self.snr_filter_params['inner']
+        b = self.snr_filter_params['center']
+        c = self.snr_filter_params['outer']
+        raw = self.raw_data['pad_data']
+        mask = self.mask_data
+        processed_pads = [None]*self.n_pads
+        for i in range(self.n_pads):
+            snr, signal = analysis.peaks.boxsnr(raw[i], mask[i], a, b, c)
+            processed_pads[i] = snr
+        if self.processed_data is None:
+            self.processed_data = {}
+        else:
+            self.processed_data['pad_data'] = processed_pads
+
+    def update_snr_filter_params(self):
+
+        # Get info from the widget
 
         vals = self.widgets['SNR Config'].get_values()
         if vals['activate']:
-            self.
+            self.snr_filter_params = vals
             self.apply_snr_filter()
             self.update_pads()
+
+        self.data_filters = [self.apply_snr_filter]
+
+    def load_geometry_file(self):
+
+        options = QtWidgets.QFileDialog.Options()
+        file_name, file_type = QtWidgets.QFileDialog.getOpenFileName(self.main_window, "Load geometry file", "",
+                                                          "CrystFEL geom (*.geom)", options=options)
+        if file_name == "":
+            return
+
+        if file_type == "CrystFEL geom (*.geom)":
+            self.pad_geometry = geometry_file_to_pad_geometry_list(file_name)
+            self.crystfel_geom_file_name = file_name
+
+    def open_data_file(self):
+
+        options = QtWidgets.QFileDialog.Options()
+        file_name, file_type = QtWidgets.QFileDialog.getOpenFileName(self.main_window, "Load data file", "",
+                                                          "Cheetah CXI (*.cxi)", options=options)
+
+        if file_name == "":
+            return
+
+        if file_type == 'Cheetah CXI (*.cxi)':
+            if self.crystfel_geom_file_name is None:
+                msg = QtWidgets.QMessageBox()
+                msg.setText("You must load a CrystFEL Geometry file before loading a Cheetah CXI file.")
+                msg.exec_()
+                self.load_geometry_file()
+                self.open_data_file()
+                return
+
+            self.frame_getter = CheetahFrameGetter(file_name, self.crystfel_geom_file_name)
+            self.show_frame(frame_number=0)
 
     def start(self):
 
         self.show_frame(0)
         self.app.exec_()
 
+    def show(self):
+
+        self.main_window.show()
+        self.main_window.callback_pb_load()
 
 
 class SNRConfigWidget(QtGui.QWidget):
@@ -1020,7 +1075,3 @@ class SNRConfigWidget(QtGui.QWidget):
         dat['center'] = self.spinBoxCenterRadius.value()
         dat['outer'] = self.spinBoxOuterRadius.value()
         return dat
-
-
-
-

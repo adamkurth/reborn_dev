@@ -19,21 +19,9 @@ shape = pads[0].shape
 masks = [edge_mask(d, 1) for d in pads]
 padview = PADView(pad_geometry=pad_geometry, frame_getter=frame_getter, mask_data=masks)
 
-radii = (3, 6, 9)
-
-def peak_filter(self):
-    for i in range(len(self.pad_data)):
-        dat = self.pad_data[i].astype(np.float64)
-        mask = self.mask_data[i].astype(np.float64)
-        if False:
-            out = boxsnr_numba(dat, mask, radii[0], radii[1], radii[2])
-        else:
-            out = boxsnr_fortran(dat, mask, radii[0], radii[1], radii[2])
-        self.pad_data[i] = out
-
 peak_finders = []
 for i in range(len(masks)):
-    peak_finders.append(PeakFinder(mask=masks[i], radii=radii))
+    peak_finders.append(PeakFinder(mask=masks[i], radii=(3, 6, 9)))
 
 def peak_finder(self):
     centroids = [None]*self.n_pads
@@ -49,5 +37,4 @@ def peak_finder(self):
     self.peaks = {'centroids': centroids, 'n_peaks': n_peaks}
 
 padview.data_filters = [peak_finder]
-#padview.add_roi()
 padview.start()
