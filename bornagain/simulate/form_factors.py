@@ -22,11 +22,12 @@ def sphere_form_factor(radius, q_mags, check_divide_by_zero=True):
 
     """
 
-    qR = q_mags*radius
-    amp = 4*np.pi*radius**3*(np.sin(qR)-qR*np.cos(qR))/qR**3
+    qr = q_mags*radius
     if check_divide_by_zero is True:
-        if any(q_mags == 0):
-            w = np.where(q_mags == 0)
-            if len(w) > 0:
-                amp[w] = 4*np.pi*radius**3
+        amp = np.zeros_like(qr)
+        amp[qr == 0] = 4*np.pi*radius**3
+        w = qr != 0
+        amp[w] = 4 * np.pi * radius ** 3 * (np.sin(qr[w]) - qr[w] * np.cos(qr[w])) / qr[w] ** 3
+    else:
+        amp = 4 * np.pi * radius ** 3 * (np.sin(qr) - qr * np.cos(qr)) / qr ** 3
     return amp
