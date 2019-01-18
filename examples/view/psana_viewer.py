@@ -137,7 +137,7 @@ else:
         mask = np.array(fid['/data/data'])
         if detector_type == 'cspad' and mask.ndim == 2:
             # This is probably in the cheetah format
-            mask_data = cheetah_remapped_cspad_array_to_pad_list(mask, geom_dict)  
+            mask_data = crystfel.split_image(mask, geom_dict)
         else:
             mask_data = None
 

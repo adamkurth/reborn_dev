@@ -90,6 +90,14 @@ class PADView(object):
             try:
                 self.raw_data = self.frame_getter.get_frame(0)
             except:
+                padview_debug('Failed to get raw data from frame_getter')
+                pass
+
+        # Possibly, the frame getter has pad_geometry info -- let's have a look:
+        if self.pad_geometry is None:
+            try:
+                self.pad_geometry = self.frame_getter.pad_geometry
+            except:
                 pass
 
         self.app = pg.mkQApp()
@@ -204,7 +212,6 @@ class PADView(object):
     def setup_histogram_tool(self):
 
         padview_debug('setup_histogram_tool()')
-
         self.main_window.histogram.gradient.loadPreset('flame')
         self.main_window.histogram.setImageItems(self.images)
 
