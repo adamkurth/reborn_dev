@@ -64,10 +64,10 @@ def boxsnr(dat, mask, nin, ncent, nout):
 
 def boxsnr_fortran(dat, mask, nin, ncent, nout):
 
-    snr = np.asfortranarray(np.ones_like(dat))
-    signal = np.asfortranarray(np.ones_like(dat))
-
-    peaks_f.peaker.boxsnr(np.asfortranarray(dat), np.asfortranarray(mask), snr, signal, nin, ncent, nout)
+    float_t = np.float64
+    snr = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
+    signal = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
+    peaks_f.peaker.boxsnr(np.asfortranarray(dat.astype(float_t)), np.asfortranarray(mask.astype(float_t)), snr, signal, nin, ncent, nout)
     return snr, signal
 
 
