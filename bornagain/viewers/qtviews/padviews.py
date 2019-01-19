@@ -14,11 +14,11 @@ import pyqtgraph as pg
 # We are using pyqtgraph's wrapper for pyqt because it helps deal with the different APIs in pyqt5 and pyqt4...
 from pyqtgraph.Qt import uic, QtGui, QtCore #, QtWidgets
 
-# import bornagain
+import bornagain
 # import bornagain.external.pyqtgraph as bpg
 from bornagain.fileio.getters import FrameGetter, CheetahFrameGetter
 from bornagain.external.crystfel import geometry_file_to_pad_geometry_list
-from bornagain.analysis.peaks import boxsnr
+from bornagain.analysis.peaks import boxsnr, PeakFinder
 
 padview_debug_on = True
 
@@ -68,6 +68,7 @@ class PADView(object):
     evt = None
     show_true_fast_scans = False
     peak_finders = None
+    do_peak_finding = False
     data_filters = None
     show_peaks = True
     peaks = None
@@ -165,6 +166,8 @@ class PADView(object):
         mw.actionBeam_position.triggered.connect(self.toggle_coordinate_axes)
         mw.actionOpen_data_file.triggered.connect(self.open_data_file)
         mw.actionShow_scan_directions.triggered.connect(self.toggle_fast_scan_directions)
+        mw.actionMask_panel_edges.triggered.connect(self.mask_panel_edges)
+        mw.actionFind_peaks.triggered.connect(self.toggle_peak_finding)
 
     def setup_shortcuts(self):
 
@@ -514,6 +517,21 @@ class PADView(object):
             mask_rgba = self._make_mask_rgba(d)
 
             self.mask_images[i].setImage(mask_rgba)
+
+    def mask_panel_edges(self, n_pixels=None):
+
+        if n_pixels is None or n_pixels is False:
+            text, ok = QtGui.QInputDialog.getText(self.main_window, "Edge mask", "Specify number of edge pixels to mask",
+                                                  QtGui.QLineEdit.Normal, "1")
+            if ok:
+                if text == '':
+                    return
+                n_pixels = int(text.strip())
+
+        for i in range(len(self.mask_data)):
+            self.mask_data[i] *= bornagain.detector.edge_mask(self.mask_data[i], n_pixels)
+
+        self.update_masks()
 
     def hide_masks(self):
 
@@ -923,6 +941,8 @@ class PADView(object):
         self.process_data()
         self.update_pads()
         self.remove_scatter_plots()
+        if self.do_peak_finding is True:
+            self.find_peaks()
         peaks = self.get_peak_data()
         if self.show_peaks is True and peaks is not None:
             self.display_peaks()
@@ -1085,10 +1105,44 @@ class PADView(object):
             self.frame_getter = CheetahFrameGetter(file_name, self.crystfel_geom_file_name)
             self.show_frame(frame_number=0)
 
+    def toggle_peak_finding(self):
+
+        if self.do_peak_finding is False:
+            self.do_peak_finding = True
+        else:
+            self.do_peak_finding = False
+
+    def setup_peak_finders(self, params=None):
+
+        padview_debug('setup_peak_finders()')
+
+        self.peak_finders = []
+        for i in range(self.n_pads):
+            self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(3, 6, 9)))
+
+    def find_peaks(self):
+
+        padview_debug('find_peaks()')
+
+        if self.peak_finders is None:
+            self.setup_peak_finders()
+
+        centroids = [None]*self.n_pads
+        n_peaks = 0
+        for i in range(self.n_pads):
+            dat = self.raw_data['pad_data'][i]
+            mask = self.mask_data[i]
+            pfind = self.peak_finders[i]
+            pfind.find_peaks(data=dat, mask=mask)
+            n_peaks += pfind.n_labels
+            centroids[i] = pfind.centroids
+        if self.processed_data is None:
+
+        self.peaks = {'centroids': centroids, 'n_peaks': n_peaks}
+
     def start(self):
 
         padview_debug('start()')
-        # self.show_frame(0)
         self.app.exec_()
 
     def show(self):

@@ -108,6 +108,7 @@
       <string>Peaks</string>
      </property>
      <addaction name="actionPeaksVisible"/>
+     <addaction name="actionFind_peaks"/>
     </widget>
     <widget class="QMenu" name="menuMask">
      <property name="title">
@@ -220,8 +221,17 @@
    </property>
   </action>
   <action name="actionMaskVisible">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Visible</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
    </property>
   </action>
   <action name="actionPeaksVisible">
@@ -282,6 +292,14 @@
   <action name="actionMask_panel_edges">
    <property name="text">
     <string>Mask panel edges...</string>
+   </property>
+  </action>
+  <action name="actionFind_peaks">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Find peaks</string>
    </property>
   </action>
  </widget>
