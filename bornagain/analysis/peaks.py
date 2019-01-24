@@ -45,9 +45,17 @@ class PeakFinder(object):
 
         self.snr, self.signal = self.snr_transform(data, mask, self.radii[0], self.radii[1], self.radii[2])
         self.labels, self.n_labels = measurements.label(self.snr > self.snr_threshold)
+        print('self.n_labels', self.n_labels)
         if self.n_labels > 0:
-            cent = measurements.center_of_mass(self.signal, labels=self.labels, index=np.arange(self.n_labels))
-            self.centroids = np.array(cent)
+            sig = self.signal.copy()
+            sig[sig < 0] = 0
+            cent = measurements.center_of_mass(sig, self.labels, np.arange(1, self.n_labels+1))
+            cent = np.array(cent)
+            if len(cent.shape) == 1:
+                cent = np.expand_dims(cent, axis=0)
+            cent = cent[:, ::-1].copy()
+            print('cent', cent)
+            self.centroids = cent
         else:
             self.centroids = None
 

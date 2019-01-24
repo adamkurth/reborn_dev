@@ -80,6 +80,15 @@ class PADView(object):
 
     def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None):
 
+        """
+
+        Args:
+            pad_geometry: a list of PADGeometry instances
+            mask_data: a list of numpy arrays
+            logscale: apply log to data before viewing
+            frame_getter: a subclass of the FrameGetter class
+        """
+
         padview_debug('__init__()')
 
         self.logscale = logscale
@@ -117,6 +126,8 @@ class PADView(object):
             self.setup_pads()
             self.show_frame()
         self.main_window.show()
+
+        padview_debug('__init__ complete')
 
     def _do_nothing(self):
 
@@ -207,10 +218,10 @@ class PADView(object):
     @property
     def n_pads(self):
 
-        if self.pad_geometry is None:
-            return 0
-        else:
+        if self.pad_geometry is not None:
             return len(self.pad_geometry)
+        if self.get_pad_display_data() is not None:
+            return len(self.get_pad_display_data())
 
     def setup_histogram_tool(self):
 
@@ -617,21 +628,34 @@ class PADView(object):
                 self.mask_data[ind] = m
                 self.mask_images[ind].setImage(self._make_mask_rgba(m))
 
-    def get_pad_display_data(self):
+    def get_pad_display_data(self, debug=False):
 
         # The logic of what actually gets displayed should go here.  For now, we display processed data if it is
         # available, else we display raw data, else we display zeros based on the pad geometry.  If none of these
         # are available, this function returns none.
 
+        if debug:
+            padview_debug('get_pad_display_data()')
+
         if self.processed_data is not None:
             if 'pad_data' in self.processed_data.keys():
-                return self.processed_data['pad_data']
+                dat = self.processed_data['pad_data']
+                if dat:
+                    if debug:
+                        padview_debug("Got self.processed_data['pad_data']")
+                    return dat
 
         if self.raw_data is not None:
             if 'pad_data' in self.raw_data.keys():
-                return self.raw_data['pad_data']
+                dat = self.raw_data['pad_data']
+                if dat:
+                    if debug:
+                        padview_debug("Got self.raw_data['pad_data']")
+                    return dat
 
         if self.pad_geometry is not None:
+            if debug:
+                padview_debug('No raw data found - setting display data arrays to zeros')
             return [pad.zeros() for pad in self.pad_geometry]
 
         return None
@@ -639,10 +663,12 @@ class PADView(object):
     def get_peak_data(self):
 
         if self.processed_data is not None:
+            padview_debug('Getting processed peak data')
             if 'peaks' in self.processed_data.keys():
                 return self.processed_data['peaks']
 
         if self.raw_data is not None:
+            padview_debug('Getting raw peak data')
             if 'peaks' in self.raw_data.keys():
                 return self.raw_data['peaks']
 
@@ -657,6 +683,9 @@ class PADView(object):
         mx = np.ravel(pad_data).max()
 
         self.images = []
+
+        if self.n_pads == 0:
+            print("Cannot setup pad display data - there are no pads to display.")
 
         for i in range(0, self.n_pads):
 
@@ -685,12 +714,13 @@ class PADView(object):
 
         padview_debug('update_pads()')
 
-        pad_data = self.get_pad_display_data()
-
-        mx = np.ravel(pad_data).max()
-
         if self.images is None:
             self.setup_pads()
+
+        pad_data = self.get_pad_display_data()
+        print(pad_data)
+
+        mx = np.ravel(pad_data).max()
 
         for i in range(0, self.n_pads):
 
@@ -905,12 +935,13 @@ class PADView(object):
 
     def show_frame(self, frame_number=0):
 
+        padview_debug('show_frame()')
+
         if self.frame_getter is None:
-            print('no getter')
+            print("Cannot show dataframe - there is no frame getter configured.")
             return
 
-        dat = self.frame_getter.get_frame(frame_number=frame_number)
-        self.raw_data = dat
+        self.raw_data = self.frame_getter.get_frame(frame_number=frame_number)
 
         self.update_display_data()
 
@@ -938,7 +969,8 @@ class PADView(object):
 
         padview_debug('update_display_data()')
 
-        self.process_data()
+        if self.data_processor is not None:
+            self.process_data()
         self.update_pads()
         self.remove_scatter_plots()
         if self.do_peak_finding is True:
@@ -968,6 +1000,8 @@ class PADView(object):
 
     def display_peaks(self):
 
+        padview_debug('display_peaks()')
+
         peaks = self.get_peak_data()
 
         if peaks is None:
@@ -990,21 +1024,6 @@ class PADView(object):
         gl_fs_pos *= self.scale_factor()
         gl_ss_pos *= self.scale_factor()
         self.add_scatter_plot(gl_fs_pos, gl_ss_pos, **self.peak_style)
-
-        # n_peaks = peaks['n_peaks']
-        # pad_numbers = peaks['pad_numbers']
-        # fs_pos = peaks['fs_pos']
-        # ss_pos = peaks['ss_pos']
-        # pad_geom = self.pad_geometry
-        # gl_fs_pos = np.zeros(n_peaks)
-        # gl_ss_pos = np.zeros(n_peaks)
-        # for i in range(0, n_peaks):
-        #     pad_num = int(pad_numbers[i])
-        #     vec = pad_geom[pad_num].indices_to_vectors(ss_pos[i], fs_pos[i]).ravel()
-        #     gl_fs_pos[i] = vec[0] * self.scale_factor()
-        #     gl_ss_pos[i] = vec[1] * self.scale_factor()
-        #
-        # self.add_scatter_plot(gl_fs_pos, gl_ss_pos, pen=pg.mkPen('g'), brush=None, width=5, size=10, pxMode=False)
 
     def toggle_peaks(self):
 
@@ -1101,9 +1120,30 @@ class PADView(object):
                 self.load_geometry_file()
                 if self.crystfel_geom_file_name is None:
                     return
+                self.main_window.setWindowTitle(file_name)
 
             self.frame_getter = CheetahFrameGetter(file_name, self.crystfel_geom_file_name)
-            self.show_frame(frame_number=0)
+
+        self.show_frame(frame_number=0)
+
+    def load_cheetah_cxi_file(self, cxi_file_name, crystfel_geom_file_name=None):
+
+        padview_debug('load_cheetah_cxi_file()')
+
+        if crystfel_geom_file_name is not None:
+            self.crystfel_geom_file_name = crystfel_geom_file_name
+
+        if self.crystfel_geom_file_name is None:
+            msg = QtGui.QMessageBox()
+            msg.setText("You must load a CrystFEL Geometry file before loading a Cheetah CXI file.")
+            msg.exec_()
+            self.load_geometry_file()
+            if self.crystfel_geom_file_name is None:
+                return
+        self.main_window.setWindowTitle(cxi_file_name)
+        self.frame_getter = CheetahFrameGetter(cxi_file_name, self.crystfel_geom_file_name)
+        self.pad_geometry = self.frame_getter.pad_geometry
+        self.show_frame(frame_number=0)
 
     def toggle_peak_finding(self):
 
@@ -1111,6 +1151,8 @@ class PADView(object):
             self.do_peak_finding = True
         else:
             self.do_peak_finding = False
+
+        self.update_display_data()
 
     def setup_peak_finders(self, params=None):
 
@@ -1130,15 +1172,14 @@ class PADView(object):
         centroids = [None]*self.n_pads
         n_peaks = 0
         for i in range(self.n_pads):
-            dat = self.raw_data['pad_data'][i]
-            mask = self.mask_data[i]
             pfind = self.peak_finders[i]
-            pfind.find_peaks(data=dat, mask=mask)
+            pfind.find_peaks(data=self.raw_data['pad_data'][i], mask=self.mask_data[i])
             n_peaks += pfind.n_labels
             centroids[i] = pfind.centroids
-        if self.processed_data is None:
 
-        self.peaks = {'centroids': centroids, 'n_peaks': n_peaks}
+        padview_debug('Found %d peaks' % (n_peaks))
+
+        self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
 
     def start(self):
 
