@@ -718,7 +718,6 @@ class PADView(object):
             self.setup_pads()
 
         pad_data = self.get_pad_display_data()
-        print(pad_data)
 
         mx = np.ravel(pad_data).max()
 
