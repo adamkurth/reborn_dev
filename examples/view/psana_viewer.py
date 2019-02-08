@@ -79,7 +79,8 @@ if detector_id == "":
         error("Specify the detector you want to view with the -d flag.")
 
 data_source = psana.DataSource("exp=%s:run=%d:idx" % (experiment, run))
-detector = lcls.Detector(detector_id)
+print(detector_id)
+detector = lcls.AreaDetector(detector_id)
 
 mask_data = None
 if os.path.isfile(geom_file):
@@ -119,16 +120,16 @@ if os.path.isfile(geom_file):
             else:
                 mask_data = None
 elif geom_file == "psana":
-    pad_geometry = detector.get_pad_geometry()
+    pad_geometry = detector.get_pad_geometry(data_source.runs().next())
 else:
     error("Couldn't locate the geometry file %s" % (geom_file,))
 
 
 class MyFrameGetter(FrameGetter):
 
-    def __init__(self):
+    def __init__(self, detector=None, data_source=None):
 
-        FrameGetter.__init__(self, detector=None, data_source=None)
+        FrameGetter.__init__(self)
         
         # self.geom_file = geom_file
         # self.pad_geometry = pad_geometry
@@ -138,7 +139,7 @@ class MyFrameGetter(FrameGetter):
         self.times = self.run.times()
         self.n_frames = len(self.times)
         self.current_frame = 0      
-        print("Found %d frames in the xtc files for run %d." % (self.n_frames, self.run_number))
+        #print("Found %d frames in the xtc files for run %d." % (self.n_frames, self.run_number))
 
         self.detector = detector
 
@@ -153,7 +154,8 @@ print("Run: %d" % (run))
 print("Detector: %s" % (detector_id))
 print("Geometry: %s" % (geom_file))
 
+data_source = psana.DataSource("exp=%s:run=%d:idx" % (experiment, run))
 frame_getter = MyFrameGetter(detector=detector, data_source=data_source)
-padview = PADView(frame_getter=frame_getter, mask_data=mask_data)
+padview = PADView(frame_getter=frame_getter, mask_data=mask_data, pad_geometry=pad_geometry)
 padview.main_window.setWindowTitle('%s - run %d - %s' % (experiment, run, detector_id))
 padview.start()

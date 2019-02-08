@@ -6,13 +6,16 @@ Note that there is documentation on `LCLS PAD geometry <https://confluence.slac.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-
+import re
 import numpy as np
 from bornagain import utils
 import bornagain
+try:
+    import psana
+except:
+    pass
 
-
-class Detector(psana.Detector):
+class AreaDetector(object):
 
     """
     Thin wrapper for psana.Detector class.  Adds methods to generate list of PADGeometry instances and to split the PAD
@@ -25,11 +28,13 @@ class Detector(psana.Detector):
 
     def __init__(self, *args, **kwargs):
 
-        psana.Detector.__init__(self, *args, **kwargs)
+        self.detector = psana.Detector(*args, **kwargs)
         self.detector_type = self.get_detector_type()
 
     def get_detector_type(self):
-        detector_id = self.source
+        detector_id = self.detector.source.__str__()
+        print(detector_id)
+        print(type(detector_id))
         if re.match(r'.*CsPad', detector_id, re.IGNORECASE) is not None:
             detector_type = 'cspad'
         elif re.match(r'pnccd.*', detector_id, re.IGNORECASE) is not None:
@@ -44,30 +49,29 @@ class Detector(psana.Detector):
             self._type = self.get_detector_type()
         return self._type
 
-    @property
-    def psf(self):
+    def get_psf(self, run):
         if self._psf is None:
-            return self.geometry(run).get_psf()
+            return self.detector.geometry(run).get_psf()
         return self._psf
 
     def get_calib_split(self, event):
 
-        calib = self.calib(event)
+        calib = self.detector.calib(event)
         if calib is None:
             return None
         return self.split_pad(calib)
 
     def get_raw_split(self, event):
 
-        raw = self.raw(event)
+        raw = self.detector.raw(event)
         if raw is None:
             return None
         return self.split_pad(raw)
 
     def get_pad_geometry(self, run):
 
-        psf = self.psf
-        if self.is_cspad():
+        psf = self.get_psf(run)
+        if self.detector.is_cspad():
             shift = 194. * 109.92 + (274.8 - 109.92) * 2.
             for i in range(0, 32, 2):
                 a = psf[i]
@@ -89,7 +93,7 @@ class Detector(psana.Detector):
         # Optional custom splitter function e.g. for funky crystfel/cheetah conventions that scamble data
         if self._splitter is not None:
             return self._splitter(data)
-        if self.is_cspad():
+        if self.detector.is_cspad():
             return self.cspad_data_splitter(data)
         pads = []
         for i in range(data.shape[0]):
