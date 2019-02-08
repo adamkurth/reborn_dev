@@ -20,7 +20,7 @@ print("Parsing arguments...")
 parser = argparse.ArgumentParser(description='Simple diffraction viewer')
 parser.add_argument('-r', dest='run', type=int, nargs=1, help='Run number', default=[-1])
 parser.add_argument('-e', dest='exp', type=str, nargs=1, help='Experiment ID', default=[''])
-parser.add_argument('-g', dest='geom', type=str, nargs=1, help='CrystFEL geomfile', default=['calib/default.geom'])
+parser.add_argument('-g', dest='geom', type=str, nargs=1, help='CrystFEL geomfile', default=['psana'])
 parser.add_argument('-d', dest='det', type=str, nargs=1, help='Detector name', default=[''])
 parser.add_argument('-m', dest='mask', type=str, nargs=1, help='Mask file (hdf5)', default=[''])
 args = parser.parse_args()
@@ -30,6 +30,76 @@ experiment = args.exp[0]
 geom_file = args.geom[0]
 detector_id = args.det[0]
 mask_file = args.mask[0]
+
+class PADHacker(object):
+
+    def __init__(self, detector_id):
+
+        if re.match(r'.*cspad', detector_id, re.IGNORECASE) is not None:
+            detector_type = 'cspad'
+        elif re.match(r'pnccd.*', detector_id, re.IGNORECASE) is not None:
+            detector_type = 'pnccd'
+        else:
+            detector_type = 'unknown'
+
+def cspad_geom_splitter(psf, returned_units='m'):
+    """
+    Thanks to Derek for this.
+    Splits the psana geometry from 32 panels to 64 panels
+    because of the non-uniform pixel gap
+    This creates a list of 64 origins, 64 slow-scan directions and 64 fast-scan directions
+    though slow and fast scan directions are assumed parallel within
+    manufacturing error
+    :param psf: tuple or (3 x 32 x 3) array of (origin, fast-scan, slow-scan) for each panel, 
+        origin is vector from interaction region to panel corner. 
+        These are in psgeom convention (TJL)
+        see get_psf for any cspads geometryAccess instance <PSCalib.GeometryAccess.GeometryAccess>
+    :param returned_units: string of 'mm', 'um', or 'pixels'
+    :return: PSF vectors, 64 long
+    """
+    #geom = cspad.geometry(event)
+    origin_64 = np.zeros((64, 3))
+    FS_64 = np.zeros_like(origin_64)
+    SS_64 = np.zeros_like(origin_64)
+
+    origin_32, SS_32, FS_32 = psf
+    for i in range(32):
+        # create the origins of each sub asic
+        origin_A = origin_32[i]
+        shift = 194. * 109.92 + (274.8 - 109.92) * 2.
+        unit_f = FS_32[i] / np.linalg.norm(FS_32[i])
+        origin_B = origin_A + unit_f * shift
+
+        # save two sub-asics per each of the 32 actual asics
+        idx_A = 2 * i
+        idx_B = 2 * i + 1
+        origin_64[idx_A] = origin_A
+        origin_64[idx_B] = origin_B
+        FS_64[idx_A] = FS_64[idx_B] = FS_32[i]
+        SS_64[idx_A] = SS_64[idx_B] = SS_32[i]
+
+    if returned_units == "mm":  # dials convention
+        return origin_64 / 1000., SS_64 / 1000., FS_64 / 1000.,
+    elif returned_units == "um":  # psgeom convention
+        return origin_64, SS_64, FS_64
+    elif returned_units == "m":  # bornagain
+        return origin_64/1e6, SS_64/1e6, FS_64/1e6
+    elif returned_units == "pixels":  # crystfel convention
+        return origin_64 / 109.92, SS_64 / 109.92, FS_64 / 109.92
+
+def  cspad_data_splitter(data):
+    """
+    Thanks to Derek for this.
+    splits 185 x 388 asics into 184 x 194 panels
+
+    :param data:  32 x 185 x 388 cspad data
+    :return: 64 x 185 x 194 cspad data
+    """
+    asics64 = []
+    for split_asic in [(asic[:, :194], asic[:, 194:]) for asic in data]:
+        for sub_asic in split_asic:  # 185x194 arrays
+            asics64.append(sub_asic)
+    return asics64
 
 def error(message):
     sys.stderr.write(message + '\n')
@@ -77,12 +147,12 @@ if detector_id == "":
         error("Specify the detector you want to view with the -d flag.")
 
 
-if not os.path.isfile(geom_file):
-    error("Can't find the CrystFEL geometry file %s.  Use the -g flag." % (geom_file))
+if os.path.isfile(geom_file):
+    #error("Can't find the CrystFEL geometry file %s.  Use the -g flag." % (geom_file))
 
-geom_dict = crystfel.load_crystfel_geometry(geom_file)
-pad_geometry = crystfel.geometry_file_to_pad_geometry_list(geom_file)
-
+    geom_dict = crystfel.load_crystfel_geometry(geom_file)
+    pad_geometry = crystfel.geometry_file_to_pad_geometry_list(geom_file)
+    
 
 
 print("Experiment ID: %s" % (experiment))
@@ -93,9 +163,9 @@ print("Geometry: %s" % (geom_file))
 data_source = psana.DataSource("exp=%s:run=%d:idx" % (experiment, run))
 detector = psana.Detector(detector_id)
 
-if re.match(r'.*CsPad', detector_id) is not None:
+if re.match(r'.*CsPad', detector_id, re.IGNORECASE) is not None:
     detector_type = 'cspad'
-elif re.match(r'pnccd.*', detector_id) is not None:
+elif re.match(r'pnccd.*', detector_id, re.IGNORECASE) is not None:
     detector_type = 'pnccd'
 else:
     detector_type = 'unknown'
