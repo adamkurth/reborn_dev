@@ -9,6 +9,101 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 from bornagain import utils
+import bornagain
+
+
+class Detector(psana.Detector):
+
+    """
+    Thin wrapper for psana.Detector class.  Adds methods to generate list of PADGeometry instances and to split the PAD
+    data in to a list of 2d arrays.
+    """
+
+    _psf = None
+    _type = None
+    _splitter = None
+
+    def __init__(self, *args, **kwargs):
+
+        psana.Detector.__init__(self, *args, **kwargs)
+        self.detector_type = self.get_detector_type()
+
+    def get_detector_type(self):
+        detector_id = self.source
+        if re.match(r'.*CsPad', detector_id, re.IGNORECASE) is not None:
+            detector_type = 'cspad'
+        elif re.match(r'pnccd.*', detector_id, re.IGNORECASE) is not None:
+            detector_type = 'pnccd'
+        else:
+            detector_type = 'unknown'
+        return detector_type
+
+    @property
+    def type(self):
+        if _type is None:
+            self._type = self.get_detector_type()
+        return self._type
+
+    @property
+    def psf(self):
+        if self._psf is None:
+            return self.geometry(run).get_psf()
+        return self._psf
+
+    def get_calib_split(self, event):
+
+        calib = self.calib(event)
+        if calib is None:
+            return None
+        return self.split_pad(calib)
+
+    def get_raw_split(self, event):
+
+        raw = self.raw(event)
+        if raw is None:
+            return None
+        return self.split_pad(raw)
+
+    def get_pad_geometry(self, run):
+
+        psf = self.psf
+        if self.is_cspad():
+            shift = 194. * 109.92 + (274.8 - 109.92) * 2.
+            for i in range(0, 32, 2):
+                a = psf[i]
+                f = np.array(a[2])
+                t = np.array(a[0]) + shift * f/np.sqrt(np.sum(f**2))
+                b = ((t[0],    t[1],    t[2]   ), (a[1][0], a[1][1], a[1][2]), (a[2][0], a[2][1], a[2][2]))
+                psf.insert(i+1, b)
+        geom = []
+        for i in range(len(psf)):
+            g = bornagain.detector.PADGeometry()
+            g.t_vec = np.array(psf[i][0])*1e6
+            g.ss_vec = np.array(psf[i][1])*1e6
+            g.fs_vec = np.array(psf[i][2])*1e6
+            geom.append(g)
+        return geom
+
+    def split_pad(self, data):
+
+        # Optional custom splitter function e.g. for funky crystfel/cheetah conventions that scamble data
+        if self._splitter is not None:
+            return self._splitter(data)
+        if self.is_cspad():
+            return self.cspad_data_splitter(data)
+        pads = []
+        for i in range(data.shape[0]):
+            pads.append(data[i, :, :])
+        return pads
+
+    @staticmethod
+    def cspad_data_splitter(data):
+        """Thanks to Derek for this."""
+        asics64 = []
+        for split_asic in [(asic[:, :194], asic[:, 194:]) for asic in data]:
+            for sub_asic in split_asic:  # 185x194 arrays
+                asics64.append(sub_asic)
+        return asics64
 
 
 def reshape_psana_cspad_array_to_cheetah_array(psana_array):
