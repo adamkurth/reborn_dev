@@ -4,6 +4,7 @@
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
+  <meta name="robots" content="noindex, nofollow" />
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,7 +30,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain.external.lcls module" href="bornagain.external.lcls.html" />
-    <link rel="prev" title="bornagain.external.pyqtgraph.mods module" href="bornagain.external.pyqtgraph.mods.html" /> 
+    <link rel="prev" title="bornagain.external.cheetah module" href="bornagain.external.cheetah.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -85,15 +86,18 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
@@ -176,17 +180,18 @@
             
   <div class="section" id="module-bornagain.external.crystfel">
 <span id="bornagain-external-crystfel-module"></span><h1>bornagain.external.crystfel module<a class="headerlink" href="#module-bornagain.external.crystfel" title="Permalink to this headline">¶</a></h1>
-<p>Method for working with CrystFEL geometry files.</p>
+<p>Method for working with CrystFEL geometry files.  Note that you can convert a CrystFEL geometry file to a Python
+dictionary object with the cfelpyutils.crystfel_utils.load_crystfel_geometry() function.</p>
 <dl class="function">
-<dt id="bornagain.external.crystfel.geometry_file_to_dict">
-<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">geometry_file_to_dict</code><span class="sig-paren">(</span><em>geometry_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#geometry_file_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.geometry_file_to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame
-Valerio if it&#8217;s broken :)</p>
+<dt id="bornagain.external.crystfel.load_crystfel_geometry">
+<code class="descclassname">bornagain.external.crystfel.</code><code class="descname">load_crystfel_geometry</code><span class="sig-paren">(</span><em>geometry_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/crystfel.html#load_crystfel_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.crystfel.load_crystfel_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blamm
+Valerio if it’s broken :)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry_file</strong> (<em>str</em>) &#8211; Path to geometry file</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry_file</strong> (<em>str</em>) – Path to geometry file</td>
 </tr>
 </tbody>
 </table>
@@ -202,7 +207,7 @@ This will also append the name of the panel to the PADGeometry instance.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry_file</strong> (<em>str</em>) &#8211; Path to geometry file</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry_file</strong> (<em>str</em>) – Path to geometry file</td>
 </tr>
 </tbody>
 </table>
@@ -218,7 +223,7 @@ crystfel-specific items like fsx, max_fs, etc.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry_file</strong> (<em>str</em>) &#8211; Path to geometry file</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>geometry_file</strong> (<em>str</em>) – Path to geometry file</td>
 </tr>
 </tbody>
 </table>
@@ -234,8 +239,8 @@ crystfel-specific items like fsx, max_fs, etc.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>data</strong> (<em>numpy array</em>) &#8211; Contiguous block of image data</li>
-<li><strong>geom_dict</strong> (<em>dict</em>) &#8211; Geometry dictionary</li>
+<li><strong>data</strong> (<em>numpy array</em>) – Contiguous block of image data</li>
+<li><strong>geom_dict</strong> (<em>dict</em>) – Geometry dictionary</li>
 </ul>
 </td>
 </tr>
@@ -262,7 +267,7 @@ crystfel-specific items like fsx, max_fs, etc.</p>
         <a href="bornagain.external.lcls.html" class="btn btn-neutral float-right" title="bornagain.external.lcls module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.external.pyqtgraph.mods.html" class="btn btn-neutral" title="bornagain.external.pyqtgraph.mods module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.external.cheetah.html" class="btn btn-neutral" title="bornagain.external.cheetah module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -271,7 +276,6 @@ crystfel-specific items like fsx, max_fs, etc.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -290,21 +294,14 @@ crystfel-specific items like fsx, max_fs, etc.</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

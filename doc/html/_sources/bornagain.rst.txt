@@ -11,7 +11,9 @@ Subpackages
 
 .. toctree::
 
+    bornagain.analysis
     bornagain.external
+    bornagain.fileio
     bornagain.simulate
     bornagain.target
     bornagain.viewers
@@ -22,7 +24,6 @@ Submodules
 .. toctree::
 
    bornagain.detector
-   bornagain.scatter
    bornagain.source
    bornagain.units
    bornagain.utils

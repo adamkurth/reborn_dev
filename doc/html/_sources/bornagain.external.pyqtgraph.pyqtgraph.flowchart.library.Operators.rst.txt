@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.flowchart.library.Operators module
-=========================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.flowchart.library.Operators
-    :members:
-    :undoc-members:
-    :show-inheritance:

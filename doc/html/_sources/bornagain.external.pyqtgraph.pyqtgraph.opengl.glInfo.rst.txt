@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.opengl.glInfo module
-===========================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl.glInfo
-    :members:
-    :undoc-members:
-    :show-inheritance:

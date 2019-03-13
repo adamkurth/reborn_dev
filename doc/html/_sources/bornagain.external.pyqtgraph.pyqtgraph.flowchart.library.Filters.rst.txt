@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.flowchart.library.Filters module
-=======================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.flowchart.library.Filters
-    :members:
-    :undoc-members:
-    :show-inheritance:

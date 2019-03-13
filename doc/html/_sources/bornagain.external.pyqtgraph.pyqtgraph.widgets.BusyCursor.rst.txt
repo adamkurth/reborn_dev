@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.BusyCursor module
-================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.BusyCursor
-    :members:
-    :undoc-members:
-    :show-inheritance:

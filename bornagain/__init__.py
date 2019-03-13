@@ -2,24 +2,25 @@ r"""
 This is the documentation for the bornagain package.
 """
 
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+
 from . import detector
-from . import scatter
+# from . import scatter
 # from . import simulate
 from . import source
 # from . import target
 from . import units
 from . import utils
 
-from .detector import SimplePAD
-from .target.crystal import Molecule
-
 
 CONFIG_OPTIONS = {'warn_depreciated': True,
                   'force_depreciated': False,
-                  'verbose': False}
+                  'verbose': False,
+                  'debug': 0}
 
 
 def set_global(option, value):
+
     r"""
 
     Set global configurations.
@@ -31,6 +32,10 @@ def set_global(option, value):
     ==================================  ================================================================
     'warn_depreciated' (True/False):    Print warnings when depreciated classes etc. are used.
     'force_depreciated' (True/False):   Like 'warn_depreciated' but raise RunTimeError instead of warn.
+    'verbose' (True/False):             Attempt to print useful information
+    'debug' (integer):                  This is intended for developers.  If the argument is 0,
+                                        bornagain will run as usual.  The other numbers will have some
+                                        special meaning that is not yet defined.
     ==================================  ================================================================
 
         value: The value that you wish to associate with one of the above options.
@@ -47,6 +52,7 @@ def set_global(option, value):
 
 
 def get_global(option):
+
     r"""
 
     Get global configurations.
@@ -58,3 +64,32 @@ def get_global(option):
     """
 
     return CONFIG_OPTIONS[option]
+
+
+def docs():
+
+    r"""
+
+    Open the bornagain documentation in a web browser (if available).
+
+    """
+
+    import os
+    import pkg_resources
+
+    docs_file_path = pkg_resources.resource_filename('bornagain', '')
+    docs_file_path = os.path.join(docs_file_path, '..', 'doc', 'html', 'index.html')
+
+    if not os.path.exists(docs_file_path):
+        print("Can't seem to locate the html index %s" % (docs_file_path))
+
+    try:
+        import webbrowser
+    except ImportError:
+        print("Can't open docs because you need to install the webbrowser Python package.")
+        print("If using conda, perhaps you could run 'conda install webbrowser?'")
+        print('You can otherwise point your webbrowser to the directory %s' % (docs_file_path))
+        print("On Mac OS, you can do that from the terminal using the command 'open %s'" % (docs_file_path))
+        return
+
+    webbrowser.open('file://' + docs_file_path)

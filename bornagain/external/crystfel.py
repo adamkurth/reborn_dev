@@ -1,30 +1,33 @@
 r"""
-Method for working with CrystFEL geometry files.
+Method for working with CrystFEL geometry files.  Note that you can convert a CrystFEL geometry file to a Python
+dictionary object with the cfelpyutils.crystfel_utils.load_crystfel_geometry() function.
 """
 
-import re
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+
 import numpy as np
 
 from .. import detector
-from .cfelpyutils.crystfel_utils import load_crystfel_geometry
+from cfelpyutils import crystfel_utils
 
 
-def geometry_file_to_dict(geometry_file):
-    """
-    Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame
+def load_crystfel_geometry(geometry_file):
+
+    r"""
+    Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blamm
     Valerio if it's broken :)
 
     Args:
         geometry_file (str): Path to geometry file
 
     Returns: Dict
-
     """
 
-    return load_crystfel_geometry(geometry_file)
+    return crystfel_utils.load_crystfel_geometry(geometry_file)
 
 
 def geometry_dict_to_pad_geometry_list(geometry_dict):
+
     """
     Given a CrystFEL geometry dictionary, create a list of :class:<bornagain.geometry.PADGeometry` objects.
     This will also append the name of the panel to the PADGeometry instance.
@@ -55,6 +58,7 @@ def geometry_dict_to_pad_geometry_list(geometry_dict):
 
 
 def geometry_file_to_pad_geometry_list(geometry_file):
+
     r"""
     Given a CrystFEL geometry file, create a list of PADGeometry objects.  This will also append extra
     crystfel-specific items like fsx, max_fs, etc.
@@ -63,16 +67,16 @@ def geometry_file_to_pad_geometry_list(geometry_file):
         geometry_file (str): Path to geometry file
 
     Returns: List of PADGeometry instances
-
     """
 
-    geometry_dict = geometry_file_to_dict(geometry_file)
+    geometry_dict = load_crystfel_geometry(geometry_file)
     pad_list = geometry_dict_to_pad_geometry_list(geometry_dict)
 
     return pad_list
 
 
 def split_image(data, geom_dict):
+
     r"""
     Split a 2D image into individual panels (useful for working with Cheetah output).
 
@@ -86,8 +90,8 @@ def split_image(data, geom_dict):
     """
 
     split_data = []
-    for p in geom_dict['panels']:
-        split_data.append(
-            data[p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)])
+    for panel_name in geom_dict['panels']:
+        p = geom_dict['panels'][panel_name]
+        split_data.append(data[p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)])
 
     return split_data

@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.opengl.GLViewWidget module
-=================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.opengl.GLViewWidget
-    :members:
-    :undoc-members:
-    :show-inheritance:

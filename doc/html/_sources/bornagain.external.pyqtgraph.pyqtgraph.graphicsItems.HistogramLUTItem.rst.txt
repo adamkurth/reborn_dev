@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.HistogramLUTItem module
-============================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.HistogramLUTItem
-    :members:
-    :undoc-members:
-    :show-inheritance:

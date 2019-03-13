@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.RemoteGraphicsView module
-========================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.RemoteGraphicsView
-    :members:
-    :undoc-members:
-    :show-inheritance:

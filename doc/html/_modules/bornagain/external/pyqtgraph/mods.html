@@ -83,11 +83,12 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">bornagain</a></li>
 </ul>
 
@@ -154,7 +155,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for bornagain.external.pyqtgraph.mods</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">pyqtgraph.Qt</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -185,21 +186,20 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">sigImageChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
-    <span class="c1"># self; emitted when &#39;remove&#39; is selected from context menu</span>
-    <span class="n">sigRemoveRequested</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">sigRemoveRequested</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># self; emitted when &#39;remove&#39; is selected from context menu</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        See :func:`setImage &lt;pyqtgraph.ImageItem.setImage&gt;` for all allowed initialization arguments.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">GraphicsObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">GraphicsObject</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">menu</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># original image data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">qimage</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># rendered image for display</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">## original image data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qimage</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">## rendered image for display</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">paintMode</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">levels</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># [min, max] or [[redMin, redMax], ...]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">levels</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">## [min, max] or [[redMin, redMax], ...]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lut</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">autoDownsample</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -231,7 +231,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">paintMode</span> <span class="o">=</span> <span class="n">mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 
-        <span class="c1"># use setOpacity instead.</span>
+        <span class="c1">## use setOpacity instead.</span>
         <span class="c1"># def setAlpha(self, alpha):</span>
         <span class="c1"># self.setOpacity(alpha)</span>
         <span class="c1"># self.updateImage()</span>
@@ -377,11 +377,9 @@
                 <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">gotNewData</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">shapeChanged</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">shapeChanged</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">15</span> <span class="o">-</span> \
-                    <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">15</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">15</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">15</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s1">&#39;autoDownsample&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kargs</span><span class="p">:</span>
                     <span class="n">kargs</span><span class="p">[</span><span class="s1">&#39;autoDownsample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">shapeChanged</span><span class="p">:</span>
@@ -420,10 +418,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">sigImageChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ImageItem.updateImage"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.updateImage">[docs]</a>    <span class="k">def</span> <span class="nf">updateImage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
-        <span class="c1"># used for re-rendering qimage from self.image.</span>
+        <span class="c1">## used for re-rendering qimage from self.image.</span>
 
-        <span class="c1"># can we make any assumptions here that speed things up?</span>
-        <span class="c1"># dtype, range, size are all the same?</span>
+        <span class="c1">## can we make any assumptions here that speed things up?</span>
+        <span class="c1">## dtype, range, size are all the same?</span>
         <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;autoLevels&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">}</span>
@@ -456,10 +454,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span>
 
-        <span class="n">argb</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">makeARGB</span><span class="p">(</span>
-            <span class="n">image</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span>
-                <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)[</span>
-                    <span class="p">:</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="p">]),</span> <span class="n">lut</span><span class="o">=</span><span class="n">lut</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span>
+        <span class="n">argb</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">makeARGB</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)[:</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="p">]),</span> <span class="n">lut</span><span class="o">=</span><span class="n">lut</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qimage</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">makeQImage</span><span class="p">(</span><span class="n">argb</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">transpose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ImageItem.paint"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
@@ -475,13 +470,7 @@
             <span class="n">p</span><span class="o">.</span><span class="n">setCompositionMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paintMode</span><span class="p">)</span>
             <span class="n">profile</span><span class="p">(</span><span class="s1">&#39;set comp mode&#39;</span><span class="p">)</span>
 
-        <span class="n">p</span><span class="o">.</span><span class="n">drawImage</span><span class="p">(</span>
-            <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span>
-                <span class="mi">0</span><span class="p">,</span>
-                <span class="mi">0</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">qimage</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">drawImage</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">qimage</span><span class="p">)</span>
         <span class="n">profile</span><span class="p">(</span><span class="s1">&#39;p.drawImage&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">border</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">border</span><span class="p">)</span>
@@ -493,13 +482,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qimage</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ImageItem.getHistogram"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.getHistogram">[docs]</a>    <span class="k">def</span> <span class="nf">getHistogram</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">bins</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
-            <span class="n">step</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
-            <span class="n">targetImageSize</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
-            <span class="n">targetHistogramSize</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageItem.getHistogram"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.getHistogram">[docs]</a>    <span class="k">def</span> <span class="nf">getHistogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">targetImageSize</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">targetHistogramSize</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns x and y arrays containing the histogram values for the current image.</span>
 <span class="sd">        For an explanation of the return format, see numpy.histogram().</span>
 
@@ -581,7 +564,7 @@
             <span class="c1"># ev.ignore()</span>
 
             <span class="c1"># def mouseMoveEvent(self, ev):</span>
-            <span class="c1"># print &quot;mouse move&quot;, ev.pos()</span>
+            <span class="c1">##print &quot;mouse move&quot;, ev.pos()</span>
             <span class="c1"># if self.drawKernel is not None:</span>
             <span class="c1"># self.drawAt(ev.pos(), ev)</span>
 
@@ -625,16 +608,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">menu</span></div>
 
 <div class="viewcode-block" id="ImageItem.hoverEvent"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.hoverEvent">[docs]</a>    <span class="k">def</span> <span class="nf">hoverEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">ev</span><span class="o">.</span><span class="n">isExit</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawKernel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ev</span><span class="o">.</span><span class="n">acceptDrags</span><span class="p">(</span>
-                <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">):</span>
-            <span class="c1"># we don&#39;t use the click, but we also don&#39;t want anyone else to use</span>
-            <span class="c1"># it.</span>
-            <span class="n">ev</span><span class="o">.</span><span class="n">acceptClicks</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ev</span><span class="o">.</span><span class="n">isExit</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawKernel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ev</span><span class="o">.</span><span class="n">acceptDrags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">):</span>
+            <span class="n">ev</span><span class="o">.</span><span class="n">acceptClicks</span><span class="p">(</span>
+                <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span>  <span class="c1">## we don&#39;t use the click, but we also don&#39;t want anyone else to use it.</span>
             <span class="n">ev</span><span class="o">.</span><span class="n">acceptClicks</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">)</span>
             <span class="c1"># self.box.setBrush(fn.mkBrush(&#39;w&#39;))</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">ev</span><span class="o">.</span><span class="n">isExit</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">removable</span><span class="p">:</span>
-            <span class="c1"># accept context menu clicks</span>
-            <span class="n">ev</span><span class="o">.</span><span class="n">acceptClicks</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">)</span></div>
+            <span class="n">ev</span><span class="o">.</span><span class="n">acceptClicks</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">)</span>  <span class="c1">## accept context menu clicks</span></div>
             <span class="c1"># else:</span>
             <span class="c1"># self.box.setBrush(self.brush)</span>
             <span class="c1"># self.update()</span>
@@ -692,7 +672,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">drawMask</span> <span class="o">=</span> <span class="n">mask</span></div>
 
 <div class="viewcode-block" id="ImageItem.removeClicked"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.removeClicked">[docs]</a>    <span class="k">def</span> <span class="nf">removeClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Send remove event only after we have exited the menu event handler</span>
+        <span class="c1">## Send remove event only after we have exited the menu event handler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">removeTimer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">removeTimer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">emitRemoveRequested</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">removeTimer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
@@ -712,7 +692,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -731,21 +710,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

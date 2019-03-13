@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.pixmaps.pixmapData\_3 module
-===================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.pixmaps.pixmapData_3
-    :members:
-    :undoc-members:
-    :show-inheritance:

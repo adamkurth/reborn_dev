@@ -6,9 +6,10 @@ If you want to view results just add the keyword "view"
 > python test_simulate_clcore.py view
 """
 
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import sys
-
+import pytest
 import numpy as np
 
 sys.path.append('..')
@@ -16,44 +17,52 @@ try:
     from bornagain.simulate import clcore
     import pyopencl
     import bornagain as ba
+    from bornagain import utils
     havecl = True
     # Check for double precision:
-    core = clcore.ClCore(context=None, queue=None, group_size=1,
-                         double_precision=True)
+    core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
     if core.double_precision:
         have_double = True
     else:
         have_double = False
+    ctx = clcore.create_some_gpu_context()
 except ImportError:
     havecl = False
+
+import bornagain.simulate.numbacore as numbacore
 
 view = False
 
 if len(sys.argv) > 1:
     view = True
 
-def test_ClCore_float():
+@pytest.mark.cl
+def test_clcore_float():
 
     if havecl:
-        _ClCore(double_precision=False)
+        _clcore(double_precision=False)
 
-def test_ClCore_double():
+@pytest.mark.cl
+def test_clcore_double():
 
     if havecl and have_double:
-        _ClCore(double_precision=True)
+        _clcore(double_precision=True)
 
-def _ClCore(double_precision=False):
+def _clcore(double_precision=False):
 
     ###########################################################################
     # Setup the simulation core
     ###########################################################################
 
-    core = clcore.ClCore(context=None, queue=None, group_size=1,
-                         double_precision=double_precision)
+    core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
+
+    if double_precision is False:
+        numbacore.real_t = np.float32
+        numbacore.complex_t = np.complex64
 
     assert(core.get_group_size() == core.group_size)
    
-    print("Using group size: %d" %core.group_size)
+    # print("Using group size: %d" %core.group_size)
     ###########################################################################
     # Check that there are no errors in phase_factor_qrf_inplace
     # TODO: check that the amplitudes are correct
@@ -63,33 +72,37 @@ def _ClCore(double_precision=False):
     pad.simple_setup(n_pixels=4, pixel_size=1, distance=1)
     N = 10
     R = np.eye(3, dtype=core.real_t)
-    q = pad.q_vecs(beam_vec=[0,0,1], wavelength=1)
+    q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
     
-    r = np.random.random([N,3])
+    r = np.random.random([N, 3])
     f = np.random.random([N])*1j
 
-    A = core.phase_factor_qrf(q,r,f,R)
+    A = core.phase_factor_qrf(q, r, f, R)
     assert(type(A) is np.ndarray)
+
+    An = numbacore.phase_factor_qrf(q, r, f, R)
+
+    assert(np.max(np.abs(A - An)) < 1e-3)  # Why such a big difference between CPU and GPU?
     
     # make device arrays first
     q = core.to_device(q) 
     r = core.to_device(r)
-    f = core.to_device(f,dtype=core.complex_t)
-    a = core.to_device(shape=[q.shape[0]],dtype=core.complex_t)
+    f = core.to_device(f, dtype=core.complex_t)
+    a = core.to_device(shape=[q.shape[0]], dtype=core.complex_t)
     R = None
     
-    core.phase_factor_qrf(q,r,f,R,a)
+    core.phase_factor_qrf(q, r, f, R, a)
     A1 = a.get()
 
     for _ in range(9):
-        core.phase_factor_qrf(q,r,f,R,a,add=True)
+        core.phase_factor_qrf(q, r, f, R, a, add=True)
     
     A10 = a.get()
     
-    assert( np.allclose(10*A1,A10))
+    assert(np.allclose(10*A1, A10))
 
     del q, r, f, R, N
-    
+
     ###########################################################################
     # Check for errors in phase_factor_pad
     # TODO: check that amplitudes are correct
@@ -179,46 +192,105 @@ def _ClCore(double_precision=False):
 
 
     ###########################################################################
-    # Check for errors in run_cromermann
+    # Check phase_factor_qrf_chunk_r
     ###########################################################################
 
-    # TODO: Derek, your simulators are crashing again.  Probably my fault - sorry.  -Rick
+    pad = ba.detector.PADGeometry()
+    pad.simple_setup(n_pixels=4, pixel_size=1, distance=1)
+    N = 10
+    R = np.eye(3, dtype=core.real_t)
+    q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
+    r = np.random.random([N, 3])
+    f = np.random.random([N]) * 1j
+    q_dev = core.to_device(q, dtype=core.real_t)
+    # r_dev = core.to_device(r, dtype=core.real_t)
+    # f_dev = core.to_device(f, dtype=core.complex_t)
 
-#    # simulate 1000 random numbers into 1000x1000 pixels
-#    natom = n_pixels_edge = 1000
-#    atom_pos = np.random.random( (natom,3) )
-#    atomic_nums = np.ones(natom)
-#   
-##   make a simple detector 
-#    #D = ba.detector.SimpleDetector(n_pixels=1000) 
-#    
-#    def dumb_detector(n_pixels_edge):
-#        img_sh = (n_pixels_edge,n_pixels_edge)
-#        py,px = np.indices(img_sh) # pixel integers
-#        pr = np.sqrt( (py-n_pixels_edge/2. )**2 + (px-n_pixels_edge/2.)**2 ) # radial pixel value
-#        
-#        theta = np.arctan( (  pr * 0.00005/0.05 ) )/2. # 50 micron pixels, 50 mm detector distance
-#        phi = np.arctan2( py-500., px-500. ) # pixel azimuthal
-#        q = np.sin(theta) * 4*np.pi / 1. # 1 angstrom wavelen
-#
-#        qx = np.cos(theta) * q * np.cos(phi)
-#        qy = np.cos(theta) * q * np.sin(phi)
-#        qz = np.sin(theta) * q
-#        q_vecs = np.vstack((qx.ravel(), qy.ravel(), qz.ravel())).T
-#   
-#        return img_sh, q_vecs
-#
-#    img_sh, q_vecs = dumb_detector(n_pixels_edge)
-#
-#    #core.prime_cromermann_simulator(D.Q, atomic_nums)
-#    core.prime_cromermann_simulator(q_vecs, atomic_nums)
-#    q = core.get_q_cromermann()
-#    r = core.get_r_cromermann(atom_pos, sub_com=False) 
-#    core.run_cromermann(q, r, rand_rot=True)
-#    A = core.release_amplitudes()
+    q1 = q_dev.get()
+    q2 = q_dev.get()
+    assert(np.allclose(q1, q2))
+
+    A0 = core.phase_factor_qrf(q, r, f, R)
+
+    a = core.phase_factor_qrf_chunk_r(q, r, f, R, n_chunks=3)
+    assert(type(a) is np.ndarray)
+
+    a_dev = core.to_device(shape=[q.shape[0]], dtype=core.complex_t)
+
+    core.phase_factor_qrf_chunk_r(q, r, f, R, a=a_dev, add=False, n_chunks=2)
+    A1 = a_dev.get()
+
+    assert(np.allclose(A0, A1))
+
+    for _ in range(9):
+        core.phase_factor_qrf_chunk_r(q, r, f, R, a=a_dev, add=True, n_chunks=2)
+
+    A10 = a_dev.get()
+
+    assert(np.allclose(10 * A1, A10))
+
+    core.phase_factor_qrf_chunk_r(q, r, f, R, a=a_dev, add=False, n_chunks=3)
+    A1_3 = a_dev.get()
+
+    assert(np.allclose(A1, A1_3))
+
+    for _ in range(9):
+        core.phase_factor_qrf_chunk_r(q, r, f, R, a=a_dev, add=True, n_chunks=3)
+
+    A10_3 = a_dev.get()
+
+    assert(np.allclose(10 * A1_3, A10_3))
+
+    del q, r, f, R, N, q_dev, a_dev, A0, A1, A10, A1_3, A10_3, pad
+
+
+@pytest.mark.cl
+def test_rotations():
+
+    if havecl:
+
+        theta = 25*np.pi/180.
+        sin = np.sin(theta)
+        cos = np.cos(theta)
+
+        R = np.array([[cos, sin, 0],
+                      [-sin, cos, 0],
+                      [0, 0, 1]])
+
+        core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=False)
+
+        vec1 = np.array([1, 2, 0], dtype=core.real_t)
+        vec2 = core.test_rotate_vec(R, vec1)
+        vec3 = utils.rotate(R, vec1)
+
+        # Rotation on gpu and rotation with utils.rotate should do the same thing
+        assert(np.max(np.abs(vec2-vec3)) <= 1e-6)
+
+        vec1 = np.array([1, 2, 0], dtype=core.real_t)
+        vec2 = core.test_rotate_vec(R, vec1)
+        vec4 = np.random.rand(10, 3).astype(core.real_t)
+        vec4[0, :] = vec1
+        vec3 = utils.rotate(R, vec4)
+        vec3 = vec3[0, :]
+
+        # Rotation on gpu and rotation with utils.rotate should do the same thing (even for many vectors; shape Nx3)
+        assert(np.max(np.abs(vec2-vec3)) <= 1e-6)
+
+        R = np.array([[0, 1.0, 0],
+                      [-1.0, 0, 0],
+                      [0, 0, 1.0]])
+
+        vec1 = np.array([1.0, 0, 0], dtype=core.real_t)
+        vec2 = core.test_rotate_vec(R, vec1)
+        vec3 = utils.rotate(R, vec1)
+        vec_pred = np.array([0, -1.0, 0])
+
+        # Check that results are as expected
+        assert(np.allclose(vec2, vec3))
+        assert (np.allclose(vec2, vec_pred))
 
 
 if __name__ == '__main__':
 
-    test_ClCore_float()
-
+    test_clcore_float()
+    test_rotations()

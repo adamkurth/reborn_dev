@@ -83,11 +83,12 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">bornagain</a></li>
 </ul>
 
@@ -154,17 +155,18 @@
            <div itemprop="articleBody">
             
   <h1>Source code for bornagain.viewers.qtviews.qtviews</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
-<span class="kn">import</span> <span class="nn">pyqtgraph.opengl</span> <span class="k">as</span> <span class="nn">gl</span>
-<span class="kn">from</span> <span class="nn">pyqtgraph.Qt</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>                 <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph</span>             <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph.opengl</span>      <span class="k">as</span> <span class="nn">gl</span>
+<span class="kn">from</span>   <span class="nn">pyqtgraph.Qt</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This is supposed to have various viewers that use pyqtgraph.  It&#39;s mostly useless right now.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="c1"># Some default bright colors.  Might need to make this list longer in the</span>
-<span class="c1"># future.</span>
+<span class="c1"># Some default bright colors.  Might need to make this list longer in the future.</span>
 <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">pg</span><span class="o">.</span><span class="n">glColor</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
           <span class="n">pg</span><span class="o">.</span><span class="n">glColor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
           <span class="n">pg</span><span class="o">.</span><span class="n">glColor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">]),</span>
@@ -183,11 +185,12 @@
         <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">]),</span>
         <span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">])]</span>
 
-
 <div class="viewcode-block" id="bright_colors"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.bright_colors">[docs]</a><span class="k">def</span> <span class="nf">bright_colors</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+
     <span class="sd">&quot;&quot;&quot; Some nice colors.  Only 8 available, which loops around as the input index increments.&quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">colors</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)]</span></div>
+
 
 
 <div class="viewcode-block" id="Volumetric3D"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D">[docs]</a><span class="k">class</span> <span class="nc">Volumetric3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -256,12 +259,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">axlen</span> <span class="o">=</span> <span class="n">length</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span>
-                       <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span>
-                       <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span> <span class="o">*</span>
-                       <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span> <span class="o">*</span> <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Volumetric3D.show"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Volumetric3D.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
@@ -269,8 +269,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">255.</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ubyte</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="p">)</span>
         <span class="n">v</span> <span class="o">=</span> <span class="n">gl</span><span class="o">.</span><span class="n">GLVolumeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="n">smooth</span><span class="p">)</span>
-        <span class="n">v</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="o">-</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
+        <span class="n">v</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">setCameraPosition</span><span class="p">(</span><span class="n">distance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxDist</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
@@ -283,7 +282,7 @@
     <span class="sd">&#39;&#39;&#39; View a 3D density map as a projection along selected axes (which can be a list)&#39;&#39;&#39;</span>
 
     <span class="k">if</span> <span class="n">axis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
             <span class="n">axis</span> <span class="o">=</span> <span class="p">[</span><span class="n">axis</span><span class="p">]</span>
         <span class="n">dat</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axis</span><span class="p">:</span>
@@ -313,7 +312,7 @@
         <span class="n">axis</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">axis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
             <span class="n">axis</span> <span class="o">=</span> <span class="p">[</span><span class="n">axis</span><span class="p">]</span>
         <span class="n">dat</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axis</span><span class="p">:</span>
@@ -337,14 +336,7 @@
         <span class="n">autoLevels</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">autoLevels</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">imv</span><span class="o">.</span><span class="n">setImage</span><span class="p">(</span>
-        <span class="n">dat</span><span class="p">,</span>
-        <span class="n">xvals</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
-            <span class="mf">1.</span><span class="p">,</span>
-            <span class="mf">3.</span><span class="p">,</span>
-            <span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-        <span class="n">levels</span><span class="o">=</span><span class="n">levels</span><span class="p">,</span>
-        <span class="n">autoLevels</span><span class="o">=</span><span class="n">autoLevels</span><span class="p">)</span>
+    <span class="n">imv</span><span class="o">.</span><span class="n">setImage</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">xvals</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">levels</span><span class="o">=</span><span class="n">levels</span><span class="p">,</span> <span class="n">autoLevels</span><span class="o">=</span><span class="n">autoLevels</span><span class="p">)</span>
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
 
 
@@ -362,8 +354,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">maxDist</span> <span class="o">=</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="Scatter3D.add_points"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.add_points">[docs]</a>    <span class="k">def</span> <span class="nf">add_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
         <span class="sd">&#39;&#39;&#39; Add an Nx3 array of points r with specified color and size.  Color is a 3-element</span>
-<span class="sd">                    Python list and size is a float scalar. &#39;&#39;&#39;</span>
+<span class="sd">		    Python list and size is a float scalar. &#39;&#39;&#39;</span>
 
         <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultColor</span>
@@ -375,11 +368,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">siz</span> <span class="o">=</span> <span class="n">size</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">maxDist</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">maxDist</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                        <span class="n">r</span> <span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxDist</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxDist</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))))</span>
         <span class="n">plt</span> <span class="o">=</span> <span class="n">gl</span><span class="o">.</span><span class="n">GLScatterPlotItem</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">siz</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">plt</span><span class="p">)</span></div>
 
@@ -410,12 +399,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">axlen</span> <span class="o">=</span> <span class="n">length</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span>
-                       <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span>
-                       <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span> <span class="o">*</span>
-                       <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span> <span class="o">*</span> <span class="n">axlen</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">wid</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Scatter3D.show"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -434,7 +420,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -453,21 +438,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

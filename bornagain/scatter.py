@@ -3,8 +3,13 @@ Classes related to x-ray "scattering",
 which loosely means diffraction from many objects in random orientations.
 """
 
-import numpy as np
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import numpy as np
+from bornagain import utils
+
+utils.depreciate("Don't use the scatter module.  It is depreciated.  The RadialProfile class has been moved to"
+                 "detector.RadialProfiler")
 
 class RadialProfile(object):
     r"""
@@ -12,6 +17,8 @@ class RadialProfile(object):
     """
 
     def __init__(self):
+
+        utils.depreciate('dont use scatter.RadialProfile() - use detector.RadialProfiler() instead')
 
         self.n_bins = None
         self.bins = None

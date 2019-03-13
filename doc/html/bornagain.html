@@ -4,6 +4,7 @@
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
+  <meta name="robots" content="noindex, nofollow" />
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +29,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.external package" href="bornagain.external.html" />
+    <link rel="next" title="bornagain.analysis package" href="bornagain.analysis.html" />
     <link rel="prev" title="bornagain" href="modules.html" /> 
 
   
@@ -85,15 +86,18 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">bornagain package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
@@ -101,7 +105,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.detector.html">bornagain.detector module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.scatter.html">bornagain.scatter module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.source.html">bornagain.source module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.units.html">bornagain.units module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.utils.html">bornagain.utils module</a></li>
@@ -188,7 +191,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>option</strong> &#8211; One of the following:</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>option</strong> – One of the following:</td>
 </tr>
 </tbody>
 </table>
@@ -203,11 +206,19 @@
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td>&#8216;warn_depreciated&#8217; (True/False):</td>
+<tr class="row-even"><td>‘warn_depreciated’ (True/False):</td>
 <td>Print warnings when depreciated classes etc. are used.</td>
 </tr>
-<tr class="row-odd"><td>&#8216;force_depreciated&#8217; (True/False):</td>
-<td>Like &#8216;warn_depreciated&#8217; but raise RunTimeError instead of warn.</td>
+<tr class="row-odd"><td>‘force_depreciated’ (True/False):</td>
+<td>Like ‘warn_depreciated’ but raise RunTimeError instead of warn.</td>
+</tr>
+<tr class="row-even"><td>‘verbose’ (True/False):</td>
+<td>Attempt to print useful information</td>
+</tr>
+<tr class="row-odd"><td>‘debug’ (integer):</td>
+<td>This is intended for developers.  If the argument is 0,
+bornagain will run as usual.  The other numbers will have some
+special meaning that is not yet defined.</td>
 </tr>
 </tbody>
 </table>
@@ -224,28 +235,32 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>option</strong> &#8211; See <a class="reference internal" href="#bornagain.set_global" title="bornagain.set_global"><code class="xref py py-func docutils literal"><span class="pre">set_global()</span></code></a> for the relevant options.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>option</strong> – See <a class="reference internal" href="#bornagain.set_global" title="bornagain.set_global"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_global()</span></code></a> for the relevant options.</td>
 </tr>
 </tbody>
 </table>
 <p>Returns: The value associated with the option.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="bornagain.docs">
+<code class="descclassname">bornagain.</code><code class="descname">docs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain.html#docs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.docs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open the bornagain documentation in a web browser (if available).</p>
+</dd></dl>
+
 <div class="section" id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.analysis.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.analysis.peaks.html">bornagain.analysis.peaks module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.external.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="bornagain.external.cfelpyutils.html">bornagain.external.cfelpyutils package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.cfelpyutils.html#submodules">Submodules</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="bornagain.external.cfelpyutils.crystfel_utils.html">bornagain.external.cfelpyutils.crystfel_utils module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="bornagain.external.cfelpyutils.geometry_utils.html">bornagain.external.cfelpyutils.geometry_utils module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="bornagain.external.cfelpyutils.parameter_utils.html">bornagain.external.cfelpyutils.parameter_utils module</a></li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.external.pyqtgraph.html">bornagain.external.pyqtgraph package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.external.pyqtgraph.html#submodules">Submodules</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="bornagain.external.pyqtgraph.extras.html">bornagain.external.pyqtgraph.extras module</a></li>
@@ -257,8 +272,16 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.external.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.external.cheetah.html">bornagain.external.cheetah module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.external.crystfel.html">bornagain.external.crystfel module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.external.lcls.html">bornagain.external.lcls module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bornagain.fileio.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.fileio.getters.html">bornagain.fileio.getters module</a></li>
 </ul>
 </li>
 </ul>
@@ -268,13 +291,11 @@
 <li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.atoms.html">bornagain.simulate.atoms module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.clcore.html">bornagain.simulate.clcore module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.examples.html">bornagain.simulate.examples module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.mcpotato.html">bornagain.simulate.mcpotato module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.form_factors.html">bornagain.simulate.form_factors module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.mcsim.html">bornagain.simulate.mcsim module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.potato.html">bornagain.simulate.potato module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.refdata.html">bornagain.simulate.refdata module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.simutils.html">bornagain.simulate.simutils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.solutions.html">bornagain.simulate.solutions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="bornagain.simulate.thorn.html">bornagain.simulate.thorn module</a></li>
 </ul>
 </li>
 </ul>
@@ -291,6 +312,13 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bornagain.viewers.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.mplviews.html">bornagain.viewers.mplviews package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.mplviews.html#submodules">Submodules</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="bornagain.viewers.mplviews.simpleview.html">bornagain.viewers.mplviews.simpleview module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.qtviews.html">bornagain.viewers.qtviews package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.qtviews.html#submodules">Submodules</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="bornagain.viewers.qtviews.padviews.html">bornagain.viewers.qtviews.padviews module</a></li>
@@ -299,10 +327,6 @@
 </li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="bornagain.viewers.html#submodules">Submodules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="bornagain.viewers.joesviews.html">bornagain.viewers.joesviews module</a></li>
 </ul>
 </li>
 </ul>
@@ -315,7 +339,6 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.detector.html">bornagain.detector module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bornagain.scatter.html">bornagain.scatter module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.source.html">bornagain.source module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.units.html">bornagain.units module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bornagain.utils.html">bornagain.utils module</a></li>
@@ -332,7 +355,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.external.html" class="btn btn-neutral float-right" title="bornagain.external package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.analysis.html" class="btn btn-neutral float-right" title="bornagain.analysis package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="modules.html" class="btn btn-neutral" title="bornagain" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -344,7 +367,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -363,21 +385,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

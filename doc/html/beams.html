@@ -4,11 +4,12 @@
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
+  <meta name="robots" content="noindex, nofollow" />
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>X-ray beams &mdash; bornagain 0.2018.9.9 documentation</title>
+  <title>Beams &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -85,11 +86,12 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">X-ray beams</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 
@@ -136,7 +138,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>X-ray beams</li>
+      <li>Beams</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -155,20 +157,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="x-ray-beams">
-<h1>X-ray beams<a class="headerlink" href="#x-ray-beams" title="Permalink to this headline">¶</a></h1>
-<p>The bornagain <a class="reference internal" href="bornagain.source.html#module-bornagain.source" title="bornagain.source"><code class="xref py py-mod docutils literal"><span class="pre">source</span></code></a> package provides the <a class="reference internal" href="bornagain.source.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref py py-class docutils literal"><span class="pre">Beam</span></code></a> class for describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of parameters that are needed to describe a beam are:</p>
+  <div class="section" id="beams">
+<h1>Beams<a class="headerlink" href="#beams" title="Permalink to this headline">¶</a></h1>
+<p>The bornagain <a class="reference internal" href="bornagain.source.html#module-bornagain.source" title="bornagain.source"><code class="xref py py-mod docutils literal notranslate"><span class="pre">source</span></code></a> package provides the <a class="reference internal" href="bornagain.source.html#bornagain.source.Beam" title="bornagain.source.Beam"><code class="xref py py-class docutils literal notranslate"><span class="pre">Beam</span></code></a> class for
+describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of
+parameters that are needed to describe a beam are:</p>
 <blockquote>
-<div><span class="math">\(\lambda\)</span> : the &#8220;nominal&#8221; wavelength of the beam</div></blockquote>
+<div><span class="math notranslate nohighlight">\(\lambda\)</span> : the “nominal” wavelength of the beam</div></blockquote>
 <p>and</p>
 <blockquote>
-<div><span class="math">\(\hat{b}\)</span> : the unit vector pointing along the &#8220;nominal&#8221; incident beam direction.</div></blockquote>
-<p>Wavelength might be accompanied by a FWHM spread in photon energy <span class="math">\(\Delta E/E\)</span>, and the nominal beam direction might be accompanied by the beam divergence FWHM.  The bornagain package does not make a general assumption about the beam direction, but the [0,0,1] direction is most commonly used so far.</p>
+<div><span class="math notranslate nohighlight">\(\hat{b}\)</span> : the unit vector pointing along the “nominal” incident beam direction.</div></blockquote>
+<p>Wavelength might be accompanied by a FWHM spread in photon energy <span class="math notranslate nohighlight">\(\Delta E/E\)</span>, and the nominal beam direction
+might be accompanied by the beam divergence FWHM.  The bornagain package does not make a general assumption about the
+beam direction, but the [0,0,1] direction is most commonly used so far.</p>
 <p>Beam polarization can also be important:</p>
 <blockquote>
-<div><span class="math">\(\hat{u}\)</span> is the polarization vector for the x-ray beam.</div></blockquote>
-<p>This single vector is appropriate for linearly polarized beams.  For beams that are not purely linearly polarized, one can sum the contributions from each of the two polarizations.  The second polarization vector is of course <span class="math">\(\hat{u}\times\hat{b}\)</span> .</p>
-<p>So far we&#8217;ve not really used the Beam class... but eventually we will...</p>
+<div><span class="math notranslate nohighlight">\(\hat{u}\)</span> is the polarization vector for the x-ray beam.</div></blockquote>
+<p>This single vector is appropriate for linearly polarized beams.  For beams that are not purely linearly polarized, one
+can sum the contributions from each of the two polarizations.  The second polarization vector is of course
+<span class="math notranslate nohighlight">\(\hat{u}\times\hat{b}\)</span> .</p>
+<p>So far we’ve not really used the Beam class… but eventually we will…</p>
+<p>TODO: Add spectrum handling to beam class</p>
 </div>
 
 
@@ -191,7 +200,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -210,21 +218,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

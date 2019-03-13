@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+
 import pkg_resources
 import numpy as np
 from bornagain.utils import memoize
@@ -6,6 +8,10 @@ from bornagain.utils import memoize
 file_name = pkg_resources.resource_filename('bornagain.simulate',
                                             'data/water_scattering_data.txt')
 
+
+
+def water_number_density():
+    return 33.3679e27
 
 @memoize
 def load_data():

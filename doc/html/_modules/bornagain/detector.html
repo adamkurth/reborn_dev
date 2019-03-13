@@ -83,11 +83,12 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">bornagain</a></li>
 </ul>
 
@@ -159,35 +160,29 @@
 <span class="sd">detectors (PADs).</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span>
+                        <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="k">import</span> <span class="n">norm</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">matplotlib</span>
-    <span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="k">pass</span>
-
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">vec_norm</span><span class="p">,</span> <span class="n">vec_mag</span><span class="p">,</span> <span class="n">vec_check</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">source</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">units</span>
 
 
 <div class="viewcode-block" id="PADGeometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry">[docs]</a><span class="k">class</span> <span class="nc">PADGeometry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    This is a simplified version of the Panel class.</span>
-<span class="sd">    Hopefully it replaces Panel.</span>
-<span class="sd">    One main difference is that it does not include any information</span>
-<span class="sd">    about the source, which makes a lot more sense and removes several</span>
-<span class="sd">    headaches that I dealt with previously.</span>
-<span class="sd">    Another big difference is the emphasis on simplicity.</span>
-<span class="sd">    So far, there is no cache for derived arrays,</span>
-<span class="sd">    but maybe that will be added later (but only on an as-needed basis...).</span>
-<span class="sd">    As a result of simplifications, there are no checks;</span>
-<span class="sd">    the programmer must think.</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A container for pixel-array detector (PAD) geometry specification, with hepful methods for generating:</span>
+
+<span class="sd">    - Vectors from sample to pixel</span>
+<span class="sd">    - Scattering vectors (i.e. &quot;q&quot; vectors... provided beam information)</span>
+<span class="sd">    - Scattering vector magnitudes.</span>
+<span class="sd">    - Scattering angles (twice the Bragg angle).</span>
+<span class="sd">    - Polarization factors</span>
+
+<span class="sd">    There are also a few methods for generating new arrays (zeros, ones, random) and re-shaping flattened arrays to 2D</span>
+<span class="sd">    arrays.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># These are the configurable parameters.  No defaults.  One must think.</span>
@@ -198,6 +193,22 @@
     <span class="n">_ss_vec</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: The slow-scan basis vector.</span>
     <span class="n">_t_vec</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: The overall translation vector.</span>
 
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_pixels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pixel_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        High-level initialization.  Centers the detector in the x-y plane.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_pixels (int):</span>
+<span class="sd">            distance (float):</span>
+<span class="sd">            pixel_size (float):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">n_pixels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">distance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pixel_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">simple_setup</span><span class="p">(</span><span class="n">n_pixels</span><span class="o">=</span><span class="n">n_pixels</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span> <span class="n">pixel_size</span><span class="o">=</span><span class="n">pixel_size</span><span class="p">)</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -205,25 +216,23 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">fs_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot; Fast-scan basis vector. &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Fast-scan basis vector. &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fs_vec</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ss_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot; Slow-scan basis vector. &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Slow-scan basis vector. &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ss_vec</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">t_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot; Translation vector pointing from origin to center</span>
-<span class="sd">        of corner pixel, which is first in memory. &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Translation vector pointing from origin to center of corner pixel, which is first in memory. &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span>
 
-    <span class="c1"># The reason for these setters is that some assumptions are made</span>
-    <span class="c1"># about the shape of vectors used within bornagain.</span>
+    <span class="c1"># The reason for these setters is that some assumptions are made about the shape of vectors used within bornagain.</span>
     <span class="c1"># TODO: Document assumptions made about vectors</span>
 
     <span class="nd">@fs_vec</span><span class="o">.</span><span class="n">setter</span>
@@ -239,23 +248,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span> <span class="o">=</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">t_vec</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PADGeometry.save"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_fname</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Saves an hdf5 file with class attributes for later use&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Saves an hdf5 file with class attributes for later use&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">save_fname</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">h</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
 
-    <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="PADGeometry.load"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; load a PAD object from fname&quot;&quot;&quot;</span>
-        <span class="n">pad</span> <span class="o">=</span> <span class="n">cls</span><span class="p">()</span>
+<div class="viewcode-block" id="PADGeometry.load"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.load">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; load a PAD object from fname&quot;&quot;&quot;</span>
+        <span class="n">pad</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">h</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pad</span></div>
 
-<div class="viewcode-block" id="PADGeometry.simple_setup"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_pixels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">pixel_size</span><span class="o">=</span><span class="mi">100</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot; Make this a square PAD with beam at center.</span>
+<div class="viewcode-block" id="PADGeometry.simple_setup"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.simple_setup">[docs]</a>    <span class="k">def</span> <span class="nf">simple_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_pixels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">pixel_size</span><span class="o">=</span><span class="mf">100e-6</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Make this a square PAD with beam at center.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            object:</span>
@@ -269,21 +278,19 @@
                       <span class="n">pixel_size</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_pixels</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">distance</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="PADGeometry.pixel_size"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.pixel_size">[docs]</a>    <span class="k">def</span> <span class="nf">pixel_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot; Return pixel size, assuming square pixels. &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Return pixel size, assuming square pixels. &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">vec_mag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">),</span> <span class="n">vec_mag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">)])</span></div>
 
 <div class="viewcode-block" id="PADGeometry.shape"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.shape">[docs]</a>    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot; Return tuple corresponding to the numpy shape of this PAD. &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Return tuple corresponding to the numpy shape of this PAD. &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADGeometry.indices_to_vectors"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.indices_to_vectors">[docs]</a>    <span class="k">def</span> <span class="nf">indices_to_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">        Convert pixel indices to translation vectors pointing</span>
-<span class="sd">        from origin to position on panel.</span>
-<span class="sd">        The positions need not lie on the actual panel;</span>
-<span class="sd">        this assums an infinite plane.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert pixel indices to translation vectors pointing from origin to position on panel.</span>
+<span class="sd">        The positions need not lie on the actual panel; this assums an infinite plane.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            i (float) :</span>
@@ -302,7 +309,7 @@
         <span class="k">return</span> <span class="n">vec_check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_vec</span> <span class="o">+</span> <span class="n">f</span> <span class="o">+</span> <span class="n">s</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADGeometry.position_vecs"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.position_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">position_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute vectors pointing from origin to pixel centers.</span>
 
 <span class="sd">        Returns: Nx3 numpy array</span>
@@ -316,30 +323,72 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_to_vectors</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADGeometry.norm_vec"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.norm_vec">[docs]</a>    <span class="k">def</span> <span class="nf">norm_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot; The vector that is normal to the PAD plane. &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; The vector that is normal to the PAD plane. &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">vec_norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="PADGeometry.ds_vecs"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.ds_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">ds_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot; Normalized scattering vectors s - s0 where s0 is the incident beam</span>
-<span class="sd">        direction and s is the outgoing vector for a given pixel.</span>
-<span class="sd">        This does **not** have the 2*pi/lambda factor included.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PADGeometry.ds_vecs"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.ds_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">ds_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalized scattering vectors s - s0 where s0 is the incident beam direction</span>
+<span class="sd">        (`beam_vec`) and  s is the outgoing vector for a given pixel.  This does **not** have</span>
+<span class="sd">        the 2*pi/lambda factor included.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            beam_vec (tuple or numpy array): specify the unit vector of the incident beam</span>
+<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification</span>
+<span class="sd">                                         of beam_vec ect.</span>
+
+<span class="sd">        Returns: numpy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">beam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">beam_vec</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">beam_vec</span>
 
         <span class="k">return</span> <span class="n">vec_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">())</span> <span class="o">-</span> <span class="n">vec_check</span><span class="p">(</span><span class="n">beam_vec</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PADGeometry.q_vecs"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.q_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">q_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PADGeometry.q_vecs"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.q_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">q_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate scattering vectors:</span>
 
-<span class="sd">:math:`\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)`</span>
+<span class="sd">            :math:`\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)`</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            beam_vec (tuple or numpy array): specify the unit vector of the incident beam</span>
+<span class="sd">            wavelength (float): wavelength</span>
+<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification</span>
+<span class="sd">                                         of beam_vec ect.</span>
 
 <span class="sd">        Returns: numpy array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="k">if</span> <span class="n">beam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">beam_vec</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">beam_vec</span>
+            <span class="n">wavelength</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">wavelength</span>
+
         <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">wavelength</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds_vecs</span><span class="p">(</span><span class="n">beam_vec</span><span class="o">=</span><span class="n">beam_vec</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="PADGeometry.q_mags"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.q_mags">[docs]</a>    <span class="k">def</span> <span class="nf">q_mags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate scattering vector magnitudes:</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            beam_vec (tuple or numpy array): specify the unit vector of the incident beam</span>
+<span class="sd">            wavelength (float): wavelength</span>
+<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification</span>
+<span class="sd">                                        of beam_vec ect.</span>
+
+<span class="sd">        Returns: numpy array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">beam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">beam_vec</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">beam_vec</span>
+            <span class="n">wavelength</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">wavelength</span>
+
+        <span class="k">return</span> <span class="n">vec_mag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span><span class="p">(</span><span class="n">beam_vec</span><span class="o">=</span><span class="n">beam_vec</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">))</span></div>
+
 <div class="viewcode-block" id="PADGeometry.solid_angles2"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.solid_angles2">[docs]</a>    <span class="k">def</span> <span class="nf">solid_angles2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        this should be sped up by vectorizing, but its more readable for now</span>
 <span class="sd">        and only has to be done once per PAD geometry...</span>
 
@@ -359,13 +408,14 @@
         <span class="k">return</span> <span class="n">sa_1</span> <span class="o">+</span> <span class="n">sa_2</span></div>
 
     <span class="k">def</span> <span class="nf">_comp_solid_ang</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">r3</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        compute solid angle of a triangle whose vertices are r1,r2,r3</span>
 <span class="sd">        Ref:thanks Jonas ...</span>
 <span class="sd">        Van Oosterom, A. &amp; Strackee, J.</span>
 <span class="sd">        The Solid Angle of a Plane Triangle. Biomedical Engineering,</span>
 <span class="sd">        IEEE Transactions on BME-30, 125-126 (1983).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">numer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span> <span class="n">r3</span><span class="p">)))</span>
 
         <span class="n">r1_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r1</span><span class="p">)</span>
@@ -380,13 +430,8 @@
         <span class="k">return</span> <span class="n">s_ang</span>
 
 <div class="viewcode-block" id="PADGeometry.solid_angles"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.solid_angles">[docs]</a>    <span class="k">def</span> <span class="nf">solid_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">        Calculate solid angles of pixels.   Assuming the pixel is small, the</span>
-<span class="sd">        approximation to the solid angle is:</span>
-
-<span class="sd">            :math:`\Delta \Omega_{ij} \approx</span>
-<span class="sd">            \frac{\text{Area}}{R^2}\cos(\theta)</span>
-<span class="sd">            = \frac{|\vec{f}\times\vec{s}|}{|v|^2}\hat{n}\cdot \hat{v}_{ij}`.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate solid angles of pixels, assuming the pixels have small angular extent.</span>
 
 <span class="sd">        Returns: numpy array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -394,29 +439,34 @@
         <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">()</span>
         <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_vec</span><span class="p">()</span>
 
-        <span class="n">A</span> <span class="o">=</span> <span class="n">vec_mag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">))</span>  <span class="c1"># Area of the pixel</span>
-        <span class="n">R2</span> <span class="o">=</span> <span class="n">vec_mag</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># Distance to the pixel, squared</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">vec_mag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ss_vec</span><span class="p">))</span>  <span class="c1"># Area of the pixel</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="n">vec_mag</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># Distance to the pixel, squared</span>
         <span class="n">cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">vec_norm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>  <span class="c1"># Inclination factor: cos(theta)</span>
-        <span class="n">sa</span> <span class="o">=</span> <span class="p">(</span><span class="n">A</span> <span class="o">/</span> <span class="n">R2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cs</span>  <span class="c1"># Solid angle</span>
+        <span class="n">sa</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">/</span> <span class="n">r2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cs</span>  <span class="c1"># Solid angle</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sa</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="PADGeometry.polarization_factors"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.polarization_factors">[docs]</a>    <span class="k">def</span> <span class="nf">polarization_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polarization_vec</span><span class="p">,</span> <span class="n">beam_vec</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PADGeometry.polarization_factors"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.polarization_factors">[docs]</a>    <span class="k">def</span> <span class="nf">polarization_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polarization_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The scattering polarization factors.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            polarization_vec (numpy array) :</span>
-<span class="sd">                First beam polarization vector</span>
-<span class="sd">                (second is this one crossed with beam vector)</span>
+<span class="sd">                First beam polarization vector (second is this one crossed with beam vector)</span>
 <span class="sd">            beam_vec (numpy array) :</span>
 <span class="sd">                Incident beam vector</span>
 <span class="sd">            weight (float) :</span>
-<span class="sd">                The weight of the first polarization component</span>
-<span class="sd">                (second is one minus this weight)</span>
+<span class="sd">                The weight of the first polarization component (second is one minus this weight)</span>
+<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification</span>
+<span class="sd">                                         of beam_vec ect.</span>
 
 <span class="sd">        Returns:  numpy array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">beam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">beam_vec</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">beam_vec</span>
+            <span class="n">polarization_vec</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">polarization_vec</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">polarization_weight</span>
 
         <span class="n">v</span> <span class="o">=</span> <span class="n">vec_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">())</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">vec_norm</span><span class="p">(</span><span class="n">vec_check</span><span class="p">(</span><span class="n">polarization_vec</span><span class="p">))</span>
@@ -436,35 +486,63 @@
 
         <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PADGeometry.scattering_angles"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.scattering_angles">[docs]</a>    <span class="k">def</span> <span class="nf">scattering_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PADGeometry.scattering_angles"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.scattering_angles">[docs]</a>    <span class="k">def</span> <span class="nf">scattering_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam_vec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Scattering angles (i.e. half the Bragg angles).</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            beam_vec (numpy array) :</span>
 <span class="sd">                Incident beam vector.</span>
+<span class="sd">            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification</span>
+<span class="sd">                                         of beam_vec ect.</span>
 
 <span class="sd">        Returns: numpy array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">beam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">beam_vec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">beam_vec</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">beam_vec</span>
+        <span class="k">elif</span> <span class="n">beam_vec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">beam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Scattering angles cannot be computed without knowing the incident beam direction&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">vec_check</span><span class="p">(</span><span class="n">beam_vec</span><span class="p">),</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">vec_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">())</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beam_vec</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span></div>
 
 <div class="viewcode-block" id="PADGeometry.reshape"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.reshape">[docs]</a>    <span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dat</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">dat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">())</span></div></div>
+<span class="sd">        Re-shape a flattened array to a 2D array.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dat (numpy array): The flattened data array</span>
+
+<span class="sd">        Returns: a 2D numpy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">dat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="PADGeometry.zeros"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PADGeometry.ones"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.ones">[docs]</a>    <span class="k">def</span> <span class="nf">ones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PADGeometry.random"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.random">[docs]</a>    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_fs</span><span class="p">))</span></div></div>
 
 
-<div class="viewcode-block" id="split_pad_data"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.split_pad_data">[docs]</a><span class="k">def</span> <span class="nf">split_pad_data</span><span class="p">(</span><span class="n">pad_list</span><span class="o">=</span><span class="p">[],</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="split_pad_data"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.split_pad_data">[docs]</a><span class="k">def</span> <span class="nf">split_pad_data</span><span class="p">(</span><span class="n">pad_list</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Given a contiguous block of data, split it up into individual PAD panels</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pad_list: A list of PADGeometry instances</span>
-<span class="sd">        data: A contiguous array with data values</span>
-<span class="sd">        (total pixels to add up to sum of pixels in all PADs)</span>
+<span class="sd">        data: A contiguous array with data values (total pixels to add up to sum of pixels in all PADs)</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A list of 2D PAD data arrays</span>
@@ -475,24 +553,43 @@
 
     <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">pad</span> <span class="ow">in</span> <span class="n">pad_list</span><span class="p">:</span>
-
         <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">offset</span><span class="p">:(</span><span class="n">offset</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_pixels</span><span class="p">)]))</span>
         <span class="n">offset</span> <span class="o">+=</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_pixels</span>
 
     <span class="k">return</span> <span class="n">data_list</span></div>
 
 
-<div class="viewcode-block" id="PADAssembler"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADAssembler">[docs]</a><span class="k">class</span> <span class="nc">PADAssembler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    Assemble PAD data into a fake single-panel PAD.</span>
-<span class="sd">    This is done in a lazy way.</span>
-<span class="sd">    The resulting image is not centered in any way;</span>
-<span class="sd">    the fake detector is a snug fit to the individual PADs.</span>
+<div class="viewcode-block" id="edge_mask"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.edge_mask">[docs]</a><span class="k">def</span> <span class="nf">edge_mask</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
 
-<span class="sd">    A list of PADGeometry objects are required on initialization,</span>
-<span class="sd">    as the first argument.  The data needed to &quot;interpolate&quot; are cached,</span>
-<span class="sd">    hence the need for a class.  The geometry cannot change;</span>
-<span class="sd">    there is no update method.</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make an &quot;edge mask&quot;; an array of ones with zeros around the edges.</span>
+<span class="sd">    The mask will be the same type as the data (e.g. double).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (2D numpy array): a data array (for shape reference)</span>
+<span class="sd">        n (int): number of pixels to mask around edges</span>
+
+<span class="sd">    Returns: numpy array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">ns</span><span class="p">,</span> <span class="n">nf</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">mask</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">mask</span><span class="p">[(</span><span class="n">ns</span><span class="o">-</span><span class="n">n</span><span class="p">):</span><span class="n">ns</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">mask</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">mask</span><span class="p">[:,</span> <span class="p">(</span><span class="n">nf</span><span class="o">-</span><span class="n">n</span><span class="p">):</span><span class="n">nf</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">mask</span></div>
+
+
+<div class="viewcode-block" id="PADAssembler"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADAssembler">[docs]</a><span class="k">class</span> <span class="nc">PADAssembler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assemble PAD data into a fake single-panel PAD.  This is done in a lazy way.  The resulting image is not</span>
+<span class="sd">    centered in any way; the fake detector is a snug fit to the individual PADs.</span>
+
+<span class="sd">    A list of PADGeometry objects are required on initialization, as the first argument.  The data needed to</span>
+<span class="sd">    &quot;interpolate&quot; are cached, hence the need for a class.  The geometry cannot change; there is no update method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_list</span><span class="p">):</span>
@@ -507,7 +604,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
 
 <div class="viewcode-block" id="PADAssembler.assemble_data"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADAssembler.assemble_data">[docs]</a>    <span class="k">def</span> <span class="nf">assemble_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given a contiguous block of data, create the fake single-panel PAD.</span>
 
 <span class="sd">        Arguments:</span>
@@ -518,15 +615,18 @@
 <span class="sd">            assembled_data (numpy array):</span>
 <span class="sd">                Assembled PAD image</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
         <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span>
         <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span>
         <span class="n">a</span><span class="p">[</span><span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span>
+
         <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PADAssembler.assemble_data_list"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADAssembler.assemble_data_list">[docs]</a>    <span class="k">def</span> <span class="nf">assemble_data_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_list</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">        Same as assemble_data() method, but accepts a list of</span>
-<span class="sd">        individual panels in the form of a list.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Same as assemble_data() method, but accepts a list of individual panels in the form of a list.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            data_list (list of numpy arrays):</span>
@@ -536,231 +636,20 @@
 <span class="sd">            assembled_data (numpy array):</span>
 <span class="sd">                Assembled PAD image</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">assemble_data</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">data_list</span><span class="p">))</span></div></div>
 
 
-<div class="viewcode-block" id="SimplePAD"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.SimplePAD">[docs]</a><span class="k">class</span> <span class="nc">SimplePAD</span><span class="p">(</span><span class="n">PADGeometry</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A simple child class to PADGeometry with some higher level functionality</span>
+<div class="viewcode-block" id="IcosphereGeometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.IcosphereGeometry">[docs]</a><span class="k">class</span> <span class="nc">IcosphereGeometry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">    This will return a detector object representing a</span>
-<span class="sd">    square pixel array detector</span>
-
-<span class="sd">    .. note::</span>
-<span class="sd">        - One can readout pixel intensities using :func:`readout`</span>
-<span class="sd">        - After reading out amplitudes, one can display pixels using</span>
-<span class="sd">          :func:`display`</span>
-
-<span class="sd">    Arguments</span>
-<span class="sd">        - n_pixels (int)</span>
-<span class="sd">            the number of pixels along one edge</span>
-
-<span class="sd">        - pixsize (float)</span>
-<span class="sd">            the edge length of the square pixels in meters</span>
-
-<span class="sd">        - detdist (float)</span>
-<span class="sd">            the distance from the interaction region to the point where</span>
-<span class="sd">            the forward beam intersects the detector (in meters)</span>
-
-<span class="sd">        - wavelen (float)</span>
-<span class="sd">            the wavelength of the photons (in Angstroms)</span>
-
-<span class="sd">        - center (tuple)</span>
-<span class="sd">            the fast-scan center coordinate and the slow-scan center coordinate</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">n_pixels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-            <span class="n">pixsize</span><span class="o">=</span><span class="mf">0.00005</span><span class="p">,</span>
-            <span class="n">detdist</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-            <span class="n">wavelen</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
-            <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
-        <span class="n">PADGeometry</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">detector_distance</span> <span class="o">=</span> <span class="n">detdist</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelen</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">si_energy</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">hc</span> <span class="o">/</span> <span class="p">(</span><span class="n">wavelen</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">simple_setup</span><span class="p">(</span><span class="n">n_pixels</span><span class="o">=</span><span class="n">n_pixels</span><span class="p">,</span>
-                          <span class="n">pixel_size</span><span class="o">=</span><span class="n">pixsize</span><span class="p">,</span>
-                          <span class="n">distance</span><span class="o">=</span><span class="n">detdist</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="c1"># shape of the 2D det panel (2D image)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">img_sh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">center</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">center</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="k">assert</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_fs</span><span class="p">)</span>
-            <span class="k">assert</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_ss</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="n">center</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_sh</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">SOLID_ANG</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solid_angles</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_make_Qmag</span><span class="p">()</span>
-
-        <span class="c1"># useful functions fr converting between pixel radii and momentum</span>
-        <span class="c1"># transfer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rad2q</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">rad</span><span class="p">:</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> \
-            <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">rad</span> <span class="o">*</span> <span class="n">pixsize</span> <span class="o">/</span> <span class="n">detdist</span><span class="p">))</span> <span class="o">/</span> <span class="n">wavelen</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">q2rad</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">wavelen</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">detdist</span> <span class="o">/</span> <span class="n">pixsize</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">def</span> <span class="nf">_make_Qmag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Makes the momentum transfer of each Q</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">beam_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">Q_vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span><span class="p">(</span>
-            <span class="n">beam_vec</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
-            <span class="n">wavelength</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Qmag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q_vectors</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-
-<div class="viewcode-block" id="SimplePAD.readout"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.SimplePAD.readout">[docs]</a>    <span class="k">def</span> <span class="nf">readout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amplitudes</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Given scattering amplitudes, this calculates the</span>
-<span class="sd">        corresponding intensity values.</span>
-
-<span class="sd">        Arguments</span>
-<span class="sd">            amplitudes (complex np.ndarray) :</span>
-<span class="sd">            Scattering amplitudes same shape as `self.Q`</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">            np.ndarray : Scattering intensities as a 2-D image.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_sh</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span></div>
-
-<div class="viewcode-block" id="SimplePAD.readout_finite"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.SimplePAD.readout_finite">[docs]</a>    <span class="k">def</span> <span class="nf">readout_finite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amplitudes</span><span class="p">,</span> <span class="n">qmin</span><span class="p">,</span> <span class="n">qmax</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="mi">1</span><span class="n">e20</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get scattering intensities as a 2D image considering</span>
-<span class="sd">        finite scattered photons</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            amplitudes (complex np.ndarray) :</span>
-<span class="sd">            Scattering amplitudes same shape as `self.Q`.</span>
-<span class="sd">            qmin (float) : Minimum q to generate intensities</span>
-<span class="sd">            qmax (float) : Maximum q to generate intenities</span>
-<span class="sd">            flux (float) : Forward beam flux in Photons per square centimeter</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            np.ndarray : Scattering intensities as a 2-D image.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_sh</span><span class="p">)</span>
-        <span class="n">struct_fact</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">qmin</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Qmag</span><span class="o">.</span><span class="n">min</span><span class="p">():</span>
-            <span class="n">qmin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Qmag</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">qmax</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Qmag</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
-            <span class="n">qmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Qmag</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-
-        <span class="n">ilow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Qmag</span> <span class="o">&lt;</span> <span class="n">qmin</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">ihigh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Qmag</span> <span class="o">&gt;</span> <span class="n">qmax</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">ilow</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
-            <span class="n">struct_fact</span><span class="p">[</span><span class="n">ilow</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">ihigh</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
-            <span class="n">struct_fact</span><span class="p">[</span><span class="n">ihigh</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="n">rad_electron</span> <span class="o">=</span> <span class="mf">2.82e-13</span>  <span class="c1"># cm</span>
-        <span class="n">phot_per_pix</span> <span class="o">=</span> <span class="n">struct_fact</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">SOLID_ANG</span> <span class="o">*</span> <span class="n">flux</span> <span class="o">*</span> <span class="n">rad_electron</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="n">total_phot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">phot_per_pix</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-
-        <span class="n">pvals</span> <span class="o">=</span> <span class="n">struct_fact</span> <span class="o">/</span> <span class="n">struct_fact</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="n">total_phot</span><span class="p">,</span> <span class="n">pvals</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_sh</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intens</span></div>
-
-<div class="viewcode-block" id="SimplePAD.display"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.SimplePAD.display">[docs]</a>    <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pause</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Displays a detector. Extra kwargs are passed</span>
-<span class="sd">        to matplotlib.figure</span>
-
-<span class="sd">        .. note::</span>
-<span class="sd">            - Requires matplotlib.</span>
-<span class="sd">            - Must first run :func:`readout` or :func:`readout_finite`</span>
-<span class="sd">                at least one time</span>
-
-<span class="sd">        Arguments</span>
-<span class="sd">            - use_log (bool)</span>
-<span class="sd">                whether to use log-scaling when displaying the intensity image.</span>
-
-<span class="sd">            - vmax (float)</span>
-<span class="sd">                colorbar scaling argument.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">assert</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="s1">&#39;matplotlib&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You need matplotlib to plot!&quot;</span><span class="p">)</span>
-            <span class="k">return</span>
-        <span class="c1"># plt = matplotlib.pylab</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-        <span class="n">qx_min</span><span class="p">,</span> <span class="n">qy_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q_vectors</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">qx_max</span><span class="p">,</span> <span class="n">qy_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q_vectors</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">extent</span> <span class="o">=</span> <span class="p">(</span><span class="n">qx_min</span><span class="p">,</span> <span class="n">qx_max</span><span class="p">,</span> <span class="n">qy_min</span><span class="p">,</span> <span class="n">qy_max</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">use_log</span><span class="p">:</span>
-            <span class="n">ax_img</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">intens</span><span class="p">),</span>
-                <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
-                <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gnuplot&#39;</span><span class="p">,</span>
-                <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;lanczos&#39;</span><span class="p">)</span>
-            <span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">ax_img</span><span class="p">)</span>
-            <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;log(photon counts)&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="p">(</span><span class="n">vmax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">ax_img</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">intens</span><span class="p">,</span>
-                <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
-                <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gnuplot&#39;</span><span class="p">,</span>
-                <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;lanczos&#39;</span><span class="p">,</span>
-                <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
-            <span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">ax_img</span><span class="p">)</span>
-            <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;photon counts&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">270</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">r&#39;$q_x\,\,\AA^{-1}$&#39;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">r&#39;$q_y\,\,\AA^{-1}$&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">pause</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="n">pause</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">pause</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">pause</span><span class="p">)</span></div></div>
-
-
-<div class="viewcode-block" id="IcosphereGeometry"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.IcosphereGeometry">[docs]</a><span class="k">class</span> <span class="nc">IcosphereGeometry</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Experimental class for a spherical detector that</span>
-<span class="sd">    follows the &quot;icosphere&quot; geometry.</span>
-<span class="sd">    The Icosphere is generated by sub-dividing the vertices of an icosahedron.</span>
-<span class="sd">    The following blog was helpful:</span>
+<span class="sd">    Experimental class for a spherical detector that follows the &quot;icosphere&quot; geometry. The Icosphere is generated by</span>
+<span class="sd">    sub-dividing the vertices of an icosahedron.  The following blog was helpful:</span>
 <span class="sd">    http://sinestesia.co/blog/tutorials/python-icospheres/</span>
-<span class="sd">    The code is quite slow; needs to be vectorized with numpy...</span>
+
+<span class="sd">    The code is quite slow; needs to be vectorized with numpy.  There are definitely better spherical detectors - the</span>
+<span class="sd">    solid angles of these pixels are not very uniform.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">n_subdivisions</span> <span class="o">=</span> <span class="mi">1</span>
@@ -772,14 +661,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
 
     <span class="k">def</span> <span class="nf">_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Return vertex coordinates fixed to the unit sphere &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Return vertex coordinates fixed to the unit sphere &quot;&quot;&quot;</span>
 
         <span class="n">length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">z</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">[(</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span> <span class="o">/</span> <span class="n">length</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
 
     <span class="k">def</span> <span class="nf">_middle_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point_1</span><span class="p">,</span> <span class="n">point_2</span><span class="p">,</span> <span class="n">verts</span><span class="p">,</span> <span class="n">middle_point_cache</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Find a middle point and project to the unit sphere &quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Find a middle point and project to the unit sphere &quot;&quot;&quot;</span>
 
         <span class="c1"># We check if we have already cut this edge first</span>
         <span class="c1"># to avoid duplicated verts</span>
@@ -812,23 +701,23 @@
         <span class="n">middle_point_cache</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Golden ratio</span>
-        <span class="n">PHI</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
 
         <span class="n">verts</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">vertex</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PHI</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-            <span class="n">vertex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">PHI</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-            <span class="n">vertex</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">PHI</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-            <span class="n">vertex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">PHI</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">phi</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">phi</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
 
-            <span class="n">vertex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PHI</span><span class="p">),</span>
-            <span class="n">vertex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">PHI</span><span class="p">),</span>
-            <span class="n">vertex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">PHI</span><span class="p">),</span>
-            <span class="n">vertex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">PHI</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">phi</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">phi</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">phi</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">phi</span><span class="p">),</span>
 
-            <span class="n">vertex</span><span class="p">(</span><span class="n">PHI</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
-            <span class="n">vertex</span><span class="p">(</span><span class="n">PHI</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-            <span class="n">vertex</span><span class="p">(</span><span class="o">-</span><span class="n">PHI</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
-            <span class="n">vertex</span><span class="p">(</span><span class="o">-</span><span class="n">PHI</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="o">-</span><span class="n">phi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">vertex</span><span class="p">(</span><span class="o">-</span><span class="n">phi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="p">]</span>
 
         <span class="n">faces</span> <span class="o">=</span> <span class="p">[</span>
@@ -886,10 +775,100 @@
         <span class="n">face_centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_faces</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_faces</span><span class="p">):</span>
             <span class="n">face_centers</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">verts</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">verts</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">:]</span> <span class="o">+</span>
-                <span class="n">verts</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">:])</span> <span class="o">/</span> <span class="mi">3</span>
+                <span class="n">verts</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">verts</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">verts</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">:])</span> <span class="o">/</span> <span class="mi">3</span>
 
         <span class="k">return</span> <span class="n">verts</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">face_centers</span></div></div>
+
+
+<div class="viewcode-block" id="RadialProfiler"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.RadialProfiler">[docs]</a><span class="k">class</span> <span class="nc">RadialProfiler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper class to create radial profiles.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bin_indices</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_mags</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_range</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counts_non_zero</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="RadialProfiler.make_plan"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.RadialProfiler.make_plan">[docs]</a>    <span class="k">def</span> <span class="nf">make_plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_mags</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">q_range</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup the binning indices for the creation of radial profiles.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            q_mags (numpy array) :</span>
+<span class="sd">                Scattering vector magnitudes.</span>
+<span class="sd">            mask (numpy array) :</span>
+<span class="sd">                Pixel mask.  Should be ones and zeros, where one means &quot;good&quot; and zero means &quot;bad&quot;.</span>
+<span class="sd">            n_bins (int) :</span>
+<span class="sd">                Number of bins.</span>
+<span class="sd">            q_range (list-like) :</span>
+<span class="sd">                The minimum and maximum of the scattering vector magnitudes.  The bin size will be equal to</span>
+<span class="sd">                (max_q - min_q) / n_bins</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">q_mags</span> <span class="o">=</span> <span class="n">q_mags</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">q_range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">min_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">q_mags</span><span class="p">)</span>
+            <span class="n">max_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">q_mags</span><span class="p">)</span>
+            <span class="n">q_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">min_q</span><span class="p">,</span> <span class="n">max_q</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q_range</span> <span class="o">=</span> <span class="n">q_range</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">min_q</span> <span class="o">=</span> <span class="n">q_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">max_q</span> <span class="o">=</span> <span class="n">q_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">bin_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_q</span> <span class="o">-</span> <span class="n">min_q</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">n_bins</span><span class="p">)</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">bin_size</span> <span class="o">+</span> <span class="n">min_q</span>
+        <span class="n">bin_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">q_mags</span> <span class="o">-</span> <span class="n">min_q</span><span class="p">)</span> <span class="o">/</span> <span class="n">bin_size</span><span class="p">))</span>
+        <span class="n">bin_indices</span><span class="p">[</span><span class="n">bin_indices</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">bin_indices</span><span class="p">[</span><span class="n">bin_indices</span> <span class="o">&gt;=</span> <span class="n">n_bins</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_bins</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">bin_indices</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="c1"># print(bin_indices.shape, mask.shape, n_bins)</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">bin_indices</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
+        <span class="n">counts_non_zero</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span> <span class="o">=</span> <span class="n">n_bins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="n">bins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span> <span class="o">=</span> <span class="n">bin_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bin_indices</span> <span class="o">=</span> <span class="n">bin_indices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_mags</span> <span class="o">=</span> <span class="n">q_mags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="n">counts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_range</span> <span class="o">=</span> <span class="n">q_range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counts_non_zero</span> <span class="o">=</span> <span class="n">counts_non_zero</span></div>
+
+<div class="viewcode-block" id="RadialProfiler.get_profile"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.RadialProfiler.get_profile">[docs]</a>    <span class="k">def</span> <span class="nf">get_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a radial profile for a particular dataframe.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            data (numpy array) :</span>
+<span class="sd">                Intensity data.</span>
+<span class="sd">            average (bool) :</span>
+<span class="sd">                If true, divide the sum in each bin by the counts, else return the sum.  Default: True.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            profile (numpy array) :</span>
+<span class="sd">                The requested radial profile.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">profile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bin_indices</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+                              <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bins</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">average</span><span class="p">:</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">counts_non_zero</span><span class="p">]</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">counts_non_zero</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">profile</span></div></div>
 </pre></div>
 
            </div>
@@ -902,7 +881,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -921,21 +899,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

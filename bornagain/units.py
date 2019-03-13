@@ -1,4 +1,4 @@
-"""
+r"""
 Collection of constants that are useful for converting to SI units.
 For example, the eV constant is equal to the number of electron volts per
 Joule.

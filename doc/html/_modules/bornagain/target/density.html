@@ -83,11 +83,12 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
 </ul>
 
@@ -154,7 +155,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for bornagain.target.density</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -165,7 +166,7 @@
 
 <div class="viewcode-block" id="CrystalMeshTool"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool">[docs]</a><span class="k">class</span> <span class="nc">CrystalMeshTool</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="sd">r&#39;&#39;&#39;</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A helper class for working with 3D density maps.  Most importantly, it allows one to do spacegroup symmetry</span>
 <span class="sd">    transformations.  Once provided information about a crystal (spacegroup, lattice), along with desired resolution and</span>
 <span class="sd">    oversampling ratio, this tool intelligently chooses the shape of the map and creates lookup tables for the symmetry</span>
@@ -177,14 +178,15 @@
 <span class="sd">    elegant in that basis.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="n">sym_luts</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># :  Cached lookup tables</span>
+    <span class="n">sym_luts</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#:  Cached lookup tables</span>
     <span class="c1"># n_vecs = None</span>
     <span class="c1"># x_vecs = None</span>
     <span class="c1"># r_vecs = None</span>
     <span class="c1"># h_vecs = None</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cryst</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">oversampling</span><span class="p">):</span>
-        <span class="sd">r&#39;&#39;&#39;</span>
+
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        This should intelligently pick the limits of a map.</span>
 
 <span class="sd">        Arguments:</span>
@@ -203,30 +205,27 @@
         <span class="n">m</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">cryst</span><span class="o">.</span><span class="n">symTs</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">mp</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
-                <span class="n">Tp</span> <span class="o">=</span> <span class="n">T</span> <span class="o">*</span> <span class="n">mp</span>
-                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Tp</span> <span class="o">%</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">Tp</span> <span class="o">=</span> <span class="n">T</span><span class="o">*</span><span class="n">mp</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Tp</span> <span class="o">%</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">mp</span> <span class="o">&gt;</span> <span class="n">m</span><span class="p">:</span>
                         <span class="n">m</span> <span class="o">=</span> <span class="n">mp</span>
                     <span class="k">break</span>
 
         <span class="n">Nc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">abc</span> <span class="o">/</span> <span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="n">m</span><span class="p">))</span> <span class="o">*</span> <span class="n">m</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">cryst</span> <span class="o">=</span> <span class="n">cryst</span>  <span class="c1"># :  crystal.target class object used to initiate the map</span>
-        <span class="c1"># self.m = np.int(m)  #:  Due to symmetry translations, map must consit</span>
-        <span class="c1"># of integer multiple of this number</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>  <span class="c1"># :  Oversampling ratio</span>
-        <span class="c1"># :  Length-3 array of &quot;actual&quot; resolutions (different from &quot;requested&quot; resolution)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">abc</span> <span class="o">/</span> <span class="n">Nc</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Nc</span>  <span class="c1"># :  Crystal basis length increment</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Nc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">Nc</span><span class="p">)</span>  <span class="c1"># :  Number of samples along edge of unit cell</span>
-        <span class="c1"># :  Number of samples along edge of whole map (includes oversampling)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">Nc</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># :  Linear length fo map (=N^3)</span>
-        <span class="c1"># :  The stride vector (mostly for internal use)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cryst</span> <span class="o">=</span> <span class="n">cryst</span>  <span class="c1">#:  crystal.target class object used to initiate the map</span>
+        <span class="c1"># self.m = np.int(m)  #:  Due to symmetry translations, map must consit of integer multiple of this number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>  <span class="c1">#:  Oversampling ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">abc</span> <span class="o">/</span> <span class="n">Nc</span>   <span class="c1">#:  Length-3 array of &quot;actual&quot; resolutions (different from &quot;requested&quot; resolution)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Nc</span>    <span class="c1">#:  Crystal basis length increment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">Nc</span><span class="p">)</span>  <span class="c1">#:  Number of samples along edge of unit cell</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">Nc</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>  <span class="c1">#:  Number of samples along edge of whole map (includes oversampling)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>  <span class="c1">#:  Linear length fo map (=N^3)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>  <span class="c1">#:  The stride vector (mostly for internal use)</span>
 
 <div class="viewcode-block" id="CrystalMeshTool.get_n_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_n_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_n_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:</span>
 
@@ -247,7 +246,8 @@
         <span class="k">return</span> <span class="n">n_vecs</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.get_x_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_x_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_x_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Get an Nx3 array of vectors in the crystal basis.  If there were four samples per unit cell, the array looks a</span>
 <span class="sd">        bit like this:</span>
@@ -263,7 +263,8 @@
         <span class="k">return</span> <span class="n">x_vecs</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.get_r_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_r_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_r_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Creates an Nx3 array of 3-vectors contain the Cartesian-basis vectors of each voxel in the map.  This is done</span>
 <span class="sd">        by taking the crystal-basis position vectors x, and applying the orthogonalization matrix O to them.</span>
@@ -277,7 +278,8 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.get_h_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_h_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_h_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        This provides an Nx3 array of Fourier-space vectors &quot;h&quot;.  These coordinates can be understood as &quot;fractional</span>
 <span class="sd">        Miller indices&quot; that coorespond to the density samples upon taking an FFT of the real-space map.  With atomic</span>
@@ -289,23 +291,26 @@
 
         <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_n_vecs</span><span class="p">()</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">h</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nc</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nc</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
         <span class="n">h</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nc</span>
         <span class="k">return</span> <span class="n">h</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.get_q_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_q_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_q_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
 
-<span class="sd">                This provides an Nx3 array of momentum-transfer vectors (with the usual 2 pi factor).</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">                Returns: numpy array</span>
+<span class="sd">		This provides an Nx3 array of momentum-transfer vectors (with the usual 2 pi factor).</span>
 
-<span class="sd">                &quot;&quot;&quot;</span>
+<span class="sd">		Returns: numpy array</span>
 
-        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_h_vecs</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_h_vecs</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+
 
 <div class="viewcode-block" id="CrystalMeshTool.get_sym_luts"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_sym_luts">[docs]</a>    <span class="k">def</span> <span class="nf">get_sym_luts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        This provides a list of &quot;symmetry transform lookup tables&quot;.  These are the linearized array indices. For a</span>
 <span class="sd">        transformation that consists of an identity matrix along with zero translation, the lut is just an array</span>
@@ -333,7 +338,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sym_luts</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.symmetry_transform"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.symmetry_transform">[docs]</a>    <span class="k">def</span> <span class="nf">symmetry_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        This applies symmetry transformations to a data array (i.e. density map).  The crystal spacegroup gives rise</span>
 <span class="sd">        to Ns symmetry transformation operations (e.g. each operation consists of a rotation matrix paired with</span>
@@ -356,7 +362,8 @@
         <span class="k">return</span> <span class="n">data_trans</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.shape"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.shape">[docs]</a>    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        For convenience, return the map shape [N,N,N]</span>
 
@@ -367,7 +374,8 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.reshape"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.reshape">[docs]</a>    <span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        For convenience, this will reshape a data array to the shape NxNxN.</span>
 
@@ -382,7 +390,8 @@
         <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.reshape3"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.reshape3">[docs]</a>    <span class="k">def</span> <span class="nf">reshape3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: A data array of length 3*N^3 that consists of 3-vectors (one for each density voxel)</span>
@@ -395,7 +404,8 @@
         <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.zeros"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        A convenience function: simply returns an array of zeros of shape NxNxN</span>
 
@@ -407,7 +417,8 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.place_atoms_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.place_atoms_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_atoms_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors</span>
 <span class="sd">        should be in the crystal basis, and the densities must be real (because the scipy function that we use does</span>
@@ -423,14 +434,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">]</span>
         <span class="n">rng</span> <span class="o">=</span> <span class="p">[</span><span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">]</span>
-        <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">a</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.place_intensities_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.place_intensities_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_intensities_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        This will take a list of Miller index vectors and intensities and place them in a 3D map.</span>
 
@@ -443,11 +453,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">hh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_h_vecs</span><span class="p">()</span>
-        <span class="n">mm</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">hh</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">hh</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">]</span>
+        <span class="n">mm</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">hh</span><span class="p">)</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">hh</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">]</span>
         <span class="n">rng</span> <span class="o">=</span> <span class="p">[</span><span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">]</span>
-        <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span>
-            <span class="n">h</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">a</span></div></div>
 </pre></div>
@@ -462,7 +470,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -481,21 +488,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

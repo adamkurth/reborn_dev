@@ -83,11 +83,12 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">bornagain</a></li>
 </ul>
 
@@ -152,28 +153,26 @@
   <h1>All modules for which code is available</h1>
 <ul><li><a href="bornagain.html">bornagain</a></li>
 <ul><li><a href="bornagain/detector.html">bornagain.detector</a></li>
-<li><a href="bornagain/external/cfelpyutils/crystfel_utils.html">bornagain.external.cfelpyutils.crystfel_utils</a></li>
-<li><a href="bornagain/external/cfelpyutils/geometry_utils.html">bornagain.external.cfelpyutils.geometry_utils</a></li>
-<li><a href="bornagain/external/cfelpyutils/parameter_utils.html">bornagain.external.cfelpyutils.parameter_utils</a></li>
+<li><a href="bornagain/external/cheetah.html">bornagain.external.cheetah</a></li>
 <li><a href="bornagain/external/crystfel.html">bornagain.external.crystfel</a></li>
 <li><a href="bornagain/external/lcls.html">bornagain.external.lcls</a></li>
 <li><a href="bornagain/external/pyqtgraph/extras.html">bornagain.external.pyqtgraph.extras</a></li>
 <li><a href="bornagain/external/pyqtgraph/mods.html">bornagain.external.pyqtgraph.mods</a></li>
-<li><a href="bornagain/scatter.html">bornagain.scatter</a></li>
+<li><a href="bornagain/fileio/getters.html">bornagain.fileio.getters</a></li>
 <li><a href="bornagain/simulate/atoms.html">bornagain.simulate.atoms</a></li>
 <li><a href="bornagain/simulate/clcore.html">bornagain.simulate.clcore</a></li>
 <li><a href="bornagain/simulate/examples.html">bornagain.simulate.examples</a></li>
+<li><a href="bornagain/simulate/form_factors.html">bornagain.simulate.form_factors</a></li>
 <li><a href="bornagain/simulate/mcsim.html">bornagain.simulate.mcsim</a></li>
-<li><a href="bornagain/simulate/potato.html">bornagain.simulate.potato</a></li>
 <li><a href="bornagain/simulate/refdata.html">bornagain.simulate.refdata</a></li>
 <li><a href="bornagain/simulate/simutils.html">bornagain.simulate.simutils</a></li>
 <li><a href="bornagain/simulate/solutions.html">bornagain.simulate.solutions</a></li>
-<li><a href="bornagain/simulate/thorn.html">bornagain.simulate.thorn</a></li>
 <li><a href="bornagain/source.html">bornagain.source</a></li>
 <li><a href="bornagain/target/crystal.html">bornagain.target.crystal</a></li>
 <li><a href="bornagain/target/density.html">bornagain.target.density</a></li>
 <li><a href="bornagain/target/placer.html">bornagain.target.placer</a></li>
 <li><a href="bornagain/utils.html">bornagain.utils</a></li>
+<li><a href="bornagain/viewers/mplviews/simpleview.html">bornagain.viewers.mplviews.simpleview</a></li>
 <li><a href="bornagain/viewers/qtviews/padviews.html">bornagain.viewers.qtviews.padviews</a></li>
 <li><a href="bornagain/viewers/qtviews/qtviews.html">bornagain.viewers.qtviews.qtviews</a></li>
 </ul></ul>
@@ -188,7 +187,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -207,21 +205,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

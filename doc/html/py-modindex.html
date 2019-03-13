@@ -4,6 +4,7 @@
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
+  <meta name="robots" content="noindex, nofollow" />
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -86,11 +87,12 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 
@@ -172,6 +174,11 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
+       <a href="bornagain.analysis.html#module-bornagain.analysis"><code class="xref">bornagain.analysis</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
        <a href="bornagain.detector.html#module-bornagain.detector"><code class="xref">bornagain.detector</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
@@ -182,22 +189,7 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="bornagain.external.cfelpyutils.html#module-bornagain.external.cfelpyutils"><code class="xref">bornagain.external.cfelpyutils</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="bornagain.external.cfelpyutils.crystfel_utils.html#module-bornagain.external.cfelpyutils.crystfel_utils"><code class="xref">bornagain.external.cfelpyutils.crystfel_utils</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="bornagain.external.cfelpyutils.geometry_utils.html#module-bornagain.external.cfelpyutils.geometry_utils"><code class="xref">bornagain.external.cfelpyutils.geometry_utils</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="bornagain.external.cfelpyutils.parameter_utils.html#module-bornagain.external.cfelpyutils.parameter_utils"><code class="xref">bornagain.external.cfelpyutils.parameter_utils</code></a></td><td>
+       <a href="bornagain.external.cheetah.html#module-bornagain.external.cheetah"><code class="xref">bornagain.external.cheetah</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -227,7 +219,12 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="bornagain.scatter.html#module-bornagain.scatter"><code class="xref">bornagain.scatter</code></a></td><td>
+       <a href="bornagain.fileio.html#module-bornagain.fileio"><code class="xref">bornagain.fileio</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="bornagain.fileio.getters.html#module-bornagain.fileio.getters"><code class="xref">bornagain.fileio.getters</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -252,12 +249,12 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="bornagain.simulate.mcsim.html#module-bornagain.simulate.mcsim"><code class="xref">bornagain.simulate.mcsim</code></a></td><td>
+       <a href="bornagain.simulate.form_factors.html#module-bornagain.simulate.form_factors"><code class="xref">bornagain.simulate.form_factors</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="bornagain.simulate.potato.html#module-bornagain.simulate.potato"><code class="xref">bornagain.simulate.potato</code></a></td><td>
+       <a href="bornagain.simulate.mcsim.html#module-bornagain.simulate.mcsim"><code class="xref">bornagain.simulate.mcsim</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -273,11 +270,6 @@
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="bornagain.simulate.solutions.html#module-bornagain.simulate.solutions"><code class="xref">bornagain.simulate.solutions</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="bornagain.simulate.thorn.html#module-bornagain.simulate.thorn"><code class="xref">bornagain.simulate.thorn</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -327,6 +319,16 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
+       <a href="bornagain.viewers.mplviews.html#module-bornagain.viewers.mplviews"><code class="xref">bornagain.viewers.mplviews</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="bornagain.viewers.mplviews.simpleview.html#module-bornagain.viewers.mplviews.simpleview"><code class="xref">bornagain.viewers.mplviews.simpleview</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
        <a href="bornagain.viewers.qtviews.html#module-bornagain.viewers.qtviews"><code class="xref">bornagain.viewers.qtviews</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
@@ -352,7 +354,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -371,21 +372,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

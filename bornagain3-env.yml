@@ -1,0 +1,20 @@
+name: bornagain3
+channels:
+  - conda-forge
+dependencies:
+  - python=3.6   # or 2.7
+  - pyqt=5       # or 4
+  - numpy
+  - scipy
+  - h5py
+  - matplotlib
+  - pyqtgraph
+  - pyopencl
+  - pyopengl
+  - future
+  - sphinx
+  - pytest
+  - numba
+  - pip:
+    - cfelpyutils
+    - sphinx_rtd_theme

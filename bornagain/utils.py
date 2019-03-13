@@ -1,12 +1,14 @@
 """
-Some utility functions that might be useful throughout bornagain.
-Don't put highly specialized functions here.
+Some utility functions that might be useful throughout bornagain.  Don't put highly specialized functions here.
 """
+
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from functools import wraps
 import sys
 import numpy as np
 from numpy import sin, cos
+import bornagain as ba
 
 # not sure where to seed
 np.random.seed()
@@ -14,8 +16,7 @@ np.random.seed()
 
 def vec_check2(vec, *args, **kwargs):
     r"""
-    Same as vec_check(vec, dimension=2).
-    See :func:`vec_check <bornagain.utils.vec_check>`
+    Same as vec_check(vec, dimension=2).  See :func:`vec_check <bornagain.utils.vec_check>`
     """
 
     return vec_check(vec, dimension=2, *args, **kwargs)
@@ -35,18 +36,17 @@ def vec_check(vec, hardcheck=False, dimension=3):
 
     Our assumptions are that:
         1) The array shape is Nxd, where d is the dimension of the vector, and
-           N is the number of vectors.
-           This is important when applying rotation operations to many vectors.
-        2) The array is c-contiguous.
-           This is important for passing arrays into external
-           c functions or to opencl kernels.
+           N is the number of vectors.  This is important when applying rotation
+           operations to many vectors.
+        2) The array is c-contiguous.  This is important for passing arrays into
+           external c functions or to opencl kernels.
 
-    The above also helps when we want to ensure that dot products
-    and broadcasting will work as expected.
+    The above also helps when we want to ensure that dot products and broadcasting
+    will work as expected.
 
     Note that we have chosen to keep vector components close in memory.  I.e.,
-    the x, y, and z components of a given vector are contiguous.
-    This will ensure that rotations and broadcasting are as fast as can be.
+    the x, y, and z components of a given vector are contiguous.  This will ensure
+    that rotations and broadcasting are as fast as can be.
 
     Input:
 
@@ -90,31 +90,127 @@ def vec_check(vec, hardcheck=False, dimension=3):
     return vec
 
 
-def vec_norm(V):
+def vec_norm(vec):
+    r"""
 
-    V = vec_check(V)
-    if V.ndim != 2:
+    Compute the normal vector, which has a length of one.
+
+    Args:
+        vec: input vector, usually of shape (3) of (N, 3)
+
+    Returns: new vector of length 1.
+
+    """
+
+    vec = vec_check(vec)
+    if vec.ndim != 2:
         raise ValueError("V must have one or two dimensions.")
-    n = np.sqrt(np.sum(V * V, axis=1))
-    return (V.T / n).T
+    vecnorm = np.sqrt(np.sum(vec * vec, axis=1))
+    return (vec.T / vecnorm).T
 
 
-def vec_mag(V):
+def vec_mag(vec):
+    r"""
 
-    V = vec_check(V)
-    if V.ndim != 2:
+    Compute the scalar magnitude sqrt(sum(x^2)) of an array of vectors, usually shape (N, 3)
+
+    Args:
+        vec: input vector or array of vectors
+
+    Returns: scalar vector magnitudes
+
+    """
+
+    vec = vec_check(vec)
+    if vec.ndim != 2:
         raise ValueError("V must have one or two dimensions.")
-    return np.sqrt(np.sum(V * V, axis=1))
+    return np.sqrt(np.sum(vec * vec, axis=1))
+
+
+def rotate(rot, vec):
+    r"""
+
+    This defines a consistent way to rotate vectors.  It is a wrapper that does a simple operation:
+
+    .. code-block:: python
+
+        return np.matmul(rot, vec.T).T
+
+    Note the bornagain package generally assumes that a set of N vectors of dimension D will be stored as a numpy array
+    of shape of N x D.
+
+    Args:
+        rot (numpy array): The rotation matrix.
+        vec (numpy array): The vector(s).  For N vectors of dimension D, this should be a NxD array.
+
+    Returns: numpy array of same shape as input vec
+
+    """
+
+    # return np.matmul(rot, vec)
+    return np.matmul(rot, vec.T).T
+
+
+def depreciate(message):
+    r"""
+
+    Utility for sending warnings when some class, method, function, etc. is depreciated.  By default, a message of the
+    form "WARNING: blah blah blah" will be printed with sys.stdout.write().  You get to choose the "blah blah blah" part
+    of the message, which is the input to this function.
+
+    The output can be silenced with the function bornagain.set_global('warn_depreciated', False), or you can force
+    an error to occur if you do bornagain.set_global('force_depreciated', True).
+
+    TODO: we need to formally raise a depreciated exception
+
+    Args:
+        message: whatever you want to have printed to the screen
+
+    Returns: nothing
+
+    """
+
+    if ba.get_global('force_depreciated') is True:
+        error(message)
+    elif ba.get_global('warn_depreciated') is True:
+        warn(message)
 
 
 def warn(message):
-    """ Simple warning message """
+    r"""
+
+    Standard way of sending a warning message.  As of now this simply results in a function call
+
+    sys.stdout.write("WARNING: %s\n" % message)
+
+    The purpose of this function is that folks can search for "WARNING:" to find all warning messages, e.g. with grep.
+
+
+    Args:
+        message: the message you want to have printed.
+
+    Returns: nothing
+
+    """
 
     sys.stdout.write("WARNING: %s\n" % message)
 
 
 def error(message):
-    """ Simple error message (to be replaced later...) """
+    r"""
+
+    Standard way of sending an error message.  As of now this simply results in a function call
+
+    sys.stdout.write("ERROR: %s\n" % message)
+
+    TODO: need to raise an exception intead of simply printing something...
+
+
+    Args:
+        message: the message you want to have printed.
+
+    Returns: nothing
+    """
 
     sys.stderr.write("ERROR: %s\n" % message)
 
@@ -221,15 +317,14 @@ def error(message):
 
 
 def random_rotation(deflection=1.0, randnums=None):
-    """
+    r"""
     Creates a random rotation matrix.
 
-    deflection: the magnitude of the rotation.
-    For 0, no rotation; for 1, competely random rotation.
-    Small deflection => small perturbation.
-    randnums: 3 random numbers in the range [0, 1].
-    If `None`, they will be auto-generated.
+    deflection: the magnitude of the rotation. For 0, no rotation; for 1, competely random
+    rotation. Small deflection => small perturbation.
+    randnums: 3 random numbers in the range [0, 1]. If `None`, they will be auto-generated.
     """
+
     # from
     # http://www.realtimerendering.com/resources/GraphicsGems/gemsiii/rand_rotation.c
     if randnums is None:
@@ -285,11 +380,10 @@ def rotation_about_axis(theta, u):
 def random_beam_vector(div_fwhm):
     """
     A random vector for emulating beam divergence.
-    Generates a random normal vector that is nominally
-    along the [0,0,1] direction but with a random rotation along the [1,0,0]
-    axis with given FWHM (Gaussian distributed and centered about zero)
-    followed by a random rotation about the  [0,0,1] axis with
-    uniform distribution in the interval [0,2*pi).
+    Generates a random normal vector that is nominally along the [0,0,1] direction
+    but with a random rotation along the [1,0,0] axis with given FWHM (Gaussian
+    distributed and centered about zero) followed by a random rotation about the
+    [0,0,1] axis with uniform distribution in the interval [0,2*pi).
 
     :param div_fwhm:
     :return:
@@ -317,10 +411,9 @@ def random_beam_vector(div_fwhm):
 
 def random_mosaic_rotation(mosaicity_fwhm):
     """
-    Attempt to generate a random orientation for a crystal mosaic domain.
-    This is a hack. We take the matrix product of three rotations,
-    each of the same FWHM, about the three orthogonal axes.
-    The order of this product is a random permutation.
+    Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.
+    We take the matrix product of three rotations, each of the same FWHM, about the three
+    orthogonal axis.  The order of this product is a random permutation.
 
     :param mosaicity_fwhm:
     :return:
@@ -330,18 +423,15 @@ def random_mosaic_rotation(mosaicity_fwhm):
         return np.eye(3)
 
     Rs = []
-    Rs.append(rotation_about_axis(np.random.normal(
-        0, mosaicity_fwhm / 2.354820045, [1])[0], [1.0, 0, 0]))
-    Rs.append(rotation_about_axis(np.random.normal(
-        0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 1.0, 0]))
-    Rs.append(rotation_about_axis(np.random.normal(
-        0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
+    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [1.0, 0, 0]))
+    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 1.0, 0]))
+    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
     rind = np.random.permutation([0, 1, 2])
     return Rs[rind[0]].dot(Rs[rind[1]].dot(Rs[rind[2]]))
 
 
 def memoize(function):
-    """
+    r"""
     This is a function decorator for caching results from a function, to avoid
     excessive computation or reading from disk.  Search the web for more
     details of how this works.
@@ -351,10 +441,12 @@ def memoize(function):
 
     @wraps(function)
     def wrapper(*args):
+
         if args in memo:
             return memo[args]
-        else:
-            rv = function(*args)
-            memo[args] = rv
-            return rv
+
+        rv = function(*args)
+        memo[args] = rv
+        return rv
+
     return wrapper

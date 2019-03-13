@@ -10,7 +10,7 @@ where you are doing your analysis or simulations so that you can reproduce them 
 code alongside results is good practice anyways.
 
 If the bornagain package directory is not in your working directory, you might need to add bornagain to your python path
- by doing something like this:
+by doing something like this:
 
 .. code-block:: python
 
@@ -33,9 +33,29 @@ If you use a symbolic link as above, you can simply add an import statement in y
 Dependencies
 ------------
 
+The current dependencies of bornagain are:
+
+* h5py
+* numpy
+* scipy
+* matplotlib
+* ipython
+* pytest
+* sphinx
+* pyqtgraph
+* pyopencl
+* pyopengl
+* future
+* numba
+* cfelpyutils
+
+You can use bornagain with only a subset of of the above dependencies (e.g. skip pyopencl if you don't want to simulate,
+and skip sphinx if you won't be modifying the documentation, skip pyqtgraph if you won't use those GUIs, etc.),
+but it's usually not difficult to install all of them for completeness.
+
 We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
-compatibility with both pyqt4 and pyqt5 (which is proving to be somewhat difficult...).
-If you're deciding on which version to use, here are a couple things to consider:
+compatibility with both pyqt4 and pyqt5 (which is proving to be somewhat difficult...). If you're deciding on which
+version to use, here are a couple things to consider:
 
 - At the time of this writing, the LCLS psana module requires Python 2.7.
 - It doesn't appear to be easy to install both pyqt4 and pyqt5 in the same Python installation
@@ -43,40 +63,69 @@ If you're deciding on which version to use, here are a couple things to consider
 
 It's hard to say what's best for you, but hopefully things work no matter what versions of software you use.
 
-Example setup with Python 3
----------------------------
+Example setup
+-------------
 
-Supposing we want python 3 and pyqt4, we can use go with Python 3.6 installed via
-`Miniconda <https://conda.io/miniconda.html>`_.
+`Miniconda <https://conda.io/miniconda.html>`_ is a reliable and lightweight distribution of python.  The
+`Conda <https://conda.io/docs/>`_ package manager that comes with it makes it fast and easy to set up Python.  You might
+consider making a `conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_ to check that
+everything works well, since packages like opengl, opencl, pyqt seem to have complicated, and occasionally conflicting
+requirments.
 
-The best thing to do is probably to make a new
-`conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_  like this:
+Assuming that you've installed conda, here's an example of how to set up a new conda environment:
 
 .. code-block:: bash
 
-  conda create -n bornagain34 -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image matplotlib ipython pytest \
-  sphinx pyqtgraph pyopencl pyopengl
+  conda create -n bornagain -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image \
+  matplotlib ipython pytest sphinx pyqtgraph pyopencl pyopengl future
 
-The only downside to the conda environment is that you need to remember to activate that environment every time you use
+The only downside to the conda environment is that you need to remember to activate the environment every time you use
 bornagain, like this:
 
 .. code-block:: bash
 
-    source activate bornagain34
+    source activate bornagain
 
-If you don't want to use a conda environment you can just install the modules you need in the default environment:
-
-.. code-block:: bash
-
- conda install -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image matplotlib ipython pytest \
-  sphinx pyqtgraph pyopencl pyopengl
-
-In order to check if the installation worked, run the following:
+Note that cfelpyutils currently requires that you use pip to install.  It can be installed (after activating your
+environment) as follows:
 
 .. code-block:: bash
 
-    cd /path/to/bornagain/test
-    pytest    
+    pip install cfelpyutils
+
+An even easier way to setup your environment is to use the provided environmen files:
+
+.. code-block:: bash
+
+    conda env create -f bornagain3-env.yml
+    conda activate bornagain3
+
+If you don't want to use a conda environment you can just install the modules in the current environment.  For example:
+
+.. code-block:: bash
+
+  conda install -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image matplotlib ipython pytest \
+  sphinx pyqtgraph pyopencl pyopengl future
+  pip instlall cfelpyutils
+
+You can check if you've got all the dependencies sorted out by running the following:
+
+.. code-block:: bash
+
+    cd bornagain/test
+    pytest
+
+You can uninstall a conda environment as follows:
+
+.. code-block:: bash
+
+    conda env remove -n bornagain3
+
+
+Possible installation issues
+----------------------------
+
+**OpenCL**
 
 If you get a runtime error involving :code:`pyopencl.cffi_cl.LogicError: clGetPlatformIDs failed:` it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple as doing the following:
 
@@ -86,33 +135,11 @@ If you get a runtime error involving :code:`pyopencl.cffi_cl.LogicError: clGetPl
 
 For any further issues with pyopencl, there are some helpful notes `here <https://documen.tician.de/pyopencl/misc.html>`_.
 
-Python 2
---------
 
-There was past success with the `Anaconda <https://anaconda.org>`_ Python 2.7 distribution.  The following usually works:
+**Scientific Linux 6**
 
-.. code-block:: bash
-
-	conda install h5py                     # Optional for file writing
-	conda install pyqt=4                   # Optional for viewing
-	conda install pyqtgraph                # Optional for viewing
-	conda install -c conda-forge pyopencl  # Optional for simulations
-	conda install sphinx                   # Optional for building documentation
-
-Notably, pyqtgraph seems not to work well with pyqt5, so you will need to force pyqt4 as in the above.  It is probably most reasonable to create an environment for bornagain:
-
-.. code-block:: bash
-
-	conda create --name bornagain
-	source activate bornagain
-
-The above will be fine if you wish to use bornagain in isolation.
-
-
-Installation on Scientific Linux 6
-----------------------------------
-
-To install `pyopencl` on SL6 I found it necessary to download the pyopencl-2016.2.1 source, and then from within the directory I did something along these lines:
+To install `pyopencl` on SL6 I found it necessary to download the pyopencl-201X.X.X source, and then from within the
+directory I did something along these lines:
 
 .. code-block:: bash
 
@@ -121,4 +148,3 @@ To install `pyopencl` on SL6 I found it necessary to download the pyopencl-2016.
     scl enable devtoolset-2 bash
     ./configure.py --cl-inc-dir=/usr/local/cuda/include --cl-lib-dir=/usr/local/cuda/lib64
     make install
-

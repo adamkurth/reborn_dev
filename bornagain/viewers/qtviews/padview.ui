@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>855</height>
+    <height>806</height>
    </rect>
   </property>
   <property name="cursor">
@@ -18,7 +18,16 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <property name="spacing">
@@ -87,25 +96,60 @@
      </widget>
      <addaction name="menuLysozyme"/>
     </widget>
-    <addaction name="actionTest"/>
+    <addaction name="actionOpen_data_file"/>
     <addaction name="menuSimulate"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionPanel_IDs"/>
-    <addaction name="actionGrid"/>
-    <addaction name="actionRings"/>
-    <addaction name="actionBeam_position"/>
+    <widget class="QMenu" name="menuViewPeaks">
+     <property name="title">
+      <string>Peaks</string>
+     </property>
+     <addaction name="actionPeaksVisible"/>
+     <addaction name="actionFind_peaks"/>
+    </widget>
+    <widget class="QMenu" name="menuMask">
+     <property name="title">
+      <string>Mask</string>
+     </property>
+     <addaction name="actionMaskVisible"/>
+     <addaction name="actionMask_panel_edges"/>
+     <addaction name="actionRectangleROIVisible"/>
+     <addaction name="actionSave_Masks"/>
+     <addaction name="actionLoad_Masks"/>
+    </widget>
+    <widget class="QMenu" name="menuCustomFilters">
+     <property name="title">
+      <string>Filters</string>
+     </property>
+     <addaction name="actionLocal_SNR"/>
+    </widget>
+    <widget class="QMenu" name="menuGeometry">
+     <property name="title">
+      <string>Geometry</string>
+     </property>
+     <addaction name="actionRings"/>
+     <addaction name="actionBeam_position"/>
+     <addaction name="actionGrid"/>
+     <addaction name="actionPanel_IDs"/>
+     <addaction name="actionShow_scan_directions"/>
+     <addaction name="actionLoad_geometry"/>
+     <addaction name="actionSave_geometry"/>
+    </widget>
+    <addaction name="menuViewPeaks"/>
+    <addaction name="menuMask"/>
+    <addaction name="menuCustomFilters"/>
+    <addaction name="menuGeometry"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionTest">
+  <action name="actionOpen_data_file">
    <property name="text">
-    <string>Open</string>
+    <string>Open data file...</string>
    </property>
   </action>
   <action name="actionShow">
@@ -138,25 +182,124 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Panel IDs</string>
+    <string>Show panel names</string>
    </property>
   </action>
   <action name="actionGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Grid</string>
+    <string>Show grid</string>
    </property>
    <property name="toolTip">
     <string>Overlay grid</string>
    </property>
   </action>
   <action name="actionRings">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Rings</string>
+    <string>Show rings...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionBeam_position">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Beam position</string>
+    <string>Show beam position</string>
+   </property>
+  </action>
+  <action name="actionRectangleROIVisible">
+   <property name="text">
+    <string>Mask rectangle</string>
+   </property>
+  </action>
+  <action name="actionMaskVisible">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Visible</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionPeaksVisible">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Visible</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionCustomFilter">
+   <property name="text">
+    <string>Apply Custom</string>
+   </property>
+  </action>
+  <action name="actionLocal_SNR">
+   <property name="text">
+    <string>Local SNR</string>
+   </property>
+  </action>
+  <action name="actionSave_Masks">
+   <property name="text">
+    <string>Save Mask...</string>
+   </property>
+  </action>
+  <action name="actionLoad_Masks">
+   <property name="text">
+    <string>Load Mask...</string>
+   </property>
+  </action>
+  <action name="actionLoad_geometry">
+   <property name="text">
+    <string>Load geometry...</string>
+   </property>
+  </action>
+  <action name="actionSave_geometry">
+   <property name="text">
+    <string>Save geometry...</string>
+   </property>
+  </action>
+  <action name="actionShow_scan_directions">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show scan directions</string>
+   </property>
+  </action>
+  <action name="actionMask_panel_edges">
+   <property name="text">
+    <string>Mask panel edges...</string>
+   </property>
+  </action>
+  <action name="actionFind_peaks">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Find peaks</string>
    </property>
   </action>
  </widget>

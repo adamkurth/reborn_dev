@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.VerticalLabel module
-===================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.VerticalLabel
-    :members:
-    :undoc-members:
-    :show-inheritance:

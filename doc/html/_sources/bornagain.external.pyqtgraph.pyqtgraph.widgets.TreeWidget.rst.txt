@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.TreeWidget module
-================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.TreeWidget
-    :members:
-    :undoc-members:
-    :show-inheritance:

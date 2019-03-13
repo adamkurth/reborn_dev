@@ -1,0 +1,7 @@
+bornagain.analysis.peaks module
+===============================
+
+.. automodule:: bornagain.analysis.peaks
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -4,43 +4,58 @@ import sys
 sys.path.append('../..')
 
 from bornagain import simulate
+import bornagain as ba
+ba.set_global('debug', 0)
 from bornagain.simulate import examples
 from bornagain.viewers.qtviews import PADView
 from bornagain import detector
+from bornagain.fileio.getters import FrameGetter
 import numpy as np
 import pyqtgraph as pg
 
 pads = examples.cspad_pads()
 # pads = examples.pnccd_pads()
+
 for pad in pads:
     pad.t_vec.flat[2] = 0.3
-
-
-# pad = detector.PADGeometry()
-# n = 4000
-# pad.simple_setup(n, 30e-6, 0.5)
-# pads = [pad]
-# geom = pads
-# I = [np.random.rand(n, n)]
 
 sim = examples.lysozyme_molecule(pads=pads)
 
 
+class MyFrameGetter(FrameGetter):
 
-geom = sim['pad_geometry']
-I = sim['intensity']
+    def __init__(self, pads):
+
+        FrameGetter.__init__(self)
+
+        self.n_frames = 1
+        self.current_frame = 0
+
+        self.pads = pads
+        self.simulator = examples.PDBMoleculeSimulator(pdb_file=None, pads=pads, wavelength=None, random_rotation=True)
+
+    def get_frame(self, frame_number=0):
+
+        self.current_frame = frame_number
+
+        I = np.double(self.simulator.next())
+        tot = np.sum(I.ravel())
+        I = I*(1e6/tot)
+        I = np.random.poisson(I)
+        I += 1
+        I = detector.split_pad_data(pads, I)
+
+        dat = {'pad_data': I}
+
+        return dat
 
 
-I = np.ravel(I)
-tot = np.sum(I)
-I *= 100000/tot
-I = np.random.poisson(I) + 1
-I = detector.split_pad_data(geom, I)
+frame_getter = MyFrameGetter(pads)
 
+pad_data = frame_getter.get_next_frame()['pad_data']
 
-# I = [np.random.poisson(d*1e-5) + 1 for d in I]
-# I = [np.log10(d) for d in I]
-padgui = PADView(pad_data=I, pad_geometry=geom, logscale=True)
+padgui = PADView(pad_data=pad_data, pad_geometry=pads, logscale=True)
+padgui.frame_getter = frame_getter
 padgui.show_all_geom_info()
 # padgui.show_pad_frames()
 # x = (np.random.rand(1000, 2)-0.5)*1000
@@ -51,50 +66,3 @@ padgui.show_all_geom_info()
 # padgui.add_rings([200, 400, 600, 800], pens=[pg.mkPen([255, 0, 0], width=2)]*4)
 
 padgui.start()
-
-
-
-
-
-
-
-
-# pads = []
-#
-# pad = detector.PADGeometry()
-# pad.simple_setup(pixel_size=100e-6, distance=0.1)
-# pads.append(pad)
-#
-# pad = detector.PADGeometry()
-# pad.simple_setup(pixel_size=100e-6, distance=0.1)
-# ang = 20*np.pi/180.
-# R = np.array([[np.cos(ang), np.sin(ang), 0],[-np.sin(ang), np.cos(ang), 0],[0, 0, 1]])
-# f = pad.fs_vec.copy()
-# s = pad.ss_vec.copy()
-# pad.fs_vec = np.dot(f, R)
-# pad.ss_vec = np.dot(s, R)
-# t = pad.t_vec.copy().ravel()
-# t[0] += 0.04
-# t[1] += 0.08
-# pad.t_vec = t
-# pads.append(pad)
-#
-# if True:
-#     pad = detector.PADGeometry()
-#     pad.simple_setup(pixel_size=100e-6, distance=0.1)
-#     ang = 30 * np.pi / 180.
-#     R = np.array([[np.cos(ang), np.sin(ang), 0], [-np.sin(ang), np.cos(ang), 0], [0, 0, 1]])
-#     f = pad.fs_vec.copy()
-#     s = pad.ss_vec.copy()
-#     f = np.dot(f, R).ravel()
-#     s = np.dot(s, R).ravel()
-#     f[1] *= -1
-#     s[1] *= -1
-#     pad.fs_vec = f
-#     pad.ss_vec = s
-#     t = pad.t_vec.copy().ravel()
-#     t[0] += 0.04
-#     t[1] += 0.08
-#     t[1] *= -1
-#     pad.t_vec = t
-#     pads.append(pad)

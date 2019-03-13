@@ -1,0 +1,21 @@
+name: bornagain2
+channels:
+  - conda-forge
+dependencies:
+  - python=2.7
+  - pyqt=4
+  - numpy
+  - scipy
+  - h5py
+  - matplotlib
+  - pyqtgraph
+  - pyopencl
+  - pyopengl
+  - future
+  - sphinx
+  - pytest
+  - numba
+  - make
+  - pip:
+    - cfelpyutils
+    - sphinx_rtd_theme

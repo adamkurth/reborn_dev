@@ -4,6 +4,7 @@
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
+  <meta name="robots" content="noindex, nofollow" />
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -84,18 +85,20 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#what-s-in-bornagain">What&#8217;s in bornagain?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#i-don-t-know-anything-about-programming">I don&#8217;t know anything about programming...</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#before-you-get-started">Before you get started...</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-in-bornagain">What’s in bornagain?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#i-don-t-know-anything-about-programming">I don’t know anything about programming…</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#before-you-start-using-bornagain">Before you start using bornagain</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#if-you-plan-to-develop-bornagain">If you plan to develop bornagain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 
@@ -163,46 +166,72 @@
             
   <div class="section" id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="what-s-in-bornagain">
-<h2>What&#8217;s in bornagain?<a class="headerlink" href="#what-s-in-bornagain" title="Permalink to this headline">¶</a></h2>
-<p>In a nutshell, the basic elements of the bornagain package consist of:</p>
+<p>The bornagain Python package is meant to be used for the simulation and analysis of
+x-ray diffraction under the Born approximation.  It is not the first attempt to create
+such a package, hence the name.</p>
+<p>It turns out that there is another Python package called “<a class="reference external" href="www.bornagainproject.org">BornAgain</a>”… and it is for
+simulating diffraction under the Born approximation.  Since they were first (and their software looks really impressive)
+this package will probably be re-named…</p>
+<p>Since bornagain is under continuous development, there might still be some large changes to the API in the near future.</p>
+<p>There are lots of other Python packages that provide utilities that overlap with bornagain:</p>
 <ul class="simple">
-<li>Source classes for describing incident x-ray beams.</li>
-<li>Detector classes for specifying detector geometry.</li>
-<li>Target classes that describe objects that we shoot with x-rays.</li>
+<li>DIALS</li>
+<li>cctbx</li>
+<li>psgeom</li>
+<li>poppy</li>
+<li>xrayutilities</li>
+<li>xraylib</li>
+<li>and so on</li>
+</ul>
+<div class="section" id="what-s-in-bornagain">
+<h2>What’s in bornagain?<a class="headerlink" href="#what-s-in-bornagain" title="Permalink to this headline">¶</a></h2>
+<p>For clarity, bornagain is not a “program” - in order to use it you must write Python code.  In a nutshell, the basic
+elements of the bornagain package are:</p>
+<ul class="simple">
+<li>Classes for describing incident x-ray beams.</li>
+<li>Classes for describing detector geometries.</li>
+<li>Classes for describing objects that we shoot with x-rays.</li>
 <li>GPU-based simulation utilities.</li>
 </ul>
 <p>In the future, we will add a few more utilities to bornagain:</p>
 <ul class="simple">
-<li>Tools for dealing with reading/writing of a few file formats.</li>
-<li>Tools displaying diffraction data.</li>
+<li>Tools for reading/writing a few file formats.</li>
+<li>Tools for displaying diffraction data.</li>
 <li>Analysis algorithms.</li>
 </ul>
 </div>
 <div class="section" id="i-don-t-know-anything-about-programming">
-<h2>I don&#8217;t know anything about programming...<a class="headerlink" href="#i-don-t-know-anything-about-programming" title="Permalink to this headline">¶</a></h2>
-<p>If you are new to programming, read the following:</p>
+<h2>I don’t know anything about programming…<a class="headerlink" href="#i-don-t-know-anything-about-programming" title="Permalink to this headline">¶</a></h2>
+<p>If you are new to programming, you should first:</p>
 <ul class="simple">
-<li>In order to make good use of bornagain, you must learn the <a class="reference external" href="https://www.python.org/">Python</a> language.  You probably also need to learn the basics of object-oriented programming.</li>
-<li>There are some example scripts to help you get started.  Look in the bornagain/examples directory.</li>
-<li><a class="reference external" href="https://ipython.org/">iPython</a> (and its <a class="reference external" href="https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion">tab-completion feature</a> is a good way to explore bornagain.</li>
-<li>The <a class="reference external" href="http://www.numpy.org/#">numpy</a> package is central to bornagain.  You must learn to use numpy along with the basic principles of <a class="reference external" href="https://en.wikipedia.org/wiki/Array_programming">array programming</a>.</li>
+<li>Learn to program in the <a class="reference external" href="https://www.python.org/">Python</a> language,</li>
+<li>Learn the basics of object-oriented programming,</li>
+<li>Master the use of the <a class="reference external" href="http://www.numpy.org/#">numpy</a> package.</li>
 </ul>
+<p>There are some example scripts in the bornagain/examples directory that might help you get started. You should
+tinker with those scripts using <a class="reference external" href="https://ipython.org/">iPython</a> and its
+<a class="reference external" href="https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion">tab-completion feature</a>.</p>
 </div>
-<div class="section" id="before-you-get-started">
-<h2>Before you get started...<a class="headerlink" href="#before-you-get-started" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="before-you-start-using-bornagain">
+<h2>Before you start using bornagain<a class="headerlink" href="#before-you-start-using-bornagain" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>The Python language is the interface to bornagin.  It&#8217;s very readable if you <a class="reference external" href="https://www.python.org/dev/peps/pep-0020/">try</a> to make it so.</li>
-<li>All units in bornagain are SI, for simplicity.  Angles are radians.</li>
-<li>We must be consistent in the way that we specify vectors using numpy arrays.  Same goes for rotation matrices.  We therefore have utilities like vec_check() and rotate_vecs() to make sure we shape arrays consistently and operate on vectors in a consistent way.  Use these utilities.</li>
-<li>We never hard-code the direction the x-ray beam.  You specify the direction that <em>you</em> want.</li>
-<li>We adhere to <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/?">PEP8</a> Python style guide.</li>
 <li>If documentation is missing or confusing, please fix it or tell someone who can.</li>
+<li><em>All</em> units in bornagain are SI.  Angles are radians.  No exceptions.</li>
+<li>There is no special x-ray beam direction.  <em>You</em> get to choose the direction of the x-ray beam.</li>
+<li>We must be consistent in the way that we specify vectors and rotation matrices using numpy arrays.  There are
+utilities to ensure consistency.</li>
 </ul>
 </div>
 <div class="section" id="if-you-plan-to-develop-bornagain">
 <h2>If you plan to develop bornagain<a class="headerlink" href="#if-you-plan-to-develop-bornagain" title="Permalink to this headline">¶</a></h2>
-<p>See the page for developers.</p>
+<p>See the page for developers <a class="reference internal" href="coding.html#developers-anchor"><span class="std std-ref">Notes for Developers</span></a>.  We aim to keep things reasonably consistent.</p>
+</div>
+<div class="section" id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<p>There are numerous contributions to bornagain made by Derek Mendez, Rick Hewitt, and Cameron Howard.</p>
+<p>Code found in bornagain has been inspired by numerous open-source software packages such as Thor, psana, OnDA, CrystFEL,
+Cheetah, cctbx.  In some cases, code has been copied or paraphrased from other open-source Python modules such as spglib
+and cfelpyutils.</p>
 </div>
 </div>
 
@@ -226,7 +255,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -245,21 +273,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GraphicsWidgetAnchor module
-================================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.graphicsItems.GraphicsWidgetAnchor
-    :members:
-    :undoc-members:
-    :show-inheritance:

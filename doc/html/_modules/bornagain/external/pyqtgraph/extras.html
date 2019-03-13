@@ -83,11 +83,12 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">bornagain</a></li>
 </ul>
 
@@ -154,13 +155,16 @@
            <div itemprop="articleBody">
             
   <h1>Source code for bornagain.external.pyqtgraph.extras</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">weakref</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">weakref</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
 
 
 <div class="viewcode-block" id="keep_open"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.keep_open">[docs]</a><span class="k">def</span> <span class="nf">keep_open</span><span class="p">():</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple helper that keeps qtgraph window open when you run a script from the terminal.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -169,7 +173,7 @@
 
 <div class="viewcode-block" id="MultiHistogramLUTWidget"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget">[docs]</a><span class="k">class</span> <span class="nc">MultiHistogramLUTWidget</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">GraphicsView</span><span class="p">):</span>
 
-    <span class="sd">r&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is the equivalent of :class:`pyqtgraph.HistogramLUTWidget`, but wraps</span>
 <span class="sd">    :class:`MultiHistogramLUTWidget &lt;bornagain.external.pyqtgraph.MultiHistogramLUTItem&gt;` instead of</span>
 <span class="sd">    :class:`pyqtgraph.HistogramLUTItem`.</span>
@@ -177,20 +181,15 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
         <span class="n">background</span> <span class="o">=</span> <span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">)</span>
-        <span class="n">pg</span><span class="o">.</span><span class="n">GraphicsView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">parent</span><span class="p">,</span>
-            <span class="n">useOpenGL</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">background</span><span class="o">=</span><span class="n">background</span><span class="p">)</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">GraphicsView</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">useOpenGL</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="n">background</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">MultiHistogramLUTItem</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setCentralItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span>
-            <span class="n">pg</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">,</span>
-            <span class="n">pg</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">,</span> <span class="n">pg</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">95</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MultiHistogramLUTWidget.sizeHint"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Undocumented pyqtgraph method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -202,7 +201,7 @@
 
 <div class="viewcode-block" id="MultiHistogramLUTItem"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem">[docs]</a><span class="k">class</span> <span class="nc">MultiHistogramLUTItem</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">HistogramLUTItem</span><span class="p">):</span>
 
-    <span class="sd">r&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a bornagain extension to the :class:`pyqtgraph.HistogramLUTItem` that allows control</span>
 <span class="sd">    over multiple images. The main feature is the</span>
 <span class="sd">    addition of the :func:`setImageItems` method.</span>
@@ -233,15 +232,18 @@
 <span class="sd">        set of levels is drawn for each channel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Undocumented pyqtgraph method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">pg</span><span class="o">.</span><span class="n">HistogramLUTItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">HistogramLUTItem</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="MultiHistogramLUTItem.setImageItems"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setImageItems">[docs]</a>    <span class="k">def</span> <span class="nf">setImageItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imgs</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set a list of :class:`pyqtgraph.ImageItem` instances that will have their levels</span>
 <span class="sd">        and LUT automatically controlled by this HistogramLUTItem.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -250,13 +252,12 @@
         <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
             <span class="n">img</span><span class="o">.</span><span class="n">sigImageChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imageChanged</span><span class="p">)</span>
-            <span class="c1"># send function pointer, not the result</span>
-            <span class="n">img</span><span class="o">.</span><span class="n">setLookupTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLookupTable</span><span class="p">)</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">setLookupTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLookupTable</span><span class="p">)</span>  <span class="c1">## send function pointer, not the result</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">phonyarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">([</span><span class="n">im</span><span class="o">.</span><span class="n">image</span> <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">])</span>
         <span class="n">phonyarray</span> <span class="o">=</span> <span class="n">phonyarray</span><span class="p">[</span><span class="mi">0</span><span class="p">:(</span><span class="nb">len</span><span class="p">(</span><span class="n">phonyarray</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">phonyarray</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">))]</span>
-        <span class="n">phonyarray</span> <span class="o">=</span> <span class="n">phonyarray</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">phonyarray</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)])</span>
+        <span class="n">phonyarray</span> <span class="o">=</span> <span class="n">phonyarray</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">phonyarray</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">imageItemStrong</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">ImageItem</span><span class="p">(</span><span class="n">phonyarray</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imageItemStrong</span><span class="p">)</span>  <span class="c1"># TODO: fix this up</span>
@@ -264,7 +265,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">imageChanged</span><span class="p">(</span><span class="n">autoLevel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MultiHistogramLUTItem.gradientChanged"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.gradientChanged">[docs]</a>    <span class="k">def</span> <span class="nf">gradientChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Undocumented pyqtgraph method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -274,14 +276,14 @@
                     <span class="n">im</span><span class="o">.</span><span class="n">setLookupTable</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># lambda x: x.astype(np.uint8))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItems</span><span class="p">:</span>
-                    <span class="c1"># send function pointer, not the result</span>
-                    <span class="n">im</span><span class="o">.</span><span class="n">setLookupTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLookupTable</span><span class="p">)</span>
+                    <span class="n">im</span><span class="o">.</span><span class="n">setLookupTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLookupTable</span><span class="p">)</span>  <span class="c1">## send function pointer, not the result</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lut</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigLookupTableChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MultiHistogramLUTItem.regionChanged"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">regionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Undocumented pyqtgraph method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -292,7 +294,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sigLevelChangeFinished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MultiHistogramLUTItem.regionChanging"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanging">[docs]</a>    <span class="k">def</span> <span class="nf">regionChanging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Undocumented pyqtgraph method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageItem</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -303,7 +306,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="MultiHistogramLUTItem.setLevelMode"><a class="viewcode-back" href="../../../../bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.setLevelMode">[docs]</a>    <span class="k">def</span> <span class="nf">setLevelMode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the method of controlling the image levels offered to the user.</span>
 <span class="sd">        Options are &#39;mono&#39; or &#39;rgba&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -346,7 +350,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -365,21 +368,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

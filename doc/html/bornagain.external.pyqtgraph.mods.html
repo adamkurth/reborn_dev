@@ -4,6 +4,7 @@
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
+  <meta name="robots" content="noindex, nofollow" />
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +29,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.external.crystfel module" href="bornagain.external.crystfel.html" />
+    <link rel="next" title="bornagain.external.cheetah module" href="bornagain.external.cheetah.html" />
     <link rel="prev" title="bornagain.external.pyqtgraph.extras module" href="bornagain.external.pyqtgraph.extras.html" /> 
 
   
@@ -85,15 +86,18 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
@@ -181,17 +185,17 @@
 <dl class="class">
 <dt id="bornagain.external.pyqtgraph.mods.ImageItem">
 <em class="property">class </em><code class="descclassname">bornagain.external.pyqtgraph.mods.</code><code class="descname">ImageItem</code><span class="sig-paren">(</span><em>image=None</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.graphicsItems.GraphicsObject.GraphicsObject</span></code></p>
-<p><strong>Bases:</strong> <code class="xref py py-class docutils literal"><span class="pre">GraphicsObject</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.graphicsItems.GraphicsObject.GraphicsObject</span></code></p>
+<p><strong>Bases:</strong> <code class="xref py py-class docutils literal notranslate"><span class="pre">GraphicsObject</span></code></p>
 <p>GraphicsObject displaying an image. Optimized for rapid update (ie video display).
 This item displays either a 2D numpy array (height, width) or
 a 3D array (height, width, RGBa). This array is optionally scaled (see
-<code class="xref py py-func docutils literal"><span class="pre">setLevels</span></code>) and/or colored
-with a lookup table (see <code class="xref py py-func docutils literal"><span class="pre">setLookupTable</span></code>)
+<code class="xref py py-func docutils literal notranslate"><span class="pre">setLevels</span></code>) and/or colored
+with a lookup table (see <code class="xref py py-func docutils literal notranslate"><span class="pre">setLookupTable</span></code>)
 before being displayed.</p>
 <p>ImageItem is frequently used in conjunction with
-<code class="xref py py-class docutils literal"><span class="pre">HistogramLUTItem</span></code> or
-<code class="xref py py-class docutils literal"><span class="pre">HistogramLUTWidget</span></code> to provide a GUI
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramLUTItem</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramLUTWidget</span></code> to provide a GUI
 for controlling the levels and lookup table used to display the image.</p>
 <dl class="attribute">
 <dt id="bornagain.external.pyqtgraph.mods.ImageItem.sigImageChanged">
@@ -215,7 +219,7 @@ in the Qt documentation). This is useful when overlaying multiple ImageItems.</p
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><strong>Most common arguments:</strong></td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-even"><td>QtGui.QPainter.CompositionMode_SourceOver</td>
 <td>Default; image replaces the background if it
@@ -254,7 +258,7 @@ are added together.</td>
 
 <dl class="method">
 <dt id="bornagain.external.pyqtgraph.mods.ImageItem.boundingRect">
-<code class="descname">boundingRect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem.boundingRect" title="Permalink to this definition">¶</a></dt>
+<code class="descname">boundingRect</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span> &#x2192; QRectF<a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem.boundingRect" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -265,7 +269,7 @@ are added together.</td>
 <li>[blackLevel, whiteLevel]</li>
 <li>[[minRed, maxRed], [minGreen, maxGreen], [minBlue, maxBlue]]</li>
 </ul>
-<p>Only the first format is compatible with lookup tables. See <code class="xref py py-func docutils literal"><span class="pre">makeARGB</span></code>
+<p>Only the first format is compatible with lookup tables. See <code class="xref py py-func docutils literal notranslate"><span class="pre">makeARGB</span></code>
 for more details on how levels are applied.</p>
 </dd></dl>
 
@@ -278,11 +282,11 @@ for more details on how levels are applied.</p>
 <dt id="bornagain.external.pyqtgraph.mods.ImageItem.setLookupTable">
 <code class="descname">setLookupTable</code><span class="sig-paren">(</span><em>lut</em>, <em>update=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem.setLookupTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem.setLookupTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the lookup table (numpy array) to use for this image. (see
-<code class="xref py py-func docutils literal"><span class="pre">makeARGB</span></code> for more information on how this is used).
+<code class="xref py py-func docutils literal notranslate"><span class="pre">makeARGB</span></code> for more information on how this is used).
 Optionally, lut can be a callable that accepts the current image as an
 argument and returns the lookup table to use.</p>
-<p>Ordinarily, this table is supplied by a <code class="xref py py-class docutils literal"><span class="pre">HistogramLUTItem</span></code>
-or <code class="xref py py-class docutils literal"><span class="pre">GradientEditorItem</span></code>.</p>
+<p>Ordinarily, this table is supplied by a <code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramLUTItem</span></code>
+or <code class="xref py py-class docutils literal notranslate"><span class="pre">GradientEditorItem</span></code>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -312,7 +316,7 @@ or <code class="xref py py-class docutils literal"><span class="pre">GradientEdi
 <dt id="bornagain.external.pyqtgraph.mods.ImageItem.setImage">
 <code class="descname">setImage</code><span class="sig-paren">(</span><em>image=None</em>, <em>autoLevels=None</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem.setImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem.setImage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the image displayed by this item. For more information on how the image
-is processed before displaying, see <code class="xref py py-func docutils literal"><span class="pre">makeARGB</span></code></p>
+is processed before displaying, see <code class="xref py py-func docutils literal notranslate"><span class="pre">makeARGB</span></code></p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="18%" />
@@ -320,7 +324,7 @@ is processed before displaying, see <code class="xref py py-func docutils litera
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><strong>Arguments:</strong></td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-even"><td>image</td>
 <td>(numpy array) Specifies the image data. May be 2D (width, height) or
@@ -336,7 +340,7 @@ given.</td>
 </tr>
 <tr class="row-even"><td>lut</td>
 <td>(numpy array) The color lookup table to use when displaying the image.
-See <code class="xref py py-func docutils literal"><span class="pre">setLookupTable</span></code>.</td>
+See <code class="xref py py-func docutils literal notranslate"><span class="pre">setLookupTable</span></code>.</td>
 </tr>
 <tr class="row-odd"><td>levels</td>
 <td>(min, max) The minimum and maximum values to use when rescaling the image
@@ -347,7 +351,7 @@ in the image. If the image array has dtype uint8, no rescaling is necessary.</td
 <td>(float 0.0-1.0)</td>
 </tr>
 <tr class="row-odd"><td>compositionMode</td>
-<td>see <code class="xref py py-func docutils literal"><span class="pre">setCompositionMode</span></code></td>
+<td>see <code class="xref py py-func docutils literal notranslate"><span class="pre">setCompositionMode</span></code></td>
 </tr>
 <tr class="row-even"><td>border</td>
 <td>Sets the pen used when drawing the image border. Default is None.</td>
@@ -373,7 +377,7 @@ reduces aliasing.</td>
 
 <dl class="method">
 <dt id="bornagain.external.pyqtgraph.mods.ImageItem.paint">
-<code class="descname">paint</code><span class="sig-paren">(</span><em>p</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem.paint" title="Permalink to this definition">¶</a></dt>
+<code class="descname">paint</code><span class="sig-paren">(</span><em>self</em>, <em>QPainter</em>, <em>QStyleOptionGraphicsItem</em>, <em>widget: QWidget = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem.paint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -388,10 +392,10 @@ reduces aliasing.</td>
 <dd><p>Returns x and y arrays containing the histogram values for the current image.
 For an explanation of the return format, see numpy.histogram().</p>
 <p>The <em>step</em> argument causes pixels to be skipped when computing the histogram to save time.
-If <em>step</em> is &#8216;auto&#8217;, then a step is chosen such that the analyzed data has
+If <em>step</em> is ‘auto’, then a step is chosen such that the analyzed data has
 dimensions roughly <em>targetImageSize</em> for each axis.</p>
 <p>The <em>bins</em> argument and any extra keyword arguments are passed to
-np.histogram(). If <em>bins</em> is &#8216;auto&#8217;, then a bin number is automatically
+np.histogram(). If <em>bins</em> is ‘auto’, then a bin number is automatically
 chosen based on the image characteristics:</p>
 <ul class="simple">
 <li>Integer images will have approximately <em>targetHistogramSize</em> bins,
@@ -429,7 +433,9 @@ parent items, but its position will be transformed as usual.
 <dl class="method">
 <dt id="bornagain.external.pyqtgraph.mods.ImageItem.viewTransformChanged">
 <code class="descname">viewTransformChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem.viewTransformChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem.viewTransformChanged" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Called whenever the transformation matrix of the view has changed.
+(eg, the view range has changed or the view was resized)</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.external.pyqtgraph.mods.ImageItem.mouseDragEvent">
@@ -493,7 +499,7 @@ parent items, but its position will be transformed as usual.
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.external.crystfel.html" class="btn btn-neutral float-right" title="bornagain.external.crystfel module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.external.cheetah.html" class="btn btn-neutral float-right" title="bornagain.external.cheetah module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="bornagain.external.pyqtgraph.extras.html" class="btn btn-neutral" title="bornagain.external.pyqtgraph.extras module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -505,7 +511,6 @@ parent items, but its position will be transformed as usual.
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -524,21 +529,14 @@ parent items, but its position will be transformed as usual.
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

@@ -5,6 +5,7 @@
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
+  <meta name="robots" content="noindex, nofollow" />
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -84,11 +85,12 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="beams.html">X-ray beams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="coding.html">Coding guidlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 
@@ -179,7 +181,6 @@
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
  | <a href="#X"><strong>X</strong></a>
- | <a href="#Y"><strong>Y</strong></a>
  | <a href="#Z"><strong>Z</strong></a>
  
 </div>
@@ -210,23 +211,23 @@
       </ul></li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.add_rings">add_rings() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
-      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.add_scatter_plot">add_scatter_plot() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.add_roi">add_roi() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Atoms.aggregate">aggregate() (bornagain.target.crystal.Atoms class method)</a>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.add_scatter_plot">add_scatter_plot() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.Ainv">Ainv (bornagain.target.crystal.Structure attribute)</a>
 </li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.alpha">alpha (bornagain.target.crystal.Structure attribute)</a>
 </li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.apply_filters">apply_filters (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+</li>
       <li><a href="bornagain.simulate.simutils.html#bornagain.simulate.simutils.area_beam">area_beam() (in module bornagain.simulate.simutils)</a>
 </li>
       <li><a href="bornagain.simulate.simutils.html#bornagain.simulate.simutils.area_crys">area_crys() (in module bornagain.simulate.simutils)</a>
 </li>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Lattice.assemble">assemble() (bornagain.target.crystal.Lattice method)</a>
-</li>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Lattice.assemble3">assemble3() (bornagain.target.crystal.Lattice method)</a>
+      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.assemble">assemble() (in module bornagain.target.crystal)</a>
 </li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADAssembler.assemble_data">assemble_data() (bornagain.detector.PADAssembler method)</a>
 </li>
@@ -235,8 +236,6 @@
       <li><a href="bornagain.simulate.atoms.html#bornagain.simulate.atoms.atomic_numbers_to_symbols">atomic_numbers_to_symbols() (in module bornagain.simulate.atoms)</a>
 </li>
       <li><a href="bornagain.simulate.atoms.html#bornagain.simulate.atoms.atomic_symbols_to_numbers">atomic_symbols_to_numbers() (in module bornagain.simulate.atoms)</a>
-</li>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Atoms">Atoms (class in bornagain.target.crystal)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -258,17 +257,13 @@
 </li>
       <li><a href="bornagain.html#module-bornagain">bornagain (module)</a>
 </li>
+      <li><a href="bornagain.analysis.html#module-bornagain.analysis">bornagain.analysis (module)</a>
+</li>
       <li><a href="bornagain.detector.html#module-bornagain.detector">bornagain.detector (module)</a>
 </li>
       <li><a href="bornagain.external.html#module-bornagain.external">bornagain.external (module)</a>
 </li>
-      <li><a href="bornagain.external.cfelpyutils.html#module-bornagain.external.cfelpyutils">bornagain.external.cfelpyutils (module)</a>
-</li>
-      <li><a href="bornagain.external.cfelpyutils.crystfel_utils.html#module-bornagain.external.cfelpyutils.crystfel_utils">bornagain.external.cfelpyutils.crystfel_utils (module)</a>
-</li>
-      <li><a href="bornagain.external.cfelpyutils.geometry_utils.html#module-bornagain.external.cfelpyutils.geometry_utils">bornagain.external.cfelpyutils.geometry_utils (module)</a>
-</li>
-      <li><a href="bornagain.external.cfelpyutils.parameter_utils.html#module-bornagain.external.cfelpyutils.parameter_utils">bornagain.external.cfelpyutils.parameter_utils (module)</a>
+      <li><a href="bornagain.external.cheetah.html#module-bornagain.external.cheetah">bornagain.external.cheetah (module)</a>
 </li>
       <li><a href="bornagain.external.crystfel.html#module-bornagain.external.crystfel">bornagain.external.crystfel (module)</a>
 </li>
@@ -280,7 +275,9 @@
 </li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#module-bornagain.external.pyqtgraph.mods">bornagain.external.pyqtgraph.mods (module)</a>
 </li>
-      <li><a href="bornagain.scatter.html#module-bornagain.scatter">bornagain.scatter (module)</a>
+      <li><a href="bornagain.fileio.html#module-bornagain.fileio">bornagain.fileio (module)</a>
+</li>
+      <li><a href="bornagain.fileio.getters.html#module-bornagain.fileio.getters">bornagain.fileio.getters (module)</a>
 </li>
       <li><a href="bornagain.simulate.html#module-bornagain.simulate">bornagain.simulate (module)</a>
 </li>
@@ -288,21 +285,19 @@
 </li>
       <li><a href="bornagain.simulate.clcore.html#module-bornagain.simulate.clcore">bornagain.simulate.clcore (module)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.simulate.examples.html#module-bornagain.simulate.examples">bornagain.simulate.examples (module)</a>
 </li>
-      <li><a href="bornagain.simulate.mcsim.html#module-bornagain.simulate.mcsim">bornagain.simulate.mcsim (module)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.simulate.form_factors.html#module-bornagain.simulate.form_factors">bornagain.simulate.form_factors (module)</a>
 </li>
-      <li><a href="bornagain.simulate.potato.html#module-bornagain.simulate.potato">bornagain.simulate.potato (module)</a>
+      <li><a href="bornagain.simulate.mcsim.html#module-bornagain.simulate.mcsim">bornagain.simulate.mcsim (module)</a>
 </li>
       <li><a href="bornagain.simulate.refdata.html#module-bornagain.simulate.refdata">bornagain.simulate.refdata (module)</a>
 </li>
       <li><a href="bornagain.simulate.simutils.html#module-bornagain.simulate.simutils">bornagain.simulate.simutils (module)</a>
 </li>
       <li><a href="bornagain.simulate.solutions.html#module-bornagain.simulate.solutions">bornagain.simulate.solutions (module)</a>
-</li>
-      <li><a href="bornagain.simulate.thorn.html#module-bornagain.simulate.thorn">bornagain.simulate.thorn (module)</a>
 </li>
       <li><a href="bornagain.source.html#module-bornagain.source">bornagain.source (module)</a>
 </li>
@@ -322,6 +317,10 @@
 </li>
       <li><a href="bornagain.viewers.html#module-bornagain.viewers">bornagain.viewers (module)</a>
 </li>
+      <li><a href="bornagain.viewers.mplviews.html#module-bornagain.viewers.mplviews">bornagain.viewers.mplviews (module)</a>
+</li>
+      <li><a href="bornagain.viewers.mplviews.simpleview.html#module-bornagain.viewers.mplviews.simpleview">bornagain.viewers.mplviews.simpleview (module)</a>
+</li>
       <li><a href="bornagain.viewers.qtviews.html#module-bornagain.viewers.qtviews">bornagain.viewers.qtviews (module)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#module-bornagain.viewers.qtviews.padviews">bornagain.viewers.qtviews.padviews (module)</a>
@@ -333,11 +332,7 @@
       <li><a href="bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.bright_colors">bright_colors() (in module bornagain.viewers.qtviews.qtviews)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup">buffer_mesh_lookup() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.buffer_mesh_lookup">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -346,31 +341,33 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.c">c (bornagain.target.crystal.Structure attribute)</a>
 </li>
-      <li><a href="bornagain.external.lcls.html#bornagain.external.lcls.cheetah_cspad_array_to_pad_list">cheetah_cspad_array_to_pad_list() (in module bornagain.external.lcls)</a>
-</li>
-      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore">ClCore (class in bornagain.simulate.clcore)</a>
+      <li><a href="bornagain.external.cheetah.html#bornagain.external.cheetah.cheetah_cspad_array_to_pad_list">cheetah_cspad_array_to_pad_list() (in module bornagain.external.cheetah)</a>
 
       <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore">(class in bornagain.simulate.potato)</a>
+        <li><a href="bornagain.external.lcls.html#bornagain.external.lcls.cheetah_cspad_array_to_pad_list">(in module bornagain.external.lcls)</a>
 </li>
       </ul></li>
-      <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.clear">clear() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
+      <li><a href="bornagain.external.cheetah.html#bornagain.external.cheetah.cheetah_remapped_cspad_array_to_pad_list">cheetah_remapped_cspad_array_to_pad_list() (in module bornagain.external.cheetah)</a>
+
+      <ul>
+        <li><a href="bornagain.external.lcls.html#bornagain.external.lcls.cheetah_remapped_cspad_array_to_pad_list">(in module bornagain.external.lcls)</a>
 </li>
-      <li><a href="bornagain.external.cfelpyutils.geometry_utils.html#bornagain.external.cfelpyutils.geometry_utils.compute_min_array_size">compute_min_array_size() (in module bornagain.external.cfelpyutils.geometry_utils)</a>
+      </ul></li>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.CheetahFrameGetter">CheetahFrameGetter (class in bornagain.fileio.getters)</a>
 </li>
-      <li><a href="bornagain.external.cfelpyutils.geometry_utils.html#bornagain.external.cfelpyutils.geometry_utils.compute_pix_maps">compute_pix_maps() (in module bornagain.external.cfelpyutils.geometry_utils)</a>
+      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore">ClCore (class in bornagain.simulate.clcore)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.clear">clear() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
+</li>
       <li><a href="bornagain.detector.html#bornagain.detector.IcosphereGeometry.compute_vertices_and_faces">compute_vertices_and_faces() (bornagain.detector.IcosphereGeometry method)</a>
-</li>
-      <li><a href="bornagain.external.cfelpyutils.geometry_utils.html#bornagain.external.cfelpyutils.geometry_utils.compute_visualization_pix_maps">compute_visualization_pix_maps() (in module bornagain.external.cfelpyutils.geometry_utils)</a>
-</li>
-      <li><a href="bornagain.external.cfelpyutils.parameter_utils.html#bornagain.external.cfelpyutils.parameter_utils.convert_parameters">convert_parameters() (in module bornagain.external.cfelpyutils.parameter_utils)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.coord_axes">coord_axes (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.create_some_gpu_context">create_some_gpu_context() (in module bornagain.simulate.clcore)</a>
+</li>
+      <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.cryst">cryst (bornagain.target.density.CrystalMeshTool attribute)</a>
 </li>
       <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool">CrystalMeshTool (class in bornagain.target.density)</a>
 </li>
@@ -382,13 +379,27 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.detector.html#bornagain.detector.SimplePAD.display">display() (bornagain.detector.SimplePAD method)</a>
+      <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.d">d (bornagain.target.density.CrystalMeshTool attribute)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.data_filters">data_filters (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.decrease_skip">decrease_skip() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.utils.html#bornagain.utils.depreciate">depreciate() (in module bornagain.utils)</a>
+</li>
+      <li><a href="bornagain.viewers.mplviews.simpleview.html#bornagain.viewers.mplviews.simpleview.SimplePAD.display">display() (bornagain.viewers.mplviews.simpleview.SimplePAD method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.display_peaks">display_peaks() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.html#bornagain.docs">docs() (in module bornagain)</a>
+</li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.drawAt">drawAt() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
 </li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.ds_vecs">ds_vecs() (bornagain.detector.PADGeometry method)</a>
+</li>
+      <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.dx">dx (bornagain.target.density.CrystalMeshTool attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -396,6 +407,8 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.detector.html#bornagain.detector.edge_mask">edge_mask() (in module bornagain.detector)</a>
+</li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.edit_ring_radii">edit_ring_radii() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.elements">elements (bornagain.target.crystal.Structure attribute)</a>
@@ -406,6 +419,8 @@
 </li>
       <li><a href="bornagain.utils.html#bornagain.utils.error">error() (in module bornagain.utils)</a>
 </li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.evt">evt (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -414,9 +429,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.source.html#bornagain.source.Beam.fluence">fluence (bornagain.source.Beam attribute)</a>
 </li>
+      <li><a href="bornagain.source.html#bornagain.source.Beam.fluence_jitter_fwhm">fluence_jitter_fwhm (bornagain.source.Beam attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.source.html#bornagain.source.Beam.fluence_jitter_fwhm">fluence_jitter_fwhm (bornagain.source.Beam attribute)</a>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.frame_getter">frame_getter (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+</li>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.FrameGetter">FrameGetter (class in bornagain.fileio.getters)</a>
 </li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.fs_vec">fs_vec (bornagain.detector.PADGeometry attribute)</a>
 </li>
@@ -429,20 +448,10 @@
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.gamma">gamma (bornagain.target.crystal.Structure attribute)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.gaussian_lattice_transform_intensities_pad">gaussian_lattice_transform_intensities_pad() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.gaussian_lattice_transform_intensities_pad">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_dict_to_pad_geometry_list">geometry_dict_to_pad_geometry_list() (in module bornagain.external.crystfel)</a>
 </li>
-      <li><a href="bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_dict">geometry_file_to_dict() (in module bornagain.external.crystfel)</a>
-</li>
       <li><a href="bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_pad_geometry_list">geometry_file_to_pad_geometry_list() (in module bornagain.external.crystfel)</a>
-</li>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Molecule.get_1d_coords">get_1d_coords() (bornagain.target.crystal.Molecule method)</a>
-</li>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Molecule.get_1d_frac_coords">get_1d_frac_coords() (bornagain.target.crystal.Molecule method)</a>
 </li>
       <li><a href="bornagain.simulate.refdata.html#bornagain.simulate.refdata.get_cmann_form_factors">get_cmann_form_factors() (in module bornagain.simulate.refdata)</a>
 </li>
@@ -450,41 +459,47 @@
 </li>
       <li><a href="bornagain.simulate.refdata.html#bornagain.simulate.refdata.get_cromermann_parameters_legacy">get_cromermann_parameters_legacy() (in module bornagain.simulate.refdata)</a>
 </li>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.FrameGetter.get_data">get_data() (bornagain.fileio.getters.FrameGetter method)</a>
+</li>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.CheetahFrameGetter.get_frame">get_frame() (bornagain.fileio.getters.CheetahFrameGetter method)</a>
+
+      <ul>
+        <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.FrameGetter.get_frame">(bornagain.fileio.getters.FrameGetter method)</a>
+</li>
+      </ul></li>
       <li><a href="bornagain.html#bornagain.get_global">get_global() (in module bornagain)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.get_group_size">get_group_size() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.get_group_size">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_h_vecs">get_h_vecs() (bornagain.target.density.CrystalMeshTool method)</a>
 </li>
       <li><a href="bornagain.simulate.atoms.html#bornagain.simulate.atoms.get_henke_data">get_henke_data() (in module bornagain.simulate.atoms)</a>
 </li>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Molecule.get_monomers">get_monomers() (bornagain.target.crystal.Molecule method)</a>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.FrameGetter.get_history_next">get_history_next() (bornagain.fileio.getters.FrameGetter method)</a>
+</li>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.FrameGetter.get_history_previous">get_history_previous() (bornagain.fileio.getters.FrameGetter method)</a>
 </li>
       <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_n_vecs">get_n_vecs() (bornagain.target.density.CrystalMeshTool method)</a>
 </li>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.FrameGetter.get_next_frame">get_next_frame() (bornagain.fileio.getters.FrameGetter method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.scatter.html#bornagain.scatter.RadialProfile.get_profile">get_profile() (bornagain.scatter.RadialProfile method)</a>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.CheetahFrameGetter.get_peaks">get_peaks() (bornagain.fileio.getters.CheetahFrameGetter method)</a>
+</li>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.FrameGetter.get_previous_frame">get_previous_frame() (bornagain.fileio.getters.FrameGetter method)</a>
+</li>
+      <li><a href="bornagain.detector.html#bornagain.detector.RadialProfiler.get_profile">get_profile() (bornagain.detector.RadialProfiler method)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.get_q_cromermann">get_q_cromermann() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.get_q_cromermann">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_q_vecs">get_q_vecs() (bornagain.target.density.CrystalMeshTool method)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.get_r_cromermann">get_r_cromermann() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.get_r_cromermann">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_r_vecs">get_r_vecs() (bornagain.target.density.CrystalMeshTool method)</a>
+</li>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.FrameGetter.get_random_frame">get_random_frame() (bornagain.fileio.getters.FrameGetter method)</a>
 </li>
       <li><a href="bornagain.simulate.atoms.html#bornagain.simulate.atoms.get_scattering_factors">get_scattering_factors() (in module bornagain.simulate.atoms)</a>
 </li>
@@ -516,27 +531,31 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.height">height() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
 </li>
-      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.helpme">helpme() (in module bornagain.simulate.clcore)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.helpme">(in module bornagain.simulate.potato)</a>
+      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.help">help() (in module bornagain.simulate.clcore)</a>
 </li>
-      </ul></li>
+      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.helpme">helpme() (in module bornagain.simulate.clcore)</a>
+</li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.hermannMauguinSymbol">hermannMauguinSymbol (bornagain.target.crystal.Structure attribute)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_all_geom_info">hide_all_geom_info() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_coordinate_axes">hide_coordinate_axes() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_fast_scan_directions">hide_fast_scan_directions() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_grid">hide_grid() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_masks">hide_masks() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_pad_borders">hide_pad_borders() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_pad_labels">hide_pad_labels() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_ring_radius_handles">hide_ring_radius_handles() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.hide_rois">hide_rois() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.hoverEvent">hoverEvent() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
 </li>
@@ -554,14 +573,12 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.increase_skip">increase_skip() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.indices_to_vectors">indices_to_vectors() (bornagain.detector.PADGeometry method)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.init_amps">init_amps() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.init_amps">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.target.placer.html#bornagain.target.placer.Place.insert">insert() (bornagain.target.placer.Place method)</a>
 </li>
   </ul></td>
@@ -578,25 +595,23 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Lattice">Lattice (class in bornagain.target.crystal)</a>
-</li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.lattice_transform_intensities_pad">lattice_transform_intensities_pad() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.lattice_transform_intensities_pad">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.load">load() (bornagain.detector.PADGeometry class method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.external.cfelpyutils.crystfel_utils.html#bornagain.external.cfelpyutils.crystfel_utils.load_crystfel_geometry">load_crystfel_geometry() (in module bornagain.external.cfelpyutils.crystfel_utils)</a>
+      <li><a href="bornagain.external.crystfel.html#bornagain.external.crystfel.load_crystfel_geometry">load_crystfel_geometry() (in module bornagain.external.crystfel)</a>
 </li>
       <li><a href="bornagain.simulate.solutions.html#bornagain.simulate.solutions.load_data">load_data() (in module bornagain.simulate.solutions)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.load_frame_dat">load_frame_dat() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.load_pdb">load_pdb() (bornagain.target.crystal.Structure method)</a>
 </li>
-      <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.ThornAgain.load_program">load_program() (bornagain.simulate.thorn.ThornAgain method)</a>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.FrameGetter.log_history">log_history() (bornagain.fileio.getters.FrameGetter method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.logscale">logscale (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
 </li>
       <li><a href="bornagain.simulate.examples.html#bornagain.simulate.examples.lysozyme_molecule">lysozyme_molecule() (in module bornagain.simulate.examples)</a>
 </li>
@@ -606,33 +621,27 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.scatter.html#bornagain.scatter.RadialProfile.make_plan">make_plan() (bornagain.scatter.RadialProfile method)</a>
-</li>
-      <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.make_q_vectors">make_q_vectors() (in module bornagain.simulate.thorn)</a>
+      <li><a href="bornagain.detector.html#bornagain.detector.RadialProfiler.make_plan">make_plan() (bornagain.detector.RadialProfiler method)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.MapProjection">MapProjection() (in module bornagain.viewers.qtviews.qtviews)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.MapSlices">MapSlices() (in module bornagain.viewers.qtviews.qtviews)</a>
 </li>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Molecule.mat_mult_many">mat_mult_many() (bornagain.target.crystal.Molecule method)</a>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.mask_all_rois">mask_all_rois() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.mask_color">mask_color (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.mask_data">mask_data (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.mask_images">mask_images (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.simulate.mcsim.html#bornagain.simulate.mcsim.mcsim">mcsim() (in module bornagain.simulate.mcsim)</a>
 </li>
       <li><a href="bornagain.utils.html#bornagain.utils.memoize">memoize() (in module bornagain.utils)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real">mod_squared_complex_to_real() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.mod_squared_complex_to_real">(bornagain.simulate.potato.ClCore method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Molecule">Molecule (class in bornagain.target.crystal)</a>
-</li>
-      <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.mosaic_gaussian_lattice_transform_intensities_pad">mosaic_gaussian_lattice_transform_intensities_pad() (bornagain.simulate.potato.ClCore method)</a>
-</li>
-      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.mouse_moved">mouse_moved() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.mouseClickEvent">mouseClickEvent() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
 </li>
@@ -648,6 +657,8 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.N">N (bornagain.target.density.CrystalMeshTool attribute)</a>
+</li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.n_fs">n_fs (bornagain.detector.PADGeometry attribute)</a>
 </li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.n_molecules">n_molecules (bornagain.target.crystal.Structure attribute)</a>
@@ -666,13 +677,11 @@
 </li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.nAtoms">nAtoms (bornagain.target.crystal.Structure attribute)</a>
 </li>
-      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.next_multiple_groupsize">next_multiple_groupsize() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.next_multiple_groupsize">(bornagain.simulate.potato.ClCore method)</a>
+      <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.Nc">Nc (bornagain.target.density.CrystalMeshTool attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.nextPow2">nextPow2() (in module bornagain.simulate.thorn)</a>
+      <li><a href="bornagain.simulate.examples.html#bornagain.simulate.examples.PDBMoleculeSimulator.next">next() (bornagain.simulate.examples.PDBMoleculeSimulator method)</a>
+</li>
+      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.next_multiple_groupsize">next_multiple_groupsize() (bornagain.simulate.clcore.ClCore method)</a>
 </li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.nMolecules">nMolecules (bornagain.target.crystal.Structure attribute)</a>
 </li>
@@ -690,12 +699,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.Oinv">Oinv (bornagain.target.crystal.Structure attribute)</a>
 </li>
+      <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.ones">ones() (bornagain.detector.PADGeometry method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.P">P (bornagain.target.density.CrystalMeshTool attribute)</a>
+</li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.pad_data">pad_data (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.pad_geometry">pad_geometry (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
@@ -712,39 +725,27 @@
 </li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.parse_pdb">parse_pdb() (in module bornagain.target.crystal)</a>
 </li>
+      <li><a href="bornagain.simulate.examples.html#bornagain.simulate.examples.PDBMoleculeSimulator">PDBMoleculeSimulator (class in bornagain.simulate.examples)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.peak_finders">peak_finders (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.peaks">peaks (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+</li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_mesh">phase_factor_mesh() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.phase_factor_mesh">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_pad">phase_factor_pad() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.phase_factor_pad">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf">phase_factor_qrf() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.phase_factor_qrf">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk">phase_factor_qrf_chunk() (bornagain.simulate.clcore.ClCore method)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.phase_factor_qrf_inplace">phase_factor_qrf_inplace() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.phase_factor_qrf_inplace">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.source.html#bornagain.source.Beam.photon_energy">photon_energy (bornagain.source.Beam attribute)</a>
 </li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.pixel_size">pixel_size() (bornagain.detector.PADGeometry method)</a>
-</li>
-      <li><a href="bornagain.external.cfelpyutils.geometry_utils.html#bornagain.external.cfelpyutils.geometry_utils.PixelMaps">PixelMaps (class in bornagain.external.cfelpyutils.geometry_utils)</a>
 </li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.pixelSize">pixelSize() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
 </li>
@@ -766,14 +767,8 @@
 </li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.position_vecs">position_vecs() (bornagain.detector.PADGeometry method)</a>
 </li>
-      <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.prevPow2">prevPow2() (in module bornagain.simulate.thorn)</a>
-</li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.prime_cromermann_simulator">prime_cromermann_simulator() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.prime_cromermann_simulator">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.source.html#bornagain.source.Beam.pulse_energy">pulse_energy (bornagain.source.Beam attribute)</a>
 </li>
   </ul></td>
@@ -781,6 +776,10 @@
 
 <h2 id="Q">Q</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.q_mags">q_mags() (bornagain.detector.PADGeometry method)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.q_vecs">q_vecs() (bornagain.detector.PADGeometry method)</a>
 </li>
@@ -790,17 +789,15 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.external.cfelpyutils.geometry_utils.html#bornagain.external.cfelpyutils.geometry_utils.PixelMaps.r">r (bornagain.external.cfelpyutils.geometry_utils.PixelMaps attribute)</a>
-
-      <ul>
-        <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.r">(bornagain.target.crystal.Structure attribute)</a>
+      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.r">r (bornagain.target.crystal.Structure attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="bornagain.scatter.html#bornagain.scatter.RadialProfile">RadialProfile (class in bornagain.scatter)</a>
+      <li><a href="bornagain.detector.html#bornagain.detector.RadialProfiler">RadialProfiler (class in bornagain.detector)</a>
 </li>
       <li><a href="bornagain.detector.html#bornagain.detector.IcosphereGeometry.radius">radius (bornagain.detector.IcosphereGeometry attribute)</a>
 </li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.raiseContextMenu">raiseContextMenu() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
+</li>
+      <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.random">random() (bornagain.detector.PADGeometry method)</a>
 </li>
       <li><a href="bornagain.utils.html#bornagain.utils.random_beam_vector">random_beam_vector() (in module bornagain.utils)</a>
 </li>
@@ -808,31 +805,23 @@
 </li>
       <li><a href="bornagain.utils.html#bornagain.utils.random_rotation">random_rotation() (in module bornagain.utils)</a>
 </li>
-      <li><a href="bornagain.detector.html#bornagain.detector.SimplePAD.readout">readout() (bornagain.detector.SimplePAD method)</a>
+      <li><a href="bornagain.viewers.mplviews.simpleview.html#bornagain.viewers.mplviews.simpleview.SimplePAD.readout">readout() (bornagain.viewers.mplviews.simpleview.SimplePAD method)</a>
 </li>
-      <li><a href="bornagain.detector.html#bornagain.detector.SimplePAD.readout_finite">readout_finite() (bornagain.detector.SimplePAD method)</a>
+      <li><a href="bornagain.viewers.mplviews.simpleview.html#bornagain.viewers.mplviews.simpleview.SimplePAD.readout_finite">readout_finite() (bornagain.viewers.mplviews.simpleview.SimplePAD method)</a>
 </li>
       <li><a href="bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanged">regionChanged() (bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem method)</a>
 </li>
       <li><a href="bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem.regionChanging">regionChanging() (bornagain.external.pyqtgraph.extras.MultiHistogramLUTItem method)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.release_amplitudes">release_amplitudes() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.release_amplitudes">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-        <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.ThornAgain.release_amplitudes">(bornagain.simulate.thorn.ThornAgain method)</a>
-</li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.release_amps">release_amps() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.release_amps">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.remove_rings">remove_rings() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.remove_scatter_plots">remove_scatter_plots() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.removeClicked">removeClicked() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
 </li>
@@ -846,23 +835,19 @@
       </ul></li>
       <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.reshape3">reshape3() (bornagain.target.density.CrystalMeshTool method)</a>
 </li>
-      <li><a href="bornagain.external.lcls.html#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">reshape_psana_cspad_array_to_cheetah_array() (in module bornagain.external.lcls)</a>
+      <li><a href="bornagain.external.cheetah.html#bornagain.external.cheetah.reshape_psana_cspad_array_to_cheetah_array">reshape_psana_cspad_array_to_cheetah_array() (in module bornagain.external.cheetah)</a>
+
+      <ul>
+        <li><a href="bornagain.external.lcls.html#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">(in module bornagain.external.lcls)</a>
 </li>
+      </ul></li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.rings">rings (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
 </li>
-      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.rois">rois (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+      <li><a href="bornagain.utils.html#bornagain.utils.rotate">rotate() (in module bornagain.utils)</a>
 </li>
       <li><a href="bornagain.utils.html#bornagain.utils.rotation_about_axis">rotation_about_axis() (in module bornagain.utils)</a>
 </li>
-      <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.ThornAgain.run">run() (bornagain.simulate.thorn.ThornAgain method)</a>
-</li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.run_cromermann">run_cromermann() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.run_cromermann">(bornagain.simulate.potato.ClCore method)</a>
-</li>
-      </ul></li>
-      <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.ThornAgain.run_transient">run_transient() (bornagain.simulate.thorn.ThornAgain method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -870,12 +855,16 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.s">s (bornagain.target.density.CrystalMeshTool attribute)</a>
+</li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.save">save() (bornagain.detector.PADGeometry method)</a>
 
       <ul>
         <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.save">(bornagain.external.pyqtgraph.mods.ImageItem method)</a>
 </li>
       </ul></li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.scale_factor">scale_factor() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.scan_arrows">scan_arrows (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D">Scatter3D (class in bornagain.viewers.qtviews.qtviews)</a>
@@ -886,18 +875,10 @@
 </li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.set_cell">set_cell() (bornagain.target.crystal.Structure method)</a>
 </li>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Atoms.set_elem">set_elem() (bornagain.target.crystal.Atoms method)</a>
-</li>
       <li><a href="bornagain.html#bornagain.set_global">set_global() (in module bornagain)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.set_groupsize">set_groupsize() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.set_groupsize">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-        <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.ThornAgain.set_groupsize">(bornagain.simulate.thorn.ThornAgain method)</a>
-</li>
-      </ul></li>
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.set_spacegroup">set_spacegroup() (bornagain.target.crystal.Structure method)</a>
 </li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.setAutoDownsample">setAutoDownsample() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
@@ -928,6 +909,8 @@
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.setup_histogram_tool">setup_histogram_tool() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.setup_masks">setup_masks() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.setup_pads">setup_pads() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.shape">shape() (bornagain.detector.PADGeometry method)</a>
@@ -936,10 +919,6 @@
         <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.shape">(bornagain.target.density.CrystalMeshTool method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Molecule.shift">shift() (bornagain.target.crystal.Molecule method)</a>
-</li>
       <li><a href="bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.show">show() (bornagain.viewers.qtviews.qtviews.Scatter3D method)</a>
 
       <ul>
@@ -952,13 +931,33 @@
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_fast_scan_directions">show_fast_scan_directions() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_frame">show_frame() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_grid">show_grid() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
-      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_pad_frame">show_pad_frame() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_history_next">show_history_next() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
-      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_pad_frames">show_pad_frames() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_history_previous">show_history_previous() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_masks">show_masks() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_next_frame">show_next_frame() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_pad_border">show_pad_border() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_pad_borders">show_pad_borders() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_pad_labels">show_pad_labels() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_peaks">show_peaks (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_previous_frame">show_previous_frame() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_random_frame">show_random_frame() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_true_fast_scans">show_true_fast_scans (bornagain.viewers.qtviews.padviews.PADView attribute)</a>
 </li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.sigImageChanged">sigImageChanged (bornagain.external.pyqtgraph.mods.ImageItem attribute)</a>
 </li>
@@ -966,9 +965,11 @@
 </li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.simple_setup">simple_setup() (bornagain.detector.PADGeometry method)</a>
 </li>
-      <li><a href="bornagain.detector.html#bornagain.detector.SimplePAD">SimplePAD (class in bornagain.detector)</a>
+      <li><a href="bornagain.viewers.mplviews.simpleview.html#bornagain.viewers.mplviews.simpleview.SimplePAD">SimplePAD (class in bornagain.viewers.mplviews.simpleview)</a>
 </li>
       <li><a href="bornagain.external.pyqtgraph.extras.html#bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget.sizeHint">sizeHint() (bornagain.external.pyqtgraph.extras.MultiHistogramLUTWidget method)</a>
+</li>
+      <li><a href="bornagain.fileio.getters.html#bornagain.fileio.getters.CheetahFrameGetter.skip_peaks">skip_peaks (bornagain.fileio.getters.CheetahFrameGetter attribute)</a>
 </li>
       <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.solid_angles">solid_angles() (bornagain.detector.PADGeometry method)</a>
 </li>
@@ -977,6 +978,8 @@
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.spaceGroupNumber">spaceGroupNumber (bornagain.target.crystal.Structure attribute)</a>
 </li>
       <li><a href="bornagain.source.html#bornagain.source.Beam.spectral_width_fwhm">spectral_width_fwhm (bornagain.source.Beam attribute)</a>
+</li>
+      <li><a href="bornagain.simulate.form_factors.html#bornagain.simulate.form_factors.sphere_form_factor">sphere_form_factor() (in module bornagain.simulate.form_factors)</a>
 </li>
       <li><a href="bornagain.simulate.simutils.html#bornagain.simulate.simutils.sphericalize">sphericalize() (in module bornagain.simulate.simutils)</a>
 </li>
@@ -1014,41 +1017,31 @@
 </li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.tabletEvent">tabletEvent() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
 </li>
-      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.test">test() (in module bornagain.simulate.clcore)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.test">(in module bornagain.simulate.potato)</a>
-</li>
-        <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.test">(in module bornagain.simulate.thorn)</a>
-</li>
-      </ul></li>
-      <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.ThornAgain">ThornAgain (class in bornagain.simulate.thorn)</a>
+      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.test_rotate_vec">test_rotate_vec() (bornagain.simulate.clcore.ClCore method)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.to_device">to_device() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.to_device">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
+      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.to_device_static">to_device_static() (bornagain.simulate.clcore.ClCore static method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_all_geom_info">toggle_all_geom_info() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.to_device_static">to_device_static() (bornagain.simulate.clcore.ClCore static method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.to_device_static">(bornagain.simulate.potato.ClCore static method)</a>
-</li>
-      </ul></li>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Atoms.to_xyz">to_xyz() (bornagain.target.crystal.Atoms method)</a>
-</li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_coordinate_axes">toggle_coordinate_axes() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_fast_scan_directions">toggle_fast_scan_directions() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_filter">toggle_filter() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_grid">toggle_grid() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_masks">toggle_masks() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
       <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_pad_labels">toggle_pad_labels() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
-      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Molecule.transform">transform() (bornagain.target.crystal.Molecule method)</a>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_peaks">toggle_peaks() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.toggle_rois">toggle_rois() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1056,10 +1049,12 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.simulate.thorn.html#bornagain.simulate.thorn.ThornAgain.update_rbuff">update_rbuff() (bornagain.simulate.thorn.ThornAgain method)</a>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.update_masks">update_masks() (bornagain.viewers.qtviews.padviews.PADView method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.update_pads">update_pads() (bornagain.viewers.qtviews.padviews.PADView method)</a>
+</li>
       <li><a href="bornagain.external.pyqtgraph.mods.html#bornagain.external.pyqtgraph.mods.ImageItem.updateImage">updateImage() (bornagain.external.pyqtgraph.mods.ImageItem method)</a>
 </li>
   </ul></td>
@@ -1071,23 +1066,15 @@
       <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.V">V (bornagain.target.crystal.Structure attribute)</a>
 </li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.vec16">vec16() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.vec16">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore.vec4">vec4() (bornagain.simulate.clcore.ClCore method)</a>
-
-      <ul>
-        <li><a href="bornagain.simulate.potato.html#bornagain.simulate.potato.ClCore.vec4">(bornagain.simulate.potato.ClCore method)</a>
 </li>
-      </ul></li>
       <li><a href="bornagain.utils.html#bornagain.utils.vec_check">vec_check() (in module bornagain.utils)</a>
+</li>
+      <li><a href="bornagain.utils.html#bornagain.utils.vec_check2">vec_check2() (in module bornagain.utils)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.utils.html#bornagain.utils.vec_check2">vec_check2() (in module bornagain.utils)</a>
-</li>
       <li><a href="bornagain.utils.html#bornagain.utils.vec_check3">vec_check3() (in module bornagain.utils)</a>
 </li>
       <li><a href="bornagain.utils.html#bornagain.utils.vec_mag">vec_mag() (in module bornagain.utils)</a>
@@ -1106,6 +1093,8 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.w">w (bornagain.target.density.CrystalMeshTool attribute)</a>
+</li>
       <li><a href="bornagain.utils.html#bornagain.utils.warn">warn() (in module bornagain.utils)</a>
 </li>
   </ul></td>
@@ -1120,19 +1109,7 @@
 <h2 id="X">X</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.external.cfelpyutils.geometry_utils.html#bornagain.external.cfelpyutils.geometry_utils.PixelMaps.x">x (bornagain.external.cfelpyutils.geometry_utils.PixelMaps attribute)</a>
-
-      <ul>
-        <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.x">(bornagain.target.crystal.Structure attribute)</a>
-</li>
-      </ul></li>
-  </ul></td>
-</tr></table>
-
-<h2 id="Y">Y</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.external.cfelpyutils.geometry_utils.html#bornagain.external.cfelpyutils.geometry_utils.PixelMaps.y">y (bornagain.external.cfelpyutils.geometry_utils.PixelMaps attribute)</a>
+      <li><a href="bornagain.target.crystal.html#bornagain.target.crystal.Structure.x">x (bornagain.target.crystal.Structure attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1144,8 +1121,12 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.zeros">zeros() (bornagain.target.density.CrystalMeshTool method)</a>
+      <li><a href="bornagain.detector.html#bornagain.detector.PADGeometry.zeros">zeros() (bornagain.detector.PADGeometry method)</a>
+
+      <ul>
+        <li><a href="bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.zeros">(bornagain.target.density.CrystalMeshTool method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1161,7 +1142,6 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Richard A Kirian.
 
     </p>
   </div>
@@ -1180,21 +1160,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

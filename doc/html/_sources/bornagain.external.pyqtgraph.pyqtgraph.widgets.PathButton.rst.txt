@@ -1,7 +1,0 @@
-bornagain.external.pyqtgraph.pyqtgraph.widgets.PathButton module
-================================================================
-
-.. automodule:: bornagain.external.pyqtgraph.pyqtgraph.widgets.PathButton
-    :members:
-    :undoc-members:
-    :show-inheritance:
