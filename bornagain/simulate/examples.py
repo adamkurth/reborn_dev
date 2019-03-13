@@ -19,6 +19,7 @@ from bornagain.simulate.clcore import ClCore
 
 
 lysozyme_pdb_file = pkg_resources.resource_filename('bornagain.simulate', 'data/pdb/2LYZ.pdb')
+psi_pdb_file = pkg_resources.resource_filename('bornagain.simulate', 'data/pdb/1jb0.pdb')
 pnccd_geom_file = pkg_resources.resource_filename('bornagain.simulate', 'data/geom/pnccd_front.geom')
 cspad_geom_file = pkg_resources.resource_filename('bornagain.simulate', 'data/geom/cspad.geom')
 

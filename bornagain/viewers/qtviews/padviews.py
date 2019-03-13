@@ -78,7 +78,7 @@ class PADView(object):
 
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': False}
 
-    def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None):
+    def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None):
 
         """
 
@@ -95,8 +95,17 @@ class PADView(object):
         self.mask_data = mask_data
         self.pad_geometry = pad_geometry
 
-        if self.frame_getter is not None:
-            self.frame_getter = frame_getter
+        if raw_data is not None:
+            if isinstance(raw_data, dict):
+                pass
+            elif isinstance(raw_data, list):
+                raw_data = {'pad_data': raw_data}
+            else:
+                raw_data = {'pad_data': [raw_data]} # Assuming it's a numpy array...
+            self.raw_data = raw_data
+
+        if frame_getter is not None:
+            self.frame_getter = frame_getterR
             try:
                 self.raw_data = self.frame_getter.get_frame(0)
             except:
@@ -718,7 +727,6 @@ class PADView(object):
             self.setup_pads()
 
         pad_data = self.get_pad_display_data()
-
         mx = np.ravel(pad_data).max()
 
         for i in range(0, self.n_pads):
@@ -937,10 +945,13 @@ class PADView(object):
         padview_debug('show_frame()')
 
         if self.frame_getter is None:
-            print("Cannot show dataframe - there is no frame getter configured.")
-            return
-
-        self.raw_data = self.frame_getter.get_frame(frame_number=frame_number)
+            print("Note: there is no frame getter configured.")
+        else:
+            raw_data = self.frame_getter.get_frame(frame_number=frame_number)
+            if raw_data is None:
+                print("Note: frame getter returned None.")
+            else:
+                self.raw_data = raw_data
 
         self.update_display_data()
 
@@ -1189,7 +1200,7 @@ class PADView(object):
 
         padview_debug('show()')
         self.main_window.show()
-        self.main_window.callback_pb_load()
+        # self.main_window.callback_pb_load()
 
 
 class SNRConfigWidget(QtGui.QWidget):
