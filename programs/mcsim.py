@@ -19,24 +19,24 @@ sys.path.append("..")
 
 
 def mcsim(
-        detector_distance=100e-3,
+        detector_distance=50e-3,
         pixel_size=110e-6,
         n_pixels=1000,
-        beam_diameter=10e-6,
-        photon_energy=12.0,
-        n_photons=1e8,
+        beam_diameter=1e-6,
+        photon_energy=9.0,
+        n_photons=1e14,
         transmission=1.0,
         mosaicity_fwhm=1e-4,
         beam_divergence_fwhm=1e-2,
         beam_spatial_profile='tophat',
         photon_energy_fwhm=0.02,
-        crystal_size=10e-6,
-        crystal_size_fwhm=0.0,
+        crystal_size=1e-6,
+        crystal_size_fwhm=0e-6,
         mosaic_domain_size=1e-6,
         mosaic_domain_size_fwhm=0.0,
         water_radius=0.0,
         temperature=298.16,
-        n_monte_carlo_iterations=1000,
+        n_monte_carlo_iterations=1,
         num_patterns=1,
         random_rotation=True,
         approximate_shape_transform=True,
@@ -49,8 +49,8 @@ def mcsim(
         write_hdf5=True,
         write_geom=True,
         write_crystal_sizes=True,
-        write_ideal_only=False,
-        results_dir='/data/temp/',
+        write_ideal_only=True,
+        results_dir='./temp',
         quiet=False,
         compression=None,
         cl_double_precision=False):
@@ -205,18 +205,18 @@ def mcsim(
         'compression',
         'cl_double_precision']
 
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+
     pseudo_dict = zip(names, values)
     dictionary = dict(pseudo_dict)
-    file_name = results_dir + 'used_params.txt'
+    file_name = os.path.join(results_dir, 'used_params.txt')
     used_params = open(str(file_name), 'w+')
 
     for k, v in dictionary.items():
         if v != str(v):
             v = str(v)
         used_params.write(k + '=' + v + '\n')
-
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
 
     if not quiet:
         write = sys.stdout.write
@@ -285,7 +285,7 @@ def mcsim(
         r = all_atoms.xyz * 1e-10
         Z = all_atoms.Z
     else:
-        cryst = ba.target.crystal.structure(pdb_file)
+        cryst = ba.target.crystal.Structure(pdb_file)
         r = cryst.r
         Z = cryst.Z
 
@@ -319,7 +319,7 @@ def mcsim(
         shape_transform = clcore.lattice_transform_intensities_pad
 
     if write_geom:
-        geom_file = results_dir + 'geom.geom'
+        geom_file = os.path.join(results_dir, 'geom.geom')
         write('Writing geometry file %s\n' % geom_file)
         fid = open(geom_file, 'w')
         fid.write("photon_energy = %g\n" % (photon_energy * ba.units.eV))
@@ -388,7 +388,7 @@ def mcsim(
             mosaic_domain_size = crystal_size
 
         # Do water scattering
-        if water_radius != 0:
+        if water_radius > 0:
             write('Simulating water scattering... ')
             water_number_density = 33.3679e27
             illuminated_water_volume = simutils.volume_solvent(
@@ -417,19 +417,8 @@ def mcsim(
         if not cromer_mann:
             write('Simulating molecular transform from Henke tables... ')
             t = time.time()
-            clcore.phase_factor_pad(
-                r_dev,
-                f_dev,
-                pad.t_vec,
-                pad.fs_vec,
-                pad.ss_vec,
-                beam_vec,
-                pad.n_fs,
-                pad.n_ss,
-                wavelength,
-                R,
-                F_dev,
-                add=False)
+            clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss,
+                wavelength, R, F_dev, add=False)
             F2 = np.abs(F_dev.get()) ** 2
             tf = time.time() - t
             write('%g s\n' % (tf))
@@ -449,7 +438,7 @@ def mcsim(
         S2_dev *= 0
 
         write('Simulating shape transform... ')
-        time.sleep(0.001)
+        # time.sleep(0.001)
         message = ''
         tt = time.time()
         for n in np.arange(1, (n_monte_carlo_iterations + 1)):
@@ -472,19 +461,8 @@ def mcsim(
                 Rm = R
                 T = pad.t_vec
 
-            shape_transform(
-                abc,
-                n_cells_mosaic_domain,
-                T,
-                pad.fs_vec,
-                pad.ss_vec,
-                B,
-                pad.n_fs,
-                pad.n_ss,
-                w,
-                Rm,
-                S2_dev,
-                add=True)
+            shape_transform(abc, n_cells_mosaic_domain, T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, S2_dev,
+                            add=True)
 
             tf = time.time() - t
             if (n % 1000) == 0:
@@ -497,7 +475,7 @@ def mcsim(
         # Average the shape transforms over MC iterations
         S2 = S2_dev.get().ravel() / n
         # Convert into useful photon units
-        I = I0 * r_e ** 2 * F2 * S2 * sa * P
+        I = I0 * r_e ** 2 * sa * P * F2 * S2
         if(crystal_size < beam_diameter):  # Correct for lower incident intensity
             if(beam_spatial_profile == 'gaussian'):
                 sig = beam_diameter / 3.0  # Let beam_diameter be 3 sigmas
@@ -506,8 +484,7 @@ def mcsim(
                 I *= (crystal_size / beam_diameter)**2
 
         # Scale up according to mosaic domain
-        n_domains = np.prod(n_cells_whole_crystal) / \
-            np.prod(n_cells_mosaic_domain)
+        n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
         I_ideal = I.copy() * n_domains
 
         if(water_radius != 0):
@@ -517,48 +494,41 @@ def mcsim(
 
         if write_hdf5:
             n_patterns = len(glob(os.path.join(results_dir, 'pattern-*.h5')))
-            file_name = os.path.join(
-                results_dir, 'pattern-%06d.h5' %
-                (n_patterns + 1))
+            file_name = os.path.join(results_dir, 'pattern-%06d.h5' % (n_patterns + 1))
             write('Writing file %s\n' % file_name)
             fid = h5py.File(file_name, 'w')
-            fid['/data/ideal'] = I_ideal.astype(
-                np.float32).reshape(
-                (pad.n_ss, pad.n_fs))
-            fid['/data/noisy'] = I_noisy.astype(
-                np.int32).reshape(
-                (pad.n_ss, pad.n_fs))
+            fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
+            fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((pad.n_ss, pad.n_fs))
             if(water_radius > 0):
-                fid['/data/water'] = I_water.astype(
-                    np.float32).reshape(
-                    (pad.n_ss, pad.n_fs))
+                fid['/data/water'] = I_water.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
             fid.close()
+            write('Wrote file %s' % (file_name,))
 
-            with h5py.File(file_name, 'w') as fid:
-                sh = (int(pad.n_ss), int(pad.n_fs))
-                fid.create_dataset("data/ideal",
-                                   data=I_ideal.astype(np.float32).reshape(sh),
-                                   compression=compression, shape=sh)
-                if not write_ideal_only:
-                    fid.create_dataset(
-                        "data/noisy",
-                        data=I_noisy.astype(
-                            np.float32).reshape(sh),
-                        compression=compression,
-                        shape=sh)
-                if water_radius > 0:
-                    fid.create_dataset(
-                        'data/water',
-                        data=I_water.astype(
-                            np.float32).reshape(sh),
-                        compression=compression,
-                        shape=sh)
-                fid.create_dataset("rotation_matrix", data=R)
+            # FIXME: what's going on here -- why is the file being written twice?
+            # with h5py.File(file_name, 'w') as fid:
+            #     sh = (int(pad.n_ss), int(pad.n_fs))
+            #     fid.create_dataset("data/ideal",
+            #                        data=I_ideal.astype(np.float32).reshape(sh),
+            #                        compression=compression, shape=sh)
+            #     if not write_ideal_only:
+            #         fid.create_dataset(
+            #             "data/noisy",
+            #             data=I_noisy.astype(
+            #                 np.float32).reshape(sh),
+            #             compression=compression,
+            #             shape=sh)
+            #     if water_radius > 0:
+            #         fid.create_dataset(
+            #             'data/water',
+            #             data=I_water.astype(
+            #                 np.float32).reshape(sh),
+            #             compression=compression,
+            #             shape=sh)
+            #     fid.create_dataset("rotation_matrix", data=R)
+
 
         if write_crystal_sizes:
-            cryst_size_file.write(
-                '%g:%g:pattern-%06d.h5\n' %
-                (crystal_size, mosaic_domain_size, (n_patterns + 1)))
+            cryst_size_file.write('%g:%g:pattern-%06d.h5\n' % (crystal_size, mosaic_domain_size, (n_patterns + 1)))
 
         # F2mean = np.mean(F2.flat[direct_beam_mask > 0])
         # Ncells = np.prod(n_cells_whole_crystal)
@@ -569,3 +539,25 @@ def mcsim(
         cryst_size_file.close()
 
     write("\n\nDone!\n\n")
+
+if __name__ == '__main__':
+
+    import numpy as np
+    import h5py
+    import pyqtgraph
+    from bornagain.simulate.examples import lysozyme_pdb_file, psi_pdb_file
+    from bornagain.viewers.qtviews.padviews import PADView
+    from bornagain.external.crystfel import geometry_file_to_pad_geometry_list
+    import shutil
+    import os
+
+    if os.path.isdir('./temp'):
+        shutil.rmtree('./temp')
+    mcsim(pdb_file=psi_pdb_file, n_monte_carlo_iterations=10000)
+    f = h5py.File('temp/pattern-000001.h5', 'r')
+    data = np.array(f['/data/ideal'])
+    geom_file = './temp/geom.geom'
+    pad_geometry = geometry_file_to_pad_geometry_list(geom_file)
+    padview = PADView(pad_geometry=pad_geometry, raw_data=[data])
+    padview.show()
+    pyqtgraph.QtGui.QApplication.exec_()
