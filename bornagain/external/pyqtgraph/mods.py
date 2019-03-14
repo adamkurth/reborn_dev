@@ -11,7 +11,7 @@ from pyqtgraph.Point import Point
 __all__ = ['ImageItem']
 
 
-def downsample(data, n, axis=0, xvals='subsample'):
+def downsample(data, n, axis=0, xvals='subsample', method='mean'):
     """Downsample by averaging points together across axis.
     If multiple axes are specified, runs once per axis.
     If a metaArray is given, then the axis values can be either subsampled
@@ -40,7 +40,10 @@ def downsample(data, n, axis=0, xvals='subsample'):
     d1 = data[tuple(sl)]
     # print d1.shape, s
     d1.shape = tuple(s)
-    d2 = d1.max(axis + 1)
+    if method == 'mean':
+        d2 = d1.mean(axis + 1)
+    elif method == 'max':
+        d2 = d1.max(axis + 1)
 
     if ma is None:
         return d2
@@ -56,6 +59,10 @@ def downsample(data, n, axis=0, xvals='subsample'):
 class ImageItem(GraphicsObject):
     """
     **Bases:** :class:`GraphicsObject <pyqtgraph.GraphicsObject>`
+
+    Note: this is a modification of the pyqtgraph ImageItem that fixes the flickering of pixels when you zoom in/out
+    on an image.  To turn on this feature, pass the keyword argument autoDownsample and set it to either 'mean' or 'max'
+    depending on whether or not you want to see the mean or max pixel values when you zoom out.
 
     GraphicsObject displaying an image. Optimized for rapid update (ie video display).
     This item displays either a 2D numpy array (height, width) or
@@ -74,7 +81,7 @@ class ImageItem(GraphicsObject):
     # self; emitted when 'remove' is selected from context menu
     sigRemoveRequested = QtCore.Signal(object)
 
-    def __init__(self, image=None, **kargs):
+    def __init__(self, image=None, autoDownsample=False, **kargs):
         """
         See :func:`setImage <pyqtgraph.ImageItem.setImage>` for all allowed initialization arguments.
         """
@@ -87,7 +94,13 @@ class ImageItem(GraphicsObject):
 
         self.levels = None  # [min, max] or [[redMin, redMax], ...]
         self.lut = None
-        self.autoDownsample = True
+        self.autoDownsample = False
+        if autoDownsample == 'mean':
+            self.autoDownsample = True
+            self.downsample_func = lambda im, n, ax: downsample(im, n, ax, method='mean')
+        elif autoDownsample == 'max':
+            self.autoDownsample = True
+            self.downsample_func = lambda im, n, ax: downsample(im, n, ax, method='max')
 
         self.drawKernel = None
         self.border = None
@@ -338,8 +351,8 @@ class ImageItem(GraphicsObject):
             xds = max(1, int(1 / w))
             yds = max(1, int(1 / h))
             # print(w, h, xds, yds)
-            image = downsample(self.image, xds, axis=0)
-            image = downsample(image, yds, axis=1)
+            image = self.downsample_func(self.image, xds, 0)
+            image = self.downsample_func(image, yds, 1)
         else:
             image = self.image
 

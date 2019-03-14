@@ -21,12 +21,40 @@ from bornagain.external.crystfel import geometry_file_to_pad_geometry_list
 from bornagain.external.pyqtgraph.mods import ImageItem
 from bornagain.analysis.peaks import boxsnr, PeakFinder
 
-padview_debug_on = True
+padview_debug_config = 1  # 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
 
 
-def padview_debug(msg):
-    if padview_debug_on:
+def padview_debug(msg, val=1):
+    """
+    Print debug messages according to the padview_debug_config variable.
+
+    Args:
+        msg: The text message to print.
+        val: How verbose to be.
+            0: don't print anything
+            1: basic messages
+            2: more verbose messages
+            3: extremely verbose
+
+    Returns: None
+
+    """
+    if padview_debug_config >= val:
         print(msg)
+
+
+def write(msg):
+    """
+    Write a message to the terminal.
+
+    Args:
+        msg: The text message to write
+
+    Returns: None
+
+    """
+
+    print(msg)
 
 padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
 snrconfigui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'configs.ui')
@@ -106,7 +134,7 @@ class PADView(object):
             self.raw_data = raw_data
 
         if frame_getter is not None:
-            self.frame_getter = frame_getterR
+            self.frame_getter = frame_getter
             try:
                 self.raw_data = self.frame_getter.get_frame(0)
             except:
@@ -145,7 +173,7 @@ class PADView(object):
 
     def _print_something(self):
 
-        print("something happened")
+        write("something happened")
 
     def close_main_window(self):
 
@@ -509,7 +537,7 @@ class PADView(object):
 
             mask_rgba = self._make_mask_rgba(d)
 
-            im = ImageItem(mask_rgba)
+            im = ImageItem(mask_rgba, autoDownsample='mean')
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 
@@ -581,7 +609,7 @@ class PADView(object):
             return
 
         if file_type == 'Python Pickle (*.pkl)':
-            print('Saving masks: ' + file_name)
+            write('Saving masks: ' + file_name)
             pickle.dump(self.mask_data, open(file_name, "wb"))
 
     def load_masks(self):
@@ -594,7 +622,7 @@ class PADView(object):
             return
 
         if file_type == 'Python Pickle (*.pkl)':
-            print('Saving masks: ' + file_name)
+            write('Saving masks: ' + file_name)
             self.mask_data = pickle.load(open(file_name, "rb"))
             self.update_masks(self.mask_data)
 
@@ -695,7 +723,7 @@ class PADView(object):
         self.images = []
 
         if self.n_pads == 0:
-            print("Cannot setup pad display data - there are no pads to display.")
+            padview_debug("Cannot setup pad display data - there are no pads to display.")
 
         for i in range(0, self.n_pads):
 
@@ -708,7 +736,7 @@ class PADView(object):
             if self.show_true_fast_scans:  # For testing - show fast scan axis
                 d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
 
-            im = ImageItem(d)
+            im = ImageItem(d, autoDownsample='mean')
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 
@@ -893,7 +921,7 @@ class PADView(object):
     def show_history_next(self):
 
         if self.frame_getter is None:
-            print('no getter')
+            padview_debug('no getter')
             return
 
         dat = self.frame_getter.get_history_next()
@@ -904,7 +932,7 @@ class PADView(object):
     def show_history_previous(self):
 
         if self.frame_getter is None:
-            print('no getter')
+            padview_debug('no getter')
             return
 
         dat = self.frame_getter.get_history_previous()
@@ -915,7 +943,7 @@ class PADView(object):
     def show_next_frame(self):
 
         if self.frame_getter is None:
-            print('no getter')
+            padview_debug('no getter')
             return
 
         dat = self.frame_getter.get_next_frame()
@@ -926,7 +954,7 @@ class PADView(object):
     def show_previous_frame(self):
 
         if self.frame_getter is None:
-            print('no getter')
+            padview_debug('no getter')
             return
 
         dat = self.frame_getter.get_previous_frame()
@@ -946,11 +974,11 @@ class PADView(object):
         padview_debug('show_frame()')
 
         if self.frame_getter is None:
-            print("Note: there is no frame getter configured.")
+            padview_debug("Note: there is no frame getter configured.")
         else:
             raw_data = self.frame_getter.get_frame(frame_number=frame_number)
             if raw_data is None:
-                print("Note: frame getter returned None.")
+                padview_debug("Note: frame getter returned None.")
             else:
                 self.raw_data = raw_data
 
@@ -1092,6 +1120,7 @@ class PADView(object):
 
         # Get info from the widget
 
+        padview_debug("Updating SNR Filter parameters")
         vals = self.widgets['SNR Config'].get_values()
         if vals['activate']:
             self.snr_filter_params = vals
@@ -1100,6 +1129,7 @@ class PADView(object):
             self.update_display_data()
         else:
             self.data_processor = None
+            self.processed_data = None
             self.update_display_data()
 
     def load_geometry_file(self):
