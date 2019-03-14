@@ -26,6 +26,44 @@ from bornagain import utils
 from bornagain.simulate import atoms, simutils
 
 
+class SpaceGroup(object):
+
+    r"""
+    #TODO: document
+    Gotchas: note that there are multiple Hall numbers that correspond to each ITOC number.  The 230 ITOC numbers that
+    specify space groups refer only to the actual symmetry properties, and there are multiple Hall numbers and Hermann
+    Mauguin symbols that have the same spacegroup.  The duplicates are just different ways of specifying the same
+    spacegroup.
+    """
+
+    hall_number = None #: Space group Hall number
+    itoc_number = None #: Space group number in the International Tables of Crystallography (ITOC)
+    hermann_mauguin_symbol = None  #: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)
+    sym_rotations = None #: Symmetry 3x3 transformation matrices (in crystal basis)
+    sym_translations = None #: Symmetry translations (in crystal basis)
+    n_molecules = None
+
+    def __init__(self, hermann_mauguin_symbol=None, hall_number=None, itoc_number=None):
+
+        if hall_number is not None:
+            self.itoc_number = itoc_number_from_hall_number(hall_number)
+            self.hermann_mauguin_symbol = hermann_mauguin_symbol_from_hall_number(hall_number)
+        elif hermann_mauguin_symbol is not None:
+            self.itoc_number = itoc_number_from_hermann_maugin_symbol(hermann_mauguin_symbol)
+            self.hall_number = hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol)
+        elif itoc_number is not None:
+            self.hall_number = hall_number_from_itoc_number(itoc_number)
+            self.hermann_mauguin_symbol = hermann_mauguin_symbol_from_hall_number(self.hall_number)
+        else:
+            raise ValueError('You must initialize SpaceGroup with a spacegroup identifier')
+
+        self.sym_rotations, self.sym_translations = get_symmetry_operators_from_hall_number(self.hall_number)
+        self.n_molecules = len(self.sym_rotations)
+
+
+
+
+
 class CrystalStructure(object):
     r"""
     A container class for stuff needed when dealing with crystal structures.
@@ -55,6 +93,7 @@ class CrystalStructure(object):
     symOps = None  #: Symmetry operations that are applied to fractional coordinates
     symRs = None #: Symmetry 3x3 transformation matrices (in crystal basis)
     symTs = None #: Symmetry translations (in crystal basis)
+
 
     def __init__(self, pdbFilePath=None):
 
@@ -171,6 +210,21 @@ class structure(CrystalStructure):
         CrystalStructure.__init__(self, *args, **kwargs)
 
 
+class UnitCell(object):
+
+    def __init__(self):
+
+        pass
+
+class FiniteLattice(object):
+
+    def __init__(self, max_size=None):
+
+        pass
+
+
+
+
 def parse_pdb(pdbFilePath, crystalStruct=None):
     r"""Return a :class:`Structure` object with PDB information. """
 
@@ -255,6 +309,72 @@ def get_hm_symbols():
 
     return symbols
 
+hermann_mauguin_symbols = get_hm_symbols()
+
+def hermann_mauguin_symbol_from_hall_number(hall_number):
+
+    if hall_number < 0 or hall_number > 530:
+        raise ValueError('hall_number must be between 1 and 530')
+
+    return spgrp._hmsym[hall_number-1]
+
+def itoc_number_from_hall_number(hall_number):
+
+    return spgrp._sgnum[hall_number-1]
+
+def hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
+
+    idx = None
+    hermann_mauguin_symbol = hermann_mauguin_symbol.strip()
+    for idx in range(0, 530):
+        if hermann_mauguin_symbol == hermann_mauguin_symbols[idx]:
+            break
+
+    if idx is None:
+        raise ValueError('Cannot find Hermann Mauguin symbol')
+
+    return idx+1
+
+def itoc_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
+
+    return itoc_number_from_hall_number(hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol))
+
+def hall_number_from_itoc_number(itoc_number):
+
+    if itoc_number < 1 or itoc_number > 230:
+        raise ValueError('ITOC spacegroup number must be in the range 1 to 230')
+
+    idx = -1
+    for idx in range(0, 530):
+        if itoc_number == spgrp._sgnum[idx]:
+            break
+    return idx+1
+
+def hermann_mauguin_symbol_from_itoc_number(itoc_number):
+
+    return hermann_mauguin_symbol_from_hall_number(hall_number_from_itoc_number(itoc_number))
+
+
+
+
+
+def spacegroup_ops_from_hall_number(hall_number):
+
+    rot = spgrp._spgrp_ops[hall_number-1]["rotations"]
+    trans = [utils.vec_check(T) for T in spgrp._spgrp_ops[hall_number-1]['translations']]
+
+    return rot, trans
+
+def get_symmetry_operators_from_hall_number(hall_number):
+
+    if hall_number < 1 or hall_number > 530:
+        raise ValueError("Hall number must be between 1 and 530")
+
+    idx = hall_number - 1
+    Rs = spgrp._spgrp_ops[idx]["rotations"]
+    Ts = [utils.vec_check(T) for T in spgrp._spgrp_ops[idx]['translations']]
+
+    return Rs, Ts
 
 def get_symmetry_operators_from_space_group(hm_symbol):
 
