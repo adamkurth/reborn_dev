@@ -52,34 +52,31 @@ def cspad_pads():
     return crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
 
-def lysozyme_molecule(pads=None, wavelength=None, random_rotation=False):
+def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=False):
 
     r"""
 
     Simple simulation of lysozyme molecule using :class:`ClCore <bornagain.simulate.clcore.ClCore>`.
 
     Args:
-        pads: List of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances.
+        pad_geometry: List of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances.
         wavelength: As always, in SI units.
 
     Returns: dictionary with {'pad_geometry': pads, 'intensity': data_list}
 
     """
 
-    if wavelength is None:
-        wavelength = 1.5e-10
-
     photon_energy = hc / wavelength
 
-    if pads is None:
-        pads = crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
+    if pad_geometry is None:
+        pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
     sim = ClCore(group_size=32, double_precision=False)
 
     cryst = CrystalStructure(lysozyme_pdb_file)
     r = cryst.r
     f = atoms.get_scattering_factors(cryst.Z, photon_energy=photon_energy)
-    q = [pad.q_vecs(beam_vec=[0, 0, 1], wavelength=wavelength) for pad in pads]
+    q = [pad.q_vecs(beam_vec=[0, 0, 1], wavelength=wavelength) for pad in pad_geometry]
     q = np.ravel(q)
 
 
@@ -91,9 +88,9 @@ def lysozyme_molecule(pads=None, wavelength=None, random_rotation=False):
     A = sim.phase_factor_qrf(q, r, f, R)
     I = np.abs(A)**2
 
-    data_list = detector.split_pad_data(pads, I)
+    data_list = detector.split_pad_data(pad_geometry, I)
 
-    return {'pad_geometry': pads, 'intensity': data_list}
+    return {'pad_geometry': pad_geometry, 'intensity': data_list}
 
 
 class PDBMoleculeSimulator(object):
@@ -105,7 +102,7 @@ class PDBMoleculeSimulator(object):
 
     """
 
-    def __init__(self, pdb_file=None, pads=None, wavelength=None, random_rotation=False):
+    def __init__(self, pdb_file=None, pad_geometry=None, wavelength=1.5e-10, random_rotation=True):
 
         r"""
 
@@ -113,7 +110,7 @@ class PDBMoleculeSimulator(object):
 
         Args:
             pdb_file: path to a pdb file
-            pads: array of :class:`PADGeometry bornagain.detector.PADGeometry` intances
+            pad_geometry: array of :class:`PADGeometry bornagain.detector.PADGeometry` intances
             wavelength: in SI units of course
             random_rotation: True or False
         """
@@ -121,28 +118,26 @@ class PDBMoleculeSimulator(object):
         if pdb_file is None:
             pdb_file = lysozyme_pdb_file
 
-        if pads is None:
-            pads = crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
-
-        if wavelength is None:
-            wavelength = 1.5e-10
+        if pad_geometry is None:
+            pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
         photon_energy = hc / wavelength
 
-        self.clcore = ClCore(group_size=32, double_precision=False)
+        self.clcore = ClCore(group_size=32)
         cryst = CrystalStructure(pdb_file)
 
         self.random_rotation = random_rotation
 
         r = cryst.r
         f = atoms.get_scattering_factors(cryst.Z, photon_energy=photon_energy)
-        q = [pad.q_vecs(beam_vec=[0, 0, 1], wavelength=wavelength) for pad in pads]
+        q = [pad.q_vecs(beam_vec=[0, 0, 1], wavelength=wavelength) for pad in pad_geometry]
         q = np.ravel(q)
+        nq = int(len(q)/3)
 
         self.q_gpu = self.clcore.to_device(q)
         self.r_gpu = self.clcore.to_device(r)
         self.f_gpu = self.clcore.to_device(f)
-        self.a_gpu = self.clcore.to_device(shape=(self.q_gpu.shape[0]), dtype=self.clcore.complex_t)
+        self.a_gpu = self.clcore.to_device(shape=(nq,), dtype=self.clcore.complex_t)
 
     def next(self):
 
