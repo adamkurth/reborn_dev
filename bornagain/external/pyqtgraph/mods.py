@@ -11,6 +11,48 @@ from pyqtgraph.Point import Point
 __all__ = ['ImageItem']
 
 
+def downsample(data, n, axis=0, xvals='subsample'):
+    """Downsample by averaging points together across axis.
+    If multiple axes are specified, runs once per axis.
+    If a metaArray is given, then the axis values can be either subsampled
+    or downsampled to match.
+    """
+    ma = None
+    if (hasattr(data, 'implements') and data.implements('MetaArray')):
+        ma = data
+        data = data.view(np.ndarray)
+
+    if hasattr(axis, '__len__'):
+        if not hasattr(n, '__len__'):
+            n = [n] * len(axis)
+        for i in range(len(axis)):
+            data = downsample(data, n[i], axis[i])
+        return data
+
+    if n <= 1:
+        return data
+    nPts = int(data.shape[axis] / n)
+    s = list(data.shape)
+    s[axis] = nPts
+    s.insert(axis + 1, n)
+    sl = [slice(None)] * data.ndim
+    sl[axis] = slice(0, nPts * n)
+    d1 = data[tuple(sl)]
+    # print d1.shape, s
+    d1.shape = tuple(s)
+    d2 = d1.max(axis + 1)
+
+    if ma is None:
+        return d2
+    else:
+        info = ma.infoCopy()
+        if 'values' in info[axis]:
+            if xvals == 'subsample':
+                info[axis]['values'] = info[axis]['values'][::n][:nPts]
+            elif xvals == 'downsample':
+                info[axis]['values'] = downsample(info[axis]['values'], n)
+        return MetaArray(d2, info=info)
+
 class ImageItem(GraphicsObject):
     """
     **Bases:** :class:`GraphicsObject <pyqtgraph.GraphicsObject>`
@@ -45,7 +87,7 @@ class ImageItem(GraphicsObject):
 
         self.levels = None  # [min, max] or [[redMin, redMax], ...]
         self.lut = None
-        self.autoDownsample = False
+        self.autoDownsample = True
 
         self.drawKernel = None
         self.border = None
@@ -287,16 +329,17 @@ class ImageItem(GraphicsObject):
 
         if self.autoDownsample:
             # reduce dimensions of image based on screen resolution
+            scl = 0.6
             o = self.mapToDevice(QtCore.QPointF(0, 0))
             x = self.mapToDevice(QtCore.QPointF(1, 0))
             y = self.mapToDevice(QtCore.QPointF(0, 1))
-            w = Point(x - o).length()
-            h = Point(y - o).length()
+            w = Point(x - o).length()*scl
+            h = Point(y - o).length()*scl
             xds = max(1, int(1 / w))
             yds = max(1, int(1 / h))
             # print(w, h, xds, yds)
-            image = fn.downsample(self.image, xds, axis=0)
-            image = fn.downsample(image, yds, axis=1)
+            image = downsample(self.image, xds, axis=0)
+            image = downsample(image, yds, axis=1)
         else:
             image = self.image
 

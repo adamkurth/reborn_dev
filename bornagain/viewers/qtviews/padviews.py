@@ -18,6 +18,7 @@ import bornagain
 # import bornagain.external.pyqtgraph as bpg
 from bornagain.fileio.getters import FrameGetter, CheetahFrameGetter
 from bornagain.external.crystfel import geometry_file_to_pad_geometry_list
+from bornagain.external.pyqtgraph.mods import ImageItem
 from bornagain.analysis.peaks import boxsnr, PeakFinder
 
 padview_debug_on = True
@@ -508,7 +509,7 @@ class PADView(object):
 
             mask_rgba = self._make_mask_rgba(d)
 
-            im = pg.ImageItem(mask_rgba)
+            im = ImageItem(mask_rgba)
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 
@@ -707,7 +708,7 @@ class PADView(object):
             if self.show_true_fast_scans:  # For testing - show fast scan axis
                 d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
 
-            im = pg.ImageItem(d)
+            im = ImageItem(d)
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 

@@ -24,15 +24,15 @@ def mcsim(
         n_pixels=1000,
         beam_diameter=1e-6,
         photon_energy=9.0,
-        n_photons=1e14,
+        n_photons=1e12,
         transmission=1.0,
-        mosaicity_fwhm=1e-4,
-        beam_divergence_fwhm=1e-2,
+        mosaicity_fwhm=0e-4,
+        beam_divergence_fwhm=0e-2,
         beam_spatial_profile='tophat',
-        photon_energy_fwhm=0.02,
+        photon_energy_fwhm=0.0,
         crystal_size=1e-6,
         crystal_size_fwhm=0e-6,
-        mosaic_domain_size=1e-6,
+        mosaic_domain_size=0.1e-6,
         mosaic_domain_size_fwhm=0.0,
         water_radius=0.0,
         temperature=298.16,
@@ -61,7 +61,7 @@ def mcsim(
     # Beam parameters
     photon_energy = photon_energy / keV
     wavelength = hc / photon_energy  # pulse_energy = 0.0024
-    wavelength_fwhm = wavelength * photon_energy_fwhm
+    wavelength_fwhm = wavelength * photon_energy_fwhm # TODO: This is wrong: wavelength FWHM is not energy FWHM
     n_photons = int(n_photons)  # pulse_energy / photon energy
     I0 = transmission * n_photons / (beam_diameter ** 2)  # Square beam
 
@@ -263,17 +263,11 @@ def mcsim(
     # Setup detector geometry
     write('Configuring detector... ')
     pad = ba.detector.PADGeometry()
-    pad.simple_setup(
-        n_pixels=n_pixels,
-        pixel_size=pixel_size,
-        distance=detector_distance)
+    pad.simple_setup(n_pixels=n_pixels, pixel_size=pixel_size, distance=detector_distance)
     q = pad.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
     qmag = vec_mag(q)
     sa = pad.solid_angles()
-    P = pad.polarization_factors(
-        polarization_vec=polarization_vec,
-        beam_vec=beam_vec,
-        weight=polarization_weight)
+    P = pad.polarization_factors(polarization_vec=polarization_vec, beam_vec=beam_vec, weight=polarization_weight)
     write('done\n')
 
     # Get atomic coordinates and scattering factors from pdb file
@@ -540,6 +534,7 @@ def mcsim(
 
     write("\n\nDone!\n\n")
 
+
 if __name__ == '__main__':
 
     import numpy as np
@@ -553,7 +548,7 @@ if __name__ == '__main__':
 
     if os.path.isdir('./temp'):
         shutil.rmtree('./temp')
-    mcsim(pdb_file=psi_pdb_file, n_monte_carlo_iterations=10000)
+    mcsim(pdb_file=psi_pdb_file, n_monte_carlo_iterations=1000)
     f = h5py.File('temp/pattern-000001.h5', 'r')
     data = np.array(f['/data/ideal'])
     geom_file = './temp/geom.geom'
@@ -561,3 +556,5 @@ if __name__ == '__main__':
     padview = PADView(pad_geometry=pad_geometry, raw_data=[data])
     padview.show()
     pyqtgraph.QtGui.QApplication.exec_()
+    if os.path.isdir('./temp'):
+        shutil.rmtree('./temp')
