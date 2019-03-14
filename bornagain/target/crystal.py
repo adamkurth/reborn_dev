@@ -26,7 +26,7 @@ from bornagain import utils
 from bornagain.simulate import atoms, simutils
 
 
-class Structure(object):
+class CrystalStructure(object):
     r"""
     A container class for stuff needed when dealing with crystal structures.
     """
@@ -153,13 +153,22 @@ class Structure(object):
         return self._x
 
 
-class structure(Structure):
+class Structure(CrystalStructure):
 
     def __init__(self, *args, **kwargs):
 
-        utils.depreciate('The class "structure" is depreciated.  Use "Structure" instead.')
+        utils.depreciate('The class "crystal.Structure" is depreciated.  Use "crystal.CrystalStructure" instead.')
 
-        Structure.__init__(self, *args, **kwargs)
+        CrystalStructure.__init__(self, *args, **kwargs)
+
+
+class structure(CrystalStructure):
+
+    def __init__(self, *args, **kwargs):
+
+        utils.depreciate('The class "crystal.structure" is depreciated.  Use "crystal.CrystalStructure" instead.')
+
+        CrystalStructure.__init__(self, *args, **kwargs)
 
 
 def parse_pdb(pdbFilePath, crystalStruct=None):
@@ -170,7 +179,7 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
     elements = []
     atomIndex = int(0)
     if crystalStruct is None:
-        cryst = Structure()
+        cryst = CrystalStructure()
     else:
         cryst = crystalStruct
     SCALE = np.zeros([3, 4])

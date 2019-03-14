@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from bornagain.target import density, crystal
 
-cryst = crystal.Structure()
+cryst = crystal.CrystalStructure()
 cryst.set_spacegroup('P 1')
 a = .3e-9
 b = .3e-9

@@ -14,7 +14,7 @@ from bornagain.units import hc
 from bornagain import utils
 from bornagain.external import crystfel
 from bornagain.simulate import atoms
-from bornagain.target.crystal import Structure
+from bornagain.target.crystal import CrystalStructure
 from bornagain.simulate.clcore import ClCore
 
 
@@ -76,7 +76,7 @@ def lysozyme_molecule(pads=None, wavelength=None, random_rotation=False):
 
     sim = ClCore(group_size=32, double_precision=False)
 
-    cryst = Structure(lysozyme_pdb_file)
+    cryst = CrystalStructure(lysozyme_pdb_file)
     r = cryst.r
     f = atoms.get_scattering_factors(cryst.Z, photon_energy=photon_energy)
     q = [pad.q_vecs(beam_vec=[0, 0, 1], wavelength=wavelength) for pad in pads]
@@ -130,7 +130,7 @@ class PDBMoleculeSimulator(object):
         photon_energy = hc / wavelength
 
         self.clcore = ClCore(group_size=32, double_precision=False)
-        cryst = Structure(pdb_file)
+        cryst = CrystalStructure(pdb_file)
 
         self.random_rotation = random_rotation
 

@@ -49,7 +49,7 @@ print('CPU q array created in %7.03f ms' % (tdif * 1e3))
 # Load a crystal structure from pdb file
 pdbFile = '../examples/data/pdb/2LYZ.pdb'  # Lysozyme
 print('Loading pdb file (%s)' % pdbFile)
-cryst = crystal.Structure(pdbFile)
+cryst = crystal.CrystalStructure(pdbFile)
 r = cryst.r # These are atomic coordinates (Nx3 array)
 n_atoms = r.shape[0]
 
