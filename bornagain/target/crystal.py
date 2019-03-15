@@ -49,7 +49,7 @@ class SpaceGroup(object):
             self.itoc_number = itoc_number_from_hall_number(hall_number)
             self.hermann_mauguin_symbol = hermann_mauguin_symbol_from_hall_number(hall_number)
         elif hermann_mauguin_symbol is not None:
-            self.itoc_number = itoc_number_from_hermann_maugin_symbol(hermann_mauguin_symbol)
+            self.itoc_number = itoc_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol)
             self.hall_number = hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol)
         elif itoc_number is not None:
             self.hall_number = hall_number_from_itoc_number(itoc_number)
@@ -59,9 +59,6 @@ class SpaceGroup(object):
 
         self.sym_rotations, self.sym_translations = get_symmetry_operators_from_hall_number(self.hall_number)
         self.n_molecules = len(self.sym_rotations)
-
-
-
 
 
 class CrystalStructure(object):
@@ -79,8 +76,8 @@ class CrystalStructure(object):
     T = None  #: Translation vector that goes with orthogonalization matrix (What is this used for???)
     elements = None  #: Atomic element symbols
     Z = None  #: Atomic numbers
-    spaceGroupNumber = None  #: Space group number in the Int. Tables
-    hermannMauguinSymbol = None  #: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)
+    # spaceGroupNumber = None  #: Space group number in the Int. Tables
+    # hermannMauguinSymbol = None  #: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)
     a = None  #: Lattice constant
     b = None  #: Lattice constant
     c = None  #: Lattice constant
@@ -89,11 +86,12 @@ class CrystalStructure(object):
     gamma = None  #: Lattice angle
     V = None  #: Unit cell volume
     nAtoms = None  #: Number of atoms
-    nMolecules = None  #: Number of molecules per unit cell
-    symOps = None  #: Symmetry operations that are applied to fractional coordinates
-    symRs = None #: Symmetry 3x3 transformation matrices (in crystal basis)
-    symTs = None #: Symmetry translations (in crystal basis)
+    # nMolecules = None  #: Number of molecules per unit cell
+    # symOps = None  #: Symmetry operations that are applied to fractional coordinates
+    # symRs = None #: Symmetry 3x3 transformation matrices (in crystal basis)
+    # symTs = None #: Symmetry translations (in crystal basis)
 
+    spacegroup = None
 
     def __init__(self, pdbFilePath=None):
 
@@ -160,21 +158,48 @@ class CrystalStructure(object):
         self.Ainv = O.T.copy()
         self.V = V
 
-    def set_spacegroup(self, hermann_mauguin_symbol):
+    def set_spacegroup(self, *args, **kwargs):
 
         r"""
 
         Set the spacegroup of the crystal.  This produces a cache of the symmetry transformation operations.
 
         Args:
-            hermann_mauguin_symbol:  This can be a string (like 'P 63' or a number 1-530)
+            hermann_mauguin_symbol:  A string like 'P 63'
+            hall_number: Hall number (between 1-530)
+            itoc_number: Spacegroup number from International Tables of Crystallography (between 1-230)
 
         """
 
-        self.hermann_mauguin_symbol = hermann_mauguin_symbol
-        self.symRs, self.symTs = get_symmetry_operators_from_space_group(hermann_mauguin_symbol)
-        self.symRinvs = [np.linalg.inv(R) for R in self.symRs]
-        self.nMolecules = len(self.symTs)
+        self.spacegroup = SpaceGroup(*args, **kwargs)
+        # self.hermann_mauguin_symbol = hermann_mauguin_symbol
+        # self.symRs, self.symTs = get_symmetry_operators_from_space_group(hermann_mauguin_symbol)
+        # self.symRinvs = [np.linalg.inv(R) for R in self.symRs]
+        # self.nMolecules = len(self.symTs)
+
+    @property
+    def hermannMauguinSymbol(self):
+        return self.spacegroup.hermann_mauguin_symbol
+
+    @property
+    def spaceGroupNumber(self):
+        return self.spacegroup.itoc_number
+
+    @property
+    def nMolecules(self):
+        return self.n_molecules
+
+    @property
+    def n_molecules(self):
+        return self.spacegroup.n_molecules
+
+    @property
+    def symRs(self):
+        return self.spacegroup.sym_rotations
+
+    @property
+    def symTs(self):
+        return self.spacegroup.sym_translations
 
     @property
     def x(self):
@@ -216,13 +241,12 @@ class UnitCell(object):
 
         pass
 
+
 class FiniteLattice(object):
 
     def __init__(self, max_size=None):
 
         pass
-
-
 
 
 def parse_pdb(pdbFilePath, crystalStruct=None):
@@ -309,7 +333,8 @@ def get_hm_symbols():
 
     return symbols
 
-hermann_mauguin_symbols = get_hm_symbols()
+# hermann_mauguin_symbols = get_hm_symbols()
+
 
 def hermann_mauguin_symbol_from_hall_number(hall_number):
 
@@ -318,16 +343,18 @@ def hermann_mauguin_symbol_from_hall_number(hall_number):
 
     return spgrp._hmsym[hall_number-1]
 
+
 def itoc_number_from_hall_number(hall_number):
 
     return spgrp._sgnum[hall_number-1]
+
 
 def hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
 
     idx = None
     hermann_mauguin_symbol = hermann_mauguin_symbol.strip()
     for idx in range(0, 530):
-        if hermann_mauguin_symbol == hermann_mauguin_symbols[idx]:
+        if hermann_mauguin_symbol == spgrp._hmsym[idx]:
             break
 
     if idx is None:
@@ -335,9 +362,11 @@ def hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
 
     return idx+1
 
+
 def itoc_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
 
     return itoc_number_from_hall_number(hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol))
+
 
 def hall_number_from_itoc_number(itoc_number):
 
@@ -350,12 +379,10 @@ def hall_number_from_itoc_number(itoc_number):
             break
     return idx+1
 
+
 def hermann_mauguin_symbol_from_itoc_number(itoc_number):
 
     return hermann_mauguin_symbol_from_hall_number(hall_number_from_itoc_number(itoc_number))
-
-
-
 
 
 def spacegroup_ops_from_hall_number(hall_number):
@@ -364,6 +391,7 @@ def spacegroup_ops_from_hall_number(hall_number):
     trans = [utils.vec_check(T) for T in spgrp._spgrp_ops[hall_number-1]['translations']]
 
     return rot, trans
+
 
 def get_symmetry_operators_from_hall_number(hall_number):
 
@@ -375,6 +403,7 @@ def get_symmetry_operators_from_hall_number(hall_number):
     Ts = [utils.vec_check(T) for T in spgrp._spgrp_ops[idx]['translations']]
 
     return Rs, Ts
+
 
 def get_symmetry_operators_from_space_group(hm_symbol):
 
