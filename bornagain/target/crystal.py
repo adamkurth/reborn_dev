@@ -13,17 +13,75 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 # Python 2 and 3 compatibility...
 try:
-  basestring
+    basestring
 except NameError:
-  basestring = str
+    basestring = str
 
 import numpy as np
 from numpy import sin, cos, sqrt
 
 import bornagain as ba
-from bornagain.target import spgrp
+from bornagain.target import spgrp, molecule
 from bornagain import utils
 from bornagain.simulate import atoms, simutils
+
+
+class UnitCell(object):
+
+    a = None  #: Lattice constant
+    b = None  #: Lattice constant
+    c = None  #: Lattice constant
+    alpha = None  #: Lattice angle
+    beta = None  #: Lattice angle
+    gamma = None  #: Lattice angle
+    volume = None  #: Unit cell volume
+    o_mat = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
+    o_mat_inv = None  #: Inverse orthogonalization matrix (3x3 array)
+    a_mat = None  #: Orthogonalization matrix transpose (3x3 array). Does the transform q = dot(A, h), with fractional Miller indices h.
+    a_mat_inv = None  #: A inverse
+
+    def __init__(self, a, b, c, alpha, beta, gamma):
+        r"""
+
+        Set the unit cell lattice.
+
+        Args:
+            a: Lattice constant
+            b: Lattice constant
+            c: Lattice constant
+            alpha: Lattice angle
+            beta:  Lattice angle
+            gamma: Lattice angle
+        """
+
+        al = alpha
+        be = beta
+        ga = gamma
+
+        self.a = a
+        self.b = b
+        self.c = c
+        self.alpha = al
+        self.beta = be
+        self.gamma = ga
+
+        V = a * b * c * sqrt(1 - cos(al)**2 - cos(be) **
+                             2 - cos(ga)**2 + 2 * cos(al) * cos(be) * cos(ga))
+        O = np.array([
+                [a, b * cos(ga), c * cos(be)],
+                [0, b * sin(ga), c * (cos(al) - cos(be) * cos(ga)) / sin(ga)],
+                [0, 0, V / (a * b * sin(ga))]
+                ])
+        Oinv = np.array([
+                [1 / a, -cos(ga) / (a * sin(ga)), 0],
+                [0, 1 / (b * sin(ga)), 0],
+                [0, 0, a * b * sin(ga) / V]
+                ])
+        self.o_mat = O
+        self.o_mat_inv = Oinv
+        self.a_mat = Oinv.T.copy()
+        self.a_mat_inv = O.T.copy()
+        self.volume = V
 
 
 class SpaceGroup(object):
@@ -67,30 +125,11 @@ class CrystalStructure(object):
     """
     # TODO: Needs documentation!
 
-    r = None  #: Atomic coordinates (3xN array)
     _x = None  #: Fractional coordinates (3xN array)
-    O = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
-    Oinv = None  #: Inverse orthogonalization matrix (3x3 array)
-    A = None  #: This is Oinv transpose (3x3 array). Does the transform q = dot(A, h), with fractional Miller indices h.
-    Ainv = None  #: A inverse
     T = None  #: Translation vector that goes with orthogonalization matrix (What is this used for???)
-    elements = None  #: Atomic element symbols
-    Z = None  #: Atomic numbers
-    # spaceGroupNumber = None  #: Space group number in the Int. Tables
-    # hermannMauguinSymbol = None  #: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)
-    a = None  #: Lattice constant
-    b = None  #: Lattice constant
-    c = None  #: Lattice constant
-    alpha = None  #: Lattice angle
-    beta = None  #: Lattice angle
-    gamma = None  #: Lattice angle
-    V = None  #: Unit cell volume
-    nAtoms = None  #: Number of atoms
-    # nMolecules = None  #: Number of molecules per unit cell
-    # symOps = None  #: Symmetry operations that are applied to fractional coordinates
-    # symRs = None #: Symmetry 3x3 transformation matrices (in crystal basis)
-    # symTs = None #: Symmetry translations (in crystal basis)
 
+    molecule = None
+    unitcell = None
     spacegroup = None
 
     def __init__(self, pdbFilePath=None):
@@ -98,23 +137,19 @@ class CrystalStructure(object):
         if pdbFilePath is not None:
             self.load_pdb(pdbFilePath)
 
-    @property
-    def n_molecules(self):
-        return self.nMolecules
-
-    def load_pdb(self, pdbFilePath):
+    def load_pdb(self, pdb_file_path):
 
         r"""
 
         Populate the class with all the info from a PDB file.
 
         Args:
-            pdbFilePath: Path to the PDB file
+            pdb_file_path: Path to the PDB file
 
         """
-        parse_pdb(pdbFilePath, self)
+        parse_pdb(pdb_file_path, self)
 
-    def set_cell(self, a, b, c, alpha, beta, gamma):
+    def set_cell(self, *args, **kwargs):
         r"""
 
         Set the unit cell lattice.
@@ -129,34 +164,7 @@ class CrystalStructure(object):
 
         """
 
-        al = alpha
-        be = beta
-        ga = gamma
-
-        self.a = a
-        self.b = b
-        self.c = c
-        self.alpha = al
-        self.beta = be
-        self.gamma = ga
-
-        V = a * b * c * sqrt(1 - cos(al)**2 - cos(be) **
-                             2 - cos(ga)**2 + 2 * cos(al) * cos(be) * cos(ga))
-        O = np.array([
-                [a, b * cos(ga), c * cos(be)],
-                [0, b * sin(ga), c * (cos(al) - cos(be) * cos(ga)) / sin(ga)],
-                [0, 0, V / (a * b * sin(ga))]
-                ])
-        Oinv = np.array([
-                [1 / a, -cos(ga) / (a * sin(ga)), 0],
-                [0, 1 / (b * sin(ga)), 0],
-                [0, 0, a * b * sin(ga) / V]
-                ])
-        self.O = O
-        self.Oinv = Oinv
-        self.A = Oinv.T.copy()
-        self.Ainv = O.T.copy()
-        self.V = V
+        self.unitcell = UnitCell(*args, **kwargs)
 
     def set_spacegroup(self, *args, **kwargs):
 
@@ -172,33 +180,118 @@ class CrystalStructure(object):
         """
 
         self.spacegroup = SpaceGroup(*args, **kwargs)
-        # self.hermann_mauguin_symbol = hermann_mauguin_symbol
-        # self.symRs, self.symTs = get_symmetry_operators_from_space_group(hermann_mauguin_symbol)
-        # self.symRinvs = [np.linalg.inv(R) for R in self.symRs]
-        # self.nMolecules = len(self.symTs)
+
+    def set_molecule(self, *args, **kwargs):
+
+        r"""
+        See docs for target.Molecule
+        """
+
+        self.molecule = molecule.Molecule(*args, **kwargs)
+
+    @property
+    def elements(self):
+        utils.depreciate('Use CrystalStructure.molecule')
+        return self.molecule.atomic_symbols
+
+    @property
+    def Z(self):
+        utils.depreciate('Use CrystalStructure.molecule')
+        return self.molecule.atomic_numbers
+
+    @property
+    def nAtoms(self):
+        utils.depreciate('Use CrystalStructure.molecule')
+        return self.molecule.n_atoms
+
+    @property
+    def r(self):
+        utils.depreciate('Use CrystalStructure.molecule')
+        return self.molecule.coordinates
+
+    @property
+    def a(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.a
+
+    @property
+    def b(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.b
+
+    @property
+    def c(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.c
+
+    @property
+    def alpha(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.alpha
+
+    @property
+    def beta(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.beta
+
+    @property
+    def gamma(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.gamma
+
+    @property
+    def V(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.volume
+
+    @property
+    def O(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.o_mat
+
+    @property
+    def Oinv(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.o_mat_inv
+
+    @property
+    def A(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.a_mat
+
+    @property
+    def Ainv(self):
+        utils.depreciate('Use CrystalStructure.unitcell')
+        return self.unitcell.a_mat_inv
 
     @property
     def hermannMauguinSymbol(self):
+        utils.depreciate('Use CrystalStructure.spacegroup')
         return self.spacegroup.hermann_mauguin_symbol
 
     @property
     def spaceGroupNumber(self):
+        utils.depreciate('Use CrystalStructure.spacegroup')
         return self.spacegroup.itoc_number
 
     @property
     def nMolecules(self):
+        utils.depreciate('Use CrystalStructure.spacegroup')
         return self.n_molecules
 
     @property
     def n_molecules(self):
+        utils.depreciate('Use CrystalStructure.spacegroup')
         return self.spacegroup.n_molecules
 
     @property
     def symRs(self):
+        utils.depreciate('Use CrystalStructure.spacegroup')
         return self.spacegroup.sym_rotations
 
     @property
     def symTs(self):
+        utils.depreciate('Use CrystalStructure.spacegroup')
         return self.spacegroup.sym_translations
 
     @property
@@ -213,7 +306,7 @@ class CrystalStructure(object):
         """
 
         if self._x is None:
-            self._x = np.dot(self.Oinv, self.r.T).T
+            self._x = np.dot(self.unitcell.o_mat_inv, self.molecule.coordinates.T).T
         return self._x
 
 
@@ -235,13 +328,6 @@ class structure(CrystalStructure):
         CrystalStructure.__init__(self, *args, **kwargs)
 
 
-class UnitCell(object):
-
-    def __init__(self):
-
-        pass
-
-
 class FiniteLattice(object):
 
     def __init__(self, max_size=None):
@@ -249,20 +335,20 @@ class FiniteLattice(object):
         pass
 
 
-def parse_pdb(pdbFilePath, crystalStruct=None):
-    r"""Return a :class:`Structure` object with PDB information. """
+def parse_pdb(pdb_file_path, crystal_structure=None):
+    r"""Return a :class:`CrystalStructure` object with PDB information. """
 
-    maxAtoms = int(1e5)
-    r = np.zeros([3, maxAtoms])
-    elements = []
-    atomIndex = int(0)
-    if crystalStruct is None:
+    max_atoms = int(1e5)
+    coordinates = np.zeros([max_atoms, 3])
+    atomic_symbols = []
+    atom_index = int(0)
+    if crystal_structure is None:
         cryst = CrystalStructure()
     else:
-        cryst = crystalStruct
+        cryst = crystal_structure
     SCALE = np.zeros([3, 4])
 
-    with open(pdbFilePath) as pdbfile:
+    with open(pdb_file_path) as pdbfile:
 
         for line in pdbfile:
 
@@ -287,40 +373,31 @@ def parse_pdb(pdbFilePath, crystalStruct=None):
                 c = float(cryst1[24:33]) * 1e-10
                 # And of course degrees are converted to radians (though we
                 # loose the perfection of rational quotients like 360/4=90...)
-                al = float(cryst1[33:40]) * np.pi / 180.0
-                be = float(cryst1[40:47]) * np.pi / 180.0
-                ga = float(cryst1[47:54]) * np.pi / 180.0
+                alpha = float(cryst1[33:40]) * np.pi / 180.0
+                beta = float(cryst1[40:47]) * np.pi / 180.0
+                gamma = float(cryst1[47:54]) * np.pi / 180.0
 
-                cryst.set_cell(a, b, c, al, be, ga)
                 hermann_mauguin_symbol = cryst1[55:66].strip()
 
             if line[:6] == 'ATOM  ' or line[:6] == "HETATM":
-                r[0, atomIndex] = float(line[30:38]) * 1e-10
-                r[1, atomIndex] = float(line[38:46]) * 1e-10
-                r[2, atomIndex] = float(line[46:54]) * 1e-10
-                elements.append(line[76:78].strip().capitalize())
-                # z = atoms.atomic_symbols_to_numbers(elements[atomIndex])
-                # #xr.SymbolToAtomicNumber(elements[atomIndex])
-                atomIndex += 1
+                coordinates[atom_index, 0] = float(line[30:38]) * 1e-10
+                coordinates[atom_index, 1] = float(line[38:46]) * 1e-10
+                coordinates[atom_index, 2] = float(line[46:54]) * 1e-10
+                atomic_symbols.append(line[76:78].strip().capitalize())
+                atom_index += 1
 
-            if atomIndex == maxAtoms:
-                r = np.append(r, np.zeros([3, maxAtoms]), axis=1)
+            if atom_index == max_atoms:
+                coordinates = np.append(coordinates, np.zeros([3, max_atoms]), axis=1)
 
     # Truncate atom list since we pre-allocated extra memory
-    nAtoms = atomIndex
-    r = r[:, :nAtoms]
-    elements = elements[:nAtoms]
+    coordinates = coordinates[:atom_index, :]
+    atomic_symbols = atomic_symbols[:atom_index]
 
     T = SCALE[:, 3]
 
-    cryst.cryst1 = cryst1
-    cryst.r = utils.vec_check(r)
-    cryst.T = utils.vec_check(T)
-    cryst.elements = elements
-    cryst.Z = atoms.atomic_symbols_to_numbers(elements)
-    cryst.nAtoms = nAtoms
-
-    cryst.set_spacegroup(hermann_mauguin_symbol)
+    cryst.set_molecule(coordinates, atomic_symbols=atomic_symbols)
+    cryst.set_cell(a, b, c, alpha, beta, gamma)
+    cryst.set_spacegroup(hermann_mauguin_symbol=hermann_mauguin_symbol)
 
     return cryst
 

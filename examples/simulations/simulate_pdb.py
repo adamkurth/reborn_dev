@@ -48,13 +48,13 @@ print('CPU q array created in %7.03f ms' % (tdif * 1e3))
 # Load a crystal structure from pdb file
 pdbFile = '../data/pdb/2LYZ.pdb'  # Lysozyme
 print('Loading pdb file (%s)' % pdbFile)
-cryst = crystal.structure(pdbFile)
-r = cryst.r # These are atomic coordinates (Nx3 array)
+cryst = crystal.CrystalStructure(pdbFile)
+r = cryst.molecule.coordinates # These are atomic coordinates (Nx3 array)
 n_atoms = r.shape[0]
 
 # Look up atomic scattering factors (they are complex numbers)
 print('Getting scattering factors')
-f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
+f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, ba.units.hc / wavelength)
 
 n_trials = 3
 show_all = show

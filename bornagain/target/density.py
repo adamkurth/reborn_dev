@@ -47,10 +47,10 @@ class CrystalMeshTool(object):
         d = resolution
         s = np.ceil(oversampling)
 
-        abc = np.array([cryst.a, cryst.b, cryst.c])
+        abc = np.array([cryst.unitcell.a, cryst.unitcell.b, cryst.unitcell.c])
 
         m = 1
-        for T in cryst.symTs:
+        for T in cryst.spacegroup.sym_translations:
             for mp in np.arange(1, 10):
                 Tp = T*mp
                 if np.round(np.max(Tp % 1.0)*100)/100 == 0:
@@ -124,7 +124,7 @@ class CrystalMeshTool(object):
 
         x = self.get_x_vecs()
 
-        return np.dot(self.cryst.O, x.T).T
+        return np.dot(self.cryst.unitcell.o_mat, x.T).T
 
     def get_h_vecs(self):
 
@@ -154,7 +154,7 @@ class CrystalMeshTool(object):
 
 		"""
 
-        return 2*np.pi*np.dot(self.cryst.A, self.get_h_vecs().T).T
+        return 2*np.pi*np.dot(self.cryst.unitcell.a_mat, self.get_h_vecs().T).T
 
 
     def get_sym_luts(self):
@@ -176,7 +176,7 @@ class CrystalMeshTool(object):
             sym_luts = []
             x0 = self.get_x_vecs()
 
-            for (R, T) in zip(self.cryst.symRs, self.cryst.symTs):
+            for (R, T) in zip(self.cryst.spacegroup.sym_rotations, self.cryst.spacegroup.sym_translations):
                 lut = np.dot(R, x0.T).T + T    # transform x vectors in 3D grid
                 lut = np.round(lut / self.dx)  # switch from x to n vectors
                 lut = lut % self.N             # wrap around
@@ -205,7 +205,7 @@ class CrystalMeshTool(object):
         """
 
         luts = self.get_sym_luts()
-        data_trans = np.zeros(data.shape)
+        data_trans = np.zeros_like(data)
         data_trans.flat[luts[j]] = data.flat[luts[i]]
 
         return data_trans
@@ -283,8 +283,8 @@ class CrystalMeshTool(object):
         """
         if mode == 'gaussian':
             sigma = fixed_atom_sigma # Gaussian sigma (i.e. atom "size"); this is a fudge factor and needs to be updated
-            n_atoms = atom_x_vecs.shape[0]
-            orth_mat = self.cryst.O.copy()
+            # n_atoms = atom_x_vecs.shape[0]
+            orth_mat = self.cryst.unitcell.o_mat.copy()
             map_x_vecs = self.get_x_vecs()
             n_map_voxels = map_x_vecs.shape[0]
             f_map = np.zeros([n_map_voxels], dtype=np.complex)

@@ -361,6 +361,36 @@ class PADGeometry(object):
 
         return np.arccos(vec_norm(self.position_vecs()).dot(beam_vec.ravel()))
 
+    def beamstop_mask(self, beam=None, wavelength=None, q_min=None, min_angle=None):
+
+        r"""
+
+        Args:
+            beam: Instance of the Beam class (for wavelength)
+            wavelength: Specify wavelength (needed for q_mags)
+            q_min: Minimum q magnitude
+            min_angle: Minimum scattering angle
+
+        Returns:
+
+        """
+
+        mask = self.ones().ravel()
+        if q_min is not None:
+            if beam is not None:
+                wavelength = beam.wavelength
+            else:
+                wavelength = wavelength
+            if wavelength is None:
+                raise ValueError("Wavelength cannot be None")
+            mask[self.q_mags(wavelength=wavelength) < q_min] = 0
+        elif min_angle is not None:
+            mask[self.scattering_angles < min_angle] = 0
+        else:
+            raise ValueError("Specify either q_min (and wavelength) or min_angle")
+        return self.reshape(mask)
+
+
     def reshape(self, dat):
         r"""
 

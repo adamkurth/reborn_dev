@@ -14,7 +14,7 @@ import pyqtgraph as pg
 sys.path.append("../..")
 import bornagain as ba
 from bornagain.viewers import qtviews
-from bornagain.target import crystal, map
+from bornagain.target import crystal, density
 
 Niter = 100  # Number of phase-retrieval iterations
 
@@ -37,7 +37,7 @@ f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
 print('Setting up 3D mesh')
 d = 0.6e-9  # Minimum resolution in SI units (as always!)
 s = 1  # Oversampling factor.  s = 1 means Bragg sampling
-mt = map.CrystalMeshTool(cryst, d, s)
+mt = density.CrystalMeshTool(cryst, d, s)
 print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))
 # h = mt.get_h_vecs()  # Miller indices (fractional)
 

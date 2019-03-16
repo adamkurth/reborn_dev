@@ -19,12 +19,12 @@ Niter = 100  # Number of phase-retrieval iterations
 
 pdbFile = '../data/pdb/1JB0.pdb'
 print('Loading pdb file (%s)' % pdbFile)
-cryst = crystal.structure(pdbFile)
-print(cryst.cryst1.strip())
+cryst = crystal.CrystalStructure(pdbFile)
+# print(cryst.cryst1.strip())
 
 print('Getting scattering factors')
 wavelength = 1.5e-10
-f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
+f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, ba.units.hc / wavelength)
 
 print('Setting up 3D mesh')
 d = 0.6e-9  # Minimum resolution in SI units (as always!)
@@ -158,7 +158,7 @@ for i in np.arange(0, Niter):
 
     rho = symmetrize(rho)
 
-    R = np.sum((rho-rho0)**2)/np.sum(rho0**2)
+    R = np.sum(np.abs(rho-rho0)**2)/np.sum(np.abs(rho0)**2)
     errors[i] = R
 
     print("Iteration #%d (%s; R: %.2g)" % (i, alg, R))

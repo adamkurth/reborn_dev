@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 sys.path.append("../..")
 import bornagain as ba
 from bornagain.viewers import qtviews
-from bornagain.target import crystal, map
+from bornagain.target import crystal, density
 
 Niter = 500  # Number of phase-retrieval iterations
 
@@ -43,7 +43,7 @@ else:  # Alternatively, load a pdb file
     pdbFile = '../data/pdb/1JB0.pdb'
     print('Loading pdb file (%s)' % pdbFile)
     cryst = crystal.structure(pdbFile)
-    print(cryst.cryst1.strip())
+    # print(cryst.cryst1.strip())
 
     print('Getting scattering factors')
     wavelength = 1.5e-10
@@ -52,7 +52,7 @@ else:  # Alternatively, load a pdb file
     print('Setting up 3D mesh')
     d = 0.5e-9  # Minimum resolution in SI units (as always!)
     s = 1  # Oversampling factor.  s = 1 means Bragg sampling
-    mt = map.CrystalMeshTool(cryst, d, s)
+    mt = density.CrystalMeshTool(cryst, d, s)
     print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))
     h = mt.get_h_vecs()  # Miller indices (fractional)
 
