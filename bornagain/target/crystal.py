@@ -131,6 +131,12 @@ class CrystalStructure(object):
     molecule = None
     unitcell = None
     spacegroup = None
+    mosaicity_fwhm = 0
+    crystal_size = 1e-6
+    crystal_size_fwhm = 0.0
+    mosaic_domain_size = 0.5e-6
+    mosaic_domain_size_fwhm = 0.0
+
 
     def __init__(self, pdbFilePath=None):
 

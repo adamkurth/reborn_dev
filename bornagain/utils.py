@@ -78,7 +78,7 @@ def vec_check(vec, hardcheck=False, dimension=3):
     if len(vec.shape) == 1:
         vec = vec[np.newaxis]
     if len(vec.shape) != 2:
-        raise ValueError('Vectors must be Nx%d numpy ndarrays' % (dimension))
+        raise ValueError('Vectors must be Nx%d numpy ndarrays' % dimension)
     if vec.shape[1] != dimension:
         if vec.shape[0] != dimension:
             raise ValueError('Vectors must be Nx3 numpy ndarrays')

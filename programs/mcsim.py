@@ -5,6 +5,7 @@ import sys
 import time
 import numpy as np
 import h5py
+import pickle
 from glob import glob
 import inspect
 from scipy.special import erf
@@ -42,12 +43,9 @@ def mcsim(
         cromer_mann=False,
         expand_symm=False,
         fix_rot_seq=False,
-        overlay_wigner_cells=False,
-        mask_direct_beam=False,
         pdb_file='../../examples/data/pdb/2LYZ-P1.pdb',
         write_hdf5=True,
         write_geom=True,
-        write_ideal_only=True,
         results_dir='./temp',
         quiet=False,
         compression=None,
@@ -118,10 +116,6 @@ def mcsim(
     beam.beam_divergence_fwhm = beam_divergence_fwhm
     beam.pulse_energy = n_photons * photon_energy
 
-    # Crystal parameters
-    crystal_size_fwhm = crystal_size * crystal_size_fwhm
-    mosaic_domain_size_fwhm = mosaic_domain_size * mosaic_domain_size_fwhm
-
     # Rotation parameters
     rotation_axis = [1, 0, 0]
     rotation_angle = 0.1
@@ -143,12 +137,11 @@ def mcsim(
         write('Writing geometry file %s\n' % geom_file)
         crystfel.write_geom_file_single_pad(file_path=geom_file, beam=beam, pad_geometry=pad)
 
-    # Creating text file with output parameters
+    # Create text file with output parameters
     used_params = open(os.path.join(results_dir, 'used_params.txt'), 'w+')
     args, _, _, values = inspect.getargvalues(inspect.currentframe())
     for i in args:
         used_params.write("%s = %s\n" % (i, values[i]))
-
 
     section = '=' * 70 + '\n'
 
@@ -169,6 +162,13 @@ def mcsim(
     # Get atomic coordinates and scattering factors from pdb file
     write('Getting atomic coordinates and scattering factors... ')
     cryst = ba.target.crystal.CrystalStructure(pdb_file)
+    # Crystal parameters
+    crystal_size_fwhm = crystal_size * crystal_size_fwhm
+    mosaic_domain_size_fwhm = mosaic_domain_size * mosaic_domain_size_fwhm
+    cryst.crystal_size = crystal_size
+    cryst.crystal_size_fwhm = crystal_size * crystal_size_fwhm
+    cryst.mosaic_domain_size = mosaic_domain_size
+    cryst.mosaic_domain_size_fwhm = mosaic_domain_size * mosaic_domain_size_fwhm
     if expand_symm:
         write('\nExpanding symmetry... ')
         r = cryst.get_symmetry_expanded_coordinates()
@@ -180,20 +180,6 @@ def mcsim(
     f = ba.simulate.atoms.get_scattering_factors(Z, photon_energy=beam.photon_energy)
     write('done\n')
     write('%d atoms per unit cell\n' % (len(f)))
-
-    # Determine number of unit cells in whole crystal and mosaic domains
-    # if crystal_size > beam_diameter:
-    #     n_cells_whole_crystal = np.ceil(np.pi*beam_diameter**2/4.0*crystal_size / cryst.unitcell.volume)
-    # else:
-    #     n_cells_whole_crystal = np.ceil(crystal_size ** 3 / cryst.unitcell.volume)
-    # if mosaic_domain_size > beam_diameter:
-    #     n_cells_mosaic_domain = np.ceil(np.pi*beam_diameter**2/4.0*mosaic_domain_size / cryst.unitcell.volume)
-    # else:
-    #     n_cells_mosaic_domain = np.ceil(mosaic_domain_size ** 3 / cryst.unitcell.volume)
-    # # n_mosaic_domains_per_crystal = n_cells_whole_crystal / np.float(n_cells_mosaic_domain)
-    #
-    # crystal_size_original = crystal_size
-    # mosaic_domain_size_original = mosaic_domain_size
 
     # Setup simulation engine
     write('Setting up simulation engine... ')
@@ -230,6 +216,9 @@ def mcsim(
 
     for i in np.arange(1, (num_patterns + 1)):
 
+        if fix_rot_seq:
+            np.random.seed(i)
+
         this_mosaic_domain_size = np.random.normal(mosaic_domain_size, mosaic_domain_size_fwhm / 2.354820045)
         this_crystal_size = np.random.normal(crystal_size, crystal_size_fwhm / 2.354820045)
 
@@ -238,8 +227,6 @@ def mcsim(
         n_cells_mosaic_domain = np.ceil(min(beam_area, this_mosaic_domain_size**2)*this_mosaic_domain_size / cell_volume)
 
         if random_rotation:
-            if fix_rot_seq:
-                np.random.seed(i)
             R = ba.utils.random_rotation()
         else:
             R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
@@ -251,18 +238,19 @@ def mcsim(
                                     beam.wavelength, R, F_dev, add=False)
             F2 = np.abs(F_dev.get()) ** 2
             tf = time.time() - t
-            write('%g s\n' % (tf))
+            write('%g s\n' % tf)
         else:
-            write('Simulating molecular transform with cromer mann... ')
-            t = time.time()
-            clcore.prime_cromermann_simulator(q.copy(), Z.copy())
-            q_cm = clcore.get_q_cromermann()
-            r_cm = clcore.get_r_cromermann(r.copy(), sub_com=False)
-            clcore.run_cromermann(q_cm, r_cm, rand_rot=False, force_rot_mat=R)
-            A = clcore.release_amplitudes(reset=True)
-            F2 = np.abs(A) ** 2
-            tf = time.time() - t
-            write('%g s\n' % (tf))
+            raise ValueError('Cromer-Mann needs to be re-implemented')
+            # write('Simulating molecular transform with cromer mann... ')
+            # t = time.time()
+            # clcore.prime_cromermann_simulator(q.copy(), Z.copy())
+            # q_cm = clcore.get_q_cromermann()
+            # r_cm = clcore.get_r_cromermann(r.copy(), sub_com=False)
+            # clcore.run_cromermann(q_cm, r_cm, rand_rot=False, force_rot_mat=R)
+            # A = clcore.release_amplitudes(reset=True)
+            # F2 = np.abs(A) ** 2
+            # tf = time.time() - t
+            # write('%g s\n' % tf)
 
         abc = cryst.O.T.copy()
         S2_dev *= 0

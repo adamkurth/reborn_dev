@@ -138,7 +138,7 @@ class PADGeometry(object):
     def shape(self):
         r""" Return tuple corresponding to the numpy shape of this PAD. """
 
-        return (self.n_ss, self.n_fs)
+        return self.n_ss, self.n_fs
 
     def indices_to_vectors(self, j, i):
         r"""

@@ -788,6 +788,10 @@ class PADView(object):
         pid = -1
         ppos = (-1, -1)
         intensity = -1
+
+        if self.images is None:
+            return
+
         if self.viewbox.sceneBoundingRect().contains(pos):
             for i in range(0, len(self.images)):
                 if self.images[i].sceneBoundingRect().contains(pos):
@@ -1232,6 +1236,8 @@ class PADView(object):
         padview_debug('show()')
         self.main_window.show()
         # self.main_window.callback_pb_load()
+
+
 
 
 class SNRConfigWidget(QtGui.QWidget):
