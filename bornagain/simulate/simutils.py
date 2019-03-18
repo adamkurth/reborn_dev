@@ -152,3 +152,16 @@ def volume_solvent(lb, lc, r):
                 return area_beam(lb, r) * lb - lc**3
         else:
             print("Crystal side length must be greater than zero.")
+
+
+# Do water scattering
+def simulate_water_jet_background(beam_diameter, crystal_size, water_radius):
+    illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
+    F_water = solutions.get_water_profile(qmag, temperature=temperature)
+    F2_water = F_water**2 * n_water_molecules
+    I_water = I0 * r_e**2 * pol * sa * F2_water
+    if(illuminated_water_volume <= 0):
+        write('\nWarning: No solvent was illuminated, water scattering not performed.\n')
+        I_water = 0
+    else:
+        write('done\n')

@@ -6,16 +6,17 @@ import time
 import numpy as np
 import h5py
 from glob import glob
+import inspect
 from scipy.special import erf
 import bornagain as ba
 from bornagain.simulate import solutions
 from bornagain.simulate import simutils
 from bornagain.units import r_e, hc, keV
 import bornagain.simulate.clcore as core
+from bornagain.external import crystfel
 
 # This path setting won't be needed once bornagain is properly installed
 sys.path.append("..")
-
 
 def mcsim(
         detector_distance=50e-3,
@@ -24,7 +25,6 @@ def mcsim(
         beam_diameter=1e-6,
         photon_energy=9.0,
         n_photons=1e12,
-        transmission=1.0,
         mosaicity_fwhm=0e-4,
         beam_divergence_fwhm=0e-2,
         beam_spatial_profile='tophat',
@@ -47,7 +47,6 @@ def mcsim(
         pdb_file='../../examples/data/pdb/2LYZ-P1.pdb',
         write_hdf5=True,
         write_geom=True,
-        write_crystal_sizes=True,
         write_ideal_only=True,
         results_dir='./temp',
         quiet=False,
@@ -56,6 +55,12 @@ def mcsim(
     """
     TODO: Write docstring.
     """
+
+    if not quiet:
+        write = sys.stdout.write
+    else:
+        def write(*args, **kwargs):
+            pass
 
     # Handle argument errors before computing
     if temperature < 0 or mosaicity_fwhm < 0 or photon_energy_fwhm < 0 or \
@@ -93,9 +98,6 @@ def mcsim(
     if n_photons <= 0:
         sys.exit('ERROR: n_photons must be greater than zero')
 
-    if transmission < 0.0 or transmission > 1.0:
-        sys.exit('ERROR: transmission must be between 0 and 1')
-
     if beam_spatial_profile != 'tophat' and beam_spatial_profile != 'gaussian':
         sys.exit('ERROR: beam_spatial_profile must be either gaussian or tophat')
 
@@ -105,13 +107,16 @@ def mcsim(
     if not (compression is None or compression == 'lzf' or compression == 'gzip'):
         sys.exit('ERROR: compression format must be either lzf or gzip')
 
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+
     # Beam parameters
     photon_energy = photon_energy / keV
-    wavelength = hc / photon_energy  # pulse_energy = 0.0024
-    beam = ba.source.Beam(wavelength=wavelength)
-    wavelength_fwhm = beam.wavelength * photon_energy_fwhm # TODO: This is wrong: wavelength FWHM is not energy FWHM
-    n_photons = int(n_photons)  # pulse_energy / photon energy
-    I0 = transmission * n_photons / (beam_diameter ** 2)  # Square beam
+    beam = ba.source.Beam(photon_energy=photon_energy)
+    beam.photon_energy_fwhm = photon_energy_fwhm
+    beam.diameter_fwhm = beam_diameter
+    beam.beam_divergence_fwhm = beam_divergence_fwhm
+    beam.pulse_energy = n_photons * photon_energy
 
     # Crystal parameters
     crystal_size_fwhm = crystal_size * crystal_size_fwhm
@@ -127,108 +132,23 @@ def mcsim(
     num_patterns = int(num_patterns)
 
     # Setup detector geometry
-    pad = ba.detector.PADGeometry()
-    pad.simple_setup(n_pixels=n_pixels, pixel_size=pixel_size, distance=detector_distance)
+    pad = ba.detector.PADGeometry(n_pixels=n_pixels, pixel_size=pixel_size, distance=detector_distance)
     q = pad.q_vecs(beam=beam)
     qmag = pad.q_mags(beam=beam)
     sa = pad.solid_angles()
     pol = pad.polarization_factors(beam=beam)
 
+    if write_geom:
+        geom_file = os.path.join(results_dir, 'geom.geom')
+        write('Writing geometry file %s\n' % geom_file)
+        crystfel.write_geom_file_single_pad(file_path=geom_file, beam=beam, pad_geometry=pad)
+
     # Creating text file with output parameters
-    values = [
-        detector_distance,
-        pixel_size,
-        n_pixels,
-        beam_diameter,
-        photon_energy *
-        keV,
-        n_photons,
-        transmission,
-        mosaicity_fwhm,
-        beam_divergence_fwhm,
-        beam_spatial_profile,
-        photon_energy_fwhm,
-        crystal_size,
-        crystal_size_fwhm /
-        crystal_size,
-        mosaic_domain_size,
-        mosaic_domain_size_fwhm /
-        mosaic_domain_size,
-        water_radius,
-        temperature,
-        n_monte_carlo_iterations,
-        num_patterns,
-        random_rotation,
-        approximate_shape_transform,
-        cromer_mann,
-        expand_symm,
-        fix_rot_seq,
-        overlay_wigner_cells,
-        mask_direct_beam,
-        pdb_file,
-        write_hdf5,
-        write_geom,
-        write_crystal_sizes,
-        write_ideal_only,
-        results_dir,
-        quiet,
-        compression,
-        cl_double_precision]
+    used_params = open(os.path.join(results_dir, 'used_params.txt'), 'w+')
+    args, _, _, values = inspect.getargvalues(inspect.currentframe())
+    for i in args:
+        used_params.write("%s = %s\n" % (i, values[i]))
 
-    names = [
-        'detector_distance',
-        'pixel_size',
-        'n_pixels',
-        'beam_diameter',
-        'photon_energy',
-        'n_photons',
-        'transmission',
-        'mosaicity_fwhm',
-        'beam_divergence_fwhm',
-        'beam_spatial_profile',
-        'photon_energy_fwhm',
-        'crystal_size',
-        'crystal_size_fwhm',
-        'mosaic_domain_size',
-        'mosaic_domain_size_fwhm',
-        'water_radius',
-        'temperature',
-        'n_monte_carlo_iterations',
-        'num_patterns',
-        'random_rotation',
-        'approximate_shape_transform',
-        'cromer_mann',
-        'expand_symm',
-        'fix_rot_sequence',
-        'overlay_wigner_cells',
-        'mask_direct_beam',
-        'pdb_file',
-        'write_hdf5',
-        'write_geom',
-        'write_crystal_sizes',
-        'write_ideal_only',
-        'results_dir',
-        'quiet',
-        'compression',
-        'cl_double_precision']
-
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
-
-    dictionary = dict(zip(names, values))
-    file_name = os.path.join(results_dir, 'used_params.txt')
-    used_params = open(str(file_name), 'w+')
-
-    for k, v in dictionary.items():
-        if v != str(v):
-            v = str(v)
-        used_params.write(k + '=' + v + '\n')
-
-    if not quiet:
-        write = sys.stdout.write
-    else:
-        def write(*args, **kwargs):
-            pass
 
     section = '=' * 70 + '\n'
 
@@ -238,51 +158,54 @@ def mcsim(
     write('PDB file: %s\n' % (os.path.basename(pdb_file)))
     write('Photons per pulse: %g\n' % (n_photons))
     write('Photon energy: %g keV\n' % (photon_energy * keV))
-    write('Beam divergence: %g mrad FWHM\n' % (beam_divergence_fwhm * 1e3))
+    write('Beam divergence: %g mrad FWHM\n' % (beam.beam_divergence_fwhm * 1e3))
     write('Beam diameter: %g microns tophat\n' % (beam_diameter * 1e6))
-    write('Spectral width: %g%% FWHM dlambda/lambda\n' % (100 * wavelength_fwhm / wavelength))
+    write('Spectral width: %g%% FWHM dE/E\n' % (100 * beam.photon_energy_fwhm / beam.photon_energy))
     write('Crystal size: %g microns\n' % (crystal_size * 1e6))
     write('Crystal mosaicity: %g radian FWHM\n' % (mosaicity_fwhm))
     write('Crystal mosaic domain size: %g microns\n' % (mosaic_domain_size * 1e6))
     write(section)
 
-    # Things we probably don't want to think about
-    cl_group_size = 32
-
-    # Setup simulation engine
-    write('Setting up simulation engine... ')
-    clcore = core.ClCore(group_size=cl_group_size, double_precision=cl_double_precision)
-    write('done\n')
-
-    write('Will run %d Monte Carlo iterations\n' % (n_monte_carlo_iterations))
-
-
-
     # Get atomic coordinates and scattering factors from pdb file
     write('Getting atomic coordinates and scattering factors... ')
+    cryst = ba.target.crystal.CrystalStructure(pdb_file)
     if expand_symm:
-        # TODO: This will not work -- the Molecule class does not exist
-        cryst = ba.target.crystal.Molecule(pdb_file)
-        monomers = cryst.get_monomers()
-        all_atoms = ba.target.crystal.Atoms.aggregate(monomers)
-        r = all_atoms.xyz * 1e-10
-        Z = all_atoms.Z
+        write('\nExpanding symmetry... ')
+        r = cryst.get_symmetry_expanded_coordinates()
+        Z = cryst.molecule.atomic_numbers
+        Z = np.concatenate([Z]*cryst.spacegroup.n_molecules)
     else:
-        cryst = ba.target.crystal.Structure(pdb_file)
         r = cryst.molecule.coordinates
         Z = cryst.molecule.atomic_numbers
-
-    f = ba.simulate.atoms.get_scattering_factors(Z, ba.units.hc / wavelength)
+    f = ba.simulate.atoms.get_scattering_factors(Z, photon_energy=beam.photon_energy)
     write('done\n')
     write('%d atoms per unit cell\n' % (len(f)))
 
     # Determine number of unit cells in whole crystal and mosaic domains
-    n_cells_whole_crystal = np.ceil(crystal_size**3 / cryst.unitcell.volume)
-    n_cells_mosaic_domain = np.ceil(mosaic_domain_size**3 / cryst.unitcell.volume)
-    if crystal_size > beam_diameter:
-        n_cells_whole_crystal = np.ceil(beam_diameter**2*crystal_size / cryst.unitcell.volume)
-    if mosaic_domain_size > beam_diameter:
-        n_cells_mosaic_domain = np.ceil(beam_diameter**2*mosaic_domain_size / cryst.unitcell.volume)
+    # if crystal_size > beam_diameter:
+    #     n_cells_whole_crystal = np.ceil(np.pi*beam_diameter**2/4.0*crystal_size / cryst.unitcell.volume)
+    # else:
+    #     n_cells_whole_crystal = np.ceil(crystal_size ** 3 / cryst.unitcell.volume)
+    # if mosaic_domain_size > beam_diameter:
+    #     n_cells_mosaic_domain = np.ceil(np.pi*beam_diameter**2/4.0*mosaic_domain_size / cryst.unitcell.volume)
+    # else:
+    #     n_cells_mosaic_domain = np.ceil(mosaic_domain_size ** 3 / cryst.unitcell.volume)
+    # # n_mosaic_domains_per_crystal = n_cells_whole_crystal / np.float(n_cells_mosaic_domain)
+    #
+    # crystal_size_original = crystal_size
+    # mosaic_domain_size_original = mosaic_domain_size
+
+    # Setup simulation engine
+    write('Setting up simulation engine... ')
+    cl_group_size = 32
+    clcore = core.ClCore(group_size=cl_group_size, double_precision=cl_double_precision)
+    # Allocate memory on GPU device
+    write('\nAllocating GPU device memory... ')
+    r_dev = clcore.to_device(r, dtype=clcore.real_t)
+    f_dev = clcore.to_device(f, dtype=clcore.complex_t)
+    F_dev = clcore.to_device(np.zeros([int(pad.n_ss * pad.n_fs)], dtype=clcore.complex_t))
+    S2_dev = clcore.to_device(shape=(int(pad.n_fs), int(pad.n_ss)), dtype=clcore.real_t)
+    write('done\n')
 
     # Setup function for shape transform calculations
     if approximate_shape_transform:
@@ -292,99 +215,40 @@ def mcsim(
         write('Using idealized (parallelepiped) shape transform\n')
         shape_transform = clcore.lattice_transform_intensities_pad
 
-    if write_geom:
-        geom_file = os.path.join(results_dir, 'geom.geom')
-        write('Writing geometry file %s\n' % geom_file)
-        fid = open(geom_file, 'w')
-        fid.write("photon_energy = %g\n" % (photon_energy * ba.units.eV))
-        fid.write("clen = %g\n" % detector_distance)
-        fid.write("res = %g\n" % (1 / pixel_size))
-        fid.write("adu_per_eV = %g\n" % (1.0 / (photon_energy * ba.units.eV)))
-        fid.write("0/min_ss = 0\n")
-        fid.write("0/max_ss = %d\n" % (n_pixels - 1))
-        fid.write("0/min_fs = 0\n")
-        fid.write("0/max_fs = %d\n" % (n_pixels - 1))
-        fid.write("0/corner_x = %g\n" % (-n_pixels / 2.0))
-        fid.write("0/corner_y = %g\n" % (-n_pixels / 2.0))
-        fid.write("0/fs = x\n")
-        fid.write("0/ss = y\n")
-        fid.close()
+    # Do water scattering
+    if water_radius > 0:
+        write('Simulating water scattering... ')
+        illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
+        F2_water = solutions.get_water_profile(qmag, temperature=temperature, volume=illuminated_water_volume)
+        I_water = I0 * r_e ** 2 * pol * sa * F2_water
+        write('done.\n')
 
-    # Allocate memory on GPU device
-    write('Allocating GPU device memory... ')
-    r_dev = clcore.to_device(r, dtype=clcore.real_t)
-    f_dev = clcore.to_device(f, dtype=clcore.complex_t)
-    F_dev = clcore.to_device(np.zeros([int(pad.n_ss * pad.n_fs)], dtype=clcore.complex_t))
-    S2_dev = clcore.to_device(shape=(int(pad.n_fs), int(pad.n_ss)), dtype=clcore.real_t)
-    write('done\n')
+    write('Will run %d Monte Carlo iterations\n' % n_monte_carlo_iterations)
 
-    crystal_size_original = crystal_size
-    mosaic_domain_size_original = mosaic_domain_size
-
-    # Write text file containing crystal and mosaic domain sizes
-    if write_crystal_sizes:
-        file_name = os.path.join(results_dir, 'crystal_sizes')
-        cryst_size_file = open(file_name, 'w+')
-        cryst_size_file.write('Crystal size (meters) : Mosaic domain size (meters) : Pattern file\n')
+    beam_area = np.pi * beam_diameter ** 2 / 4.0
+    cell_volume = cryst.unitcell.volume
 
     for i in np.arange(1, (num_patterns + 1)):
-        if(mosaic_domain_size_fwhm != 0):
-            mosaic_domain_size = np.random.normal(
-                mosaic_domain_size_original,
-                mosaic_domain_size_fwhm / 2.354820045)
-        if(crystal_size_fwhm != 0):
-            crystal_size = np.random.normal(
-                crystal_size_original, crystal_size_fwhm / 2.354820045)
 
-            # Doesn't make sense if mosaic domain size is larger than the whole
-            # crystal...
-            if mosaic_domain_size > crystal_size:
-                mosaic_domain_size = crystal_size
+        this_mosaic_domain_size = np.random.normal(mosaic_domain_size, mosaic_domain_size_fwhm / 2.354820045)
+        this_crystal_size = np.random.normal(crystal_size, crystal_size_fwhm / 2.354820045)
 
-            # Determine number of unit cells in whole crystal and mosaic
-            # domains
-            n_cells_whole_crystal = np.ceil(crystal_size / np.array([cryst.a, cryst.b, cryst.c]))
-            n_cells_mosaic_domain = np.ceil(mosaic_domain_size / np.array([cryst.a, cryst.b, cryst.c]))
-            if(crystal_size > beam_diameter):
-                n_cells_whole_crystal = np.ceil(np.array(
-                    [beam_diameter, beam_diameter, crystal_size]) / np.array([cryst.a, cryst.b, cryst.c]))
-            if(mosaic_domain_size > beam_diameter):
-                n_cells_mosaic_domain = np.ceil(np.array(
-                    [beam_diameter, beam_diameter, mosaic_domain_size]) / np.array([cryst.a, cryst.b, cryst.c]))
-
-        # In case mosaic domain varied to be larger than fixed size crystal
-        if mosaic_domain_size > crystal_size:
-            mosaic_domain_size = crystal_size
-
-        # Do water scattering
-        if water_radius > 0:
-            write('Simulating water scattering... ')
-            water_number_density = 33.3679e27
-            illuminated_water_volume = simutils.volume_solvent(beam_diameter, crystal_size, water_radius)
-            n_water_molecules = illuminated_water_volume * water_number_density
-            # Get water scattering intensity radial profile
-            F_water = solutions.get_water_profile(qmag, temperature=temperature)
-            F2_water = F_water**2 * n_water_molecules
-            I_water = I0 * r_e**2 * pol * sa * F2_water
-            if(illuminated_water_volume <= 0):
-                write('\nWarning: No solvent was illuminated, water scattering not performed.\n')
-                I_water = 0
-            else:
-                write('done\n')
-
-        R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
-        if random_rotation:
-            R = ba.utils.random_rotation()
+        # Determine number of unit cells in whole crystal and mosaic domains
+        n_cells_whole_crystal = np.ceil(min(beam_area, this_crystal_size**2)*this_crystal_size / cell_volume)
+        n_cells_mosaic_domain = np.ceil(min(beam_area, this_mosaic_domain_size**2)*this_mosaic_domain_size / cell_volume)
 
         if random_rotation:
             if fix_rot_seq:
                 np.random.seed(i)
             R = ba.utils.random_rotation()
+        else:
+            R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
+
         if not cromer_mann:
             write('Simulating molecular transform from Henke tables... ')
             t = time.time()
             clcore.phase_factor_pad(r_dev, f_dev, pad.t_vec, pad.fs_vec, pad.ss_vec, beam.beam_vec, pad.n_fs, pad.n_ss,
-                                    wavelength, R, F_dev, add=False)
+                                    beam.wavelength, R, F_dev, add=False)
             F2 = np.abs(F_dev.get()) ** 2
             tf = time.time() - t
             write('%g s\n' % (tf))
@@ -409,17 +273,14 @@ def mcsim(
         for n in np.arange(1, (n_monte_carlo_iterations + 1)):
 
             t = time.time()
-            if (wavelength_fwhm > 0 or mosaicity_fwhm >
-                    0 or beam_divergence_fwhm > 0):
-                B = ba.utils.random_beam_vector(beam_divergence_fwhm)
-                if (wavelength_fwhm == 0):
+            if beam.photon_energy_fwhm > 0 or mosaicity_fwhm > 0 or beam.beam_divergence_fwhm > 0:
+                B = ba.utils.random_beam_vector(beam.beam_divergence_fwhm)
+                if wavelength_fwhm == 0:
                     w = wavelength
                 else:
-                    w = np.random.normal(
-                        wavelength, wavelength_fwhm / 2.354820045, [1])[0]
+                    w = np.random.normal(wavelength, wavelength_fwhm / 2.354820045, [1])[0]
                 Rm = ba.utils.random_mosaic_rotation(mosaicity_fwhm).dot(R)
-                T = pad.t_vec.copy() + pad.fs_vec * \
-                    (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
+                T = pad.t_vec + pad.fs_vec * (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
             else:
                 B = beam.beam_vec
                 w = beam.wavelength
@@ -439,9 +300,9 @@ def mcsim(
         # Average the shape transforms over MC iterations
         S2 = S2_dev.get().ravel() / n
         # Convert into useful photon units
-        I = I0 * r_e ** 2 * sa * pol * F2 * S2
-        if(crystal_size < beam_diameter):  # Correct for lower incident intensity
-            if(beam_spatial_profile == 'gaussian'):
+        I = beam.photon_number_fluence * r_e ** 2 * sa * pol * F2 * S2
+        if crystal_size < beam_diameter:  # Correct for lower incident intensity
+            if beam_spatial_profile == 'gaussian':
                 sig = beam_diameter / 3.0  # Let beam_diameter be 3 sigmas
                 I *= erf(crystal_size / (sig * np.sqrt(2)))
             else:
@@ -451,7 +312,7 @@ def mcsim(
         n_domains = np.prod(n_cells_whole_crystal) / np.prod(n_cells_mosaic_domain)
         I_ideal = I.copy() * n_domains
 
-        if(water_radius != 0):
+        if water_radius != 0:
             I_ideal += I_water
         I_ideal = I_ideal.astype(np.float32)
         I_noisy = np.random.poisson(I_ideal).astype(np.float32)
@@ -463,17 +324,12 @@ def mcsim(
             fid = h5py.File(file_name, 'w')
             fid['/data/ideal'] = I_ideal.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
             fid['/data/noisy'] = I_noisy.astype(np.int32).reshape((pad.n_ss, pad.n_fs))
+            fid['/cyrstal_size'] = crystal_size
+            fid['/mosaic_domain_size'] = mosaic_domain_size
             if(water_radius > 0):
                 fid['/data/water'] = I_water.astype(np.float32).reshape((pad.n_ss, pad.n_fs))
             fid.close()
             write('Wrote file %s' % (file_name,))
-
-        if write_crystal_sizes:
-            cryst_size_file.write('%g:%g:pattern-%06d.h5\n' % (crystal_size, mosaic_domain_size, (n_patterns + 1)))
-
-    # End of pattern loop
-    if write_crystal_sizes:
-        cryst_size_file.close()
 
     write("\n\nDone!\n\n")
 
@@ -491,7 +347,8 @@ if __name__ == '__main__':
 
     if os.path.isdir('./temp'):
         shutil.rmtree('./temp')
-    mcsim(pdb_file=psi_pdb_file, random_rotation=False, n_monte_carlo_iterations=100, photon_energy=5, detector_distance=0.4)
+    mcsim(pdb_file=lysozyme_pdb_file, random_rotation=False, n_monte_carlo_iterations=100, photon_energy=5,
+          detector_distance=0.4, expand_symm=True)
     f = h5py.File('temp/pattern-000001.h5', 'r')
     data = np.array(f['/data/ideal'])
     geom_file = './temp/geom.geom'
@@ -499,5 +356,5 @@ if __name__ == '__main__':
     padview = PADView(pad_geometry=pad_geometry, raw_data=[data])
     padview.show()
     pyqtgraph.QtGui.QApplication.exec_()
-    if os.path.isdir('./temp'):
-        shutil.rmtree('./temp')
+    # if os.path.isdir('./temp'):
+    #     shutil.rmtree('./temp')

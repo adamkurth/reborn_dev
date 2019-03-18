@@ -204,7 +204,7 @@ def get_henke_data(atomic_number):
     return data
 
 
-def get_scattering_factors(atomic_numbers, photon_energy):
+def get_scattering_factors(atomic_numbers=None, photon_energy=None):
     """
     Get complex atomic scattering factors.
 

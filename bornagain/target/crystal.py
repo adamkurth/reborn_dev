@@ -309,6 +309,13 @@ class CrystalStructure(object):
             self._x = np.dot(self.unitcell.o_mat_inv, self.molecule.coordinates.T).T
         return self._x
 
+    def get_symmetry_expanded_coordinates(self):
+
+        x0 = self.x
+        xs = []
+        for (R, T) in zip(self.spacegroup.sym_rotations, self.spacegroup.sym_translations):
+            xs.append(utils.rotate(R, x0) + T)
+        return utils.rotate(self.unitcell.o_mat, np.concatenate(xs))
 
 class Structure(CrystalStructure):
 

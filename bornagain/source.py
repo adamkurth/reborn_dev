@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 from bornagain.units import hc
-
+import time
 
 class Beam(object):
 
@@ -19,17 +19,17 @@ class Beam(object):
     # n_photons (from pulse energy and photon energy)
     # fluence (from pulse_energy and beam_diameter_fwhm)
 
-
-    beam_profile = 'tophat'
-    beam_vec = None  #: Nominal direction of incident beam
-    polarization_vec = None
-    polarization_weight = 1  #: Weight of the first polarization vector
-    wavelength = None  #: Nominal photon wavelength
-    spectral_width_fwhm = 0
-    pulse_energy = None
-    beam_divergence_fwhm = 0
-    diameter_fwhm = 0
-    fluence_jitter_fwhm = 0
+    photon_energy = None
+    _beam_profile = 'tophat'
+    _beam_vec = None  #: Nominal direction of incident beam
+    _polarization_vec = None
+    _polarization_weight = 1  #: Weight of the first polarization vector
+    _wavelength = None  #: Nominal photon wavelength
+    photon_energy_fwhm = 0
+    _pulse_energy = None
+    divergence_fwhm = 0
+    diameter_fwhm = None
+    pulse_energy_fwhm = 0
 
     def __init__(self, beam_vec=np.array([0, 0, 1]), photon_energy=None, wavelength=None,
                  polarization_vec=np.array([1, 0, 0]), pulse_energy=None, diameter_fwhm=None):
@@ -46,12 +46,38 @@ class Beam(object):
         self.pulse_energy = pulse_energy
 
     @property
+    def beam_profile(self):
+        return self._beam_profile
+
+    @beam_profile.setter
+    def beam_profile(self, val):
+        if val not in ['tophat']:
+            raise ValueError("beam.beam_profile must be 'tophat' or ... that's all for now...")
+        self.beam_profile = val
+
+    @property
     def beam_vec(self):
         return self._beam_vec
 
     @beam_vec.setter
     def beam_vec(self, vec):
         self._beam_vec = np.array(vec)
+
+    @property
+    def polarization_vec(self):
+        return self._polarization_vec
+
+    @polarization_vec.setter
+    def polarization_vec(self, vec):
+        self._polarization_vec = np.array(vec)
+
+    @property
+    def polarization_weight(self):
+        return self._polarization_weight
+
+    @polarization_weight.setter
+    def polarization_weight(self, val):
+        self._polarization_weight = val
 
     @property
     def wavelength(self):
@@ -66,21 +92,31 @@ class Beam(object):
             self.photon_energy = hc/value
 
     @property
-    def n_photons(self):
-        pulse = self.pulse_energy
-        photon = self.photon_energy
-        if pulse is not None and photon is not None:
-            return pulse/photon
+    def pulse_energy(self):
+        if self._pulse_energy is None:
+            raise ValueError("beam.pulse_energy has not been defined.  There is no default.")
         else:
-            return None
+            return self._pulse_energy
+
+    @pulse_energy.setter
+    def pulse_energy(self, val):
+        self._pulse_energy = val
+
+    @property # this cannot be set - set pulse energy instead
+    def n_photons(self):
+        return self.pulse_energy / self.photon_energy
 
     @property
     def fluence(self):
-        if self.pulse_energy is not None and self.diameter_fwhm is not None:
-            return self.pulse_energy/(np.pi * self.diameter_fwhm**2 / 4.0)
-        else:
-            return None
+        return self.energy_fluence
 
+    @property
+    def photon_number_fluence(self):
+        return self.n_photons/(np.pi * self.diameter_fwhm**2 / 4.0)
+
+    @property
+    def energy_fluence(self):
+        return self.pulse_energy/(np.pi * self.diameter_fwhm**2 / 4.0)
 
 
 

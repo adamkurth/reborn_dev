@@ -5,9 +5,11 @@ dictionary object with the cfelpyutils.crystfel_utils.load_crystfel_geometry() f
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import os
 import numpy as np
 
 from .. import detector
+from .. import units
 from cfelpyutils import crystfel_utils
 
 
@@ -95,3 +97,23 @@ def split_image(data, geom_dict):
         split_data.append(data[p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)])
 
     return split_data
+
+
+def write_geom_file_single_pad(file_path=None, beam=None, pad_geometry=None):
+
+    pad = pad_geometry
+    geom_file = os.path.join(file_path)
+    fid = open(geom_file, 'w')
+    fid.write("photon_energy = %g\n" % (beam.photon_energy * units.eV))
+    fid.write("clen = %g\n" % pad.t_vec.flat[2])
+    fid.write("res = %g\n" % (1 / pad.pixel_size()))
+    fid.write("adu_per_eV = %g\n" % (1.0 / (beam.photon_energy * units.eV)))
+    fid.write("0/min_ss = 0\n")
+    fid.write("0/max_ss = %d\n" % (pad.n_ss - 1))
+    fid.write("0/min_fs = 0\n")
+    fid.write("0/max_fs = %d\n" % (pad.n_fs - 1))
+    fid.write("0/corner_x = %g\n" % ((pad.t_vec.flat[0] - pad.pixel_size() )/2.,))
+    fid.write("0/corner_y = %g\n" % ((pad.t_vec.flat[1] - pad.pixel_size())/2,))
+    fid.write("0/fs = x\n")
+    fid.write("0/ss = y\n")
+    fid.close()
