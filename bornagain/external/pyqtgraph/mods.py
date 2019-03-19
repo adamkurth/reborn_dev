@@ -44,6 +44,8 @@ def downsample(data, n, axis=0, xvals='subsample', method='mean'):
         d2 = d1.mean(axis + 1)
     elif method == 'max':
         d2 = d1.max(axis + 1)
+    elif method == 'min':
+        d2 = d1.min(axis + 1)
 
     if ma is None:
         return d2
@@ -101,6 +103,9 @@ class ImageItem(GraphicsObject):
         elif autoDownsample == 'max':
             self.autoDownsample = True
             self.downsample_func = lambda im, n, ax: downsample(im, n, ax, method='max')
+        elif autoDownsample == 'min':
+            self.autoDownsample = True
+            self.downsample_func = lambda im, n, ax: downsample(im, n, ax, method='min')
 
         self.drawKernel = None
         self.border = None
@@ -398,7 +403,7 @@ class ImageItem(GraphicsObject):
             bins='auto',
             step='auto',
             targetImageSize=200,
-            targetHistogramSize=500,
+            targetHistogramSize=100,
             **kwds):
         """Returns x and y arrays containing the histogram values for the current image.
         For an explanation of the return format, see numpy.histogram().
@@ -419,23 +424,25 @@ class ImageItem(GraphicsObject):
         """
         if self.image is None:
             return None, None
-        if step == 'auto':
-            step = (np.ceil(self.image.shape[0] / targetImageSize),
-                    np.ceil(self.image.shape[1] / targetImageSize))
-        if np.isscalar(step):
-            step = (step, step)
+        # There is something wrong with the lines below...
+        # if step == 'auto':
+        #     step = (int(np.ceil(self.image.shape[0] / targetImageSize)),
+        #             int(np.ceil(self.image.shape[1] / targetImageSize)))
+        # if np.isscalar(step):
+        #     step = (int(step), int(step))
+        step = (1, 1)
         stepData = self.image[::step[0], ::step[1]]
 
         if bins == 'auto':
             if stepData.dtype.kind in "ui":
                 mn = stepData.min()
                 mx = stepData.max()
-                step = np.ceil((mx - mn) / 500.)
+                step = np.ceil((mx - mn) / 100.)
                 bins = np.arange(mn, mx + 1.01 * step, step, dtype=np.int)
                 if len(bins) == 0:
                     bins = [mn, mx]
             else:
-                bins = 500
+                bins = 100
 
         kwds['bins'] = bins
         hist = np.histogram(stepData, **kwds)

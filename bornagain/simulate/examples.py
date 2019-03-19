@@ -250,9 +250,10 @@ class CrystalSimulatorV1(object):
                                  T, pad.fs_vec, pad.ss_vec, B, pad.n_fs, pad.n_ss, w, Rm, self.S2_dev, add=True)
 
         S2 = self.S2_dev.get() / self.n_iterations
-        intensity = self.intensity_prefactor * F2 * S2 * n_cells_whole_crystal / n_cells_mosaic_domain
+        intensity = F2 * S2 * self.intensity_prefactor * n_cells_whole_crystal / n_cells_mosaic_domain
 
         if self.poisson_noise:
             intensity = np.random.poisson(intensity)
 
+        print('made pattern')
         return intensity

@@ -139,14 +139,13 @@ class PADView(object):
                 self.raw_data = self.frame_getter.get_frame(0)
             except:
                 padview_debug('Failed to get raw data from frame_getter')
-                pass
 
         # Possibly, the frame getter has pad_geometry info -- let's have a look:
         if self.pad_geometry is None:
             try:
                 self.pad_geometry = self.frame_getter.pad_geometry
             except:
-                pass
+                padview_debug('Failed to get geometry from frame_getter')
 
         self.app = pg.mkQApp()
         self.main_window = uic.loadUi(padviewui)
@@ -952,7 +951,6 @@ class PADView(object):
 
         dat = self.frame_getter.get_next_frame()
         self.raw_data = dat
-
         self.update_display_data()
 
     def show_previous_frame(self):

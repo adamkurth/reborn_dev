@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import weakref
 import numpy as np
+from bornagain.external.pyqtgraph.mods import ImageItem
 import pyqtgraph as pg
 
 
@@ -33,7 +34,7 @@ class MultiHistogramLUTWidget(pg.GraphicsView):
         self.setSizePolicy(
             pg.QtGui.QSizePolicy.Preferred,
             pg.QtGui.QSizePolicy.Expanding)
-        self.setMinimumWidth(95)
+        self.setMinimumWidth(100)
 
     def sizeHint(self):
         r"""
@@ -104,10 +105,10 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
         phonyarray = phonyarray[0:(len(phonyarray) - (len(phonyarray) % 2))]
         phonyarray = phonyarray.reshape([2, int(len(phonyarray) / 2)])
 
-        self.imageItemStrong = pg.ImageItem(phonyarray)
+        self.imageItemStrong = ImageItem(phonyarray)
         self.imageItem = weakref.ref(self.imageItemStrong)  # TODO: fix this up
         self.regionChanged()
-        self.imageChanged(autoLevel=True)
+        self.imageChanged(autoLevel=False)
 
     def gradientChanged(self):
         r"""
