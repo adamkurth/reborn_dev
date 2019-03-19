@@ -390,7 +390,6 @@ class PADGeometry(object):
             raise ValueError("Specify either q_min (and wavelength) or min_angle")
         return self.reshape(mask)
 
-
     def reshape(self, dat):
         r"""
 

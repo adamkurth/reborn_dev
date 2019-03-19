@@ -20,10 +20,9 @@ except NameError:
 import numpy as np
 from numpy import sin, cos, sqrt
 
-import bornagain as ba
-from bornagain.target import spgrp, molecule
+import bornagain.target
 from bornagain import utils
-from bornagain.simulate import atoms, simutils
+from bornagain.simulate import simutils
 
 
 class UnitCell(object):
@@ -65,23 +64,23 @@ class UnitCell(object):
         self.beta = be
         self.gamma = ga
 
-        V = a * b * c * sqrt(1 - cos(al)**2 - cos(be) **
+        vol = a * b * c * sqrt(1 - cos(al)**2 - cos(be) **
                              2 - cos(ga)**2 + 2 * cos(al) * cos(be) * cos(ga))
-        O = np.array([
+        o_mat = np.array([
                 [a, b * cos(ga), c * cos(be)],
                 [0, b * sin(ga), c * (cos(al) - cos(be) * cos(ga)) / sin(ga)],
-                [0, 0, V / (a * b * sin(ga))]
+                [0, 0, vol / (a * b * sin(ga))]
                 ])
-        Oinv = np.array([
+        o_inv = np.array([
                 [1 / a, -cos(ga) / (a * sin(ga)), 0],
                 [0, 1 / (b * sin(ga)), 0],
-                [0, 0, a * b * sin(ga) / V]
+                [0, 0, a * b * sin(ga) / vol]
                 ])
-        self.o_mat = O
-        self.o_mat_inv = Oinv
-        self.a_mat = Oinv.T.copy()
-        self.a_mat_inv = O.T.copy()
-        self.volume = V
+        self.o_mat = o_mat
+        self.o_mat_inv = o_inv
+        self.a_mat = o_inv.T.copy()
+        self.a_mat_inv = o_mat.T.copy()
+        self.volume = vol
 
 
 class SpaceGroup(object):
@@ -94,12 +93,12 @@ class SpaceGroup(object):
     spacegroup.
     """
 
-    hall_number = None #: Space group Hall number
-    itoc_number = None #: Space group number in the International Tables of Crystallography (ITOC)
+    hall_number = None  #: Space group Hall number
+    itoc_number = None  #: Space group number in the International Tables of Crystallography (ITOC)
     hermann_mauguin_symbol = None  #: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)
-    sym_rotations = None #: Symmetry 3x3 transformation matrices (in crystal basis)
-    sym_translations = None #: Symmetry translations (in crystal basis)
-    n_molecules = None
+    sym_rotations = None  #: Symmetry 3x3 transformation matrices (in crystal basis)
+    sym_translations = None  #: Symmetry translations (in crystal basis)
+    n_molecules = None  #: Number of symmetry-related molecules
 
     def __init__(self, hermann_mauguin_symbol=None, hall_number=None, itoc_number=None):
 
@@ -158,15 +157,7 @@ class CrystalStructure(object):
     def set_cell(self, *args, **kwargs):
         r"""
 
-        Set the unit cell lattice.
-
-        Args:
-            a: Lattice constant
-            b: Lattice constant
-            c: Lattice constant
-            alpha: Lattice angle
-            beta:  Lattice angle
-            gamma: Lattice angle
+        Set the unit cell lattice.  Takes the same arguments as ``
 
         """
 
@@ -193,7 +184,7 @@ class CrystalStructure(object):
         See docs for target.Molecule
         """
 
-        self.molecule = molecule.Molecule(*args, **kwargs)
+        self.molecule = bornagain.target.molecule.Molecule(*args, **kwargs)
 
     @property
     def elements(self):
@@ -419,7 +410,7 @@ def get_hm_symbols():
 
     symbols = []
     for idx in range(0, 530):
-        symbols.append(spgrp._hmsym[idx].strip())
+        symbols.append(bornagain.target.spgrp._hmsym[idx].strip())
 
     return symbols
 
@@ -431,12 +422,12 @@ def hermann_mauguin_symbol_from_hall_number(hall_number):
     if hall_number < 0 or hall_number > 530:
         raise ValueError('hall_number must be between 1 and 530')
 
-    return spgrp._hmsym[hall_number-1]
+    return bornagain.target.spgrp._hmsym[hall_number - 1]
 
 
 def itoc_number_from_hall_number(hall_number):
 
-    return spgrp._sgnum[hall_number-1]
+    return bornagain.target.spgrp._sgnum[hall_number - 1]
 
 
 def hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
@@ -444,7 +435,7 @@ def hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
     idx = None
     hermann_mauguin_symbol = hermann_mauguin_symbol.strip()
     for idx in range(0, 530):
-        if hermann_mauguin_symbol == spgrp._hmsym[idx]:
+        if hermann_mauguin_symbol == bornagain.target.spgrp._hmsym[idx]:
             break
 
     if idx is None:
@@ -465,7 +456,7 @@ def hall_number_from_itoc_number(itoc_number):
 
     idx = -1
     for idx in range(0, 530):
-        if itoc_number == spgrp._sgnum[idx]:
+        if itoc_number == bornagain.target.spgrp._sgnum[idx]:
             break
     return idx+1
 
@@ -477,8 +468,8 @@ def hermann_mauguin_symbol_from_itoc_number(itoc_number):
 
 def spacegroup_ops_from_hall_number(hall_number):
 
-    rot = spgrp._spgrp_ops[hall_number-1]["rotations"]
-    trans = [utils.vec_check(T) for T in spgrp._spgrp_ops[hall_number-1]['translations']]
+    rot = bornagain.target.spgrp._spgrp_ops[hall_number - 1]["rotations"]
+    trans = [utils.vec_check(T) for T in bornagain.target.spgrp._spgrp_ops[hall_number - 1]['translations']]
 
     return rot, trans
 
@@ -489,8 +480,8 @@ def get_symmetry_operators_from_hall_number(hall_number):
         raise ValueError("Hall number must be between 1 and 530")
 
     idx = hall_number - 1
-    Rs = spgrp._spgrp_ops[idx]["rotations"]
-    Ts = [utils.vec_check(T) for T in spgrp._spgrp_ops[idx]['translations']]
+    Rs = bornagain.target.spgrp._spgrp_ops[idx]["rotations"]
+    Ts = [utils.vec_check(T) for T in bornagain.target.spgrp._spgrp_ops[idx]['translations']]
 
     return Rs, Ts
 
@@ -523,7 +514,7 @@ def get_symmetry_operators_from_space_group(hm_symbol):
     if isinstance(hm_symbol, basestring):
         hm_symbol = hm_symbol.strip()
         for idx in range(0, 530):
-            if hm_symbol == spgrp._hmsym[idx].strip():
+            if hm_symbol == bornagain.target.spgrp._hmsym[idx].strip():
                 symbol_found = True
                 break
     else:
@@ -534,8 +525,8 @@ def get_symmetry_operators_from_space_group(hm_symbol):
     if not symbol_found:
         return None, None
 
-    Rs = spgrp._spgrp_ops[idx]["rotations"]
-    Ts = [utils.vec_check(T) for T in spgrp._spgrp_ops[idx]['translations']]
+    Rs = bornagain.target.spgrp._spgrp_ops[idx]["rotations"]
+    Ts = [utils.vec_check(T) for T in bornagain.target.spgrp._spgrp_ops[idx]['translations']]
 
     return Rs, Ts
 
