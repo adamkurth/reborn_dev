@@ -12,8 +12,9 @@ from bornagain import utils
 import bornagain
 try:
     import psana
-except:
-    pass
+except ImportError:
+    psana = None
+
 
 class AreaDetector(object):
 
@@ -45,7 +46,7 @@ class AreaDetector(object):
 
     @property
     def type(self):
-        if _type is None:
+        if self._type is None:
             self._type = self.get_detector_type()
         return self._type
 
@@ -77,7 +78,7 @@ class AreaDetector(object):
                 a = psf[i]
                 f = np.array(a[2])
                 t = np.array(a[0]) + shift * f/np.sqrt(np.sum(f**2))
-                b = ((t[0],    t[1],    t[2]   ), (a[1][0], a[1][1], a[1][2]), (a[2][0], a[2][1], a[2][2]))
+                b = ((t[0], t[1], t[2]), (a[1][0], a[1][1], a[1][2]), (a[2][0], a[2][1], a[2][2]))
                 psf.insert(i+1, b)
         geom = []
         for i in range(len(psf)):

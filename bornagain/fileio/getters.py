@@ -43,6 +43,7 @@ class FrameGetter(object):
 
     def get_data(self, frame_number=None):
 
+        pass
         return None
 
     def get_frame(self, frame_number=None):
@@ -114,6 +115,10 @@ class CheetahFrameGetter(FrameGetter):
     """
 
     skip_peaks = False
+    fs_min = 0
+    fs_max = 0
+    ss_min = 0
+    ss_max = 0
 
     def __init__(self, cxi_file_name=None, geom_file_name=None):
 
@@ -145,7 +150,7 @@ class CheetahFrameGetter(FrameGetter):
         ss_pos_raw = h5file['entry_1/result_1/peakYPosRaw'][frame_number, 0:n_peaks]
 
         if self.peaks is None:
-            fs_min = np.zeros((self.n_pads))
+            fs_min = np.zeros(self.n_pads)
             fs_max = fs_min.copy()
             ss_min = fs_min.copy()
             ss_max = fs_min.copy()
@@ -180,7 +185,7 @@ class CheetahFrameGetter(FrameGetter):
 
         # pad_numbers = pad_numbers.astype(np.int)
 
-        centroids = [None]*self.n_pads
+        centroids = [0]*self.n_pads
         for i in range(self.n_pads):
             w = np.where(pad_numbers == i)[0]
             n = len(w)
@@ -203,10 +208,10 @@ class CheetahFrameGetter(FrameGetter):
         dat = np.array(self.h5_data[frame_number, :, :]).astype(np.double)
         # cheetah_remapped_cspad_array_to_pad_list(dat, self.geom_dict)
         pad_data = crystfel.split_image(dat, self.geom_dict)
+        dat = {'pad_data': pad_data}
 
         if not self.skip_peaks:
             peaks = self.get_peaks(self.h5file, frame_number)
-
-        dat = {'pad_data': pad_data, 'peaks': peaks}
+            dat['peaks'] = peaks
 
         return dat

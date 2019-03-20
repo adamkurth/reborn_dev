@@ -18,7 +18,7 @@ def downsample(data, n, axis=0, xvals='subsample', method='mean'):
     or downsampled to match.
     """
     ma = None
-    if (hasattr(data, 'implements') and data.implements('MetaArray')):
+    if hasattr(data, 'implements') and data.implements('MetaArray'):
         ma = data
         data = data.view(np.ndarray)
 

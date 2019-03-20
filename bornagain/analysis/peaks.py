@@ -8,9 +8,8 @@ from numba import jit
 
 try:
     from bornagain.analysis import peaks_f
-    have_fortran = True
 except ImportError:
-    have_fortran = False
+    peaks_f = None
 
 
 class PeakFinder(object):
@@ -27,7 +26,7 @@ class PeakFinder(object):
 
     def __init__(self, snr_threshold=10, radii=(3, 8, 10), mask=None):
 
-        if have_fortran:
+        if peaks_f is not None:
             self.snr_transform = boxsnr_fortran
         else:
             self.snr_transform = boxsnr_numba
@@ -63,7 +62,7 @@ class PeakFinder(object):
 
 
 def boxsnr(dat, mask, nin, ncent, nout):
-    if have_fortran:
+    if peaks_f is not None:
         snr, signal = boxsnr_fortran(dat, mask, nin, ncent, nout)
     else:
         snr, signal = boxsnr_numba(dat, mask, nin, ncent, nout)
@@ -89,7 +88,6 @@ def boxsnr_numba(dat, mask, nin, ncent, nout):
     cum2x = np.empty((npy, npx + 1), dtype=dtype)
     cummx = np.empty((npy, npx + 1), dtype=dtype)
     sqix = np.empty((npy, npx), dtype=dtype)
-    sq2ix = np.empty((npy, npx), dtype=dtype)
     sqmix = np.empty((npy, npx), dtype=dtype)
     sqcx = np.empty((npy, npx), dtype=dtype)
     sq2cx = np.empty((npy, npx), dtype=dtype)
@@ -98,7 +96,6 @@ def boxsnr_numba(dat, mask, nin, ncent, nout):
     sq2ox = np.empty((npy, npx), dtype=dtype)
     sqmox = np.empty((npy, npx), dtype=dtype)
     cumiy = np.empty((npy + 1, npx), dtype=dtype)
-    # cum2iy = np.empty((npy + 1, npx), dtype=dtype)
     cummiy = np.empty((npy + 1, npx), dtype=dtype)
     cumcy = np.empty((npy + 1, npx), dtype=dtype)
     cum2cy = np.empty((npy + 1, npx), dtype=dtype)
@@ -116,15 +113,12 @@ def boxsnr_numba(dat, mask, nin, ncent, nout):
         cum2x[:, i+1] = cum2x[:, i] + dat[:, i]**2 * mask[:, i]
         cummx[:, i+1] = cummx[:, i] + mask[:, i]
 
-    # return cumx
-
     a = 1
 
     for i in range(0, npx):
         mn = min(npx, i+nin+a)
         mx = max(0, i-nin-1+a)
         sqix[:, i] = cumx[:, mn] - cumx[:, mx]
-        # sq2ix[:, i] = cum2x[:, mn] - cum2x[:, mx]
         sqmix[:, i] = cummx[:, mn] - cummx[:, mx]
         mn = min(npx, i+ncent+a)
         mx = max(0, i-ncent-1+a)
@@ -137,10 +131,7 @@ def boxsnr_numba(dat, mask, nin, ncent, nout):
         sq2ox[:, i] = cum2x[:, mn] - cum2x[:, mx]
         sqmox[:, i] = cummx[:, mn] - cummx[:, mx]
 
-    # return sqix
-
     cumiy[0, :] = 0
-    # cum2iy[0, :] = 0
     cummiy[0, :] = 0
     cumcy[0, :] = 0
     cum2cy[0, :] = 0
@@ -151,7 +142,6 @@ def boxsnr_numba(dat, mask, nin, ncent, nout):
 
     for i in range(0, npy):
         cumiy[i+1, :] = cumiy[i, :] + sqix[i, :]
-        # cum2iy[i+1, :] = cum2iy[i-1, :] + sq2ix[i, :]
         cummiy[i+1, :] = cummiy[i, :] + sqmix[i, :]
         cumcy[i+1, :] = cumcy[i, :] + sqcx[i, :]
         cum2cy[i+1, :] = cum2cy[i, :] + sq2cx[i, :]
@@ -160,13 +150,10 @@ def boxsnr_numba(dat, mask, nin, ncent, nout):
         cum2oy[i+1, :] = cum2oy[i, :] + sq2ox[i, :]
         cummoy[i+1, :] = cummoy[i, :] + sqmox[i, :]
 
-    # return cumiy
-
     for i in range(0, npy):
         mn = min(npy, i+nin+a)
         mx = max(0, i-nin-1+a)
         sqix[i, :] = cumiy[mn, :] - cumiy[mx, :]
-        # sq2ix[i, :] = cum2iy[mn, :] - cum2iy[mx, :]
         sqmix[i, :] = cummiy[mn, :] - cummiy[mx, :]
         mn = min(npy, i+ncent+a)
         mx = max(0, i-ncent-1+a)
@@ -179,8 +166,6 @@ def boxsnr_numba(dat, mask, nin, ncent, nout):
         sq2ox[i, :] = cum2oy[mn, :] - cum2oy[mx, :]
         sqmox[i, :] = cummoy[mn, :] - cummoy[mx, :]
 
-    # return sqix
-
     small = 1.0e-15
     sqox = sqox - sqcx
     sq2ox = sq2ox - sq2cx
@@ -191,8 +176,3 @@ def boxsnr_numba(dat, mask, nin, ncent, nout):
     snr = signal / (np.sqrt(sqmix) * (np.sqrt(sq2ox / sqmox - (sqox / sqmox) ** 2) + small))
 
     return snr, signal
-
-# def snr_filter_pool(data):
-#
-#     pool = Pool(6)
-#     return pool.map(snr_filter, data)

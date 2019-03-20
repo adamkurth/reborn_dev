@@ -1,1 +1,3 @@
-__all__ = ['cheetah', 'crystfel', 'lcls']
+from . import cheetah
+from . import crystfel
+from . import lcls

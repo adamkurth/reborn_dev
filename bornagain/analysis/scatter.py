@@ -11,6 +11,7 @@ from bornagain import utils
 utils.depreciate("Don't use the scatter module.  It is depreciated.  The RadialProfile class has been moved to"
                  "detector.RadialProfiler")
 
+
 class RadialProfile(object):
     r"""
     Helper class to create radial profiles.

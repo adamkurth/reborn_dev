@@ -11,6 +11,7 @@ import numpy as np
 from bornagain.external import crystfel
 from bornagain import utils
 
+
 def reshape_psana_cspad_array_to_cheetah_array(psana_array):
     r"""
     Transform  a native psana cspad numpy array of shape (32,185,388) into a "Cheetah array" of shape (1480, 1552).

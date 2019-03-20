@@ -35,7 +35,7 @@ def geometry_dict_to_pad_geometry_list(geometry_dict):
     This will also append the name of the panel to the PADGeometry instance.
 
     Args:
-        geometry_file (str): Path to geometry file
+        geometry_dict (str): Path to geometry file
 
     Returns: List of PADGeometry instances
 
@@ -112,7 +112,7 @@ def write_geom_file_single_pad(file_path=None, beam=None, pad_geometry=None):
     fid.write("0/max_ss = %d\n" % (pad.n_ss - 1))
     fid.write("0/min_fs = 0\n")
     fid.write("0/max_fs = %d\n" % (pad.n_fs - 1))
-    fid.write("0/corner_x = %g\n" % ((pad.t_vec.flat[0] - pad.pixel_size() )/2.,))
+    fid.write("0/corner_x = %g\n" % ((pad.t_vec.flat[0] - pad.pixel_size())/2.,))
     fid.write("0/corner_y = %g\n" % ((pad.t_vec.flat[1] - pad.pixel_size())/2,))
     fid.write("0/fs = x\n")
     fid.write("0/ss = y\n")
