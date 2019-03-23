@@ -263,11 +263,21 @@ pytest
 <div class="section" id="possible-installation-issues">
 <h2>Possible installation issues<a class="headerlink" href="#possible-installation-issues" title="Permalink to this headline">¶</a></h2>
 <p><strong>OpenCL</strong></p>
-<p>If you get a runtime error involving <code class="code docutils literal notranslate"><span class="pre">pyopencl.cffi_cl.LogicError:</span> <span class="pre">clGetPlatformIDs</span> <span class="pre">failed:</span></code> it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple as doing the following:</p>
+<p>If you get a runtime error involving</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pyopencl.cffi_cl.LogicError: clGetPlatformIDs failed:
+</pre></div>
+</div>
+<p>it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple as doing the following:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp /etc/OpenCL/vendors/nvidia.icd ~/miniconda3/etc/OpenCL/vendors
 </pre></div>
 </div>
 <p>For any further issues with pyopencl, there are some helpful notes <a class="reference external" href="https://documen.tician.de/pyopencl/misc.html">here</a>.</p>
+<p>If you get a runtime error like this</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pyopencl._cl.LogicError: clGetPlatformIDs failed: PLATFORM_NOT_FOUND_KHR
+</pre></div>
+</div>
+<p>you should try installing the package pocl.  I don’t know why this fixes the problem but it has worked on a couple
+of Linux systems thus far.</p>
 <p><strong>Scientific Linux 6</strong></p>
 <p>To install <cite>pyopencl</cite> on SL6 I found it necessary to download the pyopencl-201X.X.X source, and then from within the
 directory I did something along these lines:</p>

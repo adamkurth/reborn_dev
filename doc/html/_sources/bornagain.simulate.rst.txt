@@ -15,7 +15,7 @@ Submodules
    bornagain.simulate.clcore
    bornagain.simulate.examples
    bornagain.simulate.form_factors
-   bornagain.simulate.mcsim
+   bornagain.simulate.numbacore
    bornagain.simulate.refdata
    bornagain.simulate.simutils
    bornagain.simulate.solutions

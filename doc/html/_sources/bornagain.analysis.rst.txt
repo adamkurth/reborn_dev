@@ -12,4 +12,5 @@ Submodules
 .. toctree::
 
    bornagain.analysis.peaks
+   bornagain.analysis.scatter
 

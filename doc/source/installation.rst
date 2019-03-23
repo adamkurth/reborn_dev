@@ -127,13 +127,28 @@ Possible installation issues
 
 **OpenCL**
 
-If you get a runtime error involving :code:`pyopencl.cffi_cl.LogicError: clGetPlatformIDs failed:` it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple as doing the following:
+If you get a runtime error involving
+
+.. code-block:: bash
+
+    pyopencl.cffi_cl.LogicError: clGetPlatformIDs failed:
+
+it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple as doing the following:
 
 .. code-block:: bash
 
     cp /etc/OpenCL/vendors/nvidia.icd ~/miniconda3/etc/OpenCL/vendors
 
 For any further issues with pyopencl, there are some helpful notes `here <https://documen.tician.de/pyopencl/misc.html>`_.
+
+If you get a runtime error like this
+
+.. code-block:: bash
+
+    pyopencl._cl.LogicError: clGetPlatformIDs failed: PLATFORM_NOT_FOUND_KHR
+
+you should try installing the package pocl.  I don't know why this fixes the problem but it has worked on a couple
+of Linux systems thus far.
 
 
 **Scientific Linux 6**

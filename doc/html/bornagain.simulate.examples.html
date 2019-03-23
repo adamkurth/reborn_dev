@@ -200,15 +200,16 @@ the <a class="reference external" href="http://www.slac.stanford.edu/cgi-wrap/ge
 
 <dl class="function">
 <dt id="bornagain.simulate.examples.lysozyme_molecule">
-<code class="descclassname">bornagain.simulate.examples.</code><code class="descname">lysozyme_molecule</code><span class="sig-paren">(</span><em>pads=None</em>, <em>wavelength=None</em>, <em>random_rotation=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#lysozyme_molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.lysozyme_molecule" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.simulate.examples.</code><code class="descname">lysozyme_molecule</code><span class="sig-paren">(</span><em>pad_geometry=None</em>, <em>wavelength=1.5e-10</em>, <em>random_rotation=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#lysozyme_molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.lysozyme_molecule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple simulation of lysozyme molecule using <a class="reference internal" href="bornagain.simulate.clcore.html#bornagain.simulate.clcore.ClCore" title="bornagain.simulate.clcore.ClCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClCore</span></code></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>pads</strong> – List of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances.</li>
+<li><strong>pad_geometry</strong> – List of <a class="reference internal" href="bornagain.detector.html#bornagain.detector.PADGeometry" title="bornagain.detector.PADGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">PADGeometry</span></code></a> instances.</li>
 <li><strong>wavelength</strong> – As always, in SI units.</li>
+<li><strong>random_rotation</strong> – If True generate a random rotation.  Default is True.</li>
 </ul>
 </td>
 </tr>
@@ -219,7 +220,7 @@ the <a class="reference external" href="http://www.slac.stanford.edu/cgi-wrap/ge
 
 <dl class="class">
 <dt id="bornagain.simulate.examples.PDBMoleculeSimulator">
-<em class="property">class </em><code class="descclassname">bornagain.simulate.examples.</code><code class="descname">PDBMoleculeSimulator</code><span class="sig-paren">(</span><em>pdb_file=None</em>, <em>pads=None</em>, <em>wavelength=None</em>, <em>random_rotation=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#PDBMoleculeSimulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.PDBMoleculeSimulator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">bornagain.simulate.examples.</code><code class="descname">PDBMoleculeSimulator</code><span class="sig-paren">(</span><em>pdb_file=None</em>, <em>pad_geometry=None</em>, <em>wavelength=1.5e-10</em>, <em>random_rotation=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#PDBMoleculeSimulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.PDBMoleculeSimulator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A simple generator of simulated single-molecule intensities, from a pdb file.  Defaults to lysozyme at 1.5 A
 wavelength, on a pnccd detector layout.</p>
@@ -228,6 +229,35 @@ wavelength, on a pnccd detector layout.</p>
 <code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#PDBMoleculeSimulator.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.PDBMoleculeSimulator.next" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate another simulated pattern.  No scaling or noise added.</p>
 <p>Returns: Flat array of diffraction intensities.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.simulate.examples.CrystalSimulatorV1">
+<em class="property">class </em><code class="descclassname">bornagain.simulate.examples.</code><code class="descname">CrystalSimulatorV1</code><span class="sig-paren">(</span><em>pad_geometry=None</em>, <em>beam=None</em>, <em>crystal_structure=None</em>, <em>n_iterations=1</em>, <em>approximate_shape_transform=True</em>, <em>cromer_mann=False</em>, <em>expand_symmetry=False</em>, <em>cl_double_precision=False</em>, <em>cl_group_size=32</em>, <em>poisson_noise=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#CrystalSimulatorV1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.CrystalSimulatorV1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for generating crystal diffraction patterns.  Generates the average pattern upon:</p>
+<ol class="arabic simple">
+<li>Randomizing the x-ray beam direction (beam divergence)</li>
+<li>Randomizing the outgoing beam according to pixel area (“pixel solid angle”)</li>
+<li>Randomizing photon energy (spectral width)</li>
+<li>Randomizing the orientation of crystal mosaic domains (mosaicity)</li>
+<li>Randomizing the shape transforms or Gaussian crystal-size broadening</li>
+</ol>
+<p>Computations are done on a GPU with OpenCL.</p>
+<dl class="method">
+<dt id="bornagain.simulate.examples.CrystalSimulatorV1.generate_pattern">
+<code class="descname">generate_pattern</code><span class="sig-paren">(</span><em>rotation_matrix=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/examples.html#CrystalSimulatorV1.generate_pattern"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.examples.CrystalSimulatorV1.generate_pattern" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rotation_matrix</strong> – Specify a rotation matrix, else a random rotation is generated.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: A numpy array with diffraction intensities</p>
 </dd></dl>
 
 </dd></dl>

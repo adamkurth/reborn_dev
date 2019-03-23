@@ -181,6 +181,11 @@
   <div class="section" id="module-bornagain.simulate.solutions">
 <span id="bornagain-simulate-solutions-module"></span><h1>bornagain.simulate.solutions module<a class="headerlink" href="#module-bornagain.simulate.solutions" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
+<dt id="bornagain.simulate.solutions.water_number_density">
+<code class="descclassname">bornagain.simulate.solutions.</code><code class="descname">water_number_density</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/solutions.html#water_number_density"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.solutions.water_number_density" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="bornagain.simulate.solutions.load_data">
 <code class="descclassname">bornagain.simulate.solutions.</code><code class="descname">load_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/solutions.html#load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.solutions.load_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -200,6 +205,31 @@ n = 33.3679e27 / m^3 .</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>q</strong> – The momentum transfer vector magnitudes (i.e. 2 pi sin(theta/lambda)/wavelength )</li>
 <li><strong>temperature</strong> – Desired water temperature in Kelvin</li>
+<li><strong>volume</strong> – if this is not None, the scattering factor will be multiplied by the number of molecules in volume</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.simulate.solutions.water_scattering_factor_squared">
+<code class="descclassname">bornagain.simulate.solutions.</code><code class="descname">water_scattering_factor_squared</code><span class="sig-paren">(</span><em>q</em>, <em>temperature=298</em>, <em>volume=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/solutions.html#water_scattering_factor_squared"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.solutions.water_scattering_factor_squared" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get water scattering profile from Greg Hura’s PhD thesis data.  Interpolates the data for given
+q-vector magnitudes and temperature.  Temperatures range from 1, 11, 25, 44, 55, 66, 77 degrees
+Celcius.  Bornagain, of course, uses SI units, including for temperature.  To go from Celcius to Kelvin, add 273.16.
+Note that this is the scattering factor F for a single water molecule.  The number density of water is approximately
+n = 33.3679e27 / m^3 .</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q</strong> – The momentum transfer vector magnitudes (i.e. 2 pi sin(theta/lambda)/wavelength )</li>
+<li><strong>temperature</strong> – Desired water temperature in Kelvin</li>
+<li><strong>volume</strong> – if this is not None, the scattering factor will be multiplied by the number of molecules in volume</li>
 </ul>
 </td>
 </tr>

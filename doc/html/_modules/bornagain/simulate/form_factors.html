@@ -166,8 +166,9 @@
 
 <span class="sd">    Form factor for a sphere of given radius, at given q magnitudes.  Assumes the scattering density is unity inside.</span>
 
-<span class="sd">    Formula from Table A.1 in Guinier &quot;X-ray diffraction in crystals, imperfect crystals, and amorphous bodies&quot;.  Rick</span>
-<span class="sd">    confirms there are no approximations in this formula, and radius is correct (no it&#39;s not diameter by mistake).</span>
+<span class="sd">    Formula can be cound, for example, in Table A.1 in Guinier&#39;s &quot;X-ray diffraction in crystals, imperfect crystals, and</span>
+<span class="sd">    amorphous bodies&quot;.  There are no approximations in this formula beyond the 1st Born approximation; it is not a</span>
+<span class="sd">    small-angle formula.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        radius (float): In SI units of course</span>
@@ -178,13 +179,14 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">qR</span> <span class="o">=</span> <span class="n">q_mags</span><span class="o">*</span><span class="n">radius</span>
-    <span class="n">amp</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">radius</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">qR</span><span class="p">)</span><span class="o">-</span><span class="n">qR</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">qR</span><span class="p">))</span><span class="o">/</span><span class="n">qR</span><span class="o">**</span><span class="mi">3</span>
+    <span class="n">qr</span> <span class="o">=</span> <span class="n">q_mags</span><span class="o">*</span><span class="n">radius</span>
     <span class="k">if</span> <span class="n">check_divide_by_zero</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">q_mags</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">q_mags</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">amp</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">radius</span><span class="o">**</span><span class="mi">3</span>
+        <span class="n">amp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">qr</span><span class="p">)</span>
+        <span class="n">amp</span><span class="p">[</span><span class="n">qr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">radius</span><span class="o">**</span><span class="mi">3</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">qr</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="n">amp</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">qr</span><span class="p">[</span><span class="n">w</span><span class="p">])</span> <span class="o">-</span> <span class="n">qr</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">qr</span><span class="p">[</span><span class="n">w</span><span class="p">]))</span> <span class="o">/</span> <span class="n">qr</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">**</span> <span class="mi">3</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">amp</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">qr</span><span class="p">)</span> <span class="o">-</span> <span class="n">qr</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">qr</span><span class="p">))</span> <span class="o">/</span> <span class="n">qr</span> <span class="o">**</span> <span class="mi">3</span>
     <span class="k">return</span> <span class="n">amp</span></div>
 </pre></div>
 

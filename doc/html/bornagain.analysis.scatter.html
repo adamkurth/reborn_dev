@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bornagain.simulate.mcsim module &mdash; bornagain 0.2018.9.9 documentation</title>
+  <title>bornagain.analysis.scatter module &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -29,8 +29,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.simulate.refdata module" href="bornagain.simulate.refdata.html" />
-    <link rel="prev" title="bornagain.simulate.form_factors module" href="bornagain.simulate.form_factors.html" /> 
+    <link rel="next" title="bornagain.external package" href="bornagain.external.html" />
+    <link rel="prev" title="bornagain.analysis.peaks module" href="bornagain.analysis.peaks.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -95,10 +95,10 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
 </ul>
@@ -157,15 +157,15 @@
         
           <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
         
-          <li><a href="bornagain.simulate.html">bornagain.simulate package</a> &raquo;</li>
+          <li><a href="bornagain.analysis.html">bornagain.analysis package</a> &raquo;</li>
         
-      <li>bornagain.simulate.mcsim module</li>
+      <li>bornagain.analysis.scatter module</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/bornagain.simulate.mcsim.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/bornagain.analysis.scatter.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -178,12 +178,63 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-bornagain.simulate.mcsim">
-<span id="bornagain-simulate-mcsim-module"></span><h1>bornagain.simulate.mcsim module<a class="headerlink" href="#module-bornagain.simulate.mcsim" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="bornagain.simulate.mcsim.mcsim">
-<code class="descclassname">bornagain.simulate.mcsim.</code><code class="descname">mcsim</code><span class="sig-paren">(</span><em>detector_distance=0.1</em>, <em>pixel_size=0.00011</em>, <em>n_pixels=1000</em>, <em>beam_diameter=1e-05</em>, <em>photon_energy=12.0</em>, <em>n_photons=100000000.0</em>, <em>transmission=1.0</em>, <em>mosaicity_fwhm=0.0001</em>, <em>beam_divergence_fwhm=0.01</em>, <em>beam_spatial_profile='tophat'</em>, <em>photon_energy_fwhm=0.02</em>, <em>crystal_size=1e-05</em>, <em>crystal_size_fwhm=0.0</em>, <em>mosaic_domain_size=1e-06</em>, <em>mosaic_domain_size_fwhm=0.0</em>, <em>water_radius=0.0</em>, <em>temperature=298.16</em>, <em>n_monte_carlo_iterations=1000</em>, <em>num_patterns=1</em>, <em>random_rotation=True</em>, <em>approximate_shape_transform=True</em>, <em>cromer_mann=False</em>, <em>expand_symm=False</em>, <em>fix_rot_seq=False</em>, <em>overlay_wigner_cells=False</em>, <em>mask_direct_beam=False</em>, <em>pdb_file='../../examples/data/pdb/2LYZ-P1.pdb'</em>, <em>write_hdf5=True</em>, <em>write_geom=True</em>, <em>write_crystal_sizes=True</em>, <em>write_ideal_only=False</em>, <em>results_dir='/data/temp/'</em>, <em>quiet=False</em>, <em>compression=None</em>, <em>cl_double_precision=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/mcsim.html#mcsim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.mcsim.mcsim" title="Permalink to this definition">¶</a></dt>
-<dd><p>TODO: Write docstring.</p>
+  <div class="section" id="module-bornagain.analysis.scatter">
+<span id="bornagain-analysis-scatter-module"></span><h1>bornagain.analysis.scatter module<a class="headerlink" href="#module-bornagain.analysis.scatter" title="Permalink to this headline">¶</a></h1>
+<p>Classes related to x-ray “scattering”,
+which loosely means diffraction from many objects in random orientations.</p>
+<dl class="class">
+<dt id="bornagain.analysis.scatter.RadialProfile">
+<em class="property">class </em><code class="descclassname">bornagain.analysis.scatter.</code><code class="descname">RadialProfile</code><a class="reference internal" href="_modules/bornagain/analysis/scatter.html#RadialProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.analysis.scatter.RadialProfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Helper class to create radial profiles.</p>
+<dl class="method">
+<dt id="bornagain.analysis.scatter.RadialProfile.make_plan">
+<code class="descname">make_plan</code><span class="sig-paren">(</span><em>q_mags</em>, <em>mask=None</em>, <em>n_bins=100</em>, <em>q_range=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/analysis/scatter.html#RadialProfile.make_plan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.analysis.scatter.RadialProfile.make_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup the binning indices for the creation of radial profiles.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q_mags</strong> (<em>numpy array</em>) – Scattering vector magnitudes.</li>
+<li><strong>mask</strong> (<em>numpy array</em>) – Pixel mask.  Should be ones and zeros,
+where one means “good” and zero means “bad”.</li>
+<li><strong>n_bins</strong> (<em>int</em>) – Number of bins.</li>
+<li><strong>q_range</strong> (<em>list-like</em>) – The minimum and maximum of the scattering vector magnitudes.
+The bin size will be equal to
+(max_q - min_q) / n_bins</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.analysis.scatter.RadialProfile.get_profile">
+<code class="descname">get_profile</code><span class="sig-paren">(</span><em>data</em>, <em>average=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/analysis/scatter.html#RadialProfile.get_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.analysis.scatter.RadialProfile.get_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a radial profile for a particular dataframe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>numpy array</em>) – Intensity data.</li>
+<li><strong>average</strong> (<em>bool</em>) – If true, divide the sum in each bin by the counts,
+else return the sum.  Default: True.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The requested radial profile.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">profile (numpy array)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -196,10 +247,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.simulate.refdata.html" class="btn btn-neutral float-right" title="bornagain.simulate.refdata module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.external.html" class="btn btn-neutral float-right" title="bornagain.external package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.simulate.form_factors.html" class="btn btn-neutral" title="bornagain.simulate.form_factors module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.analysis.peaks.html" class="btn btn-neutral" title="bornagain.analysis.peaks module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

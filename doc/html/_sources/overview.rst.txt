@@ -6,20 +6,17 @@ x-ray diffraction under the Born approximation.  It is not the first attempt to 
 such a package, hence the name.
 
 It turns out that there is another Python package called "`BornAgain <www.bornagainproject.org>`_"... and it is for
-simulating diffraction under the Born approximation.  Since they were first (and their software looks really impressive)
-this package will probably be re-named...
-
-Since bornagain is under continuous development, there might still be some large changes to the API in the near future.
-
-There are lots of other Python packages that provide utilities that overlap with bornagain:
-
-- DIALS
-- cctbx
-- psgeom
-- poppy
-- xrayutilities
-- xraylib
-- and so on
+simulating diffraction under the Born approximation (this package will probably be re-named some day...).  There are
+of course lots of other Python packages that provide utilities that overlap in various ways with bornagain: e.g.
+`thor <https://github.com/tjlane/thor>`_,
+`OnDa <https://github.com/ondateam>`_,
+`DIALS <https://dials.github.io/>`_,
+`cctbx <https://cci.lbl.gov/cctbx_docs/index.html#id2>`_,
+`psgeom <https://github.com/slaclab/psgeom>`_,
+`xrayutilities <https://xrayutilities.sourceforge.io/index.html>`_,
+`xraylib <https://github.com/tschoonj/xraylib/wiki>`_,
+`Dragonfly <https://github.com/duaneloh/Dragonfly/wiki/EMC-implementation>`_
+and so on.
 
 
 What's in bornagain?
@@ -72,8 +69,5 @@ See the page for developers :ref:`developers_anchor`.  We aim to keep things rea
 Acknowledgements
 ----------------
 
-There are numerous contributions to bornagain made by Derek Mendez, Rick Hewitt, and Cameron Howard.
-
-Code found in bornagain has been inspired by numerous open-source software packages such as Thor, psana, OnDA, CrystFEL,
-Cheetah, cctbx.  In some cases, code has been copied or paraphrased from other open-source Python modules such as spglib
-and cfelpyutils.
+Code found in bornagain has been inspired by numerous open-source software packages listed above.  Numerous
+ contributions to bornagain have been made by Derek Mendez, Rick Hewitt, and Cameron Howard.

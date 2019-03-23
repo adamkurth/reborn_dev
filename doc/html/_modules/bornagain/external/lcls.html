@@ -163,9 +163,109 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
-
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">utils</span>
+<span class="kn">import</span> <span class="nn">bornagain</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">psana</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">psana</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="AreaDetector"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.AreaDetector">[docs]</a><span class="k">class</span> <span class="nc">AreaDetector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Thin wrapper for psana.Detector class.  Adds methods to generate list of PADGeometry instances and to split the PAD</span>
+<span class="sd">    data in to a list of 2d arrays.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_psf</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_type</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_splitter</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="o">=</span> <span class="n">psana</span><span class="o">.</span><span class="n">Detector</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detector_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_detector_type</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AreaDetector.get_detector_type"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.AreaDetector.get_detector_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_detector_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">detector_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">detector_id</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">detector_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.*CsPad&#39;</span><span class="p">,</span> <span class="n">detector_id</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">detector_type</span> <span class="o">=</span> <span class="s1">&#39;cspad&#39;</span>
+        <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;pnccd.*&#39;</span><span class="p">,</span> <span class="n">detector_id</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">detector_type</span> <span class="o">=</span> <span class="s1">&#39;pnccd&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">detector_type</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+        <span class="k">return</span> <span class="n">detector_type</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_detector_type</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
+
+<div class="viewcode-block" id="AreaDetector.get_psf"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.AreaDetector.get_psf">[docs]</a>    <span class="k">def</span> <span class="nf">get_psf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_psf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="n">run</span><span class="p">)</span><span class="o">.</span><span class="n">get_psf</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_psf</span></div>
+
+<div class="viewcode-block" id="AreaDetector.get_calib_split"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.AreaDetector.get_calib_split">[docs]</a>    <span class="k">def</span> <span class="nf">get_calib_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+
+        <span class="n">calib</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">calib</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">calib</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_pad</span><span class="p">(</span><span class="n">calib</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AreaDetector.get_raw_split"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.AreaDetector.get_raw_split">[docs]</a>    <span class="k">def</span> <span class="nf">get_raw_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+
+        <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">raw</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">raw</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_pad</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AreaDetector.get_pad_geometry"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.AreaDetector.get_pad_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">get_pad_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run</span><span class="p">):</span>
+
+        <span class="n">psf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_psf</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">is_cspad</span><span class="p">():</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="mf">194.</span> <span class="o">*</span> <span class="mf">109.92</span> <span class="o">+</span> <span class="p">(</span><span class="mf">274.8</span> <span class="o">-</span> <span class="mf">109.92</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">psf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">shift</span> <span class="o">*</span> <span class="n">f</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">f</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="p">((</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]),</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]))</span>
+                <span class="n">psf</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">psf</span><span class="p">)):</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">bornagain</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">PADGeometry</span><span class="p">()</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">t_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">psf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="mf">1e6</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">ss_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">psf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="mf">1e6</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">fs_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">psf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="mf">1e6</span>
+            <span class="n">geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geom</span></div>
+
+<div class="viewcode-block" id="AreaDetector.split_pad"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.AreaDetector.split_pad">[docs]</a>    <span class="k">def</span> <span class="nf">split_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+        <span class="c1"># Optional custom splitter function e.g. for funky crystfel/cheetah conventions that scamble data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_splitter</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">is_cspad</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cspad_data_splitter</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">pads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">pads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+        <span class="k">return</span> <span class="n">pads</span></div>
+
+<div class="viewcode-block" id="AreaDetector.cspad_data_splitter"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.AreaDetector.cspad_data_splitter">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">cspad_data_splitter</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Thanks to Derek for this.&quot;&quot;&quot;</span>
+        <span class="n">asics64</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">split_asic</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">asic</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">194</span><span class="p">],</span> <span class="n">asic</span><span class="p">[:,</span> <span class="mi">194</span><span class="p">:])</span> <span class="k">for</span> <span class="n">asic</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">sub_asic</span> <span class="ow">in</span> <span class="n">split_asic</span><span class="p">:</span>  <span class="c1"># 185x194 arrays</span>
+                <span class="n">asics64</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub_asic</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">asics64</span></div></div>
 
 
 <div class="viewcode-block" id="reshape_psana_cspad_array_to_cheetah_array"><a class="viewcode-back" href="../../../bornagain.external.lcls.html#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">[docs]</a><span class="k">def</span> <span class="nf">reshape_psana_cspad_array_to_cheetah_array</span><span class="p">(</span><span class="n">psana_array</span><span class="p">):</span>

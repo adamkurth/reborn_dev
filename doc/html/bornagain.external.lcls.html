@@ -184,6 +184,55 @@
 official psana documentation is but if you work with LCLS data you should at least skim through all of the material in
 the <a class="reference external" href="https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis">LCLS Data Analysis Confluence pages</a>.
 Note that there is documentation on <a class="reference external" href="https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry">LCLS PAD geometry</a>.</p>
+<dl class="class">
+<dt id="bornagain.external.lcls.AreaDetector">
+<em class="property">class </em><code class="descclassname">bornagain.external.lcls.</code><code class="descname">AreaDetector</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Thin wrapper for psana.Detector class.  Adds methods to generate list of PADGeometry instances and to split the PAD
+data in to a list of 2d arrays.</p>
+<dl class="method">
+<dt id="bornagain.external.lcls.AreaDetector.get_detector_type">
+<code class="descname">get_detector_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.get_detector_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.get_detector_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.external.lcls.AreaDetector.type">
+<code class="descname">type</code><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.lcls.AreaDetector.get_psf">
+<code class="descname">get_psf</code><span class="sig-paren">(</span><em>run</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.get_psf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.get_psf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.lcls.AreaDetector.get_calib_split">
+<code class="descname">get_calib_split</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.get_calib_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.get_calib_split" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.lcls.AreaDetector.get_raw_split">
+<code class="descname">get_raw_split</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.get_raw_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.get_raw_split" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.lcls.AreaDetector.get_pad_geometry">
+<code class="descname">get_pad_geometry</code><span class="sig-paren">(</span><em>run</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.get_pad_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.get_pad_geometry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.external.lcls.AreaDetector.split_pad">
+<code class="descname">split_pad</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.split_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.split_pad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="bornagain.external.lcls.AreaDetector.cspad_data_splitter">
+<em class="property">static </em><code class="descname">cspad_data_splitter</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.cspad_data_splitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.cspad_data_splitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thanks to Derek for this.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">
 <code class="descclassname">bornagain.external.lcls.</code><code class="descname">reshape_psana_cspad_array_to_cheetah_array</code><span class="sig-paren">(</span><em>psana_array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#reshape_psana_cspad_array_to_cheetah_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array" title="Permalink to this definition">¶</a></dt>

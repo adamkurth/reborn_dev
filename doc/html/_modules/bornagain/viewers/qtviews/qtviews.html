@@ -355,13 +355,15 @@
 
 <div class="viewcode-block" id="Scatter3D.add_points"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.qtviews.html#bornagain.viewers.qtviews.qtviews.Scatter3D.add_points">[docs]</a>    <span class="k">def</span> <span class="nf">add_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39; Add an Nx3 array of points r with specified color and size.  Color is a 3-element</span>
-<span class="sd">		    Python list and size is a float scalar. &#39;&#39;&#39;</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Add an Nx3 array of points r with specified color and size.  Color is a 3-element</span>
+<span class="sd">        Python list and size is a float scalar.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultColor</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">col</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">glColor</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">color</span> <span class="c1">#pg.glColor(color)</span>
 
         <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">siz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultSize</span>

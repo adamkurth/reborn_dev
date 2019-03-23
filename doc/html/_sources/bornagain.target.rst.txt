@@ -13,6 +13,7 @@ Submodules
 
    bornagain.target.crystal
    bornagain.target.density
+   bornagain.target.molecule
    bornagain.target.placer
    bornagain.target.spgrp
 

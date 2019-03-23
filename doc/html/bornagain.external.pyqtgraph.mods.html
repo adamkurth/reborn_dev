@@ -184,9 +184,12 @@
 <span id="bornagain-external-pyqtgraph-mods-module"></span><h1>bornagain.external.pyqtgraph.mods module<a class="headerlink" href="#module-bornagain.external.pyqtgraph.mods" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="bornagain.external.pyqtgraph.mods.ImageItem">
-<em class="property">class </em><code class="descclassname">bornagain.external.pyqtgraph.mods.</code><code class="descname">ImageItem</code><span class="sig-paren">(</span><em>image=None</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">bornagain.external.pyqtgraph.mods.</code><code class="descname">ImageItem</code><span class="sig-paren">(</span><em>image=None</em>, <em>autoDownsample=False</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pyqtgraph.graphicsItems.GraphicsObject.GraphicsObject</span></code></p>
 <p><strong>Bases:</strong> <code class="xref py py-class docutils literal notranslate"><span class="pre">GraphicsObject</span></code></p>
+<p>Note: this is a modification of the pyqtgraph ImageItem that fixes the flickering of pixels when you zoom in/out
+on an image.  To turn on this feature, pass the keyword argument autoDownsample and set it to either ‘mean’ or ‘max’
+depending on whether or not you want to see the mean or max pixel values when you zoom out.</p>
 <p>GraphicsObject displaying an image. Optimized for rapid update (ie video display).
 This item displays either a 2D numpy array (height, width) or
 a 3D array (height, width, RGBa). This array is optionally scaled (see
@@ -388,7 +391,7 @@ reduces aliasing.</td>
 
 <dl class="method">
 <dt id="bornagain.external.pyqtgraph.mods.ImageItem.getHistogram">
-<code class="descname">getHistogram</code><span class="sig-paren">(</span><em>bins='auto'</em>, <em>step='auto'</em>, <em>targetImageSize=200</em>, <em>targetHistogramSize=500</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem.getHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem.getHistogram" title="Permalink to this definition">¶</a></dt>
+<code class="descname">getHistogram</code><span class="sig-paren">(</span><em>bins='auto'</em>, <em>step='auto'</em>, <em>targetImageSize=200</em>, <em>targetHistogramSize=100</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/pyqtgraph/mods.html#ImageItem.getHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.pyqtgraph.mods.ImageItem.getHistogram" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns x and y arrays containing the histogram values for the current image.
 For an explanation of the return format, see numpy.histogram().</p>
 <p>The <em>step</em> argument causes pixels to be skipped when computing the histogram to save time.

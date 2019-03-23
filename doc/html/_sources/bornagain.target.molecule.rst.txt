@@ -1,0 +1,7 @@
+bornagain.target.molecule module
+================================
+
+.. automodule:: bornagain.target.molecule
+    :members:
+    :undoc-members:
+    :show-inheritance:

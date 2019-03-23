@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.external package" href="bornagain.external.html" />
+    <link rel="next" title="bornagain.analysis.scatter module" href="bornagain.analysis.scatter.html" />
     <link rel="prev" title="bornagain.analysis package" href="bornagain.analysis.html" /> 
 
   
@@ -178,8 +178,74 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="bornagain-analysis-peaks-module">
-<h1>bornagain.analysis.peaks module<a class="headerlink" href="#bornagain-analysis-peaks-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-bornagain.analysis.peaks">
+<span id="bornagain-analysis-peaks-module"></span><h1>bornagain.analysis.peaks module<a class="headerlink" href="#module-bornagain.analysis.peaks" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="bornagain.analysis.peaks.PeakFinder">
+<em class="property">class </em><code class="descclassname">bornagain.analysis.peaks.</code><code class="descname">PeakFinder</code><span class="sig-paren">(</span><em>snr_threshold=10</em>, <em>radii=(3</em>, <em>8</em>, <em>10)</em>, <em>mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/analysis/peaks.html#PeakFinder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.analysis.peaks.PeakFinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="bornagain.analysis.peaks.PeakFinder.snr">
+<code class="descname">snr</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.analysis.peaks.PeakFinder.snr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.analysis.peaks.PeakFinder.signal">
+<code class="descname">signal</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.analysis.peaks.PeakFinder.signal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.analysis.peaks.PeakFinder.labels">
+<code class="descname">labels</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.analysis.peaks.PeakFinder.labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.analysis.peaks.PeakFinder.n_labels">
+<code class="descname">n_labels</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.analysis.peaks.PeakFinder.n_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.analysis.peaks.PeakFinder.centroids">
+<code class="descname">centroids</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.analysis.peaks.PeakFinder.centroids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.analysis.peaks.PeakFinder.snr_threshold">
+<code class="descname">snr_threshold</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.analysis.peaks.PeakFinder.snr_threshold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.analysis.peaks.PeakFinder.radii">
+<code class="descname">radii</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.analysis.peaks.PeakFinder.radii" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.analysis.peaks.PeakFinder.mask">
+<code class="descname">mask</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.analysis.peaks.PeakFinder.mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.analysis.peaks.PeakFinder.find_peaks">
+<code class="descname">find_peaks</code><span class="sig-paren">(</span><em>data</em>, <em>mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/analysis/peaks.html#PeakFinder.find_peaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.analysis.peaks.PeakFinder.find_peaks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.analysis.peaks.boxsnr">
+<code class="descclassname">bornagain.analysis.peaks.</code><code class="descname">boxsnr</code><span class="sig-paren">(</span><em>dat</em>, <em>mask</em>, <em>nin</em>, <em>ncent</em>, <em>nout</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/analysis/peaks.html#boxsnr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.analysis.peaks.boxsnr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.analysis.peaks.boxsnr_fortran">
+<code class="descclassname">bornagain.analysis.peaks.</code><code class="descname">boxsnr_fortran</code><span class="sig-paren">(</span><em>dat</em>, <em>mask</em>, <em>nin</em>, <em>ncent</em>, <em>nout</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/analysis/peaks.html#boxsnr_fortran"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.analysis.peaks.boxsnr_fortran" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.analysis.peaks.boxsnr_numba">
+<code class="descclassname">bornagain.analysis.peaks.</code><code class="descname">boxsnr_numba</code><a class="reference internal" href="_modules/bornagain/analysis/peaks.html#boxsnr_numba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.analysis.peaks.boxsnr_numba" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 
 
@@ -190,7 +256,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.external.html" class="btn btn-neutral float-right" title="bornagain.external package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.analysis.scatter.html" class="btn btn-neutral float-right" title="bornagain.analysis.scatter module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="bornagain.analysis.html" class="btn btn-neutral" title="bornagain.analysis package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

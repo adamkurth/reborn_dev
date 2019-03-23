@@ -186,176 +186,212 @@ and we will likey always deal with Angstrom scale coordinates?</p>
 <p>for example print( “Lattice dim is %.3f”%(0.0000008)) will print 0.000, which can
 cause problems…</p>
 <dl class="class">
-<dt id="bornagain.target.crystal.Structure">
-<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">Structure</code><span class="sig-paren">(</span><em>pdbFilePath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Structure" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.UnitCell">
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">UnitCell</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>alpha</em>, <em>beta</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#UnitCell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.UnitCell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A container class for stuff needed when dealing with crystal structures.</p>
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.r">
-<code class="descname">r</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.r" title="Permalink to this definition">¶</a></dt>
-<dd><p>Atomic coordinates (3xN array)</p>
+<dt id="bornagain.target.crystal.UnitCell.a">
+<code class="descname">a</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.a" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice constant</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.O">
-<code class="descname">O</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.O" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.UnitCell.b">
+<code class="descname">b</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice constant</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.UnitCell.c">
+<code class="descname">c</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice constant</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.UnitCell.alpha">
+<code class="descname">alpha</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.alpha" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice angle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.UnitCell.beta">
+<code class="descname">beta</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.beta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice angle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.UnitCell.gamma">
+<code class="descname">gamma</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.gamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lattice angle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.UnitCell.o_mat">
+<code class="descname">o_mat</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.o_mat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.Oinv">
-<code class="descname">Oinv</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.Oinv" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.UnitCell.o_mat_inv">
+<code class="descname">o_mat_inv</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.o_mat_inv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse orthogonalization matrix (3x3 array)</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.A">
-<code class="descname">A</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.A" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is Oinv transpose (3x3 array).  Does the transform q = dot(A, h), with fractional Miller indices h.</p>
+<dt id="bornagain.target.crystal.UnitCell.a_mat">
+<code class="descname">a_mat</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.a_mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Orthogonalization matrix transpose (3x3 array). Does the transform q = dot(A, h), with fractional Miller indices h.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.Ainv">
-<code class="descname">Ainv</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.Ainv" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.UnitCell.a_mat_inv">
+<code class="descname">a_mat_inv</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.a_mat_inv" title="Permalink to this definition">¶</a></dt>
 <dd><p>A inverse</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.T">
-<code class="descname">T</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.T" title="Permalink to this definition">¶</a></dt>
-<dd><p>Translation vector that goes with orthogonalization matrix (What is this used for???)</p>
+<dt id="bornagain.target.crystal.UnitCell.volume">
+<code class="descname">volume</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.UnitCell.volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unit cell volume</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.target.crystal.SpaceGroup">
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">SpaceGroup</code><span class="sig-paren">(</span><em>hermann_mauguin_symbol=None</em>, <em>hall_number=None</em>, <em>itoc_number=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#SpaceGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>#TODO: document
+Gotchas: note that there are multiple Hall numbers that correspond to each ITOC number.  The 230 ITOC numbers that
+specify space groups refer only to the actual symmetry properties, and there are multiple Hall numbers and Hermann
+Mauguin symbols that have the same spacegroup.  The duplicates are just different ways of specifying the same
+spacegroup.</p>
+<dl class="attribute">
+<dt id="bornagain.target.crystal.SpaceGroup.itoc_number">
+<code class="descname">itoc_number</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup.itoc_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Space group number in the International Tables of Crystallography (ITOC)</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.elements">
-<code class="descname">elements</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Atomic element symbols</p>
+<dt id="bornagain.target.crystal.SpaceGroup.hall_number">
+<code class="descname">hall_number</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup.hall_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Space group Hall number</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.Z">
-<code class="descname">Z</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.Z" title="Permalink to this definition">¶</a></dt>
-<dd><p>Atomic numbers</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.spaceGroupNumber">
-<code class="descname">spaceGroupNumber</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.spaceGroupNumber" title="Permalink to this definition">¶</a></dt>
-<dd><p>Space group number in the Int. Tables</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.hermannMauguinSymbol">
-<code class="descname">hermannMauguinSymbol</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.hermannMauguinSymbol" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.SpaceGroup.hermann_mauguin_symbol">
+<code class="descname">hermann_mauguin_symbol</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup.hermann_mauguin_symbol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.a">
-<code class="descname">a</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.a" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lattice constant</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.b">
-<code class="descname">b</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lattice constant</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.c">
-<code class="descname">c</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.c" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lattice constant</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.alpha">
-<code class="descname">alpha</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.alpha" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lattice angle</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.beta">
-<code class="descname">beta</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.beta" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lattice angle</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.gamma">
-<code class="descname">gamma</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.gamma" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lattice angle</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.V">
-<code class="descname">V</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.V" title="Permalink to this definition">¶</a></dt>
-<dd><p>Unit cell volume</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.nAtoms">
-<code class="descname">nAtoms</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.nAtoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of atoms</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.nMolecules">
-<code class="descname">nMolecules</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.nMolecules" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of molecules per unit cell</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.symOps">
-<code class="descname">symOps</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.symOps" title="Permalink to this definition">¶</a></dt>
-<dd><p>Symmetry operations that are applied to fractional coordinates</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.symRs">
-<code class="descname">symRs</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.symRs" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.SpaceGroup.sym_rotations">
+<code class="descname">sym_rotations</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup.sym_rotations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Symmetry 3x3 transformation matrices (in crystal basis)</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.symTs">
-<code class="descname">symTs</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.Structure.symTs" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.SpaceGroup.sym_translations">
+<code class="descname">sym_translations</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup.sym_translations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Symmetry translations (in crystal basis)</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.n_molecules">
-<code class="descname">n_molecules</code><a class="headerlink" href="#bornagain.target.crystal.Structure.n_molecules" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.SpaceGroup.n_molecules">
+<code class="descname">n_molecules</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup.n_molecules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of symmetry-related molecules</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.SpaceGroup.apply_symmetry_operation">
+<code class="descname">apply_symmetry_operation</code><span class="sig-paren">(</span><em>op_num=None</em>, <em>x_vecs=None</em>, <em>inverse=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#SpaceGroup.apply_symmetry_operation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup.apply_symmetry_operation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.target.crystal.CrystalStructure">
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">CrystalStructure</code><span class="sig-paren">(</span><em>pdbFilePath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#CrystalStructure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A container class for stuff needed when dealing with crystal structures.</p>
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.T">
+<code class="descname">T</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translation vector that goes with orthogonalization matrix (What is this used for???)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.molecule">
+<code class="descname">molecule</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.molecule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.unitcell">
+<code class="descname">unitcell</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.unitcell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.spacegroup">
+<code class="descname">spacegroup</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.spacegroup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.mosaicity_fwhm">
+<code class="descname">mosaicity_fwhm</code><em class="property"> = 0</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.mosaicity_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.crystal_size">
+<code class="descname">crystal_size</code><em class="property"> = 1e-06</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.crystal_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.crystal_size_fwhm">
+<code class="descname">crystal_size_fwhm</code><em class="property"> = 0.0</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.crystal_size_fwhm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.mosaic_domain_size">
+<code class="descname">mosaic_domain_size</code><em class="property"> = 5e-07</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.mosaic_domain_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.mosaic_domain_size_fwhm">
+<code class="descname">mosaic_domain_size_fwhm</code><em class="property"> = 0.0</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.mosaic_domain_size_fwhm" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.crystal.Structure.load_pdb">
-<code class="descname">load_pdb</code><span class="sig-paren">(</span><em>pdbFilePath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Structure.load_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Structure.load_pdb" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.CrystalStructure.load_pdb">
+<code class="descname">load_pdb</code><span class="sig-paren">(</span><em>pdb_file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#CrystalStructure.load_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.load_pdb" title="Permalink to this definition">¶</a></dt>
 <dd><p>Populate the class with all the info from a PDB file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pdbFilePath</strong> – Path to the PDB file</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pdb_file_path</strong> – Path to the PDB file</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.crystal.Structure.set_cell">
-<code class="descname">set_cell</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>alpha</em>, <em>beta</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Structure.set_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Structure.set_cell" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the unit cell lattice.</p>
+<dt id="bornagain.target.crystal.CrystalStructure.set_cell">
+<code class="descname">set_cell</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#CrystalStructure.set_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.set_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the unit cell lattice.  Takes the same arguments as ``</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.CrystalStructure.set_spacegroup">
+<code class="descname">set_spacegroup</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#CrystalStructure.set_spacegroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.set_spacegroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the spacegroup of the crystal.  This produces a cache of the symmetry transformation operations.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>a</strong> – Lattice constant</li>
-<li><strong>b</strong> – Lattice constant</li>
-<li><strong>c</strong> – Lattice constant</li>
-<li><strong>alpha</strong> – Lattice angle</li>
-<li><strong>beta</strong> – Lattice angle</li>
-<li><strong>gamma</strong> – Lattice angle</li>
+<li><strong>hermann_mauguin_symbol</strong> – A string like ‘P 63’</li>
+<li><strong>hall_number</strong> – Hall number (between 1-530)</li>
+<li><strong>itoc_number</strong> – Spacegroup number from International Tables of Crystallography (between 1-230)</li>
 </ul>
 </td>
 </tr>
@@ -364,39 +400,233 @@ cause problems…</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="bornagain.target.crystal.Structure.set_spacegroup">
-<code class="descname">set_spacegroup</code><span class="sig-paren">(</span><em>hermann_mauguin_symbol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Structure.set_spacegroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Structure.set_spacegroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the spacegroup of the crystal.  This produces a cache of the symmetry transformation operations.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>hermann_mauguin_symbol</strong> – This can be a string (like ‘P 63’ or a number 1-530)</td>
-</tr>
-</tbody>
-</table>
+<dt id="bornagain.target.crystal.CrystalStructure.set_molecule">
+<code class="descname">set_molecule</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#CrystalStructure.set_molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.set_molecule" title="Permalink to this definition">¶</a></dt>
+<dd><p>See docs for target.Molecule</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.Structure.x">
-<code class="descname">x</code><a class="headerlink" href="#bornagain.target.crystal.Structure.x" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.CrystalStructure.elements">
+<code class="descname">elements</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.elements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.Z">
+<code class="descname">Z</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.Z" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.nAtoms">
+<code class="descname">nAtoms</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.nAtoms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.r">
+<code class="descname">r</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.r" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.a">
+<code class="descname">a</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.a" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.b">
+<code class="descname">b</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.b" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.c">
+<code class="descname">c</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.c" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.alpha">
+<code class="descname">alpha</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.alpha" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.beta">
+<code class="descname">beta</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.beta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.gamma">
+<code class="descname">gamma</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.gamma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.V">
+<code class="descname">V</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.V" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.O">
+<code class="descname">O</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.O" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.Oinv">
+<code class="descname">Oinv</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.Oinv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.A">
+<code class="descname">A</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.A" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.Ainv">
+<code class="descname">Ainv</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.Ainv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.hermannMauguinSymbol">
+<code class="descname">hermannMauguinSymbol</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.hermannMauguinSymbol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.spaceGroupNumber">
+<code class="descname">spaceGroupNumber</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.spaceGroupNumber" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.nMolecules">
+<code class="descname">nMolecules</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.nMolecules" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.n_molecules">
+<code class="descname">n_molecules</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.n_molecules" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.symRs">
+<code class="descname">symRs</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.symRs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.symTs">
+<code class="descname">symTs</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.symTs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.x">
+<code class="descname">x</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fractional coordinates of atoms.</p>
 <p>Returns: Nx3 numpy array</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="bornagain.target.crystal.CrystalStructure.get_symmetry_expanded_coordinates">
+<code class="descname">get_symmetry_expanded_coordinates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#CrystalStructure.get_symmetry_expanded_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.get_symmetry_expanded_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.target.crystal.Structure">
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">Structure</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#Structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.Structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bornagain.target.crystal.CrystalStructure" title="bornagain.target.crystal.CrystalStructure"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.target.crystal.CrystalStructure</span></code></a></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="bornagain.target.crystal.structure">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">structure</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.structure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#bornagain.target.crystal.Structure" title="bornagain.target.crystal.Structure"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.target.crystal.Structure</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#bornagain.target.crystal.CrystalStructure" title="bornagain.target.crystal.CrystalStructure"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.target.crystal.CrystalStructure</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.target.crystal.FiniteLattice">
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">FiniteLattice</code><span class="sig-paren">(</span><em>max_size=None</em>, <em>unitcell=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#FiniteLattice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="bornagain.target.crystal.FiniteLattice.all_r_coordinates">
+<code class="descname">all_r_coordinates</code><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.all_r_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.FiniteLattice.occupied_indices">
+<code class="descname">occupied_indices</code><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.occupied_indices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.FiniteLattice.occupied_x_coordinates">
+<code class="descname">occupied_x_coordinates</code><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.occupied_x_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.FiniteLattice.occupied_r_coordinates">
+<code class="descname">occupied_r_coordinates</code><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.occupied_r_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.FiniteLattice.add_facet">
+<code class="descname">add_facet</code><span class="sig-paren">(</span><em>plane=None</em>, <em>length=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#FiniteLattice.add_facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.add_facet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.FiniteLattice.reset_occupancies">
+<code class="descname">reset_occupancies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#FiniteLattice.reset_occupancies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.reset_occupancies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.crystal.FiniteLattice.make_hexagonal_prism">
+<code class="descname">make_hexagonal_prism</code><span class="sig-paren">(</span><em>n_cells=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#FiniteLattice.make_hexagonal_prism"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.make_hexagonal_prism" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="function">
 <dt id="bornagain.target.crystal.parse_pdb">
-<code class="descclassname">bornagain.target.crystal.</code><code class="descname">parse_pdb</code><span class="sig-paren">(</span><em>pdbFilePath</em>, <em>crystalStruct=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#parse_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.parse_pdb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a <a class="reference internal" href="#bornagain.target.crystal.Structure" title="bornagain.target.crystal.Structure"><code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code></a> object with PDB information.</p>
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">parse_pdb</code><span class="sig-paren">(</span><em>pdb_file_path</em>, <em>crystal_structure=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#parse_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.parse_pdb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#bornagain.target.crystal.CrystalStructure" title="bornagain.target.crystal.CrystalStructure"><code class="xref py py-class docutils literal notranslate"><span class="pre">CrystalStructure</span></code></a> object with PDB information.</p>
 </dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.get_hm_symbols">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">get_hm_symbols</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#get_hm_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.get_hm_symbols" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.hermann_mauguin_symbol_from_hall_number">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">hermann_mauguin_symbol_from_hall_number</code><span class="sig-paren">(</span><em>hall_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#hermann_mauguin_symbol_from_hall_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.hermann_mauguin_symbol_from_hall_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.itoc_number_from_hall_number">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">itoc_number_from_hall_number</code><span class="sig-paren">(</span><em>hall_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#itoc_number_from_hall_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.itoc_number_from_hall_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.hall_number_from_hermann_mauguin_symbol">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">hall_number_from_hermann_mauguin_symbol</code><span class="sig-paren">(</span><em>hermann_mauguin_symbol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#hall_number_from_hermann_mauguin_symbol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.hall_number_from_hermann_mauguin_symbol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.itoc_number_from_hermann_mauguin_symbol">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">itoc_number_from_hermann_mauguin_symbol</code><span class="sig-paren">(</span><em>hermann_mauguin_symbol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#itoc_number_from_hermann_mauguin_symbol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.itoc_number_from_hermann_mauguin_symbol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.hall_number_from_itoc_number">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">hall_number_from_itoc_number</code><span class="sig-paren">(</span><em>itoc_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#hall_number_from_itoc_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.hall_number_from_itoc_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.hermann_mauguin_symbol_from_itoc_number">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">hermann_mauguin_symbol_from_itoc_number</code><span class="sig-paren">(</span><em>itoc_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#hermann_mauguin_symbol_from_itoc_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.hermann_mauguin_symbol_from_itoc_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.spacegroup_ops_from_hall_number">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">spacegroup_ops_from_hall_number</code><span class="sig-paren">(</span><em>hall_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#spacegroup_ops_from_hall_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.spacegroup_ops_from_hall_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.get_symmetry_operators_from_hall_number">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">get_symmetry_operators_from_hall_number</code><span class="sig-paren">(</span><em>hall_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#get_symmetry_operators_from_hall_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.get_symmetry_operators_from_hall_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="bornagain.target.crystal.get_symmetry_operators_from_space_group">
@@ -404,9 +634,11 @@ cause problems…</p>
 <dd><p>For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
 translation and rotation operators.  These operators are in the crystal basis.
 As of now, this is a rather unreliable function.  My brain hurts badly after attempting
-to make sense of the ways in which space groups are specified…</p>
-<p>Input: A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)</p>
+to make sense of the ways in which space groups are specified… if you are having trouble
+finding your spacegroup check that it is contained in the output of print(crystal.get_hm_symbols()).</p>
 <dl class="docutils">
+<dt>Input:</dt>
+<dd>hm_symbol (str): A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)</dd>
 <dt>Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy</dt>
 <dd>arrays) and translation vectors (1x3 numpy arrays)</dd>
 </dl>

@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.target.placer module" href="bornagain.target.placer.html" />
+    <link rel="next" title="bornagain.target.molecule module" href="bornagain.target.molecule.html" />
     <link rel="prev" title="bornagain.target.crystal module" href="bornagain.target.crystal.html" /> 
 
   
@@ -180,6 +180,17 @@
             
   <div class="section" id="module-bornagain.target.density">
 <span id="bornagain-target-density-module"></span><h1>bornagain.target.density module<a class="headerlink" href="#module-bornagain.target.density" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="bornagain.target.density.DensityMap3D">
+<em class="property">class </em><code class="descclassname">bornagain.target.density.</code><code class="descname">DensityMap3D</code><span class="sig-paren">(</span><em>shape=None</em>, <em>centers=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#DensityMap3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.DensityMap3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="bornagain.target.density.DensityMap3D.density">
+<code class="descname">density</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.DensityMap3D.density" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="class">
 <dt id="bornagain.target.density.CrystalMeshTool">
 <em class="property">class </em><code class="descclassname">bornagain.target.density.</code><code class="descname">CrystalMeshTool</code><span class="sig-paren">(</span><em>cryst</em>, <em>resolution</em>, <em>oversampling</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool" title="Permalink to this definition">¶</a></dt>
@@ -365,7 +376,7 @@ configuration to the jth configuration.</p>
 
 <dl class="method">
 <dt id="bornagain.target.density.CrystalMeshTool.place_atoms_in_map">
-<code class="descname">place_atoms_in_map</code><span class="sig-paren">(</span><em>x</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.place_atoms_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.place_atoms_in_map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">place_atoms_in_map</code><span class="sig-paren">(</span><em>atom_x_vecs</em>, <em>atom_fs</em>, <em>mode='gaussian'</em>, <em>fixed_atom_sigma=5e-11</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.place_atoms_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.place_atoms_in_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
 should be in the crystal basis, and the densities must be real (because the scipy function that we use does
 not allow for complex numbers…).  This is done in a lazy way - the density samples are placed in the nearest
@@ -375,8 +386,8 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>x</strong> (<em>numpy array</em>) – An Nx3 array of position vectors</li>
-<li><strong>f</strong> (<em>numpy array</em>) – An N-length array of densities (must be real)</li>
+<li><strong>x</strong> (<em>numpy array</em>) – An nx3 array of position vectors</li>
+<li><strong>f</strong> (<em>numpy array</em>) – An n-length array of densities (must be real)</li>
 </ul>
 </td>
 </tr>
@@ -406,6 +417,12 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
 
 </dd></dl>
 
+<dl class="attribute">
+<dt id="bornagain.target.density.place_atoms_in_map">
+<code class="descclassname">bornagain.target.density.</code><code class="descname">place_atoms_in_map</code><a class="reference internal" href="_modules/bornagain/target/density.html#place_atoms_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.place_atoms_in_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Needs documentation…</p>
+</dd></dl>
+
 </div>
 
 
@@ -416,7 +433,7 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.target.placer.html" class="btn btn-neutral float-right" title="bornagain.target.placer module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.target.molecule.html" class="btn btn-neutral float-right" title="bornagain.target.molecule module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="bornagain.target.crystal.html" class="btn btn-neutral" title="bornagain.target.crystal module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

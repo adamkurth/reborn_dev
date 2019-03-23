@@ -164,6 +164,18 @@
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">binned_statistic_dd</span>
 
 
+<div class="viewcode-block" id="DensityMap3D"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.DensityMap3D">[docs]</a><span class="k">class</span> <span class="nc">DensityMap3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">density</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">centers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Shape must have three integer values&quot;</span><span class="p">)</span></div>
+
+
+
+
 <div class="viewcode-block" id="CrystalMeshTool"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool">[docs]</a><span class="k">class</span> <span class="nc">CrystalMeshTool</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
@@ -187,10 +199,14 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cryst</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">oversampling</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        This should intelligently pick the limits of a map.</span>
+<span class="sd">        This should intelligently pick the limits of a map.  On initialization, you only need to provide a</span>
+<span class="sd">        target.crystal.Structure() class instance, along with your desired resolution and oversampling.  You can create</span>
+<span class="sd">        the target.crystal.Structure() class most easily if you have a pdb file as follows:</span>
+
+<span class="sd">        &gt;&gt;&gt; cryst = target.crystal.Structure(pdbFilePath=some_path)</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            cryst (crystal.structure) : A crystal structure that contains the spacegroup and lattice information.</span>
+<span class="sd">            cryst (crystal.Structure) : A crystal structure that contains the spacegroup and lattice information.</span>
 <span class="sd">            resolution (float) : The desired resolution of the map (will be modified to suit integer samples and a</span>
 <span class="sd">                                  square 3D mesh)</span>
 <span class="sd">            oversampling (int) : An oversampling of 2 gives a real-space map that is twice as large as the unit cell. In</span>
@@ -200,10 +216,10 @@
         <span class="n">d</span> <span class="o">=</span> <span class="n">resolution</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">oversampling</span><span class="p">)</span>
 
-        <span class="n">abc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">c</span><span class="p">])</span>
+        <span class="n">abc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cryst</span><span class="o">.</span><span class="n">unitcell</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">unitcell</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">cryst</span><span class="o">.</span><span class="n">unitcell</span><span class="o">.</span><span class="n">c</span><span class="p">])</span>
 
         <span class="n">m</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">cryst</span><span class="o">.</span><span class="n">symTs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">cryst</span><span class="o">.</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">sym_translations</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">mp</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
                 <span class="n">Tp</span> <span class="o">=</span> <span class="n">T</span><span class="o">*</span><span class="n">mp</span>
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Tp</span> <span class="o">%</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -211,6 +227,8 @@
                         <span class="n">m</span> <span class="o">=</span> <span class="n">mp</span>
                     <span class="k">break</span>
 
+        <span class="c1"># The idea here is that if, for example, we have a 3-fold screw axis in the spacegroup, then the number of</span>
+        <span class="c1"># samples in the map should be a multiple of 3.  Hopefully this works...</span>
         <span class="n">Nc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">abc</span> <span class="o">/</span> <span class="p">(</span><span class="n">d</span> <span class="o">*</span> <span class="n">m</span><span class="p">))</span> <span class="o">*</span> <span class="n">m</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">cryst</span> <span class="o">=</span> <span class="n">cryst</span>  <span class="c1">#:  crystal.target class object used to initiate the map</span>
@@ -275,7 +293,7 @@
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_x_vecs</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">O</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">unitcell</span><span class="o">.</span><span class="n">o_mat</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.get_h_vecs"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_h_vecs">[docs]</a>    <span class="k">def</span> <span class="nf">get_h_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -305,7 +323,7 @@
 
 <span class="sd">		&quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_h_vecs</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+        <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">unitcell</span><span class="o">.</span><span class="n">a_mat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_h_vecs</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
 
 
 <div class="viewcode-block" id="CrystalMeshTool.get_sym_luts"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.get_sym_luts">[docs]</a>    <span class="k">def</span> <span class="nf">get_sym_luts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -327,7 +345,7 @@
             <span class="n">sym_luts</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_x_vecs</span><span class="p">()</span>
 
-            <span class="k">for</span> <span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">symRs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">symTs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">sym_rotations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">sym_translations</span><span class="p">):</span>
                 <span class="n">lut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">x0</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">T</span>    <span class="c1"># transform x vectors in 3D grid</span>
                 <span class="n">lut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">lut</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span>  <span class="c1"># switch from x to n vectors</span>
                 <span class="n">lut</span> <span class="o">=</span> <span class="n">lut</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span>             <span class="c1"># wrap around</span>
@@ -356,7 +374,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">luts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sym_luts</span><span class="p">()</span>
-        <span class="n">data_trans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">data_trans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">data_trans</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">luts</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">luts</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
 
         <span class="k">return</span> <span class="n">data_trans</span></div>
@@ -416,7 +434,7 @@
         <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="CrystalMeshTool.place_atoms_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.place_atoms_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_atoms_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<div class="viewcode-block" id="CrystalMeshTool.place_atoms_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.place_atoms_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_atoms_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_x_vecs</span><span class="p">,</span> <span class="n">atom_fs</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">fixed_atom_sigma</span><span class="o">=</span><span class="mf">0.5e-10</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -426,17 +444,28 @@
 <span class="sd">        voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy...</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            x (numpy array):  An Nx3 array of position vectors</span>
-<span class="sd">            f (numpy array):  An N-length array of densities (must be real)</span>
+<span class="sd">            x (numpy array):  An nx3 array of position vectors</span>
+<span class="sd">            f (numpy array):  An n-length array of densities (must be real)</span>
 
 <span class="sd">        Returns: An NxNxN numpy array containing the sum of densities that were provided as input.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">mm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">]</span>
-        <span class="n">rng</span> <span class="o">=</span> <span class="p">[</span><span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">]</span>
-        <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">a</span></div>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">fixed_atom_sigma</span> <span class="c1"># Gaussian sigma (i.e. atom &quot;size&quot;); this is a fudge factor and needs to be updated</span>
+            <span class="c1"># n_atoms = atom_x_vecs.shape[0]</span>
+            <span class="n">orth_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cryst</span><span class="o">.</span><span class="n">unitcell</span><span class="o">.</span><span class="n">o_mat</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">map_x_vecs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_x_vecs</span><span class="p">()</span>
+            <span class="n">n_map_voxels</span> <span class="o">=</span> <span class="n">map_x_vecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">f_map</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_map_voxels</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
+            <span class="n">f_map_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_map_voxels</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span>
+            <span class="n">place_atoms_in_map</span><span class="p">(</span><span class="n">atom_x_vecs</span><span class="p">,</span> <span class="n">atom_fs</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">orth_mat</span><span class="p">,</span> <span class="n">map_x_vecs</span><span class="p">,</span> <span class="n">f_map</span><span class="p">,</span> <span class="n">f_map_tmp</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">f_map</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;nearest&#39;</span><span class="p">:</span>
+            <span class="n">mm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">]</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="p">[</span><span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">]</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">a</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.place_intensities_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.place_intensities_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_intensities_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
 
@@ -458,6 +487,46 @@
         <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">a</span></div></div>
+
+<span class="kn">from</span> <span class="nn">numba</span> <span class="k">import</span> <span class="n">jit</span>
+
+<div class="viewcode-block" id="place_atoms_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.place_atoms_in_map">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">place_atoms_in_map</span><span class="p">(</span><span class="n">x_vecs</span><span class="p">,</span> <span class="n">atom_fs</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">orth_mat</span><span class="p">,</span> <span class="n">map_x_vecs</span><span class="p">,</span> <span class="n">f_map</span><span class="p">,</span> <span class="n">f_map_tmp</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Needs documentation...</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">x_vecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n_map_voxels</span> <span class="o">=</span> <span class="n">map_x_vecs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># f_map = np.empty([n_map_voxels], dtype=atom_fs.dtype)</span>
+        <span class="c1"># f_map_tmp = np.empty([n_map_voxels], dtype=x_vecs.dtype)</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x_vecs</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="n">s</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">x_vecs</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">%</span> <span class="n">s</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">x_vecs</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">%</span> <span class="n">s</span>
+            <span class="n">w_tot</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_map_voxels</span><span class="p">):</span>
+                <span class="n">mx</span> <span class="o">=</span> <span class="n">map_x_vecs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">my</span> <span class="o">=</span> <span class="n">map_x_vecs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">mz</span> <span class="o">=</span> <span class="n">map_x_vecs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mx</span><span class="p">)</span>
+                <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">my</span><span class="p">)</span>
+                <span class="n">dz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">mz</span><span class="p">)</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">s</span> <span class="o">-</span> <span class="n">dx</span><span class="p">)</span>
+                <span class="n">dy</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">s</span> <span class="o">-</span> <span class="n">dy</span><span class="p">)</span>
+                <span class="n">dz</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">dz</span><span class="p">,</span> <span class="n">s</span> <span class="o">-</span> <span class="n">dz</span><span class="p">)</span>
+                <span class="n">dr2</span> <span class="o">=</span> <span class="p">(</span><span class="n">orth_mat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">orth_mat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">+</span> <span class="n">orth_mat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">dz</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> \
+                      <span class="p">(</span><span class="n">orth_mat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">orth_mat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">+</span> <span class="n">orth_mat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">dz</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> \
+                      <span class="p">(</span><span class="n">orth_mat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">orth_mat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">+</span> <span class="n">orth_mat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">dz</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">dr2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+                <span class="n">f_map_tmp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
+                <span class="n">w_tot</span> <span class="o">+=</span> <span class="n">w</span>
+            <span class="n">f_map</span> <span class="o">+=</span> <span class="n">atom_fs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="n">f_map_tmp</span><span class="o">/</span><span class="n">w_tot</span></div>
+
+        <span class="c1"># return f_map</span>
 </pre></div>
 
            </div>

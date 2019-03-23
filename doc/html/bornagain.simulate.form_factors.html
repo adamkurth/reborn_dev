@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.simulate.mcsim module" href="bornagain.simulate.mcsim.html" />
+    <link rel="next" title="bornagain.simulate.numbacore module" href="bornagain.simulate.numbacore.html" />
     <link rel="prev" title="bornagain.simulate.examples module" href="bornagain.simulate.examples.html" /> 
 
   
@@ -184,8 +184,9 @@
 <dt id="bornagain.simulate.form_factors.sphere_form_factor">
 <code class="descclassname">bornagain.simulate.form_factors.</code><code class="descname">sphere_form_factor</code><span class="sig-paren">(</span><em>radius</em>, <em>q_mags</em>, <em>check_divide_by_zero=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/form_factors.html#sphere_form_factor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.form_factors.sphere_form_factor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Form factor for a sphere of given radius, at given q magnitudes.  Assumes the scattering density is unity inside.</p>
-<p>Formula from Table A.1 in Guinier “X-ray diffraction in crystals, imperfect crystals, and amorphous bodies”.  Rick
-confirms there are no approximations in this formula, and radius is correct (no it’s not diameter by mistake).</p>
+<p>Formula can be cound, for example, in Table A.1 in Guinier’s “X-ray diffraction in crystals, imperfect crystals, and
+amorphous bodies”.  There are no approximations in this formula beyond the 1st Born approximation; it is not a
+small-angle formula.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -212,7 +213,7 @@ confirms there are no approximations in this formula, and radius is correct (no 
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.simulate.mcsim.html" class="btn btn-neutral float-right" title="bornagain.simulate.mcsim module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.simulate.numbacore.html" class="btn btn-neutral float-right" title="bornagain.simulate.numbacore module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="bornagain.simulate.examples.html" class="btn btn-neutral" title="bornagain.simulate.examples module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
