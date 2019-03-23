@@ -1,6 +1,7 @@
 import sys
 sys.path.append('..')
 
+import numpy as np
 from bornagain import target
 from bornagain.target import crystal
 
@@ -38,6 +39,14 @@ def test_spacegroup():
     sg = crystal.SpaceGroup(itoc_number=1)
     assert(sg.n_molecules == 1)
     assert(sg.hermann_mauguin_symbol == 'P 1')
+
+
+def test_finite_lattice():
+
+    siz = 5
+    unitcell = crystal.UnitCell(5e-10, 5e-10, 5e-10, 90*np.pi/180, 90*np.pi/180, 90*np.pi/180)
+    lat = crystal.FiniteLattice(max_size=siz, unitcell=unitcell)
+    assert(lat.all_x_coordinates.shape[0] == siz**3)
 
 
 if __name__ == "__main__":

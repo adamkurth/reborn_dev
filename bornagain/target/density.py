@@ -7,6 +7,18 @@ import scipy
 from scipy.stats import binned_statistic_dd
 
 
+class DensityMap3D(object):
+
+    density = None
+
+    def __init__(self, shape=None, centers=None):
+
+        if self.shape is None:
+            raise ValueError("Shape must have three integer values")
+
+
+
+
 class CrystalMeshTool(object):
 
     r'''

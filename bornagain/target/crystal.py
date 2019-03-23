@@ -22,6 +22,7 @@ from numpy import sin, cos, sqrt
 
 import bornagain.target
 from bornagain import utils
+from bornagain.utils import rotate
 from bornagain.simulate import simutils
 
 
@@ -116,6 +117,13 @@ class SpaceGroup(object):
 
         self.sym_rotations, self.sym_translations = get_symmetry_operators_from_hall_number(self.hall_number)
         self.n_molecules = len(self.sym_rotations)
+
+    def apply_symmetry_operation(self, op_num=None, x_vecs=None, inverse=False):
+
+        rot = self.sym_rotations[op_num]
+        trans = self.sym_translations[op_num]
+        return utils.rotate(rot, x_vecs) + trans
+
 
 
 class CrystalStructure(object):
@@ -334,9 +342,77 @@ class structure(CrystalStructure):
 
 class FiniteLattice(object):
 
-    def __init__(self, max_size=None):
+    def __init__(self, max_size=None, unitcell=None):
 
-        pass
+        r"""
+
+        Args:
+            max_size: Integer N that sets the size of the lattice to N x N x N.
+            unitcell: A crystal.UnitCell type that is needed to generate
+        """
+
+        if max_size is None:
+            raise ValueError("You need to choose a maximum lattice size.")
+
+        if not isinstance(unitcell, UnitCell):
+            raise ValueError("You must provide a unitcell of crystal.UnitCell type.")
+
+        if not isinstance(max_size, int):
+            raise ValueError("max_size must be an int.")
+
+        if max_size <= 0:
+            raise ValueError("max_size must be >= 0.")
+
+        self.max_size = max_size
+        self.occupancies = np.ones([self.max_size]*3)
+        self.unitcell = unitcell
+        ran = np.arange(-(self.max_size-1)/2.0, (self.max_size+1)/2.0)
+        x, y, z = np.meshgrid(ran, ran, ran, indexing='ij')
+        self.all_x_coordinates = np.vstack([x.ravel(), y.ravel(), z.ravel()]).T.copy()
+
+    @property
+    def all_r_coordinates(self):
+
+        return rotate(self.unitcell.o_mat, self.all_x_coordinates)
+
+    @property
+    def occupied_indices(self):
+
+        return np.where(self.occupancies.ravel() != 0)[0]
+
+    @property
+    def occupied_x_coordinates(self):
+
+        return self.all_x_coordinates[self.occupied_indices, :]
+
+    @property
+    def occupied_r_coordinates(self):
+
+        return rotate(self.unitcell.o_mat, self.occupied_x_coordinates)
+
+    def add_facet(self, plane=None, length=None):
+
+        vec = utils.vec_norm(np.array(plane))
+        proj = self.all_x_coordinates.dot(vec.ravel())
+        w = np.where(proj > length)[0]
+        if len(w) > 0:
+            self.occupancies.flat[w] = 0
+
+    def reset_occupancies(self):
+
+        self.occupancies = np.ones([self.max_size]*3)
+
+    def make_hexagonal_prism(self, n_cells=None):
+
+        self.reset_occupancies()
+        m = n_cells
+        n = m / np.sqrt(2)
+        self.add_facet(plane=[-1, 1, 0], length=n)
+        self.add_facet(plane=[1, -1, 0], length=n)
+        self.add_facet(plane=[1, 0, 0], length=m)
+        self.add_facet(plane=[0, 1, 0], length=m)
+        self.add_facet(plane=[-1, 0, 0], length=m)
+        self.add_facet(plane=[0, -1, 0], length=m)
 
 
 def parse_pdb(pdb_file_path, crystal_structure=None):

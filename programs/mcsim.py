@@ -19,6 +19,7 @@ from bornagain.external import crystfel
 # This path setting won't be needed once bornagain is properly installed
 sys.path.append("..")
 
+
 def mcsim(
         detector_distance=50e-3,
         pixel_size=110e-6,
@@ -50,7 +51,7 @@ def mcsim(
         quiet=False,
         compression=None,
         cl_double_precision=False):
-    """
+    r"""
     TODO: Write docstring.
     """
 
@@ -127,7 +128,7 @@ def mcsim(
 
     # Setup detector geometry
     pad = ba.detector.PADGeometry(n_pixels=n_pixels, pixel_size=pixel_size, distance=detector_distance)
-    q = pad.q_vecs(beam=beam)
+    # q_vecs = pad.q_vecs(beam=beam)
     qmag = pad.q_mags(beam=beam)
     sa = pad.solid_angles()
     pol = pad.polarization_factors(beam=beam)
@@ -149,7 +150,7 @@ def mcsim(
     if fix_rot_seq:
         write("Fixing the rotation sequence based on random seed")
     write('PDB file: %s\n' % (os.path.basename(pdb_file)))
-    write('Photons per pulse: %g\n' % (n_photons))
+    write('Photons per pulse: %g\n' % n_photons)
     write('Photon energy: %g keV\n' % (photon_energy * keV))
     write('Beam divergence: %g mrad FWHM\n' % (beam.beam_divergence_fwhm * 1e3))
     write('Beam diameter: %g microns tophat\n' % (beam_diameter * 1e6))

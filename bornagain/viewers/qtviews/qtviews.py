@@ -198,13 +198,15 @@ class Scatter3D(object):
 
     def add_points(self, r, color=None, size=None):
 
-        ''' Add an Nx3 array of points r with specified color and size.  Color is a 3-element
-		    Python list and size is a float scalar. '''
+        r'''
+        Add an Nx3 array of points r with specified color and size.  Color is a 3-element
+        Python list and size is a float scalar.
+        '''
 
         if color is None:
             col = self.defaultColor
         else:
-            col = pg.glColor(color)
+            col = color #pg.glColor(color)
 
         if size is None:
             siz = self.defaultSize
