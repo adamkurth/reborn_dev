@@ -28,11 +28,13 @@ pens = [pg.mkPen([255, 0, 0]),
         pg.mkPen([255, 255, 255]),
         pg.mkPen([255, 128, 128])]
 
-def bright_colors(i):
+def bright_colors(i, alpha=1):
 
     """ Some nice colors.  Only 8 available, which loops around as the input index increments."""
 
-    return colors[i % len(colors)]
+    col = list(colors[i % len(colors)])
+    col[3] = alpha
+    return col
 
 
 
