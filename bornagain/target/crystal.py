@@ -410,8 +410,6 @@ class FiniteLattice(object):
     def make_hexagonal_prism(self, n_cells=None):
 
         self.reset_occupancies()
-        m = n_cells
-        # n = m / np.sqrt(2)
         self.add_facet(plane=[-1, 1, 0], length=n_cells)
         self.add_facet(plane=[1, -1, 0], length=n_cells)
         self.add_facet(plane=[1, 0, 0], length=n_cells)

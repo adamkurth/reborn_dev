@@ -22,11 +22,10 @@ spacegroup.sym_translations[5] += np.array([0, 1, 0])
 unitcell = cryst.unitcell
 mol_x_coords = utils.rotate(unitcell.o_mat_inv, cryst.molecule.coordinates)
 mol_x_com = np.mean(mol_x_coords, axis=0)
-max_size = 20
-max_size += 1 - (max_size % 1)
+max_size = 7
 lat = crystal.FiniteLattice(max_size=max_size, unitcell=unitcell)
-cryst_length = 3
-cryst_width = 2
+cryst_length = 0.5
+cryst_width = 3
 lat.make_hexagonal_prism(n_cells=cryst_width)
 lat.add_facet(plane=[0, 0, 1], length=cryst_length)
 lat.add_facet(plane=[0, 0, -1], length=cryst_length)
