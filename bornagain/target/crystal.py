@@ -396,10 +396,9 @@ class FiniteLattice(object):
 
         return rotate(self.unitcell.o_mat, self.occupied_x_coordinates)
 
-    def add_facet(self, plane=None, length=None, offset=None):
+    def add_facet(self, plane=None, length=None, shift=0):
 
-        # vec = utils.vec_norm(np.array(plane))
-        proj = self.all_x_coordinates.dot(np.array(plane))
+        proj = (self.all_x_coordinates+offset).dot(np.array(plane))
         w = np.where(proj > length)[0]
         if len(w) > 0:
             self.occupancies.flat[w] = 0
