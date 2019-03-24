@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division,
 import numpy as np
 import h5py
 
-from .utils import vec_norm, vec_mag, vec_check
+from .utils import vec_norm, vec_mag
 
 
 class PADGeometry(object):
@@ -90,15 +90,15 @@ class PADGeometry(object):
 
     @fs_vec.setter
     def fs_vec(self, fs_vec):
-        self._fs_vec = vec_check(fs_vec)
+        self._fs_vec = np.array(fs_vec)
 
     @ss_vec.setter
     def ss_vec(self, ss_vec):
-        self._ss_vec = vec_check(ss_vec)
+        self._ss_vec = np.array(ss_vec)
 
     @t_vec.setter
     def t_vec(self, t_vec):
-        self._t_vec = vec_check(t_vec)
+        self._t_vec = np.array(t_vec)
 
     def save(self, save_fname):
         r"""Saves an hdf5 file with class attributes for later use"""
@@ -159,7 +159,7 @@ class PADGeometry(object):
         j = np.array(j)
         f = np.outer(i.ravel(), self.fs_vec)
         s = np.outer(j.ravel(), self.ss_vec)
-        return vec_check(self.t_vec + f + s)
+        return self.t_vec + f + s
 
     def position_vecs(self):
         r"""
@@ -198,7 +198,7 @@ class PADGeometry(object):
         if beam is not None:
             beam_vec = beam.beam_vec
 
-        return vec_norm(self.position_vecs()) - vec_check(beam_vec)
+        return vec_norm(self.position_vecs()) - beam_vec
 
     def q_vecs(self, beam_vec=None, wavelength=None, beam=None):
         r"""
@@ -322,8 +322,8 @@ class PADGeometry(object):
             weight = beam.polarization_weight
 
         v = vec_norm(self.position_vecs())
-        u = vec_norm(vec_check(polarization_vec))
-        b = vec_norm(vec_check(beam_vec))
+        u = vec_norm(polarization_vec)
+        b = vec_norm(beam_vec)
         up = np.cross(u, b)
 
         if weight is None:

@@ -163,7 +163,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">bornagain.units</span> <span class="k">import</span> <span class="n">hc</span>
-<span class="kn">import</span> <span class="nn">time</span>
+
 
 <div class="viewcode-block" id="Beam"><a class="viewcode-back" href="../../bornagain.source.html#bornagain.source.Beam">[docs]</a><span class="k">class</span> <span class="nc">Beam</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
@@ -210,7 +210,7 @@
     <span class="k">def</span> <span class="nf">beam_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;tophat&#39;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;beam.beam_profile must be &#39;tophat&#39; or ... that&#39;s all for now...&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">beam_profile</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_beam_profile</span> <span class="o">=</span> <span class="n">val</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">beam_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -259,7 +259,7 @@
     <span class="k">def</span> <span class="nf">pulse_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pulse_energy</span> <span class="o">=</span> <span class="n">val</span>
 
-    <span class="nd">@property</span> <span class="c1"># this cannot be set - set pulse energy instead</span>
+    <span class="nd">@property</span>  <span class="c1"># this cannot be set - set pulse energy instead</span>
     <span class="k">def</span> <span class="nf">n_photons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulse_energy</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">photon_energy</span>
 
@@ -274,14 +274,6 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">energy_fluence</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulse_energy</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">diameter_fwhm</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">)</span></div>
-
-
-
-
-
-
-
-
 </pre></div>
 
            </div>

@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 from bornagain.units import hc
-import time
+
 
 class Beam(object):
 
@@ -53,7 +53,7 @@ class Beam(object):
     def beam_profile(self, val):
         if val not in ['tophat']:
             raise ValueError("beam.beam_profile must be 'tophat' or ... that's all for now...")
-        self.beam_profile = val
+        self._beam_profile = val
 
     @property
     def beam_vec(self):
@@ -102,7 +102,7 @@ class Beam(object):
     def pulse_energy(self, val):
         self._pulse_energy = val
 
-    @property # this cannot be set - set pulse energy instead
+    @property  # this cannot be set - set pulse energy instead
     def n_photons(self):
         return self.pulse_energy / self.photon_energy
 
@@ -117,11 +117,3 @@ class Beam(object):
     @property
     def energy_fluence(self):
         return self.pulse_energy/(np.pi * self.diameter_fwhm**2 / 4.0)
-
-
-
-
-
-
-
-

@@ -13,15 +13,17 @@ from bornagain.target import crystal, density
 import bornagain.simulate.clcore as core
 
 
+plot = True
+if 'noplots' in sys.argv:
+    plot = False
 
 pdbFile = '../data/pdb/1JB0.pdb'
 print('Loading pdb file (%s)' % pdbFile)
-cryst = crystal.structure(pdbFile)
-print(cryst.cryst1.strip())
+cryst = crystal.CrystalStructure(pdbFile)
 
-if 0:
+if plot and 0:
     # Show atoms in scatter plot
-    r = cryst.r
+    r = cryst.molecule.coordinates
     sv = qtviews.Scatter3D()
     sv.add_points(r)
     sv.show()
@@ -39,7 +41,7 @@ mt = density.CrystalMeshTool(cryst, d, s)
 print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))
 h = mt.get_h_vecs()  # Miller indices (fractional)
 
-if 0:  # Display the mesh as a scatterplot
+if plot and 0:  # Display the mesh as a scatterplot
 
     print('Showing the mesh of h vectors')
     v = h
@@ -82,7 +84,7 @@ else:  # This is the direct way of making a density map from atoms and their str
 
 rho_cell = fftshift(rho_cell)
 
-if 1:
+if plot and 1:
 
     print('Showing 3D volumetric rendering of unit cell')
     vol = qtviews.Volumetric3D()
@@ -90,11 +92,7 @@ if 1:
         vol.add_density(fftshift(mt.symmetry_transform(0, i, rho)), qtviews.bright_colors(i))
     vol.show()
 
-if 0:  # Joe's isosurface function
-
-    joesviews.meshplot3D(rho_cell, np.max(rho_cell)*0.05)
-
-if 1:
+if plot and 1:
 
     print('Showing orthogonal slices of diffraction intensities and density projections')
     fig = plt.figure()

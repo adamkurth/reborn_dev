@@ -10,85 +10,6 @@ import numpy as np
 from numpy import sin, cos
 import bornagain as ba
 
-# not sure where to seed
-np.random.seed()
-
-
-def vec_check2(vec, *args, **kwargs):
-    r"""
-    Same as vec_check(vec, dimension=2).  See :func:`vec_check <bornagain.utils.vec_check>`
-    """
-
-    return vec_check(vec, dimension=2, *args, **kwargs)
-
-
-def vec_check3(vec, *args, **kwargs):
-    r"""
-    Same as vec_check(vec, dimension=2)
-    """
-
-    return vec_check(vec, dimension=3, *args, **kwargs)
-
-
-def vec_check(vec, hardcheck=False, dimension=3):
-    r"""
-    Check that a vector meets our assumptions, and correct it if it doesn't.
-
-    Our assumptions are that:
-        1) The array shape is Nxd, where d is the dimension of the vector, and
-           N is the number of vectors.  This is important when applying rotation
-           operations to many vectors.
-        2) The array is c-contiguous.  This is important for passing arrays into
-           external c functions or to opencl kernels.
-
-    The above also helps when we want to ensure that dot products and broadcasting
-    will work as expected.
-
-    Note that we have chosen to keep vector components close in memory.  I.e.,
-    the x, y, and z components of a given vector are contiguous.  This will ensure
-    that rotations and broadcasting are as fast as can be.
-
-    Input:
-
-    vec: The object that we are trying to make conform to our assumption
-    about vectors.
-
-    hardcheck: If True, then this function will raise a ValueError if the check
-    fails.  If False, then this function attempts to fix the problem
-    with the input.
-
-    dimension: The expected dimension of the vectors
-
-    ==== Output:
-    vec: The original input if it satisfies our conditions.  Otherwise
-    return a modified numpy ndarray with the correct shape.
-    """
-
-    if hardcheck:  # Raise an error if the input isn't perfect
-        if not isinstance(vec, np.ndarray):
-            raise ValueError('Vectors must be Nx3 numpy ndarrays')
-        if len(vec.shape) != 2:
-            raise ValueError('Vectors must be Nx3 numpy ndarrays')
-        if vec.shape[1] != 3:
-            raise ValueError('Vectors must be Nx3 numpy ndarrays')
-        return vec
-
-    if not isinstance(vec, np.ndarray):
-        vec = np.array(vec)
-    if len(vec.shape) == 1:
-        vec = vec[np.newaxis]
-    if len(vec.shape) != 2:
-        raise ValueError('Vectors must be Nx%d numpy ndarrays' % dimension)
-    if vec.shape[1] != dimension:
-        if vec.shape[0] != dimension:
-            raise ValueError('Vectors must be Nx3 numpy ndarrays')
-        else:
-            vec = vec.T
-    if ~vec.flags['C_CONTIGUOUS']:
-        vec = vec.copy()
-
-    return vec
-
 
 def vec_norm(vec):
     r"""
@@ -102,7 +23,6 @@ def vec_norm(vec):
 
     """
 
-    vec = vec_check(vec)
     if vec.ndim != 2:
         raise ValueError("V must have one or two dimensions.")
     vecnorm = np.sqrt(np.sum(vec * vec, axis=1))
@@ -121,7 +41,6 @@ def vec_mag(vec):
 
     """
 
-    vec = vec_check(vec)
     if vec.ndim != 2:
         raise ValueError("V must have one or two dimensions.")
     return np.sqrt(np.sum(vec * vec, axis=1))
@@ -160,8 +79,6 @@ def depreciate(message):
 
     The output can be silenced with the function bornagain.set_global('warn_depreciated', False), or you can force
     an error to occur if you do bornagain.set_global('force_depreciated', True).
-
-    TODO: we need to formally raise a depreciated exception
 
     Args:
         message: whatever you want to have printed to the screen
@@ -202,8 +119,6 @@ def error(message):
     Standard way of sending an error message.  As of now this simply results in a function call
 
     sys.stdout.write("ERROR: %s\n" % message)
-
-    TODO: need to raise an exception intead of simply printing something...
 
 
     Args:
@@ -343,7 +258,7 @@ def random_rotation(deflection=1.0, randnums=None):
     # has length sqrt(2) to eliminate the 2 in the Householder matrix.
 
     r = np.sqrt(z)
-    V = (
+    vec = (
         np.sin(phi) * r,
         np.cos(phi) * r,
         np.sqrt(2.0 - z)
@@ -352,12 +267,12 @@ def random_rotation(deflection=1.0, randnums=None):
     st = np.sin(theta)
     ct = np.cos(theta)
 
-    R = np.array(((ct, st, 0), (-st, ct, 0), (0, 0, 1)))
+    rot = np.array(((ct, st, 0), (-st, ct, 0), (0, 0, 1)))
 
     # Construct the rotation matrix  ( V Transpose(V) - I ) R.
 
-    M = (np.outer(V, V) - np.eye(3)).dot(R)
-    return M
+    mat = (np.outer(vec, vec) - np.eye(3)).dot(rot)
+    return mat
 
 
 def rotation_about_axis(theta, u):
@@ -390,23 +305,23 @@ def random_beam_vector(div_fwhm):
     """
 
     # Don't do anything if no divergence
-    B = np.array([0, 0, 1.0])
+    bvec = np.array([0, 0, 1.0])
     if div_fwhm == 0:
-        return B
+        return bvec
 
     # First rotate around the x axis with Gaussian prob. dist.
     sig = div_fwhm / 2.354820045
     theta = np.random.normal(0, sig, [1])[0]
-    Rtheta = rotation_about_axis(theta, [1.0, 0, 0])
-    B = np.dot(Rtheta, B)
+    rtheta = rotation_about_axis(theta, [1.0, 0, 0])
+    bvec = np.dot(rtheta, bvec)
 
     # Next rotate around z axis with uniform dist [0,2*pi)
     phi = np.random.random(1)[0] * 2 * np.pi
-    Rphi = rotation_about_axis(phi, [0, 0, 1.0])
-    B = np.dot(Rphi, B)
-    B /= np.sqrt(np.sum(B**2))
+    rphi = rotation_about_axis(phi, [0, 0, 1.0])
+    bvec = np.dot(rphi, bvec)
+    bvec /= np.sqrt(np.sum(bvec**2))
 
-    return B
+    return bvec
 
 
 def random_mosaic_rotation(mosaicity_fwhm):
@@ -422,12 +337,12 @@ def random_mosaic_rotation(mosaicity_fwhm):
     if mosaicity_fwhm == 0:
         return np.eye(3)
 
-    Rs = []
-    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [1.0, 0, 0]))
-    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 1.0, 0]))
-    Rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
+    rs = list()
+    rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [1.0, 0, 0]))
+    rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 1.0, 0]))
+    rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
     rind = np.random.permutation([0, 1, 2])
-    return Rs[rind[0]].dot(Rs[rind[1]].dot(Rs[rind[2]]))
+    return rs[rind[0]].dot(rs[rind[1]].dot(rs[rind[2]]))
 
 
 def memoize(function):

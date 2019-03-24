@@ -18,6 +18,8 @@ if 'double' in sys.argv: double = True
 if 'rotate' in sys.argv: rotate = True
 
 show = True
+if 'noplots' in sys.argv:
+    show = False
 
 clcore = core.ClCore(group_size=32, double_precision=double)
 

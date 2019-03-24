@@ -545,7 +545,7 @@ def hermann_mauguin_symbol_from_itoc_number(itoc_number):
 def spacegroup_ops_from_hall_number(hall_number):
 
     rot = bornagain.target.spgrp._spgrp_ops[hall_number - 1]["rotations"]
-    trans = [utils.vec_check(T) for T in bornagain.target.spgrp._spgrp_ops[hall_number - 1]['translations']]
+    trans = [T for T in bornagain.target.spgrp._spgrp_ops[hall_number - 1]['translations']]
 
     return rot, trans
 
@@ -557,7 +557,7 @@ def get_symmetry_operators_from_hall_number(hall_number):
 
     idx = hall_number - 1
     Rs = bornagain.target.spgrp._spgrp_ops[idx]["rotations"]
-    Ts = [utils.vec_check(T) for T in bornagain.target.spgrp._spgrp_ops[idx]['translations']]
+    Ts = [T for T in bornagain.target.spgrp._spgrp_ops[idx]['translations']]
 
     return Rs, Ts
 
@@ -602,7 +602,7 @@ def get_symmetry_operators_from_space_group(hm_symbol):
         return None, None
 
     Rs = bornagain.target.spgrp._spgrp_ops[idx]["rotations"]
-    Ts = [utils.vec_check(T) for T in bornagain.target.spgrp._spgrp_ops[idx]['translations']]
+    Ts = [T for T in bornagain.target.spgrp._spgrp_ops[idx]['translations']]
 
     return Rs, Ts
 

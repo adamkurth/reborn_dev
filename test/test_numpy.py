@@ -22,14 +22,18 @@ def test_rotations_and_broadcasting():
     # Also note that the result is as expected:
     assert(np.allclose(vec_rotated[0, :], np.array([2, -1, 3])))
     assert(np.allclose(vec_rotated, vec_rotated2))
+    assert(np.allclose(vec_rotated[0, :], np.array([2, -1, 3])))
 
     # Check that addition broadcasting works even if arrays don't have shape M x D and 1 x D
     vec1 = np.array([1, 2, 3])
-    vec2 = np.random.rand(5, 3)
+    vec2 = np.zeros((5, 3))
     vec3 = vec2 + vec1
+    assert(np.sum(vec3[:, 1]) == 10)
 
-    assert (np.allclose(vec_rotated[0, :], np.array([2, -1, 3])))
-
+    vec1 = utils.vec_check3(np.array([1, 2, 3]))
+    vec2 = np.zeros((5, 3))
+    vec3 = vec2 + vec1
+    assert(np.sum(vec3[:, 1]) == 10)
 
 if __name__ == "__main__":
 
