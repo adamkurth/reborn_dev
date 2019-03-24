@@ -398,7 +398,7 @@ class FiniteLattice(object):
 
     def add_facet(self, plane=None, length=None, shift=0):
 
-        proj = (self.all_x_coordinates+offset).dot(np.array(plane))
+        proj = (self.all_x_coordinates+shift).dot(np.array(plane))
         w = np.where(proj > length)[0]
         if len(w) > 0:
             self.occupancies.flat[w] = 0
