@@ -369,11 +369,17 @@ class FiniteLattice(object):
         ran = np.arange(-(self.max_size-1)/2.0, (self.max_size+1)/2.0)
         x, y, z = np.meshgrid(ran, ran, ran, indexing='ij')
         self.all_x_coordinates = np.vstack([x.ravel(), y.ravel(), z.ravel()]).T.copy()
+        self.all_x_coordinates.flags.writeable = False
+        self._all_r_coordinates = None
 
     @property
     def all_r_coordinates(self):
 
-        return rotate(self.unitcell.o_mat, self.all_x_coordinates)
+        if self._all_r_coordinates is None:
+            self._all_r_coordinates = rotate(self.unitcell.o_mat, self.all_x_coordinates)
+            self._all_r_coordinates.flags.writeable = False
+
+        return self._all_r_coordinates
 
     @property
     def occupied_indices(self):
@@ -390,10 +396,10 @@ class FiniteLattice(object):
 
         return rotate(self.unitcell.o_mat, self.occupied_x_coordinates)
 
-    def add_facet(self, plane=None, length=None):
+    def add_facet(self, plane=None, length=None, offset=None):
 
-        vec = utils.vec_norm(np.array(plane))
-        proj = self.all_x_coordinates.dot(vec.ravel())
+        # vec = utils.vec_norm(np.array(plane))
+        proj = self.all_x_coordinates.dot(np.array(plane))
         w = np.where(proj > length)[0]
         if len(w) > 0:
             self.occupancies.flat[w] = 0
@@ -406,13 +412,13 @@ class FiniteLattice(object):
 
         self.reset_occupancies()
         m = n_cells
-        n = m / np.sqrt(2)
-        self.add_facet(plane=[-1, 1, 0], length=n)
-        self.add_facet(plane=[1, -1, 0], length=n)
-        self.add_facet(plane=[1, 0, 0], length=m)
-        self.add_facet(plane=[0, 1, 0], length=m)
-        self.add_facet(plane=[-1, 0, 0], length=m)
-        self.add_facet(plane=[0, -1, 0], length=m)
+        # n = m / np.sqrt(2)
+        self.add_facet(plane=[-1, 1, 0], length=n_cells)
+        self.add_facet(plane=[1, -1, 0], length=n_cells)
+        self.add_facet(plane=[1, 0, 0], length=n_cells)
+        self.add_facet(plane=[0, 1, 0], length=n_cells)
+        self.add_facet(plane=[-1, 0, 0], length=n_cells)
+        self.add_facet(plane=[0, -1, 0], length=n_cells)
 
 
 def parse_pdb(pdb_file_path, crystal_structure=None):

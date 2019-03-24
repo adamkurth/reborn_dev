@@ -23,9 +23,7 @@ def vec_norm(vec):
 
     """
 
-    if vec.ndim != 2:
-        raise ValueError("V must have one or two dimensions.")
-    vecnorm = np.sqrt(np.sum(vec * vec, axis=1))
+    vecnorm = np.sqrt(np.sum(vec**2, axis=(vec.ndim-1)))
     return (vec.T / vecnorm).T
 
 
@@ -41,9 +39,7 @@ def vec_mag(vec):
 
     """
 
-    if vec.ndim != 2:
-        raise ValueError("V must have one or two dimensions.")
-    return np.sqrt(np.sum(vec * vec, axis=1))
+    return np.sqrt(np.sum(vec * vec, axis=(vec.ndim-1)))
 
 
 def rotate(rot, vec):
@@ -66,7 +62,6 @@ def rotate(rot, vec):
 
     """
 
-    # return np.matmul(rot, vec)
     return np.matmul(rot, vec.T).T
 
 

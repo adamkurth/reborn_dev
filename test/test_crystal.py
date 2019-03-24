@@ -47,6 +47,7 @@ def test_finite_lattice():
     unitcell = crystal.UnitCell(5e-10, 5e-10, 5e-10, 90*np.pi/180, 90*np.pi/180, 90*np.pi/180)
     lat = crystal.FiniteLattice(max_size=siz, unitcell=unitcell)
     assert(lat.all_x_coordinates.shape[0] == siz**3)
+    lat.add_facet(plane=[1, 0, 0], length=2)
 
 
 if __name__ == "__main__":

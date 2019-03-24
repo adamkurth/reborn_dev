@@ -213,7 +213,7 @@ class Scatter3D(object):
         else:
             siz = size
 
-        self.maxDist = max(self.maxDist, np.amax(np.sqrt(np.sum(r * r, axis=1))))
+        self.maxDist = max(self.maxDist, np.amax(np.sqrt(np.sum(r * r, axis=-1))))
         plt = gl.GLScatterPlotItem(pos=r, color=col, size=siz)
         self.w.addItem(plt)
 
