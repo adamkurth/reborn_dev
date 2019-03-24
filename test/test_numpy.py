@@ -30,10 +30,11 @@ def test_rotations_and_broadcasting():
     vec3 = vec2 + vec1
     assert(np.sum(vec3[:, 1]) == 10)
 
-    vec1 = utils.vec_check3(np.array([1, 2, 3]))
+    vec1 = np.array([[1, 2, 3]])
     vec2 = np.zeros((5, 3))
     vec3 = vec2 + vec1
     assert(np.sum(vec3[:, 1]) == 10)
+
 
 if __name__ == "__main__":
 
