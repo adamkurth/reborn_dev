@@ -328,7 +328,7 @@ class ClCore(object):
 
         self.mod_squared_complex_to_real_cl(self.queue, (global_size,), (self.group_size,), A_dev.data, I_dev.data, n)
 
-    def phase_factor_qrf_chunk_r(self, q, r, f, R=None, a=None, add=False, n_chunks=1):
+    def phase_factor_qrf_chunk_r(self, q, r, f=None, R=None, a=None, add=False, n_chunks=1):
 
         r"""
 
@@ -358,6 +358,9 @@ class ClCore(object):
 
         add = self.int_t(add)
 
+        if f is None:
+            f = np.ones(r.shape[0])
+
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
         q_dev = self.to_device(q, dtype=self.real_t)
@@ -377,7 +380,7 @@ class ClCore(object):
         else:
             return a_dev
 
-    def phase_factor_qrf(self, q, r, f, R=None, a=None, add=False):
+    def phase_factor_qrf(self, q, r, f=None, R=None, a=None, add=False):
 
         r"""
         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
@@ -410,6 +413,9 @@ class ClCore(object):
         else:
             add = 0
 
+        if f is None:
+            f = np.ones(r.shape[0])
+
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
         q_dev = self.to_device(q, dtype=self.real_t)
@@ -417,8 +423,7 @@ class ClCore(object):
         f_dev = self.to_device(f, dtype=self.complex_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
-                             * self.group_size)
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
 
         self.phase_factor_qrf_cl(self.queue, (global_size,),
                                  (self.group_size,), q_dev.data, r_dev.data,

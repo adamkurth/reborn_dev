@@ -85,13 +85,11 @@ class UnitCell(object):
 
 
 class SpaceGroup(object):
-
     r"""
-    #TODO: document
-    Gotchas: note that there are multiple Hall numbers that correspond to each ITOC number.  The 230 ITOC numbers that
-    specify space groups refer only to the actual symmetry properties, and there are multiple Hall numbers and Hermann
-    Mauguin symbols that have the same spacegroup.  The duplicates are just different ways of specifying the same
-    spacegroup.
+    Container for crystallographic spacegroup information.  Note that the 230 ITOC numbers that
+    specify space groups refer only to the actual symmetry properties.  There are multiple Hall numbers and Hermann
+    Mauguin symbols that correspond to the same spacegroup.  The duplicates are just different ways of specifying the
+    same spacegroup -- e.g. some may apply rotations around different axes than others.
     """
 
     hall_number = None  #: Space group Hall number
@@ -102,6 +100,15 @@ class SpaceGroup(object):
     n_molecules = None  #: Number of symmetry-related molecules
 
     def __init__(self, hermann_mauguin_symbol=None, hall_number=None, itoc_number=None):
+        r"""
+        Initialize the spacegroup.  You must identify the spacegroup by either a Hall number, a
+        Hermann Mauguin symbol, or an ITOC number (see International Tables of Crystallography).
+
+        Args:
+            hermann_mauguin_symbol (string): Hermann Mauguin symbol (for example: P63)
+            hall_number (int): One of the 1-530 Hall numbers.
+            itoc_number (int): One of the 230 ITOC numbers.
+        """
 
         if hall_number is not None:
             self.itoc_number = itoc_number_from_hall_number(hall_number)
@@ -119,11 +126,19 @@ class SpaceGroup(object):
         self.n_molecules = len(self.sym_rotations)
 
     def apply_symmetry_operation(self, op_num=None, x_vecs=None, inverse=False):
+        r"""
+        Apply a symmetry operation to an asymmetric unit.
 
+        Args:
+            op_num (int): The number of the operation to be applied.
+            x_vecs (Nx3 array): The atomic coordinates in the crystal basis.
+            inverse (bool): If true, do the inverse operation.  Default is False.
+
+        Returns: Nx3 array.
+        """
         rot = self.sym_rotations[op_num]
         trans = self.sym_translations[op_num]
         return utils.rotate(rot, x_vecs) + trans
-
 
 
 class CrystalStructure(object):
@@ -341,11 +356,13 @@ class structure(CrystalStructure):
 
 
 class FiniteLattice(object):
+    r"""
+    A utility for creating finite crystal lattices.  Enables the generation of lattice vector positions, lattice
+    occupancies, shaping of crystals by zeroing occupancies beyond arbitrary lattice planes.
+    """
 
     def __init__(self, max_size=None, unitcell=None):
-
         r"""
-
         Args:
             max_size: Integer N that sets the size of the lattice to N x N x N.
             unitcell: A crystal.UnitCell type that is needed to generate

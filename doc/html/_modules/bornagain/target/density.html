@@ -162,6 +162,7 @@
 <span class="kn">from</span> <span class="nn">bornagain.target</span> <span class="k">import</span> <span class="n">crystal</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">binned_statistic_dd</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="k">import</span> <span class="n">jit</span>
 
 
 <div class="viewcode-block" id="DensityMap3D"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.DensityMap3D">[docs]</a><span class="k">class</span> <span class="nc">DensityMap3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -488,7 +489,6 @@
 
         <span class="k">return</span> <span class="n">a</span></div></div>
 
-<span class="kn">from</span> <span class="nn">numba</span> <span class="k">import</span> <span class="n">jit</span>
 
 <div class="viewcode-block" id="place_atoms_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.place_atoms_in_map">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">place_atoms_in_map</span><span class="p">(</span><span class="n">x_vecs</span><span class="p">,</span> <span class="n">atom_fs</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">orth_mat</span><span class="p">,</span> <span class="n">map_x_vecs</span><span class="p">,</span> <span class="n">f_map</span><span class="p">,</span> <span class="n">f_map_tmp</span><span class="p">):</span>
@@ -526,7 +526,133 @@
                 <span class="n">w_tot</span> <span class="o">+=</span> <span class="n">w</span>
             <span class="n">f_map</span> <span class="o">+=</span> <span class="n">atom_fs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="n">f_map_tmp</span><span class="o">/</span><span class="n">w_tot</span></div>
 
-        <span class="c1"># return f_map</span>
+
+<div class="viewcode-block" id="trilinear_interpolation"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.trilinear_interpolation">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">trilinear_interpolation</span><span class="p">(</span><span class="n">densities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trilinear interpolation of a 3D map.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        densities: A 3D array of shape AxBxC</span>
+<span class="sd">        vectors: An Nx3 array of 3-vectors</span>
+<span class="sd">        limits: A 3x2 array specifying the limits of the density map samples.  These values specify the voxel centers.</span>
+
+<span class="sd">    Returns: Array of intensities with length N.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="n">nx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ny</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">nz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">nx</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">ny</span>
+    <span class="n">dz</span> <span class="o">=</span> <span class="p">(</span><span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">nz</span>
+
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+
+        <span class="c1"># Floating point coordinates</span>
+        <span class="n">i_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dx</span>
+        <span class="n">j_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dy</span>
+        <span class="n">k_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dz</span>
+
+        <span class="c1"># Integer coordinates</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">i_f</span><span class="p">))</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">j_f</span><span class="p">))</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">k_f</span><span class="p">))</span>
+
+        <span class="c1"># Trilinear interpolation formula specified in e.g. paulbourke.net/miscellaneous/interpolation</span>
+        <span class="n">k0</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="n">j0</span> <span class="o">=</span> <span class="n">j</span>
+        <span class="n">i0</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">k1</span> <span class="o">=</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">j1</span> <span class="o">=</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">i1</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">i_f</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">i_f</span><span class="p">)</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">j_f</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">j_f</span><span class="p">)</span>
+        <span class="n">z0</span> <span class="o">=</span> <span class="n">k_f</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">k_f</span><span class="p">)</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">x0</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">y0</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">z0</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nx</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">ny</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">nz</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="trilinear_insertion"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.trilinear_insertion">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">trilinear_insertion</span><span class="p">(</span><span class="n">densities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trilinear interpolation of a 3D map.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        densities: A 3D array of shape AxBxC</span>
+<span class="sd">        vectors: An Nx3 array of 3-vectors</span>
+<span class="sd">        limits: A 3x2 array specifying the limits of the density map samples.  These values specify the voxel centers.</span>
+
+<span class="sd">    Returns: Array of intensities with length N.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="n">nx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ny</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">nz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">nx</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">ny</span>
+    <span class="n">dz</span> <span class="o">=</span> <span class="p">(</span><span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">nz</span>
+
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+
+        <span class="c1"># Floating point coordinates</span>
+        <span class="n">i_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dx</span>
+        <span class="n">j_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dy</span>
+        <span class="n">k_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dz</span>
+
+        <span class="c1"># Integer coordinates</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">i_f</span><span class="p">))</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">j_f</span><span class="p">))</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">k_f</span><span class="p">))</span>
+
+        <span class="c1"># Trilinear interpolation formula specified in e.g. paulbourke.net/miscellaneous/interpolation</span>
+        <span class="n">k0</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="n">j0</span> <span class="o">=</span> <span class="n">j</span>
+        <span class="n">i0</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">k1</span> <span class="o">=</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">j1</span> <span class="o">=</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">i1</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">i_f</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">i_f</span><span class="p">)</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">j_f</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">j_f</span><span class="p">)</span>
+        <span class="n">z0</span> <span class="o">=</span> <span class="n">k_f</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">k_f</span><span class="p">)</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">x0</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">y0</span>
+        <span class="n">z1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">z0</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nx</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">ny</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">nz</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
 </pre></div>
 
            </div>

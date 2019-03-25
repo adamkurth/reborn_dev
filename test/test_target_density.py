@@ -23,3 +23,27 @@ def test_transforms():
 
         assert(np.allclose(dat0, dat2))
 
+
+def test_interpolations():
+
+    nx, ny, nz = 6, 7, 8
+    dens = np.ones([nx, ny, nz])
+    lims = np.array([[0, nx-1], [0, ny-1], [0, nz-1]])
+    tvecs = np.ones((nx, 3))
+    tvecs[:, 0] = np.arange(0, nx)
+    densintp = density.trilinear_interpolation(dens, tvecs, lims)
+    assert(np.max(np.abs(densintp[1:-1] - 1)) < 1e-6)
+
+    def func(vecs):
+        return np.sin(vecs[:, 0]/100.0) + np.cos(3*vecs[:, 1]/100.) + np.cos(2*vecs[:, 2]/100.)
+
+    nx, ny, nz = 6, 7, 8
+    lims = np.array([[0, nx-1], [0, ny-1], [0, nz-1]])
+    x, y, z = np.meshgrid(np.arange(0, nx), np.arange(0, ny), np.arange(0, nz), indexing='ij')
+    xyz = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy()
+    dens = func(xyz).reshape([nx, ny, nz])
+    x, y, z = np.meshgrid(np.arange(1, nx-1), np.arange(1, ny-1), np.arange(1, nz-1), indexing='ij')
+    xyz = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy()
+    dens1 = func(xyz)
+    dens2 = density.trilinear_interpolation(dens, xyz, lims)
+    assert(np.max(np.abs(dens1 - dens2)) < 1e-2)

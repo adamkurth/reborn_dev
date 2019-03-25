@@ -261,11 +261,10 @@ cause problems…</p>
 <dt id="bornagain.target.crystal.SpaceGroup">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">SpaceGroup</code><span class="sig-paren">(</span><em>hermann_mauguin_symbol=None</em>, <em>hall_number=None</em>, <em>itoc_number=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#SpaceGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>#TODO: document
-Gotchas: note that there are multiple Hall numbers that correspond to each ITOC number.  The 230 ITOC numbers that
-specify space groups refer only to the actual symmetry properties, and there are multiple Hall numbers and Hermann
-Mauguin symbols that have the same spacegroup.  The duplicates are just different ways of specifying the same
-spacegroup.</p>
+<p>Container for crystallographic spacegroup information.  Note that the 230 ITOC numbers that
+specify space groups refer only to the actual symmetry properties.  There are multiple Hall numbers and Hermann
+Mauguin symbols that correspond to the same spacegroup.  The duplicates are just different ways of specifying the
+same spacegroup – e.g. some may apply rotations around different axes than others.</p>
 <dl class="attribute">
 <dt id="bornagain.target.crystal.SpaceGroup.itoc_number">
 <code class="descname">itoc_number</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup.itoc_number" title="Permalink to this definition">¶</a></dt>
@@ -305,7 +304,22 @@ spacegroup.</p>
 <dl class="method">
 <dt id="bornagain.target.crystal.SpaceGroup.apply_symmetry_operation">
 <code class="descname">apply_symmetry_operation</code><span class="sig-paren">(</span><em>op_num=None</em>, <em>x_vecs=None</em>, <em>inverse=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#SpaceGroup.apply_symmetry_operation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.SpaceGroup.apply_symmetry_operation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Apply a symmetry operation to an asymmetric unit.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>op_num</strong> (<em>int</em>) – The number of the operation to be applied.</li>
+<li><strong>x_vecs</strong> (<em>Nx3 array</em>) – The atomic coordinates in the crystal basis.</li>
+<li><strong>inverse</strong> (<em>bool</em>) – If true, do the inverse operation.  Default is False.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: Nx3 array.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -540,6 +554,8 @@ spacegroup.</p>
 <dt id="bornagain.target.crystal.FiniteLattice">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">FiniteLattice</code><span class="sig-paren">(</span><em>max_size=None</em>, <em>unitcell=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#FiniteLattice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A utility for creating finite crystal lattices.  Enables the generation of lattice vector positions, lattice
+occupancies, shaping of crystals by zeroing occupancies beyond arbitrary lattice planes.</p>
 <dl class="attribute">
 <dt id="bornagain.target.crystal.FiniteLattice.all_r_coordinates">
 <code class="descname">all_r_coordinates</code><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.all_r_coordinates" title="Permalink to this definition">¶</a></dt>
@@ -562,7 +578,7 @@ spacegroup.</p>
 
 <dl class="method">
 <dt id="bornagain.target.crystal.FiniteLattice.add_facet">
-<code class="descname">add_facet</code><span class="sig-paren">(</span><em>plane=None</em>, <em>length=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#FiniteLattice.add_facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.add_facet" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_facet</code><span class="sig-paren">(</span><em>plane=None</em>, <em>length=None</em>, <em>shift=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#FiniteLattice.add_facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.add_facet" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">

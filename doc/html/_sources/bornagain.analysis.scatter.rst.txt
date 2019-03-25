@@ -1,7 +1,0 @@
-bornagain.analysis.scatter module
-=================================
-
-.. automodule:: bornagain.analysis.scatter
-    :members:
-    :undoc-members:
-    :show-inheritance:
