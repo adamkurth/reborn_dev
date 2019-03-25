@@ -47,3 +47,10 @@ def test_interpolations():
     dens1 = func(xyz)
     dens2 = density.trilinear_interpolation(dens, xyz, lims)
     assert(np.max(np.abs(dens1 - dens2)) < 1e-2)
+
+    xyz = np.array([[2, 3, 4]])
+    vals = np.array([func(xyz)])
+    dens3 = np.zeros_like(dens)
+    counts3 = np.zeros_like(dens)
+    density.trilinear_insertion(dens3, counts3, xyz, vals, lims)
+    assert(dens3[xyz[0], xyz[1], xyz[2]]/counts3[xyz[0], xyz[1], xyz[2]] == vals[0])
