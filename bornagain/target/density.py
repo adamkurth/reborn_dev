@@ -5,6 +5,7 @@ import numpy as np
 from bornagain.target import crystal
 import scipy
 from scipy.stats import binned_statistic_dd
+from numba import jit
 
 
 class DensityMap3D(object):
@@ -45,8 +46,6 @@ class CrystalMeshTool(object):
         This should intelligently pick the limits of a map.  On initialization, you only need to provide a
         target.crystal.Structure() class instance, along with your desired resolution and oversampling.  You can create
         the target.crystal.Structure() class most easily if you have a pdb file as follows:
-
-        >>> cryst = target.crystal.Structure(pdbFilePath=some_path)
 
         Arguments:
             cryst (crystal.Structure) : A crystal structure that contains the spacegroup and lattice information.
@@ -331,7 +330,6 @@ class CrystalMeshTool(object):
 
         return a
 
-from numba import jit
 
 @jit(nopython=True)
 def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp):
@@ -369,4 +367,176 @@ def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f
                 w_tot += w
             f_map += atom_fs[n] * f_map_tmp/w_tot
 
-        # return f_map
+
+try:
+    from bornagain.target import density_f
+except ImportError:
+    density_f = None
+
+
+def trilinear_interpolation_fortran(densities, vectors, limits, out):
+
+    float_t = np.float64
+    assert(densities.dtype == float_t)
+    assert(vectors.dtype == float_t)
+    assert(limits.dtype == float_t)
+    assert(out.dtype == float_t)
+    nx, ny, nz = densities.shape
+    nn = vectors.shape[0]
+    density_f.trilinear_interpolation(np.asfortranarray(densities), np.asfortranarray(vectors),
+                                      np.asfortranarray(limits), np.asfortranarray(out), nx, ny, nz, nn)
+
+
+def trilinear_interpolation(densities, vectors, limits, out=None):
+
+    if out is None:
+        out = np.zeros(vectors.shape[0], dtype=densities.dtype)
+    if density_f is not None:
+        trilinear_interpolation_fortran(densities, vectors, limits, out)
+    else:
+        trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out=None)
+    return out
+
+
+@jit(nopython=True)
+def trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out=None):
+    r"""
+    Trilinear interpolation of a 3D map.
+
+    Args:
+        densities: A 3D array of shape AxBxC
+        vectors: An Nx3 array of 3-vectors
+        limits: A 3x2 array specifying the limits of the density map samples.  These values specify the voxel centers.
+
+    Returns: Array of intensities with length N.
+    """
+
+    nx = int(densities.shape[0])
+    ny = int(densities.shape[1])
+    nz = int(densities.shape[2])
+
+    dx = (limits[0, 1] - limits[0, 0]) / nx
+    dy = (limits[1, 1] - limits[1, 0]) / ny
+    dz = (limits[2, 1] - limits[2, 0]) / nz
+
+    for ii in range(vectors.shape[0]):
+
+        # Floating point coordinates
+        i_f = float(vectors[ii, 0] - limits[0, 0]) / dx
+        j_f = float(vectors[ii, 1] - limits[1, 0]) / dy
+        k_f = float(vectors[ii, 2] - limits[2, 0]) / dz
+
+        # Integer coordinates
+        i = int(np.floor(i_f))
+        j = int(np.floor(j_f))
+        k = int(np.floor(k_f))
+
+        # Trilinear interpolation formula specified in e.g. paulbourke.net/miscellaneous/interpolation
+        k0 = k
+        j0 = j
+        i0 = i
+        k1 = k+1
+        j1 = j+1
+        i1 = i+1
+        x0 = i_f - np.floor(i_f)
+        y0 = j_f - np.floor(j_f)
+        z0 = k_f - np.floor(k_f)
+        x1 = 1.0 - x0
+        y1 = 1.0 - y0
+        z1 = 1.0 - z0
+        if i >= 0 and i < nx and j >= 0 and j < ny and k >= 0 and k < nz:
+            out[ii] = densities[i0, j0, k0] * x1 * y1 * z1 + \
+                     densities[i1, j0, k0] * x0 * y1 * z1 + \
+                     densities[i0, j1, k0] * x1 * y0 * z1 + \
+                     densities[i0, j0, k1] * x1 * y1 * z0 + \
+                     densities[i1, j0, k1] * x0 * y1 * z0 + \
+                     densities[i0, j1, k1] * x1 * y0 * z0 + \
+                     densities[i1, j1, k0] * x0 * y0 * z1 + \
+                     densities[i1, j1, k1] * x0 * y0 * z0
+        else:
+            out[ii] = 0
+
+    return out
+
+
+def trilinear_insertion(densities, weights, vectors, vals, limits):
+
+    float_t = np.float64
+    assert(densities.dtype == float_t)
+    assert(weights.dtype == float_t)
+    assert(vectors.dtype == float_t)
+    assert(limits.dtype == float_t)
+    assert(vals.dtype == float_t)
+    nx, ny, nz = densities.shape
+    nn = vectors.shape[0]
+    density_f.trilinear_insertion(np.asfortranarray(densities), np.asfortranarray(weights), np.asfortranarray(vectors),
+                                      np.asfortranarray(vals), np.asfortranarray(limits), nx, ny, nz, nn)
+
+# @jit(['void(float64[:], float64[:], float64[:], float64[:], float64[:])'], nopython=True)
+# def trilinear_insertion(densities=None, weights=None, vectors=None, input_densities=None, limits=None):
+#     r"""
+#     Trilinear "insertion" -- basically the opposite of trilinear interpolation.  This places densities into a grid
+#     using the same weights as in trilinear interpolation.
+#
+#     Args:
+#         densities (NxMxP array):
+#         weights (NxMxP array):
+#         vectors (Qx3 array):
+#         input_densities (length-Q array):
+#         limits (3x2 array): A 3x2 array specifying the limits of the density map samples.  These values specify the
+#                             voxel centers.
+#
+#     Returns: None -- the inputs densities and weights are modified by this function
+#     """
+#
+#     nx = int(densities.shape[0])
+#     ny = int(densities.shape[1])
+#     nz = int(densities.shape[2])
+#
+#     dx = (limits[0, 1] - limits[0, 0]) / nx
+#     dy = (limits[1, 1] - limits[1, 0]) / ny
+#     dz = (limits[2, 1] - limits[2, 0]) / nz
+#
+#     for ii in range(vectors.shape[0]):
+#
+#         # Floating point coordinates
+#         i_f = float(vectors[ii, 0] - limits[0, 0]) / dx
+#         j_f = float(vectors[ii, 1] - limits[1, 0]) / dy
+#         k_f = float(vectors[ii, 2] - limits[2, 0]) / dz
+#
+#         # Integer coordinates
+#         i = int(np.floor(i_f))
+#         j = int(np.floor(j_f))
+#         k = int(np.floor(k_f))
+#
+#         # Trilinear interpolation formula specified in e.g. paulbourke.net/miscellaneous/interpolation
+#         k0 = k
+#         j0 = j
+#         i0 = i
+#         k1 = k+1
+#         j1 = j+1
+#         i1 = i+1
+#         x0 = i_f - np.floor(i_f)
+#         y0 = j_f - np.floor(j_f)
+#         z0 = k_f - np.floor(k_f)
+#         x1 = 1.0 - x0
+#         y1 = 1.0 - y0
+#         z1 = 1.0 - z0
+#         if i >= 0 and i < nx and j >= 0 and j < ny and k >= 0 and k < nz:
+#             val = input_densities[ii]
+#             densities[i0, j0, k0] += val
+#             densities[i1, j0, k0] += val
+#             densities[i0, j1, k0] += val
+#             densities[i0, j0, k1] += val
+#             densities[i1, j0, k1] += val
+#             densities[i0, j1, k1] += val
+#             densities[i1, j1, k0] += val
+#             densities[i1, j1, k1] += val
+#             weights[i0, j0, k0] += x1 * y1 * z1
+#             weights[i1, j0, k0] += x0 * y1 * z1
+#             weights[i0, j1, k0] += x1 * y0 * z1
+#             weights[i0, j0, k1] += x1 * y1 * z0
+#             weights[i1, j0, k1] += x0 * y1 * z0
+#             weights[i0, j1, k1] += x1 * y0 * z0
+#             weights[i1, j1, k0] += x0 * y0 * z1
+#             weights[i1, j1, k1] += x0 * y0 * z0

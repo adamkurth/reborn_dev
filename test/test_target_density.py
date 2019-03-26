@@ -23,3 +23,36 @@ def test_transforms():
 
         assert(np.allclose(dat0, dat2))
 
+
+def test_interpolations():
+
+    float_t = np.float64
+    nx, ny, nz = 6, 7, 8
+    dens = np.ones([nx, ny, nz], dtype=float_t)
+    lims = np.array([[0, nx-1], [0, ny-1], [0, nz-1]], dtype=float_t)
+    xyz = np.ones((nx, 3), dtype=float_t)
+    xyz[:, 0] = np.arange(0, nx)
+    dens = density.trilinear_interpolation(dens, xyz, lims)
+    assert(np.max(np.abs(dens[1:-1] - 1)) < 1e-6)
+
+    def func(vecs):
+        return np.sin(vecs[:, 0]/1000.0) + np.cos(3*vecs[:, 1]/1000.) + np.cos(2*vecs[:, 2]/1000.)
+
+    nx, ny, nz = 6, 7, 8
+    lims = np.array([[0, nx-1], [0, ny-1], [0, nz-1]], dtype=float_t)
+    x, y, z = np.meshgrid(np.arange(0, nx), np.arange(0, ny), np.arange(0, nz), indexing='ij')
+    xyz = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
+    dens = func(xyz).reshape([nx, ny, nz])
+    x, y, z = np.meshgrid(np.arange(1, nx-1), np.arange(1, ny-1), np.arange(1, nz-1), indexing='ij')
+    xyz = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
+    dens1 = func(xyz)
+    dens2 = density.trilinear_interpolation(dens, xyz, lims)
+    assert(np.max(np.abs(dens1 - dens2)) < 1e-3)
+    xyz = np.array([[2, 3, 4]], dtype=float_t)
+    vals = np.array([func(xyz)])
+    dens3 = np.zeros_like(dens)
+    counts3 = np.zeros_like(dens)
+    density.trilinear_insertion(dens3, counts3, xyz, vals, lims)
+    assert(np.max(np.abs(dens3)) > 0)
+    assert(np.max(np.abs(counts3)) > 0)
+    assert(dens3[2, 3, 4]/counts3[2, 3, 4] == vals[0])

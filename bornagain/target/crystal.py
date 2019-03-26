@@ -85,13 +85,11 @@ class UnitCell(object):
 
 
 class SpaceGroup(object):
-
     r"""
-    #TODO: document
-    Gotchas: note that there are multiple Hall numbers that correspond to each ITOC number.  The 230 ITOC numbers that
-    specify space groups refer only to the actual symmetry properties, and there are multiple Hall numbers and Hermann
-    Mauguin symbols that have the same spacegroup.  The duplicates are just different ways of specifying the same
-    spacegroup.
+    Container for crystallographic spacegroup information.  Note that the 230 ITOC numbers that
+    specify space groups refer only to the actual symmetry properties.  There are multiple Hall numbers and Hermann
+    Mauguin symbols that correspond to the same spacegroup.  The duplicates are just different ways of specifying the
+    same spacegroup -- e.g. some may apply rotations around different axes than others.
     """
 
     hall_number = None  #: Space group Hall number
@@ -102,6 +100,15 @@ class SpaceGroup(object):
     n_molecules = None  #: Number of symmetry-related molecules
 
     def __init__(self, hermann_mauguin_symbol=None, hall_number=None, itoc_number=None):
+        r"""
+        Initialize the spacegroup.  You must identify the spacegroup by either a Hall number, a
+        Hermann Mauguin symbol, or an ITOC number (see International Tables of Crystallography).
+
+        Args:
+            hermann_mauguin_symbol (string): Hermann Mauguin symbol (for example: P63)
+            hall_number (int): One of the 1-530 Hall numbers.
+            itoc_number (int): One of the 230 ITOC numbers.
+        """
 
         if hall_number is not None:
             self.itoc_number = itoc_number_from_hall_number(hall_number)
@@ -119,11 +126,19 @@ class SpaceGroup(object):
         self.n_molecules = len(self.sym_rotations)
 
     def apply_symmetry_operation(self, op_num=None, x_vecs=None, inverse=False):
+        r"""
+        Apply a symmetry operation to an asymmetric unit.
 
+        Args:
+            op_num (int): The number of the operation to be applied.
+            x_vecs (Nx3 array): The atomic coordinates in the crystal basis.
+            inverse (bool): If true, do the inverse operation.  Default is False.
+
+        Returns: Nx3 array.
+        """
         rot = self.sym_rotations[op_num]
         trans = self.sym_translations[op_num]
         return utils.rotate(rot, x_vecs) + trans
-
 
 
 class CrystalStructure(object):
@@ -341,11 +356,13 @@ class structure(CrystalStructure):
 
 
 class FiniteLattice(object):
+    r"""
+    A utility for creating finite crystal lattices.  Enables the generation of lattice vector positions, lattice
+    occupancies, shaping of crystals by zeroing occupancies beyond arbitrary lattice planes.
+    """
 
     def __init__(self, max_size=None, unitcell=None):
-
         r"""
-
         Args:
             max_size: Integer N that sets the size of the lattice to N x N x N.
             unitcell: A crystal.UnitCell type that is needed to generate
@@ -369,11 +386,17 @@ class FiniteLattice(object):
         ran = np.arange(-(self.max_size-1)/2.0, (self.max_size+1)/2.0)
         x, y, z = np.meshgrid(ran, ran, ran, indexing='ij')
         self.all_x_coordinates = np.vstack([x.ravel(), y.ravel(), z.ravel()]).T.copy()
+        self.all_x_coordinates.flags.writeable = False
+        self._all_r_coordinates = None
 
     @property
     def all_r_coordinates(self):
 
-        return rotate(self.unitcell.o_mat, self.all_x_coordinates)
+        if self._all_r_coordinates is None:
+            self._all_r_coordinates = rotate(self.unitcell.o_mat, self.all_x_coordinates)
+            self._all_r_coordinates.flags.writeable = False
+
+        return self._all_r_coordinates
 
     @property
     def occupied_indices(self):
@@ -390,10 +413,9 @@ class FiniteLattice(object):
 
         return rotate(self.unitcell.o_mat, self.occupied_x_coordinates)
 
-    def add_facet(self, plane=None, length=None):
+    def add_facet(self, plane=None, length=None, shift=0):
 
-        vec = utils.vec_norm(np.array(plane))
-        proj = self.all_x_coordinates.dot(vec.ravel())
+        proj = (self.all_x_coordinates+shift).dot(np.array(plane))
         w = np.where(proj > length)[0]
         if len(w) > 0:
             self.occupancies.flat[w] = 0
@@ -405,14 +427,12 @@ class FiniteLattice(object):
     def make_hexagonal_prism(self, n_cells=None):
 
         self.reset_occupancies()
-        m = n_cells
-        n = m / np.sqrt(2)
-        self.add_facet(plane=[-1, 1, 0], length=n)
-        self.add_facet(plane=[1, -1, 0], length=n)
-        self.add_facet(plane=[1, 0, 0], length=m)
-        self.add_facet(plane=[0, 1, 0], length=m)
-        self.add_facet(plane=[-1, 0, 0], length=m)
-        self.add_facet(plane=[0, -1, 0], length=m)
+        self.add_facet(plane=[-1, 1, 0], length=n_cells)
+        self.add_facet(plane=[1, -1, 0], length=n_cells)
+        self.add_facet(plane=[1, 0, 0], length=n_cells)
+        self.add_facet(plane=[0, 1, 0], length=n_cells)
+        self.add_facet(plane=[-1, 0, 0], length=n_cells)
+        self.add_facet(plane=[0, -1, 0], length=n_cells)
 
 
 def parse_pdb(pdb_file_path, crystal_structure=None):
