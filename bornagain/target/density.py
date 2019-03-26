@@ -368,8 +368,37 @@ def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f
             f_map += atom_fs[n] * f_map_tmp/w_tot
 
 
-@jit(nopython=True)
+try:
+    from bornagain.target import density_f
+except ImportError:
+    density_f = None
+
+def trilinear_interpolation_fortran(densities, vectors, limits, out):
+
+    float_t = np.float64
+    assert(densities.dtype == float_t)
+    assert(vectors.dtype == float_t)
+    assert(limits.dtype == float_t)
+    assert(out.dtype == float_t)
+    nx, ny, nz = densities.shape
+    nn = vectors.shape[0]
+    density_f.trilinear_interpolation(np.asfortranarray(densities), np.asfortranarray(vectors),
+                                      np.asfortranarray(limits), np.asfortranarray(out), nx, ny, nz, nn)
+
+
 def trilinear_interpolation(densities=None, vectors=None, limits=None, out=None):
+
+    if out is None:
+        out = np.zeros(vectors.shape[0], dtype=densities.dtype)
+    if density_f is not None:
+        trilinear_interpolation_fortran(densities, vectors, limits, out)
+    else:
+        trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out=None)
+    return out
+
+
+@jit(nopython=True)
+def trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out=None):
     r"""
     Trilinear interpolation of a 3D map.
 
@@ -380,9 +409,6 @@ def trilinear_interpolation(densities=None, vectors=None, limits=None, out=None)
 
     Returns: Array of intensities with length N.
     """
-
-    if out is None:
-        out = np.zeros(vectors.shape[0], dtype=densities.dtype)
 
     nx = int(densities.shape[0])
     ny = int(densities.shape[1])
