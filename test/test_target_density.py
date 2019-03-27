@@ -46,13 +46,34 @@ def test_interpolations():
     x, y, z = np.meshgrid(np.arange(1, nx-1), np.arange(1, ny-1), np.arange(1, nz-1), indexing='ij')
     xyz = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
     dens1 = func(xyz)
-    dens2 = density.trilinear_interpolation(dens, xyz, lims)
+    dens2 = np.zeros_like(dens1)
+    density.trilinear_interpolation(dens, xyz, lims, dens2)
     assert(np.max(np.abs(dens1 - dens2)) < 1e-3)
-    xyz = np.array([[2, 3, 4]], dtype=float_t)
-    vals = np.array([func(xyz)])
-    dens3 = np.zeros_like(dens)
-    counts3 = np.zeros_like(dens)
-    density.trilinear_insertion(dens3, counts3, xyz, vals, lims)
-    assert(np.max(np.abs(dens3)) > 0)
-    assert(np.max(np.abs(counts3)) > 0)
-    assert(dens3[2, 3, 4]/counts3[2, 3, 4] == vals[0])
+
+
+# def test_insertions():
+#
+#     def func(vecs):
+#         return np.sin(vecs[:, 0]/1000.0) + np.cos(3*vecs[:, 1]/1000.) + np.cos(2*vecs[:, 2]/1000.)
+#
+#     float_t = np.float64
+#     nx, ny, nz = 6, 7, 8
+#     dens = np.zeros([nx, ny, nz], dtype=float_t)
+#     counts = np.zeros([nx, ny, nz], dtype=float_t)
+#
+#     lims = np.array([[0, nx-1], [0, ny-1], [0, nz-1]], dtype=float_t)
+#
+#     xyz = np.array([[2, 3, 4]], dtype=float_t)
+#     vals = np.array([func(xyz)])
+#
+#     density.trilinear_insertion(dens, counts, xyz, vals, lims)
+#     print(xyz, vals)
+#     print(dens)
+#     print(counts)
+#     assert(np.max(np.abs(dens)) > 0)
+#     assert(np.max(np.abs(counts)) > 0)
+#     assert(dens[2, 3, 4]/counts[2, 3, 4] == vals[0])
+
+if __name__ == '__main__':
+
+    test_interpolations()

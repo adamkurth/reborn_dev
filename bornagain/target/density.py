@@ -381,10 +381,8 @@ def trilinear_interpolation_fortran(densities, vectors, limits, out):
     assert(vectors.dtype == float_t)
     assert(limits.dtype == float_t)
     assert(out.dtype == float_t)
-    nx, ny, nz = densities.shape
-    nn = vectors.shape[0]
     density_f.trilinear_interpolation(np.asfortranarray(densities), np.asfortranarray(vectors),
-                                      np.asfortranarray(limits), np.asfortranarray(out), nx, ny, nz, nn)
+                                      np.asfortranarray(limits), np.asfortranarray(out))
 
 
 def trilinear_interpolation(densities, vectors, limits, out=None):
@@ -393,8 +391,8 @@ def trilinear_interpolation(densities, vectors, limits, out=None):
         out = np.zeros(vectors.shape[0], dtype=densities.dtype)
     if density_f is not None:
         trilinear_interpolation_fortran(densities, vectors, limits, out)
-    else:
-        trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out=None)
+#    else:
+#        trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out=None)
     return out
 
 
@@ -469,8 +467,11 @@ def trilinear_insertion(densities, weights, vectors, vals, limits):
     assert(vals.dtype == float_t)
     nx, ny, nz = densities.shape
     nn = vectors.shape[0]
+    print(densities.__array_interface__)
     density_f.trilinear_insertion(np.asfortranarray(densities), np.asfortranarray(weights), np.asfortranarray(vectors),
                                       np.asfortranarray(vals), np.asfortranarray(limits), nx, ny, nz, nn)
+    print(densities.__array_interface__)
+    assert(np.max(np.abs(densities)) > 0)
 
 # @jit(['void(float64[:], float64[:], float64[:], float64[:], float64[:])'], nopython=True)
 # def trilinear_insertion(densities=None, weights=None, vectors=None, input_densities=None, limits=None):
