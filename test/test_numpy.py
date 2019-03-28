@@ -33,3 +33,21 @@ def test_rotations_and_broadcasting():
     vec2 = np.zeros((5, 3))
     vec3 = vec2 + vec1
     assert(np.sum(vec3[:, 1]) == 10)
+
+
+def test_fortranarray():
+
+    a = np.zeros((10, 10))
+    b = a
+    c = np.asfortranarray(a)
+    assert(a.data == b.data)
+    assert(a.data == c.data)
+    assert(b.data == c.data)
+    # a[0, 0] = 1
+    # assert(a.data == b.data)
+    # assert(a.data == c.data)  # Fails. Why?
+    # assert(b.data == c.data)
+    # c[0, 0] = 1
+    # assert(a.data == b.data)
+    # assert(a.data == c.data)  # Fails. Why?
+    # assert(b.data == c.data)

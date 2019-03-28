@@ -518,7 +518,7 @@
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">vec_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_vecs</span><span class="p">())</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beam_vec</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span></div>
 
-<div class="viewcode-block" id="PADGeometry.beamstop_mask"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.beamstop_mask">[docs]</a>    <span class="k">def</span> <span class="nf">beamstop_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_angle</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PADGeometry.beamstop_mask"><a class="viewcode-back" href="../../bornagain.detector.html#bornagain.detector.PADGeometry.beamstop_mask">[docs]</a>    <span class="k">def</span> <span class="nf">beamstop_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_angle</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -532,17 +532,13 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="k">if</span> <span class="n">beam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;A beam must be provided&quot;</span><span class="p">)</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ones</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">q_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">beam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">wavelength</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">wavelength</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelength</span>
-            <span class="k">if</span> <span class="n">wavelength</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wavelength cannot be None&quot;</span><span class="p">)</span>
-            <span class="n">mask</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">q_mags</span><span class="p">(</span><span class="n">wavelength</span><span class="o">=</span><span class="n">wavelength</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">q_min</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">mask</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">q_mags</span><span class="p">(</span><span class="n">beam</span><span class="o">=</span><span class="n">beam</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">q_min</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">elif</span> <span class="n">min_angle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">mask</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">scattering_angles</span> <span class="o">&lt;</span> <span class="n">min_angle</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">mask</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">scattering_angles</span><span class="p">(</span><span class="n">beam</span><span class="o">=</span><span class="n">beam</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">min_angle</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Specify either q_min (and wavelength) or min_angle&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span></div>

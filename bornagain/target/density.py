@@ -381,8 +381,12 @@ def trilinear_interpolation_fortran(densities, vectors, limits, out):
     assert(vectors.dtype == float_t)
     assert(limits.dtype == float_t)
     assert(out.dtype == float_t)
-    density_f.trilinear_interpolation(np.asfortranarray(densities), np.asfortranarray(vectors),
-                                      np.asfortranarray(limits), np.asfortranarray(out))
+    assert(densities.flags.c_contiguous)
+    assert(vectors.flags.c_contiguous)
+    assert(limits.flags.c_contiguous)
+    assert(out.flags.c_contiguous)
+    af = np.asfortranarray
+    density_f.trilinear_interpolation(af(densities.T), af(vectors.T), af(limits.T), af(out.T))
 
 
 def trilinear_interpolation(densities, vectors, limits, out=None):
@@ -465,13 +469,16 @@ def trilinear_insertion(densities, weights, vectors, vals, limits):
     assert(vectors.dtype == float_t)
     assert(limits.dtype == float_t)
     assert(vals.dtype == float_t)
-    nx, ny, nz = densities.shape
-    nn = vectors.shape[0]
-    print(densities.__array_interface__)
-    density_f.trilinear_insertion(np.asfortranarray(densities), np.asfortranarray(weights), np.asfortranarray(vectors),
-                                      np.asfortranarray(vals), np.asfortranarray(limits), nx, ny, nz, nn)
-    print(densities.__array_interface__)
-    assert(np.max(np.abs(densities)) > 0)
+    assert(densities.flags.c_contiguous)
+    assert(weights.flags.c_contiguous)
+    assert(vectors.flags.c_contiguous)
+    assert(vals.flags.c_contiguous)
+    assert(limits.flags.c_contiguous)
+    vals = np.asfortranarray(vals)
+    limits = np.asfortranarray(limits)
+    af = np.asfortranarray
+    density_f.trilinear_insertion(densities.T, weights.T, af(vectors.T), af(vals.T), af(limits.T))
+
 
 # @jit(['void(float64[:], float64[:], float64[:], float64[:], float64[:])'], nopython=True)
 # def trilinear_insertion(densities=None, weights=None, vectors=None, input_densities=None, limits=None):
