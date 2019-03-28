@@ -4,11 +4,12 @@ sys.path.append('..')
 import numpy as np
 from bornagain import target
 from bornagain.target import crystal
+from bornagain.simulate.examples import lysozyme_pdb_file, psi_pdb_file
 
 
 def test_load_pdb_and_assemble():
     # print("\n Entering quick test:")
-    pdb_struct = target.crystal.CrystalStructure("../examples/data/pdb/2LYZ.pdb")
+    pdb_struct = target.crystal.CrystalStructure(lysozyme_pdb_file)
     lat_vecs = target.crystal.assemble(pdb_struct.unitcell.o_mat, 10)
 
     # print ("\tMade cubic lattice with bounds %.2f-%.2f, %.2f-%.2f, %.2f-%.2f Angstrom" %\
@@ -17,6 +18,14 @@ def test_load_pdb_and_assemble():
     # print ("\tMade rectangular lattice with bounds %.2f-%.2f, %.2f-%.2f, %.2f-%.2f Angstrom" %\
     #    tuple( np.ravel( [ (i,j) for i,j in zip( lat_vecs_rect.min(0)*1e10, lat_vecs_rect.max(0)*1e10 )]) ))
     assert(lat_vecs_rect.max(0)[-1] > lat_vecs.max(0)[-1])
+
+
+def test_unitcell():
+
+    cryst = target.crystal.CrystalStructure(psi_pdb_file)
+    cell = cryst.unitcell
+    assert(np.max(np.abs(cell.a_vec - np.array([2.81e-08, 0.00e+00, 0.00e+00]))) < 1e-8)
+    assert(np.max(np.abs(cell.a_mat_inv[0, :] - np.array([2.81e-08, 0.00e+00, 0.00e+00]))) < 1e-8)
 
 
 def test_spacegroup():
