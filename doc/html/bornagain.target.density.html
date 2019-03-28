@@ -423,9 +423,19 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
 <dd><p>Needs documentation…</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="function">
+<dt id="bornagain.target.density.trilinear_interpolation_fortran">
+<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_interpolation_fortran</code><span class="sig-paren">(</span><em>densities</em>, <em>vectors</em>, <em>limits</em>, <em>out</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_interpolation_fortran"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_interpolation_fortran" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="bornagain.target.density.trilinear_interpolation">
-<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_interpolation</code><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_interpolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_interpolation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_interpolation</code><span class="sig-paren">(</span><em>densities</em>, <em>vectors</em>, <em>limits</em>, <em>out=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_interpolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_interpolation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.trilinear_interpolation_numba">
+<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_interpolation_numba</code><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_interpolation_numba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_interpolation_numba" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trilinear interpolation of a 3D map.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -443,25 +453,10 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
 <p>Returns: Array of intensities with length N.</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="function">
 <dt id="bornagain.target.density.trilinear_insertion">
-<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_insertion</code><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_insertion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_insertion" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trilinear interpolation of a 3D map.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>densities</strong> – A 3D array of shape AxBxC</li>
-<li><strong>vectors</strong> – An Nx3 array of 3-vectors</li>
-<li><strong>limits</strong> – A 3x2 array specifying the limits of the density map samples.  These values specify the voxel centers.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Returns: Array of intensities with length N.</p>
-</dd></dl>
+<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_insertion</code><span class="sig-paren">(</span><em>densities</em>, <em>weights</em>, <em>vectors</em>, <em>vals</em>, <em>limits</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_insertion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_insertion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 

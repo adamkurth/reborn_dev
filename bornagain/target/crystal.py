@@ -83,6 +83,42 @@ class UnitCell(object):
         self.a_mat_inv = o_mat.T.copy()
         self.volume = vol
 
+    def r2x(self, r_vecs):
+        return rotate(self.o_mat_inv, r_vecs)
+
+    def x2r(self, x_vecs):
+        return rotate(self.o_mat, x_vecs)
+
+    def q2h(self, q_vecs):
+        return rotate(self.a_mat_inv, q_vecs)
+
+    def h2q(self, h_vecs):
+        return rotate(self.a_mat, h_vecs)
+
+    @property
+    def a_vec(self):
+        return self.o_mat[:, 0].copy()
+
+    @property
+    def b_vec(self):
+        return self.o_mat[:, 1].copy()
+
+    @property
+    def c_vec(self):
+        return self.o_mat[:, 2].copy()
+
+    @property
+    def as_vec(self):
+        return self.a_mat[:, 0].copy()
+
+    @property
+    def bs_vec(self):
+        return self.a_mat[:, 1].copy()
+
+    @property
+    def cs_vec(self):
+        return self.a_mat[:, 2].copy()
+
 
 class SpaceGroup(object):
     r"""

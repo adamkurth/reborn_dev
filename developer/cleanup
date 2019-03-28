@@ -3,8 +3,3 @@
 
 # Refactor with perl
 > perl p i e 's/oldString/newString/g' `find ./ name '.py'` 
-
-# Clear out all the .pyc files
-> find . -name '*.pyc' -type f -exec rm {} \+
-
-
