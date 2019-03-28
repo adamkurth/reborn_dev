@@ -15,8 +15,11 @@ from bornagain import utils
 import bornagain.external
 from bornagain.simulate import atoms
 from bornagain.target.crystal import CrystalStructure
-from bornagain.simulate.clcore import ClCore
-
+try:
+    from bornagain.simulate.clcore import ClCore
+except ImportError:
+    utils.warn("simulate.clcore cannot be imported, probably because pyopencl is not installed.")
+    ClCore = None
 
 lysozyme_pdb_file = pkg_resources.resource_filename('bornagain.simulate', 'data/pdb/2LYZ.pdb')
 psi_pdb_file = pkg_resources.resource_filename('bornagain.simulate', 'data/pdb/1jb0.pdb')
