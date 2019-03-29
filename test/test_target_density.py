@@ -5,12 +5,43 @@ import sys
 import numpy as np
 
 sys.path.append("..")
+from bornagain.simulate.examples import lysozyme_pdb_file, psi_pdb_file
 from bornagain.target import crystal, density
 
 try:
     from bornagain.target import density_f
 except ImportError:
     density_f = None
+
+
+def test_crystal_density():
+
+    cryst = crystal.CrystalStructure()
+    cryst.set_cell(1e-9, 2e-9, 4e-9, np.pi/2, np.pi/2, np.pi/2)
+    cryst.set_spacegroup(hall_number=1)
+    dens = density.CrystalDensityMap(cryst, 2e-9, 2)
+    assert (np.sum(np.abs(dens.n_vecs[10, :] - np.array([0, 1, 0]))) < 1e-8)
+    assert(np.allclose(dens.x_vecs[11, :], np.array([0., 0.33333333, 0.2])))
+
+    cryst = crystal.CrystalStructure(lysozyme_pdb_file)
+    for d in [0.2, 0.3, 0.4, 0.5]:
+
+        dens = density.CrystalDensityMap(cryst, d, 1)
+        dat0 = dens.reshape(np.arange(0, dens.n_voxels)).astype(np.float)
+        dat1 = dens.symmetry_transform(0, 1, dat0)
+        dat2 = dens.symmetry_transform(1, 0, dat1)
+
+        assert(np.allclose(dat0, dat2))
+
+    cryst = crystal.CrystalStructure(psi_pdb_file)
+    for d in [0.2, 0.3, 0.4, 0.5]:
+
+        dens = density.CrystalDensityMap(cryst, d, 1)
+        dat0 = dens.reshape(np.arange(0, dens.n_voxels)).astype(np.float)
+        dat1 = dens.symmetry_transform(0, 1, dat0)
+        dat2 = dens.symmetry_transform(1, 0, dat1)
+
+        assert(np.allclose(dat0, dat2))
 
 
 def test_transforms():

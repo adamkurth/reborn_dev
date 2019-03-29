@@ -147,12 +147,15 @@ class SpaceGroup(object):
         """
 
         if hall_number is not None:
+            self.hall_number = hall_number
             self.itoc_number = itoc_number_from_hall_number(hall_number)
             self.hermann_mauguin_symbol = hermann_mauguin_symbol_from_hall_number(hall_number)
         elif hermann_mauguin_symbol is not None:
+            self.hermann_mauguin_symbol = hermann_mauguin_symbol
             self.itoc_number = itoc_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol)
             self.hall_number = hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol)
         elif itoc_number is not None:
+            self.itoc_number = itoc_number
             self.hall_number = hall_number_from_itoc_number(itoc_number)
             self.hermann_mauguin_symbol = hermann_mauguin_symbol_from_hall_number(self.hall_number)
         else:

@@ -49,6 +49,40 @@ def test_spacegroup():
     assert(sg.n_molecules == 1)
     assert(sg.hermann_mauguin_symbol == 'P 1')
 
+    # Check that translations are multiples of 1, 1/2, 1/3, 1/4, or 1/6.
+    uniqtrans = []
+    reductrans = []
+    for h in range(1, 531):
+        sg = crystal.SpaceGroup(hall_number=h)
+        trans = [[],[],[]]
+        transc = [[],[],[]]
+        for vec in sg.sym_translations:
+            for j in range(0, 3):
+                comp = vec[j] % 1
+                comp = min(comp, 1-comp)
+                if comp == 0:
+                    comp = 1
+                comp = int(np.round(1/comp))
+                if comp not in trans[j]:
+                    trans[j].append(comp)
+        for j in range(0, 3):
+            tr = np.sort(np.array(trans[j], dtype=np.int))[::-1]
+            trans[j] = list(tr)
+            indiv = [tr[0]]
+            for p in range(0, len(tr)):
+                for q in range(0, len(tr)):
+                    rat = max(tr[p], tr[q])/float(max(tr[p], tr[q]))
+                    if np.abs(rat - np.round(rat)) > 1e-2:
+                        if tr[q] not in indiv:
+                            indiv.append(tr[p])
+            transc[j] = indiv
+        uniqtrans.append(trans)
+        reductrans.append(transc)
+
+    # for h in range(0, 530):
+        # print(h)
+        # print(reductrans[h], uniqtrans[h])
+
 
 def test_finite_lattice():
 
@@ -60,4 +94,4 @@ def test_finite_lattice():
 
 
 if __name__ == "__main__":
-    test_load_pdb_and_assemble()
+    test_spacegroup()
