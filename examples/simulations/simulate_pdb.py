@@ -6,17 +6,18 @@ import matplotlib.pyplot as plt
 import bornagain as ba
 import bornagain.target.crystal as crystal
 import bornagain.simulate.clcore as core
+from bornagain.utils import rotate, rotation_about_axis
 
 
 show = True     # Display the simulated patterns
 double = False  # Use double precision if available
-rotate = False  # Check if rotation matrices work
+dorotate = False  # Check if rotation matrices work
 if 'view' in sys.argv:
     show = True
 if 'double' in sys.argv:
     double = True
-if 'rotate' in sys.argv:
-    rotate = True
+if 'dorotate' in sys.argv:
+    dorotate = True
 if 'noplots' in sys.argv:
     show = False
 
@@ -60,7 +61,7 @@ f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, ba.u
 n_trials = 3
 
 print('Generate rotation matrix')
-if rotate:
+if dorotate:
     phi = 0.5
     R = np.array([[np.cos(phi), np.sin(phi), 0], [-np.sin(phi), np.cos(phi), 0], [0, 0, 1]])
 else:
@@ -208,6 +209,67 @@ if 1:
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
         plt.show()
+    print("")
+
+if 1:
+
+    print(lin)
+    print("Compute q vectors directly on GPU instead of CPU")
+    print("Amplitudes passed in/out as GPU array")
+    print("Include two interfering pairs of molecules, shifted and rotated.")
+    print(lin)
+
+    n_pixels = pl.n_fs * pl.n_ss
+    n_atoms = r.shape[0]
+    a_dev = clcore.to_device(shape=(n_pixels,), dtype=clcore.complex_t)
+    U = np.array([1, 0, 0]) * 5e-9
+    RR = rotation_about_axis(20*np.pi/180.0, [1, 1, 0])
+
+    print("Rotation and translation on CPU.")
+    r0 = r
+    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=None,
+                            a=a_dev, U=None, add=False)
+    r0 = rotate(RR, r) + U
+    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=None,
+                            a=a_dev, U=None, add=True)
+    if show:
+        imdisp = np.abs(a_dev.get()) ** 2
+        imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
+        imdisp = np.log(imdisp + 0.1)
+        plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
+        plt.title('y: up, x: right, z: beam (towards you)')
+        plt.show()
+
+    print("Rotation and translation on GPU.")
+    r0 = r
+    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=None,
+                            a=a_dev, U=None, add=False)
+    r0 = r
+    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=RR,
+                            a=a_dev, U=U, add=True)
+    if show:
+        imdisp = np.abs(a_dev.get()) ** 2
+        imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
+        imdisp = np.log(imdisp + 0.1)
+        plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
+        plt.title('y: up, x: right, z: beam (towards you)')
+        plt.show()
+
+    print("Rotation on CPU, translation on GPU.")
+    r0 = r.copy()
+    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=None,
+                            a=a_dev, U=None, add=False)
+    r0 = rotate(RR, r.copy())
+    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=None,
+                            a=a_dev, U=U, add=True)
+    if show:
+        imdisp = np.abs(a_dev.get()) ** 2
+        imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
+        imdisp = np.log(imdisp + 0.1)
+        plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
+        plt.title('y: up, x: right, z: beam (towards you)')
+        plt.show()
+
     print("")
 
 if 1:

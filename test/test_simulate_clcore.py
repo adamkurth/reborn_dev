@@ -274,28 +274,27 @@ def _clcore(double_precision=False):
     r0 = np.random.random([n_atoms, 3]).astype(core.real_t)*5e-9
     f = np.random.random([n_atoms]).astype(core.complex_t)
 
-    amps1 = core.phase_factor_qrf(q, rotate(rot, r0), f, R=None, U=None)
+    # Do rotation and translation on CPU
+    amps1 = core.phase_factor_qrf(q, rotate(rot, r0) + trans, f, R=None, U=None)
+    # Rotation and translation on GPU
     amps2 = core.phase_factor_qrf(q, r0, f, R=rot, U=trans)
-    amps3 = core.phase_factor_qrf(rotate(rot.T, q), r0, f, R=None, U=trans)
-
-    # print("")
-    # print(amps1[0:3])
-    # print(amps2[0:3])
-    # print(amps3[0:3])
-    # print('1,2', np.max(np.abs(amps1 - amps2)))
-    # print('1,3', np.max(np.abs(amps1 - amps3)))
-    # print('2,3', np.max(np.abs(amps3 - amps2)))
-    # print(np.mean(np.abs(amps1 - amps2))/np.mean(np.abs(amps1)))
+    # Rotation on CPU, translation on GPU
+    amps3 = core.phase_factor_qrf(q, rotate(rot, r0), f, R=None, U=trans)
+    # Rotation on GPU, translation on CPU
+    amps4 = core.phase_factor_qrf(q, r0 + rotate(rot.T, trans), f, R=rot, U=None)
 
     if double_precision:
-        assert (np.mean(np.abs(amps1 - amps2)) / np.mean(np.abs(amps1)) < 10)
-        assert (np.mean(np.abs(amps1 - amps3)) / np.mean(np.abs(amps3)) < 10)
-        assert (np.mean(np.abs(amps3 - amps2)) / np.mean(np.abs(amps2)) < 10)
+        tol = 1e-6
+        assert (np.mean(np.abs(amps1 - amps2)) / np.mean(np.abs(amps1)) < tol)
+        assert (np.mean(np.abs(amps1 - amps3)) / np.mean(np.abs(amps3)) < tol)
+        assert (np.mean(np.abs(amps3 - amps2)) / np.mean(np.abs(amps2)) < tol)
+        assert (np.mean(np.abs(amps3 - amps4)) / np.mean(np.abs(amps4)) < tol)
     else:
-        # TODO: Why is this match so poor?
-        assert (np.mean(np.abs(amps1 - amps2)) / np.mean(np.abs(amps1)) < 10)
-        assert (np.mean(np.abs(amps1 - amps3)) / np.mean(np.abs(amps3)) < 10)
-        assert (np.mean(np.abs(amps3 - amps2)) / np.mean(np.abs(amps2)) < 10)
+        tol = 1e-6
+        assert (np.mean(np.abs(amps1 - amps2)) / np.mean(np.abs(amps1)) < tol)
+        assert (np.mean(np.abs(amps1 - amps3)) / np.mean(np.abs(amps3)) < tol)
+        assert (np.mean(np.abs(amps3 - amps2)) / np.mean(np.abs(amps2)) < tol)
+        assert (np.mean(np.abs(amps3 - amps4)) / np.mean(np.abs(amps4)) < tol)
 
 
 @pytest.mark.cl

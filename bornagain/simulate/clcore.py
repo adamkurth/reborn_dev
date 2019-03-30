@@ -426,7 +426,7 @@ class ClCore(object):
 
         if U is None:
             U = np.zeros(3, dtype=self.real_t)
-        U = rotate(R, U)
+        U = rotate(R.T, U)
 
         if add:
             add = 1
@@ -501,7 +501,7 @@ class ClCore(object):
 
         if U is None:
             U = np.zeros(3, dtype=self.real_t)
-        U = rotate(R, U)
+        U = rotate(R.T, U)
 
         if add:
             add = 1
@@ -573,7 +573,7 @@ class ClCore(object):
 
         if U is None:
             U = np.zeros(3, dtype=self.real_t)
-        U = rotate(R, U)
+        U = rotate(R.T, U)
 
         R = self.vec16(R.T, dtype=self.real_t)
         U = self.vec4(U, dtype=self.real_t)
