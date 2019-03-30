@@ -104,6 +104,20 @@ class CrystalDensityMap(object):
         return self.n_vecs * self.dx
 
     @property
+    def x_limits(self):
+        r"""
+        Return a 3x2 array with the limits of the density map.  These limits correspond to the centers of the voxels.
+
+        Returns:
+
+        """
+
+        shp = self.shape
+        dx = self.dx
+        return np.array([[0, dx[0]*(shp[0]-1)], [0, dx[1]*(shp[1]-1)], [0, dx[2]*(shp[2]-1)]])
+
+
+    @property
     def r_vecs(self):
 
         r"""
@@ -202,29 +216,14 @@ class CrystalDensityMap(object):
 
         return data_trans
 
-    def shape(self):
-
-        r"""
-
-        For convenience, return the map shape [N,N,N]
-
-        Returns: numpy array
-
-        """
-
-        return np.array([self.shape, self.shape, self.shape])
-
     def reshape(self, data):
-
         r"""
-
         For convenience, this will reshape a data array to the shape NxNxN.
 
         Args:
             data: the data array
 
         Returns: the same data array as the input, but with shape NxNxN
-
         """
 
         return data.reshape(self.shape)

@@ -181,13 +181,178 @@
   <div class="section" id="module-bornagain.target.density">
 <span id="bornagain-target-density-module"></span><h1>bornagain.target.density module<a class="headerlink" href="#module-bornagain.target.density" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="bornagain.target.density.DensityMap3D">
-<em class="property">class </em><code class="descclassname">bornagain.target.density.</code><code class="descname">DensityMap3D</code><span class="sig-paren">(</span><em>shape=None</em>, <em>centers=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#DensityMap3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.DensityMap3D" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalDensityMap">
+<em class="property">class </em><code class="descclassname">bornagain.target.density.</code><code class="descname">CrystalDensityMap</code><span class="sig-paren">(</span><em>cryst</em>, <em>resolution</em>, <em>oversampling</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A helper class for working with 3D density maps.  Most importantly, it allows one to do spacegroup symmetry
+transformations.  Once provided information about a crystal (spacegroup, lattice), along with desired resolution and
+oversampling ratio, this tool intelligently chooses the shape of the map and creates lookup tables for the symmetry
+transformations.  It also produces the Fourier-space frequency samples that are helpful when connecting direct
+all-atom simulations with FFTs.  In general, the maps are cubic NxNxN array.  This class does not maintain the data
+array; it provides methods needed to work on the data arrays.</p>
+<p>Importantly, this class is focused on operations in the crystal basis, because the symmetry operations are most
+elegant in that basis.</p>
 <dl class="attribute">
-<dt id="bornagain.target.density.DensityMap3D.density">
-<code class="descname">density</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.DensityMap3D.density" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.density.CrystalDensityMap.sym_luts">
+<code class="descname">sym_luts</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.sym_luts" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.n_vecs">
+<code class="descname">n_vecs</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.n_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this</em> – [[0,0,0],[0,0,1],[0,0,2], … ,[N-1,N-1,N-1]]</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.x_vecs">
+<code class="descname">x_vecs</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.x_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an Nx3 array of vectors in the crystal basis.  If there were four samples per unit cell, the array looks a
+bit like this:</p>
+<p>[[0,0,0],[0,0,0.25],[0,0,0.5],[0,0,0.75],[0,0.25,0], … ,[0.75,0.75,0.75]]</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.x_limits">
+<code class="descname">x_limits</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.x_limits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a 3x2 array with the limits of the density map.  These limits correspond to the centers of the voxels.</p>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.r_vecs">
+<code class="descname">r_vecs</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.r_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an Nx3 array of 3-vectors contain the Cartesian-basis vectors of each voxel in the map.  This is done
+by taking the crystal-basis position vectors x, and applying the orthogonalization matrix O to them.</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.h_vecs">
+<code class="descname">h_vecs</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.h_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This provides an Nx3 array of Fourier-space vectors “h”.  These coordinates can be understood as “fractional
+Miller indices” that coorespond to the density samples upon taking an FFT of the real-space map.  With atomic
+coordinates x (in the crystal basis) one can take the Fourier transform F(h) = sum_n f_n exp(i h*x)</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.q_vecs">
+<code class="descname">q_vecs</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.q_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This provides an Nx3 array of momentum-transfer vectors (with the usual 2 pi factor).</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.density.CrystalDensityMap.get_sym_luts">
+<code class="descname">get_sym_luts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap.get_sym_luts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.get_sym_luts" title="Permalink to this definition">¶</a></dt>
+<dd><p>This provides a list of “symmetry transform lookup tables”.  These are the linearized array indices. For a
+transformation that consists of an identity matrix along with zero translation, the lut is just an array
+p = [0,1,2,3,…,N^3-1].  Other transforms are like a “scrambling” of that ordering, such that a remapping of
+density samples is done with an operation like this: newmap.flat[p2] = oldmap.flat[p1].   Note that the luts are
+kept in memory for future use - beware of the memory requirement.</p>
+<p>Returns: list of numpy arrays</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.density.CrystalDensityMap.symmetry_transform">
+<code class="descname">symmetry_transform</code><span class="sig-paren">(</span><em>i</em>, <em>j</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap.symmetry_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.symmetry_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>This applies symmetry transformations to a data array (i.e. density map).  The crystal spacegroup gives rise
+to Ns symmetry transformation operations (e.g. each operation consists of a rotation matrix paired with
+translation vector).  Of those Ns symmetry transformations, this function will take a map from the ith
+configuration to the jth configuration.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>i</strong> (<em>int</em>) – The “from” index; symmetry transforms are performed from this index to the j index</li>
+<li><strong>j</strong> (<em>int</em>) – The “to” index; symmetry transforms are performed from the i index to this index</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: A transformed data array (i.e. density map)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.density.CrystalDensityMap.reshape">
+<code class="descname">reshape</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap.reshape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.reshape" title="Permalink to this definition">¶</a></dt>
+<dd><p>For convenience, this will reshape a data array to the shape NxNxN.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> – the data array</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: the same data array as the input, but with shape NxNxN</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.density.CrystalDensityMap.reshape3">
+<code class="descname">reshape3</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap.reshape3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.reshape3" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> – A data array of length 3*N^3 that consists of 3-vectors (one for each density voxel)</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: A re-shaped data array of shape NxNxNx3</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.density.CrystalDensityMap.zeros">
+<code class="descname">zeros</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap.zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.zeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>A convenience function: simply returns an array of zeros of shape NxNxN</p>
+<p>Returns: numpy array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.density.CrystalDensityMap.place_atoms_in_map">
+<code class="descname">place_atoms_in_map</code><span class="sig-paren">(</span><em>atom_x_vecs</em>, <em>atom_fs</em>, <em>mode='gaussian'</em>, <em>fixed_atom_sigma=5e-11</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap.place_atoms_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.place_atoms_in_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
+should be in the crystal basis, and the densities must be real (because the scipy function that we use does
+not allow for complex numbers…).  This is done in a lazy way - the density samples are placed in the nearest
+voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>numpy array</em>) – An nx3 array of position vectors</li>
+<li><strong>f</strong> (<em>numpy array</em>) – An n-length array of densities (must be real)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: An NxNxN numpy array containing the sum of densities that were provided as input.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bornagain.target.density.CrystalDensityMap.place_intensities_in_map">
+<code class="descname">place_intensities_in_map</code><span class="sig-paren">(</span><em>h</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap.place_intensities_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.place_intensities_in_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will take a list of Miller index vectors and intensities and place them in a 3D map.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>h</strong> (<em>numpy array</em>) – An Nx3 array of hkl vectors</li>
+<li><strong>f</strong> (<em>numpy array</em>) – An N-length array of intensities (must be real)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: An NxNxN numpy array containing the sum of densities that were provided as input.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -498,14 +663,21 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
 
   
 
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -7,7 +7,7 @@ from bornagain import utils
 from bornagain.utils import rotate, vec_norm
 from bornagain.simulate.clcore import ClCore
 from bornagain.simulate.examples import psi_pdb_file, lysozyme_pdb_file
-from bornagain.target import crystal
+from bornagain.target import crystal, density
 from bornagain.viewers.qtviews import Scatter3D, bright_colors, colors
 from bornagain.external.pyqtgraph.extras import keep_open
 
@@ -82,10 +82,19 @@ amps_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
 amps_mol_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
 amps_lat_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
 h_vecs_dev = clcore.to_device(unitcell.q2h(q_vecs))
-max_res_d = 2*np.pi/np.max(pad.q_mags(beam=beam))
-h_size = 2*np.ceil(np.array(1/(max_res_d*np.array(utils.vec_mag(unitcell.a_mat.T)))))-1
-h_size = 4*h_size.astype(np.int)+1
-print('Max resolution: d = %g A.  %dx%dx%d array.' % (max_res_d*1e10,h_size[0],h_size[1],h_size[2]))
+au_x_vecs_dev = clcore.to_device(au_x_coords, dtype=clcore.real_t)
+au_f_dev = clcore.to_device(shape=(cryst.molecule.n_atoms,), dtype=clcore.real_t)*0 + 1
+resolution = 2*np.pi/np.max(pad.q_mags(beam=beam))
+oversampling = 4
+dens = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
+amps3d_dev = clcore.to_device(shape=dens.shape, dtype=clcore.complex_t)*0
+print('mesh', dens.shape)
+clcore.phase_factor_mesh(au_x_vecs_dev, au_f_dev, dens.shape, q_min=dens.x_limits[:, 0], q_max=dens.x_limits[:, 1],
+                         a=amps3d_dev)
+print('done')
+
+clcore.buffer_mesh_lookup(amps3d_dev, dens.shape, q_min=dens.x_limits[:, 0], q_max=dens.x_limits[:, 1],
+                          q, R=None, a=None)
 t = time()
 for i in range(spacegroup.n_molecules):
     print('Symmetry partner %d' % (i,))

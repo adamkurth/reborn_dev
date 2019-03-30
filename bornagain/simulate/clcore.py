@@ -23,8 +23,10 @@ import pyopencl as cl
 import pyopencl.array
 
 import bornagain as ba
+from bornagain.utils import rotate
 from bornagain.simulate import refdata
 
+cl_array = cl.array.Array
 
 clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
 
@@ -109,7 +111,7 @@ class ClCore(object):
         self.set_groupsize(group_size)
 
         # setup the programs
-        self._load_programs()
+        self._build_opencl_programs()
 
     def set_groupsize(self, group_size):
         r"""
@@ -168,8 +170,8 @@ class ClCore(object):
         self.real_t = np.float32
         self.complex_t = np.complex64
 
-    def _load_programs(self):
-        self._build_opencl_programs()
+    # def _load_programs(self):
+    #     self._build_opencl_programs()
 
     def _build_opencl_programs(self):
         clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
@@ -249,7 +251,7 @@ class ClCore(object):
             pyopencl array
         """
 
-        if isinstance(array, cl.array.Array):
+        if isinstance(array, cl_array):
             return array
 
         if array is None:
@@ -285,7 +287,7 @@ class ClCore(object):
         else:
             return 0
 
-    def test_rotate_vec(self, R, vec):
+    def test_rotate_vec(self, rot, trans, vec):
 
         r"""
         Rotate a single vector.  CPU arrays in, CPU array out. This is just for testing the consistency of memory
@@ -294,19 +296,34 @@ class ClCore(object):
 
         if not hasattr(self, 'test_rotate_vec_cl'):
             self.test_rotate_vec_cl = self.programs.test_rotate_vec
-            self.test_rotate_vec_cl.set_scalar_arg_dtypes([None, None, None])
+            self.test_rotate_vec_cl.set_scalar_arg_dtypes([None, None, None, None])
 
-        R = self.vec16(R)
+        rot = self.vec16(rot)
         vec = self.vec4(vec)
+        trans = self.vec4(trans)
         vec_out = vec.copy()
         vec_out_dev = self.to_device(vec_out, dtype=self.real_t)
         n = 1
 
         global_size = np.int(np.ceil(n / np.float(self.group_size)) * self.group_size)
 
-        self.test_rotate_vec_cl(self.queue, (global_size,), (self.group_size,), R, vec, vec_out_dev.data)
+        self.test_rotate_vec_cl(self.queue, (global_size,), (self.group_size,), rot, trans, vec, vec_out_dev.data)
 
         return vec_out_dev.get()[0:3]
+
+    def test_simple_sum(self, vec):
+
+        if not hasattr(self, 'test_rotate_vec_cl'):
+            self.test_simple_sum_cl = self.programs.test_simple_sum
+            self.test_simple_sum_cl.set_scalar_arg_dtypes([None, None, self.int_t])
+
+        n = self.int_t(len(vec))
+        out = np.array((1,), self.real_t)
+        vec_dev = self.to_device(vec, dtype=self.real_t)
+        out_dev = self.to_device(out, dtype=self.real_t)
+        global_size = self.group_size
+        self.test_simple_sum_cl(self.queue, (global_size,), (self.group_size,), vec_dev.data, out_dev.data, n)
+        return out_dev.get()[0]
 
     def mod_squared_complex_to_real(self, A, I):
 
@@ -328,7 +345,7 @@ class ClCore(object):
 
         self.mod_squared_complex_to_real_cl(self.queue, (global_size,), (self.group_size,), A_dev.data, I_dev.data, n)
 
-    def phase_factor_qrf_chunk_r(self, q, r, f=None, R=None, a=None, add=False, n_chunks=1):
+    def phase_factor_qrf_chunk_r(self, q, r, f=None, R=None, U=None, a=None, add=False, n_chunks=1):
 
         r"""
 
@@ -353,7 +370,7 @@ class ClCore(object):
         """
 
         # We must do this because pyopencl Array objects do not allow array slicing.
-        if type(r) is pyopencl.array.Array or type(f) is pyopencl.array.Array:
+        if type(r) is cl_array or type(f) is cl_array:
             raise ValueError('phase_factor_qrf_chunk_r requires that r and f are numpy arrays.')
 
         add = self.int_t(add)
@@ -364,7 +381,7 @@ class ClCore(object):
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
         q_dev = self.to_device(q, dtype=self.real_t)
-        a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
+        a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels,))
 
         r_split = np.array_split(np.arange(n_atoms), n_chunks)
         for i in range(0, len(r_split)):
@@ -373,14 +390,14 @@ class ClCore(object):
             f_chunk = f[r_rng[0]:(r_rng[-1]+1)]
             if i > 0:
                 add = self.int_t(1)
-            self.phase_factor_qrf(q_dev, r_chunk, f_chunk, R, a_dev, add)
+            self.phase_factor_qrf(q_dev, r_chunk, f_chunk, R, U, a_dev, add)
 
         if a is None:
             return a_dev.get()
         else:
             return a_dev
 
-    def phase_factor_qrf(self, q, r, f=None, R=None, a=None, add=False):
+    def phase_factor_qrf(self, q, r, f=None, R=None, U=None, a=None, add=False):
 
         r"""
         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
@@ -402,11 +419,14 @@ class ClCore(object):
         if not hasattr(self, 'phase_factor_qrf_cl'):
             self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
             self.phase_factor_qrf_cl.set_scalar_arg_dtypes(
-                [None, None, None, None, None, self.int_t, self.int_t, self.int_t])
+                [None, None, None, None, None, None, self.int_t, self.int_t, self.int_t])
 
         if R is None:
             R = np.eye(3)
-        R = self.vec16(R.T, dtype=self.real_t)
+
+        if U is None:
+            U = np.zeros(3, dtype=self.real_t)
+        U = rotate(R, U)
 
         if add:
             add = 1
@@ -422,12 +442,14 @@ class ClCore(object):
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
+        R = self.vec16(R.T, dtype=self.real_t)
+        U = self.vec4(U, dtype=self.real_t)
 
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
 
         self.phase_factor_qrf_cl(self.queue, (global_size,),
                                  (self.group_size,), q_dev.data, r_dev.data,
-                                 f_dev.data, R, a_dev.data, n_atoms,
+                                 f_dev.data, R, U, a_dev.data, n_atoms,
                                  n_pixels, add)
         self.queue.finish()
 
@@ -436,7 +458,7 @@ class ClCore(object):
         else:
             return a_dev
 
-    def phase_factor_pad(self, r, f, T, F, S, B, nF, nS, w, R=None, a=None, add=False):
+    def phase_factor_pad(self, r, f, T, F, S, B, nF, nS, w, R=None, U=None, a=None, add=False):
 
         r"""
         This should simulate detector panels.
@@ -471,12 +493,16 @@ class ClCore(object):
         if not hasattr(self, 'phase_factor_pad_cl'):
             self.phase_factor_pad_cl = self.programs.phase_factor_pad
             self.phase_factor_pad_cl.set_scalar_arg_dtypes(
-                [None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t, self.real_t,
+                [None, None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t, self.real_t,
                  None, None, None, None, self.int_t])
 
         if R is None:
             R = np.eye(3)
-        R = self.vec16(R.T,dtype=self.real_t)
+
+        if U is None:
+            U = np.zeros(3, dtype=self.real_t)
+        U = rotate(R, U)
+
         if add:
             add = 1
         else:
@@ -488,11 +514,12 @@ class ClCore(object):
         n_atoms = self.int_t(r.shape[0])
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
-
+        R = self.vec16(R.T, dtype=self.real_t)
         T = self.vec4(T, dtype=self.real_t)
         F = self.vec4(F, dtype=self.real_t)
         S = self.vec4(S, dtype=self.real_t)
         B = self.vec4(B, dtype=self.real_t)
+        U = self.vec4(U, dtype=self.real_t)
 
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
@@ -500,7 +527,7 @@ class ClCore(object):
 
         self.phase_factor_pad_cl(self.queue, (global_size,),
                                  (self.group_size,), r_dev.data,
-                                 f_dev.data, R, a_dev.data, n_pixels, n_atoms,
+                                 f_dev.data, R, U, a_dev.data, n_pixels, n_atoms,
                                  nF, nS, w, T, F, S, B, add)
         self.queue.finish()
 
@@ -509,7 +536,7 @@ class ClCore(object):
         else:
             return a_dev
 
-    def phase_factor_mesh(self, r, f, N, q_min, q_max, a=None):
+    def phase_factor_mesh(self, r, f, N, q_min, q_max, a=None, R=None, U=None, add=False):
 
         r"""
         Compute phase factors on a regular 3D mesh of q-space samples.
@@ -523,6 +550,9 @@ class ClCore(object):
                These values specify the *center* of the first voxel.
             q_max (numpy array length 3): Naximum q-space magnitudes in the 3d mesh.
                These values specify the *center* of the voxel.
+            a (clArray): device buffer, if available
+            R (3x3 array): Rotation matrix, to be applied to r vectors
+            add (bool): If True, add to device buffer a, else overwrite the buffer.
 
         Returns:
             An array of complex scattering amplitudes.  By default this is a normal
@@ -532,7 +562,21 @@ class ClCore(object):
         if not hasattr(self, 'phase_factor_mesh_cl'):
             self.phase_factor_mesh_cl = self.programs.phase_factor_mesh
             self.phase_factor_mesh_cl.set_scalar_arg_dtypes(
-                [None, None, None, self.int_t, self.int_t, None, None, None])
+                [None, None, None, self.int_t, self.int_t, None, None, None, None, None, self.int_t])
+
+        if add:
+            add = 1
+        else:
+            add = 0
+        if R is None:
+            R = np.eye(3)
+
+        if U is None:
+            U = np.zeros(3, dtype=self.real_t)
+        U = rotate(R, U)
+
+        R = self.vec16(R.T, dtype=self.real_t)
+        U = self.vec4(U, dtype=self.real_t)
 
         N = np.array(N, dtype=self.int_t)
         q_max = np.array(q_max, dtype=self.real_t)
@@ -565,7 +609,7 @@ class ClCore(object):
         self.phase_factor_mesh_cl(self.queue, (global_size,),
                                   (self.group_size,), r_dev.data, f_dev.data,
                                   a_dev.data, n_pixels, n_atoms, N, deltaQ,
-                                  q_min)
+                                  q_min, R, U, add)
         self.queue.finish()
 
         if a is None:
@@ -801,7 +845,7 @@ class ClCoreDerek(ClCore):
         """
 
         # TODO: why does this method exist?  It is not used anywhere.
-        if isinstance(array, cl.array.Array):
+        if isinstance(array, cl_array):
             return array
 
         return cl.array.to_device(queue, np.ascontiguousarray(array.astype(dtype)))

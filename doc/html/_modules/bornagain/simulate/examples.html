@@ -172,8 +172,11 @@
 <span class="kn">import</span> <span class="nn">bornagain.external</span>
 <span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="k">import</span> <span class="n">atoms</span>
 <span class="kn">from</span> <span class="nn">bornagain.target.crystal</span> <span class="k">import</span> <span class="n">CrystalStructure</span>
-<span class="kn">from</span> <span class="nn">bornagain.simulate.clcore</span> <span class="k">import</span> <span class="n">ClCore</span>
-
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">bornagain.simulate.clcore</span> <span class="k">import</span> <span class="n">ClCore</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;simulate.clcore cannot be imported, probably because pyopencl is not installed.&quot;</span><span class="p">)</span>
+    <span class="n">ClCore</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="n">lysozyme_pdb_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/pdb/2LYZ.pdb&#39;</span><span class="p">)</span>
 <span class="n">psi_pdb_file</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="s1">&#39;data/pdb/1jb0.pdb&#39;</span><span class="p">)</span>
@@ -481,14 +484,21 @@
 
   
 
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

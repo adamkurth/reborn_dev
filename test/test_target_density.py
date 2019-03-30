@@ -36,12 +36,14 @@ def test_crystal_density():
     cryst = crystal.CrystalStructure(psi_pdb_file)
     for d in [0.2, 0.3, 0.4, 0.5]:
 
-        dens = density.CrystalDensityMap(cryst, d, 1)
+        dens = density.CrystalDensityMap(cryst, d, 2)
         dat0 = dens.reshape(np.arange(0, dens.n_voxels)).astype(np.float)
         dat1 = dens.symmetry_transform(0, 1, dat0)
         dat2 = dens.symmetry_transform(1, 0, dat1)
 
         assert(np.allclose(dat0, dat2))
+
+    assert(np.max(dens.x_limits - 1.5) == 0)
 
 
 def test_transforms():

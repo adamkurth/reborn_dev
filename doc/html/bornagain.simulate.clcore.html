@@ -303,10 +303,15 @@ are useful here are np.float32 and np.complex64</li>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.test_rotate_vec">
-<code class="descname">test_rotate_vec</code><span class="sig-paren">(</span><em>R</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.test_rotate_vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.test_rotate_vec" title="Permalink to this definition">¶</a></dt>
+<code class="descname">test_rotate_vec</code><span class="sig-paren">(</span><em>rot</em>, <em>trans</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.test_rotate_vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.test_rotate_vec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rotate a single vector.  CPU arrays in, CPU array out. This is just for testing the consistency of memory
 allocation.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="bornagain.simulate.clcore.ClCore.test_simple_sum">
+<code class="descname">test_simple_sum</code><span class="sig-paren">(</span><em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.test_simple_sum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.test_simple_sum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.mod_squared_complex_to_real">
@@ -318,7 +323,7 @@ do this operation correctly on some computers.</p>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk_r">
-<code class="descname">phase_factor_qrf_chunk_r</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f=None</em>, <em>R=None</em>, <em>a=None</em>, <em>add=False</em>, <em>n_chunks=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_qrf_chunk_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk_r" title="Permalink to this definition">¶</a></dt>
+<code class="descname">phase_factor_qrf_chunk_r</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f=None</em>, <em>R=None</em>, <em>U=None</em>, <em>a=None</em>, <em>add=False</em>, <em>n_chunks=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_qrf_chunk_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_qrf_chunk_r" title="Permalink to this definition">¶</a></dt>
 <dd><p>This needs to be tested, made for really big atom-vectors (e.g. a virus or rhibosome)</p>
 <p>Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -354,7 +359,7 @@ do this operation correctly on some computers.</p>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.phase_factor_qrf">
-<code class="descname">phase_factor_qrf</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f=None</em>, <em>R=None</em>, <em>a=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_qrf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_qrf" title="Permalink to this definition">¶</a></dt>
+<code class="descname">phase_factor_qrf</code><span class="sig-paren">(</span><em>q</em>, <em>r</em>, <em>f=None</em>, <em>R=None</em>, <em>U=None</em>, <em>a=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_qrf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_qrf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -388,7 +393,7 @@ amplitudes.</li>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.phase_factor_pad">
-<code class="descname">phase_factor_pad</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>T</em>, <em>F</em>, <em>S</em>, <em>B</em>, <em>nF</em>, <em>nS</em>, <em>w</em>, <em>R=None</em>, <em>a=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_pad" title="Permalink to this definition">¶</a></dt>
+<code class="descname">phase_factor_pad</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>T</em>, <em>F</em>, <em>S</em>, <em>B</em>, <em>nF</em>, <em>nS</em>, <em>w</em>, <em>R=None</em>, <em>U=None</em>, <em>a=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_pad" title="Permalink to this definition">¶</a></dt>
 <dd><p>This should simulate detector panels.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -431,7 +436,7 @@ detector panel</li>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.phase_factor_mesh">
-<code class="descname">phase_factor_mesh</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>a=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_mesh" title="Permalink to this definition">¶</a></dt>
+<code class="descname">phase_factor_mesh</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>a=None</em>, <em>R=None</em>, <em>U=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute phase factors on a regular 3D mesh of q-space samples.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -446,6 +451,9 @@ dimensions</li>
 These values specify the <em>center</em> of the first voxel.</li>
 <li><strong>q_max</strong> (<em>numpy array length 3</em>) – Naximum q-space magnitudes in the 3d mesh.
 These values specify the <em>center</em> of the voxel.</li>
+<li><strong>a</strong> (<em>clArray</em>) – device buffer, if available</li>
+<li><strong>R</strong> (<em>3x3 array</em>) – Rotation matrix, to be applied to r vectors</li>
+<li><strong>add</strong> (<em>bool</em>) – If True, add to device buffer a, else overwrite the buffer.</li>
 </ul>
 </td>
 </tr>
@@ -840,14 +848,21 @@ available for running simulations.</p>
 
   
 
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

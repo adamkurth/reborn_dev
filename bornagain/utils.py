@@ -276,15 +276,18 @@ def rotation_about_axis(theta, u):
     https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python
     """
 
-    return np.array([[cos(theta) + u[0]**2 * (1 - cos(theta)),
-                      u[0] * u[1] * (1 - cos(theta)) - u[2] * sin(theta),
-                      u[0] * u[2] * (1 - cos(theta)) + u[1] * sin(theta)],
-                     [u[0] * u[1] * (1 - cos(theta)) + u[2] * sin(theta),
-                      cos(theta) + u[1]**2 * (1 - cos(theta)),
-                      u[1] * u[2] * (1 - cos(theta)) - u[0] * sin(theta)],
-                     [u[0] * u[2] * (1 - cos(theta)) - u[1] * sin(theta),
-                      u[1] * u[2] * (1 - cos(theta)) + u[0] * sin(theta),
-                      cos(theta) + u[2]**2 * (1 - cos(theta))]])
+    u = vec_norm(np.array(u))
+    ct = cos(theta)
+    st = sin(theta)
+    return np.array([[ct + u[0]**2 * (1 - ct),
+                      u[0] * u[1] * (1 - ct) - u[2] * st,
+                      u[0] * u[2] * (1 - ct) + u[1] * st],
+                     [u[0] * u[1] * (1 - ct) + u[2] * st,
+                      ct + u[1]**2 * (1 - ct),
+                      u[1] * u[2] * (1 - ct) - u[0] * st],
+                     [u[0] * u[2] * (1 - ct) - u[1] * st,
+                      u[1] * u[2] * (1 - ct) + u[0] * st,
+                      ct + u[2]**2 * (1 - ct)]])
 
 
 def random_beam_vector(div_fwhm):
