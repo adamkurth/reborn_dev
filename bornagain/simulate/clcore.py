@@ -559,7 +559,8 @@ class ClCore(object):
         else:
             return a_dev
 
-    def phase_factor_mesh(self, r, f, N, q_min, q_max, a=None, R=None, U=None, add=False):
+    def phase_factor_mesh(self, r, f, N=None, q_min=None, q_max=None, a=None, R=None, U=None, add=False,
+                          density_map=None):
 
         r"""
         Compute phase factors on a regular 3D mesh of q-space samples.
@@ -601,9 +602,14 @@ class ClCore(object):
         R = self.vec16(R.T, dtype=self.real_t)
         U = self.vec4(U, dtype=self.real_t)
 
-        N = np.array(N, dtype=self.int_t)
-        q_max = np.array(q_max, dtype=self.real_t)
-        q_min = np.array(q_min, dtype=self.real_t)
+        if density_map is None:
+            N = np.array(N, dtype=self.int_t)
+            q_max = np.array(q_max, dtype=self.real_t)
+            q_min = np.array(q_min, dtype=self.real_t)
+        else:
+            N = np.array(density_map.shape, dtype=self.int_t)
+            q_min = np.array(density_map.x_limits[:, 0], dtype=self.real_t)
+            q_max = np.array(density_map.x_limits[:, 1], dtype=self.real_t)
 
         if len(N.shape) == 0:
             N = np.ones(3, dtype=self.int_t) * N
@@ -640,7 +646,7 @@ class ClCore(object):
         else:
             return a_dev
 
-    def buffer_mesh_lookup(self, a_map, N, q_min, q_max, q, R=None, a=None):
+    def buffer_mesh_lookup(self, a_map, q, N=None, q_min=None, q_max=None, R=None, a=None, density_map=None):
 
         r"""
         This is supposed to lookup intensities from a 3d mesh of amplitudes.
@@ -669,9 +675,14 @@ class ClCore(object):
             R = np.eye(3)
         R = self.vec16(R.T, dtype=self.real_t)
 
-        N = np.array(N, dtype=self.int_t)
-        q_max = np.array(q_max, dtype=self.real_t)
-        q_min = np.array(q_min, dtype=self.real_t)
+        if density_map is None:
+            N = np.array(N, dtype=self.int_t)
+            q_max = np.array(q_max, dtype=self.real_t)
+            q_min = np.array(q_min, dtype=self.real_t)
+        else:
+            N = np.array(density_map.shape, dtype=self.int_t)
+            q_min = np.array(density_map.x_limits[:, 0], dtype=self.real_t)
+            q_max = np.array(density_map.x_limits[:, 1], dtype=self.real_t)
 
         if len(N.shape) == 0:
             N = (np.ones(3) * N).astype(self.int_t)

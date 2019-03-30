@@ -104,6 +104,10 @@ class CrystalDensityMap(object):
         return self.n_vecs * self.dx
 
     @property
+    def limits(self):
+        return self.x_limits
+
+    @property
     def x_limits(self):
         r"""
         Return a 3x2 array with the limits of the density map.  These limits correspond to the centers of the voxels.

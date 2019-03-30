@@ -80,6 +80,7 @@ clcore = ClCore()
 t = time()
 amps_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
 amps_mol_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
+amps_mol_interp_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
 amps_lat_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
 h_vecs_dev = clcore.to_device(unitcell.q2h(q_vecs))
 au_x_vecs_dev = clcore.to_device(au_x_coords, dtype=clcore.real_t)
@@ -89,12 +90,9 @@ oversampling = 4
 dens = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
 amps3d_dev = clcore.to_device(shape=dens.shape, dtype=clcore.complex_t)*0
 print('mesh', dens.shape)
-clcore.phase_factor_mesh(au_x_vecs_dev, au_f_dev, dens.shape, q_min=dens.x_limits[:, 0], q_max=dens.x_limits[:, 1],
-                         a=amps3d_dev)
+clcore.phase_factor_mesh(au_x_vecs_dev, au_f_dev, density_map=dens, a=amps3d_dev)
 print('done')
-
-clcore.buffer_mesh_lookup(amps3d_dev, dens.shape, q_min=dens.x_limits[:, 0], q_max=dens.x_limits[:, 1],
-                          q, R=None, a=None)
+clcore.buffer_mesh_lookup(amps3d_dev, h_vecs_dev, density_map=dens, R=None, a=amps_mol_interp_dev)
 t = time()
 for i in range(spacegroup.n_molecules):
     print('Symmetry partner %d' % (i,))

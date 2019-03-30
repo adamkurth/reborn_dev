@@ -185,7 +185,7 @@ def _clcore(double_precision=False):
     q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
 
     amps = core.phase_factor_mesh(r_vecs, f, n_mesh, q_min, q_max)
-    amps2 = core.buffer_mesh_lookup(amps, n_mesh, q_min, q_max, q)
+    amps2 = core.buffer_mesh_lookup(amps, q, n_mesh, q_min, q_max)
     assert(type(amps) is np.ndarray)
     assert(type(amps2) is np.ndarray)
 
@@ -196,7 +196,7 @@ def _clcore(double_precision=False):
     a_out = core.to_device(shape=pad.n_fs*pad.n_ss, dtype=core.complex_t)
 
     amps = core.phase_factor_mesh(r_vecs, f, n_mesh, q_min, q_max, a)
-    amps2 = core.buffer_mesh_lookup(a, n_mesh, q_min, q_max, q, rot, a_out)
+    amps2 = core.buffer_mesh_lookup(a, q, n_mesh, q_min, q_max, rot, a_out)
     assert(type(amps) is cl_array)
     assert(type(amps2) is cl_array)
 
