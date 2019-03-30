@@ -296,6 +296,28 @@ def _clcore(double_precision=False):
         assert (np.mean(np.abs(amps3 - amps2)) / np.mean(np.abs(amps2)) < tol)
         assert (np.mean(np.abs(amps3 - amps4)) / np.mean(np.abs(amps4)) < tol)
 
+    # Do rotation and translation on CPU
+    amps1 = core.phase_factor_pad(rotate(rot, r0) + trans, f, R=None, U=None, beam=beam, pad=pad)
+    # Rotation and translation on GPU
+    amps2 = core.phase_factor_pad(r0, f, R=rot, U=trans, beam=beam, pad=pad)
+    # Rotation on CPU, translation on GPU
+    amps3 = core.phase_factor_pad(rotate(rot, r0), f, R=None, U=trans, beam=beam, pad=pad)
+    # Rotation on GPU, translation on CPU
+    amps4 = core.phase_factor_pad(r0 + rotate(rot.T, trans), f, R=rot, U=None, beam=beam, pad=pad)
+
+    if double_precision:
+        tol = 1e-6
+        assert (np.mean(np.abs(amps1 - amps2)) / np.mean(np.abs(amps1)) < tol)
+        assert (np.mean(np.abs(amps1 - amps3)) / np.mean(np.abs(amps3)) < tol)
+        assert (np.mean(np.abs(amps3 - amps2)) / np.mean(np.abs(amps2)) < tol)
+        assert (np.mean(np.abs(amps3 - amps4)) / np.mean(np.abs(amps4)) < tol)
+    else:
+        tol = 1e-6
+        assert (np.mean(np.abs(amps1 - amps2)) / np.mean(np.abs(amps1)) < tol)
+        assert (np.mean(np.abs(amps1 - amps3)) / np.mean(np.abs(amps3)) < tol)
+        assert (np.mean(np.abs(amps3 - amps2)) / np.mean(np.abs(amps2)) < tol)
+        assert (np.mean(np.abs(amps3 - amps4)) / np.mean(np.abs(amps4)) < tol)
+
 
 @pytest.mark.cl
 def _test_rotations(double_precision=False):

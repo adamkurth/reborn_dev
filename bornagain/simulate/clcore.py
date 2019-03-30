@@ -458,7 +458,8 @@ class ClCore(object):
         else:
             return a_dev
 
-    def phase_factor_pad(self, r, f, T, F, S, B, nF, nS, w, R=None, U=None, a=None, add=False):
+    def phase_factor_pad(self, r, f=None, T=None, F=None, S=None, B=None, nF=None, nS=None, w=None, R=None, U=None, a=None,
+                         add=False, beam=None, pad=None):
 
         r"""
         This should simulate detector panels.
@@ -496,6 +497,10 @@ class ClCore(object):
                 [None, None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t, self.real_t,
                  None, None, None, None, self.int_t])
 
+        n_atoms = r.shape[0]
+        if f is None:
+            f = np.ones(n_atoms, dtype=self.complex_t)
+
         if R is None:
             R = np.eye(3)
 
@@ -508,18 +513,36 @@ class ClCore(object):
         else:
             add = 0
 
-        nF = self.int_t(nF)
-        nS = self.int_t(nS)
-        n_pixels = self.int_t(nF * nS)
-        n_atoms = self.int_t(r.shape[0])
-        r_dev = self.to_device(r, dtype=self.real_t)
-        f_dev = self.to_device(f, dtype=self.complex_t)
-        R = self.vec16(R.T, dtype=self.real_t)
-        T = self.vec4(T, dtype=self.real_t)
-        F = self.vec4(F, dtype=self.real_t)
-        S = self.vec4(S, dtype=self.real_t)
-        B = self.vec4(B, dtype=self.real_t)
-        U = self.vec4(U, dtype=self.real_t)
+        if beam is None and pad is None:
+            w = self.real_t(w)
+            nF = self.int_t(nF)
+            nS = self.int_t(nS)
+            n_pixels = self.int_t(nF * nS)
+            n_atoms = self.int_t(n_atoms)
+            r_dev = self.to_device(r, dtype=self.real_t)
+            f_dev = self.to_device(f, dtype=self.complex_t)
+            R = self.vec16(R.T, dtype=self.real_t)
+            T = self.vec4(T, dtype=self.real_t)
+            F = self.vec4(F, dtype=self.real_t)
+            S = self.vec4(S, dtype=self.real_t)
+            B = self.vec4(B, dtype=self.real_t)
+            U = self.vec4(U, dtype=self.real_t)
+        elif beam is not None and pad is not None:
+            w = self.real_t(beam.wavelength)
+            nF = self.int_t(pad.n_fs)
+            nS = self.int_t(pad.n_ss)
+            n_pixels = self.int_t(pad.n_pixels)
+            n_atoms = self.int_t(n_atoms)
+            r_dev = self.to_device(r, dtype=self.real_t)
+            f_dev = self.to_device(f, dtype=self.complex_t)
+            R = self.vec16(R.T, dtype=self.real_t)
+            T = self.vec4(pad.t_vec, dtype=self.real_t)
+            F = self.vec4(pad.fs_vec, dtype=self.real_t)
+            S = self.vec4(pad.ss_vec, dtype=self.real_t)
+            B = self.vec4(beam.beam_vec, dtype=self.real_t)
+            U = self.vec4(U, dtype=self.real_t)
+        else:
+            raise ValueError('Ether beam and pad must be provided, or provide all parameters separately')
 
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
