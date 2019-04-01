@@ -690,6 +690,9 @@ class ClCore(object):
         R = self.vec16(R.T, dtype=self.real_t)
         U = self.vec4(U, dtype=self.real_t)
 
+        print('R', R)
+        print('U', U)
+
         if density_map is None:
             N = np.array(N, dtype=self.int_t)
             q_max = np.array(q_max, dtype=self.real_t)
@@ -698,6 +701,8 @@ class ClCore(object):
             N = np.array(density_map.shape, dtype=self.int_t)
             q_min = np.array(density_map.limits[:, 0], dtype=self.real_t)
             q_max = np.array(density_map.limits[:, 1], dtype=self.real_t)
+
+        print('N, q_min, q_max', N, q_min, q_max)
 
         if len(N.shape) == 0:
             N = (np.ones(3) * N).astype(self.int_t)

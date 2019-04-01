@@ -4,6 +4,7 @@ import numpy as np
 
 from bornagain.target import crystal
 from bornagain import utils
+from bornagain.utils import vec_mag
 from scipy.stats import binned_statistic_dd
 from numba import jit
 
@@ -89,10 +90,10 @@ class CrystalDensityMap(object):
                                   Fourier space, there will be one sample between Bragg samples.  And so on for 3,4,...
         '''
 
-
         # Given desired resolution and unit cell, these are the number of voxels along along each edge of unit cell.
-        cshape = (2*np.ceil(np.array(1/(resolution*np.array(utils.vec_mag(cryst.unitcell.a_mat.T)))))-1).astype(np.int)
-
+        cshape = np.ceil((1/resolution) * (1/vec_mag(cryst.unitcell.a_mat.T)))
+        # cshape = (2*np.ceil(np.array(1/(resolution*np.array(utils.vec_mag(cryst.unitcell.a_mat.T)))))-1).astype(np.int)
+        print('cshape', cshape)
         # The number of cells along an edge must be a multple of the shortest translation.  E.g., if an operation
         # consists of a translation of 1/3 distance along the cell, we must have a multiple of 3.
         multiples = np.ones(3, dtype=np.int)
@@ -106,6 +107,7 @@ class CrystalDensityMap(object):
                 if comp > multiples[j]:
                     multiples[j] = comp
         multiples = np.max(multiples)*np.ones(3)
+        print('multiples', multiples)
         cshape = np.ceil(cshape / multiples) * multiples
 
         self.cryst = cryst  # :  crystal class object used to initiate the map
@@ -155,15 +157,15 @@ class CrystalDensityMap(object):
 
     @property
     def limits(self):
-        return self.x_limits
+        return self.x_limits.copy()
 
     @property
     def corner_min(self):
-        return self.limits[:, 0]
+        return self.limits[:, 0].copy().ravel()
 
     @property
     def corner_max(self):
-        return self.limits[:, 1]
+        return self.limits[:, 1].copy().ravel()
 
     @property
     def x_limits(self):
@@ -208,8 +210,8 @@ class CrystalDensityMap(object):
         h = self.n_vecs.copy()
         h = h / self.dx / self.shape
         for i in range(3):
-            f = np.where(h[:, i] > (self.cshape[i] / 2))
-            h[f, i] = h[f, i] - self.cshape[i]
+            f = np.where(h[:, i] > (self.shape[i] / 2))
+            h[f, i] = h[f, i] - self.shape[i]
         return h
 
     @property
@@ -407,6 +409,7 @@ class CrystalMeshTool(object):
     # x_vecs = None
     # r_vecs = None
     # h_vecs = None
+    cryst1 = None
 
     def __init__(self, cryst, resolution, oversampling):
 

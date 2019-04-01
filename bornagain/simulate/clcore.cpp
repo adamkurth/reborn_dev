@@ -386,12 +386,12 @@ kernel void buffer_mesh_lookup(
 
     // Trilinear interpolation formula specified in
     //     paulbourke.net/miscellaneous/interpolation
-    const int k0 = k*N.x*N.y;
-    const int j0 = j*N.x;
-    const int i0 = i;
-    const int k1 = (k+1)*N.x*N.y;
-    const int j1 = (j+1)*N.x;
-    const int i1 = i+1;
+    const int k0 = (k % N.z)*N.x*N.y;
+    const int j0 = (j % N.y)*N.x;
+    const int i0 = (i % N.x);
+    const int k1 = ((k+1) % N.z)*N.x*N.y;
+    const int j1 = ((j+1) % N.y)*N.x;
+    const int i1 = ((i+1) % N.x);
     const dsfloat x0 = i_f - floor(i_f);
     const dsfloat y0 = j_f - floor(j_f);
     const dsfloat z0 = k_f - floor(k_f);
@@ -400,23 +400,20 @@ kernel void buffer_mesh_lookup(
     const dsfloat z1 = 1.0f - z0;
     dsfloat2 a_sum = 0;
 
-    if (i >= 0 && i < N.x && j >= 0 && j < N.y && k >= 0 && k < N.z){
+//    if (i >= 0 && i < N.x && j >= 0 && j < N.y && k >= 0 && k < N.z){
 
-        a_sum = a_map[i0 + j0 + k0] * x1 * y1 * z1 +
+    a_sum = a_map[i0 + j0 + k0] * x1 * y1 * z1 +
+            a_map[i1 + j0 + k0] * x0 * y1 * z1 +
+            a_map[i0 + j1 + k0] * x1 * y0 * z1 +
+            a_map[i0 + j0 + k1] * x1 * y1 * z0 +
+            a_map[i1 + j0 + k1] * x0 * y1 * z0 +
+            a_map[i0 + j1 + k1] * x1 * y0 * z0 +
+            a_map[i1 + j1 + k0] * x0 * y0 * z1 +
+            a_map[i1 + j1 + k1] * x0 * y0 * z0;
 
-                    a_map[i1 + j0 + k0] * x0 * y1 * z1 +
-                    a_map[i0 + j1 + k0] * x1 * y0 * z1 +
-                    a_map[i0 + j0 + k1] * x1 * y1 * z0 +
-
-                    a_map[i1 + j0 + k1] * x0 * y1 * z0 +
-                    a_map[i0 + j1 + k1] * x1 * y0 * z0 +
-                    a_map[i1 + j1 + k0] * x0 * y0 * z1 +
-
-                    a_map[i1 + j1 + k1] * x0 * y0 * z0   ;
-
-    } else {
-        a_sum = (dsfloat2)(0.0f,0.0f);
-    }
+//    } else {
+//        a_sum = (dsfloat2)(0.0f,0.0f);
+//    }
 
         // Check that this pixel index is not out of bounds
     if (gi < n_pixels){

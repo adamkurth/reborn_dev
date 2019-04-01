@@ -119,6 +119,10 @@ class UnitCell(object):
     def cs_vec(self):
         return self.a_mat[:, 2].copy()
 
+    def __str__(self):
+
+        return 'a=%g b=%g c=%g, alpha=%g beta=%g gamma=%g' % (self.a, self.b, self.c, self.alpha, self.beta, self.gamma)
+
 
 class SpaceGroup(object):
     r"""
