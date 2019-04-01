@@ -653,8 +653,11 @@ class CrystalMeshTool(object):
 
         This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
         should be in the crystal basis, and the densities must be real (because the scipy function that we use does
-        not allow for complex numbers...).  This is done in a lazy way - the density samples are placed in the nearest
-        voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy...
+        not allow for complex numbers...).  
+        There are currently two modes - one mode, called 'gaussian', places Guassian atoms of a fixed width and sums them
+        to form the density map. The other mode, called 'nearest', just placed the atom Z values in the nearest
+        voxel. Both of these modes will need to be replaced with something more realistic later, probably based on the 
+        Cromer-Mann coefficients.
 
         Args:
             x (numpy array):  An nx3 array of position vectors
