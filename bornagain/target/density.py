@@ -8,6 +8,56 @@ from scipy.stats import binned_statistic_dd
 from numba import jit
 
 
+class DensityMap(object):
+
+    shape = None  # : Shape of the array, numpy style
+    corner_min = None  # : 3-vector with coordinates of the center of the voxel with smaller values
+    corner_max = None  # : 3-vector with coordinates of the center of the voxel with larger values
+    n_voxels = None  # : Total number of voxels
+    dx = None  # : 3-vecto with increments beteen voxels
+    strides = None  # : Array strides
+
+    def __init__(self, shape, corner_min, corner_max):
+        r"""
+
+        Args:
+            shape: shape of the 3d map
+            corner_min:  a 3-vector with the coordinate of the center of the corner pixel
+            corner_max:  opposit corner to corner_min
+        """
+
+        self.shape = shape
+        self.corner_min = corner_min
+        self.corner_max = corner_max
+        self.limits = np.zeros((3, 2))
+        self.limits[:, 0] = corner_min
+        self.limits[:, 1] = corner_max
+        self.n_voxels = int(np.prod(shape.ravel()))
+        self.dx = 1.0 / shape
+        self.strides = np.array([self.shape[0]*self.shape[1], self.shape[0], 1])
+
+    @property
+    def n_vecs(self):
+
+        r"""
+
+        Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:
+
+        [[0,0,0],[0,0,1],[0,0,2], ... ,[N-1,N-1,N-1]]
+
+        Returns: numpy array
+
+        """
+
+        shp = self.shape
+        ind = np.arange(0, self.n_voxels)
+        n_vecs = np.zeros([self.n_voxels, 3])
+        n_vecs[:, 0] = np.floor(ind / (shp[1]*shp[2]))
+        n_vecs[:, 1] = np.floor(ind / shp[2]) % shp[1]
+        n_vecs[:, 2] = ind % shp[2]
+        return n_vecs
+
+
 class CrystalDensityMap(object):
 
     r'''
@@ -64,7 +114,7 @@ class CrystalDensityMap(object):
         self.cshape = cshape.astype(int)  # :  Number of samples along edge of unit cell
         self.shape = (cshape * self.oversampling).astype(int)  # :  Number of samples along edge of whole map (includes oversampling)
         self.n_voxels = np.int(np.product(self.shape))  # :  Linear length of map (=N^3)
-        self.strides = np.array([self.shape[0]*self.shape[1], self.shape[0], 1])  # :  The stride vector (mostly for internal use)
+        self.strides = np.array([self.shape[2]*self.shape[1], self.shape[2], 1])  # :  The stride vector (mostly for internal use)
 
     @property
     def n_vecs(self):
@@ -108,6 +158,14 @@ class CrystalDensityMap(object):
         return self.x_limits
 
     @property
+    def corner_min(self):
+        return self.limits[:, 0]
+
+    @property
+    def corner_max(self):
+        return self.limits[:, 1]
+
+    @property
     def x_limits(self):
         r"""
         Return a 3x2 array with the limits of the density map.  These limits correspond to the centers of the voxels.
@@ -119,7 +177,6 @@ class CrystalDensityMap(object):
         shp = self.shape
         dx = self.dx
         return np.array([[0, dx[0]*(shp[0]-1)], [0, dx[1]*(shp[1]-1)], [0, dx[2]*(shp[2]-1)]])
-
 
     @property
     def r_vecs(self):
@@ -148,11 +205,27 @@ class CrystalDensityMap(object):
 
         """
 
-        h = self.n_vecs
+        h = self.n_vecs.copy()
         h = h / self.dx / self.shape
-        f = np.where(h.ravel() > (self.cshape / 2))
-        h.flat[f] = h.flat[f] - self.cshape
+        for i in range(3):
+            f = np.where(h[:, i] > (self.cshape[i] / 2))
+            h[f, i] = h[f, i] - self.cshape[i]
         return h
+
+    @property
+    def h_limits(self):
+
+        limits = np.zeros((3, 2))
+        limits[:, 0] = -((self.shape - np.floor(self.shape / 2))-1)/self.dx/self.shape
+        limits[:, 1] = np.floor(self.shape / 2)/self.dx/self.shape
+        return limits
+
+    @property
+    def h_density_map(self):
+
+        hlim = self.h_limits
+        dens = DensityMap(self.shape, hlim[:, 0], hlim[:, 1])
+        return dens
 
     @property
     def q_vecs(self):
@@ -268,8 +341,10 @@ class CrystalDensityMap(object):
         voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy...
 
         Args:
-            x (numpy array):  An nx3 array of position vectors
-            f (numpy array):  An n-length array of densities (must be real)
+            atom_x_vecs (numpy array):  An nx3 array of position vectors
+            atom_fs (numpy array):  An n-length array of densities (must be real)
+            mode (str): Either 'gaussian' or 'nearest'
+            fixed_atom_sigma (float): Standard deviation of
 
         Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
 
@@ -288,7 +363,7 @@ class CrystalDensityMap(object):
         elif mode == 'nearest':
             mm = [0, self.oversampling]
             rng = [mm, mm, mm]
-            a, _, _ = binned_statistic_dd(x, f, statistic='sum', bins=[self.shape] * 3, range=rng)
+            a, _, _ = binned_statistic_dd(atom_x_vecs, atom_fs, statistic='sum', bins=[self.shape] * 3, range=rng)
             return a
 
     def place_intensities_in_map(self, h, f):
@@ -311,8 +386,6 @@ class CrystalDensityMap(object):
         a, _, _ = binned_statistic_dd(h, f, statistic='mean', bins=[self.shape] * 3, range=rng)
 
         return a
-
-
 
 
 class CrystalMeshTool(object):
@@ -601,7 +674,7 @@ class CrystalMeshTool(object):
         elif mode == 'nearest':
             mm = [0, self.s]
             rng = [mm, mm, mm]
-            a, _, _ = binned_statistic_dd(x, f, statistic='sum', bins=[self.N] * 3, range=rng)
+            a, _, _ = binned_statistic_dd(atom_x_vecs, atom_fs, statistic='sum', bins=[self.N] * 3, range=rng)
             return a
 
     def place_intensities_in_map(self, h, f):
@@ -672,14 +745,14 @@ except ImportError:
 def trilinear_interpolation_fortran(densities, vectors, limits, out):
 
     float_t = np.float64
-    assert(densities.dtype == float_t)
-    assert(vectors.dtype == float_t)
-    assert(limits.dtype == float_t)
-    assert(out.dtype == float_t)
-    assert(densities.flags.c_contiguous)
-    assert(vectors.flags.c_contiguous)
-    assert(limits.flags.c_contiguous)
-    assert(out.flags.c_contiguous)
+    assert densities.dtype == float_t
+    assert vectors.dtype == float_t
+    assert limits.dtype == float_t
+    assert out.dtype == float_t
+    assert densities.flags.c_contiguous
+    assert vectors.flags.c_contiguous
+    assert limits.flags.c_contiguous
+    assert out.flags.c_contiguous
     af = np.asfortranarray
     density_f.trilinear_interpolation(af(densities.T), af(vectors.T), af(limits.T), af(out.T))
 
@@ -724,9 +797,9 @@ def trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out
         k_f = float(vectors[ii, 2] - limits[2, 0]) / dz
 
         # Integer coordinates
-        i = int(np.floor(i_f))
-        j = int(np.floor(j_f))
-        k = int(np.floor(k_f))
+        i = int(np.floor(i_f)) % nx
+        j = int(np.floor(j_f)) % ny
+        k = int(np.floor(k_f)) % nz
 
         # Trilinear interpolation formula specified in e.g. paulbourke.net/miscellaneous/interpolation
         k0 = k
@@ -741,17 +814,17 @@ def trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out
         x1 = 1.0 - x0
         y1 = 1.0 - y0
         z1 = 1.0 - z0
-        if i >= 0 and i < nx and j >= 0 and j < ny and k >= 0 and k < nz:
-            out[ii] = densities[i0, j0, k0] * x1 * y1 * z1 + \
-                     densities[i1, j0, k0] * x0 * y1 * z1 + \
-                     densities[i0, j1, k0] * x1 * y0 * z1 + \
-                     densities[i0, j0, k1] * x1 * y1 * z0 + \
-                     densities[i1, j0, k1] * x0 * y1 * z0 + \
-                     densities[i0, j1, k1] * x1 * y0 * z0 + \
-                     densities[i1, j1, k0] * x0 * y0 * z1 + \
-                     densities[i1, j1, k1] * x0 * y0 * z0
-        else:
-            out[ii] = 0
+        # if i >= 0 and i < nx and j >= 0 and j < ny and k >= 0 and k < nz:
+        out[ii] = densities[i0, j0, k0] * x1 * y1 * z1 + \
+                 densities[i1, j0, k0] * x0 * y1 * z1 + \
+                 densities[i0, j1, k0] * x1 * y0 * z1 + \
+                 densities[i0, j0, k1] * x1 * y1 * z0 + \
+                 densities[i1, j0, k1] * x0 * y1 * z0 + \
+                 densities[i0, j1, k1] * x1 * y0 * z0 + \
+                 densities[i1, j1, k0] * x0 * y0 * z1 + \
+                 densities[i1, j1, k1] * x0 * y0 * z0
+        # else:
+        #     out[ii] = 0
 
     return out
 
@@ -759,16 +832,16 @@ def trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out
 def trilinear_insertion(densities, weights, vectors, vals, limits):
 
     float_t = np.float64
-    assert(densities.dtype == float_t)
-    assert(weights.dtype == float_t)
-    assert(vectors.dtype == float_t)
-    assert(limits.dtype == float_t)
-    assert(vals.dtype == float_t)
-    assert(densities.flags.c_contiguous)
-    assert(weights.flags.c_contiguous)
-    assert(vectors.flags.c_contiguous)
-    assert(vals.flags.c_contiguous)
-    assert(limits.flags.c_contiguous)
+    assert densities.dtype == float_t
+    assert weights.dtype == float_t
+    assert vectors.dtype == float_t
+    assert limits.dtype == float_t
+    assert vals.dtype == float_t
+    assert densities.flags.c_contiguous
+    assert weights.flags.c_contiguous
+    assert vectors.flags.c_contiguous
+    assert vals.flags.c_contiguous
+    assert limits.flags.c_contiguous
     vals = np.asfortranarray(vals)
     limits = np.asfortranarray(limits)
     af = np.asfortranarray

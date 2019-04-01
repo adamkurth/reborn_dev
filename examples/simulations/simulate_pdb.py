@@ -291,8 +291,7 @@ if 1:
         t = time.time()
         clcore.phase_factor_mesh(r, f, N, qmin, qmax, a=a_map_dev)
         tf = time.time() - t
-        print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' %
-              (tf * 1e3, n_atoms, n_pixels))
+        print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' % (tf * 1e3, n_atoms, n_pixels))
 
     print("Interpolate patterns from GPU lookup table")
     print("Amplitudes passed as GPU array")

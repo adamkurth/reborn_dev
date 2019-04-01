@@ -196,7 +196,7 @@ def _clcore(double_precision=False):
     a_out = core.to_device(shape=pad.n_fs*pad.n_ss, dtype=core.complex_t)
 
     amps = core.phase_factor_mesh(r_vecs, f, n_mesh, q_min, q_max, a)
-    amps2 = core.buffer_mesh_lookup(a, q, n_mesh, q_min, q_max, rot, a_out)
+    amps2 = core.buffer_mesh_lookup(a, q, n_mesh, q_min, q_max, R=rot, a=a_out)
     assert(type(amps) is cl_array)
     assert(type(amps2) is cl_array)
 

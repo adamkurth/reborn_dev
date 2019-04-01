@@ -24,7 +24,7 @@ def test_crystal_density():
     assert(np.allclose(dens.x_vecs[11, :], np.array([0., 0.33333333, 0.2])))
 
     cryst = crystal.CrystalStructure(lysozyme_pdb_file)
-    for d in [0.2, 0.3, 0.4, 0.5]:
+    for d in np.array([5, 10])*1e-10:
 
         dens = density.CrystalDensityMap(cryst, d, 1)
         dat0 = dens.reshape(np.arange(0, dens.n_voxels)).astype(np.float)
@@ -34,7 +34,7 @@ def test_crystal_density():
         assert(np.allclose(dat0, dat2))
 
     cryst = crystal.CrystalStructure(psi_pdb_file)
-    for d in [0.2, 0.3, 0.4, 0.5]:
+    for d in np.array([5, 10])*1e-10:
 
         dens = density.CrystalDensityMap(cryst, d, 2)
         dat0 = dens.reshape(np.arange(0, dens.n_voxels)).astype(np.float)
@@ -42,8 +42,6 @@ def test_crystal_density():
         dat2 = dens.symmetry_transform(1, 0, dat1)
 
         assert(np.allclose(dat0, dat2))
-
-    assert(np.max(dens.x_limits - 1.5) == 0)
 
 
 def test_transforms():
@@ -78,8 +76,9 @@ def test_interpolations():
     xyz = np.ones((nx, 3), dtype=float_t)
     xyz[:, 0] = np.arange(0, nx)
     dens = density.trilinear_interpolation(dens, xyz, lims)
+    print('dens', dens)
     assert(np.max(np.abs(dens)) > 0)
-    assert(np.max(np.abs(dens[1:-1] - 1)) < 1e-6)
+    assert(np.max(np.abs(dens[:] - 1)) < 1e-6)
 
     float_t = np.float64
     nx, ny, nz = 6, 7, 8

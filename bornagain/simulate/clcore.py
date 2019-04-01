@@ -608,8 +608,8 @@ class ClCore(object):
             q_min = np.array(q_min, dtype=self.real_t)
         else:
             N = np.array(density_map.shape, dtype=self.int_t)
-            q_min = np.array(density_map.x_limits[:, 0], dtype=self.real_t)
-            q_max = np.array(density_map.x_limits[:, 1], dtype=self.real_t)
+            q_min = np.array(density_map.limits[:, 0], dtype=self.real_t)
+            q_max = np.array(density_map.limits[:, 1], dtype=self.real_t)
 
         if len(N.shape) == 0:
             N = np.ones(3, dtype=self.int_t) * N
@@ -646,7 +646,7 @@ class ClCore(object):
         else:
             return a_dev
 
-    def buffer_mesh_lookup(self, a_map, q, N=None, q_min=None, q_max=None, R=None, a=None, density_map=None):
+    def buffer_mesh_lookup(self, a_map, q, N=None, q_min=None, q_max=None, R=None, U=None, a=None, density_map=None, add=False):
 
         r"""
         This is supposed to lookup intensities from a 3d mesh of amplitudes.
@@ -669,11 +669,26 @@ class ClCore(object):
 
         if not hasattr(self, 'buffer_mesh_lookup_cl'):
             self.buffer_mesh_lookup_cl = self.programs.buffer_mesh_lookup
-            self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, None, None, None, None])
+            self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, None, None, None, None,
+                                                              None, self.int_t, self.int_t])
+
+        if add is True:
+            add = self.int_t(1)
+        else:
+            add = self.int_t(0)
 
         if R is None:
             R = np.eye(3)
+
+        if U is None:
+            do_translate = self.int_t(0)
+            U = np.zeros(3, dtype=self.real_t)
+        else:
+            do_translate = self.int_t(1)
+            U = rotate(R.T, U)
+
         R = self.vec16(R.T, dtype=self.real_t)
+        U = self.vec4(U, dtype=self.real_t)
 
         if density_map is None:
             N = np.array(N, dtype=self.int_t)
@@ -681,8 +696,8 @@ class ClCore(object):
             q_min = np.array(q_min, dtype=self.real_t)
         else:
             N = np.array(density_map.shape, dtype=self.int_t)
-            q_min = np.array(density_map.x_limits[:, 0], dtype=self.real_t)
-            q_max = np.array(density_map.x_limits[:, 1], dtype=self.real_t)
+            q_min = np.array(density_map.limits[:, 0], dtype=self.real_t)
+            q_max = np.array(density_map.limits[:, 1], dtype=self.real_t)
 
         if len(N.shape) == 0:
             N = (np.ones(3) * N).astype(self.int_t)
@@ -700,14 +715,14 @@ class ClCore(object):
         N = self.vec4(N, dtype=self.int_t)
         deltaQ = self.vec4(deltaQ, dtype=self.real_t)
         q_min = self.vec4(q_min, dtype=self.real_t)
-        a_out_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
+        a_out_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels,))
 
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
                              * self.group_size)
 
         self.buffer_mesh_lookup_cl(self.queue, (global_size,), (self.group_size,),
                                    a_map_dev.data, q_dev.data, a_out_dev.data,
-                                   n_pixels, N, deltaQ, q_min, R)
+                                   n_pixels, N, deltaQ, q_min, R, U, do_translate, add)
         self.queue.finish()
 
         if a is None:

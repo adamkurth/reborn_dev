@@ -363,7 +363,10 @@ kernel void buffer_mesh_lookup(
     int4 N,                  // See phase_factor_mesh
     dsfloat4 deltaQ,         // See phase_factor_mesh
     dsfloat4 q_min,          // See phase_factor_mesh
-    const dsfloat16 R        // Rotation matrix
+    const dsfloat16 R,       // Rotation matrix
+    const dsfloat4 U,
+    int do_translate,
+    int add
 ){
 
     const int gi = get_global_id(0);
@@ -395,10 +398,11 @@ kernel void buffer_mesh_lookup(
     const dsfloat x1 = 1.0f - x0;
     const dsfloat y1 = 1.0f - y0;
     const dsfloat z1 = 1.0f - z0;
+    dsfloat2 a_sum = 0;
 
     if (i >= 0 && i < N.x && j >= 0 && j < N.y && k >= 0 && k < N.z){
 
-        a_out[gi] = a_map[i0 + j0 + k0] * x1 * y1 * z1 +
+        a_sum = a_map[i0 + j0 + k0] * x1 * y1 * z1 +
 
                     a_map[i1 + j0 + k0] * x0 * y1 * z1 +
                     a_map[i0 + j1 + k0] * x1 * y0 * z1 +
@@ -411,7 +415,16 @@ kernel void buffer_mesh_lookup(
                     a_map[i1 + j1 + k1] * x0 * y0 * z0   ;
 
     } else {
-        a_out[gi] = (dsfloat2)(0.0f,0.0f);
+        a_sum = (dsfloat2)(0.0f,0.0f);
+    }
+
+        // Check that this pixel index is not out of bounds
+    if (gi < n_pixels){
+        if ( add == 1 ){
+            a_out[gi] += a_sum;
+        } else {
+            a_out[gi] = a_sum;
+        }
     }
 
 }

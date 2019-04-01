@@ -13,7 +13,7 @@ from bornagain.external.pyqtgraph.extras import keep_open
 
 
 # Load up the pdb file for PSI
-cryst = crystal.CrystalStructure(psi_pdb_file)
+cryst = crystal.CrystalStructure(lysozyme_pdb_file)
 spacegroup = cryst.spacegroup
 unitcell = cryst.unitcell
 
@@ -43,8 +43,8 @@ max_size = 41  # Make sure we have an odd value... for making hexagonal prisms
 lats = [crystal.FiniteLattice(max_size=max_size, unitcell=unitcell) for i in range(spacegroup.n_molecules)]
 
 # Construct a finite lattice in the form of a hexagonal prism
-width = 2
-length = 3
+width = 1
+length = 1
 for i in range(spacegroup.n_molecules):
     lat = lats[i]
     com = mol_x_coms[i]
@@ -72,36 +72,45 @@ if viewcrystal:
     scat.add_rgb_axis(length=100e-10)
     scat.show()
 
-
+t = time()
 beam = source.Beam(wavelength=3e-10)
-pad = detector.PADGeometry(pixel_size=100e-6, distance=1.0, n_pixels=1000)
+pad = detector.PADGeometry(pixel_size=200e-6, distance=0.2, n_pixels=300)
 q_vecs = pad.q_vecs(beam=beam)
 clcore = ClCore()
+print(clcore.context.devices)
 t = time()
 amps_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
 amps_mol_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
 amps_mol_interp_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
 amps_lat_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
-h_vecs_dev = clcore.to_device(unitcell.q2h(q_vecs))
+h_vecs = unitcell.q2h(q_vecs)
+print(np.max(h_vecs))
+h_vecs_dev = clcore.to_device(h_vecs, dtype=clcore.real_t)
 au_x_vecs_dev = clcore.to_device(au_x_coords, dtype=clcore.real_t)
 au_f_dev = clcore.to_device(shape=(cryst.molecule.n_atoms,), dtype=clcore.real_t)*0 + 1
-resolution = 2*np.pi/np.max(pad.q_mags(beam=beam))
-oversampling = 4
+resolution = 0.8/np.max(pad.q_mags(beam=beam))
+oversampling = 1
 dens = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
+dens_h = dens.h_density_map
+print('res',resolution)
+print('hlims', dens_h.limits)
+print(h_vecs)
 amps3d_dev = clcore.to_device(shape=dens.shape, dtype=clcore.complex_t)*0
-print('mesh', dens.shape)
-clcore.phase_factor_mesh(au_x_vecs_dev, au_f_dev, density_map=dens, a=amps3d_dev)
-print('done')
-clcore.buffer_mesh_lookup(amps3d_dev, h_vecs_dev, density_map=dens, R=None, a=amps_mol_interp_dev)
-t = time()
-for i in range(spacegroup.n_molecules):
+clcore.phase_factor_mesh(au_x_vecs_dev, au_f_dev, density_map=dens_h, a=amps3d_dev)
+for i in range(1):#spacegroup.n_molecules):
     print('Symmetry partner %d' % (i,))
     mol_x_vecs = spacegroup.apply_symmetry_operation(i, au_x_coords)
     clcore.phase_factor_qrf(h_vecs_dev, mol_x_vecs, a=amps_mol_dev, add=False)
     clcore.phase_factor_qrf(h_vecs_dev, lats[i].occupied_x_coordinates, a=amps_lat_dev, add=False)
-    amps_dev += amps_mol_dev * amps_lat_dev
-intensities = pad.reshape(np.abs(amps_dev.get())**2)
-print('GPU simulation: %g seconds' % (time()-t,))
+    RR = spacegroup.sym_rotations[i]
+    TT = spacegroup.sym_translations[i]
+    clcore.buffer_mesh_lookup(amps3d_dev, h_vecs_dev, density_map=dens_h, R=None, U=None, a=amps_mol_interp_dev, add=False)
+    # amps_dev += amps_mol_interp_dev #* amps_lat_dev
 
-pg.image(intensities * pad.beamstop_mask(beam=beam, min_angle=0.0001))
+intensities1 = pad.reshape(np.abs(amps_mol_interp_dev.get())**2)
+intensities2 = pad.reshape(np.abs(amps_mol_dev.get())**2)
+intensities = np.concatenate([intensities1, intensities2])
+print('GPU simulation: %g seconds' % (time()-t,))
+pg.image(intensities)
+
 keep_open()
