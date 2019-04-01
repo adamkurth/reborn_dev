@@ -201,7 +201,7 @@ class CrystalStructure(object):
     crystal_size_fwhm = 0.0
     mosaic_domain_size = 0.5e-6
     mosaic_domain_size_fwhm = 0.0
-    cryst1 = None
+    cryst1 = ""
 
 
     def __init__(self, pdbFilePath=None):
