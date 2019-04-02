@@ -37,17 +37,31 @@ def test_rotations_and_broadcasting():
 
 def test_fortranarray():
 
-    a = np.zeros((10, 10))
-    b = a
-    c = np.asfortranarray(a)
-    assert(a.data == b.data)
-    assert(a.data == c.data)
-    assert(b.data == c.data)
-    # a[0, 0] = 1
-    # assert(a.data == b.data)
-    # assert(a.data == c.data)  # Fails. Why?
-    # assert(b.data == c.data)
-    # c[0, 0] = 1
-    # assert(a.data == b.data)
-    # assert(a.data == c.data)  # Fails. Why?
-    # assert(b.data == c.data)
+    c = np.arange(200).reshape(10, 20).copy()
+    f = np.asfortranarray(c)
+    c_original = c               # We need to keep track of the original arrays
+    f_original = f
+    c_flat = c.reshape(200)
+    f_flat = f.reshape(200)
+
+    assert c.data != c_flat.data
+    assert f.data != f_flat.data
+    assert c.data == f.data      # ndarray.data is: "Python buffer object pointing to the start of the array’s data."
+    assert c_flat.data == f_flat.data
+    assert c.shape[0] == 10      # They are still the same shape
+    assert f.shape[0] == 10
+    assert c.flags.c_contiguous  # Yet one is "c-contiguous" while the other is "f-contiguous"
+    assert f.flags.f_contiguous  # This seems impossible to me.  How can c and f have the same shape and same data
+                                 # without both of them being either c *or* f contiguous?
+    assert c_flat[21] == 21      # Ravel makes the ND array into a 1D array, may or may not copy memory buffer.
+    assert f_flat[21] == 21
+    assert c_flat.data == f_flat.data
+    assert c.data != c_flat.data
+    assert f.data != f_flat.data
+    assert c[0, 1] == 1
+    c[0, 1] = 0                  # Now we modify the original array c
+    assert c.flags.c_contiguous  # Still f/c contiguous as before
+    assert f.flags.f_contiguous
+    assert c.data != f.data      # But they no longer share the same memory.  The operation on c created a new array.
+    assert c.data == c_original.data
+    assert f.data == f_original.data
