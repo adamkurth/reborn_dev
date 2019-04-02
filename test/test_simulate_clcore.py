@@ -341,7 +341,7 @@ def _test_rotations(double_precision=False):
     vec3 = utils.rotate(rot, vec1) + trans
 
     # Rotation on gpu and rotation with utils.rotate should do the same thing
-    assert(np.max(np.abs(vec2-vec3)) <= 1e-6)
+    assert np.max(np.abs(vec2-vec3)) <= 1e-6
 
     vec1 = np.array([1, 2, 0], dtype=core.real_t)
     vec2 = core.test_rotate_vec(rot, trans, vec1)
@@ -363,8 +363,8 @@ def _test_rotations(double_precision=False):
     vec_pred = np.array([0, -1.0, 0])
 
     # Check that results are as expected
-    assert(np.max(np.abs(vec2 - vec3)) < 1e-6)
-    assert (np.max(np.abs(vec2 - vec_pred)) < 1e-6)
+    assert np.max(np.abs(vec2 - vec3)) < 1e-6
+    assert np.max(np.abs(vec2 - vec_pred)) < 1e-6
 
 
 def _test_ridiculous_sum(double_precision=False):
@@ -381,8 +381,6 @@ def _test_ridiculous_sum(double_precision=False):
         for i in range(0, n):
             b += a[i]
         c = core.test_simple_sum(a)
-        # print('n, b,c,b-c', n, b, c, np.abs(b-c))
-        # print('%d, %010f' % (np.abs(b-c),))
         if double_precision:
             assert(np.abs(b - c) < 1e-12)
         else:

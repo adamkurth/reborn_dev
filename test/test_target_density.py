@@ -20,8 +20,8 @@ def test_crystal_density():
     cryst.set_cell(1e-9, 2e-9, 4e-9, np.pi/2, np.pi/2, np.pi/2)
     cryst.set_spacegroup(hall_number=1)
     dens = density.CrystalDensityMap(cryst, 2e-9, 2)
-    assert (np.sum(np.abs(dens.n_vecs[10, :] - np.array([0, 1, 0]))) < 1e-8)
-    assert(np.allclose(dens.x_vecs[11, :], np.array([0., 0.33333333, 0.2])))
+    assert np.sum(np.abs(dens.n_vecs[8, :] - np.array([1, 0, 0]))) < 1e-8
+    assert np.allclose(dens.x_vecs[9, :], np.array([1., 0., 0.5]))
 
     cryst = crystal.CrystalStructure(lysozyme_pdb_file)
     for d in np.array([5, 10])*1e-10:
@@ -31,7 +31,7 @@ def test_crystal_density():
         dat1 = dens.symmetry_transform(0, 1, dat0)
         dat2 = dens.symmetry_transform(1, 0, dat1)
 
-        assert(np.allclose(dat0, dat2))
+        assert np.allclose(dat0, dat2)
 
     cryst = crystal.CrystalStructure(psi_pdb_file)
     for d in np.array([5, 10])*1e-10:
@@ -41,7 +41,7 @@ def test_crystal_density():
         dat1 = dens.symmetry_transform(0, 1, dat0)
         dat2 = dens.symmetry_transform(1, 0, dat1)
 
-        assert(np.allclose(dat0, dat2))
+        assert np.allclose(dat0, dat2)
 
 
 def test_transforms():
@@ -57,7 +57,7 @@ def test_transforms():
         dat1 = mt.symmetry_transform(0, 1, dat0)
         dat2 = mt.symmetry_transform(1, 0, dat1)
 
-        assert(np.allclose(dat0, dat2))
+        assert np.allclose(dat0, dat2)
 
 
 def func(vecs):
@@ -76,9 +76,8 @@ def test_interpolations():
     xyz = np.ones((nx, 3), dtype=float_t)
     xyz[:, 0] = np.arange(0, nx)
     dens = density.trilinear_interpolation(dens, xyz, lims)
-    print('dens', dens)
-    assert(np.max(np.abs(dens)) > 0)
-    assert(np.max(np.abs(dens[:] - 1)) < 1e-6)
+    assert np.max(np.abs(dens)) > 0
+    assert np.max(np.abs(dens[:] - 1)) < 1e-6
 
     float_t = np.float64
     nx, ny, nz = 6, 7, 8
@@ -91,9 +90,9 @@ def test_interpolations():
     dens1 = func(xyz)
     dens2 = np.zeros_like(dens1)
     density.trilinear_interpolation(dens, xyz, lims, dens2)
-    assert(np.max(np.abs(dens1)) > 0)
-    assert(np.max(np.abs(dens2)) > 0)
-    assert(np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2)  # Interpolations only good to the 1% level.  Why?
+    assert np.max(np.abs(dens1)) > 0
+    assert np.max(np.abs(dens2)) > 0
+    assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2  # Interpolations only good to the 1% level.  Why?
 
 
 def test_insertions():
@@ -109,8 +108,8 @@ def test_insertions():
     xyz = np.array([[2, 3, 4]], dtype=float_t)
     vals = func(xyz)
     density.trilinear_insertion(densities, counts, xyz, vals, lims)
-    assert(np.max(np.abs(densities)) > 0)
-    assert((np.abs((vals - densities[2, 3, 4]) / vals)) < 1e-8)
+    assert np.max(np.abs(densities)) > 0
+    assert (np.abs((vals - densities[2, 3, 4]) / vals)) < 1e-8
 
     float_t = np.float64
     nx, ny, nz = 6, 7, 8
@@ -120,8 +119,8 @@ def test_insertions():
     xyz = np.array([[2.5, 3.5, 4.5]], dtype=float_t)
     vals = func(xyz)
     density.trilinear_insertion(densities, counts, xyz, vals, lims)
-    assert(np.max(np.abs(densities)) > 0)
-    assert((np.abs((vals - densities[2, 3, 4]/counts[2, 3, 4]) / vals)) < 1e-8)
+    assert np.max(np.abs(densities)) > 0
+    assert (np.abs((vals - densities[2, 3, 4]/counts[2, 3, 4]) / vals)) < 1e-8
 
     np.random.seed(0)
     float_t = np.float64

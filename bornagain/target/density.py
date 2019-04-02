@@ -93,7 +93,6 @@ class CrystalDensityMap(object):
         # Given desired resolution and unit cell, these are the number of voxels along along each edge of unit cell.
         cshape = np.ceil((1/resolution) * (1/vec_mag(cryst.unitcell.a_mat.T)))
         # cshape = (2*np.ceil(np.array(1/(resolution*np.array(utils.vec_mag(cryst.unitcell.a_mat.T)))))-1).astype(np.int)
-        print('cshape', cshape)
         # The number of cells along an edge must be a multple of the shortest translation.  E.g., if an operation
         # consists of a translation of 1/3 distance along the cell, we must have a multiple of 3.
         multiples = np.ones(3, dtype=np.int)
@@ -107,7 +106,6 @@ class CrystalDensityMap(object):
                 if comp > multiples[j]:
                     multiples[j] = comp
         multiples = np.max(multiples)*np.ones(3)
-        print('multiples', multiples)
         cshape = np.ceil(cshape / multiples) * multiples
 
         self.cryst = cryst  # :  crystal class object used to initiate the map
