@@ -746,34 +746,36 @@ except ImportError:
     density_f = None
 
 
-def trilinear_interpolation_fortran(densities, vectors, limits, out):
+def trilinear_interpolation_fortran(densities, vectors, corners, deltas, out):
 
     float_t = np.float64
     assert densities.dtype == float_t
     assert vectors.dtype == float_t
-    assert limits.dtype == float_t
+    assert corners.dtype == float_t
+    assert deltas.dtype == float_t
     assert out.dtype == float_t
     assert densities.flags.c_contiguous
     assert vectors.flags.c_contiguous
-    assert limits.flags.c_contiguous
+    assert corners.flags.c_contiguous
+    assert deltas.flags.c_contiguous
     assert out.flags.c_contiguous
-    af = np.asfortranarray
-    density_f.trilinear_interpolation(af(densities.T), af(vectors.T), af(limits.T), af(out.T))
+    assert np.min(deltas) > 0
+    density_f.trilinear_interpolation(densities.T, vectors.T, corners.T, deltas.T, out.T)
 
 
-def trilinear_interpolation(densities, vectors, limits, out=None):
+def trilinear_interpolation(densities, vectors, corners, deltas, out=None):
 
     if out is None:
         out = np.zeros(vectors.shape[0], dtype=densities.dtype)
     if density_f is not None:
-        trilinear_interpolation_fortran(densities, vectors, limits, out)
+        trilinear_interpolation_fortran(densities, vectors, corners, deltas, out)
 #    else:
 #        trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out=None)
     return out
 
 
 @jit(nopython=True)
-def trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out=None):
+def trilinear_interpolation_numba(densities=None, vectors=None, corners=None, deltas=None, out=None):
     r"""
     Trilinear interpolation of a 3D map.
 
@@ -789,16 +791,12 @@ def trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out
     ny = int(densities.shape[1])
     nz = int(densities.shape[2])
 
-    dx = (limits[0, 1] - limits[0, 0]) / nx
-    dy = (limits[1, 1] - limits[1, 0]) / ny
-    dz = (limits[2, 1] - limits[2, 0]) / nz
-
     for ii in range(vectors.shape[0]):
 
         # Floating point coordinates
-        i_f = float(vectors[ii, 0] - limits[0, 0]) / dx
-        j_f = float(vectors[ii, 1] - limits[1, 0]) / dy
-        k_f = float(vectors[ii, 2] - limits[2, 0]) / dz
+        i_f = float(vectors[ii, 0] - corners[0, 0]) / deltas[0]
+        j_f = float(vectors[ii, 1] - corners[1, 0]) / deltas[1]
+        k_f = float(vectors[ii, 2] - corners[2, 0]) / deltas[2]
 
         # Integer coordinates
         i = int(np.floor(i_f)) % nx
@@ -818,7 +816,6 @@ def trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out
         x1 = 1.0 - x0
         y1 = 1.0 - y0
         z1 = 1.0 - z0
-        # if i >= 0 and i < nx and j >= 0 and j < ny and k >= 0 and k < nz:
         out[ii] = densities[i0, j0, k0] * x1 * y1 * z1 + \
                  densities[i1, j0, k0] * x0 * y1 * z1 + \
                  densities[i0, j1, k0] * x1 * y0 * z1 + \
@@ -827,29 +824,26 @@ def trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out
                  densities[i0, j1, k1] * x1 * y0 * z0 + \
                  densities[i1, j1, k0] * x0 * y0 * z1 + \
                  densities[i1, j1, k1] * x0 * y0 * z0
-        # else:
-        #     out[ii] = 0
 
     return out
 
 
-def trilinear_insertion(densities, weights, vectors, vals, limits):
+def trilinear_insertion(densities, weights, vectors, vals, corners, deltas):
 
     float_t = np.float64
     assert densities.dtype == float_t
     assert weights.dtype == float_t
     assert vectors.dtype == float_t
-    assert limits.dtype == float_t
     assert vals.dtype == float_t
+    assert corners.dtype == float_t
+    assert deltas.dtype == float_t
     assert densities.flags.c_contiguous
     assert weights.flags.c_contiguous
     assert vectors.flags.c_contiguous
     assert vals.flags.c_contiguous
-    assert limits.flags.c_contiguous
-    vals = np.asfortranarray(vals)
-    limits = np.asfortranarray(limits)
-    af = np.asfortranarray
-    density_f.trilinear_insertion(densities.T, weights.T, af(vectors.T), af(vals.T), af(limits.T))
+    assert corners.flags.c_contiguous
+    assert deltas.flags.c_contiguous
+    density_f.trilinear_insertion(densities.T, weights.T, vectors.T, vals.T, corners.T, deltas.T)
 
 
 # @jit(['void(float64[:], float64[:], float64[:], float64[:], float64[:])'], nopython=True)

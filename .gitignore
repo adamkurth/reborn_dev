@@ -2,6 +2,7 @@ developer/rkirian/data
 ignore
 .DS_Store
 *.pyc
+*.o
 *.cprof
 build/*
 build

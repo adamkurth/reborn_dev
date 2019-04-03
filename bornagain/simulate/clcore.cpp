@@ -244,11 +244,7 @@ kernel void phase_factor_qrf(
 
     // Again, check that this pixel index is not out of bounds
     if (gi < n_pixels){
-        if ( add == 1 ){
-            a[gi] += a_sum;
-        } else {
-            a[gi] = a_sum;
-        }
+        a[gi] = a[gi]*add + a_sum;
     }
 
 }
@@ -294,11 +290,7 @@ kernel void phase_factor_pad(
 
     // Check that this pixel index is not out of bounds
     if (gi < n_pixels){
-        if ( add == 1 ){
-            a[gi] += a_sum;
-        } else {
-            a[gi] = a_sum;
-        }
+        a[gi] = a[gi]*add + a_sum;
     }
 }
 
@@ -320,17 +312,14 @@ kernel void phase_factor_mesh(
     const int add              // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
 ){
 
-    const int Nxy = N.x*N.y;
     const int gi = get_global_id(0); /* Global index */
-    const int i = gi % N.x;          /* Voxel coordinate i (x) */
-    const int j = (gi/N.x) % N.y;    /* Voxel coordinate j (y) */
-    const int k = gi/Nxy;            /* Voxel corrdinate k (z) */
+    const int i = gi/(N.z*N.y);      /* Voxel coordinate i (x) */
+    const int j = (gi/N.z) % N.y;    /* Voxel coordinate j (y) */
+    const int k = gi % N.z;          /* Voxel corrdinate k (z) */
     const int li = get_local_id(0);  /* Local group index */
 
     // Each global index corresponds to a particular q-vector
-    dsfloat4 q4r = (dsfloat4)(i*deltaQ.x+q_min.x,
-            j*deltaQ.y+q_min.y,
-            k*deltaQ.z+q_min.z,0.0f);
+    dsfloat4 q4r = (dsfloat4)(i*deltaQ.x+q_min.x, j*deltaQ.y+q_min.y, k*deltaQ.z+q_min.z,0.0f);
 
     // Rotate the scattering vector
     q4r = rotate_vec(R, q4r);
@@ -343,11 +332,7 @@ kernel void phase_factor_mesh(
 
     // Check that this pixel index is not out of bounds
     if (gi < n_pixels){
-        if ( add == 1 ){
-            a[gi] += a_sum;
-        } else {
-            a[gi] = a_sum;
-        }
+        a[gi] = a[gi]*add + a_sum;
     }
 }
 
@@ -384,14 +369,13 @@ kernel void buffer_mesh_lookup(
     const int j = (int)(floor(j_f));
     const int k = (int)(floor(k_f));
 
-    // Trilinear interpolation formula specified in
-    //     paulbourke.net/miscellaneous/interpolation
-    const int k0 = (k % N.z)*N.x*N.y;
-    const int j0 = (j % N.y)*N.x;
-    const int i0 = (i % N.x);
-    const int k1 = ((k+1) % N.z)*N.x*N.y;
-    const int j1 = ((j+1) % N.y)*N.x;
-    const int i1 = ((i+1) % N.x);
+    // Trilinear interpolation formula specified in paulbourke.net/miscellaneous/interpolation
+    const int i0 = (i % N.x)*N.y*N.z;
+    const int j0 = (j % N.y)*N.z;
+    const int k0 = (k % N.z);
+    const int i1 = ((i+1) % N.x)*N.y*N.z;
+    const int j1 = ((j+1) % N.y)*N.z;
+    const int k1 = ((k+1) % N.z);
     const dsfloat x0 = i_f - floor(i_f);
     const dsfloat y0 = j_f - floor(j_f);
     const dsfloat z0 = k_f - floor(k_f);
@@ -399,8 +383,6 @@ kernel void buffer_mesh_lookup(
     const dsfloat y1 = 1.0f - y0;
     const dsfloat z1 = 1.0f - z0;
     dsfloat2 a_sum = 0;
-
-//    if (i >= 0 && i < N.x && j >= 0 && j < N.y && k >= 0 && k < N.z){
 
     a_sum = a_map[i0 + j0 + k0] * x1 * y1 * z1 +
             a_map[i1 + j0 + k0] * x0 * y1 * z1 +
@@ -411,17 +393,10 @@ kernel void buffer_mesh_lookup(
             a_map[i1 + j1 + k0] * x0 * y0 * z1 +
             a_map[i1 + j1 + k1] * x0 * y0 * z0;
 
-//    } else {
-//        a_sum = (dsfloat2)(0.0f,0.0f);
-//    }
 
-        // Check that this pixel index is not out of bounds
+    // Check that this pixel index is not out of bounds
     if (gi < n_pixels){
-        if ( add == 1 ){
-            a_out[gi] += a_sum;
-        } else {
-            a_out[gi] = a_sum;
-        }
+        a_out[gi] = a_out[gi]*add + a_sum;
     }
 
 }

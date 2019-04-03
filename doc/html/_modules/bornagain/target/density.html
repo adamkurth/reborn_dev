@@ -17,32 +17,35 @@
   
 
   
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
-
-  
-  <script src="../../../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -161,8 +164,59 @@
 
 <span class="kn">from</span> <span class="nn">bornagain.target</span> <span class="k">import</span> <span class="n">crystal</span>
 <span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">bornagain.utils</span> <span class="k">import</span> <span class="n">vec_mag</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">binned_statistic_dd</span>
 <span class="kn">from</span> <span class="nn">numba</span> <span class="k">import</span> <span class="n">jit</span>
+
+
+<div class="viewcode-block" id="DensityMap"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.DensityMap">[docs]</a><span class="k">class</span> <span class="nc">DensityMap</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">shape</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># : Shape of the array, numpy style</span>
+    <span class="n">corner_min</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># : 3-vector with coordinates of the center of the voxel with smaller values</span>
+    <span class="n">corner_max</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># : 3-vector with coordinates of the center of the voxel with larger values</span>
+    <span class="n">n_voxels</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># : Total number of voxels</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># : 3-vecto with increments beteen voxels</span>
+    <span class="n">strides</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># : Array strides</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">corner_min</span><span class="p">,</span> <span class="n">corner_max</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape: shape of the 3d map</span>
+<span class="sd">            corner_min:  a 3-vector with the coordinate of the center of the corner pixel</span>
+<span class="sd">            corner_max:  opposit corner to corner_min</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corner_min</span> <span class="o">=</span> <span class="n">corner_min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corner_max</span> <span class="o">=</span> <span class="n">corner_max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limits</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">corner_min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limits</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">corner_max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_voxels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strides</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:</span>
+
+<span class="sd">        [[0,0,0],[0,0,1],[0,0,2], ... ,[N-1,N-1,N-1]]</span>
+
+<span class="sd">        Returns: numpy array</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">shp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_voxels</span><span class="p">)</span>
+        <span class="n">n_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">n_voxels</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">n_vecs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ind</span> <span class="o">/</span> <span class="p">(</span><span class="n">shp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">shp</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">n_vecs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ind</span> <span class="o">/</span> <span class="n">shp</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">%</span> <span class="n">shp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">n_vecs</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">ind</span> <span class="o">%</span> <span class="n">shp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">n_vecs</span></div>
 
 
 <div class="viewcode-block" id="CrystalDensityMap"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalDensityMap">[docs]</a><span class="k">class</span> <span class="nc">CrystalDensityMap</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -196,10 +250,9 @@
 <span class="sd">                                  Fourier space, there will be one sample between Bragg samples.  And so on for 3,4,...</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
-
         <span class="c1"># Given desired resolution and unit cell, these are the number of voxels along along each edge of unit cell.</span>
-        <span class="n">cshape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">resolution</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">vec_mag</span><span class="p">(</span><span class="n">cryst</span><span class="o">.</span><span class="n">unitcell</span><span class="o">.</span><span class="n">a_mat</span><span class="o">.</span><span class="n">T</span><span class="p">)))))</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
-
+        <span class="n">cshape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="mi">1</span><span class="o">/</span><span class="n">resolution</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">vec_mag</span><span class="p">(</span><span class="n">cryst</span><span class="o">.</span><span class="n">unitcell</span><span class="o">.</span><span class="n">a_mat</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span>
+        <span class="c1"># cshape = (2*np.ceil(np.array(1/(resolution*np.array(utils.vec_mag(cryst.unitcell.a_mat.T)))))-1).astype(np.int)</span>
         <span class="c1"># The number of cells along an edge must be a multple of the shortest translation.  E.g., if an operation</span>
         <span class="c1"># consists of a translation of 1/3 distance along the cell, we must have a multiple of 3.</span>
         <span class="n">multiples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
@@ -221,7 +274,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cshape</span> <span class="o">=</span> <span class="n">cshape</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># :  Number of samples along edge of unit cell</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">cshape</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversampling</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># :  Number of samples along edge of whole map (includes oversampling)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_voxels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>  <span class="c1"># :  Linear length of map (=N^3)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">strides</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">])</span>  <span class="c1"># :  The stride vector (mostly for internal use)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strides</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">])</span>  <span class="c1"># :  The stride vector (mostly for internal use)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -261,6 +314,18 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vecs</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">limits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_limits</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">corner_min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">corner_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a 3x2 array with the limits of the density map.  These limits correspond to the centers of the voxels.</span>
@@ -272,7 +337,6 @@
         <span class="n">shp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">shp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">shp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">shp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)]])</span>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">r_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -301,11 +365,27 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vecs</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vecs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">h</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cshape</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
-        <span class="n">h</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cshape</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">h</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">h</span><span class="p">[</span><span class="n">f</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="n">f</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">h</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">h_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">limits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">limits</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">limits</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">return</span> <span class="n">limits</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">h_density_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">hlim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_limits</span>
+        <span class="n">dens</span> <span class="o">=</span> <span class="n">DensityMap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">hlim</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">hlim</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">dens</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">q_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -421,8 +501,10 @@
 <span class="sd">        voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy...</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            x (numpy array):  An nx3 array of position vectors</span>
-<span class="sd">            f (numpy array):  An n-length array of densities (must be real)</span>
+<span class="sd">            atom_x_vecs (numpy array):  An nx3 array of position vectors</span>
+<span class="sd">            atom_fs (numpy array):  An n-length array of densities (must be real)</span>
+<span class="sd">            mode (str): Either &#39;gaussian&#39; or &#39;nearest&#39;</span>
+<span class="sd">            fixed_atom_sigma (float): Standard deviation of</span>
 
 <span class="sd">        Returns: An NxNxN numpy array containing the sum of densities that were provided as input.</span>
 
@@ -441,7 +523,7 @@
         <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;nearest&#39;</span><span class="p">:</span>
             <span class="n">mm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversampling</span><span class="p">]</span>
             <span class="n">rng</span> <span class="o">=</span> <span class="p">[</span><span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">]</span>
-            <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span><span class="n">atom_x_vecs</span><span class="p">,</span> <span class="n">atom_fs</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">a</span></div>
 
 <div class="viewcode-block" id="CrystalDensityMap.place_intensities_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalDensityMap.place_intensities_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_intensities_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
@@ -466,8 +548,6 @@
         <span class="k">return</span> <span class="n">a</span></div></div>
 
 
-
-
 <div class="viewcode-block" id="CrystalMeshTool"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool">[docs]</a><span class="k">class</span> <span class="nc">CrystalMeshTool</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sa">r</span><span class="sd">&#39;&#39;&#39;</span>
@@ -487,6 +567,7 @@
     <span class="c1"># x_vecs = None</span>
     <span class="c1"># r_vecs = None</span>
     <span class="c1"># h_vecs = None</span>
+    <span class="n">cryst1</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cryst</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">oversampling</span><span class="p">):</span>
 
@@ -730,8 +811,11 @@
 
 <span class="sd">        This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors</span>
 <span class="sd">        should be in the crystal basis, and the densities must be real (because the scipy function that we use does</span>
-<span class="sd">        not allow for complex numbers...).  This is done in a lazy way - the density samples are placed in the nearest</span>
-<span class="sd">        voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy...</span>
+<span class="sd">        not allow for complex numbers...).  </span>
+<span class="sd">        There are currently two modes - one mode, called &#39;gaussian&#39;, places Guassian atoms of a fixed width and sums them</span>
+<span class="sd">        to form the density map. The other mode, called &#39;nearest&#39;, just placed the atom Z values in the nearest</span>
+<span class="sd">        voxel. Both of these modes will need to be replaced with something more realistic later, probably based on the </span>
+<span class="sd">        Cromer-Mann coefficients.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            x (numpy array):  An nx3 array of position vectors</span>
@@ -754,7 +838,7 @@
         <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;nearest&#39;</span><span class="p">:</span>
             <span class="n">mm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">]</span>
             <span class="n">rng</span> <span class="o">=</span> <span class="p">[</span><span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">,</span> <span class="n">mm</span><span class="p">]</span>
-            <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">binned_statistic_dd</span><span class="p">(</span><span class="n">atom_x_vecs</span><span class="p">,</span> <span class="n">atom_fs</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">a</span></div>
 
 <div class="viewcode-block" id="CrystalMeshTool.place_intensities_in_map"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.CrystalMeshTool.place_intensities_in_map">[docs]</a>    <span class="k">def</span> <span class="nf">place_intensities_in_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
@@ -822,34 +906,36 @@
     <span class="n">density_f</span> <span class="o">=</span> <span class="kc">None</span>
 
 
-<div class="viewcode-block" id="trilinear_interpolation_fortran"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.trilinear_interpolation_fortran">[docs]</a><span class="k">def</span> <span class="nf">trilinear_interpolation_fortran</span><span class="p">(</span><span class="n">densities</span><span class="p">,</span> <span class="n">vectors</span><span class="p">,</span> <span class="n">limits</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+<div class="viewcode-block" id="trilinear_interpolation_fortran"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.trilinear_interpolation_fortran">[docs]</a><span class="k">def</span> <span class="nf">trilinear_interpolation_fortran</span><span class="p">(</span><span class="n">densities</span><span class="p">,</span> <span class="n">vectors</span><span class="p">,</span> <span class="n">corners</span><span class="p">,</span> <span class="n">deltas</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
 
     <span class="n">float_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">limits</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">limits</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span><span class="p">)</span>
-    <span class="n">af</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span>
-    <span class="n">density_f</span><span class="o">.</span><span class="n">trilinear_interpolation</span><span class="p">(</span><span class="n">af</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">af</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">af</span><span class="p">(</span><span class="n">limits</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">af</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">T</span><span class="p">))</span></div>
+    <span class="k">assert</span> <span class="n">densities</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">vectors</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">corners</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">deltas</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">out</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">densities</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="k">assert</span> <span class="n">vectors</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="k">assert</span> <span class="n">corners</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="k">assert</span> <span class="n">deltas</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="k">assert</span> <span class="n">out</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">deltas</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">density_f</span><span class="o">.</span><span class="n">trilinear_interpolation</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">vectors</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">corners</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">deltas</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="trilinear_interpolation"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.trilinear_interpolation">[docs]</a><span class="k">def</span> <span class="nf">trilinear_interpolation</span><span class="p">(</span><span class="n">densities</span><span class="p">,</span> <span class="n">vectors</span><span class="p">,</span> <span class="n">limits</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="trilinear_interpolation"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.trilinear_interpolation">[docs]</a><span class="k">def</span> <span class="nf">trilinear_interpolation</span><span class="p">(</span><span class="n">densities</span><span class="p">,</span> <span class="n">vectors</span><span class="p">,</span> <span class="n">corners</span><span class="p">,</span> <span class="n">deltas</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">densities</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">density_f</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">trilinear_interpolation_fortran</span><span class="p">(</span><span class="n">densities</span><span class="p">,</span> <span class="n">vectors</span><span class="p">,</span> <span class="n">limits</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+        <span class="n">trilinear_interpolation_fortran</span><span class="p">(</span><span class="n">densities</span><span class="p">,</span> <span class="n">vectors</span><span class="p">,</span> <span class="n">corners</span><span class="p">,</span> <span class="n">deltas</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
 <span class="c1">#    else:</span>
 <span class="c1">#        trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out=None)</span>
     <span class="k">return</span> <span class="n">out</span></div>
 
 
 <div class="viewcode-block" id="trilinear_interpolation_numba"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.trilinear_interpolation_numba">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">trilinear_interpolation_numba</span><span class="p">(</span><span class="n">densities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">trilinear_interpolation_numba</span><span class="p">(</span><span class="n">densities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">corners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">deltas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Trilinear interpolation of a 3D map.</span>
 
@@ -865,21 +951,17 @@
     <span class="n">ny</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">nz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-    <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span><span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">nx</span>
-    <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">ny</span>
-    <span class="n">dz</span> <span class="o">=</span> <span class="p">(</span><span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">nz</span>
-
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
 
         <span class="c1"># Floating point coordinates</span>
-        <span class="n">i_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dx</span>
-        <span class="n">j_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dy</span>
-        <span class="n">k_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">dz</span>
+        <span class="n">i_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">corners</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">deltas</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">j_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">corners</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">deltas</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">k_f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">corners</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">deltas</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
         <span class="c1"># Integer coordinates</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">i_f</span><span class="p">))</span>
-        <span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">j_f</span><span class="p">))</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">k_f</span><span class="p">))</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">i_f</span><span class="p">))</span> <span class="o">%</span> <span class="n">nx</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">j_f</span><span class="p">))</span> <span class="o">%</span> <span class="n">ny</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">k_f</span><span class="p">))</span> <span class="o">%</span> <span class="n">nz</span>
 
         <span class="c1"># Trilinear interpolation formula specified in e.g. paulbourke.net/miscellaneous/interpolation</span>
         <span class="n">k0</span> <span class="o">=</span> <span class="n">k</span>
@@ -894,38 +976,34 @@
         <span class="n">x1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">x0</span>
         <span class="n">y1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">y0</span>
         <span class="n">z1</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">z0</span>
-        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nx</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">ny</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">nz</span><span class="p">:</span>
-            <span class="n">out</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
-                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
-                     <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
-                     <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
-                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
-                     <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
-                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
-                     <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">out</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                 <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                 <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                 <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
+                 <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j0</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y1</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
+                 <span class="n">densities</span><span class="p">[</span><span class="n">i0</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> \
+                 <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z1</span> <span class="o">+</span> \
+                 <span class="n">densities</span><span class="p">[</span><span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">y0</span> <span class="o">*</span> <span class="n">z0</span>
 
     <span class="k">return</span> <span class="n">out</span></div>
 
 
-<div class="viewcode-block" id="trilinear_insertion"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.trilinear_insertion">[docs]</a><span class="k">def</span> <span class="nf">trilinear_insertion</span><span class="p">(</span><span class="n">densities</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">vectors</span><span class="p">,</span> <span class="n">vals</span><span class="p">,</span> <span class="n">limits</span><span class="p">):</span>
+<div class="viewcode-block" id="trilinear_insertion"><a class="viewcode-back" href="../../../bornagain.target.density.html#bornagain.target.density.trilinear_insertion">[docs]</a><span class="k">def</span> <span class="nf">trilinear_insertion</span><span class="p">(</span><span class="n">densities</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">vectors</span><span class="p">,</span> <span class="n">vals</span><span class="p">,</span> <span class="n">corners</span><span class="p">,</span> <span class="n">deltas</span><span class="p">):</span>
 
     <span class="n">float_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">limits</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span><span class="p">)</span>
-    <span class="k">assert</span><span class="p">(</span><span class="n">limits</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span><span class="p">)</span>
-    <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
-    <span class="n">limits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span><span class="p">(</span><span class="n">limits</span><span class="p">)</span>
-    <span class="n">af</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span>
-    <span class="n">density_f</span><span class="o">.</span><span class="n">trilinear_insertion</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">weights</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">af</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">af</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">af</span><span class="p">(</span><span class="n">limits</span><span class="o">.</span><span class="n">T</span><span class="p">))</span></div>
+    <span class="k">assert</span> <span class="n">densities</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">weights</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">vectors</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">vals</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">corners</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">deltas</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">float_t</span>
+    <span class="k">assert</span> <span class="n">densities</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="k">assert</span> <span class="n">weights</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="k">assert</span> <span class="n">vectors</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="k">assert</span> <span class="n">vals</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="k">assert</span> <span class="n">corners</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="k">assert</span> <span class="n">deltas</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span>
+    <span class="n">density_f</span><span class="o">.</span><span class="n">trilinear_insertion</span><span class="p">(</span><span class="n">densities</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">weights</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">vectors</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">vals</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">corners</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">deltas</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div>
 
 
 <span class="c1"># @jit([&#39;void(float64[:], float64[:], float64[:], float64[:], float64[:])&#39;], nopython=True)</span>
@@ -1024,33 +1102,16 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

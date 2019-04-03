@@ -90,19 +90,47 @@ If you modify code and wish to update this documentation, the easiest way to do 
 because sphinx must be able to import all of the bornagain modules in order to auto-generate module/package
 documentation.
 
-Outstanding issues
-------------------
+Speeding up code with Numba
+---------------------------
 
-* We need a better way to manage documentation.  Ideally it would be available on the web, but I don't
-  want it to be
-  public until the API is reasonably stable.  At presently, nobody seems to read the documentation.
-* We need a standardized way to test bornagain in the various combinations of Python 2, Python 3, pyqt4,
-  pyqt5.  This may be possible with GitLab or GitHub.
-* There are some classes, functions, methods that don't adhere to PEP8.  They will be changed, and old
-  scripts will be
-  broken.
-* We need a good way to present example scripts in the documentation, which also shows output such as images.  The
-  pyqtgraph package has a neat GUI demo when you do pyqtgraph.examples.run(), which we might emulate.
-* We must revisit the way that we define vectors and rotation operations, and check for consistency
-  throughout
-* There are many more issues that need to be discussed.
+Numba is one way to speed up Python code.  The basic idea is that you can write simple Python code and have it be
+compiled on the fly so that it runs with speeds comparable to a language such as c.  We have used Numba in a couple
+places, with some success, but there have been many instances when Numba has failed to compile code.  Last time I
+tried, Numba did not have some basic methods for allocating arrays, such as numpy.zeros().  It seems ok to include
+Numba code in bornagain, whenever it works, especially given that there have not yet been any issues with installing
+Numba via the conda package manager.
+
+Integration of Fortran and Numpy
+--------------------------------
+
+The f2py utility included with numpy is a convenient way to integrate fast CPU code
+with numpy.  However, there are some issues with regard to passing numpy array pointers into a fortran function.
+Fortran stores data in the so-called
+"`column-major <https://en.wikipedia.org/wiki/Row-_and_column-major_order>`_" format, which means that an
+increment in the left-most index of a multi-dimensional array corresponds to the smallest increment in the contiguous
+block of memory.  In contrast, Numpy arrays are "row-major" by default, which means the right-most index corresonds
+to contiguous increment.  This would not be a major problem if it weren't for the fact that Numpy arrays can also
+be column-major, and it is hard to be sure of which indexing an
+array might be using without explicitly checking the attributes such as "ndarray.flags.c_contiguous" (True if the
+array is row-major) or "ndarray.flags.f_contiguous" (True if the array is column-major).  In Numpy language,
+"C-contiguous" corresponds to row major, and "F-contiguous" corresponds to column major.
+
+The above indexing syntax becomes important when you want to pass a Numpy array into a Fortran function with the
+intention of actually modifying the Numpy array data.  When you use the f2py utility (see examples in
+developer/compile-fortran.sh) to compile your Fortran code you will get runtime errors if you do not pass F-contiguous
+arrays as inputs to the Fortran functions.  There is an exception: for
+one-dimensional arrays, there is no distinction between F/C contiguous and no errors are raised.  There
+is a convenience function "numpy.asfortranarray()" that will convert an array to a Fortran array, but
+this is a very dubious function because it will make copies of the data, but it might not make the copy immediately and
+this can potentially create a lot of confusion.
+
+A good way to go is the following:
+
+(1) Make sure that you always work with C-contiguous arrays in Python.  It makes no sense to work with a non-default
+memory ordering.
+
+(2) When you pass an array into a Fortran function, take the transpose of the array.  This will make the array
+F-contiguous but will not make a copy of the memory.  Do not use the asfortranarray function for this purpose.
+
+(3) In your Fortran code, simply reverse the ordering of indices as compared to your Numpy code.  You then use Fortran
+reasoning in the Fortran code, and you assume the defaults in your Numpy code.

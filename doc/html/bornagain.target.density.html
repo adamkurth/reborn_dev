@@ -18,34 +18,37 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain.target.molecule module" href="bornagain.target.molecule.html" />
     <link rel="prev" title="bornagain.target.crystal module" href="bornagain.target.crystal.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -181,6 +184,57 @@
   <div class="section" id="module-bornagain.target.density">
 <span id="bornagain-target-density-module"></span><h1>bornagain.target.density module<a class="headerlink" href="#module-bornagain.target.density" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
+<dt id="bornagain.target.density.DensityMap">
+<em class="property">class </em><code class="descclassname">bornagain.target.density.</code><code class="descname">DensityMap</code><span class="sig-paren">(</span><em>shape</em>, <em>corner_min</em>, <em>corner_max</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#DensityMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.DensityMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="bornagain.target.density.DensityMap.shape">
+<code class="descname">shape</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.DensityMap.shape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.DensityMap.corner_min">
+<code class="descname">corner_min</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.DensityMap.corner_min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.DensityMap.corner_max">
+<code class="descname">corner_max</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.DensityMap.corner_max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.DensityMap.n_voxels">
+<code class="descname">n_voxels</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.DensityMap.n_voxels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.DensityMap.dx">
+<code class="descname">dx</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.DensityMap.dx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.DensityMap.strides">
+<code class="descname">strides</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.DensityMap.strides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.DensityMap.n_vecs">
+<code class="descname">n_vecs</code><a class="headerlink" href="#bornagain.target.density.DensityMap.n_vecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>[[0,0,0],[0,0,1],[0,0,2], … ,[N-1,N-1,N-1]]</p>
+<p>Returns: numpy array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="bornagain.target.density.CrystalDensityMap">
 <em class="property">class </em><code class="descclassname">bornagain.target.density.</code><code class="descname">CrystalDensityMap</code><span class="sig-paren">(</span><em>cryst</em>, <em>resolution</em>, <em>oversampling</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -200,8 +254,16 @@ elegant in that basis.</p>
 <dl class="attribute">
 <dt id="bornagain.target.density.CrystalDensityMap.n_vecs">
 <code class="descname">n_vecs</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.n_vecs" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this</em> – [[0,0,0],[0,0,1],[0,0,2], … ,[N-1,N-1,N-1]]</p>
+<dd><p>[[0,0,0],[0,0,1],[0,0,2], … ,[N-1,N-1,N-1]]</p>
 <p>Returns: numpy array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -212,6 +274,21 @@ bit like this:</p>
 <p>[[0,0,0],[0,0,0.25],[0,0,0.5],[0,0,0.75],[0,0.25,0], … ,[0.75,0.75,0.75]]</p>
 <p>Returns: numpy array</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.limits">
+<code class="descname">limits</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.limits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.corner_min">
+<code class="descname">corner_min</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.corner_min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.corner_max">
+<code class="descname">corner_max</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.corner_max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.target.density.CrystalDensityMap.x_limits">
@@ -236,6 +313,16 @@ Miller indices” that coorespond to the density samples upon taking an FFT of t
 coordinates x (in the crystal basis) one can take the Fourier transform F(h) = sum_n f_n exp(i h*x)</p>
 <p>Returns: numpy array</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.h_limits">
+<code class="descname">h_limits</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.h_limits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.h_density_map">
+<code class="descname">h_density_map</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.h_density_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.target.density.CrystalDensityMap.q_vecs">
@@ -325,8 +412,10 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>x</strong> (<em>numpy array</em>) – An nx3 array of position vectors</li>
-<li><strong>f</strong> (<em>numpy array</em>) – An n-length array of densities (must be real)</li>
+<li><strong>atom_x_vecs</strong> (<em>numpy array</em>) – An nx3 array of position vectors</li>
+<li><strong>atom_fs</strong> (<em>numpy array</em>) – An n-length array of densities (must be real)</li>
+<li><strong>mode</strong> (<em>str</em>) – Either ‘gaussian’ or ‘nearest’</li>
+<li><strong>fixed_atom_sigma</strong> (<em>float</em>) – Standard deviation of</li>
 </ul>
 </td>
 </tr>
@@ -373,6 +462,11 @@ elegant in that basis.</p>
 <code class="descname">sym_luts</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.sym_luts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cached lookup tables</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalMeshTool.cryst1">
+<code class="descname">cryst1</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.cryst1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.target.density.CrystalMeshTool.cryst">
@@ -544,8 +638,11 @@ configuration to the jth configuration.</p>
 <code class="descname">place_atoms_in_map</code><span class="sig-paren">(</span><em>atom_x_vecs</em>, <em>atom_fs</em>, <em>mode='gaussian'</em>, <em>fixed_atom_sigma=5e-11</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalMeshTool.place_atoms_in_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalMeshTool.place_atoms_in_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
 should be in the crystal basis, and the densities must be real (because the scipy function that we use does
-not allow for complex numbers…).  This is done in a lazy way - the density samples are placed in the nearest
-voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy…</p>
+not allow for complex numbers…).
+There are currently two modes - one mode, called ‘gaussian’, places Guassian atoms of a fixed width and sums them
+to form the density map. The other mode, called ‘nearest’, just placed the atom Z values in the nearest
+voxel. Both of these modes will need to be replaced with something more realistic later, probably based on the
+Cromer-Mann coefficients.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -590,12 +687,12 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
 
 <dl class="function">
 <dt id="bornagain.target.density.trilinear_interpolation_fortran">
-<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_interpolation_fortran</code><span class="sig-paren">(</span><em>densities</em>, <em>vectors</em>, <em>limits</em>, <em>out</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_interpolation_fortran"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_interpolation_fortran" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_interpolation_fortran</code><span class="sig-paren">(</span><em>densities</em>, <em>vectors</em>, <em>corners</em>, <em>deltas</em>, <em>out</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_interpolation_fortran"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_interpolation_fortran" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="bornagain.target.density.trilinear_interpolation">
-<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_interpolation</code><span class="sig-paren">(</span><em>densities</em>, <em>vectors</em>, <em>limits</em>, <em>out=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_interpolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_interpolation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_interpolation</code><span class="sig-paren">(</span><em>densities</em>, <em>vectors</em>, <em>corners</em>, <em>deltas</em>, <em>out=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_interpolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_interpolation" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -620,7 +717,7 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
 
 <dl class="function">
 <dt id="bornagain.target.density.trilinear_insertion">
-<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_insertion</code><span class="sig-paren">(</span><em>densities</em>, <em>weights</em>, <em>vectors</em>, <em>vals</em>, <em>limits</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_insertion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_insertion" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_insertion</code><span class="sig-paren">(</span><em>densities</em>, <em>weights</em>, <em>vectors</em>, <em>vals</em>, <em>corners</em>, <em>deltas</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_insertion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_insertion" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -636,7 +733,7 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
         <a href="bornagain.target.molecule.html" class="btn btn-neutral float-right" title="bornagain.target.molecule module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.target.crystal.html" class="btn btn-neutral" title="bornagain.target.crystal module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.target.crystal.html" class="btn btn-neutral float-left" title="bornagain.target.crystal module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -661,33 +758,16 @@ voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy�
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

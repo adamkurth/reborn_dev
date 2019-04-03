@@ -13,6 +13,8 @@ import pytest
 import numpy as np
 import bornagain as ba
 from bornagain import utils
+from numba import jit
+
 try:
     from bornagain.simulate import clcore
     import pyopencl
@@ -374,18 +376,26 @@ def _test_ridiculous_sum(double_precision=False):
 
     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 
+    @jit(nopython=True)
+    def numba_add(input):
+        out = 0
+        for i in range(len(input)):
+            out += input[i]
+        return out
+
     np.random.seed(0)
     for n in np.array([2**n for n in range(0, 16)]):
         a = np.random.rand(n).astype(core.real_t)
         b = 0
         for i in range(0, n):
             b += a[i]
+        d = numba_add(a)
         c = core.test_simple_sum(a)
         if double_precision:
             assert(np.abs(b - c) < 1e-12)
         else:
-            assert(np.abs(b - c) < 0.03)  # TODO: Why is the GPU producing a different result than CPU?
-
+            assert(np.abs(b - c)/np.abs(c) < 1e-5)  # TODO: Why is the GPU producing a different result than CPU?
+            assert(np.abs(b - d)/np.abs(d) < 1e-5)
 
 if __name__ == '__main__':
 

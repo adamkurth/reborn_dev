@@ -18,34 +18,37 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain.simulate.examples module" href="bornagain.simulate.examples.html" />
     <link rel="prev" title="bornagain.simulate.atoms module" href="bornagain.simulate.atoms.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -393,7 +396,7 @@ amplitudes.</li>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.phase_factor_pad">
-<code class="descname">phase_factor_pad</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>T</em>, <em>F</em>, <em>S</em>, <em>B</em>, <em>nF</em>, <em>nS</em>, <em>w</em>, <em>R=None</em>, <em>U=None</em>, <em>a=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_pad" title="Permalink to this definition">¶</a></dt>
+<code class="descname">phase_factor_pad</code><span class="sig-paren">(</span><em>r</em>, <em>f=None</em>, <em>T=None</em>, <em>F=None</em>, <em>S=None</em>, <em>B=None</em>, <em>nF=None</em>, <em>nS=None</em>, <em>w=None</em>, <em>R=None</em>, <em>U=None</em>, <em>a=None</em>, <em>add=False</em>, <em>beam=None</em>, <em>pad=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_pad" title="Permalink to this definition">¶</a></dt>
 <dd><p>This should simulate detector panels.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -436,7 +439,7 @@ detector panel</li>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.phase_factor_mesh">
-<code class="descname">phase_factor_mesh</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>a=None</em>, <em>R=None</em>, <em>U=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_mesh" title="Permalink to this definition">¶</a></dt>
+<code class="descname">phase_factor_mesh</code><span class="sig-paren">(</span><em>r</em>, <em>f</em>, <em>N=None</em>, <em>q_min=None</em>, <em>q_max=None</em>, <em>a=None</em>, <em>R=None</em>, <em>U=None</em>, <em>add=False</em>, <em>density_map=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.phase_factor_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.phase_factor_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute phase factors on a regular 3D mesh of q-space samples.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -471,7 +474,7 @@ These values specify the <em>center</em> of the voxel.</li>
 
 <dl class="method">
 <dt id="bornagain.simulate.clcore.ClCore.buffer_mesh_lookup">
-<code class="descname">buffer_mesh_lookup</code><span class="sig-paren">(</span><em>a_map</em>, <em>N</em>, <em>q_min</em>, <em>q_max</em>, <em>q</em>, <em>R=None</em>, <em>a=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.buffer_mesh_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup" title="Permalink to this definition">¶</a></dt>
+<code class="descname">buffer_mesh_lookup</code><span class="sig-paren">(</span><em>a_map</em>, <em>q</em>, <em>N=None</em>, <em>q_min=None</em>, <em>q_max=None</em>, <em>R=None</em>, <em>U=None</em>, <em>a=None</em>, <em>density_map=None</em>, <em>add=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/simulate/clcore.html#ClCore.buffer_mesh_lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.simulate.clcore.ClCore.buffer_mesh_lookup" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is supposed to lookup intensities from a 3d mesh of amplitudes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -821,7 +824,7 @@ available for running simulations.</p>
         <a href="bornagain.simulate.examples.html" class="btn btn-neutral float-right" title="bornagain.simulate.examples module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.simulate.atoms.html" class="btn btn-neutral" title="bornagain.simulate.atoms module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.simulate.atoms.html" class="btn btn-neutral float-left" title="bornagain.simulate.atoms module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -846,33 +849,16 @@ available for running simulations.</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

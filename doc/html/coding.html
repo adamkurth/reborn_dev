@@ -18,34 +18,37 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Numpy, vectors, rotations, etc." href="numpy.html" />
     <link rel="prev" title="Simulations" href="simulations.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -97,7 +100,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#checking-for-pep8-compliance">Checking for PEP8 compliance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generation-of-documentation">Generation of documentation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#outstanding-issues">Outstanding issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#speeding-up-code-with-numba">Speeding up code with Numba</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#integration-of-fortran-and-numpy">Integration of Fortran and Numpy</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
@@ -239,23 +243,43 @@ the formatting consistent by adhering to the Google-style doc strings.</p>
 because sphinx must be able to import all of the bornagain modules in order to auto-generate module/package
 documentation.</p>
 </div>
-<div class="section" id="outstanding-issues">
-<h2>Outstanding issues<a class="headerlink" href="#outstanding-issues" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>We need a better way to manage documentation.  Ideally it would be available on the web, but I don’t
-want it to be
-public until the API is reasonably stable.  At presently, nobody seems to read the documentation.</li>
-<li>We need a standardized way to test bornagain in the various combinations of Python 2, Python 3, pyqt4,
-pyqt5.  This may be possible with GitLab or GitHub.</li>
-<li>There are some classes, functions, methods that don’t adhere to PEP8.  They will be changed, and old
-scripts will be
-broken.</li>
-<li>We need a good way to present example scripts in the documentation, which also shows output such as images.  The
-pyqtgraph package has a neat GUI demo when you do pyqtgraph.examples.run(), which we might emulate.</li>
-<li>We must revisit the way that we define vectors and rotation operations, and check for consistency
-throughout</li>
-<li>There are many more issues that need to be discussed.</li>
-</ul>
+<div class="section" id="speeding-up-code-with-numba">
+<h2>Speeding up code with Numba<a class="headerlink" href="#speeding-up-code-with-numba" title="Permalink to this headline">¶</a></h2>
+<p>Numba is one way to speed up Python code.  The basic idea is that you can write simple Python code and have it be
+compiled on the fly so that it runs with speeds comparable to a language such as c.  We have used Numba in a couple
+places, with some success, but there have been many instances when Numba has failed to compile code.  Last time I
+tried, Numba did not have some basic methods for allocating arrays, such as numpy.zeros().  It seems ok to include
+Numba code in bornagain, whenever it works, especially given that there have not yet been any issues with installing
+Numba via the conda package manager.</p>
+</div>
+<div class="section" id="integration-of-fortran-and-numpy">
+<h2>Integration of Fortran and Numpy<a class="headerlink" href="#integration-of-fortran-and-numpy" title="Permalink to this headline">¶</a></h2>
+<p>The f2py utility included with numpy is a convenient way to integrate fast CPU code
+with numpy.  However, there are some issues with regard to passing numpy array pointers into a fortran function.
+Fortran stores data in the so-called
+“<a class="reference external" href="https://en.wikipedia.org/wiki/Row-_and_column-major_order">column-major</a>” format, which means that an
+increment in the left-most index of a multi-dimensional array corresponds to the smallest increment in the contiguous
+block of memory.  In contrast, Numpy arrays are “row-major” by default, which means the right-most index corresonds
+to contiguous increment.  This would not be a major problem if it weren’t for the fact that Numpy arrays can also
+be column-major, and it is hard to be sure of which indexing an
+array might be using without explicitly checking the attributes such as “ndarray.flags.c_contiguous” (True if the
+array is row-major) or “ndarray.flags.f_contiguous” (True if the array is column-major).  In Numpy language,
+“C-contiguous” corresponds to row major, and “F-contiguous” corresponds to column major.</p>
+<p>The above indexing syntax becomes important when you want to pass a Numpy array into a Fortran function with the
+intention of actually modifying the Numpy array data.  When you use the f2py utility (see examples in
+developer/compile-fortran.sh) to compile your Fortran code you will get runtime errors if you do not pass F-contiguous
+arrays as inputs to the Fortran functions.  There is an exception: for
+one-dimensional arrays, there is no distinction between F/C contiguous and no errors are raised.  There
+is a convenience function “numpy.asfortranarray()” that will convert an array to a Fortran array, but
+this is a very dubious function because it will make copies of the data, but it might not make the copy immediately and
+this can potentially create a lot of confusion.</p>
+<p>A good way to go is the following:</p>
+<p>(1) Make sure that you always work with C-contiguous arrays in Python.  It makes no sense to work with a non-default
+memory ordering.</p>
+<p>(2) When you pass an array into a Fortran function, take the transpose of the array.  This will make the array
+F-contiguous but will not make a copy of the memory.  Do not use the asfortranarray function for this purpose.</p>
+<p>(3) In your Fortran code, simply reverse the ordering of indices as compared to your Numpy code.  You then use Fortran
+reasoning in the Fortran code, and you assume the defaults in your Numpy code.</p>
 </div>
 </div>
 
@@ -270,7 +294,7 @@ throughout</li>
         <a href="numpy.html" class="btn btn-neutral float-right" title="Numpy, vectors, rotations, etc." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="simulations.html" class="btn btn-neutral" title="Simulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="simulations.html" class="btn btn-neutral float-left" title="Simulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -295,33 +319,16 @@ throughout</li>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.2018.9.9',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

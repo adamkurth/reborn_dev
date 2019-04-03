@@ -69,8 +69,6 @@ def test_interpolations():
     if density_f is None:
         return
 
-    print('hello')
-
     float_t = np.float64
     nx, ny, nz = 6, 7, 8
     dens = np.ones([nx, ny, nz], dtype=float_t)
@@ -78,67 +76,69 @@ def test_interpolations():
     deltas = np.array([1, 1, 1], dtype=float_t)
     vectors = np.ones((nx, 3), dtype=float_t)
     vectors[:, 0] = np.arange(0, nx).astype(float_t)
-    out = np.zeros((vectors.shape[0]), dtype=float_t)
-    density_f.trilinear_interpolation(dens.T, vectors.T, corners.T, deltas.T, out.T)
-    # dens2 = density.trilinear_interpolation(dens, vectors, corners, deltas)
-#     assert np.max(np.abs(dens2)) > 0
-#     assert np.max(np.abs(dens2[:] - 1)) < 1e-6
-#
-#     float_t = np.float64
-#     nx, ny, nz = 6, 7, 8
-#     lims = np.array([[0, nx-1], [0, ny-1], [0, nz-1]], dtype=float_t)
-#     x, y, z = np.meshgrid(np.arange(0, nx), np.arange(0, ny), np.arange(0, nz), indexing='ij')
-#     xyz = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
-#     dens = func(xyz).reshape([nx, ny, nz])
-#     x, y, z = np.meshgrid(np.arange(1, nx-1), np.arange(1, ny-1), np.arange(1, nz-1), indexing='ij')
-#     xyz = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
-#     dens1 = func(xyz)
-#     dens2 = np.zeros_like(dens1)
-#     density.trilinear_interpolation(dens, xyz, lims, dens2)
-#     assert np.max(np.abs(dens1)) > 0
-#     assert np.max(np.abs(dens2)) > 0
-#     assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2  # Interpolations only good to the 1% level.  Why?
+    dens2 = density.trilinear_interpolation(dens, vectors, corners, deltas)
+    assert np.max(np.abs(dens2)) > 0
+    assert np.max(np.abs(dens2[:] - 1)) < 1e-6
+
+    float_t = np.float64
+    nx, ny, nz = 6, 7, 8
+    corners = np.array([0, 0, 0], dtype=float_t)
+    deltas = np.array([1, 1, 1], dtype=float_t)
+    x, y, z = np.meshgrid(np.arange(0, nx), np.arange(0, ny), np.arange(0, nz), indexing='ij')
+    xyz0 = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
+    dens = func(xyz0).reshape([nx, ny, nz])
+    x, y, z = np.meshgrid(np.arange(1, nx-1), np.arange(1, ny-1), np.arange(1, nz-1), indexing='ij')
+    xyz = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
+    dens1 = func(xyz)
+    dens2 = np.zeros_like(dens1)
+    density.trilinear_interpolation(dens, xyz, corners, deltas, dens2)
+    assert np.max(np.abs(dens1)) > 0
+    assert np.max(np.abs(dens2)) > 0
+    assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-12  # Interpolations only good to the 1% level.  Why?
 
 
-# def test_insertions():
-#
-#     if density_f is None:
-#         return
-#
-#     float_t = np.float64
-#     nx, ny, nz = 6, 7, 8
-#     densities = np.zeros([nx, ny, nz], dtype=float_t)
-#     counts = np.zeros([nx, ny, nz], dtype=float_t)
-#     lims = np.array([[0, nx-1], [0, ny-1], [0, nz-1]], dtype=float_t)
-#     xyz = np.array([[2, 3, 4]], dtype=float_t)
-#     vals = func(xyz)
-#     density.trilinear_insertion(densities, counts, xyz, vals, lims)
-#     assert np.max(np.abs(densities)) > 0
-#     assert (np.abs((vals - densities[2, 3, 4]) / vals)) < 1e-8
-#
-#     float_t = np.float64
-#     nx, ny, nz = 6, 7, 8
-#     densities = np.zeros([nx, ny, nz], dtype=float_t)
-#     counts = np.zeros([nx, ny, nz], dtype=float_t)
-#     lims = np.array([[0, nx-1], [0, ny-1], [0, nz-1]], dtype=float_t)
-#     xyz = np.array([[2.5, 3.5, 4.5]], dtype=float_t)
-#     vals = func(xyz)
-#     density.trilinear_insertion(densities, counts, xyz, vals, lims)
-#     assert np.max(np.abs(densities)) > 0
-#     assert (np.abs((vals - densities[2, 3, 4]/counts[2, 3, 4]) / vals)) < 1e-8
-#
-#     np.random.seed(0)
-#     float_t = np.float64
-#     nx, ny, nz = 6, 7, 8
-#     densities = np.zeros([nx, ny, nz], dtype=float_t)
-#     counts = np.zeros([nx, ny, nz], dtype=float_t)
-#     lims = np.array([[0, nx-1], [0, ny-1], [0, nz-1]], dtype=float_t)
-#     xyz = (np.random.rand(10000, 3) * np.array([nx-1, ny-1, nz-1]) ).astype(float_t)
-#     vals = func(xyz)
-#     density.trilinear_insertion(densities, counts, xyz, vals, lims)
-#     val = func(np.array([[2, 3, 4]], dtype=float_t))
-#     assert np.max(np.abs(densities)) > 0
-#     assert (np.abs((val - densities[2, 3, 4]/counts[2, 3, 4]) / val)) < 1e-3
+def test_insertions():
+
+    if density_f is None:
+        return
+
+    float_t = np.float64
+    nx, ny, nz = 6, 7, 8
+    densities = np.zeros([nx, ny, nz], dtype=float_t)
+    counts = np.zeros([nx, ny, nz], dtype=float_t)
+    corners = np.array([0, 0, 0], dtype=float_t)
+    deltas = np.array([1, 1, 1], dtype=float_t)
+    vectors = np.array([[2, 3, 4]], dtype=float_t)
+    vals = func(vectors)
+    density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
+    assert np.max(np.abs(densities)) > 0
+    assert (np.abs((vals - densities[2, 3, 4]) / vals)) < 1e-8
+
+    float_t = np.float64
+    nx, ny, nz = 6, 7, 8
+    densities = np.zeros([nx, ny, nz], dtype=float_t)
+    counts = np.zeros([nx, ny, nz], dtype=float_t)
+    corners = np.array([0, 0, 0], dtype=float_t)
+    deltas = np.array([1, 1, 1], dtype=float_t)
+    vectors = np.array([[2.5, 3.5, 4.5]], dtype=float_t)
+    vals = func(vectors)
+    density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
+    assert np.max(np.abs(densities)) > 0
+    assert (np.abs((vals - densities[2, 3, 4]/counts[2, 3, 4]) / vals)) < 1e-8
+
+    np.random.seed(0)
+    float_t = np.float64
+    nx, ny, nz = 6, 7, 8
+    densities = np.zeros([nx, ny, nz], dtype=float_t)
+    counts = np.zeros([nx, ny, nz], dtype=float_t)
+    corners = np.array([0, 0, 0], dtype=float_t)
+    deltas = np.array([1, 1, 1], dtype=float_t)
+    vectors = (np.random.rand(10000, 3) * np.array([nx-1, ny-1, nz-1])).astype(float_t)
+    vals = func(vectors)
+    density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
+    val = func(np.array([[2, 3, 4]], dtype=float_t))
+    assert np.max(np.abs(densities)) > 0
+    assert (np.abs((val - densities[2, 3, 4]/counts[2, 3, 4]) / val)) < 1e-3
 
 
 def test_wtf():
@@ -154,41 +154,43 @@ def test_wtf():
     if density_f is None:
         return
 
-    def wrap(out1, out2, out3):
-        density_f.wtf(np.asfortranarray(out1), out2, np.asfortranarray(out3))
+    # The fortran function "wtf" does the following:
+    # out1(2) = 10
+    # out2(2,1) = 10
+    # out3(2,1,1) = 10
 
     out1 = np.zeros(10)
     out2 = np.zeros((10, 10))
     out3 = np.zeros((10, 10, 10))
     density_f.wtf(np.asfortranarray(out1), np.asfortranarray(out2), np.asfortranarray(out3))
     assert out1.flags.f_contiguous
-    assert out1[1] == 10
-    assert not out2.flags.f_contiguous
-    assert not out2[1, 0] == 10
-    # print(out3.flags.f_contiguous) # False
-    # assert(out3[1, 0, 0] == 10) # Fails
+    assert out1[1] == 10  # A 1D array can be passed into a fortran function and the function can modify the data
+    assert out2.flags.c_contiguous
+    assert out2[1, 0] != 10  # Look: the asfortranarray function will not let you modify the data; it makes a copy
+    assert out3.flags.c_contiguous
+    assert out3[1, 0, 0] != 10  # Once again, a copy is made.  Note that this issue pertains to multi-dimensional arrays
 
     out1 = np.zeros(10)
     out2_0 = np.zeros((10, 10))
     out2 = np.asfortranarray(out2_0)
-    assert out2_0.data == out2.data
+    assert out2_0.data == out2.data  # This line shows that asfortranarray does not make a data copy immediately
     out3 = np.zeros((10, 10, 10))
     density_f.wtf(np.asfortranarray(out1), out2, np.asfortranarray(out3))
-    # print(out1.flags.f_contiguous) # True
+    assert out1.flags.f_contiguous
     assert out1[1] == 10
-    # print(out2.flags.f_contiguous) # True
+    assert out2.flags.f_contiguous
     assert out2[1, 0] == 10
-    # assert(out2_0.data == out2.data) # Fails: conclusion: this function rewrites memory
-    # print(out3.flags.f_contiguous) # False
-    # assert(out3[1, 0, 0] == 10) # Fails
+    assert out2_0.data != out2.data  # Compare to the above - the wtf function
+    assert not out3.flags.f_contiguous
+    assert out3[1, 0, 0] != 10
 
     out1 = np.zeros(10)
     out2 = np.asfortranarray(np.zeros((10, 10)))
-    out3 = np.zeros((10, 10, 10)).T  # This array is now fortran contiguous
-    wrap(out1, out2, out3)
-    # print(out1.flags.f_contiguous) # True
+    out3 = np.zeros((10, 10, 10)).T  # This array is now fortran contiguous, as a result of the transpose.
+    density_f.wtf(out1, out2, out3)
+    assert out1.flags.f_contiguous
     assert out1[1] == 10
-    # print(out2.flags.f_contiguous) # True
+    assert out2.flags.f_contiguous
     assert out2[1, 0] == 10
-    # print(out3.flags.f_contiguous) # True
+    assert out3.flags.f_contiguous
     assert out3[1, 0, 0] == 10
