@@ -59,9 +59,12 @@ def test_transforms():
 
         assert np.allclose(dat0, dat2)
 
-
 def func(vecs):
-    return np.sin(vecs[:, 0]/100.0) + np.cos(3*vecs[:, 1]/100.) + np.cos(2*vecs[:, 2]/100.)
+    return vecs[:, 0].ravel().copy()
+
+
+def func1(vecs):
+    return np.sin(vecs[:, 0]/10.0) + np.cos(3*vecs[:, 1]/10.) + np.cos(2*vecs[:, 2]/10.)
 
 
 def test_interpolations():
@@ -85,16 +88,32 @@ def test_interpolations():
     corners = np.array([0, 0, 0], dtype=float_t)
     deltas = np.array([1, 1, 1], dtype=float_t)
     x, y, z = np.meshgrid(np.arange(0, nx), np.arange(0, ny), np.arange(0, nz), indexing='ij')
-    xyz0 = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
-    dens = func(xyz0).reshape([nx, ny, nz])
-    x, y, z = np.meshgrid(np.arange(1, nx-1), np.arange(1, ny-1), np.arange(1, nz-1), indexing='ij')
-    xyz = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
-    dens1 = func(xyz)
+    vectors0 = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
+    dens = func(vectors0).reshape([nx, ny, nz])
+    x, y, z = np.meshgrid(np.arange(1, nx-2), np.arange(1, ny-2), np.arange(1, nz-2), indexing='ij')
+    vectors = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t) + 0.1
+    dens1 = func(vectors)
     dens2 = np.zeros_like(dens1)
-    density.trilinear_interpolation(dens, xyz, corners, deltas, dens2)
+    density.trilinear_interpolation(dens, vectors, corners, deltas, dens2)
     assert np.max(np.abs(dens1)) > 0
     assert np.max(np.abs(dens2)) > 0
-    assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-12  # Interpolations only good to the 1% level.  Why?
+    assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-8
+
+    float_t = np.float64
+    nx, ny, nz = 6, 7, 8
+    corners = np.array([0, 0, 0], dtype=float_t)
+    deltas = np.array([1, 1, 1], dtype=float_t)
+    x, y, z = np.meshgrid(np.arange(0, nx), np.arange(0, ny), np.arange(0, nz), indexing='ij')
+    vectors0 = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
+    dens = func1(vectors0).reshape([nx, ny, nz])
+    x, y, z = np.meshgrid(np.arange(1, nx-2), np.arange(1, ny-2), np.arange(1, nz-2), indexing='ij')
+    vectors = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t) + 0.1
+    dens1 = func1(vectors)
+    dens2 = np.zeros_like(dens1)
+    density.trilinear_interpolation(dens, vectors, corners, deltas, dens2)
+    assert np.max(np.abs(dens1)) > 0
+    assert np.max(np.abs(dens2)) > 0
+    assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2
 
 
 def test_insertions():
@@ -109,7 +128,7 @@ def test_insertions():
     corners = np.array([0, 0, 0], dtype=float_t)
     deltas = np.array([1, 1, 1], dtype=float_t)
     vectors = np.array([[2, 3, 4]], dtype=float_t)
-    vals = func(vectors)
+    vals = func1(vectors)
     density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
     assert np.max(np.abs(densities)) > 0
     assert (np.abs((vals - densities[2, 3, 4]) / vals)) < 1e-8
@@ -121,7 +140,7 @@ def test_insertions():
     corners = np.array([0, 0, 0], dtype=float_t)
     deltas = np.array([1, 1, 1], dtype=float_t)
     vectors = np.array([[2.5, 3.5, 4.5]], dtype=float_t)
-    vals = func(vectors)
+    vals = func1(vectors)
     density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
     assert np.max(np.abs(densities)) > 0
     assert (np.abs((vals - densities[2, 3, 4]/counts[2, 3, 4]) / vals)) < 1e-8
@@ -134,11 +153,26 @@ def test_insertions():
     corners = np.array([0, 0, 0], dtype=float_t)
     deltas = np.array([1, 1, 1], dtype=float_t)
     vectors = (np.random.rand(10000, 3) * np.array([nx-1, ny-1, nz-1])).astype(float_t)
+    vectors = np.floor(vectors)
     vals = func(vectors)
     density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
     val = func(np.array([[2, 3, 4]], dtype=float_t))
     assert np.max(np.abs(densities)) > 0
-    assert (np.abs((val - densities[2, 3, 4]/counts[2, 3, 4]) / val)) < 1e-3
+    assert (np.abs((val - densities[2, 3, 4]/counts[2, 3, 4]) / val)) < 1e-8
+
+    np.random.seed(0)
+    float_t = np.float64
+    nx, ny, nz = 6, 7, 8
+    densities = np.zeros([nx, ny, nz], dtype=float_t)
+    counts = np.zeros([nx, ny, nz], dtype=float_t)
+    corners = np.array([0, 0, 0], dtype=float_t)
+    deltas = np.array([1, 1, 1], dtype=float_t)
+    vectors = (np.random.rand(10000, 3) * np.array([nx-1, ny-1, nz-1])).astype(float_t)
+    vals = func1(vectors)
+    density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
+    val = func1(np.array([[2, 3, 4]], dtype=float_t))
+    assert np.max(np.abs(densities)) > 0
+    assert (np.abs((val - densities[2, 3, 4]/counts[2, 3, 4]) / val)) < 1e-2
 
 
 def test_wtf():
