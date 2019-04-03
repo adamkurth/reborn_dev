@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import bornagain as ba
 import bornagain.target.crystal as crystal
 import bornagain.simulate.clcore as core
+from bornagain.simulate.examples import lysozyme_pdb_file
 from bornagain.utils import rotate, rotation_about_axis
 
 
@@ -33,22 +34,19 @@ print(lin)
 # Create a detector
 print('Setting up the detector')
 tstart = time.time()
-pl = ba.detector.PADGeometry()
 nPixels = 1001
 pixelSize = 100e-6
 detectorDistance = 0.5
 wavelength = 1.5e-10
 beam_vec = np.array([0, 0, 1])
-pl.simple_setup(n_pixels=nPixels, pixel_size=pixelSize, distance=detectorDistance)
-# pl.simple_setup(nPixels, nPixels + 1, pixelSize, detectorDistance, wavelength)
-# q = pl[0].Q
-q_vecs = pl.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
+pad = ba.detector.PADGeometry(n_pixels=nPixels, pixel_size=pixelSize, distance=detectorDistance)
+q_vecs = pad.q_vecs(beam_vec=beam_vec, wavelength=wavelength)
 n_pixels = q_vecs.shape[0]
 tdif = time.time() - tstart
 print('CPU q array created in %7.03f ms' % (tdif * 1e3))
 
 # Load a crystal structure from pdb file
-pdbFile = '../data/pdb/2LYZ.pdb'  # Lysozyme
+pdbFile = lysozyme_pdb_file  # Lysozyme
 print('Loading pdb file (%s)' % pdbFile)
 cryst = crystal.CrystalStructure(pdbFile)
 r = cryst.molecule.coordinates  # These are atomic coordinates (Nx3 array)
@@ -94,7 +92,7 @@ if 1:
 
     if show:
         imdisp = np.abs(A) ** 2
-        imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
+        imdisp = imdisp.reshape((pad.n_ss, pad.n_fs))
         imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
@@ -131,7 +129,7 @@ if 1:
 
     if show:
         imdisp = np.abs(a) ** 2
-        imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
+        imdisp = imdisp.reshape((pad.n_ss, pad.n_fs))
         imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
@@ -149,13 +147,13 @@ if 1:
     print("Amplitudes passed in/out as GPU array")
     print(lin)
 
-    n_pixels = pl.n_fs * pl.n_ss
+    n_pixels = pad.n_fs * pad.n_ss
     n_atoms = r.shape[0]
     a_dev = clcore.to_device(shape=(n_pixels,), dtype=clcore.complex_t)
 
     for i in range(0, n_trials):
         t = time.time()
-        clcore.phase_factor_pad(r, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=R, a=a_dev)
+        clcore.phase_factor_pad(r, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=R, a=a_dev)
         tf = time.time() - t
         print('phase_factor_pad: %7.03f ms' % (tf * 1e3))
 
@@ -167,7 +165,7 @@ if 1:
     # Display pattern
     if show:
         imdisp = np.abs(a) ** 2
-        imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
+        imdisp = imdisp.reshape((pad.n_ss, pad.n_fs))
         imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
@@ -182,16 +180,16 @@ if 1:
     print("Include two interfering pairs of molecules, shifted in space.")
     print(lin)
 
-    n_pixels = pl.n_fs * pl.n_ss
+    n_pixels = pad.n_fs * pad.n_ss
     n_atoms = r.shape[0]
     a_dev = clcore.to_device(shape=(n_pixels,), dtype=clcore.complex_t)
     U = np.array([1, 0, 0])*5e-9
 
     for i in range(0, n_trials):
         t = time.time()
-        clcore.phase_factor_pad(r, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=R,
+        clcore.phase_factor_pad(r, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=R,
                                 a=a_dev, U=None, add=False)
-        clcore.phase_factor_pad(r, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=R,
+        clcore.phase_factor_pad(r, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=R,
                                 a=a_dev, U=U, add=True)
         tf = time.time() - t
         print('phase_factor_pad: %7.03f ms' % (tf * 1e3,))
@@ -204,7 +202,7 @@ if 1:
     # Display pattern
     if show:
         imdisp = np.abs(a) ** 2
-        imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
+        imdisp = imdisp.reshape((pad.n_ss, pad.n_fs))
         imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
@@ -219,7 +217,7 @@ if 1:
     print("Include two interfering pairs of molecules, shifted and rotated.")
     print(lin)
 
-    n_pixels = pl.n_fs * pl.n_ss
+    n_pixels = pad.n_fs * pad.n_ss
     n_atoms = r.shape[0]
     a_dev = clcore.to_device(shape=(n_pixels,), dtype=clcore.complex_t)
     U = np.array([1, 0, 0]) * 5e-9
@@ -227,14 +225,14 @@ if 1:
 
     print("Rotation and translation on CPU.")
     r0 = r
-    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=None,
+    clcore.phase_factor_pad(r0, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=None,
                             a=a_dev, U=None, add=False)
     r0 = rotate(RR, r) + U
-    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=None,
+    clcore.phase_factor_pad(r0, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=None,
                             a=a_dev, U=None, add=True)
     if show:
         imdisp = np.abs(a_dev.get()) ** 2
-        imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
+        imdisp = imdisp.reshape((pad.n_ss, pad.n_fs))
         imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
@@ -242,14 +240,14 @@ if 1:
 
     print("Rotation and translation on GPU.")
     r0 = r
-    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=None,
+    clcore.phase_factor_pad(r0, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=None,
                             a=a_dev, U=None, add=False)
     r0 = r
-    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=RR,
+    clcore.phase_factor_pad(r0, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=RR,
                             a=a_dev, U=U, add=True)
     if show:
         imdisp = np.abs(a_dev.get()) ** 2
-        imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
+        imdisp = imdisp.reshape((pad.n_ss, pad.n_fs))
         imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
@@ -257,14 +255,14 @@ if 1:
 
     print("Rotation on CPU, translation on GPU.")
     r0 = r.copy()
-    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=None,
+    clcore.phase_factor_pad(r0, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=None,
                             a=a_dev, U=None, add=False)
     r0 = rotate(RR, r.copy())
-    clcore.phase_factor_pad(r0, f, pl.t_vec, pl.fs_vec, pl.ss_vec, beam_vec, pl.n_fs, pl.n_ss, wavelength, R=None,
+    clcore.phase_factor_pad(r0, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=None,
                             a=a_dev, U=U, add=True)
     if show:
         imdisp = np.abs(a_dev.get()) ** 2
-        imdisp = imdisp.reshape((pl.n_ss, pl.n_fs))
+        imdisp = imdisp.reshape((pad.n_ss, pad.n_fs))
         imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')
         plt.title('y: up, x: right, z: beam (towards you)')
@@ -289,7 +287,7 @@ if 1:
 
     for i in range(0, 1):
         t = time.time()
-        clcore.phase_factor_mesh(r, f, N, qmin, qmax, a=a_map_dev)
+        clcore.phase_factor_mesh(r, f, N=N, q_min=qmin, q_max=qmax, a=a_map_dev)
         tf = time.time() - t
         print('phase_factor_mesh: %7.03f ms (%d atoms; %d pixels)' % (tf * 1e3, n_atoms, n_pixels))
 
@@ -297,12 +295,12 @@ if 1:
     print("Amplitudes passed as GPU array")
 
     q_dev = clcore.to_device(q, dtype=clcore.real_t)
-    a_out_dev = clcore.to_device(dtype=clcore.complex_t, shape=(pl.n_fs*pl.n_ss))
+    a_out_dev = clcore.to_device(dtype=clcore.complex_t, shape=(pad.n_fs * pad.n_ss))
     n_atoms = 0
     n_pixels = q.shape[0]
     for i in range(0, n_trials):
         t = time.time()
-        clcore.buffer_mesh_lookup(a_map_dev, q_dev, N, qmin, qmax, R=R, a=a_out_dev)
+        clcore.buffer_mesh_lookup(a_map_dev, q_dev, N=N, q_min=qmin, q_max=qmax, R=R, a=a_out_dev)
         tf = time.time() - t
         print('buffer_mesh_lookup: %7.03f ms' % (tf * 1e3))
 
@@ -312,7 +310,7 @@ if 1:
     print("Moving amplitudes back to CPU memory in %7.03f ms" % (tt*1e3))
 
     if show:
-        imdisp = a.reshape(pl.n_ss, pl.n_fs)
+        imdisp = a.reshape(pad.n_ss, pad.n_fs)
         imdisp = np.abs(imdisp) ** 2
         imdisp = np.log(imdisp + 0.1)
         plt.imshow(imdisp, interpolation='nearest', cmap='gray', origin='lower')

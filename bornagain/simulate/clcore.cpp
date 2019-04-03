@@ -383,7 +383,6 @@ kernel void buffer_mesh_lookup(
     const dsfloat y1 = 1.0f - y0;
     const dsfloat z1 = 1.0f - z0;
     dsfloat2 a_sum = 0;
-
     a_sum = a_map[i0 + j0 + k0] * x1 * y1 * z1 +
             a_map[i1 + j0 + k0] * x0 * y1 * z1 +
             a_map[i0 + j1 + k0] * x1 * y0 * z1 +

@@ -164,7 +164,7 @@ def _clcore(double_precision=False):
     f = core.to_device(f)
     a = core.to_device(shape=(np.prod(n_mesh),), dtype=core.complex_t)
 
-    amps = core.phase_factor_mesh(r_vecs, f, n_mesh, q_min, q_max, a)
+    amps = core.phase_factor_mesh(r_vecs, f, N=n_mesh, q_min=q_min, q_max=q_max, a=a)
     assert(type(amps) is cl_array)
 
     del n_atoms, n_mesh, q_min, q_max, r_vecs, f, amps, a
@@ -197,8 +197,8 @@ def _clcore(double_precision=False):
     a = core.to_device(shape=(np.prod(n_mesh),), dtype=core.complex_t)
     a_out = core.to_device(shape=pad.n_fs*pad.n_ss, dtype=core.complex_t)
 
-    amps = core.phase_factor_mesh(r_vecs, f, n_mesh, q_min, q_max, a)
-    amps2 = core.buffer_mesh_lookup(a, q, n_mesh, q_min, q_max, R=rot, a=a_out)
+    amps = core.phase_factor_mesh(r_vecs, f, N=n_mesh, q_min=q_min, q_max=q_max, a=a)
+    amps2 = core.buffer_mesh_lookup(a, q, N=n_mesh, q_min=q_min, q_max=q_max, R=rot, a=a_out)
     assert(type(amps) is cl_array)
     assert(type(amps2) is cl_array)
 
@@ -377,11 +377,11 @@ def _test_ridiculous_sum(double_precision=False):
     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 
     @jit(nopython=True)
-    def numba_add(input):
-        out = 0
+    def numba_add(input, dtype):
+        out = np.array((0,), dtype=dtype)
         for i in range(len(input)):
-            out += input[i]
-        return out
+            out[0] += input[i]
+        return out[0]
 
     np.random.seed(0)
     for n in np.array([2**n for n in range(0, 16)]):
@@ -389,15 +389,10 @@ def _test_ridiculous_sum(double_precision=False):
         b = 0
         for i in range(0, n):
             b += a[i]
-        d = numba_add(a)
+        d = numba_add(a, core.real_t)
         c = core.test_simple_sum(a)
         if double_precision:
             assert(np.abs(b - c) < 1e-12)
         else:
-            assert(np.abs(b - c)/np.abs(c) < 1e-5)  # TODO: Why is the GPU producing a different result than CPU?
+            assert(np.abs(b - c)/np.abs(c) < 1e-5)
             assert(np.abs(b - d)/np.abs(d) < 1e-5)
-
-if __name__ == '__main__':
-
-    test_clcore_float()
-    test_rotations()

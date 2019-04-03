@@ -1,10 +1,10 @@
 from time import time
 import numpy as np
 import pyqtgraph as pg
+import bornagain as ba
 from bornagain import detector
 from bornagain import source
-from bornagain import utils
-from bornagain.utils import rotate, vec_norm
+from bornagain.utils import rotate
 from bornagain.simulate.clcore import ClCore
 from bornagain.simulate.examples import psi_pdb_file, lysozyme_pdb_file
 from bornagain.target import crystal, density
@@ -16,7 +16,12 @@ from bornagain.external.pyqtgraph.extras import keep_open
 cryst = crystal.CrystalStructure(lysozyme_pdb_file)
 spacegroup = cryst.spacegroup
 unitcell = cryst.unitcell
+r = cryst.molecule.coordinates.copy()
 print(unitcell)
+
+# Setup beam and detector
+beam = source.Beam(wavelength=3e-10)
+pad = detector.PADGeometry(pixel_size=300e-6, distance=0.2, n_pixels=300)
 
 # Redefine operators so that trimers are tightly packed
 spacegroup.sym_translations[2] += np.array([1, 0, 0])
@@ -74,8 +79,6 @@ if viewcrystal:
     scat.show()
 
 t = time()
-beam = source.Beam(wavelength=3e-10)
-pad = detector.PADGeometry(pixel_size=200e-6, distance=0.2, n_pixels=500)
 q_vecs = pad.q_vecs(beam=beam)
 h_vecs = unitcell.q2h(q_vecs)/2/np.pi
 print(np.max(h_vecs))
@@ -83,43 +86,72 @@ print(np.max(h_vecs))
 clcore = ClCore()
 print(clcore.context.devices)
 t = time()
-amps_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
-amps_mol_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
-amps_mol_interp_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
-amps_lat_dev = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
-h_vecs_dev = clcore.to_device(h_vecs, dtype=clcore.real_t)
-au_x_vecs_dev = clcore.to_device(au_x_coords, dtype=clcore.real_t)
-au_f_dev = clcore.to_device(shape=(cryst.molecule.n_atoms,), dtype=clcore.real_t)*0 + 1
+amps_gpu = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
+amps_mol_gpu = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
+amps_mol_interp_gpu = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
+amps_lat_gpu = clcore.to_device(np.zeros(pad.shape(), dtype=clcore.complex_t))
+q_dev = clcore.to_device(q_vecs, dtype=clcore.real_t)
+h_vecs_gpu = clcore.to_device(h_vecs, dtype=clcore.real_t)
+au_x_vecs_gpu = clcore.to_device(au_x_coords, dtype=clcore.real_t)
+au_f_gpu = clcore.to_device(shape=(cryst.molecule.n_atoms,), dtype=clcore.complex_t)*0 + 1
 
 
 resolution = 0.8*2*np.pi/np.max(pad.q_mags(beam=beam))
-oversampling = 1
-dens = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
-print('shape', dens.shape)
-print('h dens', dens.h_vecs)
-dens_h = dens.h_density_map
 print('Resolution: %.3g A' % (resolution*1e10,))
-print('hlims')
-print(dens_h.limits)
-print('H_vecs')
-print(h_vecs)
-amps3d_dev = clcore.to_device(shape=dens.shape, dtype=clcore.complex_t)*0
-clcore.phase_factor_mesh(au_x_vecs_dev, au_f_dev, density_map=dens_h, a=amps3d_dev)
+oversampling = 2
+dens = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
+
+
+
 for i in range(1):#spacegroup.n_molecules):
     print('Symmetry partner %d' % (i,))
-    mol_x_vecs = spacegroup.apply_symmetry_operation(i, au_x_coords)
-    clcore.phase_factor_qrf(h_vecs_dev, mol_x_vecs, a=amps_mol_dev, add=False)
-    clcore.phase_factor_qrf(h_vecs_dev, lats[i].occupied_x_coordinates, a=amps_lat_dev, add=False)
-    RR = spacegroup.sym_rotations[i]
-    TT = spacegroup.sym_translations[i]
-    clcore.buffer_mesh_lookup(amps3d_dev, h_vecs_dev, density_map=dens_h, R=None, U=None, a=amps_mol_interp_dev, add=False)
-    # amps_dev += amps_mol_interp_dev #* amps_lat_dev
+    mol_x_vecs = au_x_coords #spacegroup.apply_symmetry_operation(i, au_x_coords)
+    clcore.phase_factor_qrf(2*np.pi*h_vecs_gpu, mol_x_vecs, a=amps_mol_gpu, add=False)
+    amps1 = clcore.phase_factor_qrf(q_vecs, unitcell.x2r(mol_x_vecs))
+    # clcore.phase_factor_qrf(2*np.pi*h_vecs_gpu, lats[i].occupied_x_coordinates, a=amps_lat_gpu, add=False)
+    # RR = spacegroup.sym_rotations[i]
+    # TT = spacegroup.sym_translations[i]
+    # a_out_dev = clcore.to_device(dtype=clcore.complex_t, shape=(pad.n_fs * pad.n_ss))
+    # R = rotation_about_axis(np.pi*90/180, [0, 0, 1])
+    # clcore.buffer_mesh_lookup(a_map_dev, q_dev, N=N, q_min=qmin, q_max=qmax, R=R, a=a_out_dev)
+    # amps_gpu += amps_mol_interp_gpu #* amps_lat_gpu
 
-intensities1 = pad.reshape(np.abs(amps_mol_interp_dev.get())**2)
-intensities = intensities1
-# intensities2 = pad.reshape(np.abs(amps_mol_dev.get())**2)
-# intensities = np.concatenate([intensities1, intensities2])
-print('GPU simulation: %g seconds' % (time()-t,))
+
+beam_vec = np.array([0, 0, 1])
+pad = ba.detector.PADGeometry(pixel_size=300e-6, distance=0.2, n_pixels=300)
+q_vecs = pad.q_vecs(beam=beam)
+n_pixels = q_vecs.shape[0]
+pdbFile = lysozyme_pdb_file  # Lysozyme
+print('Loading pdb file (%s)' % pdbFile)
+cryst = crystal.CrystalStructure(pdbFile)
+r = cryst.molecule.coordinates  # These are atomic coordinates (Nx3 array)
+n_atoms = r.shape[0]
+f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, ba.units.hc / beam.wavelength)*0 + 1
+R = np.eye(3)
+res = 10e-10  # Resolution
+qmax = 2 * np.pi / res
+qmin = -qmax
+N = 200  # Number of samples
+n_atoms = r.shape[0]
+n_pixels = N ** 3
+a_map_dev = clcore.to_device(shape=(n_pixels,), dtype=clcore.complex_t)
+clcore.phase_factor_mesh(r, au_f_gpu, N=N, q_min=qmin, q_max=qmax, a=a_map_dev)
+q_dev = clcore.to_device(q_vecs, dtype=clcore.real_t)
+a_out_dev = clcore.to_device(dtype=clcore.complex_t, shape=(pad.n_fs * pad.n_ss))
+n_atoms = 0
+n_pixels = q_vecs.shape[0]
+clcore.buffer_mesh_lookup(a_map_dev, q_dev, N=N, q_min=qmin, q_max=qmax, R=R, a=a_out_dev)
+
+# print('%g %g %g' % (np.max(q_vecs)*1e-9, qmin*1e-9, qmax*1e-9))
+
+intensities1 = pad.reshape(np.abs(a_out_dev.get())**2)
+# pg.image(intensities1)
+# print('GPU simulation: %g seconds' % (time()-t,))
+
+
+intensities2 = pad.reshape(np.abs(amps_mol_gpu.get())**2)
+intensities3 = pad.reshape(np.abs(amps1)**2)
+intensities = np.concatenate([intensities1, intensities2, intensities3])
 pg.image(intensities)
 
 keep_open()

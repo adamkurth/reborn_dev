@@ -559,7 +559,7 @@ class ClCore(object):
         else:
             return a_dev
 
-    def phase_factor_mesh(self, r, f, N=None, q_min=None, q_max=None, a=None, R=None, U=None, add=False,
+    def phase_factor_mesh(self, r, f, N=None, q_min=None, q_max=None, dq=None, a=None, R=None, U=None, add=False,
                           density_map=None):
 
         r"""
@@ -604,6 +604,8 @@ class ClCore(object):
 
         if density_map is None:
             N = np.array(N, dtype=self.int_t)
+            if q_max is None:
+                q_max = q_min + dq*(N-1)
             q_max = np.array(q_max, dtype=self.real_t)
             q_min = np.array(q_min, dtype=self.real_t)
         else:
@@ -646,7 +648,7 @@ class ClCore(object):
         else:
             return a_dev
 
-    def buffer_mesh_lookup(self, a_map, q, N=None, q_min=None, q_max=None, R=None, U=None, a=None, density_map=None,
+    def buffer_mesh_lookup(self, a_map, q, N=None, q_min=None, q_max=None, dq=None, R=None, U=None, a=None, density_map=None,
                            add=False):
 
         r"""
@@ -693,6 +695,8 @@ class ClCore(object):
 
         if density_map is None:
             N = np.array(N, dtype=self.int_t)
+            if q_max is None:
+                q_max = q_min + dq*(N-1)
             q_max = np.array(q_max, dtype=self.real_t)
             q_min = np.array(q_min, dtype=self.real_t)
         else:
@@ -707,14 +711,14 @@ class ClCore(object):
         if len(q_min.shape) == 0:
             q_min = self.real_t(np.ones(3) * q_min)
 
-        deltaQ = np.array((q_max - q_min) / (N - 1.0), dtype=self.real_t)
+        dq = np.array((q_max - q_min) / (N - 1.0), dtype=self.real_t)
 
         n_pixels = self.int_t(q.shape[0])
 
         a_map_dev = self.to_device(a_map, dtype=self.complex_t)
         q_dev = self.to_device(q, dtype=self.real_t)
         N = self.vec4(N, dtype=self.int_t)
-        deltaQ = self.vec4(deltaQ, dtype=self.real_t)
+        dq = self.vec4(dq, dtype=self.real_t)
         q_min = self.vec4(q_min, dtype=self.real_t)
         a_out_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels,))
 
@@ -723,7 +727,7 @@ class ClCore(object):
 
         self.buffer_mesh_lookup_cl(self.queue, (global_size,), (self.group_size,),
                                    a_map_dev.data, q_dev.data, a_out_dev.data,
-                                   n_pixels, N, deltaQ, q_min, R, U, do_translate, add)
+                                   n_pixels, N, dq, q_min, R, U, do_translate, add)
         self.queue.finish()
 
         if a is None:
@@ -731,8 +735,7 @@ class ClCore(object):
         else:
             return a_out_dev
 
-    def lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w,
-                                          R=None, I=None, add=False):
+    def lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w, R=None, I=None, add=False):
         r"""
         Calculate crystal lattice transform intensities for a pixel-array detector.  This is the usual transform for
         an idealized parallelepiped crystal (usually not very realistic...).
