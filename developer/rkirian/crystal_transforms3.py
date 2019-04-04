@@ -16,14 +16,14 @@ from bornagain.external.pyqtgraph.extras import keep_open
 cryst = crystal.CrystalStructure(lysozyme_pdb_file)
 spacegroup = cryst.spacegroup
 unitcell = cryst.unitcell
-r_vecs = cryst.molecule.coordinates.copy()
 print(unitcell)
 
 # Setup beam and detector
 beam = source.Beam(wavelength=3e-10)
-pad = detector.PADGeometry(pixel_size=300e-6, distance=0.2, n_pixels=300)
-q_vecs = pad.q_vecs(beam=beam)
-
+pad = detector.PADGeometry(pixel_size=300e-6, distance=0.2, n_pixels=1000)
+det_h_vecs = unitcell.q2h(pad.q_vecs(beam=beam)) / 2 / np.pi
+resolution = 0.8*2*np.pi/np.max(pad.q_mags(beam=beam))
+print('Resolution: %.3g A' % (resolution*1e10,))
 
 # Atomic scattering factors
 f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, ba.units.hc / beam.wavelength)*0 + 1
@@ -54,8 +54,8 @@ max_size = 41  # Make sure we have an odd value... for making hexagonal prisms
 lats = [crystal.FiniteLattice(max_size=max_size, unitcell=unitcell) for i in range(spacegroup.n_molecules)]
 
 # Construct a finite lattice in the form of a hexagonal prism
-width = 1
-length = 1
+width = 2
+length = 2
 for i in range(spacegroup.n_molecules):
     lat = lats[i]
     com = mol_x_coms[i]
@@ -84,56 +84,33 @@ if viewcrystal:
     scat.show()
 
 t = time()
-h_vecs = unitcell.q2h(q_vecs)/2/np.pi
-# print(np.max(h_vecs))
+
 
 t = time()
 clcore = ClCore()
-# print(clcore.context.devices)
 amps_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
-amps_mol_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
-amps_mol_gpu2 = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
 amps_slice_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
-amps_mol_interp_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
 amps_lat_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
-r_vecs_gpu = clcore.to_device(r_vecs, dtype=clcore.real_t)
-q_vecs_gpu = clcore.to_device(q_vecs, dtype=clcore.real_t)
-h_vecs_gpu = clcore.to_device(h_vecs, dtype=clcore.real_t)*2*np.pi
-au_x_vecs_gpu = clcore.to_device(au_x_coords, dtype=clcore.real_t)
-au_f_gpu = clcore.to_device(f, dtype=clcore.complex_t)
+h_vecs_gpu = clcore.to_device(det_h_vecs, dtype=clcore.real_t) * 2 * np.pi
 
-resolution = 0.8*2*np.pi/np.max(pad.q_mags(beam=beam))
-print('Resolution: %.3g A' % (resolution*1e10,))
 oversampling = 4
 dens = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
 dens_h = dens.h_density_map
 mesh_h_lims = dens_h.limits*2*np.pi
-print(dens_h.shape)
-print(mesh_h_lims)
 
-qmax = 2 * np.pi / resolution
-qmin = -qmax
-N = np.ones(3, dtype=clcore.int_t)*100  # Number of samples
 a_map_dev = clcore.to_device(shape=dens_h.shape, dtype=clcore.complex_t)
-clcore.phase_factor_mesh(au_x_vecs_gpu, au_f_gpu, N=dens_h.shape, q_min=mesh_h_lims[:, 0], q_max=mesh_h_lims[:, 1], a=a_map_dev)
+clcore.phase_factor_mesh(au_x_coords, f, N=dens_h.shape, a=a_map_dev,
+                         q_min=dens_h.limits[:, 0]*2*np.pi, q_max=dens_h.limits[:, 1]*2*np.pi)
 
 for i in range(spacegroup.n_molecules):
-    print('Symmetry partner %d' % (i,))
-    mol_x_vecs = spacegroup.apply_symmetry_operation(i, au_x_coords)
-    clcore.phase_factor_qrf(h_vecs_gpu, mol_x_vecs, au_f_gpu, a=amps_mol_gpu, add=True)
-    clcore.phase_factor_qrf(q_vecs_gpu, unitcell.x2r(mol_x_vecs), au_f_gpu, a=amps_mol_gpu2, add=True)
     clcore.phase_factor_qrf(h_vecs_gpu, lats[i].occupied_x_coordinates, a=amps_lat_gpu, add=False)
     RR = spacegroup.sym_rotations[i]
     TT = spacegroup.sym_translations[i]
     clcore.buffer_mesh_lookup(a_map_dev, h_vecs_gpu, N=dens_h.shape, q_min=mesh_h_lims[:, 0], q_max=mesh_h_lims[:, 1],
-                              a=amps_slice_gpu, R=RR, U=TT, add=True)
-    amps_gpu += amps_mol_interp_gpu * amps_lat_gpu
+                              a=amps_slice_gpu, R=RR, U=TT, add=False)
+    amps_gpu += amps_slice_gpu * amps_lat_gpu
 
-intensities1 = pad.reshape(np.abs(amps_slice_gpu.get()) ** 2)
-intensities2 = pad.reshape(np.abs(amps_mol_gpu.get())**2)
-intensities3 = pad.reshape(np.abs(amps_mol_gpu2.get())**2)
-intensities = np.concatenate([intensities1, intensities2, intensities3])
-
+intensities = np.abs(amps_gpu.get())**2
 print('GPU simulation: %g seconds' % (time()-t,))
 pg.image(intensities)
 

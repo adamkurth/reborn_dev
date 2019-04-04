@@ -376,12 +376,12 @@ def _test_ridiculous_sum(double_precision=False):
 
     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 
-    @jit(nopython=True)
-    def numba_add(input, dtype):
-        out = np.array((0,), dtype=dtype)
-        for i in range(len(input)):
-            out[0] += input[i]
-        return out[0]
+    # @jit(nopython=True)
+    # def numba_add(input, dtype):
+    #     out = np.array((0,), dtype=dtype)
+    #     for i in range(len(input)):
+    #         out[0] += input[i]
+    #     return out[0]
 
     np.random.seed(0)
     for n in np.array([2**n for n in range(0, 16)]):
@@ -389,10 +389,10 @@ def _test_ridiculous_sum(double_precision=False):
         b = 0
         for i in range(0, n):
             b += a[i]
-        d = numba_add(a, core.real_t)
+        # d = numba_add(a, core.real_t)
         c = core.test_simple_sum(a)
         if double_precision:
             assert(np.abs(b - c) < 1e-12)
         else:
             assert(np.abs(b - c)/np.abs(c) < 1e-5)
-            assert(np.abs(b - d)/np.abs(d) < 1e-5)
+            # assert(np.abs(b - d)/np.abs(d) < 1e-5)
