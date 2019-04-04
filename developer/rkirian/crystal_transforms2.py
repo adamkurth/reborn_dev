@@ -98,31 +98,38 @@ amps_mol_interp_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t
 amps_lat_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
 r_vecs_gpu = clcore.to_device(r_vecs, dtype=clcore.real_t)
 q_vecs_gpu = clcore.to_device(q_vecs, dtype=clcore.real_t)
-h_vecs_gpu = clcore.to_device(h_vecs, dtype=clcore.real_t)
+h_vecs_gpu = clcore.to_device(h_vecs, dtype=clcore.real_t)*2*np.pi
 au_x_vecs_gpu = clcore.to_device(au_x_coords, dtype=clcore.real_t)
 au_f_gpu = clcore.to_device(f, dtype=clcore.complex_t)
 
 resolution = 0.8*2*np.pi/np.max(pad.q_mags(beam=beam))
 print('Resolution: %.3g A' % (resolution*1e10,))
-oversampling = 2
+oversampling = 4
 dens = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
+dens_h = dens.h_density_map
+mesh_h_lims = dens_h.limits*2*np.pi
+print(dens_h.shape, mesh_h_lims)
 
 qmax = 2 * np.pi / resolution
 qmin = -qmax
 N = np.ones(3, dtype=clcore.int_t)*100  # Number of samples
-a_map_dev = clcore.to_device(shape=N, dtype=clcore.complex_t)
-clcore.phase_factor_mesh(r_vecs, au_f_gpu, N=N, q_min=qmin, q_max=qmax, a=a_map_dev)
+a_map_dev = clcore.to_device(shape=dens_h.shape, dtype=clcore.complex_t)
+clcore.phase_factor_mesh(au_x_vecs_gpu, au_f_gpu, N=dens_h.shape, q_min=mesh_h_lims[:, 0], q_max=mesh_h_lims[:, 1], a=a_map_dev)
+
+print(h_vecs)
+print(qmin)
 
 for i in range(spacegroup.n_molecules):
     print('Symmetry partner %d' % (i,))
     mol_x_vecs = spacegroup.apply_symmetry_operation(i, au_x_coords)
-    clcore.phase_factor_qrf(2*np.pi*h_vecs_gpu, mol_x_vecs, au_f_gpu, a=amps_mol_gpu, add=True)
+    clcore.phase_factor_qrf(h_vecs_gpu, mol_x_vecs, au_f_gpu, a=amps_mol_gpu, add=True)
     clcore.phase_factor_qrf(q_vecs_gpu, unitcell.x2r(mol_x_vecs), au_f_gpu, a=amps_mol_gpu2, add=True)
-    # clcore.phase_factor_qrf(2*np.pi*h_vecs_gpu, lats[i].occupied_x_coordinates, a=amps_lat_gpu, add=False)
-    # RR = spacegroup.sym_rotations[i]
-    # TT = spacegroup.sym_translations[i]
-    clcore.buffer_mesh_lookup(a_map_dev, q_vecs_gpu, N=N, q_min=qmin, q_max=qmax, a=amps_slice_gpu, add=True)
-    # amps_gpu += amps_mol_interp_gpu #* amps_lat_gpu
+    clcore.phase_factor_qrf(h_vecs_gpu, lats[i].occupied_x_coordinates, a=amps_lat_gpu, add=False)
+    RR = spacegroup.sym_rotations[i]
+    TT = spacegroup.sym_translations[i]
+    clcore.buffer_mesh_lookup(a_map_dev, h_vecs_gpu, N=dens_h.shape, q_min=mesh_h_lims[:, 0], q_max=mesh_h_lims[:, 1],
+                              a=amps_slice_gpu, R=RR, U=TT, add=True)
+    amps_gpu += amps_mol_interp_gpu * amps_lat_gpu
 
 intensities1 = pad.reshape(np.abs(amps_slice_gpu.get()) ** 2)
 intensities2 = pad.reshape(np.abs(amps_mol_gpu.get())**2)

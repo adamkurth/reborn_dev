@@ -392,6 +392,16 @@ kernel void buffer_mesh_lookup(
             a_map[i1 + j1 + k0] * x0 * y0 * z1 +
             a_map[i1 + j1 + k1] * x0 * y0 * z0;
 
+    dsfloat ph, cosph, sinph;
+    dsfloat2 a_temp;
+    if (do_translate == 1){
+        ph = -dot(q4r,U);
+        cosph = native_cos(ph);
+        sinph = native_sin(ph);
+        a_temp.x = a_sum.x*cosph - a_sum.y*sinph;
+        a_temp.y = a_sum.x*sinph + a_sum.y*cosph;
+        a_sum = a_temp;
+    }
 
     // Check that this pixel index is not out of bounds
     if (gi < n_pixels){
