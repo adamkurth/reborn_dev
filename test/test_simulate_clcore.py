@@ -9,6 +9,7 @@ If you want to view results just add the keyword "view"
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import sys
+sys.path.append('..')
 import pytest
 import numpy as np
 import bornagain as ba
