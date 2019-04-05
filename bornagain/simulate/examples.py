@@ -253,6 +253,8 @@ class CrystalSimulatorV1(object):
 
         """
 
+        print('hello')
+
         cryst = self.crystal_structure
         beam = self.beam
         pad = self.pad_geometry

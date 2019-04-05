@@ -260,7 +260,7 @@ def _clcore(double_precision=False):
     # Check that rotations and translations work
     ###########################################################################
 
-    n_pixels = 100
+    n_pixels = 20
     pixel_size = 300e-6
     distance = 0.5
     wavelength = 2e-10

@@ -116,19 +116,22 @@ class PADGeometry(object):
                 setattr(pad, name, data)
         return pad
 
-    def simple_setup(self, n_pixels=1000, pixel_size=100e-6, distance=0.1):
+    def simple_setup(self, n_pixels=(1000, 1000), pixel_size=100e-6, distance=0.1):
         r""" Make this a square PAD with beam at center.
 
         Returns:
             object:
         """
 
-        self.n_fs = n_pixels
-        self.n_ss = n_pixels
+        try:
+            self.n_fs = n_pixels[0]
+            self.n_ss = n_pixels[1]
+        except TypeError:
+            self.n_fs = n_pixels
+            self.n_ss = n_pixels
         self.fs_vec = [pixel_size, 0, 0]
         self.ss_vec = [0, pixel_size, 0]
-        self.t_vec = [-pixel_size * (n_pixels / 2.0 - 0.5), -
-                      pixel_size * (n_pixels / 2.0 - 0.5), distance]
+        self.t_vec = [-pixel_size * (self.n_fs / 2.0 - 0.5), -pixel_size * (self.n_ss / 2.0 - 0.5), distance]
 
     def pixel_size(self):
         r""" Return pixel size, assuming square pixels. """

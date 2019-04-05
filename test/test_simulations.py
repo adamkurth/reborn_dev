@@ -27,7 +27,7 @@ def test_mappings():
 
     # Setup beam and detector
     beam = source.Beam(wavelength=3e-10)
-    pad = detector.PADGeometry(pixel_size=300e-6, distance=0.2, n_pixels=100)
+    pad = detector.PADGeometry(pixel_size=300e-6, distance=0.2, n_pixels=10)
     q_vecs = pad.q_vecs(beam=beam)
     h_vecs = unitcell.q2h(q_vecs)/2/np.pi  # These are the scattering vectors in reciprocal lattice basis
 

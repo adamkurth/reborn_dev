@@ -49,7 +49,7 @@ def rotate(rot, vec):
 
     .. code-block:: python
 
-        return np.matmul(rot, vec.T).T
+        return np.dot(rot, vec.T).T
 
     Note the bornagain package generally assumes that a set of N vectors of dimension D will be stored as a numpy array
     of shape of N x D.
@@ -62,7 +62,7 @@ def rotate(rot, vec):
 
     """
 
-    return np.matmul(rot, vec.T).T
+    return np.dot(vec, rot.T.copy()) #np.dot(rot, vec.T).T
 
 
 def depreciate(message):
