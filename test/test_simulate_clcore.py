@@ -186,8 +186,8 @@ def _clcore(double_precision=False):
     rot = np.eye(3, dtype=core.real_t)
     q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
 
-    amps = core.phase_factor_mesh(r_vecs, f, n_mesh, q_min, q_max)
-    amps2 = core.mesh_interpolation(amps, q, n_mesh, q_min, q_max)
+    amps = core.phase_factor_mesh(r_vecs, f, N=n_mesh, q_min=q_min, q_max=q_max)
+    amps2 = core.mesh_interpolation(amps, q, N=n_mesh, q_min=q_min, q_max=q_max)
     assert(type(amps) is np.ndarray)
     assert(type(amps2) is np.ndarray)
 
