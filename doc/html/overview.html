@@ -89,7 +89,6 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#what-s-in-bornagain">What’s in bornagain?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#i-don-t-know-anything-about-programming">I don’t know anything about programming…</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#before-you-start-using-bornagain">Before you start using bornagain</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#if-you-plan-to-develop-bornagain">If you plan to develop bornagain</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
@@ -201,26 +200,12 @@ elements of the bornagain package are:</p>
 <li>Analysis algorithms.</li>
 </ul>
 </div>
-<div class="section" id="i-don-t-know-anything-about-programming">
-<h2>I don’t know anything about programming…<a class="headerlink" href="#i-don-t-know-anything-about-programming" title="Permalink to this headline">¶</a></h2>
-<p>If you are new to programming, you should first:</p>
-<ul class="simple">
-<li>Learn to program in the <a class="reference external" href="https://www.python.org/">Python</a> language,</li>
-<li>Learn the basics of object-oriented programming,</li>
-<li>Master the use of the <a class="reference external" href="http://www.numpy.org/#">numpy</a> package.</li>
-</ul>
-<p>There are some example scripts in the bornagain/examples directory that might help you get started. You should
-tinker with those scripts using <a class="reference external" href="https://ipython.org/">iPython</a> and its
-<a class="reference external" href="https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion">tab-completion feature</a>.</p>
-</div>
 <div class="section" id="before-you-start-using-bornagain">
 <h2>Before you start using bornagain<a class="headerlink" href="#before-you-start-using-bornagain" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>If documentation is missing or confusing, please fix it or tell someone who can.</li>
-<li><em>All</em> units in bornagain are SI.  Angles are radians.  No exceptions.</li>
-<li>There is no special x-ray beam direction.  <em>You</em> get to choose the direction of the x-ray beam.</li>
-<li>We must be consistent in the way that we specify vectors and rotation matrices using numpy arrays.  There are
-utilities to ensure consistency.</li>
+<li><em>All</em> units in bornagain are SI.  Angles are radians.  No exceptions (so far).</li>
+<li>There is no special coordinate system that is assumed.  <em>You</em> get to choose the direction of the x-ray beam and so on.</li>
 </ul>
 </div>
 <div class="section" id="if-you-plan-to-develop-bornagain">
@@ -229,10 +214,8 @@ utilities to ensure consistency.</li>
 </div>
 <div class="section" id="acknowledgements">
 <h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
-<dl class="docutils">
-<dt>Code found in bornagain has been inspired by numerous open-source software packages listed above.  Numerous</dt>
-<dd>contributions to bornagain have been made by Derek Mendez, Rick Hewitt, and Cameron Howard.</dd>
-</dl>
+<p>Code found in bornagain has been inspired by numerous open-source software packages listed above.  Numerous
+contributions to bornagain have been made by Derek Mendez, Rick Hewitt, Cameron Howard, and Joe Chen.</p>
 </div>
 </div>
 

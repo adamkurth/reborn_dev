@@ -23,7 +23,7 @@ import pyopencl as cl
 import pyopencl.array
 
 import bornagain as ba
-from bornagain.utils import rotate
+from bornagain.utils import rotate, depreciate
 from bornagain.simulate import refdata
 
 cl_array = cl.array.Array
@@ -286,6 +286,48 @@ class ClCore(object):
             return self.int_t(self.group_size - N % self.group_size)
         else:
             return 0
+
+    def rotate_translate_vectors(self, rot, trans, vec_in, vec_out=None):
+
+        r"""
+
+        Apply rotation followed by translation on GPU.
+
+        Args:
+            rot: rotation matrix
+            trans: translation vector
+            v_in (Nx3 array): input vectors
+            v_out (Nx3 array): output vectors
+
+        Returns: output vectors
+
+        """
+
+        if not hasattr(self, 'rotate_translate_vectors_cl'):
+            self.rotate_translate_vectors_cl = self.programs.rotate_translate_vectors
+            self.rotate_translate_vectors_cl.set_scalar_arg_dtypes([None, None, None, None, self.int_t])
+
+        n_vecs = self.int_t(vec_in.shape[0])
+
+        if vec_out is None:
+            vec_out_dev = self.to_device(shape=vec_in.shape, dtype=self.real_t)
+        else:
+            vec_out_dev = self.to_device(vec_out, dtype=self.real_t)
+
+        rot_dev = self.vec16(rot)
+        trans_dev = self.vec4(trans)
+
+        vec_in_dev = self.to_device(vec_in, dtype=self.real_t)
+
+        global_size = np.int(np.ceil(n_vecs / np.float(self.group_size)) * self.group_size)
+
+        self.rotate_translate_vectors_cl(self.queue, (global_size,), (self.group_size,), rot_dev, trans_dev,
+                                vec_in_dev.data, vec_out_dev.data, n_vecs)
+
+        if vec_out is None:
+            return vec_out_dev.get()
+        else:
+            return None
 
     def test_rotate_vec(self, rot, trans, vec):
 
@@ -648,8 +690,14 @@ class ClCore(object):
         else:
             return a_dev
 
-    def buffer_mesh_lookup(self, a_map, q, N=None, q_min=None, q_max=None, dq=None, R=None, U=None, a=None, density_map=None,
-                           add=False):
+    def buffer_mesh_lookup(self, *args, **kwargs):
+
+        depreciate("buffer_mesh_lookup has been renamed to mesh_interpolation")
+
+        return self.mesh_interpolation(*args, **kwargs)
+
+    def mesh_interpolation(self, a_map, q, N=None, q_min=None, q_max=None, dq=None, R=None, U=None, a=None,
+                           density_map=None, add=False):
 
         r"""
         This is supposed to lookup intensities from a 3d mesh of amplitudes.
@@ -670,9 +718,9 @@ class ClCore(object):
             numpy array of complex amplitudes
         """
 
-        if not hasattr(self, 'buffer_mesh_lookup_cl'):
-            self.buffer_mesh_lookup_cl = self.programs.buffer_mesh_lookup
-            self.buffer_mesh_lookup_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, None, None, None, None,
+        if not hasattr(self, 'mesh_interpolation_cl'):
+            self.mesh_interpolation_cl = self.programs.mesh_interpolation
+            self.mesh_interpolation_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, None, None, None, None,
                                                               None, self.int_t, self.int_t])
 
         if add is True:
@@ -725,7 +773,7 @@ class ClCore(object):
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
                              * self.group_size)
 
-        self.buffer_mesh_lookup_cl(self.queue, (global_size,), (self.group_size,),
+        self.mesh_interpolation_cl(self.queue, (global_size,), (self.group_size,),
                                    a_map_dev.data, q_dev.data, a_out_dev.data,
                                    n_pixels, N, dq, q_min, R, U, do_translate, add)
         self.queue.finish()

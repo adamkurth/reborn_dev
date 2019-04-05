@@ -13,17 +13,23 @@ from bornagain.external.pyqtgraph.extras import keep_open
 
 
 # Load up the pdb file for PSI
-cryst = crystal.CrystalStructure(lysozyme_pdb_file)
+cryst = crystal.CrystalStructure(psi_pdb_file)
 spacegroup = cryst.spacegroup
 unitcell = cryst.unitcell
 print(unitcell)
 
 # Setup beam and detector
 beam = source.Beam(wavelength=3e-10)
-pad = detector.PADGeometry(pixel_size=300e-6, distance=0.2, n_pixels=1000)
-det_h_vecs = unitcell.q2h(pad.q_vecs(beam=beam)) / 2 / np.pi
-resolution = 0.8*2*np.pi/np.max(pad.q_mags(beam=beam))
+pad = detector.PADGeometry(pixel_size=300e-6, distance=0.5, n_pixels=1000)
+det_q_vecs = pad.q_vecs(beam=beam).copy()
+det_h_vecs = unitcell.q2h(det_q_vecs) / 2 / np.pi
+resolution = 2*np.pi/np.max(pad.q_mags(beam=beam))
 print('Resolution: %.3g A' % (resolution*1e10,))
+
+oversampling = 4
+dens = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
+dens_h = dens.h_density_map
+mesh_h_lims = dens_h.limits*2*np.pi
 
 # Atomic scattering factors
 f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, ba.units.hc / beam.wavelength)*0 + 1
@@ -54,8 +60,8 @@ max_size = 41  # Make sure we have an odd value... for making hexagonal prisms
 lats = [crystal.FiniteLattice(max_size=max_size, unitcell=unitcell) for i in range(spacegroup.n_molecules)]
 
 # Construct a finite lattice in the form of a hexagonal prism
-width = 2
-length = 2
+width = 3
+length = 6
 for i in range(spacegroup.n_molecules):
     lat = lats[i]
     com = mol_x_coms[i]
@@ -88,15 +94,13 @@ t = time()
 
 t = time()
 clcore = ClCore()
+print('Computing with:', clcore.context.devices)
 amps_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
 amps_slice_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
 amps_lat_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
 h_vecs_gpu = clcore.to_device(det_h_vecs, dtype=clcore.real_t) * 2 * np.pi
 
-oversampling = 4
-dens = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
-dens_h = dens.h_density_map
-mesh_h_lims = dens_h.limits*2*np.pi
+
 
 a_map_dev = clcore.to_device(shape=dens_h.shape, dtype=clcore.complex_t)
 clcore.phase_factor_mesh(au_x_coords, f, N=dens_h.shape, a=a_map_dev,
@@ -106,7 +110,7 @@ for i in range(spacegroup.n_molecules):
     clcore.phase_factor_qrf(h_vecs_gpu, lats[i].occupied_x_coordinates, a=amps_lat_gpu, add=False)
     RR = spacegroup.sym_rotations[i]
     TT = spacegroup.sym_translations[i]
-    clcore.buffer_mesh_lookup(a_map_dev, h_vecs_gpu, N=dens_h.shape, q_min=mesh_h_lims[:, 0], q_max=mesh_h_lims[:, 1],
+    clcore.mesh_interpolation(a_map_dev, h_vecs_gpu, N=dens_h.shape, q_min=mesh_h_lims[:, 0], q_max=mesh_h_lims[:, 1],
                               a=amps_slice_gpu, R=RR, U=TT, add=False)
     amps_gpu += amps_slice_gpu * amps_lat_gpu
 

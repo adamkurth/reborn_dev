@@ -300,9 +300,9 @@ if 1:
     n_pixels = q.shape[0]
     for i in range(0, n_trials):
         t = time.time()
-        clcore.buffer_mesh_lookup(a_map_dev, q_dev, N=N, q_min=qmin, q_max=qmax, R=R, a=a_out_dev)
+        clcore.mesh_interpolation(a_map_dev, q_dev, N=N, q_min=qmin, q_max=qmax, R=R, a=a_out_dev)
         tf = time.time() - t
-        print('buffer_mesh_lookup: %7.03f ms' % (tf * 1e3))
+        print('mesh_interpolation: %7.03f ms' % (tf * 1e3))
 
     t = time.time()
     a = a_out_dev.get()

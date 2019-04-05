@@ -13,7 +13,6 @@ import pytest
 import numpy as np
 import bornagain as ba
 from bornagain import utils
-from numba import jit
 
 try:
     from bornagain.simulate import clcore
@@ -170,7 +169,7 @@ def _clcore(double_precision=False):
     del n_atoms, n_mesh, q_min, q_max, r_vecs, f, amps, a
 
     ###########################################################################
-    # Check for errors in buffer_mesh_lookup
+    # Check for errors in mesh_interpolation
     # TODO: check that amplitudes are correct
     ###########################################################################
 
@@ -187,7 +186,7 @@ def _clcore(double_precision=False):
     q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
 
     amps = core.phase_factor_mesh(r_vecs, f, n_mesh, q_min, q_max)
-    amps2 = core.buffer_mesh_lookup(amps, q, n_mesh, q_min, q_max)
+    amps2 = core.mesh_interpolation(amps, q, n_mesh, q_min, q_max)
     assert(type(amps) is np.ndarray)
     assert(type(amps2) is np.ndarray)
 
@@ -198,7 +197,7 @@ def _clcore(double_precision=False):
     a_out = core.to_device(shape=pad.n_fs*pad.n_ss, dtype=core.complex_t)
 
     amps = core.phase_factor_mesh(r_vecs, f, N=n_mesh, q_min=q_min, q_max=q_max, a=a)
-    amps2 = core.buffer_mesh_lookup(a, q, N=n_mesh, q_min=q_min, q_max=q_max, R=rot, a=a_out)
+    amps2 = core.mesh_interpolation(a, q, N=n_mesh, q_min=q_min, q_max=q_max, R=rot, a=a_out)
     assert(type(amps) is cl_array)
     assert(type(amps2) is cl_array)
 

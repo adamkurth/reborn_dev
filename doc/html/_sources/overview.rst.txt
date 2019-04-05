@@ -36,30 +36,12 @@ In the future, we will add a few more utilities to bornagain:
 - Tools for displaying diffraction data.
 - Analysis algorithms.
 
-
-I don't know anything about programming...
-------------------------------------------
-
-If you are new to programming, you should first:
-
-* Learn to program in the `Python <https://www.python.org/>`_ language,
-* Learn the basics of object-oriented programming,
-* Master the use of the `numpy <http://www.numpy.org/#>`_ package.
-
-There are some example scripts in the bornagain/examples directory that might help you get started. You should
-tinker with those scripts using `iPython <https://ipython.org/>`_ and its
-`tab-completion feature <https://ipython.org/ipython-doc/3/interactive/tutorial.html#tab-completion>`_.
-
-
 Before you start using bornagain
 --------------------------------
 
 - If documentation is missing or confusing, please fix it or tell someone who can.
-- *All* units in bornagain are SI.  Angles are radians.  No exceptions.
-- There is no special x-ray beam direction.  *You* get to choose the direction of the x-ray beam.
-- We must be consistent in the way that we specify vectors and rotation matrices using numpy arrays.  There are
-  utilities to ensure consistency.
-
+- *All* units in bornagain are SI.  Angles are radians.  No exceptions (so far).
+- There is no special coordinate system that is assumed.  *You* get to choose the direction of the x-ray beam and so on.
 
 If you plan to develop bornagain
 --------------------------------
@@ -70,4 +52,4 @@ Acknowledgements
 ----------------
 
 Code found in bornagain has been inspired by numerous open-source software packages listed above.  Numerous
- contributions to bornagain have been made by Derek Mendez, Rick Hewitt, and Cameron Howard.
+contributions to bornagain have been made by Derek Mendez, Rick Hewitt, Cameron Howard, and Joe Chen.

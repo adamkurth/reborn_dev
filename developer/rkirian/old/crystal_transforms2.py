@@ -125,7 +125,7 @@ for i in range(spacegroup.n_molecules):
     clcore.phase_factor_qrf(h_vecs_gpu, lats[i].occupied_x_coordinates, a=amps_lat_gpu, add=False)
     RR = spacegroup.sym_rotations[i]
     TT = spacegroup.sym_translations[i]
-    clcore.buffer_mesh_lookup(a_map_dev, h_vecs_gpu, N=dens_h.shape, q_min=mesh_h_lims[:, 0], q_max=mesh_h_lims[:, 1],
+    clcore.mesh_interpolation(a_map_dev, h_vecs_gpu, N=dens_h.shape, q_min=mesh_h_lims[:, 0], q_max=mesh_h_lims[:, 1],
                               a=amps_slice_gpu, R=RR, U=TT, add=True)
     amps_gpu += amps_mol_interp_gpu * amps_lat_gpu
 
