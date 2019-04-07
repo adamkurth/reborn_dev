@@ -18,7 +18,7 @@ class DensityMap(object):
     dx = None  # : 3-vecto with increments beteen voxels
     strides = None  # : Array strides
 
-    def __init__(self, shape, corner_min, corner_max):
+    def __init__(self, shape=None, corner_min=None, corner_max=None, molecule=None):
         r"""
 
         Args:

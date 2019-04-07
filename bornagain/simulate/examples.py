@@ -165,6 +165,46 @@ class PDBMoleculeSimulator(object):
         return np.abs(intensity)**2
 
 
+class MoleculeSimulatorV1(object):
+
+    def __init__(self, beam=None, molecule=None, pad=None, oversample=10, max_mesh_size=200, clcore=None):
+
+        if clcore is None:
+            self.clcore = ClCore(group_size=32)
+        else:
+            self.clcore = clcore
+        self.pad = pad
+        self.molecule = molecule
+        self.beam = beam
+        self.oversample = oversample
+        self.q_vecs = pad.q_vecs(beam=beam)
+        self.f = molecule.get_scattering_factors(beam=beam)
+        self.intensity_prefactor = pad.reshape(beam.photon_number_fluence * r_e ** 2 * pad.solid_angles() *
+                                          pad.polarization_factors(beam=beam))
+        self.resolution = pad.max_resolution(beam=beam)
+        self.mol_size = utils.max_pair_distance(molecule.coordinates)
+        self.qmax = 2 * np.pi / self.resolution
+        self.mesh_size = int(np.ceil(10 * self.mol_size / self.resolution))
+        self.mesh_size = int(min(self.mesh_size, max_mesh_size))
+        self.a_map_dev = clcore.to_device(shape=(self.mesh_size ** 3,), dtype=clcore.complex_t)
+        self.q_dev = clcore.to_device(self.q_vecs, dtype=clcore.real_t)
+        self.a_out_dev = clcore.to_device(dtype=clcore.complex_t, shape=pad.shape())
+        clcore.phase_factor_mesh(self.molecule.coordinates, self.f, N=self.mesh_size, q_min=-self.qmax,
+                                 q_max=self.qmax, a=self.a_map_dev)
+
+    def generate_pattern(self, rotation=None, poisson=False):
+
+        if rotation is None:
+            rotation = utils.random_rotation()
+        self.clcore.mesh_interpolation(self.a_map_dev, self.q_dev, N=self.mesh_size, q_min=-self.qmax,
+                                       q_max=self.qmax, R=rotation, a=self.a_out_dev)
+        if poisson:
+            intensity = np.random.poisson(self.intensity_prefactor * np.abs(self.a_out_dev.get()) ** 2)
+        else:
+            intensity = self.intensity_prefactor * np.abs(self.a_out_dev.get()) ** 2
+        return intensity
+
+
 class CrystalSimulatorV1(object):
 
     r"""

@@ -415,6 +415,10 @@ class PADGeometry(object):
 
         return np.random.random((self.n_ss, self.n_fs))
 
+    def max_resolution(self, beam=None):
+
+        return 2 * np.pi / np.max(self.q_mags(beam=beam))
+
 
 def split_pad_data(pad_list, data):
     r"""

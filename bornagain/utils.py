@@ -9,6 +9,7 @@ import sys
 import numpy as np
 from numpy import sin, cos
 import bornagain as ba
+from numba import jit
 
 
 def vec_norm(vec):
@@ -363,3 +364,14 @@ def memoize(function):
         return rv
 
     return wrapper
+
+
+@jit(nopython=True)
+def max_pair_distance(vecs):
+    d_max = 0
+    for i in range(vecs.shape[0]):
+        for j in range(vecs.shape[0]):
+            d = np.sum((vecs[i, :] - vecs[j, :])**2)
+            if d > d_max:
+                d_max = d
+    return np.sqrt(d_max)

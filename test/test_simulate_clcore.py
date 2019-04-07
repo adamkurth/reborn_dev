@@ -195,7 +195,7 @@ def _clcore(double_precision=False):
     f = core.to_device(f)
     q = core.to_device(q)
     a = core.to_device(shape=(np.prod(n_mesh),), dtype=core.complex_t)
-    a_out = core.to_device(shape=pad.n_fs*pad.n_ss, dtype=core.complex_t)
+    a_out = core.to_device(shape=pad.n_pixels, dtype=core.complex_t)
 
     amps = core.phase_factor_mesh(r_vecs, f, N=n_mesh, q_min=q_min, q_max=q_max, a=a)
     amps2 = core.mesh_interpolation(a, q, N=n_mesh, q_min=q_min, q_max=q_max, R=rot, a=a_out)
