@@ -1,4 +1,4 @@
-"""
+r"""
 Some utility functions that might be useful throughout bornagain.  Don't put highly specialized functions here.
 """
 
@@ -268,19 +268,19 @@ def random_rotation(deflection=1.0, randnums=None):
     # Construct the rotation matrix  ( V Transpose(V) - I ) R.
 
     mat = (np.outer(vec, vec) - np.eye(3)).dot(rot)
-    return mat
+    return mat.reshape(3, 3)
 
 
 def rotation_about_axis(theta, u):
-    """
+    r"""
     This needs to be tested.  It was taken from
     https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python
     """
 
-    u = vec_norm(np.array(u))
+    u = vec_norm(np.array(u)).reshape(3)
     ct = cos(theta)
     st = sin(theta)
-    return np.array([[ct + u[0]**2 * (1 - ct),
+    rot = np.array([[ct + u[0]**2 * (1 - ct),
                       u[0] * u[1] * (1 - ct) - u[2] * st,
                       u[0] * u[2] * (1 - ct) + u[1] * st],
                      [u[0] * u[1] * (1 - ct) + u[2] * st,
@@ -289,10 +289,21 @@ def rotation_about_axis(theta, u):
                      [u[0] * u[2] * (1 - ct) - u[1] * st,
                       u[1] * u[2] * (1 - ct) + u[0] * st,
                       ct + u[2]**2 * (1 - ct)]])
+    return rot.reshape(3, 3)
+
+
+def random_unit_vector():
+    r"""
+    Generate a totally random unit vector.
+
+    Returns: numpy array length 3
+
+    """
+    return vec_norm(np.random.normal(size=3))
 
 
 def random_beam_vector(div_fwhm):
-    """
+    r"""
     A random vector for emulating beam divergence.
     Generates a random normal vector that is nominally along the [0,0,1] direction
     but with a random rotation along the [1,0,0] axis with given FWHM (Gaussian
@@ -324,7 +335,7 @@ def random_beam_vector(div_fwhm):
 
 
 def random_mosaic_rotation(mosaicity_fwhm):
-    """
+    r"""
     Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.
     We take the matrix product of three rotations, each of the same FWHM, about the three
     orthogonal axis.  The order of this product is a random permutation.
