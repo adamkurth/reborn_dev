@@ -704,7 +704,7 @@ class ClCore(object):
 
         Arguments:
             a_map (numpy array): Complex scattering amplitudes (usually generated from
-               the function phase_factor_mesh())
+               the function phase_factor_mesh()).  Can also be real amplitudes.
             N (int): As defined in phase_factor_mesh()
             q_min (float): As defined in phase_factor_mesh()
             q_max (float): As defined in phase_factor_mesh()
@@ -722,6 +722,9 @@ class ClCore(object):
             self.mesh_interpolation_cl = self.programs.mesh_interpolation
             self.mesh_interpolation_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, None, None, None, None,
                                                               None, self.int_t, self.int_t])
+            self.mesh_interpolation_real_cl = self.programs.mesh_interpolation_real
+            self.mesh_interpolation_real_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, None, None, None, None,
+                                                                   None, self.int_t, self.int_t])
 
         if add is True:
             add = self.int_t(1)
@@ -763,25 +766,78 @@ class ClCore(object):
 
         n_pixels = self.int_t(q.shape[0])
 
-        a_map_dev = self.to_device(a_map, dtype=self.complex_t)
-        q_dev = self.to_device(q, dtype=self.real_t)
-        N = self.vec4(N, dtype=self.int_t)
-        dq = self.vec4(dq, dtype=self.real_t)
-        q_min = self.vec4(q_min, dtype=self.real_t)
-        a_out_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels,))
+        if a_map.dtype == self.complex_t:
+            a_map_dev = self.to_device(a_map, dtype=self.complex_t)
+            q_dev = self.to_device(q, dtype=self.real_t)
+            N = self.vec4(N, dtype=self.int_t)
+            dq = self.vec4(dq, dtype=self.real_t)
+            q_min = self.vec4(q_min, dtype=self.real_t)
+            a_out_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels,))
 
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
-                             * self.group_size)
+            global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
+                                 * self.group_size)
 
-        self.mesh_interpolation_cl(self.queue, (global_size,), (self.group_size,),
-                                   a_map_dev.data, q_dev.data, a_out_dev.data,
-                                   n_pixels, N, dq, q_min, R, U, do_translate, add)
+            self.mesh_interpolation_cl(self.queue, (global_size,), (self.group_size,),
+                                       a_map_dev.data, q_dev.data, a_out_dev.data,
+                                       n_pixels, N, dq, q_min, R, U, do_translate, add)
+        elif a_map.dtype == self.real_t:
+            a_map_dev = self.to_device(a_map, dtype=self.real_t)
+            q_dev = self.to_device(q, dtype=self.real_t)
+            N = self.vec4(N, dtype=self.int_t)
+            dq = self.vec4(dq, dtype=self.real_t)
+            q_min = self.vec4(q_min, dtype=self.real_t)
+            a_out_dev = self.to_device(a, dtype=self.real_t, shape=(n_pixels,))
+
+            global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
+
+            self.mesh_interpolation_real_cl(self.queue, (global_size,), (self.group_size,), a_map_dev.data, q_dev.data,
+                                            a_out_dev.data, n_pixels, N, dq, q_min, R, U, do_translate, add)
+
         self.queue.finish()
 
         if a is None:
             return a_out_dev.get()
         else:
             return a_out_dev
+
+    def mesh_insertion(self, densities, weights, vecs, vals, shape, corner, deltas, rot=None):
+
+        r"""
+        Undocomented
+        """
+        # TODO: documentation
+
+        if not hasattr(self, 'mesh_interpolation_cl'):
+            arg_types = [None, None, None, None, self.int_t, None, None, None, None, None, self.int_t]
+            self.mesh_insertion_cl = self.programs.mesh_insertion
+            self.mesh_insertion_cl.set_scalar_arg_dtypes(arg_types)
+            self.mesh_insertion_real_cl = self.programs.mesh_insertion_real
+            self.mesh_insertion_real_cl.set_scalar_arg_dtypes(arg_types)
+
+        if rot is None:
+            rot = np.eye(3)
+        rot = self.vec16(rot.T, dtype=self.real_t)
+        trans = self.vec4(np.zeros(3), dtype=self.real_t)
+        do_trans = self.int_t(0)
+        shape = np.array(shape, dtype=self.int_t)
+        corner = np.array(corner, dtype=self.real_t)
+        deltas = np.array(deltas, dtype=self.real_t)
+        vecs_gpu = self.to_device(vecs, dtype=self.real_t)
+        n_pixels = self.int_t(vecs.shape[0])
+
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
+
+        if densities.dtype == self.complex_t:
+            assert vals.dtype == self.complex_t
+            vals_gpu = self.to_device(vals, dtype=self.complex_t)
+            self.mesh_insertion_cl(self.queue, (global_size,), (self.group_size,), densities.data, weights.data,
+                                   vecs_gpu.data, vals_gpu.data, n_pixels, shape, deltas, corner, rot, trans, do_trans)
+        elif densities.dtype == self.real_t:
+            assert vals.dtype == self.real_t
+            vals_gpu = self.to_device(vals, dtype=self.real_t)
+            self.mesh_insertion_real_cl(self.queue, (global_size,), (self.group_size,), densities.data, weights.data,
+                                   vecs_gpu.data, vals_gpu.data, n_pixels, shape, deltas, corner, rot, trans, do_trans)
+        self.queue.finish()
 
     def lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w, R=None, I=None, add=False):
         r"""
@@ -901,8 +957,7 @@ class ClCore(object):
         B = self.vec4(B, dtype=self.real_t)
         I_dev = self.to_device(I, dtype=self.real_t, shape=(n_pixels))
 
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) *
-                             self.group_size)
+        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
         self.gaussian_lattice_transform_intensities_pad_cl(self.queue, (global_size,),
                                                   (self.group_size,), abc,
                                                   N, R, I_dev.data, n_pixels,
@@ -913,6 +968,22 @@ class ClCore(object):
             return I_dev.get()
         else:
             return I_dev
+
+    def test_atomic_add_real(self, a, b):
+        if not hasattr(self, 'test_atomic_add_real_cl'):
+            self.test_atomic_add_real_cl = self.programs.test_atomic_add_real
+            self.test_atomic_add_real_cl.set_scalar_arg_dtypes([None, None, self.int_t])
+
+            global_size = np.int(np.ceil(len(a) / np.float(self.group_size)) * self.group_size)
+            self.test_atomic_add_real_cl(self.queue, (global_size,), (self.group_size,), a.data, b.data, len(a))
+
+    def test_atomic_add_int(self, a, b):
+        if not hasattr(self, 'test_atomic_add_real_cl'):
+            self.test_atomic_add_int_cl = self.programs.test_atomic_add_int
+            self.test_atomic_add_int_cl.set_scalar_arg_dtypes([None, None, self.int_t])
+
+            global_size = np.int(np.ceil(len(a) / np.float(self.group_size)) * self.group_size)
+            self.test_atomic_add_int_cl(self.queue, (global_size,), (self.group_size,), a.data, b.data, len(a))
 
 
 class ClCoreDerek(ClCore):

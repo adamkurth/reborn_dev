@@ -90,7 +90,7 @@ def func1(vecs):
 
 def test_interpolations():
 
-    if pyopencl is None:
+    if ClCore is None:
         return
 
     clcore = ClCore(group_size=32)
@@ -124,79 +124,107 @@ def test_interpolations():
     assert np.max(np.abs(dens1)) > 0
     assert np.max(np.abs(dens2)) > 0
     assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-6
-    #
-    # float_t = np.float64
-    # nx, ny, nz = 6, 7, 8
-    # corners = np.array([0, 0, 0], dtype=float_t)
-    # deltas = np.array([1, 1, 1], dtype=float_t)
-    # x, y, z = np.meshgrid(np.arange(0, nx), np.arange(0, ny), np.arange(0, nz), indexing='ij')
-    # vectors0 = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
-    # dens = func1(vectors0).reshape([nx, ny, nz])
-    # x, y, z = np.meshgrid(np.arange(1, nx-2), np.arange(1, ny-2), np.arange(1, nz-2), indexing='ij')
-    # vectors = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t) + 0.1
-    # dens1 = func1(vectors)
-    # dens2 = np.zeros_like(dens1)
-    # density.trilinear_interpolation(dens, vectors, corners, deltas, dens2)
-    # assert np.max(np.abs(dens1)) > 0
-    # assert np.max(np.abs(dens2)) > 0
-    # assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2
+
+    nx, ny, nz = 6, 7, 8
+    corners = np.array([0, 0, 0], dtype=real_t)
+    deltas = np.array([1, 1, 1], dtype=real_t)
+    x, y, z = np.meshgrid(np.arange(0, nx), np.arange(0, ny), np.arange(0, nz), indexing='ij')
+    vectors0 = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(real_t)
+    dens = func1(vectors0).reshape([nx, ny, nz])
+    x, y, z = np.meshgrid(np.arange(1, nx-2), np.arange(1, ny-2), np.arange(1, nz-2), indexing='ij')
+    vectors = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(real_t) + 0.1
+    dens1 = func1(vectors)
+    dens2 = np.zeros_like(dens1)
+    dens2_gpu = clcore.to_device(dens2)
+    clcore.mesh_interpolation(dens, vectors, q_min=corners, dq=deltas, N=dens.shape, a=dens2_gpu)
+    dens2 = dens2_gpu.get()
+    assert np.max(np.abs(dens1)) > 0
+    assert np.max(np.abs(dens2)) > 0
+    assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2
 
 
-# def test_insertions():
+def test_insertions():
+
+    if ClCore is None:
+        return
+
+    clcore = ClCore(group_size=32)
+    real_t = clcore.real_t
+    int_t = clcore.int_t
+
+    n = 100
+    a = np.zeros(n)
+    b = np.arange(n)
+    a_gpu = clcore.to_device(a, dtype=int_t)
+    b_gpu = clcore.to_device(b, dtype=int_t)
+    clcore.test_atomic_add_int(a_gpu, b_gpu)
+    assert a_gpu.get()[0] - np.sum(b)*n == 0
+
+    n = 100
+    a = np.zeros(n)
+    b = np.arange(n)
+    a_gpu = clcore.to_device(a, dtype=real_t)
+    b_gpu = clcore.to_device(b, dtype=real_t)
+    clcore.test_atomic_add_real(a_gpu, b_gpu)
+    assert a_gpu.get()[0] - np.sum(b)*n == 0
+
+    return
+
+    shape = (6, 7, 8)
+    densities = np.zeros(shape, dtype=real_t)
+    weights = np.zeros(shape, dtype=real_t)
+    corner = np.array([0, 0, 0], dtype=real_t)
+    deltas = np.array([1, 1, 1], dtype=real_t)
+    vecs = np.array([[2, 3, 4], [3, 4, 4], [4, 4, 4]], dtype=real_t)
+    vals = func1(vecs)
+    densities_gpu = clcore.to_device(densities)
+    weights_gpu = clcore.to_device(weights)
+    vecs_gpu = clcore.to_device(vecs)
+    vals_gpu = clcore.to_device(vals)
+    clcore.mesh_insertion(densities_gpu, weights_gpu, vecs_gpu, vals_gpu, shape, deltas, corner, rot=None) #, trans, do_trans)
+    densities = densities_gpu.get()
+    print(densities[4, 4, 4], densities[3, 3, 3], np.max(densities), np.min(densities))
+    assert np.max(np.abs(densities)) > 0
+    assert (np.abs((vals - densities[2, 3, 4]) / vals)) < 1e-8
 #
-#     if density_f is None:
-#         return
-#
-#     float_t = np.float64
+#     real_t = np.float64
 #     nx, ny, nz = 6, 7, 8
-#     densities = np.zeros([nx, ny, nz], dtype=float_t)
-#     counts = np.zeros([nx, ny, nz], dtype=float_t)
-#     corners = np.array([0, 0, 0], dtype=float_t)
-#     deltas = np.array([1, 1, 1], dtype=float_t)
-#     vectors = np.array([[2, 3, 4]], dtype=float_t)
-#     vals = func1(vectors)
-#     density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
-#     assert np.max(np.abs(densities)) > 0
-#     assert (np.abs((vals - densities[2, 3, 4]) / vals)) < 1e-8
-#
-#     float_t = np.float64
-#     nx, ny, nz = 6, 7, 8
-#     densities = np.zeros([nx, ny, nz], dtype=float_t)
-#     counts = np.zeros([nx, ny, nz], dtype=float_t)
-#     corners = np.array([0, 0, 0], dtype=float_t)
-#     deltas = np.array([1, 1, 1], dtype=float_t)
-#     vectors = np.array([[2.5, 3.5, 4.5]], dtype=float_t)
+#     densities = np.zeros([nx, ny, nz], dtype=real_t)
+#     counts = np.zeros([nx, ny, nz], dtype=real_t)
+#     corners = np.array([0, 0, 0], dtype=real_t)
+#     deltas = np.array([1, 1, 1], dtype=real_t)
+#     vectors = np.array([[2.5, 3.5, 4.5]], dtype=real_t)
 #     vals = func1(vectors)
 #     density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
 #     assert np.max(np.abs(densities)) > 0
 #     assert (np.abs((vals - densities[2, 3, 4]/counts[2, 3, 4]) / vals)) < 1e-8
 #
 #     np.random.seed(0)
-#     float_t = np.float64
+#     real_t = np.float64
 #     nx, ny, nz = 6, 7, 8
-#     densities = np.zeros([nx, ny, nz], dtype=float_t)
-#     counts = np.zeros([nx, ny, nz], dtype=float_t)
-#     corners = np.array([0, 0, 0], dtype=float_t)
-#     deltas = np.array([1, 1, 1], dtype=float_t)
-#     vectors = (np.random.rand(10000, 3) * np.array([nx-1, ny-1, nz-1])).astype(float_t)
+#     densities = np.zeros([nx, ny, nz], dtype=real_t)
+#     counts = np.zeros([nx, ny, nz], dtype=real_t)
+#     corners = np.array([0, 0, 0], dtype=real_t)
+#     deltas = np.array([1, 1, 1], dtype=real_t)
+#     vectors = (np.random.rand(10000, 3) * np.array([nx-1, ny-1, nz-1])).astype(real_t)
 #     vectors = np.floor(vectors)
 #     vals = func(vectors)
 #     density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
-#     val = func(np.array([[2, 3, 4]], dtype=float_t))
+#     val = func(np.array([[2, 3, 4]], dtype=real_t))
 #     assert np.max(np.abs(densities)) > 0
 #     assert (np.abs((val - densities[2, 3, 4]/counts[2, 3, 4]) / val)) < 1e-8
 #
 #     np.random.seed(0)
-#     float_t = np.float64
+#     real_t = np.float64
 #     nx, ny, nz = 6, 7, 8
-#     densities = np.zeros([nx, ny, nz], dtype=float_t)
-#     counts = np.zeros([nx, ny, nz], dtype=float_t)
-#     corners = np.array([0, 0, 0], dtype=float_t)
-#     deltas = np.array([1, 1, 1], dtype=float_t)
-#     vectors = (np.random.rand(10000, 3) * np.array([nx-1, ny-1, nz-1])).astype(float_t)
+#     densities = np.zeros([nx, ny, nz], dtype=real_t)
+#     counts = np.zeros([nx, ny, nz], dtype=real_t)
+#     corners = np.array([0, 0, 0], dtype=real_t)
+#     deltas = np.array([1, 1, 1], dtype=real_t)
+#     vectors = (np.random.rand(10000, 3) * np.array([nx-1, ny-1, nz-1])).astype(real_t)
 #     vals = func1(vectors)
 #     density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
-#     val = func1(np.array([[2, 3, 4]], dtype=float_t))
+#     val = func1(np.array([[2, 3, 4]], dtype=real_t))
 #     assert np.max(np.abs(densities)) > 0
 #     assert (np.abs((val - densities[2, 3, 4]/counts[2, 3, 4]) / val)) < 1e-2
 #

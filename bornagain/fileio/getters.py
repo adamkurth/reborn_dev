@@ -183,9 +183,7 @@ class CheetahFrameGetter(FrameGetter):
                 fs_pos[indices] = fs_pos_raw[indices] - fs_min[i]
                 ss_pos[indices] = ss_pos_raw[indices] - ss_min[i]
 
-        # pad_numbers = pad_numbers.astype(np.int)
-
-        centroids = [0]*self.n_pads
+        centroids = [None]*self.n_pads
         for i in range(self.n_pads):
             w = np.where(pad_numbers == i)[0]
             n = len(w)

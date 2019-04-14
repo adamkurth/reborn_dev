@@ -46,25 +46,72 @@
 
 // There is no atomic add for floats.  We are therefore trying the suggestion found here:
 //     https://streamhpc.com/blog/2016-02-09/atomic-operations-for-floats-in-opencl-improved/
-// This utilizes the following "compare and exchange" function:
+// This appears to be the basic idea:
+// (1) Copy the current value from an element in gloabl memory
+// (2) Pre-compute the next value using that copy and the amount to be added
+// (3) Lock the global memory
+// (4) Check if any other thread has changed the global memory since step (1)
+// (5) If the memory has not been changed, update the global value with the next value, else start over at (1)
+// The above seems silly because the lock should occur before step 1, and perhaps there is a way to achieve that,
+// but of course this is what an atomic add function would do.  The reason for the above strategy is that it utilizes
+// the following "compare and exchange" function:
 //     int atomic_cmpxchg (	volatile __global int *addr , int cmp, int val)
-// From documentation, this will read the 32-bit value (referred to as old) stored at location pointed by addr.
+// This will read the 32-bit value (referred to as old) stored at location pointed by addr.
 // Compute (addr == cmp) ? val : old and store result at location pointed by p. The function returns old.
 
 inline void atomic_add_real(volatile global dsfloat *addr, dsfloat val)
 {
+//*addr = 1;
+
 union {dsint u; dsfloat f;} next, expected, current;
+////current.f = *addr;
+do {
+expected.f = *addr; //current.f;
+next.f     = expected.f + val;
+//current.u  = ATOMIC_CMPXCHG( (volatile global dsint *)addr, expected.u, next.u);
+current.u  = atomic_cmpxchg( (volatile global dsint *)addr, expected.u, next.u);
+} while( current.u != expected.u );
+}
+
+inline void atomic_add_int(volatile global int *addr, int val)
+{
+//*addr = 1;
+
+union {int u; int f;} next, expected, current;
 current.f = *addr;
 do {
 expected.f = current.f;
 next.f     = expected.f + val;
-// (1) Grab the current value from gloabl memory
-// (2) Pre-compute the next value
-// (3) Lock the global memory
-// (4) Check if any other thread has changed the global memory since step (1)
-// (5) If the memory has not been changed, update the global value, else try again.
-current.u  = ATOMIC_CMPXCHG( (volatile global unsigned int *)addr, expected.u, next.u);
+current.u  = ATOMIC_CMPXCHG( (volatile global int *)addr, expected.u, next.u);
 } while( current.u != expected.u );
+}
+
+// For testing: every global index tries to add all elements of b to the first element of a
+kernel void test_atomic_add_int(
+global int * a,
+global int * b,
+int length
+){
+    int gi = get_global_id(0);
+    if (gi < length){
+        for (int g=0; g<length; g++){
+            atomic_add_int(&a[0], b[g]);
+        }
+    }
+}
+
+// For testing: every global index tries to add all elements of b to the first element of a
+kernel void test_atomic_add_real(
+global dsfloat * a,
+global dsfloat * b,
+int length
+){
+    int gi = get_global_id(0);
+    if (gi < length){
+        for (int g=0; g<length; g++){
+            atomic_add_real(&a[0], b[g]);
+        }
+    }
 }
 
 //inline void atomic_add_complex(volatile global dsfloat2 *addr, dsfloat2 val)
@@ -551,32 +598,32 @@ kernel void mesh_interpolation_real(
 
 
 
-// The counterpart to mesh_interpolation - this one inserts intensities into the 3D mesh.
+// The counterpart to mesh_interpolation - this one inserts intensities into the 3D mesh rather than extracting
+// intensities from an existing mesh.
 
 kernel void mesh_insertion(
-    global dsfloat2 *a_map,  // Lookup table akin to one made by phase_factor_mesh
-    global dsfloat *q,       // Scattering vectors
-    global dsfloat2 *a_in,   // The scattering amplitudes to be inserted
+    global dsfloat2 *densities,  // Lookup table akin to one made by phase_factor_mesh
     global dsfloat *weights, // Weights for insertion
+    global dsfloat *vecs,       // Scattering vectors
+    global dsfloat2 *vals,   // The scattering amplitudes to be inserted
     int n_pixels,            // Number of pixels
-    int4 N,                  // See phase_factor_mesh
-    dsfloat4 deltaQ,         // See phase_factor_mesh
-    dsfloat4 q_min,          // See phase_factor_mesh
+    int4 shape,                  // See phase_factor_mesh
+    dsfloat4 deltas,         // See phase_factor_mesh
+    dsfloat4 corner,          // See phase_factor_mesh
     const dsfloat16 R,       // Rotation matrix
     const dsfloat4 U,
-    int do_translate,
-    int add
+    int do_translate
 ){
 
     const int gi = get_global_id(0);
 
-    dsfloat4 q4r = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
-    q4r = rotate_vec(R,q4r);
+    dsfloat4 vecs4r = (dsfloat4)(vecs[gi*3],vecs[gi*3+1],vecs[gi*3+2],0.0f);
+    vecs4r = rotate_vec(R,vecs4r);
 
     // Floating point coordinates
-    const dsfloat i_f = (q4r.x - q_min.x)/deltaQ.x;
-    const dsfloat j_f = (q4r.y - q_min.y)/deltaQ.y;
-    const dsfloat k_f = (q4r.z - q_min.z)/deltaQ.z;
+    const dsfloat i_f = (vecs4r.x - corner.x)/deltas.x;
+    const dsfloat j_f = (vecs4r.y - corner.y)/deltas.y;
+    const dsfloat k_f = (vecs4r.z - corner.z)/deltas.z;
 
     // Integer coordinates
     const int i = (int)(floor(i_f));
@@ -584,12 +631,12 @@ kernel void mesh_insertion(
     const int k = (int)(floor(k_f));
 
     // Trilinear interpolation formula specified in paulbourke.net/miscellaneous/interpolation
-    const int i0 = (i % N.x)*N.y*N.z;
-    const int j0 = (j % N.y)*N.z;
-    const int k0 = (k % N.z);
-    const int i1 = ((i+1) % N.x)*N.y*N.z;
-    const int j1 = ((j+1) % N.y)*N.z;
-    const int k1 = ((k+1) % N.z);
+    const int i0 = (i % shape.x)*shape.y*shape.z;
+    const int j0 = (j % shape.y)*shape.z;
+    const int k0 = (k % shape.z);
+    const int i1 = ((i+1) % shape.x)*shape.y*shape.z;
+    const int j1 = ((j+1) % shape.y)*shape.z;
+    const int k1 = ((k+1) % shape.z);
     const dsfloat x0 = i_f - floor(i_f);
     const dsfloat y0 = j_f - floor(j_f);
     const dsfloat z0 = k_f - floor(k_f);
@@ -597,23 +644,23 @@ kernel void mesh_insertion(
     const dsfloat y1 = 1.0f - y0;
     const dsfloat z1 = 1.0f - z0;
     // First the real part
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i0 + j0 + k0)]), a_in[gi].x * x1 * y1 * z1);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i1 + j0 + k0)]), a_in[gi].x * x0 * y1 * z1);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i0 + j1 + k0)]), a_in[gi].x * x1 * y0 * z1);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i0 + j0 + k1)]), a_in[gi].x * x1 * y1 * z0);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i1 + j0 + k1)]), a_in[gi].x * x0 * y1 * z0);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i0 + j1 + k1)]), a_in[gi].x * x1 * y0 * z0);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i1 + j1 + k0)]), a_in[gi].x * x0 * y0 * z1);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i1 + j1 + k1)]), a_in[gi].x * x0 * y0 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j0 + k0)]), vals[gi].x * x1 * y1 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j0 + k0)]), vals[gi].x * x0 * y1 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j1 + k0)]), vals[gi].x * x1 * y0 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j0 + k1)]), vals[gi].x * x1 * y1 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j0 + k1)]), vals[gi].x * x0 * y1 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j1 + k1)]), vals[gi].x * x1 * y0 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j1 + k0)]), vals[gi].x * x0 * y0 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j1 + k1)]), vals[gi].x * x0 * y0 * z0);
     // Then the imaginary part
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i0 + j0 + k0)+1]), a_in[gi].y * x1 * y1 * z1);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i1 + j0 + k0)+1]), a_in[gi].y * x0 * y1 * z1);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i0 + j1 + k0)+1]), a_in[gi].y * x1 * y0 * z1);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i0 + j0 + k1)+1]), a_in[gi].y * x1 * y1 * z0);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i1 + j0 + k1)+1]), a_in[gi].y * x0 * y1 * z0);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i0 + j1 + k1)+1]), a_in[gi].y * x1 * y0 * z0);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i1 + j1 + k0)+1]), a_in[gi].y * x0 * y0 * z1);
-    atomic_add_real(&(((volatile global dsfloat *)a_map)[2*(i1 + j1 + k1)+1]), a_in[gi].y * x0 * y0 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j0 + k0)+1]), vals[gi].y * x1 * y1 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j0 + k0)+1]), vals[gi].y * x0 * y1 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j1 + k0)+1]), vals[gi].y * x1 * y0 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j0 + k1)+1]), vals[gi].y * x1 * y1 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j0 + k1)+1]), vals[gi].y * x0 * y1 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j1 + k1)+1]), vals[gi].y * x1 * y0 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j1 + k0)+1]), vals[gi].y * x0 * y0 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j1 + k1)+1]), vals[gi].y * x0 * y0 * z0);
     // Then the weights
     atomic_add_real(&weights[i0 + j0 + k0], x1 * y1 * z1);
     atomic_add_real(&weights[i1 + j0 + k0], x0 * y1 * z1);
@@ -623,6 +670,78 @@ kernel void mesh_insertion(
     atomic_add_real(&weights[i0 + j1 + k1], x1 * y0 * z0);
     atomic_add_real(&weights[i1 + j1 + k0], x0 * y0 * z1);
     atomic_add_real(&weights[i1 + j1 + k1], x0 * y0 * z0);
+}
+
+kernel void mesh_insertion_real(
+    global dsfloat *densities,   // Lookup table akin to one made by phase_factor_mesh
+    global dsfloat *weights, // Weights for insertion
+    global dsfloat *vecs,       // Scattering vectors
+    global dsfloat *vals,    // The scattering amplitudes to be inserted
+    int n_pixels,            // Number of pixels
+    int4 shape,                  // See phase_factor_mesh
+    dsfloat4 deltas,         // See phase_factor_mesh
+    dsfloat4 corner,          // See phase_factor_mesh
+    const dsfloat16 R,       // Rotation matrix
+    const dsfloat4 U,
+    int do_translate
+){
+
+    const int gi = get_global_id(0);
+
+    dsfloat4 vecs4r = (dsfloat4)(vecs[gi*3],vecs[gi*3+1],vecs[gi*3+2],0.0f);
+    vecs4r = rotate_vec(R,vecs4r);
+
+    // Floating point coordinates
+    const dsfloat i_f = (vecs4r.x - corner.x)/deltas.x;
+    const dsfloat j_f = (vecs4r.y - corner.y)/deltas.y;
+    const dsfloat k_f = (vecs4r.z - corner.z)/deltas.z;
+
+    // Integer coordinates
+    const int i = (int)(floor(i_f));
+    const int j = (int)(floor(j_f));
+    const int k = (int)(floor(k_f));
+
+    // Trilinear interpolation formula specified in paulbourke.net/miscellaneous/interpolation
+    const int i0 = (i % shape.x)*shape.y*shape.z;
+    const int j0 = (j % shape.y)*shape.z;
+    const int k0 = (k % shape.z);
+    const int i1 = ((i+1) % shape.x)*shape.y*shape.z;
+    const int j1 = ((j+1) % shape.y)*shape.z;
+    const int k1 = ((k+1) % shape.z);
+    const dsfloat x0 = i_f - floor(i_f);
+    const dsfloat y0 = j_f - floor(j_f);
+    const dsfloat z0 = k_f - floor(k_f);
+    const dsfloat x1 = 1.0f - x0;
+    const dsfloat y1 = 1.0f - y0;
+    const dsfloat z1 = 1.0f - z0;
+//    densities[i0 + j0 + k0] = vals[gi] * x1 * y1 * z1;
+    // First the intensities
+    atomic_add_real(&(((volatile global dsfloat *)densities)[i0 + j0 + k0]), vals[gi] * x1 * y1 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[i1 + j0 + k0]), vals[gi] * x0 * y1 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[i0 + j1 + k0]), vals[gi] * x1 * y0 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[i0 + j0 + k1]), vals[gi] * x1 * y1 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[i1 + j0 + k1]), vals[gi] * x0 * y1 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[i0 + j1 + k1]), vals[gi] * x1 * y0 * z0);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[i1 + j1 + k0]), vals[gi] * x0 * y0 * z1);
+    atomic_add_real(&(((volatile global dsfloat *)densities)[i1 + j1 + k1]), vals[gi] * x0 * y0 * z0);
+//    atomic_add_real(&densities[i0 + j0 + k0], vals[gi] * x1 * y1 * z1);
+//    atomic_add_real(&densities[i1 + j0 + k0], vals[gi] * x0 * y1 * z1);
+//    atomic_add_real(&densities[i0 + j1 + k0], vals[gi] * x1 * y0 * z1);
+//    atomic_add_real(&densities[i0 + j0 + k1], vals[gi] * x1 * y1 * z0);
+//    atomic_add_real(&densities[i1 + j0 + k1], vals[gi] * x0 * y1 * z0);
+//    atomic_add_real(&densities[i0 + j1 + k1], vals[gi] * x1 * y0 * z0);
+//    atomic_add_real(&densities[i1 + j1 + k0], vals[gi] * x0 * y0 * z1);
+//    atomic_add_real(&densities[i1 + j1 + k1], vals[gi] * x0 * y0 * z0);
+    // Then the weights
+    atomic_add_real(&weights[i0 + j0 + k0], x1 * y1 * z1);
+    atomic_add_real(&weights[i1 + j0 + k0], x0 * y1 * z1);
+    atomic_add_real(&weights[i0 + j1 + k0], x1 * y0 * z1);
+    atomic_add_real(&weights[i0 + j0 + k1], x1 * y1 * z0);
+    atomic_add_real(&weights[i1 + j0 + k1], x0 * y1 * z0);
+    atomic_add_real(&weights[i0 + j1 + k1], x1 * y0 * z0);
+    atomic_add_real(&weights[i1 + j1 + k0], x0 * y0 * z1);
+    atomic_add_real(&weights[i1 + j1 + k1], x0 * y0 * z0);
+//    densities[0] = 1;
 }
 
 

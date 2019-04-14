@@ -1050,6 +1050,7 @@ class PADView(object):
 
         n_peaks = peaks['n_peaks']
         centroids = peaks['centroids']
+        print(centroids[0])
         gl_fs_pos = np.empty(n_peaks)
         gl_ss_pos = np.empty(n_peaks)
         n = 0
