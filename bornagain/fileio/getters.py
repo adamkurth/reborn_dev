@@ -6,7 +6,7 @@ import numpy as np
 from bornagain.external import crystfel
 from bornagain.external.crystfel import load_crystfel_geometry, geometry_file_to_pad_geometry_list
 from bornagain.external.cheetah import cheetah_remapped_cspad_array_to_pad_list
-
+from streamfileReader import get_total_number_of_frames, get_nth_frame
 
 class FrameGetter(object):
 
@@ -213,3 +213,37 @@ class CheetahFrameGetter(FrameGetter):
             dat['peaks'] = peaks
 
         return dat
+
+
+
+class streamfileFrameGetter(FrameGetter):
+
+    r"""
+    
+    A frame getter that reads a CrystFEL streamfile. More specifically, it:
+    1. Extracts the geom file info.
+    2. Gets the A star matrix, the cxi file path, and the cxi file frame number for the nth frame.
+
+    """
+
+    def __init__(self, streamfile_name=None):
+
+        FrameGetter.__init__(self)
+
+        
+        self.n_frames = get_total_number_of_frames(streamfile_name)
+        self.streamfile_name = streamfile_name
+
+        # self.geom_dict = load_crystfel_geometry(geom_file_name)
+        # self.current_frame = 0
+
+    def get_frame(self, frame_number=0):
+
+        dat = {}
+        dat['A_matrix'], dat['cxiFilepath'], dat['cxiFileFrameNumber'] = get_nth_frame(self.streamfile_name, frame_number)
+
+        return dat
+    
+    
+            
+
