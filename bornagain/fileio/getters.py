@@ -21,7 +21,7 @@ class FrameGetter(object):
     Minimally, a "frame getter" should have a simple means to provide infomation on how many frames there are, and
     methods for getting next frame, previous frame, and arbitrary frames.
 
-    Once could imagine making things fast by having parallel threads or processes that are pulling data of disk and
+    Once could imagine making things fast by having parallel threads or processes that are pulling data off disk and
     cleaning it up prior to serving it up to a top-level program.  Or, the getter just serves up raw data.
 
     We could also have getters that serve up simulated data.
@@ -232,25 +232,35 @@ class StreamfileFrameGetter(FrameGetter):
 
     # Initialise class variables
     streamfile_name = None
-    
+
 
     def __init__(self, streamfile_name=None):
 
         # FrameGetter.__init__(self)
+
+        StreamfileFrameGetter.streamfile_name = streamfile_name
         
         self.n_frames = get_total_number_of_frames(streamfile_name)
-        StreamfileFrameGetter.streamfile_name = streamfile_name
-
+        self.current_frame = 0
+        
         # self.geom_dict = load_crystfel_geometry(geom_file_name)
-        # self.current_frame = 0
+        # self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file_name)
 
+    
     def get_frame(self, frame_number=0):
 
         dat = {}
-        dat['A_matrix'], dat['cxiFilepath'], dat['cxiFileFrameNumber'] = get_nth_frame(StreamfileFrameGetter.streamfile_name, frame_number)
+        dat['A_matrix'], cxiFilepath, cxiFileFrameNumber = get_nth_frame(StreamfileFrameGetter.streamfile_name, frame_number)
+
+        print(cxiFilepath)
+        print(cxiFileFrameNumber)
+
+        # Extract data from the cxi file corresponding to the cxiFileFrameNumber (not necessarily the same as frame_number)
+        # h5File = h5py.File(cxiFilepath, 'r')
+        # h5Data = h5File['/entry_1/data_1/data']
+        # theData = np.array(h5Data[cxiFileFrameNumber, :, :]).astype(np.double)
+        # pad_data = crystfel.split_image(theData, self.geom_dict)
+        # dat['pad_data'] = pad_data
 
         return dat
-    
-    
-            
 
