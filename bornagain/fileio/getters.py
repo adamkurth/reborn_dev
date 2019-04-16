@@ -129,15 +129,19 @@ class CheetahFrameGetter(FrameGetter):
         # p.t_vec = np.array([0, 0, p.t_vec.flat[2]])
         self.n_pads = len(self.pad_geometry)
         # print(self.n_pads)
-        self.h5file = h5py.File(cxi_file_name, 'r')
-        self.h5_data = self.h5file['/entry_1/data_1/data']
-        self.n_frames = self.h5_data.shape[0]
+        self.load_cxidb_file(cxi_file_name)
         self.current_frame = 0
 
         self.peaks = None
 
         # for key in list(self.h5file['entry_1/result_1'].keys()):
         #     print(self.h5file['entry_1/result_1/'+key])
+
+    def load_cxidb_file(self, cxi_file_name):
+
+        self.h5file = h5py.File(cxi_file_name, 'r')
+        self.h5_data = self.h5file['/entry_1/data_1/data']
+        self.n_frames = self.h5_data.shape[0]
 
     def get_peaks(self, h5file, frame_number):
 
@@ -216,23 +220,26 @@ class CheetahFrameGetter(FrameGetter):
 
 
 
-class streamfileFrameGetter(FrameGetter):
+class StreamfileFrameGetter(FrameGetter):
 
     r"""
     
     A frame getter that reads a CrystFEL streamfile. More specifically, it:
     1. Extracts the geom file info.
-    2. Gets the A star matrix, the cxi file path, and the cxi file frame number for the nth frame.
+    2. Gets the A star matrix, the cxi file path, and the cxi file frame number for the nth frame in the streamfile.
 
     """
 
+    # Initialise class variables
+    streamfile_name = None
+    
+
     def __init__(self, streamfile_name=None):
 
-        FrameGetter.__init__(self)
-
+        # FrameGetter.__init__(self)
         
         self.n_frames = get_total_number_of_frames(streamfile_name)
-        self.streamfile_name = streamfile_name
+        StreamfileFrameGetter.streamfile_name = streamfile_name
 
         # self.geom_dict = load_crystfel_geometry(geom_file_name)
         # self.current_frame = 0
@@ -240,7 +247,7 @@ class streamfileFrameGetter(FrameGetter):
     def get_frame(self, frame_number=0):
 
         dat = {}
-        dat['A_matrix'], dat['cxiFilepath'], dat['cxiFileFrameNumber'] = get_nth_frame(self.streamfile_name, frame_number)
+        dat['A_matrix'], dat['cxiFilepath'], dat['cxiFileFrameNumber'] = get_nth_frame(StreamfileFrameGetter.streamfile_name, frame_number)
 
         return dat
     
