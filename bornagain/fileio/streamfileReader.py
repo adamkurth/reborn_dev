@@ -53,6 +53,8 @@ def get_nth_frame(streamfile_name, n):
     cxiFilepath = 0
     cxiFileFrameNumber = 0
 
+    astar_exist = False
+
     for line in f:
         if "Image filename:" in line:
             cxiFilepath = line[16:-1]
@@ -64,6 +66,7 @@ def get_nth_frame(streamfile_name, n):
             A[0,0] = float(line[8:19])
             A[0,1] = float(line[19:30])
             A[0,2] = float(line[29:40])
+            astar_exist = True
 
         if "bstar = " in line:
             A[1,0] = float(line[8:19])
@@ -77,6 +80,11 @@ def get_nth_frame(streamfile_name, n):
 
         if end_chunk in line:
             break
+
+    # If frame does not contain a star, etc. set the A star matrix to None
+    if astar_exist == False:
+        A = None
+
 
     # close the file
     f.close()

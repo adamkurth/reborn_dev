@@ -21,7 +21,7 @@ class FrameGetter(object):
     Minimally, a "frame getter" should have a simple means to provide infomation on how many frames there are, and
     methods for getting next frame, previous frame, and arbitrary frames.
 
-    Once could imagine making things fast by having parallel threads or processes that are pulling data of disk and
+    Once could imagine making things fast by having parallel threads or processes that are pulling data off disk and
     cleaning it up prior to serving it up to a top-level program.  Or, the getter just serves up raw data.
 
     We could also have getters that serve up simulated data.
@@ -129,15 +129,19 @@ class CheetahFrameGetter(FrameGetter):
         # p.t_vec = np.array([0, 0, p.t_vec.flat[2]])
         self.n_pads = len(self.pad_geometry)
         # print(self.n_pads)
-        self.h5file = h5py.File(cxi_file_name, 'r')
-        self.h5_data = self.h5file['/entry_1/data_1/data']
-        self.n_frames = self.h5_data.shape[0]
+        self.load_cxidb_file(cxi_file_name)
         self.current_frame = 0
 
         self.peaks = None
 
         # for key in list(self.h5file['entry_1/result_1'].keys()):
         #     print(self.h5file['entry_1/result_1/'+key])
+
+    def load_cxidb_file(self, cxi_file_name):
+
+        self.h5file = h5py.File(cxi_file_name, 'r')
+        self.h5_data = self.h5file['/entry_1/data_1/data']
+        self.n_frames = self.h5_data.shape[0]
 
     def get_peaks(self, h5file, frame_number):
 
@@ -216,34 +220,47 @@ class CheetahFrameGetter(FrameGetter):
 
 
 
-class streamfileFrameGetter(FrameGetter):
+class StreamfileFrameGetter(FrameGetter):
 
     r"""
     
     A frame getter that reads a CrystFEL streamfile. More specifically, it:
     1. Extracts the geom file info.
-    2. Gets the A star matrix, the cxi file path, and the cxi file frame number for the nth frame.
+    2. Gets the A star matrix, the cxi file path, and the cxi file frame number for the nth frame in the streamfile.
 
     """
 
+    # Initialise class variables
+    streamfile_name = None
+
+
     def __init__(self, streamfile_name=None):
 
-        FrameGetter.__init__(self)
+        # FrameGetter.__init__(self)
 
+        StreamfileFrameGetter.streamfile_name = streamfile_name
         
         self.n_frames = get_total_number_of_frames(streamfile_name)
-        self.streamfile_name = streamfile_name
-
+        self.current_frame = 0
+        
         # self.geom_dict = load_crystfel_geometry(geom_file_name)
-        # self.current_frame = 0
+        # self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file_name)
 
+    
     def get_frame(self, frame_number=0):
 
         dat = {}
-        dat['A_matrix'], dat['cxiFilepath'], dat['cxiFileFrameNumber'] = get_nth_frame(self.streamfile_name, frame_number)
+        dat['A_matrix'], cxiFilepath, cxiFileFrameNumber = get_nth_frame(StreamfileFrameGetter.streamfile_name, frame_number)
+
+        print(cxiFilepath)
+        print(cxiFileFrameNumber)
+
+        # Extract data from the cxi file corresponding to the cxiFileFrameNumber (not necessarily the same as frame_number)
+        # h5File = h5py.File(cxiFilepath, 'r')
+        # h5Data = h5File['/entry_1/data_1/data']
+        # theData = np.array(h5Data[cxiFileFrameNumber, :, :]).astype(np.double)
+        # pad_data = crystfel.split_image(theData, self.geom_dict)
+        # dat['pad_data'] = pad_data
 
         return dat
-    
-    
-            
 
