@@ -808,7 +808,7 @@ class ClCore(object):
         # TODO: documentation
 
         if not hasattr(self, 'mesh_interpolation_cl'):
-            arg_types = [None, None, None, None, self.int_t, None, None, None, None, None, self.int_t]
+            arg_types = [None, None, None, None, self.int_t, None, None, None, None]
             self.mesh_insertion_cl = self.programs.mesh_insertion
             self.mesh_insertion_cl.set_scalar_arg_dtypes(arg_types)
             self.mesh_insertion_real_cl = self.programs.mesh_insertion_real
@@ -831,12 +831,12 @@ class ClCore(object):
             assert vals.dtype == self.complex_t
             vals_gpu = self.to_device(vals, dtype=self.complex_t)
             self.mesh_insertion_cl(self.queue, (global_size,), (self.group_size,), densities.data, weights.data,
-                                   vecs_gpu.data, vals_gpu.data, n_pixels, shape, deltas, corner, rot, trans, do_trans)
+                                   vecs_gpu.data, vals_gpu.data, n_pixels, shape, deltas, corner, rot)
         elif densities.dtype == self.real_t:
             assert vals.dtype == self.real_t
             vals_gpu = self.to_device(vals, dtype=self.real_t)
             self.mesh_insertion_real_cl(self.queue, (global_size,), (self.group_size,), densities.data, weights.data,
-                                   vecs_gpu.data, vals_gpu.data, n_pixels, shape, deltas, corner, rot, trans, do_trans)
+                                   vecs_gpu.data, vals_gpu.data, n_pixels, shape, deltas, corner, rot)
         self.queue.finish()
 
     def lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w, R=None, I=None, add=False):

@@ -12,8 +12,9 @@ from bornagain.simulate.clcore import ClCore
 from bornagain.simulate.examples import lysozyme_pdb_file, MoleculeSimulatorV1
 from bornagain.utils import rotate, random_rotation, random_unit_vector, max_pair_distance, rotation_about_axis
 from bornagain.units import r_e
-from image_viewers import ImageViewer2
+# from image_viewers import ImageViewer2
 
+live_update = 100
 n_patterns = 100
 n_orientations = 100
 skip = 5
@@ -27,7 +28,7 @@ distance = 0.05
 cl_group_size = 32
 rot_angle = (2*np.pi)*1.0
 
-debug_true_rotations = False
+debug_true_rotations = True
 debug_correct_starting_model = True
 
 real_t = np.float64
@@ -99,7 +100,6 @@ prev_rot = 0
 # Generate patterns
 ###############################
 
-live_update = 10
 if live_update:
     shotim = pg.image(np.zeros(pad.shape()), title='Single shot')
     shotim.setPredefinedGradient('flame')
@@ -107,7 +107,6 @@ if live_update:
     modelim.setPredefinedGradient('flame')
     weightsim = pg.image(np.zeros(2*[mesh_size]), title='Weights')
     weightsim.setPredefinedGradient('flame')
-    imview = ImageViewer2()
 trueim = pg.image(true_model, title='Correct model')
 trueim.setPredefinedGradient('flame')
 
@@ -121,7 +120,7 @@ for update in range(n_model_updates):
     # if len(ww) >= 1:
     current_model.flat[ww] /= weights.flat[ww]
     if live_update > 0:
-        modelim.setImage(log(current_model[int(np.floor(mesh_size / 2)), :, :]+1))
+        modelim.setImage(log(current_model[int(np.floor(mesh_size / 2)), :, :] + 1))
         weightsim.setImage(log(weights[int(np.floor(mesh_size / 2)), :, :] + 1))
     weights *= 0
     new_model *= 0
@@ -133,32 +132,30 @@ for update in range(n_model_updates):
         if live_update > 0 and (pat % live_update) == 0:
             shotim.setImage(log(intensity+1))
             pg.QtGui.QApplication.processEvents()
-            imview.set_image(log(intensity+1))
+        n_acceptances = 0
         for orient in range(n_orientations):
-            if debug_true_rotations:
-                rot = true_rot.copy()
-            else:
-                rot2 = rotation_about_axis(np.random.rand(1)[0]*rot_angle, random_unit_vector()).astype(real_t)
-                rot = rotate(rot2, rot)
+            rot = true_rot.copy()
+            # rot2 = rotation_about_axis(np.random.rand(1)[0]*rot_angle, random_unit_vector()).astype(real_t)
+            # rot = rotate(rot2, rot)
             rotq = rotate(rot.T, q_vecs)
-            trilinear_interpolation(current_model, rotq, corner, deltas, out=model_slice)
+            # trilinear_interpolation(current_model, rotq, corner, deltas, out=model_slice)
             # model_slice = sim.generate_pattern(rotation=rot, poisson=False).astype(real_t)
-            w = np.where((model_slice > 0)*(intensity > 0)*(mask > 0))[0]
-            M = model_slice.flat[w]
-            K = intensity.flat[w]
-            prob = np.sum(-M + K*log(M) - loggamma(K+1))
-            if np.isnan(prob).any():
-                breakit
-            print(prob, np.max(K))
+            # w = np.where((model_slice > 0)*(intensity > 0)*(mask > 0))[0]
+            # M = model_slice.flat[w]
+            # K = intensity.flat[w]
+            # prob = np.sum(-M + K*log(M) - loggamma(K+1))
+            prob = 1
             if orient == 0:
                 prev_prob = prob
                 prev_rot = rot.copy()
                 continue
-            a = np.random.rand(1)
-            prob_ratio = min(exp(np.longdouble(prob) - np.longdouble(prev_prob)), 1)
-            if a < prob_ratio:
+            # a = np.random.rand(1)
+            # prob_ratio = min(exp(np.longdouble(prob) - np.longdouble(prev_prob)), 1)
+            # accept = a < prob_ratio
+            accept = True
+            if accept:
                 if orient >= skip:
-                    sys.stdout.write('%4d ' % (orient+1,))
+                    n_acceptances += 1
                     trilinear_insertion(new_model, weights, rotq, intensity, corner, deltas)
                 prev_prob = prob
                 prev_rot = rot.copy()
@@ -166,7 +163,7 @@ for update in range(n_model_updates):
                 if orient >= skip:
                     rotq = rotate(prev_rot.T, q_vecs)
                     trilinear_insertion(new_model, weights, rotq, intensity, corner, deltas)
-
+        sys.stdout.write('%5d' % (n_acceptances,))
 
 if 1:
     w = np.where(weights.flat > 0)

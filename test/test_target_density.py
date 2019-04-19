@@ -59,6 +59,7 @@ def test_transforms():
 
         assert np.allclose(dat0, dat2)
 
+
 def func(vecs):
     return vecs[:, 0].ravel().copy()
 

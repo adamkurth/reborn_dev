@@ -570,34 +570,24 @@ kernel void mesh_interpolation_real(
 
 kernel void mesh_insertion(
     global dsfloat2 *densities,  // Lookup table akin to one made by phase_factor_mesh
-    global dsfloat *weights, // Weights for insertion
-    global dsfloat *vecs,       // Scattering vectors
-    global dsfloat2 *vals,   // The scattering amplitudes to be inserted
-    int n_pixels,            // Number of pixels
+    global dsfloat *weights,     // Weights for insertion
+    global dsfloat *vecs,        // Scattering vectors
+    global dsfloat2 *vals,       // The scattering amplitudes to be inserted
+    int n_pixels,                // Number of pixels
     int4 shape,                  // See phase_factor_mesh
-    dsfloat4 deltas,         // See phase_factor_mesh
-    dsfloat4 corner,          // See phase_factor_mesh
-    const dsfloat16 R,       // Rotation matrix
-    const dsfloat4 U,
-    int do_translate
+    dsfloat4 deltas,             // See phase_factor_mesh
+    dsfloat4 corner,             // See phase_factor_mesh
+    const dsfloat16 R            // Rotation matrix
 ){
-
     const int gi = get_global_id(0);
-
     dsfloat4 vecs4r = (dsfloat4)(vecs[gi*3],vecs[gi*3+1],vecs[gi*3+2],0.0f);
     vecs4r = rotate_vec(R,vecs4r);
-
-    // Floating point coordinates
     const dsfloat i_f = (vecs4r.x - corner.x)/deltas.x;
     const dsfloat j_f = (vecs4r.y - corner.y)/deltas.y;
     const dsfloat k_f = (vecs4r.z - corner.z)/deltas.z;
-
-    // Integer coordinates
     const int i = (int)(floor(i_f));
     const int j = (int)(floor(j_f));
     const int k = (int)(floor(k_f));
-
-    // Trilinear interpolation formula specified in paulbourke.net/miscellaneous/interpolation
     const int i0 = (i % shape.x)*shape.y*shape.z;
     const int j0 = (j % shape.y)*shape.z;
     const int k0 = (k % shape.z);
@@ -610,7 +600,6 @@ kernel void mesh_insertion(
     const dsfloat x1 = 1.0f - x0;
     const dsfloat y1 = 1.0f - y0;
     const dsfloat z1 = 1.0f - z0;
-    // First the real part
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j0 + k0)]), vals[gi].x * x1 * y1 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j0 + k0)]), vals[gi].x * x0 * y1 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j1 + k0)]), vals[gi].x * x1 * y0 * z1);
@@ -619,7 +608,6 @@ kernel void mesh_insertion(
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j1 + k1)]), vals[gi].x * x1 * y0 * z0);
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j1 + k0)]), vals[gi].x * x0 * y0 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j1 + k1)]), vals[gi].x * x0 * y0 * z0);
-    // Then the imaginary part
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j0 + k0)+1]), vals[gi].y * x1 * y1 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j0 + k0)+1]), vals[gi].y * x0 * y1 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j1 + k0)+1]), vals[gi].y * x1 * y0 * z1);
@@ -628,7 +616,6 @@ kernel void mesh_insertion(
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i0 + j1 + k1)+1]), vals[gi].y * x1 * y0 * z0);
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j1 + k0)+1]), vals[gi].y * x0 * y0 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[2*(i1 + j1 + k1)+1]), vals[gi].y * x0 * y0 * z0);
-    // Then the weights
     atomic_add_real(&weights[i0 + j0 + k0], x1 * y1 * z1);
     atomic_add_real(&weights[i1 + j0 + k0], x0 * y1 * z1);
     atomic_add_real(&weights[i0 + j1 + k0], x1 * y0 * z1);
@@ -648,9 +635,7 @@ kernel void mesh_insertion_real(
     int4 shape,                  // See phase_factor_mesh
     dsfloat4 deltas,             // See phase_factor_mesh
     dsfloat4 corner,             // See phase_factor_mesh
-    const dsfloat16 R,           // Rotation matrix
-    const dsfloat4 U,
-    int do_translate
+    const dsfloat16 R            // Rotation matrix
 ){
     const int gi = get_global_id(0);
     dsfloat4 vecs4r = (dsfloat4)(vecs[gi*3],vecs[gi*3+1],vecs[gi*3+2],0.0f);
