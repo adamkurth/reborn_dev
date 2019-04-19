@@ -11,7 +11,7 @@ tests:
   stage: test
   script:
     - cd test
-    - pytest --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py  --ignore=test_mplviews.py
+    - pytest --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py  --ignore=test_mplviews.py
 
 pages:
   script:
