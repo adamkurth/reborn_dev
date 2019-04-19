@@ -12,6 +12,7 @@ from bornagain.simulate.clcore import ClCore
 from bornagain.simulate.examples import lysozyme_pdb_file, MoleculeSimulatorV1
 from bornagain.utils import rotate, random_rotation, random_unit_vector, max_pair_distance, rotation_about_axis
 from bornagain.units import r_e
+from image_viewers import ImageViewer2
 
 n_patterns = 100
 n_orientations = 100
@@ -41,7 +42,7 @@ f = mol.get_scattering_factors(beam=beam)
 intensity_prefactor = pad.reshape(beam.photon_number_fluence * r_e**2 * pad.solid_angles() *
                                   pad.polarization_factors(beam=beam))
 resolution = pad.max_resolution(beam=beam)
-mol_size = max_pair_distance(mol.coordinates)
+mol_size = mol.max_atomic_pair_distance
 qmax = 2 * np.pi / resolution
 mesh_size = int(np.ceil(6 * mol_size / resolution))
 mask = pad.beamstop_mask(beam=beam, q_min=2 * np.pi / mol_size).astype(real_t)
@@ -62,7 +63,7 @@ new_model *= np.mean(intensity.flat[w])
 if debug_correct_starting_model:
     new_model = true_model.copy()
 
-lngam = np.arange(0,1000)
+lngam = np.arange(0, 1000)
 lngam = loggamma(lngam+1)
 
 patterns = []
@@ -106,6 +107,7 @@ if live_update:
     modelim.setPredefinedGradient('flame')
     weightsim = pg.image(np.zeros(2*[mesh_size]), title='Weights')
     weightsim.setPredefinedGradient('flame')
+    imview = ImageViewer2()
 trueim = pg.image(true_model, title='Correct model')
 trueim.setPredefinedGradient('flame')
 
@@ -131,6 +133,7 @@ for update in range(n_model_updates):
         if live_update > 0 and (pat % live_update) == 0:
             shotim.setImage(log(intensity+1))
             pg.QtGui.QApplication.processEvents()
+            imview.set_image(log(intensity+1))
         for orient in range(n_orientations):
             if debug_true_rotations:
                 rot = true_rot.copy()
@@ -144,6 +147,8 @@ for update in range(n_model_updates):
             M = model_slice.flat[w]
             K = intensity.flat[w]
             prob = np.sum(-M + K*log(M) - loggamma(K+1))
+            if np.isnan(prob).any():
+                breakit
             print(prob, np.max(K))
             if orient == 0:
                 prev_prob = prob

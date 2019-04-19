@@ -152,7 +152,7 @@ def test_insertions():
     real_t = clcore.real_t
     int_t = clcore.int_t
 
-    n = 100
+    n = 101
     a = np.zeros(n)
     b = np.arange(n)
     a_gpu = clcore.to_device(a, dtype=int_t)
@@ -167,6 +167,8 @@ def test_insertions():
     b_gpu = clcore.to_device(b, dtype=real_t)
     clcore.test_atomic_add_real(a_gpu, b_gpu)
     assert a_gpu.get()[0] - np.sum(b)*n == 0
+
+    print(a_gpu.get()[0], np.sum(b)*n)
 
     return
 

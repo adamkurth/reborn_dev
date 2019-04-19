@@ -8,11 +8,7 @@ If you want to view results just add the keyword "view"
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import sys
-sys.path.append('..')
-import pytest
 import numpy as np
-import bornagain as ba
 from bornagain import utils
 
 try:
@@ -21,7 +17,6 @@ try:
     from pyopencl import array as clarray
     cl_array = clarray.Array
     havecl = True
-    # Check for double precision:
     test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
     if test_core.double_precision:
         have_double = True
@@ -34,8 +29,72 @@ except ImportError:
     pyopencl = None
     havecl = False
 
-import bornagain.simulate.numbacore as numbacore
-from bornagain.utils import rotation_about_axis, rotate
+
+def test_atomics_01():
+
+    if not havecl:
+        return
+
+    core = clcore.ClCore(group_size=32)
+
+    n = 3
+    a = np.zeros(n)
+    b = np.arange(n)
+    a_gpu = core.to_device(a, dtype=core.real_t)
+    b_gpu = core.to_device(b, dtype=core.real_t)
+    core.test_atomic_add_real(a_gpu, b_gpu)
+    assert a_gpu.get()[0] - np.sum(b) * n == 0
+
+
+def test_atomics_02():
+
+    if not havecl:
+        return
+
+    core = clcore.ClCore(group_size=32)
+
+    n = 101
+    a = np.zeros(n)
+    b = np.arange(n)
+    a_gpu = core.to_device(a, dtype=core.int_t)
+    b_gpu = core.to_device(b, dtype=core.int_t)
+    core.test_atomic_add_int(a_gpu, b_gpu)
+    assert a_gpu.get()[0] - np.sum(b) * n == 0
+
+
+def test_atomics_03():
+
+    if not havecl:
+        return
+
+    core = clcore.ClCore(group_size=32)
+
+    n = 100
+    a = np.zeros(n)
+    b = np.arange(n)
+    a_gpu = core.to_device(a, dtype=core.real_t)
+    b_gpu = core.to_device(b, dtype=core.real_t)
+    core.test_atomic_add_real(a_gpu, b_gpu)
+    assert a_gpu.get()[0] - np.sum(b) * n == 0
+
+
+def test_atomics_04():
+
+    if not havecl:
+        return
+
+    core = clcore.ClCore(group_size=32)
+
+    n = 100
+    a = np.zeros(n)
+    b = np.arange(n)
+    a_gpu = core.to_device(a, dtype=core.real_t)
+    b_gpu = core.to_device(b, dtype=core.real_t)
+    m = 5
+    for _ in range(m):
+        core.test_atomic_add_real(a_gpu, b_gpu)
+    assert a_gpu.get()[0] - np.sum(b) * n * m == 0
+
 
 def test_rotations(double_precision=False):
 

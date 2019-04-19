@@ -13,6 +13,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 from bornagain import units
+from bornagain.utils import max_pair_distance
 from bornagain.simulate import atoms
 
 
@@ -71,3 +72,8 @@ class Molecule(object):
         self.coordinates = coordinates[:atom_index, :]
         self.atomic_symbols = atomic_symbols[:atom_index]
         self.atomic_numbers = atoms.atomic_symbols_to_numbers(atomic_symbols)
+
+    @property
+    def max_atomic_pair_distance(self):
+
+        return max_pair_distance(self.coordinates)

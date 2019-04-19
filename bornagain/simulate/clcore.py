@@ -973,17 +973,18 @@ class ClCore(object):
         if not hasattr(self, 'test_atomic_add_real_cl'):
             self.test_atomic_add_real_cl = self.programs.test_atomic_add_real
             self.test_atomic_add_real_cl.set_scalar_arg_dtypes([None, None, self.int_t])
-
-            global_size = np.int(np.ceil(len(a) / np.float(self.group_size)) * self.group_size)
-            self.test_atomic_add_real_cl(self.queue, (global_size,), (self.group_size,), a.data, b.data, len(a))
+        global_size = np.int(np.ceil(len(a) / np.float(self.group_size)) * self.group_size)
+        self.test_atomic_add_real_cl(self.queue, (global_size,), (self.group_size,), a.data, b.data, len(a))
+        self.queue.finish()
 
     def test_atomic_add_int(self, a, b):
         if not hasattr(self, 'test_atomic_add_real_cl'):
             self.test_atomic_add_int_cl = self.programs.test_atomic_add_int
             self.test_atomic_add_int_cl.set_scalar_arg_dtypes([None, None, self.int_t])
-
-            global_size = np.int(np.ceil(len(a) / np.float(self.group_size)) * self.group_size)
-            self.test_atomic_add_int_cl(self.queue, (global_size,), (self.group_size,), a.data, b.data, len(a))
+        n = self.int_t(len(b))
+        global_size = np.int(np.ceil(n / np.float(self.group_size)) * self.group_size)
+        self.test_atomic_add_int_cl(self.queue, (global_size,), (self.group_size,), a.data, b.data, n)
+        self.queue.finish()
 
 
 class ClCoreDerek(ClCore):

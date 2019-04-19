@@ -59,24 +59,17 @@
 // This will read the 32-bit value (referred to as old) stored at location pointed by addr.
 // Compute (addr == cmp) ? val : old and store result at location pointed by p. The function returns old.
 
-inline void atomic_add_real(volatile global dsfloat *addr, dsfloat val)
-{
-//*addr = 1;
-
+inline void atomic_add_real(volatile global dsfloat *addr, dsfloat val){
 union {dsint u; dsfloat f;} next, expected, current;
-////current.f = *addr;
+current.f = *addr;
 do {
-expected.f = *addr; //current.f;
+expected.f = current.f;
 next.f     = expected.f + val;
-//current.u  = ATOMIC_CMPXCHG( (volatile global dsint *)addr, expected.u, next.u);
-current.u  = atomic_cmpxchg( (volatile global dsint *)addr, expected.u, next.u);
+current.u  = ATOMIC_CMPXCHG( (volatile global dsint *)addr, expected.u, next.u);
 } while( current.u != expected.u );
 }
 
-inline void atomic_add_int(volatile global int *addr, int val)
-{
-//*addr = 1;
-
+inline void atomic_add_int(volatile global int *addr, int val){
 union {int u; int f;} next, expected, current;
 current.f = *addr;
 do {
@@ -87,32 +80,20 @@ current.u  = ATOMIC_CMPXCHG( (volatile global int *)addr, expected.u, next.u);
 }
 
 // For testing: every global index tries to add all elements of b to the first element of a
-kernel void test_atomic_add_int(
-global int * a,
-global int * b,
-int length
-){
+kernel void test_atomic_add_int(global int * a, global int * b, int length){
     int gi = get_global_id(0);
     if (gi < length){
         for (int g=0; g<length; g++){
             atomic_add_int(&a[0], b[g]);
-        }
-    }
-}
+}}}
 
 // For testing: every global index tries to add all elements of b to the first element of a
-kernel void test_atomic_add_real(
-global dsfloat * a,
-global dsfloat * b,
-int length
-){
+kernel void test_atomic_add_real(global dsfloat * a, global dsfloat * b, int length){
     int gi = get_global_id(0);
     if (gi < length){
         for (int g=0; g<length; g++){
             atomic_add_real(&a[0], b[g]);
-        }
-    }
-}
+}}}
 
 //inline void atomic_add_complex(volatile global dsfloat2 *addr, dsfloat2 val)
 //{
@@ -578,25 +559,11 @@ kernel void mesh_interpolation_real(
             a_map[i1 + j1 + k0] * x0 * y0 * z1 +
             a_map[i1 + j1 + k1] * x0 * y0 * z0;
 
-//    dsfloat ph, cosph, sinph;
-//    dsfloat2 a_temp;
-//    if (do_translate == 1){
-//        ph = -dot(q4r,U);
-//        cosph = native_cos(ph);
-//        sinph = native_sin(ph);
-//        a_temp.x = a_sum.x*cosph - a_sum.y*sinph;
-//        a_temp.y = a_sum.x*sinph + a_sum.y*cosph;
-//        a_sum = a_temp;
-//    }
-
-    // Check that this pixel index is not out of bounds
     if (gi < n_pixels){
         a_out[gi] = a_out[gi]*add + a_sum;
     }
 
 }
-
-
 
 // The counterpart to mesh_interpolation - this one inserts intensities into the 3D mesh rather than extracting
 // intensities from an existing mesh.
@@ -674,34 +641,26 @@ kernel void mesh_insertion(
 
 kernel void mesh_insertion_real(
     global dsfloat *densities,   // Lookup table akin to one made by phase_factor_mesh
-    global dsfloat *weights, // Weights for insertion
-    global dsfloat *vecs,       // Scattering vectors
-    global dsfloat *vals,    // The scattering amplitudes to be inserted
-    int n_pixels,            // Number of pixels
+    global dsfloat *weights,     // Weights for insertion
+    global dsfloat *vecs,        // Scattering vectors
+    global dsfloat *vals,        // The scattering amplitudes to be inserted
+    int n_pixels,                // Number of pixels
     int4 shape,                  // See phase_factor_mesh
-    dsfloat4 deltas,         // See phase_factor_mesh
-    dsfloat4 corner,          // See phase_factor_mesh
-    const dsfloat16 R,       // Rotation matrix
+    dsfloat4 deltas,             // See phase_factor_mesh
+    dsfloat4 corner,             // See phase_factor_mesh
+    const dsfloat16 R,           // Rotation matrix
     const dsfloat4 U,
     int do_translate
 ){
-
     const int gi = get_global_id(0);
-
     dsfloat4 vecs4r = (dsfloat4)(vecs[gi*3],vecs[gi*3+1],vecs[gi*3+2],0.0f);
     vecs4r = rotate_vec(R,vecs4r);
-
-    // Floating point coordinates
     const dsfloat i_f = (vecs4r.x - corner.x)/deltas.x;
     const dsfloat j_f = (vecs4r.y - corner.y)/deltas.y;
     const dsfloat k_f = (vecs4r.z - corner.z)/deltas.z;
-
-    // Integer coordinates
     const int i = (int)(floor(i_f));
     const int j = (int)(floor(j_f));
     const int k = (int)(floor(k_f));
-
-    // Trilinear interpolation formula specified in paulbourke.net/miscellaneous/interpolation
     const int i0 = (i % shape.x)*shape.y*shape.z;
     const int j0 = (j % shape.y)*shape.z;
     const int k0 = (k % shape.z);
@@ -714,8 +673,6 @@ kernel void mesh_insertion_real(
     const dsfloat x1 = 1.0f - x0;
     const dsfloat y1 = 1.0f - y0;
     const dsfloat z1 = 1.0f - z0;
-//    densities[i0 + j0 + k0] = vals[gi] * x1 * y1 * z1;
-    // First the intensities
     atomic_add_real(&(((volatile global dsfloat *)densities)[i0 + j0 + k0]), vals[gi] * x1 * y1 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[i1 + j0 + k0]), vals[gi] * x0 * y1 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[i0 + j1 + k0]), vals[gi] * x1 * y0 * z1);
@@ -724,15 +681,6 @@ kernel void mesh_insertion_real(
     atomic_add_real(&(((volatile global dsfloat *)densities)[i0 + j1 + k1]), vals[gi] * x1 * y0 * z0);
     atomic_add_real(&(((volatile global dsfloat *)densities)[i1 + j1 + k0]), vals[gi] * x0 * y0 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[i1 + j1 + k1]), vals[gi] * x0 * y0 * z0);
-//    atomic_add_real(&densities[i0 + j0 + k0], vals[gi] * x1 * y1 * z1);
-//    atomic_add_real(&densities[i1 + j0 + k0], vals[gi] * x0 * y1 * z1);
-//    atomic_add_real(&densities[i0 + j1 + k0], vals[gi] * x1 * y0 * z1);
-//    atomic_add_real(&densities[i0 + j0 + k1], vals[gi] * x1 * y1 * z0);
-//    atomic_add_real(&densities[i1 + j0 + k1], vals[gi] * x0 * y1 * z0);
-//    atomic_add_real(&densities[i0 + j1 + k1], vals[gi] * x1 * y0 * z0);
-//    atomic_add_real(&densities[i1 + j1 + k0], vals[gi] * x0 * y0 * z1);
-//    atomic_add_real(&densities[i1 + j1 + k1], vals[gi] * x0 * y0 * z0);
-    // Then the weights
     atomic_add_real(&weights[i0 + j0 + k0], x1 * y1 * z1);
     atomic_add_real(&weights[i1 + j0 + k0], x0 * y1 * z1);
     atomic_add_real(&weights[i0 + j1 + k0], x1 * y0 * z1);
@@ -741,7 +689,6 @@ kernel void mesh_insertion_real(
     atomic_add_real(&weights[i0 + j1 + k1], x1 * y0 * z0);
     atomic_add_real(&weights[i1 + j1 + k0], x0 * y0 * z1);
     atomic_add_real(&weights[i1 + j1 + k1], x0 * y0 * z0);
-//    densities[0] = 1;
 }
 
 
