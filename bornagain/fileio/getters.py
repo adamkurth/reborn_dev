@@ -6,7 +6,7 @@ import numpy as np
 from bornagain.external import crystfel
 from bornagain.external.crystfel import load_crystfel_geometry, geometry_file_to_pad_geometry_list
 from bornagain.external.cheetah import cheetah_remapped_cspad_array_to_pad_list
-from streamfileReader import get_total_number_of_frames, get_nth_frame
+#from streamfileReader import get_total_number_of_frames, get_nth_frame
 
 class FrameGetter(object):
 

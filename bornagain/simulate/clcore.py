@@ -719,12 +719,11 @@ class ClCore(object):
         """
 
         if not hasattr(self, 'mesh_interpolation_cl'):
+            arg_types = [None, None, None, self.int_t, None, None, None, None, None, self.int_t, self.int_t]
             self.mesh_interpolation_cl = self.programs.mesh_interpolation
-            self.mesh_interpolation_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, None, None, None, None,
-                                                              None, self.int_t, self.int_t])
+            self.mesh_interpolation_cl.set_scalar_arg_dtypes(arg_types)
             self.mesh_interpolation_real_cl = self.programs.mesh_interpolation_real
-            self.mesh_interpolation_real_cl.set_scalar_arg_dtypes([None, None, None, self.int_t, None, None, None, None,
-                                                                   None, self.int_t, self.int_t])
+            self.mesh_interpolation_real_cl.set_scalar_arg_dtypes(arg_types)
 
         if add is True:
             add = self.int_t(1)
@@ -800,44 +799,45 @@ class ClCore(object):
         else:
             return a_out_dev
 
-    def mesh_insertion(self, densities, weights, vecs, vals, shape, corner, deltas, rot=None):
-
-        r"""
-        Undocomented
-        """
-        # TODO: documentation
-
-        if not hasattr(self, 'mesh_interpolation_cl'):
-            arg_types = [None, None, None, None, self.int_t, None, None, None, None]
-            self.mesh_insertion_cl = self.programs.mesh_insertion
-            self.mesh_insertion_cl.set_scalar_arg_dtypes(arg_types)
-            self.mesh_insertion_real_cl = self.programs.mesh_insertion_real
-            self.mesh_insertion_real_cl.set_scalar_arg_dtypes(arg_types)
-
-        if rot is None:
-            rot = np.eye(3)
-        rot = self.vec16(rot.T, dtype=self.real_t)
-        trans = self.vec4(np.zeros(3), dtype=self.real_t)
-        do_trans = self.int_t(0)
-        shape = np.array(shape, dtype=self.int_t)
-        corner = np.array(corner, dtype=self.real_t)
-        deltas = np.array(deltas, dtype=self.real_t)
-        vecs_gpu = self.to_device(vecs, dtype=self.real_t)
-        n_pixels = self.int_t(vecs.shape[0])
-
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
-
-        if densities.dtype == self.complex_t:
-            assert vals.dtype == self.complex_t
-            vals_gpu = self.to_device(vals, dtype=self.complex_t)
-            self.mesh_insertion_cl(self.queue, (global_size,), (self.group_size,), densities.data, weights.data,
-                                   vecs_gpu.data, vals_gpu.data, n_pixels, shape, deltas, corner, rot)
-        elif densities.dtype == self.real_t:
-            assert vals.dtype == self.real_t
-            vals_gpu = self.to_device(vals, dtype=self.real_t)
-            self.mesh_insertion_real_cl(self.queue, (global_size,), (self.group_size,), densities.data, weights.data,
-                                   vecs_gpu.data, vals_gpu.data, n_pixels, shape, deltas, corner, rot)
-        self.queue.finish()
+    # def mesh_insertion(self, densities, weights, vecs, vals, shape, corner, deltas, rot=None):
+    #
+    #     r"""
+    #     Undocomented
+    #     """
+    #     # TODO: documentation
+    #
+    #     if not hasattr(self, 'mesh_insertion_cl'):
+    #         arg_types = [None, None, None, None, self.int_t, None, None, None, None]
+    #         self.mesh_insertion_cl = self.programs.mesh_insertion
+    #         self.mesh_insertion_cl.set_scalar_arg_dtypes(arg_types)
+    #         self.mesh_insertion_real_cl = self.programs.mesh_insertion_real
+    #         self.mesh_insertion_real_cl.set_scalar_arg_dtypes(arg_types)
+    #
+    #     if rot is None:
+    #         rot = np.eye(3)
+    #     rot = self.vec16(rot.T, dtype=self.real_t)
+    #     shape = np.array(shape, dtype=np.int)
+    #     corner = np.array(corner, dtype=self.real_t)
+    #     deltas = np.array(deltas, dtype=self.real_t)
+    #     vecs_gpu = self.to_device(vecs, dtype=self.real_t)
+    #     n_pixels = self.int_t(vecs.shape[0])
+    #
+    #     global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
+    #
+    #
+    #     if densities.dtype == self.complex_t:
+    #         assert vals.dtype == self.complex_t
+    #         vals_gpu = self.to_device(vals, dtype=self.complex_t)
+    #         self.mesh_insertion_cl(self.queue, (global_size,), (self.group_size,), densities.data, weights.data,
+    #                                vecs_gpu.data, vals_gpu.data, n_pixels, shape, deltas, corner, rot)
+    #     elif densities.dtype == self.real_t:
+    #         assert vals.dtype == self.real_t
+    #         vals_gpu = self.to_device(vals, dtype=self.real_t)
+    #         print(rot,vals_gpu,vecs_gpu,global_size)
+    #         self.mesh_insertion_real_cl(self.queue, (global_size,), (self.group_size,), densities.data, weights.data,
+    #                                vecs_gpu.data, vals_gpu.data, n_pixels, shape, deltas, corner, rot)
+    #         print(densities, weights)
+    #     self.queue.finish()
 
     def lattice_transform_intensities_pad(self, abc, N, T, F, S, B, nF, nS, w, R=None, I=None, add=False):
         r"""
@@ -984,6 +984,15 @@ class ClCore(object):
         n = self.int_t(len(b))
         global_size = np.int(np.ceil(n / np.float(self.group_size)) * self.group_size)
         self.test_atomic_add_int_cl(self.queue, (global_size,), (self.group_size,), a.data, b.data, n)
+        self.queue.finish()
+
+    def divide_nonzero_inplace(self, a, b):
+        if not hasattr(self, 'divide_nonzero_inplace_real_cl'):
+            self.divide_nonzero_inplace_real_cl = self.programs.divide_nonzero_inplace_real
+            self.divide_nonzero_inplace_real_cl.set_scalar_arg_dtypes([None, None, self.int_t])
+        n = self.int_t(len(a))
+        global_size = np.int(np.ceil(n / np.float(self.group_size)) * self.group_size)
+        self.divide_nonzero_inplace_real_cl(self.queue, (global_size,), (self.group_size,), a.data, b.data, n)
         self.queue.finish()
 
 

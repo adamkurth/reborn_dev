@@ -14,7 +14,8 @@ from bornagain.utils import rotate, random_rotation, random_unit_vector, max_pai
 from bornagain.units import r_e
 # from image_viewers import ImageViewer2
 
-live_update = 100
+visualize = False
+live_update = 1000
 n_patterns = 100
 n_orientations = 100
 skip = 5
@@ -31,8 +32,8 @@ rot_angle = (2*np.pi)*1.0
 debug_true_rotations = True
 debug_correct_starting_model = True
 
-real_t = np.float64
-clcore = ClCore(group_size=cl_group_size)
+clcore = ClCore(group_size=cl_group_size, double_precision=False)
+real_t = clcore.real_t
 beam = Beam(wavelength=wavelength, pulse_energy=pulse_energy, diameter_fwhm=beam_diameter)
 pad = PADGeometry(n_pixels=n_pixels, pixel_size=pixel_size, distance=distance)
 mol = Molecule(pdb_file=lysozyme_pdb_file)
@@ -46,6 +47,7 @@ resolution = pad.max_resolution(beam=beam)
 mol_size = mol.max_atomic_pair_distance
 qmax = 2 * np.pi / resolution
 mesh_size = int(np.ceil(6 * mol_size / resolution))
+shape = np.array([mesh_size]*3)
 mask = pad.beamstop_mask(beam=beam, q_min=2 * np.pi / mol_size).astype(real_t)
 w = np.where(mask.flat != 0)
 a_map_dev = clcore.to_device(shape=(mesh_size**3,), dtype=clcore.complex_t)
@@ -59,6 +61,7 @@ deltas = np.array([((qmax - -qmax) / (mesh_size - 1))] * 3, dtype=real_t)
 weights = np.ones(shape=[mesh_size] * 3, dtype=real_t)
 vec0 = q_vecs.astype(real_t).copy()
 new_model = np.random.random([mesh_size]*3).astype(real_t)
+current_model = new_model.copy()
 intensity = sim.generate_pattern(rotation=None, poisson=True).astype(real_t)*mask
 new_model *= np.mean(intensity.flat[w])
 if debug_correct_starting_model:
@@ -76,6 +79,7 @@ print('Diffraction detector size: %d x %d' % (n_pixels, n_pixels))
 print('Diffraction GPU lookup table size: %d x %d x %d' % (mesh_size, mesh_size, mesh_size))
 print('Model grid size: %d x %d x %d' % (mesh_size, mesh_size, mesh_size))
 print('='*79)
+
 
 print('='*79)
 sys.stdout.write('Generating patterns... ')
@@ -113,31 +117,30 @@ trueim.setPredefinedGradient('flame')
 # Main loop
 #############################
 
+current_model_gpu = clcore.to_device(current_model, dtype=real_t)
+new_model_gpu = clcore.to_device(new_model, dtype=real_t)
+weights_gpu = clcore.to_device(weights, dtype=real_t)
+q_vecs_gpu = clcore.to_device(q_vecs, dtype=real_t)
+
 for update in range(n_model_updates):
-    current_model = new_model.copy()
-    ww = np.where(weights.flat > 0)
-    # if len(ww) >= 1:
-    current_model.flat[ww] /= weights.flat[ww]
-    if live_update > 0:
-        modelim.setImage(log(current_model[int(np.floor(mesh_size / 2)), :, :] + 1))
-        weightsim.setImage(log(weights[int(np.floor(mesh_size / 2)), :, :] + 1))
-    weights *= 0
-    new_model *= 0
+    current_model_gpu[:] = new_model_gpu
+    clcore.divide_nonzero_inplace(current_model_gpu, weights_gpu)
+    current_model_gpu.set(current_model)
+    weights_gpu.fill(0)
+    new_model_gpu.fill(0)
     rot = random_rotation().astype(real_t)
     for pat in range(n_patterns):
         t = time()
         sys.stdout.write('model %d, pattern %d: ' % (update+1, pat+1))
         true_rot = rotations[pat] #random_rotation().astype(real_t)
-        intensity = patterns[pat] #sim.generate_pattern(rotation=true_rot, poisson=True).astype(real_t)*mask
-        if live_update > 0 and (pat % live_update) == 0:
-            shotim.setImage(log(intensity+1))
-            pg.QtGui.QApplication.processEvents()
+        intensity_gpu = clcore.to_device(patterns[pat], dtype=real_t)
         n_acceptances = 0
         for orient in range(n_orientations):
             rot = true_rot.copy()
             # rot2 = rotation_about_axis(np.random.rand(1)[0]*rot_angle, random_unit_vector()).astype(real_t)
             # rot = rotate(rot2, rot)
-            rotq = rotate(rot.T, q_vecs)
+            # rotq = rotate(rot.T, q_vecs)
+            # rotq_gpu = clcore.to_device(rotq, dtype=real_t)
             # trilinear_interpolation(current_model, rotq, corner, deltas, out=model_slice)
             # model_slice = sim.generate_pattern(rotation=rot, poisson=False).astype(real_t)
             # w = np.where((model_slice > 0)*(intensity > 0)*(mask > 0))[0]
@@ -156,16 +159,21 @@ for update in range(n_model_updates):
             if accept:
                 if orient >= skip:
                     n_acceptances += 1
-                    trilinear_insertion(new_model, weights, rotq, intensity, corner, deltas)
+                    clcore.mesh_insertion(new_model_gpu, weights_gpu, q_vecs_gpu, intensity_gpu, shape=shape,
+                                          corner=corner, deltas=deltas, rot=rot)
                 prev_prob = prob
                 prev_rot = rot.copy()
             else:
                 if orient >= skip:
-                    rotq = rotate(prev_rot.T, q_vecs)
-                    trilinear_insertion(new_model, weights, rotq, intensity, corner, deltas)
+                    clcore.mesh_insertion(new_model_gpu, weights_gpu, q_vecs_gpu, intensity_gpu, shape=shape,
+                                          corner=corner, deltas=deltas, rot=rot)
         sys.stdout.write('%5d (%g seconds)\n' % (n_acceptances, time()-t))
 
-if 1:
+new_model = new_model_gpu.get()
+weights = weights_gpu.get()
+intensity = intensity_gpu.get()
+
+if visualize:
     w = np.where(weights.flat > 0)
     dmodel = np.zeros_like(new_model)
     dmodel.flat[w] = new_model.flat[w] / weights.flat[w]

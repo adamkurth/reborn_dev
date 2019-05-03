@@ -18,7 +18,8 @@ import bornagain
 # import bornagain.external.pyqtgraph as bpg
 from bornagain.fileio.getters import FrameGetter, CheetahFrameGetter
 from bornagain.external.crystfel import geometry_file_to_pad_geometry_list
-from bornagain.external.pyqtgraph.mods import ImageItem
+# from bornagain.external.pyqtgraph.mods import ImageItem
+from pyqtgraph import ImageItem
 from bornagain.analysis.peaks import boxsnr, PeakFinder
 
 padview_debug_config = 1  # 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
@@ -637,7 +638,8 @@ class PADView(object):
             if not roi.mouseHovering:
                 continue
 
-            for (ind, im, dat, geom) in zip(range(self.n_pads), self.images, self.pad_data, self.pad_geometry):
+            pad_data = self.get_pad_display_data()
+            for (ind, im, dat, geom) in zip(range(self.n_pads), self.images, pad_data, self.pad_geometry):
 
                 # Using builtin function of pyqtgraph ROI to identify panels associated with the ROI...
                 pslice = roi.getArraySlice(dat, im, axes=(0, 1), returnSlice=True)[0]
@@ -754,12 +756,12 @@ class PADView(object):
         if self.images is None:
             self.setup_pads()
 
-        pad_data = self.get_pad_display_data()
-        mx = np.ravel(pad_data).max()
+        processed_data = self.get_pad_display_data()
+        mx = np.ravel(processed_data).max()
 
         for i in range(0, self.n_pads):
 
-            d = pad_data[i]
+            d = processed_data[i]
 
             if self.show_true_fast_scans:  # For testing - show fast scan axis
                 d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx

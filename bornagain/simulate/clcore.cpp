@@ -279,28 +279,23 @@ kernel void get_group_size(
 }
 
 
-kernel void mod_squared_complex_to_real(
-        global const dsfloat2 *A,
-        global dsfloat *I,
-        const int n)
-{
-
 // Take the mod square of an array of complex numbers.  This is supposed to be
 // done with the pyopencl.array.Array class, but I only get seg. faults...
-
+kernel void mod_squared_complex_to_real(global const dsfloat2 *A, global dsfloat *I, const int n){
     const int gi = get_global_id(0);
     if (gi < n){
         dsfloat2 a = A[gi];
         I[gi] += a.x*a.x + a.y*a.y;
-    }
-}
+}}
 
+// Divide A by B wherever B is not zero
+kernel void divide_nonzero_inplace_real(global dsfloat *A, global const dsfloat *B, const int n){
+    const int gi = get_global_id(0);
+    if (gi < n){if (B[gi] != 0){A[gi] /= B[gi];}}
+}
 
 // Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
 // This variant allows for an arbitrary collection of scattering vectors
-
-
-
 
 kernel void phase_factor_qrf(
     global const dsfloat *q,  // Scattering vectors
@@ -658,6 +653,7 @@ kernel void mesh_insertion_real(
     const dsfloat x1 = 1.0f - x0;
     const dsfloat y1 = 1.0f - y0;
     const dsfloat z1 = 1.0f - z0;
+    if (gi < n_pixels){
     atomic_add_real(&(((volatile global dsfloat *)densities)[i0 + j0 + k0]), vals[gi] * x1 * y1 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[i1 + j0 + k0]), vals[gi] * x0 * y1 * z1);
     atomic_add_real(&(((volatile global dsfloat *)densities)[i0 + j1 + k0]), vals[gi] * x1 * y0 * z1);
@@ -674,6 +670,7 @@ kernel void mesh_insertion_real(
     atomic_add_real(&weights[i0 + j1 + k1], x1 * y0 * z0);
     atomic_add_real(&weights[i1 + j1 + k0], x0 * y0 * z1);
     atomic_add_real(&weights[i1 + j1 + k1], x0 * y0 * z0);
+    }
 }
 
 
