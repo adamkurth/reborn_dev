@@ -242,7 +242,7 @@ class PADView(object):
         shortcut("Ctrl+s", self.increase_skip)
         shortcut("Shift+s", self.decrease_skip)
         shortcut("m", self.toggle_masks)
-        shortcut("t", self.mask_all_rois)
+        shortcut("t", self.mask_hovering_roi)
 
     def update_status_string(self, frame_number=None, n_frames=None):
 
@@ -626,12 +626,12 @@ class PADView(object):
             self.mask_data = pickle.load(open(file_name, "rb"))
             self.update_masks(self.mask_data)
 
-    def mask_all_rois(self):
-
-        noslice = slice(0, 1, None)
+    def mask_hovering_roi(self):
 
         if self._mask_rois is None:
             return
+
+        noslice = slice(0, 1, None)
 
         for roi in self._mask_rois:
 
@@ -639,6 +639,7 @@ class PADView(object):
                 continue
 
             pad_data = self.get_pad_display_data()
+
             for (ind, im, dat, geom) in zip(range(self.n_pads), self.images, pad_data, self.pad_geometry):
 
                 # Using builtin function of pyqtgraph ROI to identify panels associated with the ROI...
