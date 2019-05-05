@@ -35,10 +35,10 @@ subroutine trilinear_interpolation(densities, vectors, corners, deltas, out)
     enddo
 end subroutine trilinear_interpolation
 
-subroutine trilinear_insertion(densities, weights, vectors, vals, corners, deltas)
+subroutine trilinear_insertion(densities, weights, vectors, vals, corners, deltas, weight)
     implicit none
     real(kind=8), intent(inout) :: densities(:,:,:), weights(:,:,:)
-    real(kind=8), intent(in) :: vectors(:,:), vals(:), corners(3), deltas(3)
+    real(kind=8), intent(in) :: vectors(:,:), vals(:), corners(3), deltas(3), weight
     real(kind=8) :: i_f,j_f,k_f,x0,y0,z0,x1,y1,z1,val
     integer(kind=4) :: i0,j0,k0,i1,j1,k1,ii,nx,ny,nz,nn
     nn = size(vals, 1)
@@ -62,22 +62,22 @@ subroutine trilinear_insertion(densities, weights, vectors, vals, corners, delta
         y1 = 1.0 - y0
         z1 = 1.0 - z0
         val = vals(ii)
-        densities(i0, j0, k0) = densities(i0, j0, k0) + val * x1 * y1 * z1
-        densities(i1, j0, k0) = densities(i1, j0, k0) + val * x0 * y1 * z1
-        densities(i0, j1, k0) = densities(i0, j1, k0) + val * x1 * y0 * z1
-        densities(i0, j0, k1) = densities(i0, j0, k1) + val * x1 * y1 * z0
-        densities(i1, j0, k1) = densities(i1, j0, k1) + val * x0 * y1 * z0
-        densities(i0, j1, k1) = densities(i0, j1, k1) + val * x1 * y0 * z0
-        densities(i1, j1, k0) = densities(i1, j1, k0) + val * x0 * y0 * z1
-        densities(i1, j1, k1) = densities(i1, j1, k1) + val * x0 * y0 * z0
-        weights(i0, j0, k0) = weights(i0, j0, k0) + x1 * y1 * z1
-        weights(i1, j0, k0) = weights(i1, j0, k0) + x0 * y1 * z1
-        weights(i0, j1, k0) = weights(i0, j1, k0) + x1 * y0 * z1
-        weights(i0, j0, k1) = weights(i0, j0, k1) + x1 * y1 * z0
-        weights(i1, j0, k1) = weights(i1, j0, k1) + x0 * y1 * z0
-        weights(i0, j1, k1) = weights(i0, j1, k1) + x1 * y0 * z0
-        weights(i1, j1, k0) = weights(i1, j1, k0) + x0 * y0 * z1
-        weights(i1, j1, k1) = weights(i1, j1, k1) + x0 * y0 * z0
+        densities(i0, j0, k0) = densities(i0, j0, k0) + val * x1 * y1 * z1 * weight
+        densities(i1, j0, k0) = densities(i1, j0, k0) + val * x0 * y1 * z1 * weight
+        densities(i0, j1, k0) = densities(i0, j1, k0) + val * x1 * y0 * z1 * weight
+        densities(i0, j0, k1) = densities(i0, j0, k1) + val * x1 * y1 * z0 * weight
+        densities(i1, j0, k1) = densities(i1, j0, k1) + val * x0 * y1 * z0 * weight
+        densities(i0, j1, k1) = densities(i0, j1, k1) + val * x1 * y0 * z0 * weight
+        densities(i1, j1, k0) = densities(i1, j1, k0) + val * x0 * y0 * z1 * weight
+        densities(i1, j1, k1) = densities(i1, j1, k1) + val * x0 * y0 * z0 * weight
+        weights(i0, j0, k0) = weights(i0, j0, k0) + x1 * y1 * z1 * weight
+        weights(i1, j0, k0) = weights(i1, j0, k0) + x0 * y1 * z1 * weight
+        weights(i0, j1, k0) = weights(i0, j1, k0) + x1 * y0 * z1 * weight
+        weights(i0, j0, k1) = weights(i0, j0, k1) + x1 * y1 * z0 * weight
+        weights(i1, j0, k1) = weights(i1, j0, k1) + x0 * y1 * z0 * weight
+        weights(i0, j1, k1) = weights(i0, j1, k1) + x1 * y0 * z0 * weight
+        weights(i1, j1, k0) = weights(i1, j1, k0) + x0 * y0 * z1 * weight
+        weights(i1, j1, k1) = weights(i1, j1, k1) + x0 * y0 * z0 * weight
     enddo
 end subroutine trilinear_insertion
 

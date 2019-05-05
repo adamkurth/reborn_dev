@@ -828,7 +828,7 @@ def trilinear_interpolation_numba(densities=None, vectors=None, corners=None, de
     return out
 
 
-def trilinear_insertion(densities, weights, vectors, vals, corners, deltas):
+def trilinear_insertion(densities, weights, vectors, vals, corners, deltas, weight=1):
 
     float_t = np.float64
     assert densities.dtype == float_t
@@ -843,7 +843,8 @@ def trilinear_insertion(densities, weights, vectors, vals, corners, deltas):
     assert vals.flags.c_contiguous
     assert corners.flags.c_contiguous
     assert deltas.flags.c_contiguous
-    density_f.trilinear_insertion(densities.T, weights.T, vectors.T, vals.T, corners.T, deltas.T)
+    weight = float_t(weight)
+    density_f.trilinear_insertion(densities.T, weights.T, vectors.T, vals.T, corners.T, deltas.T, weight)
 
 
 # @jit(['void(float64[:], float64[:], float64[:], float64[:], float64[:])'], nopython=True)
