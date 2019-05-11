@@ -74,7 +74,7 @@ class AreaDetector(object):
         psf = self.get_psf(run)
         if self.detector.is_cspad():
             shift = 194. * 109.92 + (274.8 - 109.92) * 2.
-            for i in range(0, 32, 2):
+            for i in range(0, 64, 2):
                 a = psf[i]
                 f = np.array(a[2])
                 t = np.array(a[0]) + shift * f/np.sqrt(np.sum(f**2))
@@ -86,6 +86,8 @@ class AreaDetector(object):
             g.t_vec = np.array(psf[i][0])*1e6
             g.ss_vec = np.array(psf[i][1])*1e6
             g.fs_vec = np.array(psf[i][2])*1e6
+            g.n_fs = 194
+            g.n_ss = 185
             geom.append(g)
         return geom
 
