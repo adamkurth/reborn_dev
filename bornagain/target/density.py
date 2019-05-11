@@ -201,6 +201,18 @@ class CrystalDensityMap(object):
 
         return np.dot(self.cryst.unitcell.o_mat, self.x_vecs.T).T
 
+    # @property
+    # def h_vecs(self):
+    #
+    #
+    #
+    #     h = self.n_vecs.copy()
+    #     h = h / self.dx / self.shape
+    #     for i in range(3):
+    #         f = np.where(h[:, i] > (self.shape[i] / 2))
+    #         h[f, i] = h[f, i] - self.shape[i]
+    #     return h
+
     @property
     def h_vecs(self):
 
@@ -214,19 +226,23 @@ class CrystalDensityMap(object):
 
         """
 
-        h = self.n_vecs.copy()
-        h = h / self.dx / self.shape
-        for i in range(3):
-            f = np.where(h[:, i] > (self.shape[i] / 2))
-            h[f, i] = h[f, i] - self.shape[i]
-        return h
+        h0 = np.fft.fftshift(np.fft.fftfreq(self.shape[0], d=self.oversampling/self.shape[0]))
+        h1 = np.fft.fftshift(np.fft.fftfreq(self.shape[1], d=self.oversampling/self.shape[1]))
+        h2 = np.fft.fftshift(np.fft.fftfreq(self.shape[2], d=self.oversampling/self.shape[2]))
+        hh0, hh1, hh2 = np.meshgrid(h0, h1, h2, indexing='ij')
+        print(hh0.shape)
+        h_vecs = np.empty((self.n_voxels, 3))
+        h_vecs[:, 0] = hh0.ravel()
+        h_vecs[:, 1] = hh1.ravel()
+        h_vecs[:, 2] = hh2.ravel()
+        return h_vecs
 
     @property
     def h_limits(self):
 
         limits = np.zeros((3, 2))
-        limits[:, 0] = -((self.shape - np.floor(self.shape / 2))-1)/self.dx/self.shape
-        limits[:, 1] = np.floor(self.shape / 2)/self.dx/self.shape
+        limits[:, 0] = -np.floor(self.shape/2)/self.oversampling
+        limits[:, 1] = np.floor((self.shape-1) / 2)/self.oversampling
         return limits
 
     @property
