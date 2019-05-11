@@ -14,11 +14,12 @@ class DensityMap(object):
     shape = None  # : Shape of the array, numpy style
     corner_min = None  # : 3-vector with coordinates of the center of the voxel with smaller values
     corner_max = None  # : 3-vector with coordinates of the center of the voxel with larger values
+    deltas = None
     n_voxels = None  # : Total number of voxels
     dx = None  # : 3-vecto with increments beteen voxels
     strides = None  # : Array strides
 
-    def __init__(self, shape=None, corner_min=None, corner_max=None, molecule=None):
+    def __init__(self, shape=None, corner_min=None, corner_max=None, deltas=None, molecule=None):
         r"""
 
         Args:
@@ -27,9 +28,12 @@ class DensityMap(object):
             corner_max:  opposit corner to corner_min
         """
 
-        self.shape = shape
+        self.shape = np.array(shape)
         self.corner_min = corner_min
-        self.corner_max = corner_max
+        if deltas is None:
+            self.deltas = (corner_max - corner_min)/(self.shape - 1)
+        else:
+            self.corner_max = self.corner_min + (self.shape - 1)*self.deltas
         self.limits = np.zeros((3, 2))
         self.limits[:, 0] = corner_min
         self.limits[:, 1] = corner_max
@@ -111,6 +115,7 @@ class CrystalDensityMap(object):
         self.cryst = cryst  # :  crystal class object used to initiate the map
         self.oversampling = np.int(np.ceil(oversampling))  # :  Oversampling ratio
         self.dx = 1.0 / cshape  # :  Crystal basis length increment
+        self.deltas = self.dx
         self.cshape = cshape.astype(int)  # :  Number of samples along edge of unit cell
         self.shape = (cshape * self.oversampling).astype(int)  # :  Number of samples along edge of whole map (includes oversampling)
         self.n_voxels = np.int(np.product(self.shape))  # :  Linear length of map (=N^3)
@@ -166,6 +171,10 @@ class CrystalDensityMap(object):
         return self.limits[:, 1].copy().ravel()
 
     @property
+    def corner(self):
+        return self.corner_min
+
+    @property
     def x_limits(self):
         r"""
         Return a 3x2 array with the limits of the density map.  These limits correspond to the centers of the voxels.
@@ -219,6 +228,14 @@ class CrystalDensityMap(object):
         limits[:, 0] = -((self.shape - np.floor(self.shape / 2))-1)/self.dx/self.shape
         limits[:, 1] = np.floor(self.shape / 2)/self.dx/self.shape
         return limits
+
+    @property
+    def h_corner(self):
+        return self.h_limits[:, 0].copy()
+
+    @property
+    def h_deltas(self):
+        return np.array([1.0/self.oversampling]*3)
 
     @property
     def h_density_map(self):
@@ -319,7 +336,7 @@ class CrystalDensityMap(object):
         N = self.shape
         return data.reshape([N[0], N[1], N[2], 3])
 
-    def zeros(self):
+    def zeros(self, *args, **kwargs):
 
         r"""
 
@@ -329,7 +346,7 @@ class CrystalDensityMap(object):
 
         """
 
-        return np.zeros(self.shape)
+        return np.zeros(self.shape, *args, **kwargs)
 
     def place_atoms_in_map(self, atom_x_vecs, atom_fs, mode='gaussian', fixed_atom_sigma=0.5e-10):
 
@@ -423,6 +440,8 @@ class CrystalMeshTool(object):
             oversampling (int) : An oversampling of 2 gives a real-space map that is twice as large as the unit cell. In
                                   Fourier space, there will be one sample between Bragg samples.  And so on for 3,4,...
         '''
+
+
 
         d = resolution
         s = np.ceil(oversampling)

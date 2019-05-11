@@ -2,6 +2,7 @@ from time import time
 import numpy as np
 import pyqtgraph as pg
 import bornagain as ba
+from bornagain.units import keV
 from bornagain import detector
 from bornagain import source
 from bornagain.utils import rotate, random_rotation
@@ -25,16 +26,21 @@ spacegroup.sym_translations[3] += np.array([1, 1, 0])
 spacegroup.sym_translations[5] += np.array([0, 1, 0])
 
 # Setup beam and detector
-beam = source.Beam(wavelength=3e-10)
+beam = source.Beam(photon_energy=1.8/keV, pulse_energy=1e-3, diameter_fwhm=1e-6)
 pad = detector.PADGeometry(pixel_size=300e-6, distance=0.5, n_pixels=500)
 q_vecs = pad.q_vecs(beam=beam).copy()
-resolution = 2*np.pi/np.max(pad.q_mags(beam=beam))
+q_max = np.max(pad.q_mags(beam=beam))
+resolution = 2*np.pi/q_max
 mask = pad.beamstop_mask(beam=beam, q_min=2*np.pi/300e-10)
 print('Resolution: %.3g A' % (resolution*1e10,))
 
+# Density map for merging
+dmap = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=4)
+dens = dmap.zeros()
+denswt = dmap.zeros()
+
 # Atomic scattering factors
-f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers,
-                                             ba.units.hc / beam.wavelength)*0 + 1
+f = cryst.molecule.get_scattering_factors(beam=beam)
 
 # Coordinates of asymmetric unit in crystal basis x
 au_x_vecs = rotate(unitcell.o_mat_inv, cryst.molecule.coordinates)
@@ -84,7 +90,6 @@ if viewcrystal:
     scat.add_rgb_axis(length=100e-10)
     scat.show()
 
-t = time()
 clcore = ClCore()
 print('Computing with:', clcore.context.devices)
 amps_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
@@ -93,18 +98,28 @@ amps_lat_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)
 q_vecs_gpu = clcore.to_device(q_vecs, dtype=clcore.real_t)
 q_rot_gpu = clcore.to_device(shape=q_vecs.shape, dtype=clcore.real_t)
 
-rot = random_rotation()
-trans = np.zeros(3)
-clcore.rotate_translate_vectors(rot, trans, q_vecs_gpu, q_rot_gpu)
+for c in range(10):
+    print(c)
+    t = time()
+    rot = random_rotation()
+    trans = np.zeros(3)
+    clcore.rotate_translate_vectors(rot, trans, q_vecs_gpu, q_rot_gpu)
+    amps_gpu *= 0
+    for i in range(1):#spacegroup.n_molecules):
+        x = spacegroup.apply_symmetry_operation(i, au_x_vecs)
+        r = unitcell.x2r(x)
+        clcore.phase_factor_qrf(q_rot_gpu, lats[i].occupied_r_coordinates, a=amps_lat_gpu, add=False)
+        clcore.phase_factor_qrf(q_rot_gpu, r, a=amps_mol_gpu, add=False)
+        amps_gpu += amps_lat_gpu #* amps_mol_gpu
 
-for i in range(spacegroup.n_molecules):
-    r = unitcell.x2r(spacegroup.apply_symmetry_operation(i, au_x_vecs))
-    clcore.phase_factor_qrf(q_rot_gpu, lats[i].occupied_r_coordinates, a=amps_lat_gpu, add=False)
-    clcore.phase_factor_qrf(q_rot_gpu, r, a=amps_mol_gpu, add=False)
-    amps_gpu += amps_mol_gpu * amps_lat_gpu
+    intensities = (np.abs(amps_gpu.get())**2).astype(np.float64)
+    print('GPU simulation: %g seconds' % (time()-t,))
+    density.trilinear_insertion(densities=dens, weights=denswt, vectors=unitcell.q2h(rotate(rot, q_vecs)),
+                                vals=intensities.ravel(), corners=dmap.h_corner, deltas=dmap.h_deltas)
 
-intensities = np.abs(amps_gpu.get())**2
-print('GPU simulation: %g seconds' % (time()-t,))
 pg.image(intensities*mask)
-
+w = np.where(denswt > 0)[0]
+d = dens.copy()
+d.flat[w] /= denswt.flat[w]
+pg.image(dens)
 keep_open()
