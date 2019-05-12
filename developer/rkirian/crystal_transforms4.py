@@ -99,7 +99,7 @@ q_vecs_gpu = clcore.to_device(q_vecs, dtype=clcore.real_t)
 q_rot_gpu = clcore.to_device(shape=q_vecs.shape, dtype=clcore.real_t)
 f_gpu = clcore.to_device(f, dtype=clcore.complex_t)
 
-for c in range(1000):
+for c in range(100):
     t = time()
     rot = random_rotation()
     trans = np.zeros(3)
