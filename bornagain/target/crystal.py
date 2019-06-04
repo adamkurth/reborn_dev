@@ -11,12 +11,15 @@ cause problems...
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import os
+import urllib
 # Python 2 and 3 compatibility...
 try:
     basestring
 except NameError:
     basestring = str
 
+import pkg_resources
 import numpy as np
 from numpy import sin, cos, sqrt
 
@@ -24,6 +27,33 @@ import bornagain.target
 from bornagain import utils
 from bornagain.utils import rotate
 from bornagain.simulate import simutils
+
+pdb_data_path = pkg_resources.resource_filename('bornagain.simulate', os.path.join('data', 'pdb'))
+
+
+def get_pdb_file(pdb_id, save_path='.'):
+    r"""
+    Fetch a pdb file from the web and return the path to the file.
+    The default location for the file is bornagain/simulate/data/pdb/ .
+    If the file already exists, just return the path to the existint file.
+
+    Args:
+        pdb_id: for example: "101M" or "101M.pdb"
+
+    Returns:
+        string path to file
+    """
+    if save_path is None:
+        save_path = pdb_data_path
+    if not pdb_id.endswith('.pdb'):
+        pdb_id += '.pdb'
+    pdb_path = os.path.join(save_path, pdb_id)
+    if not os.path.isfile(pdb_id):
+        try:
+            urllib.request.urlretrieve('https://files.rcsb.org/download/' + pdb_id, pdb_path)
+        except urllib.error.HTTPError:
+            return None
+    return pdb_path
 
 
 class UnitCell(object):
@@ -359,7 +389,7 @@ class CrystalStructure(object):
         return self.spacegroup.sym_translations
 
     @property
-    def x(self):
+    def x_vecs(self):
 
         r"""
 
@@ -373,6 +403,10 @@ class CrystalStructure(object):
             self._x = np.dot(self.unitcell.o_mat_inv, self.molecule.coordinates.T).T
         return self._x
 
+    @property
+    def x(self):
+        return self.x_vecs
+
     def get_symmetry_expanded_coordinates(self):
 
         x0 = self.x
@@ -380,6 +414,7 @@ class CrystalStructure(object):
         for (R, T) in zip(self.spacegroup.sym_rotations, self.spacegroup.sym_translations):
             xs.append(utils.rotate(R, x0) + T)
         return utils.rotate(self.unitcell.o_mat, np.concatenate(xs))
+
 
 class Structure(CrystalStructure):
 
