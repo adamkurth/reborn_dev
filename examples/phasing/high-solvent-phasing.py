@@ -8,26 +8,24 @@ else:
     import numpy as np
     from numpy.fft import fftn, ifftn
 
+import pyqtgraph as pg
 import matplotlib.pyplot as plt
 
 sys.path.append("../..")
-import bornagain as ba
 from bornagain.viewers.qtviews import qtviews
 from bornagain.target import crystal, density
 
-Niter = 100  # Number of phase-retrieval iterations
+Niter = 200  # Number of phase-retrieval iterations
 
-pdbFile = '../data/pdb/1JB0.pdb'
+pdbFile = crystal.get_pdb_file('1jb0')
 print('Loading pdb file (%s)' % pdbFile)
 cryst = crystal.CrystalStructure(pdbFile)
-# print(cryst.cryst1.strip())
 
 print('Getting scattering factors')
-wavelength = 1.5e-10
-f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, ba.units.hc / wavelength)
+f = cryst.molecule.get_scattering_factors(wavelength=1.5e-10)
 
 print('Setting up 3D mesh')
-d = 0.6e-9  # Minimum resolution in SI units (as always!)
+d = 0.8e-9  # Minimum resolution in SI units (as always!)
 s = 1  # Oversampling factor.  s = 1 means Bragg sampling
 mt = density.CrystalMeshTool(cryst, d, s)
 n_molecules = len(mt.get_sym_luts())
@@ -53,6 +51,8 @@ for i in range(0, n_molecules):
     rho_cell += mt.symmetry_transform(0, i, rho0)
 rho0 = rho_cell
 
+# im = pg.image(np.abs(rho0))
+# pg.QtGui.QApplication.instance().exec_()
 
 if 0:
     print("Showing intial density (volumetric)")
@@ -70,7 +70,7 @@ if 0:
 
 # Create the initial support
 S0 = mt.zeros()
-S0.flat[rho0.flat != 0] = 1
+S0.flat[rho0.flat >= np.percentile(rho0.flat, 70)] = 1
 
 if 0:
     print("Showing initial support (volumetric)")
@@ -144,19 +144,27 @@ phi = np.random.random([mt.N]*3) * 2 * np.pi
 # Create the initial iterate
 rho = ifftn(np.exp(phi) * sqrtI0)
 
+# Create initial support
+S = S0.copy()
+
 # Do phase retrieval
 errors = np.zeros([Niter])
 t = time()
 for i in np.arange(0, Niter):
 
-    if (i % 20) > 5:
-        rho = DM(rho, S0, sqrtI0)
+    if (i % 20) > 10:
+        rho = DM(rho, S, sqrtI0)
         alg = 'DM'
     else:
-        rho = ER(rho, S0, sqrtI0)
+        rho = ER(rho, S, sqrtI0)
         alg = 'ER'
 
     rho = symmetrize(rho)
+
+    if ((i+1) % 1e6 == 0):
+        S *= 0
+        rhomag = np.abs(rho)
+        S.flat[rhomag.flat >= np.percentile(rhomag.flat, 60)] = 1
 
     R = np.sum(np.abs(rho-rho0)**2)/np.sum(np.abs(rho0)**2)
     errors[i] = R
@@ -184,7 +192,7 @@ if 0:
 
 if 1:
     print("Showing reconstruction (projections)")
-    qtviews.MapProjection(np.abs(rho), axis=[0, 1])
+    qtviews.MapProjection(np.abs(rho), axis=[0, 1, 2])
 
 if 1:
     plt.plot(np.log10(errors))
