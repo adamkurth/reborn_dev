@@ -24,3 +24,5 @@ temp
 .pytest_cache
 __pycache__
 doc/source/bornagain.*
+examples/phasing/*.pdb
+bornagain/simulate/data/pdb/*.pdb
