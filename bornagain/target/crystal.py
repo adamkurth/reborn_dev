@@ -233,11 +233,16 @@ class CrystalStructure(object):
     mosaic_domain_size_fwhm = 0.0
     cryst1 = ""
 
-
-    def __init__(self, pdbFilePath=None):
+    def __init__(self, pdbFilePath=None, spacegroup=None):
 
         if pdbFilePath is not None:
-            self.load_pdb(pdbFilePath)
+            dic = pdb_to_dict(pdbFilePath)
+            self.set_molecule(dic['coordinates'], atomic_symbols=dic['atomic_symbols'])
+            self.set_cell(*dic['cell'])
+            if spacegroup is None:
+                self.set_spacegroup(hermann_mauguin_symbol=dic['hermann_mauguin_symbol'])
+        if spacegroup is not None:
+            self.spacegroup = spacegroup
 
     def load_pdb(self, pdb_file_path):
 
@@ -513,11 +518,78 @@ class FiniteLattice(object):
         self.add_facet(plane=[-1, 0, 0], length=n_cells)
         self.add_facet(plane=[0, -1, 0], length=n_cells)
 
+def pdb_to_dict(pdb_file_path):
+    r"""Return a :class:`CrystalStructure` object with PDB information. """
+
+    max_atoms = int(1e6)
+    coordinates = np.zeros([max_atoms, 3])
+    atomic_symbols = []
+    atom_index = int(0)
+    # if crystal_structure is None:
+    #     cryst = CrystalStructure()
+    # else:
+    #     cryst = crystal_structure
+    SCALE = np.zeros([3, 4])
+
+    with open(pdb_file_path) as pdbfile:
+
+        for line in pdbfile:
+
+            # This is the inverse of the "orthogonalization matrix"  along with
+            # translation vector.  See Rupp for an explanation.
+
+            if line[:5] == 'SCALE':
+                n = int(line[5]) - 1
+                SCALE[n, 0] = float(line[10:20])
+                SCALE[n, 1] = float(line[20:30])
+                SCALE[n, 2] = float(line[30:40])
+                SCALE[n, 3] = float(line[45:55])
+
+            # The crystal lattice and symmetry
+
+            if line[:6] == 'CRYST1':
+                cryst1 = line
+                # As always, everything in our programs are in SI units.
+                # PDB files use angstrom units.
+                a = float(cryst1[6:15]) * 1e-10
+                b = float(cryst1[15:24]) * 1e-10
+                c = float(cryst1[24:33]) * 1e-10
+                # And of course degrees are converted to radians (though we
+                # loose the perfection of rational quotients like 360/4=90...)
+                alpha = float(cryst1[33:40]) * np.pi / 180.0
+                beta = float(cryst1[40:47]) * np.pi / 180.0
+                gamma = float(cryst1[47:54]) * np.pi / 180.0
+
+                hermann_mauguin_symbol = cryst1[55:66].strip()
+
+            if line[:6] == 'ATOM  ' or line[:6] == "HETATM":
+                coordinates[atom_index, 0] = float(line[30:38]) * 1e-10
+                coordinates[atom_index, 1] = float(line[38:46]) * 1e-10
+                coordinates[atom_index, 2] = float(line[46:54]) * 1e-10
+                atomic_symbols.append(line[76:78].strip().capitalize())
+                atom_index += 1
+
+            if atom_index == max_atoms:
+                coordinates = np.append(coordinates, np.zeros([3, max_atoms]), axis=1)
+
+    # Truncate atom list since we pre-allocated extra memory
+    coordinates = coordinates[:atom_index, :]
+    atomic_symbols = atomic_symbols[:atom_index]
+
+    # T = SCALE[:, 3]
+
+    dic = {'coordinates': coordinates,
+           'atomic_symbols': atomic_symbols,
+           'cell': (a, b, c, alpha, beta, gamma),
+           'hermann_mauguin_symbol': hermann_mauguin_symbol}
+
+    return dic
+
 
 def parse_pdb(pdb_file_path, crystal_structure=None):
     r"""Return a :class:`CrystalStructure` object with PDB information. """
 
-    max_atoms = int(1e5)
+    max_atoms = int(1e6)
     coordinates = np.zeros([max_atoms, 3])
     atomic_symbols = []
     atom_index = int(0)
