@@ -34,11 +34,9 @@ class AreaDetector(object):
 
     def get_detector_type(self):
         detector_id = self.detector.source.__str__()
-        print(detector_id)
-        print(type(detector_id))
         if re.match(r'.*CsPad', detector_id, re.IGNORECASE) is not None:
             detector_type = 'cspad'
-        elif re.match(r'pnccd.*', detector_id, re.IGNORECASE) is not None:
+        elif re.match(r'.*pnccd.*', detector_id, re.IGNORECASE) is not None:
             detector_type = 'pnccd'
         else:
             detector_type = 'unknown'
