@@ -674,28 +674,24 @@ class PADView(object):
         # available, else we display raw data, else we display zeros based on the pad geometry.  If none of these
         # are available, this function returns none.
 
-        if debug:
-            padview_debug('get_pad_display_data()')
+        # padview_debug('get_pad_display_data()')
 
         if self.processed_data is not None:
             if 'pad_data' in self.processed_data.keys():
                 dat = self.processed_data['pad_data']
                 if dat:
-                    if debug:
-                        padview_debug("Got self.processed_data['pad_data']")
+                    padview_debug("Got self.processed_data['pad_data']")
                     return dat
 
         if self.raw_data is not None:
             if 'pad_data' in self.raw_data.keys():
                 dat = self.raw_data['pad_data']
                 if dat:
-                    if debug:
-                        padview_debug("Got self.raw_data['pad_data']")
+                    # padview_debug("Got self.raw_data['pad_data']")
                     return dat
 
         if self.pad_geometry is not None:
-            if debug:
-                padview_debug('No raw data found - setting display data arrays to zeros')
+            padview_debug('No raw data found - setting display data arrays to zeros')
             return [pad.zeros() for pad in self.pad_geometry]
 
         return None
@@ -759,7 +755,6 @@ class PADView(object):
 
         processed_data = self.get_pad_display_data()
         mx = np.ravel(processed_data).max()
-
         for i in range(0, self.n_pads):
 
             d = processed_data[i]
@@ -948,6 +943,8 @@ class PADView(object):
 
     def show_next_frame(self):
 
+        padview_debug('show_next_frame()')
+
         if self.frame_getter is None:
             padview_debug('no getter')
             return
@@ -957,6 +954,8 @@ class PADView(object):
         self.update_display_data()
 
     def show_previous_frame(self):
+
+        padview_debug('show_previous_frame()')
 
         if self.frame_getter is None:
             padview_debug('no getter')
@@ -968,6 +967,8 @@ class PADView(object):
         self.update_display_data()
 
     def show_random_frame(self):
+
+        padview_debug('show_random_frame()')
 
         dat = self.frame_getter.get_random_frame()
         self.raw_data = dat
@@ -986,7 +987,6 @@ class PADView(object):
                 padview_debug("Note: frame getter returned None.")
             else:
                 self.raw_data = raw_data
-
         self.update_display_data()
 
     def process_data(self):
@@ -1053,7 +1053,6 @@ class PADView(object):
 
         n_peaks = peaks['n_peaks']
         centroids = peaks['centroids']
-        print(centroids[0])
         gl_fs_pos = np.empty(n_peaks)
         gl_ss_pos = np.empty(n_peaks)
         n = 0
