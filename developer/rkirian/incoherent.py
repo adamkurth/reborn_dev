@@ -164,7 +164,7 @@ class Place(cKDTree):
 # maximum distance spanned by the molecule:
 r_size = distance.pdist(r).max()
 n_atoms = r.shape[0]
-
+sphereical_detector = False
 if spherical_detector:
     print('Creating spherical detector...')
     ico = ba.detector.IcosphereGeometry(n_subdivisions=n_subdivisions, radius=radius)

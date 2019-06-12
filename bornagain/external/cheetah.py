@@ -1,13 +1,17 @@
 r"""
-Utilities for working with data created by Cheetah.  I make no promises that any of this will be helpful for you. 
+Utilities for working with data created by Cheetah.  I make no promises that any of this will work as expected; Cheetahs
+are wild animals.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
 from bornagain.external import crystfel
-from bornagain import utils
 
+
+# =======================================================================================================================
+# Functions that are specific to the CSPAD and CrystFEL geom files
+# =======================================================================================================================
 
 def reshape_psana_cspad_array_to_cheetah_array(psana_array):
     r"""
@@ -52,35 +56,37 @@ def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
             A list containing data from each pixel array
     """
 
-    cheetah_array = reshape_psana_cspad_array_to_cheetah_array(psana_array)
+    slab = reshape_psana_cspad_array_to_cheetah_array(psana_array)
 
-    return cheetah_remapped_cspad_array_to_pad_list(cheetah_array, geom_dict)
+    return crystfel.split_image(slab, geom_dict)
 
 
-def cheetah_remapped_cspad_array_to_pad_list(cheetah_array, geom_dict):
+# def cheetah_remapped_cspad_array_to_pad_list(cheetah_array, geom_dict):
+#
+#     utils.depreciate('Dont use cheetah_remapped_cspad_array_to_pad_list() function.  Instead, use'
+#                      'crystfel.split_image()')
+#
+#     return crystfel.split_image(cheetah_array, geom_dict)
 
-    utils.depreciate('Dont use cheetah_remapped_cspad_array_to_pad_list() function.  Instead, use'
-                     'crystfel.split_image()')
-
-    return crystfel.split_image(cheetah_array, geom_dict)
-
+# =======================================================================================================================
+# Functions that are specific to the pnCCD and CrystFEL geom files
+# =======================================================================================================================
 
 def reshape_psana_pnccd_array_to_cheetah_array(psana_array):
     r"""
-    Transform  a native psana cspad numpy array of shape (32,185,388) into a "Cheetah array" of shape (1480, 1552).
-    Conversion to Cheetah format requires a re-write of the data in memory, and each detector panel is no longer stored
-    contiguously in memory.
+    Transform  a native psana pnccd numpy array of shape (???) into a "Cheetah array" of shape (1024,1024).
+    Conversion to Cheetah format requires a re-write of the data in memory.  Panels might not be contiguous in memory.
 
     Arguments:
         psana_array (numpy array) :
-            A numpy array of shape (32,185,388) produced by the psana module
+            A numpy array of shape (???) produced by the psana module
 
     Returns:
         cheetah_array (numpy array) :
             A numpy array of shape (1024, 1024); same data as the psana array but mangled as done within Cheetah
     """
 
-    slab = np.zeros((1024, 1024), dtype=psana_array.dtype)
+    slab = np.zeros_like((1024, 1024))
     slab[0:512, 0:512] = psana_array[0]
     slab[512:1024, 0:512] = psana_array[1][::-1, ::-1]
     slab[512:1024, 512:1024] = psana_array[2][::-1, ::-1]
@@ -89,3 +95,23 @@ def reshape_psana_pnccd_array_to_cheetah_array(psana_array):
     return slab
 
 
+def cheetah_pnccd_array_to_pad_list(psana_array, geom_dict):
+    r"""
+    This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with
+    data in the native psana format.  First you should create a crystfel geometry dictionary using the function
+    :func:`geometry_file_to_pad_geometry_list() <bornagain.external.crystfel.geometry_file_to_pad_geometry_list>`.
+
+    Arguments:
+        psana_array (numpy array) :
+            A numpy array of shape (32,185,388) produced by the psana module.
+        geom_dict (dict) :
+            A CrystFEL geometry dictionary produced by external.crystfel.geom_to_dict() .
+
+    Returns:
+        pad_list (list) :
+            A list containing data from each pixel array
+    """
+
+    slab = reshape_psana_pnccd_array_to_cheetah_array(psana_array)
+
+    return crystfel.split_image(slab, geom_dict)

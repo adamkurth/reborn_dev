@@ -3,7 +3,7 @@ sys.path.append('..')
 
 import numpy as np
 from bornagain import target
-from bornagain.target import crystal
+from bornagain.target import crystal, spgrp
 from bornagain.simulate.examples import lysozyme_pdb_file, psi_pdb_file
 
 
@@ -79,6 +79,24 @@ def test_spacegroup():
         uniqtrans.append(trans)
         reductrans.append(transc)
 
+    lst = []
+    for idx in range(530):
+        lst.append(spgrp._hmsym[idx].replace(' ', '').strip())
+    seenonce = []
+    seentwice = []
+    for sym in lst:
+        if sym not in seenonce:
+            seenonce.append(sym)
+        elif sym not in seentwice:
+            seentwice.append(sym)
+    for sym in seentwice:
+        # print('check', sym)
+        for idx in range(530):
+            osym = spgrp._hmsym[idx]
+            if sym == osym.replace(' ', '').strip():
+                print(idx, osym)
+    uniq = np.unique(lst)
+    assert len(uniq) == 530
     # for h in range(0, 530):
         # print(h)
         # print(reductrans[h], uniqtrans[h])
