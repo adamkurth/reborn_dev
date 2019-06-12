@@ -35,6 +35,7 @@ run = args.run[0]
 experiment = args.exp[0]
 geom_file = args.geom[0]
 detector_id = args.det[0]
+print('Provided detector ID: %s' % (detector_id,))
 mask_file = args.mask[0]
 
 if run == -1:
@@ -50,6 +51,7 @@ if experiment == "":
     experiment = lst[1]
     print("Found experment ID based on your path...")
 data_source = psana.DataSource("exp=%s:run=%d:idx" % (experiment, run))
+print('Data source: %s' % (data_source,))
 
 if detector_id == "":
     print("You didn't specify a detector.  I will try to guess...")
@@ -61,7 +63,7 @@ if detector_id == "":
             if reg.match(name) is not None:
                 goodnames.append(reg.match(name).group(0))
     if len(goodnames) == 1:
-        print("Found a detector to look at (there might be others...).")
+        print("Found a detector %s (there might be others...)." % (goodnames[0]))
         detector_id = goodnames[0]
     if len(goodnames) > 1:
         print("Found multiple detector IDs in this run:")
@@ -78,8 +80,8 @@ if detector_id == "":
                     print('\t' + name)
         error("Specify the detector you want to view with the -d flag.")
 
+print('Using detector ID: %s' % (detector_id,))
 data_source = psana.DataSource("exp=%s:run=%d:idx" % (experiment, run))
-print(detector_id)
 detector = lcls.AreaDetector(detector_id)
 
 mask_data = None
@@ -147,7 +149,8 @@ class MyFrameGetter(FrameGetter):
 
         self.current_frame = frame_number
         event = self.run.event(self.times[self.current_frame])
-        return {'pad_data': self.detector.get_calib_split(event)}
+        pad_data = self.detector.get_calib_split(event)
+        return {'pad_data': pad_data}
 
 print("Experiment ID: %s" % (experiment))
 print("Run: %d" % (run))
