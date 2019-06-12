@@ -3,10 +3,9 @@ from __future__ import (absolute_import, division,
 
 import h5py
 import numpy as np
-from bornagain.external import crystfel
-from bornagain.external.crystfel import load_crystfel_geometry, geometry_file_to_pad_geometry_list
-from bornagain.external.cheetah import cheetah_remapped_cspad_array_to_pad_list
+from bornagain.external import crystfel, cheetah
 #from streamfileReader import get_total_number_of_frames, get_nth_frame
+# @Joe - the above was causing problems for me.  Best if CrystFEL stuff is kept in the crystfel module.
 
 class FrameGetter(object):
 
@@ -123,19 +122,14 @@ class CheetahFrameGetter(FrameGetter):
     def __init__(self, cxi_file_name=None, geom_file_name=None):
 
         FrameGetter.__init__(self)
-        self.geom_dict = load_crystfel_geometry(geom_file_name)
-        self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file_name)
-        # p = self.pad_geometry[0]
-        # p.t_vec = np.array([0, 0, p.t_vec.flat[2]])
+        self.geom_dict = crystfel.load_crystfel_geometry(geom_file_name)
+        self.pad_geometry = crystfel.geometry_file_to_pad_geometry_list(geom_file_name)
         self.n_pads = len(self.pad_geometry)
-        # print(self.n_pads)
         self.load_cxidb_file(cxi_file_name)
         self.current_frame = 0
 
         self.peaks = None
 
-        # for key in list(self.h5file['entry_1/result_1'].keys()):
-        #     print(self.h5file['entry_1/result_1/'+key])
 
     def load_cxidb_file(self, cxi_file_name):
 
@@ -208,7 +202,6 @@ class CheetahFrameGetter(FrameGetter):
     def get_frame(self, frame_number=0):
 
         dat = np.array(self.h5_data[frame_number, :, :]).astype(np.double)
-        # cheetah_remapped_cspad_array_to_pad_list(dat, self.geom_dict)
         pad_data = crystfel.split_image(dat, self.geom_dict)
         dat = {'pad_data': pad_data}
 
@@ -218,8 +211,7 @@ class CheetahFrameGetter(FrameGetter):
 
         return dat
 
-
-
+# TODO: Move this to the crystfel module (if it works)
 class StreamfileFrameGetter(FrameGetter):
 
     r"""

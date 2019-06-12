@@ -86,11 +86,11 @@ def reshape_psana_pnccd_array_to_cheetah_array(psana_array):
             A numpy array of shape (1024, 1024); same data as the psana array but mangled as done within Cheetah
     """
 
-    slab = np.zeros_like((1024, 1024))
-    slab[0:512, 0:512] = psana_array[0]
-    slab[512:1024, 0:512] = psana_array[1][::-1, ::-1]
-    slab[512:1024, 512:1024] = psana_array[2][::-1, ::-1]
-    slab[0:512, 512:1024] = psana_array[3]
+    slab = np.zeros((1024, 1024), dtype=psana_array.dtype)
+    slab[0:512, 0:512] = psana_array[0,:,:]
+    slab[512:1024, 0:512] = psana_array[1,::-1, ::-1]
+    slab[512:1024, 512:1024] = psana_array[2,::-1, ::-1]
+    slab[0:512, 512:1024] = psana_array[3,:,:]
 
     return slab
 

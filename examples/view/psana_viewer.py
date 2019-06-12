@@ -19,10 +19,10 @@ def error(message):
 
 print("Parsing arguments...")
 parser = argparse.ArgumentParser(description='Simple diffraction viewer')
-parser.add_argument('-r', dest='run', type=int, nargs=1, help='Run number', default=-1)
-parser.add_argument('-e', dest='exp', type=str, nargs=1, help='Experiment ID, for example "amok8916"', default='')
-parser.add_argument('-g', dest='geom', type=str, nargs=1, help='CrystFEL geomfile', default='psana')
-parser.add_argument('-d', dest='det', type=str, nargs=1, help='Detector name, for example "cspad"', default='')
+parser.add_argument('-r', dest='run', type=int, help='Run number', default=-1)
+parser.add_argument('-e', dest='exp', type=str, help='Experiment ID, for example "amok8916"', default='')
+parser.add_argument('-g', dest='geom', type=str, help='CrystFEL geomfile', default='psana')
+parser.add_argument('-d', dest='det', type=str, help='Detector name, for example "cspad"', default='')
 # parser.add_argument('-m', dest='mask', type=str, nargs=1, help='Mask file (hdf5)', default='')
 args = parser.parse_args()
 
