@@ -1,8 +1,5 @@
 r"""
-Utilities for working with LCLS data.  Most of what you need is already in the psana package.  I don't know where the
-official psana documentation is but if you work with LCLS data you should at least skim through all of the material in
-the `LCLS Data Analysis Confluence pages <https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis>`_.
-Note that there is documentation on `LCLS PAD geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
+Utilities for working with data created by Cheetah.  I make no promises that any of this will be helpful for you. 
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -66,3 +63,29 @@ def cheetah_remapped_cspad_array_to_pad_list(cheetah_array, geom_dict):
                      'crystfel.split_image()')
 
     return crystfel.split_image(cheetah_array, geom_dict)
+
+
+def reshape_psana_pnccd_array_to_cheetah_array(psana_array):
+    r"""
+    Transform  a native psana cspad numpy array of shape (32,185,388) into a "Cheetah array" of shape (1480, 1552).
+    Conversion to Cheetah format requires a re-write of the data in memory, and each detector panel is no longer stored
+    contiguously in memory.
+
+    Arguments:
+        psana_array (numpy array) :
+            A numpy array of shape (32,185,388) produced by the psana module
+
+    Returns:
+        cheetah_array (numpy array) :
+            A numpy array of shape (1024, 1024); same data as the psana array but mangled as done within Cheetah
+    """
+
+    slab = np.zeros((1024, 1024), dtype=psana_array.dtype)
+    slab[0:512, 0:512] = psana_array[0]
+    slab[512:1024, 0:512] = psana_array[1][::-1, ::-1]
+    slab[512:1024, 512:1024] = psana_array[2][::-1, ::-1]
+    slab[0:512, 512:1024] = psana_array[3]
+
+    return slab
+
+

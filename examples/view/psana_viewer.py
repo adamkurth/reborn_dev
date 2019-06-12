@@ -86,7 +86,8 @@ detector = lcls.AreaDetector(detector_id)
 
 mask_data = None
 if os.path.isfile(geom_file):
-    # Everything needs to be handled differently with geom files... please make this go away...
+    # If a geom file is provided, it probably operates on data produced by Cheetah.  The Cheetah program does not
+    # preserve the layout of data as provided by the psana package.  Cheetah reshapes the data.
     geom_dict = crystfel.load_crystfel_geometry(geom_file)
     pad_geometry = crystfel.geometry_file_to_pad_geometry_list(geom_file)
     if detector.type == 'cspad':
