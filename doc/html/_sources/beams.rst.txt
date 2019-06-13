@@ -2,7 +2,12 @@ Beams
 ===========
 
 The bornagain :mod:`source <bornagain.source>` package provides the :class:`Beam <bornagain.source.Beam>` class for
-describing x-ray beams.  So far it is a lightweight and minimalistic description of an x-ray beam.  The first couple of
+describing x-ray beams.  In some sense this class is overkill since we often need only know the wavelength, but since
+bornagain does not specify a standard beam direction you also need to know the beam direction at minimum, and this
+class helps keep such information together in a tidy and standard format.  If you are doing simulations, then you
+probably also need to know the beam fluence (photons/area), and perhaps polarization.  In a more deluxe simulation,
+you might also want to know the beam divergence and spectral width.  The :class:`Beam <bornagain.source.Beam>` class
+exists to help organize all this information.  The first couple of
 parameters that are needed to describe a beam are:
 
    :math:`\lambda` : the "nominal" wavelength of the beam
@@ -13,17 +18,15 @@ and
 
 Wavelength might be accompanied by a FWHM spread in photon energy :math:`\Delta E/E`, and the nominal beam direction
 might be accompanied by the beam divergence FWHM.  The bornagain package does not make a general assumption about the
-beam direction, but the [0,0,1] direction is most commonly used so far.
+beam direction, but the [0,0,1] direction is most commonly used (in particular, the viewers in bornagain assume that
+to be the direction thus far).
 
 Beam polarization can also be important:
 
    :math:`\hat{u}` is the polarization vector for the x-ray beam.
 
 This single vector is appropriate for linearly polarized beams.  For beams that are not purely linearly polarized, one
-can sum the contributions from each of the two polarizations.  The second polarization vector is of course
+can sum the contributions from each of the two polarizations.  The second polarization vector is equal to
 :math:`\hat{u}\times\hat{b}` .
 
-So far we've not really used the Beam class... but eventually we will...
-
-TODO: Add spectrum handling to beam class
-
+You can find more information about what this class does by looking at the API documentation.

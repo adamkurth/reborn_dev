@@ -17,35 +17,32 @@
   
 
   
-  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -178,7 +175,8 @@
 <span class="c1"># import bornagain.external.pyqtgraph as bpg</span>
 <span class="kn">from</span> <span class="nn">bornagain.fileio.getters</span> <span class="k">import</span> <span class="n">FrameGetter</span><span class="p">,</span> <span class="n">CheetahFrameGetter</span>
 <span class="kn">from</span> <span class="nn">bornagain.external.crystfel</span> <span class="k">import</span> <span class="n">geometry_file_to_pad_geometry_list</span>
-<span class="kn">from</span> <span class="nn">bornagain.external.pyqtgraph.mods</span> <span class="k">import</span> <span class="n">ImageItem</span>
+<span class="c1"># from bornagain.external.pyqtgraph.mods import ImageItem</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="k">import</span> <span class="n">ImageItem</span>
 <span class="kn">from</span> <span class="nn">bornagain.analysis.peaks</span> <span class="k">import</span> <span class="n">boxsnr</span><span class="p">,</span> <span class="n">PeakFinder</span>
 
 <span class="n">padview_debug_config</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose</span>
@@ -401,7 +399,7 @@
         <span class="n">shortcut</span><span class="p">(</span><span class="s2">&quot;Ctrl+s&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">increase_skip</span><span class="p">)</span>
         <span class="n">shortcut</span><span class="p">(</span><span class="s2">&quot;Shift+s&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decrease_skip</span><span class="p">)</span>
         <span class="n">shortcut</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggle_masks</span><span class="p">)</span>
-        <span class="n">shortcut</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_all_rois</span><span class="p">)</span></div>
+        <span class="n">shortcut</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_hovering_roi</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PADView.update_status_string"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.update_status_string">[docs]</a>    <span class="k">def</span> <span class="nf">update_status_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_frames</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
@@ -785,19 +783,21 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mask_data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_masks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PADView.mask_all_rois"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.mask_all_rois">[docs]</a>    <span class="k">def</span> <span class="nf">mask_all_rois</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="n">noslice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<div class="viewcode-block" id="PADView.mask_hovering_roi"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.mask_hovering_roi">[docs]</a>    <span class="k">def</span> <span class="nf">mask_hovering_roi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask_rois</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
+
+        <span class="n">noslice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">roi</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask_rois</span><span class="p">:</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">roi</span><span class="o">.</span><span class="n">mouseHovering</span><span class="p">:</span>
                 <span class="k">continue</span>
 
-            <span class="k">for</span> <span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">dat</span><span class="p">,</span> <span class="n">geom</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pads</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span><span class="p">):</span>
+            <span class="n">pad_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pad_display_data</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">dat</span><span class="p">,</span> <span class="n">geom</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_pads</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">,</span> <span class="n">pad_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span><span class="p">):</span>
 
                 <span class="c1"># Using builtin function of pyqtgraph ROI to identify panels associated with the ROI...</span>
                 <span class="n">pslice</span> <span class="o">=</span> <span class="n">roi</span><span class="o">.</span><span class="n">getArraySlice</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">im</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">returnSlice</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -831,28 +831,24 @@
         <span class="c1"># available, else we display raw data, else we display zeros based on the pad geometry.  If none of these</span>
         <span class="c1"># are available, this function returns none.</span>
 
-        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
-            <span class="n">padview_debug</span><span class="p">(</span><span class="s1">&#39;get_pad_display_data()&#39;</span><span class="p">)</span>
+        <span class="c1"># padview_debug(&#39;get_pad_display_data()&#39;)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="s1">&#39;pad_data&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_data</span><span class="p">[</span><span class="s1">&#39;pad_data&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">dat</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
-                        <span class="n">padview_debug</span><span class="p">(</span><span class="s2">&quot;Got self.processed_data[&#39;pad_data&#39;]&quot;</span><span class="p">)</span>
+                    <span class="n">padview_debug</span><span class="p">(</span><span class="s2">&quot;Got self.processed_data[&#39;pad_data&#39;]&quot;</span><span class="p">)</span>
                     <span class="k">return</span> <span class="n">dat</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="s1">&#39;pad_data&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="s1">&#39;pad_data&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">dat</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
-                        <span class="n">padview_debug</span><span class="p">(</span><span class="s2">&quot;Got self.raw_data[&#39;pad_data&#39;]&quot;</span><span class="p">)</span>
+                    <span class="c1"># padview_debug(&quot;Got self.raw_data[&#39;pad_data&#39;]&quot;)</span>
                     <span class="k">return</span> <span class="n">dat</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
-                <span class="n">padview_debug</span><span class="p">(</span><span class="s1">&#39;No raw data found - setting display data arrays to zeros&#39;</span><span class="p">)</span>
+            <span class="n">padview_debug</span><span class="p">(</span><span class="s1">&#39;No raw data found - setting display data arrays to zeros&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">pad</span><span class="o">.</span><span class="n">zeros</span><span class="p">()</span> <span class="k">for</span> <span class="n">pad</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="kc">None</span></div>
@@ -914,12 +910,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setup_pads</span><span class="p">()</span>
 
-        <span class="n">pad_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pad_display_data</span><span class="p">()</span>
-        <span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">pad_data</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-
+        <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pad_display_data</span><span class="p">()</span>
+        <span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">processed_data</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_pads</span><span class="p">):</span>
 
-            <span class="n">d</span> <span class="o">=</span> <span class="n">pad_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">processed_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_true_fast_scans</span><span class="p">:</span>  <span class="c1"># For testing - show fast scan axis</span>
                 <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">n_fs</span><span class="o">/</span><span class="mi">2</span><span class="p">))]</span> <span class="o">=</span> <span class="n">mx</span>
@@ -1105,6 +1100,8 @@
 
 <div class="viewcode-block" id="PADView.show_next_frame"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_next_frame">[docs]</a>    <span class="k">def</span> <span class="nf">show_next_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
+        <span class="n">padview_debug</span><span class="p">(</span><span class="s1">&#39;show_next_frame()&#39;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">padview_debug</span><span class="p">(</span><span class="s1">&#39;no getter&#39;</span><span class="p">)</span>
             <span class="k">return</span>
@@ -1114,6 +1111,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_display_data</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PADView.show_previous_frame"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_previous_frame">[docs]</a>    <span class="k">def</span> <span class="nf">show_previous_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">padview_debug</span><span class="p">(</span><span class="s1">&#39;show_previous_frame()&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">padview_debug</span><span class="p">(</span><span class="s1">&#39;no getter&#39;</span><span class="p">)</span>
@@ -1125,6 +1124,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_display_data</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PADView.show_random_frame"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.show_random_frame">[docs]</a>    <span class="k">def</span> <span class="nf">show_random_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">padview_debug</span><span class="p">(</span><span class="s1">&#39;show_random_frame()&#39;</span><span class="p">)</span>
 
         <span class="n">dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_getter</span><span class="o">.</span><span class="n">get_random_frame</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span> <span class="o">=</span> <span class="n">dat</span>
@@ -1143,7 +1144,6 @@
                 <span class="n">padview_debug</span><span class="p">(</span><span class="s2">&quot;Note: frame getter returned None.&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span> <span class="o">=</span> <span class="n">raw_data</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">update_display_data</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PADView.process_data"><a class="viewcode-back" href="../../../../bornagain.viewers.qtviews.padviews.html#bornagain.viewers.qtviews.padviews.PADView.process_data">[docs]</a>    <span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1451,16 +1451,33 @@
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

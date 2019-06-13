@@ -12,4 +12,6 @@ Submodules
 .. toctree::
 
    bornagain.fileio.getters
+   bornagain.fileio.notest_streamfilegetter
+   bornagain.fileio.streamfileReader
 

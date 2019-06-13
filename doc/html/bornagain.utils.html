@@ -18,36 +18,33 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="bornagain.units module" href="bornagain.units.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -213,7 +210,7 @@
 <dt id="bornagain.utils.rotate">
 <code class="descclassname">bornagain.utils.</code><code class="descname">rotate</code><span class="sig-paren">(</span><em>rot</em>, <em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#rotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.rotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>This defines a consistent way to rotate vectors.  It is a wrapper that does a simple operation:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 </pre></div>
 </div>
 <p>Note the bornagain package generally assumes that a set of N vectors of dimension D will be stored as a numpy array
@@ -302,6 +299,13 @@ randnums: 3 random numbers in the range [0, 1]. If <cite>None</cite>, they will 
 </dd></dl>
 
 <dl class="function">
+<dt id="bornagain.utils.random_unit_vector">
+<code class="descclassname">bornagain.utils.</code><code class="descname">random_unit_vector</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#random_unit_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.random_unit_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a totally random unit vector.</p>
+<p>Returns: numpy array length 3</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="bornagain.utils.random_beam_vector">
 <code class="descclassname">bornagain.utils.</code><code class="descname">random_beam_vector</code><span class="sig-paren">(</span><em>div_fwhm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/utils.html#random_beam_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.random_beam_vector" title="Permalink to this definition">¶</a></dt>
 <dd><p>A random vector for emulating beam divergence.
@@ -347,6 +351,11 @@ excessive computation or reading from disk.  Search the web for more
 details of how this works.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="bornagain.utils.max_pair_distance">
+<code class="descclassname">bornagain.utils.</code><code class="descname">max_pair_distance</code><a class="reference internal" href="_modules/bornagain/utils.html#max_pair_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.utils.max_pair_distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 
 
@@ -358,7 +367,7 @@ details of how this works.</p>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="bornagain.units.html" class="btn btn-neutral float-left" title="bornagain.units module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.units.html" class="btn btn-neutral" title="bornagain.units module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -383,16 +392,33 @@ details of how this works.</p>
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

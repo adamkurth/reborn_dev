@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bornagain.target.spgrp module &mdash; bornagain 0.2018.9.9 documentation</title>
+  <title>bornagain.fileio.notest_streamfilegetter module &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -29,8 +29,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.viewers package" href="bornagain.viewers.html" />
-    <link rel="prev" title="bornagain.target.placer module" href="bornagain.target.placer.html" /> 
+    <link rel="next" title="bornagain.fileio.streamfileReader module" href="bornagain.fileio.streamfileReader.html" />
+    <link rel="prev" title="bornagain.fileio.getters module" href="bornagain.fileio.getters.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -97,9 +97,9 @@
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
 </ul>
 </li>
@@ -157,15 +157,15 @@
         
           <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
         
-          <li><a href="bornagain.target.html">bornagain.target package</a> &raquo;</li>
+          <li><a href="bornagain.fileio.html">bornagain.fileio package</a> &raquo;</li>
         
-      <li>bornagain.target.spgrp module</li>
+      <li>bornagain.fileio.notest_streamfilegetter module</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/bornagain.target.spgrp.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/bornagain.fileio.notest_streamfilegetter.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -178,20 +178,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-bornagain.target.spgrp">
-<span id="bornagain-target-spgrp-module"></span><h1>bornagain.target.spgrp module<a class="headerlink" href="#module-bornagain.target.spgrp" title="Permalink to this headline">¶</a></h1>
-<p>This module is essentially just a data container and should not be used externally.  The data should be
-accessed using <a class="reference internal" href="bornagain.target.crystal.html#bornagain.target.crystal.get_symmetry_operators_from_space_group" title="bornagain.target.crystal.get_symmetry_operators_from_space_group"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_symmetry_operators_from_space_group</span></code></a>.</p>
-<p>The data were taken from the <a class="reference external" href="https://atztogo.github.io/spglib/">spglib</a> package.</p>
-<p>This module defines the following lists:</p>
-<p>_spgrp_ops: The list of dictionaries containing the symmetry operations (translations and rotations).</p>
-<p>_hmsym: The list of Hermann–Mauguin symbols (python strings)</p>
-<dl class="docutils">
-<dt>_sgnum: The list of space group numbers (ranging from 1-230) corresponding to</dt>
-<dd>each of the Hall numbers (ranging from 1-530).  I don’t yet understand
-what the Hall numbers are… but there is a useful table here:
-<a class="reference external" href="http://pmsl.planet.sci.kobe-u.ac.jp/~seto/?page_id=37&amp;lang=en">http://pmsl.planet.sci.kobe-u.ac.jp/~seto/?page_id=37&amp;lang=en</a></dd>
-</dl>
+  <div class="section" id="bornagain-fileio-notest-streamfilegetter-module">
+<h1>bornagain.fileio.notest_streamfilegetter module<a class="headerlink" href="#bornagain-fileio-notest-streamfilegetter-module" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
@@ -202,10 +190,10 @@ what the Hall numbers are… but there is a useful table here:
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.viewers.html" class="btn btn-neutral float-right" title="bornagain.viewers package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.fileio.streamfileReader.html" class="btn btn-neutral float-right" title="bornagain.fileio.streamfileReader module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.target.placer.html" class="btn btn-neutral" title="bornagain.target.placer module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.fileio.getters.html" class="btn btn-neutral" title="bornagain.fileio.getters module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

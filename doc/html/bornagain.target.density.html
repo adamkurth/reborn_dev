@@ -18,37 +18,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain.target.molecule module" href="bornagain.target.molecule.html" />
     <link rel="prev" title="bornagain.target.crystal module" href="bornagain.target.crystal.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -185,7 +182,7 @@
 <span id="bornagain-target-density-module"></span><h1>bornagain.target.density module<a class="headerlink" href="#module-bornagain.target.density" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="bornagain.target.density.DensityMap">
-<em class="property">class </em><code class="descclassname">bornagain.target.density.</code><code class="descname">DensityMap</code><span class="sig-paren">(</span><em>shape</em>, <em>corner_min</em>, <em>corner_max</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#DensityMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.DensityMap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">bornagain.target.density.</code><code class="descname">DensityMap</code><span class="sig-paren">(</span><em>shape=None</em>, <em>corner_min=None</em>, <em>corner_max=None</em>, <em>deltas=None</em>, <em>molecule=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#DensityMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.DensityMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="attribute">
 <dt id="bornagain.target.density.DensityMap.shape">
@@ -195,6 +192,11 @@
 <dl class="attribute">
 <dt id="bornagain.target.density.DensityMap.corner_min">
 <code class="descname">corner_min</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.DensityMap.corner_min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.DensityMap.deltas">
+<code class="descname">deltas</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.density.DensityMap.deltas" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -220,16 +222,8 @@
 <dl class="attribute">
 <dt id="bornagain.target.density.DensityMap.n_vecs">
 <code class="descname">n_vecs</code><a class="headerlink" href="#bornagain.target.density.DensityMap.n_vecs" title="Permalink to this definition">¶</a></dt>
-<dd><p>[[0,0,0],[0,0,1],[0,0,2], … ,[N-1,N-1,N-1]]</p>
+<dd><p><em>Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this</em> – [[0,0,0],[0,0,1],[0,0,2], … ,[N-1,N-1,N-1]]</p>
 <p>Returns: numpy array</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 </dd></dl>
@@ -254,16 +248,8 @@ elegant in that basis.</p>
 <dl class="attribute">
 <dt id="bornagain.target.density.CrystalDensityMap.n_vecs">
 <code class="descname">n_vecs</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.n_vecs" title="Permalink to this definition">¶</a></dt>
-<dd><p>[[0,0,0],[0,0,1],[0,0,2], … ,[N-1,N-1,N-1]]</p>
+<dd><p><em>Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this</em> – [[0,0,0],[0,0,1],[0,0,2], … ,[N-1,N-1,N-1]]</p>
 <p>Returns: numpy array</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -288,6 +274,11 @@ bit like this:</p>
 <dl class="attribute">
 <dt id="bornagain.target.density.CrystalDensityMap.corner_max">
 <code class="descname">corner_max</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.corner_max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.corner">
+<code class="descname">corner</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.corner" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -317,6 +308,16 @@ coordinates x (in the crystal basis) one can take the Fourier transform F(h) = s
 <dl class="attribute">
 <dt id="bornagain.target.density.CrystalDensityMap.h_limits">
 <code class="descname">h_limits</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.h_limits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.h_corner">
+<code class="descname">h_corner</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.h_corner" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.density.CrystalDensityMap.h_deltas">
+<code class="descname">h_deltas</code><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.h_deltas" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -395,7 +396,7 @@ configuration to the jth configuration.</p>
 
 <dl class="method">
 <dt id="bornagain.target.density.CrystalDensityMap.zeros">
-<code class="descname">zeros</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap.zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.zeros" title="Permalink to this definition">¶</a></dt>
+<code class="descname">zeros</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#CrystalDensityMap.zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.CrystalDensityMap.zeros" title="Permalink to this definition">¶</a></dt>
 <dd><p>A convenience function: simply returns an array of zeros of shape NxNxN</p>
 <p>Returns: numpy array</p>
 </dd></dl>
@@ -717,7 +718,7 @@ Cromer-Mann coefficients.</p>
 
 <dl class="function">
 <dt id="bornagain.target.density.trilinear_insertion">
-<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_insertion</code><span class="sig-paren">(</span><em>densities</em>, <em>weights</em>, <em>vectors</em>, <em>vals</em>, <em>corners</em>, <em>deltas</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_insertion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_insertion" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">bornagain.target.density.</code><code class="descname">trilinear_insertion</code><span class="sig-paren">(</span><em>densities</em>, <em>weights</em>, <em>vectors</em>, <em>vals</em>, <em>corners</em>, <em>deltas</em>, <em>weight=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/density.html#trilinear_insertion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.density.trilinear_insertion" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -733,7 +734,7 @@ Cromer-Mann coefficients.</p>
         <a href="bornagain.target.molecule.html" class="btn btn-neutral float-right" title="bornagain.target.molecule module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.target.crystal.html" class="btn btn-neutral float-left" title="bornagain.target.crystal module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.target.crystal.html" class="btn btn-neutral" title="bornagain.target.crystal module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -758,16 +759,33 @@ Cromer-Mann coefficients.</p>
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

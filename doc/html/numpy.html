@@ -18,37 +18,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain" href="modules.html" />
     <link rel="prev" title="Notes for Developers" href="coding.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -95,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Numpy, vectors, rotations, etc.</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#about-indexing-and-memory">About indexing and memory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-store-many-vectors-in-a-numpy-array">How to store many vectors in a numpy array</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-rotate-vectors">How to rotate vectors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-store-many-3d-density-intensity-maps-in-numpy-arrays">How to store many 3D density/intensity maps in numpy arrays</a></li>
@@ -168,14 +166,25 @@
   <div class="section" id="numpy-vectors-rotations-etc">
 <h1>Numpy, vectors, rotations, etc.<a class="headerlink" href="#numpy-vectors-rotations-etc" title="Permalink to this headline">¶</a></h1>
 <p>We use numpy a lot, and there are a few important conventions within bornagain to be aware of.</p>
+<div class="section" id="about-indexing-and-memory">
+<h2>About indexing and memory<a class="headerlink" href="#about-indexing-and-memory" title="Permalink to this headline">¶</a></h2>
+<p>By default, increments in the right-most index of a numpy array correspond to the smallest increments
+in the memory buffer.  In other words, the right-most index has the shortest stride.  Some people refer to this as
+the “row-major” format, as opposed to the “column-major” format whereby the left-most index corresponds to
+the shortest stride.  (If these concepts are new to you, make sure you do the relevant background reading – perhaps
+<a class="reference external" href="https://www.jessicayung.com/numpy-arrays-memory-and-strides/">this</a> helps).  Importantly, when certain operations are
+performed on a numpy array, a row-major array might become a column-major array.  Other operations in numpy might cause
+the memory buffer to be wiped out and re-written.  It is also common that the modification of an array might affect
+another another one, if the two have a shared memory buffer.  Basically, you need to be careful with how you use
+numpy arrays if this matters, and in fact it does matter when moving numpy arrays into memory on a GPU or when
+interfacing with C or Fortran code.</p>
+</div>
 <div class="section" id="how-to-store-many-vectors-in-a-numpy-array">
 <h2>How to store many vectors in a numpy array<a class="headerlink" href="#how-to-store-many-vectors-in-a-numpy-array" title="Permalink to this headline">¶</a></h2>
-<p>If you have <em>N</em> vectors of dimension <em>D</em>, you should store them in a numpy array of shape <em>N</em> x <em>D</em>.  If you do something
-different, it is possible that rotations (for example) will be performed incorrectly.  This choice of convention was
-made because the right-most index of a numpy array has the smallest stride (by default – this can be changed, but that
-would create a new set of bigger problems…), and because it seems to make most sense to have vector components stored
-close to each other in memory.  This is important, for example, when we pass numpy arrays to opencl for fast GPU
-simulations.</p>
+<p>If you have <em>N</em> vectors of dimension <em>D</em>, you should store them in a numpy array of shape <em>N</em> x <em>D</em>.  This choice was
+made because the right-most index of a numpy array has the smallest stride by default, and because it usually makes
+most sense to have vector components stored close to each other in memory.  This convention is assumed in every function
+in bornagain.</p>
 </div>
 <div class="section" id="how-to-rotate-vectors">
 <h2>How to rotate vectors<a class="headerlink" href="#how-to-rotate-vectors" title="Permalink to this headline">¶</a></h2>
@@ -197,16 +206,13 @@ simulations.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vec_rotated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Interestingly, the former method is faster than the latter, despite the fact that there are two transpose operations.
-Also noteworthy is the fact that the <cite>np.dot</cite> function is fastest if we could avoid all transpose operations.  Maybe
-we can do that, but I don’t see how.</p>
+<p>Interestingly, the former method is faster than the latter.</p>
 <p>Note that the <a class="reference internal" href="bornagain.utils.html#bornagain.utils.rotate" title="bornagain.utils.rotate"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate</span></code></a> function carried out via numpy is consistent with rotation
 operations performed on GPU devices within the <a class="reference internal" href="bornagain.simulate.clcore.html#module-bornagain.simulate.clcore" title="bornagain.simulate.clcore"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulate.clcore</span></code></a> module.</p>
 </div>
 <div class="section" id="how-to-store-many-3d-density-intensity-maps-in-numpy-arrays">
 <h2>How to store many 3D density/intensity maps in numpy arrays<a class="headerlink" href="#how-to-store-many-3d-density-intensity-maps-in-numpy-arrays" title="Permalink to this headline">¶</a></h2>
-<p>For 3D density/intensity maps, we choose to index such that the “z” coordinate corresponds to the right-most numpy
-index.  More notes are needed on this topic.</p>
+<p>This needs to be specified some day…</p>
 </div>
 </div>
 
@@ -221,7 +227,7 @@ index.  More notes are needed on this topic.</p>
         <a href="modules.html" class="btn btn-neutral float-right" title="bornagain" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="coding.html" class="btn btn-neutral float-left" title="Notes for Developers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="coding.html" class="btn btn-neutral" title="Notes for Developers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -246,16 +252,33 @@ index.  More notes are needed on this topic.</p>
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -41,12 +41,12 @@ Before you start using bornagain
 
 - If documentation is missing or confusing, please fix it or tell someone who can.
 - *All* units in bornagain are SI.  Angles are radians.  No exceptions (so far).
-- There is no special coordinate system that is assumed.  *You* get to choose the direction of the x-ray beam and so on.
+- No special coordinate system is assumed.  That is, *You* get to choose the direction of the x-ray beam and so on.
 
 If you plan to develop bornagain
 --------------------------------
 
-See the page for developers :ref:`developers_anchor`.  We aim to keep things reasonably consistent.
+See the page for developers :ref:`developers_anchor`.
 
 Acknowledgements
 ----------------

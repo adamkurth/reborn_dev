@@ -18,37 +18,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain.fileio package" href="bornagain.fileio.html" />
     <link rel="prev" title="bornagain.external.crystfel module" href="bornagain.external.crystfel.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -192,115 +189,72 @@ Note that there is documentation on <a class="reference external" href="https://
 <em class="property">class </em><code class="descclassname">bornagain.external.lcls.</code><code class="descname">AreaDetector</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Thin wrapper for psana.Detector class.  Adds methods to generate list of PADGeometry instances and to split the PAD
-data in to a list of 2d arrays.</p>
+data into a list of 2d arrays.</p>
 <dl class="method">
 <dt id="bornagain.external.lcls.AreaDetector.get_detector_type">
 <code class="descname">get_detector_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.get_detector_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.get_detector_type" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The psana detector fails to provide reliable information on detector type.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.external.lcls.AreaDetector.type">
 <code class="descname">type</code><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.type" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="bornagain.external.lcls.AreaDetector.get_psf">
-<code class="descname">get_psf</code><span class="sig-paren">(</span><em>run</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.get_psf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.get_psf" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>See get_detector_type method.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.external.lcls.AreaDetector.get_calib_split">
 <code class="descname">get_calib_split</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.get_calib_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.get_calib_split" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Just like the calib data but split into a list of panels</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.external.lcls.AreaDetector.get_raw_split">
 <code class="descname">get_raw_split</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.get_raw_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.get_raw_split" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Just like the raw data but split into a list of panels</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.external.lcls.AreaDetector.get_pad_geometry">
 <code class="descname">get_pad_geometry</code><span class="sig-paren">(</span><em>run</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.get_pad_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.get_pad_geometry" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>See documentation for the function get_pad_geometry().</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.external.lcls.AreaDetector.split_pad">
 <code class="descname">split_pad</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.split_pad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.split_pad" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Split psana data block into a PAD list</p>
+</dd></dl>
 
 <dl class="staticmethod">
 <dt id="bornagain.external.lcls.AreaDetector.cspad_data_splitter">
 <em class="property">static </em><code class="descname">cspad_data_splitter</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#AreaDetector.cspad_data_splitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.AreaDetector.cspad_data_splitter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Thanks to Derek for this.</p>
+<dd><p>Thanks to Derek Mendez for this.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array">
-<code class="descclassname">bornagain.external.lcls.</code><code class="descname">reshape_psana_cspad_array_to_cheetah_array</code><span class="sig-paren">(</span><em>psana_array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#reshape_psana_cspad_array_to_cheetah_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.reshape_psana_cspad_array_to_cheetah_array" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transform a native psana cspad numpy array of shape (32,185,388) into a “Cheetah array” of shape (1480, 1552).
-Conversion to Cheetah format requires a re-write of the data in memory, and each detector panel is no longer stored
-contiguously in memory.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>psana_array</strong> (<em>numpy array</em>) – A numpy array of shape (32,185,388) produced by the psana module</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A numpy array of shape (1480, 1552); same data as the psana array but mangled as done within Cheetah</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">cheetah_array (numpy array)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.external.lcls.cheetah_cspad_array_to_pad_list">
-<code class="descclassname">bornagain.external.lcls.</code><code class="descname">cheetah_cspad_array_to_pad_list</code><span class="sig-paren">(</span><em>psana_array</em>, <em>geom_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#cheetah_cspad_array_to_pad_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.cheetah_cspad_array_to_pad_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with
-data in the native psana format.  First you should create a crystfel geometry dictionary using the function
-<a class="reference internal" href="bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_pad_geometry_list" title="bornagain.external.crystfel.geometry_file_to_pad_geometry_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">geometry_file_to_pad_geometry_list()</span></code></a>.</p>
+<dt id="bornagain.external.lcls.get_pad_geometry">
+<code class="descclassname">bornagain.external.lcls.</code><code class="descname">get_pad_geometry</code><span class="sig-paren">(</span><em>detector</em>, <em>run</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#get_pad_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.get_pad_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a list of PADGeometry instances from a psana detector and run objects.  Special considerations are taken for
+the case of the CSPAD detector, since it has rows of pixels that are elongated (did you know that?).</p>
+<p>Credit goes to Derek Mendez for this.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>psana_array</strong> (<em>numpy array</em>) – A numpy array of shape (32,185,388) produced by the psana module.</li>
-<li><strong>geom_dict</strong> (<em>dict</em>) – A CrystFEL geometry dictionary produced by external.crystfel.geom_to_dict() .</li>
+<li><strong>detector</strong> – a psana.Detector object</li>
+<li><strong>run</strong> – a psana run object</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list containing data from each pixel array</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pad_list (list)</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of bornagain PADGeometry objects</p>
 </td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="function">
-<dt id="bornagain.external.lcls.cheetah_remapped_cspad_array_to_pad_list">
-<code class="descclassname">bornagain.external.lcls.</code><code class="descname">cheetah_remapped_cspad_array_to_pad_list</code><span class="sig-paren">(</span><em>cheetah_array</em>, <em>geom_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/lcls.html#cheetah_remapped_cspad_array_to_pad_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.lcls.cheetah_remapped_cspad_array_to_pad_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>This will make a list of PAD data arrays, provided a data array that is in the form that Cheetah works with.  This
-is needed because people mostly make geom files that work with the Cheetah format.  See the function
-<a class="reference internal" href="bornagain.external.cheetah.html#bornagain.external.cheetah.reshape_psana_cspad_array_to_cheetah_array" title="bornagain.external.cheetah.reshape_psana_cspad_array_to_cheetah_array"><code class="xref py py-func docutils literal notranslate"><span class="pre">reshape_psana_cspad_array_to_cheetah_array</span></code></a> for more details on array shapes.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>cheetah_array</strong> – The data in Cheetah format</li>
-<li><strong>geom_dict</strong> – The dictionary created from a CrystFEL geom file via :func:``</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>Returns:</p>
 </dd></dl>
 
 </div>
@@ -316,7 +270,7 @@ is needed because people mostly make geom files that work with the Cheetah forma
         <a href="bornagain.fileio.html" class="btn btn-neutral float-right" title="bornagain.fileio package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.external.crystfel.html" class="btn btn-neutral float-left" title="bornagain.external.crystfel module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.external.crystfel.html" class="btn btn-neutral" title="bornagain.external.crystfel module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -341,16 +295,33 @@ is needed because people mostly make geom files that work with the Cheetah forma
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

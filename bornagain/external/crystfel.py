@@ -1,6 +1,7 @@
 r"""
-Method for working with CrystFEL geometry files.  Note that you can convert a CrystFEL geometry file to a Python
-dictionary object with the cfelpyutils.crystfel_utils.load_crystfel_geometry() function.
+Utilities for working with CrystFEL files.  Note that you can convert a CrystFEL geometry file to a Python
+dictionary object with the cfelpyutils.crystfel_utils.load_crystfel_geometry() function.  Most of the functions below
+wrap around the cfelpyutils package.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -16,13 +17,14 @@ from cfelpyutils import crystfel_utils
 def load_crystfel_geometry(geometry_file):
 
     r"""
-    Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blamm
-    Valerio if it's broken :)
+    Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame
+    Valerio Mariani if it's broken :)
 
-    Args:
+    Arguments:
         geometry_file (str): Path to geometry file
 
-    Returns: Dict
+    Returns:
+        Dict
     """
 
     return crystfel_utils.load_crystfel_geometry(geometry_file)
@@ -30,11 +32,11 @@ def load_crystfel_geometry(geometry_file):
 
 def geometry_dict_to_pad_geometry_list(geometry_dict):
 
-    """
-    Given a CrystFEL geometry dictionary, create a list of :class:<bornagain.geometry.PADGeometry` objects.
+    r"""
+    Given a CrystFEL geometry dictionary, create a list of `:class:<bornagain.geometry.PADGeometry` objects.
     This will also append the name of the panel to the PADGeometry instance.
 
-    Args:
+    Arguments:
         geometry_dict (str): Path to geometry file
 
     Returns: List of PADGeometry instances
@@ -62,13 +64,14 @@ def geometry_dict_to_pad_geometry_list(geometry_dict):
 def geometry_file_to_pad_geometry_list(geometry_file):
 
     r"""
-    Given a CrystFEL geometry file, create a list of PADGeometry objects.  This will also append extra
-    crystfel-specific items like fsx, max_fs, etc.
+    Given a CrystFEL geometry file, create a list of `:class:<bornagain.geometry.PADGeometry` objects.  This will also
+    append extra crystfel-specific items like fsx, max_fs, etc.
 
-    Args:
+    Arguments:
         geometry_file (str): Path to geometry file
 
-    Returns: List of PADGeometry instances
+    Returns:
+        List of PADGeometry instances
     """
 
     geometry_dict = load_crystfel_geometry(geometry_file)

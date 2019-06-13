@@ -134,6 +134,9 @@ def get_pad_geometry(detector, run):
     """
 
     psf = detector.geometry(run).get_psf()
+    geom = []
+    n_fs = detector.shape[2]
+    n_ss = detector.shape[1]
     if detector.is_cspad():
         # We must deal with the fact that the 32 PADs returned by psana are really 64 PADs.
         shift = 194. * 109.92 + (274.8 - 109.92) * 2.
@@ -143,14 +146,15 @@ def get_pad_geometry(detector, run):
             t = np.array(a[0]) + shift * f / np.sqrt(np.sum(f ** 2))
             b = ((t[0], t[1], t[2]), (a[1][0], a[1][1], a[1][2]), (a[2][0], a[2][1], a[2][2]))
             psf.insert(i + 1, b)
-    geom = []
+        n_fs = 194
+        n_ss = 185
     for i in range(len(psf)):
         g = bornagain.detector.PADGeometry()
         g.t_vec = np.array(psf[i][0]) * 1e6
         g.ss_vec = np.array(psf[i][1]) * 1e6
         g.fs_vec = np.array(psf[i][2]) * 1e6
-        g.n_fs = 194
-        g.n_ss = 185
+        g.n_fs = n_fs
+        g.n_ss = n_ss
         geom.append(g)
     return geom
 

@@ -1,12 +1,12 @@
 print("Loading python modules...")
-import h5py
+# import h5py
 import re
 import os
 import sys
 # sys.path.append('../..')
 import argparse
 import psana
-import numpy as np
+# import numpy as np
 from bornagain.viewers.qtviews import PADView
 from bornagain.external import crystfel, lcls, cheetah
 from bornagain.fileio.getters import FrameGetter
@@ -67,17 +67,6 @@ if os.path.isfile(geom_file):
     elif detector.type == 'pnccd':
         def split_pads(psana_array):
             return cheetah.cheetah_pnccd_array_to_pad_list(psana_array, geom_dict)
-            # slab = np.zeros((1024, 1024), dtype=psana_array.dtype)
-            # slab[0:512, 0:512] = psana_array[0]
-            # slab[512:1024, 0:512] = psana_array[1][::-1, ::-1]
-            # slab[512:1024, 512:1024] = psana_array[2][::-1, ::-1]
-            # slab[0:512, 512:1024] = psana_array[3]
-            # data_list = []
-            # for panel_name in geom_dict['panels'].keys():
-            #     g = geom_dict['panels'][panel_name]
-            #     d = slab[np.int(g['min_ss']):np.int(g['max_ss']), np.int(g['min_fs']):np.int(g['max_fs'])]
-            #     data_list.append(d)
-            # return data_list
     elif detector.type == 'unknown':
         def split_pads(psana_array):
             if len(psana_array) != 2:

@@ -9,26 +9,41 @@ Since bornagain is changing frequently at this time, it is recommended that you 
 where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving
 code alongside results is good practice anyways.
 
-If the bornagain package directory is not in your working directory, you might need to add bornagain to your python path
-by doing something like this:
+You need to make sure that Python can load the bornagain package.  There are several ways to do this.
+
+1) Within your shell, you can set an environment variable so that Python looks in the right place for bornagain.
+If you are using the bash shell, you can do the following:
+
+.. code-block:: bash
+
+    export PYTHONPATH=example/path/to/bornagain
+
+2) You can specify the location of bornagain directly in your python path.  For example:
 
 .. code-block:: python
 
 	import sys
-	sys.path.append("../example/path/to/bornagain")
+	sys.path.append("example/path/to/bornagain")
 
-Another option is to make a symbolic link to the bornagain package, like this:
+3) You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
+example:
 
 .. code-block:: bash
 
-    ln -s path/to/bornagain/bornagain path/where/your/script/is
+    ln -s example/path/to/bornagain/bornagain path/to/where/your/script/is/located
 
-If you use a symbolic link as above, you can simply add an import statement in your script
+Note that "bornagain/bornagain" is not a typo in the above -- in the case of a symbolic link you need to link to the
+actual bornagain package, which is not the same as the git repository bornagain that contains the bornagain package.
+
+If you do any of the above correctly, you should then be able to import bornagain in the usual way:
 
 .. code-block:: python
 
     import bornagain
 
+The fact that you are reading this suggests that you should take some time to learn a little bit about how Python
+imports work in general.
+`This <https://www.digitalocean.com/community/tutorials/how-to-import-modules-in-python-3>`_ hit from Google might help.
 
 Dependencies
 ------------
@@ -122,8 +137,8 @@ You can uninstall a conda environment as follows:
     conda env remove -n bornagain3
 
 
-Possible installation issues
-----------------------------
+Possible issues
+---------------
 
 **OpenCL**
 

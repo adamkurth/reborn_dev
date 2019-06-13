@@ -18,37 +18,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Beams" href="beams.html" />
     <link rel="prev" title="Overview" href="overview.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -92,7 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#system-wide-installation">System-wide installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-setup">Example setup</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#possible-installation-issues">Possible installation issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#possible-issues">Possible issues</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
@@ -174,20 +171,33 @@
 Since bornagain is changing frequently at this time, it is recommended that you keep a local copy of bornagain
 where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving
 code alongside results is good practice anyways.</p>
-<p>If the bornagain package directory is not in your working directory, you might need to add bornagain to your python path
-by doing something like this:</p>
+<p>You need to make sure that Python can load the bornagain package.  There are several ways to do this.</p>
+<p>1) Within your shell, you can set an environment variable so that Python looks in the right place for bornagain.
+If you are using the bash shell, you can do the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span>example/path/to/bornagain
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>You can specify the location of bornagain directly in your python path.  For example:</li>
+</ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;../example/path/to/bornagain&quot;</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;example/path/to/bornagain&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Another option is to make a symbolic link to the bornagain package, like this:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ln -s path/to/bornagain/bornagain path/where/your/script/is
+<p>3) You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
+example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ln -s example/path/to/bornagain/bornagain path/to/where/your/script/is/located
 </pre></div>
 </div>
-<p>If you use a symbolic link as above, you can simply add an import statement in your script</p>
+<p>Note that “bornagain/bornagain” is not a typo in the above – in the case of a symbolic link you need to link to the
+actual bornagain package, which is not the same as the git repository bornagain that contains the bornagain package.</p>
+<p>If you do any of the above correctly, you should then be able to import bornagain in the usual way:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bornagain</span>
 </pre></div>
 </div>
+<p>The fact that you are reading this suggests that you should take some time to learn a little bit about how Python
+imports work in general.
+<a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-import-modules-in-python-3">This</a> hit from Google might help.</p>
 </div>
 <div class="section" id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
@@ -263,8 +273,8 @@ pytest
 </pre></div>
 </div>
 </div>
-<div class="section" id="possible-installation-issues">
-<h2>Possible installation issues<a class="headerlink" href="#possible-installation-issues" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="possible-issues">
+<h2>Possible issues<a class="headerlink" href="#possible-issues" title="Permalink to this headline">¶</a></h2>
 <p><strong>OpenCL</strong></p>
 <p>If you get a runtime error involving</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pyopencl.cffi_cl.LogicError: clGetPlatformIDs failed:
@@ -305,7 +315,7 @@ make install
         <a href="beams.html" class="btn btn-neutral float-right" title="Beams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="overview.html" class="btn btn-neutral" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -330,16 +340,33 @@ make install
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

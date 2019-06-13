@@ -17,35 +17,32 @@
   
 
   
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -325,6 +322,46 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">intensity</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span></div></div>
 
 
+<div class="viewcode-block" id="MoleculeSimulatorV1"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.MoleculeSimulatorV1">[docs]</a><span class="k">class</span> <span class="nc">MoleculeSimulatorV1</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">molecule</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oversample</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_mesh_size</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">clcore</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">clcore</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clcore</span> <span class="o">=</span> <span class="n">ClCore</span><span class="p">(</span><span class="n">group_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clcore</span> <span class="o">=</span> <span class="n">clcore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pad</span> <span class="o">=</span> <span class="n">pad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span> <span class="o">=</span> <span class="n">molecule</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">beam</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oversample</span> <span class="o">=</span> <span class="n">oversample</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">q_vecs</span><span class="p">(</span><span class="n">beam</span><span class="o">=</span><span class="n">beam</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">get_scattering_factors</span><span class="p">(</span><span class="n">beam</span><span class="o">=</span><span class="n">beam</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intensity_prefactor</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">beam</span><span class="o">.</span><span class="n">photon_number_fluence</span> <span class="o">*</span> <span class="n">r_e</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">pad</span><span class="o">.</span><span class="n">solid_angles</span><span class="p">()</span> <span class="o">*</span>
+                                          <span class="n">pad</span><span class="o">.</span><span class="n">polarization_factors</span><span class="p">(</span><span class="n">beam</span><span class="o">=</span><span class="n">beam</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">max_resolution</span><span class="p">(</span><span class="n">beam</span><span class="o">=</span><span class="n">beam</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mol_size</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">max_pair_distance</span><span class="p">(</span><span class="n">molecule</span><span class="o">.</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmax</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mol_size</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_size</span><span class="p">,</span> <span class="n">max_mesh_size</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_map_dev</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_size</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">clcore</span><span class="o">.</span><span class="n">complex_t</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q_dev</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q_vecs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">clcore</span><span class="o">.</span><span class="n">real_t</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_out_dev</span> <span class="o">=</span> <span class="n">clcore</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">clcore</span><span class="o">.</span><span class="n">complex_t</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">pad</span><span class="o">.</span><span class="n">shape</span><span class="p">())</span>
+        <span class="n">clcore</span><span class="o">.</span><span class="n">phase_factor_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_size</span><span class="p">,</span> <span class="n">q_min</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="p">,</span>
+                                 <span class="n">q_max</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a_map_dev</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MoleculeSimulatorV1.generate_pattern"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.MoleculeSimulatorV1.generate_pattern">[docs]</a>    <span class="k">def</span> <span class="nf">generate_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">poisson</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">rotation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rotation</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">random_rotation</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clcore</span><span class="o">.</span><span class="n">mesh_interpolation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_map_dev</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q_dev</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_size</span><span class="p">,</span> <span class="n">q_min</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="p">,</span>
+                                       <span class="n">q_max</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="n">rotation</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a_out_dev</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">poisson</span><span class="p">:</span>
+            <span class="n">intensity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intensity_prefactor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_out_dev</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">intensity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intensity_prefactor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_out_dev</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">intensity</span></div></div>
+
+
 <div class="viewcode-block" id="CrystalSimulatorV1"><a class="viewcode-back" href="../../../bornagain.simulate.examples.html#bornagain.simulate.examples.CrystalSimulatorV1">[docs]</a><span class="k">class</span> <span class="nc">CrystalSimulatorV1</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -413,6 +450,8 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+
         <span class="n">cryst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal_structure</span>
         <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span>
         <span class="n">pad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_geometry</span>
@@ -485,16 +524,33 @@
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

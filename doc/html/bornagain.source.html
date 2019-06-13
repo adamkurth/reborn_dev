@@ -18,37 +18,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain.units module" href="bornagain.units.html" />
     <link rel="prev" title="bornagain.detector module" href="bornagain.detector.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -213,22 +210,29 @@
 <dl class="attribute">
 <dt id="bornagain.source.Beam.beam_profile">
 <code class="descname">beam_profile</code><a class="headerlink" href="#bornagain.source.Beam.beam_profile" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>In the future this will be a means of specifying the profile of the incident x-rays.  The only option is
+‘tophat’ for the time being.  Possibly in the future we could allow for complex wavefronts.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.source.Beam.beam_vec">
 <code class="descname">beam_vec</code><a class="headerlink" href="#bornagain.source.Beam.beam_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The nominal direction of the incident x-ray beam.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.source.Beam.polarization_vec">
 <code class="descname">polarization_vec</code><a class="headerlink" href="#bornagain.source.Beam.polarization_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The principle polarization vector <span class="math notranslate nohighlight">\(\hat{u}\)</span>.  This should be orthogonal to the incident beam direction.  The
+complementary polarization vector is <span class="math notranslate nohighlight">\(\hat{u}\times\hat{b}\)</span></p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.source.Beam.polarization_weight">
 <code class="descname">polarization_weight</code><a class="headerlink" href="#bornagain.source.Beam.polarization_weight" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The fraction of f of energy that goes into the principle polarization vector specified by the
+polarization_vec attriute.  The fraction of the energy in the complementary polarization is of course (1-f).</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.source.Beam.wavelength">
@@ -275,7 +279,7 @@
         <a href="bornagain.units.html" class="btn btn-neutral float-right" title="bornagain.units module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.detector.html" class="btn btn-neutral float-left" title="bornagain.detector module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.detector.html" class="btn btn-neutral" title="bornagain.detector module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -300,16 +304,33 @@
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

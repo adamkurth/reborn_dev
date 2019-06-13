@@ -18,37 +18,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain.external.crystfel module" href="bornagain.external.crystfel.html" />
     <link rel="prev" title="bornagain.external.pyqtgraph.mods module" href="bornagain.external.pyqtgraph.mods.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -183,10 +180,8 @@
             
   <div class="section" id="module-bornagain.external.cheetah">
 <span id="bornagain-external-cheetah-module"></span><h1>bornagain.external.cheetah module<a class="headerlink" href="#module-bornagain.external.cheetah" title="Permalink to this headline">¶</a></h1>
-<p>Utilities for working with LCLS data.  Most of what you need is already in the psana package.  I don’t know where the
-official psana documentation is but if you work with LCLS data you should at least skim through all of the material in
-the <a class="reference external" href="https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis">LCLS Data Analysis Confluence pages</a>.
-Note that there is documentation on <a class="reference external" href="https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry">LCLS PAD geometry</a>.</p>
+<p>Utilities for working with data created by Cheetah.  I make no promises that any of this will work as expected; Cheetahs
+are wild animals.</p>
 <dl class="function">
 <dt id="bornagain.external.cheetah.reshape_psana_cspad_array_to_cheetah_array">
 <code class="descclassname">bornagain.external.cheetah.</code><code class="descname">reshape_psana_cspad_array_to_cheetah_array</code><span class="sig-paren">(</span><em>psana_array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cheetah.html#reshape_psana_cspad_array_to_cheetah_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cheetah.reshape_psana_cspad_array_to_cheetah_array" title="Permalink to this definition">¶</a></dt>
@@ -234,9 +229,49 @@ data in the native psana format.  First you should create a crystfel geometry di
 </dd></dl>
 
 <dl class="function">
-<dt id="bornagain.external.cheetah.cheetah_remapped_cspad_array_to_pad_list">
-<code class="descclassname">bornagain.external.cheetah.</code><code class="descname">cheetah_remapped_cspad_array_to_pad_list</code><span class="sig-paren">(</span><em>cheetah_array</em>, <em>geom_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cheetah.html#cheetah_remapped_cspad_array_to_pad_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cheetah.cheetah_remapped_cspad_array_to_pad_list" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="bornagain.external.cheetah.reshape_psana_pnccd_array_to_cheetah_array">
+<code class="descclassname">bornagain.external.cheetah.</code><code class="descname">reshape_psana_pnccd_array_to_cheetah_array</code><span class="sig-paren">(</span><em>psana_array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cheetah.html#reshape_psana_pnccd_array_to_cheetah_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cheetah.reshape_psana_pnccd_array_to_cheetah_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform  a native psana pnccd numpy array of shape (???) into a “Cheetah array” of shape (1024,1024).
+Conversion to Cheetah format requires a re-write of the data in memory.  Panels might not be contiguous in memory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>psana_array</strong> (<em>numpy array</em>) – A numpy array of shape (???) produced by the psana module</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A numpy array of shape (1024, 1024); same data as the psana array but mangled as done within Cheetah</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">cheetah_array (numpy array)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.external.cheetah.cheetah_pnccd_array_to_pad_list">
+<code class="descclassname">bornagain.external.cheetah.</code><code class="descname">cheetah_pnccd_array_to_pad_list</code><span class="sig-paren">(</span><em>psana_array</em>, <em>geom_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/external/cheetah.html#cheetah_pnccd_array_to_pad_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.external.cheetah.cheetah_pnccd_array_to_pad_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with
+data in the native psana format.  First you should create a crystfel geometry dictionary using the function
+<a class="reference internal" href="bornagain.external.crystfel.html#bornagain.external.crystfel.geometry_file_to_pad_geometry_list" title="bornagain.external.crystfel.geometry_file_to_pad_geometry_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">geometry_file_to_pad_geometry_list()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>psana_array</strong> (<em>numpy array</em>) – A numpy array of shape (32,185,388) produced by the psana module.</li>
+<li><strong>geom_dict</strong> (<em>dict</em>) – A CrystFEL geometry dictionary produced by external.crystfel.geom_to_dict() .</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list containing data from each pixel array</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pad_list (list)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 
@@ -251,7 +286,7 @@ data in the native psana format.  First you should create a crystfel geometry di
         <a href="bornagain.external.crystfel.html" class="btn btn-neutral float-right" title="bornagain.external.crystfel module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.external.pyqtgraph.mods.html" class="btn btn-neutral float-left" title="bornagain.external.pyqtgraph.mods module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.external.pyqtgraph.mods.html" class="btn btn-neutral" title="bornagain.external.pyqtgraph.mods module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -276,16 +311,33 @@ data in the native psana format.  First you should create a crystfel geometry di
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

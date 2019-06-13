@@ -47,6 +47,8 @@ class Beam(object):
 
     @property
     def beam_profile(self):
+        r""" In the future this will be a means of specifying the profile of the incident x-rays.  The only option is
+         'tophat' for the time being.  Possibly in the future we could allow for complex wavefronts.  """
         return self._beam_profile
 
     @beam_profile.setter
@@ -57,6 +59,7 @@ class Beam(object):
 
     @property
     def beam_vec(self):
+        r""" The nominal direction of the incident x-ray beam. """
         return self._beam_vec
 
     @beam_vec.setter
@@ -65,6 +68,8 @@ class Beam(object):
 
     @property
     def polarization_vec(self):
+        r""" The principle polarization vector :math:`\hat{u}`.  This should be orthogonal to the incident beam direction.  The
+        complementary polarization vector is :math:`\hat{u}\times\hat{b}`"""
         return self._polarization_vec
 
     @polarization_vec.setter
@@ -73,6 +78,8 @@ class Beam(object):
 
     @property
     def polarization_weight(self):
+        r""" The fraction of f of energy that goes into the principle polarization vector specified by the
+        polarization_vec attriute.  The fraction of the energy in the complementary polarization is of course (1-f). """
         return self._polarization_weight
 
     @polarization_weight.setter

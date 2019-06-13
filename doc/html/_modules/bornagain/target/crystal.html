@@ -17,35 +17,32 @@
   
 
   
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -171,12 +168,15 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
 <span class="c1"># Python 2 and 3 compatibility...</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">basestring</span>
 <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
     <span class="n">basestring</span> <span class="o">=</span> <span class="nb">str</span>
 
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sqrt</span>
 
@@ -184,6 +184,33 @@
 <span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">utils</span>
 <span class="kn">from</span> <span class="nn">bornagain.utils</span> <span class="k">import</span> <span class="n">rotate</span>
 <span class="kn">from</span> <span class="nn">bornagain.simulate</span> <span class="k">import</span> <span class="n">simutils</span>
+
+<span class="n">pdb_data_path</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;bornagain.simulate&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb&#39;</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="get_pdb_file"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.get_pdb_file">[docs]</a><span class="k">def</span> <span class="nf">get_pdb_file</span><span class="p">(</span><span class="n">pdb_id</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fetch a pdb file from the web and return the path to the file.</span>
+<span class="sd">    The default location for the file is bornagain/simulate/data/pdb/ .</span>
+<span class="sd">    If the file already exists, just return the path to the existint file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pdb_id: for example: &quot;101M&quot; or &quot;101M.pdb&quot;</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        string path to file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">save_path</span> <span class="o">=</span> <span class="n">pdb_data_path</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pdb_id</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pdb&#39;</span><span class="p">):</span>
+        <span class="n">pdb_id</span> <span class="o">+=</span> <span class="s1">&#39;.pdb&#39;</span>
+    <span class="n">pdb_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">pdb_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pdb_id</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="s1">&#39;https://files.rcsb.org/download/&#39;</span> <span class="o">+</span> <span class="n">pdb_id</span><span class="p">,</span> <span class="n">pdb_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">urllib</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">pdb_path</span></div>
 
 
 <div class="viewcode-block" id="UnitCell"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.UnitCell">[docs]</a><span class="k">class</span> <span class="nc">UnitCell</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -363,11 +390,16 @@
     <span class="n">mosaic_domain_size_fwhm</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">cryst1</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdbFilePath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdbFilePath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">spacegroup</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">pdbFilePath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">load_pdb</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">)</span>
+            <span class="n">dic</span> <span class="o">=</span> <span class="n">pdb_to_dict</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_molecule</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">],</span> <span class="n">atomic_symbols</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;atomic_symbols&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="o">*</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;cell&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">spacegroup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_spacegroup</span><span class="p">(</span><span class="n">hermann_mauguin_symbol</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;hermann_mauguin_symbol&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">spacegroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup</span> <span class="o">=</span> <span class="n">spacegroup</span>
 
 <div class="viewcode-block" id="CrystalStructure.load_pdb"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.CrystalStructure.load_pdb">[docs]</a>    <span class="k">def</span> <span class="nf">load_pdb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdb_file_path</span><span class="p">):</span>
 
@@ -519,7 +551,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">sym_translations</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">x_vecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -533,6 +565,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unitcell</span><span class="o">.</span><span class="n">o_mat_inv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">coordinates</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_vecs</span>
+
 <div class="viewcode-block" id="CrystalStructure.get_symmetry_expanded_coordinates"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.CrystalStructure.get_symmetry_expanded_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">get_symmetry_expanded_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
@@ -540,6 +576,7 @@
         <span class="k">for</span> <span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">sym_rotations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup</span><span class="o">.</span><span class="n">sym_translations</span><span class="p">):</span>
             <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span> <span class="o">+</span> <span class="n">T</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unitcell</span><span class="o">.</span><span class="n">o_mat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span></div></div>
+
 
 <div class="viewcode-block" id="Structure"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.Structure">[docs]</a><span class="k">class</span> <span class="nc">Structure</span><span class="p">(</span><span class="n">CrystalStructure</span><span class="p">):</span>
 
@@ -638,11 +675,78 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_facet</span><span class="p">(</span><span class="n">plane</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">length</span><span class="o">=</span><span class="n">n_cells</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_facet</span><span class="p">(</span><span class="n">plane</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">length</span><span class="o">=</span><span class="n">n_cells</span><span class="p">)</span></div></div>
 
+<div class="viewcode-block" id="pdb_to_dict"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.pdb_to_dict">[docs]</a><span class="k">def</span> <span class="nf">pdb_to_dict</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a :class:`CrystalStructure` object with PDB information. &quot;&quot;&quot;</span>
+
+    <span class="n">max_atoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e6</span><span class="p">)</span>
+    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">max_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+    <span class="n">atomic_symbols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">atom_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># if crystal_structure is None:</span>
+    <span class="c1">#     cryst = CrystalStructure()</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     cryst = crystal_structure</span>
+    <span class="n">SCALE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">pdbfile</span><span class="p">:</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pdbfile</span><span class="p">:</span>
+
+            <span class="c1"># This is the inverse of the &quot;orthogonalization matrix&quot;  along with</span>
+            <span class="c1"># translation vector.  See Rupp for an explanation.</span>
+
+            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SCALE&#39;</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">])</span>
+                <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span><span class="p">])</span>
+                <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span>
+                <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">45</span><span class="p">:</span><span class="mi">55</span><span class="p">])</span>
+
+            <span class="c1"># The crystal lattice and symmetry</span>
+
+            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;CRYST1&#39;</span><span class="p">:</span>
+                <span class="n">cryst1</span> <span class="o">=</span> <span class="n">line</span>
+                <span class="c1"># As always, everything in our programs are in SI units.</span>
+                <span class="c1"># PDB files use angstrom units.</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">15</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">24</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">33</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
+                <span class="c1"># And of course degrees are converted to radians (though we</span>
+                <span class="c1"># loose the perfection of rational quotients like 360/4=90...)</span>
+                <span class="n">alpha</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">33</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+                <span class="n">beta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">47</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+                <span class="n">gamma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">47</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+
+                <span class="n">hermann_mauguin_symbol</span> <span class="o">=</span> <span class="n">cryst1</span><span class="p">[</span><span class="mi">55</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ATOM  &#39;</span> <span class="ow">or</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;HETATM&quot;</span><span class="p">:</span>
+                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">38</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
+                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">38</span><span class="p">:</span><span class="mi">46</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
+                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">46</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
+                <span class="n">atomic_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">76</span><span class="p">:</span><span class="mi">78</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
+                <span class="n">atom_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">atom_index</span> <span class="o">==</span> <span class="n">max_atoms</span><span class="p">:</span>
+                <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_atoms</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Truncate atom list since we pre-allocated extra memory</span>
+    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[:</span><span class="n">atom_index</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">atomic_symbols</span> <span class="o">=</span> <span class="n">atomic_symbols</span><span class="p">[:</span><span class="n">atom_index</span><span class="p">]</span>
+
+    <span class="c1"># T = SCALE[:, 3]</span>
+
+    <span class="n">dic</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;coordinates&#39;</span><span class="p">:</span> <span class="n">coordinates</span><span class="p">,</span>
+           <span class="s1">&#39;atomic_symbols&#39;</span><span class="p">:</span> <span class="n">atomic_symbols</span><span class="p">,</span>
+           <span class="s1">&#39;cell&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">),</span>
+           <span class="s1">&#39;hermann_mauguin_symbol&#39;</span><span class="p">:</span> <span class="n">hermann_mauguin_symbol</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">dic</span></div>
+
 
 <div class="viewcode-block" id="parse_pdb"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.parse_pdb">[docs]</a><span class="k">def</span> <span class="nf">parse_pdb</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">,</span> <span class="n">crystal_structure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a :class:`CrystalStructure` object with PDB information. &quot;&quot;&quot;</span>
 
-    <span class="n">max_atoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e5</span><span class="p">)</span>
+    <span class="n">max_atoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e6</span><span class="p">)</span>
     <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">max_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
     <span class="n">atomic_symbols</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">atom_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -889,16 +993,33 @@
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

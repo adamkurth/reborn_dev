@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bornagain.target.spgrp module &mdash; bornagain 0.2018.9.9 documentation</title>
+  <title>bornagain.fileio.streamfileReader module &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -29,8 +29,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.viewers package" href="bornagain.viewers.html" />
-    <link rel="prev" title="bornagain.target.placer module" href="bornagain.target.placer.html" /> 
+    <link rel="next" title="bornagain.simulate package" href="bornagain.simulate.html" />
+    <link rel="prev" title="bornagain.fileio.notest_streamfilegetter module" href="bornagain.fileio.notest_streamfilegetter.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -97,9 +97,9 @@
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
 </ul>
 </li>
@@ -157,15 +157,15 @@
         
           <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
         
-          <li><a href="bornagain.target.html">bornagain.target package</a> &raquo;</li>
+          <li><a href="bornagain.fileio.html">bornagain.fileio package</a> &raquo;</li>
         
-      <li>bornagain.target.spgrp module</li>
+      <li>bornagain.fileio.streamfileReader module</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/bornagain.target.spgrp.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/bornagain.fileio.streamfileReader.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -178,20 +178,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-bornagain.target.spgrp">
-<span id="bornagain-target-spgrp-module"></span><h1>bornagain.target.spgrp module<a class="headerlink" href="#module-bornagain.target.spgrp" title="Permalink to this headline">¶</a></h1>
-<p>This module is essentially just a data container and should not be used externally.  The data should be
-accessed using <a class="reference internal" href="bornagain.target.crystal.html#bornagain.target.crystal.get_symmetry_operators_from_space_group" title="bornagain.target.crystal.get_symmetry_operators_from_space_group"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_symmetry_operators_from_space_group</span></code></a>.</p>
-<p>The data were taken from the <a class="reference external" href="https://atztogo.github.io/spglib/">spglib</a> package.</p>
-<p>This module defines the following lists:</p>
-<p>_spgrp_ops: The list of dictionaries containing the symmetry operations (translations and rotations).</p>
-<p>_hmsym: The list of Hermann–Mauguin symbols (python strings)</p>
-<dl class="docutils">
-<dt>_sgnum: The list of space group numbers (ranging from 1-230) corresponding to</dt>
-<dd>each of the Hall numbers (ranging from 1-530).  I don’t yet understand
-what the Hall numbers are… but there is a useful table here:
-<a class="reference external" href="http://pmsl.planet.sci.kobe-u.ac.jp/~seto/?page_id=37&amp;lang=en">http://pmsl.planet.sci.kobe-u.ac.jp/~seto/?page_id=37&amp;lang=en</a></dd>
-</dl>
+  <div class="section" id="module-bornagain.fileio.streamfileReader">
+<span id="bornagain-fileio-streamfilereader-module"></span><h1>bornagain.fileio.streamfileReader module<a class="headerlink" href="#module-bornagain.fileio.streamfileReader" title="Permalink to this headline">¶</a></h1>
+<p>A module to read and parse streamfiles from CrystFEL.</p>
+<p>Date Created: 14 Apr 2019
+Last Modified: 15 Apr 2019
+Author: Joe Chen</p>
+<dl class="function">
+<dt id="bornagain.fileio.streamfileReader.get_total_number_of_frames">
+<code class="descclassname">bornagain.fileio.streamfileReader.</code><code class="descname">get_total_number_of_frames</code><span class="sig-paren">(</span><em>streamfile_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/fileio/streamfileReader.html#get_total_number_of_frames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.fileio.streamfileReader.get_total_number_of_frames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bornagain.fileio.streamfileReader.get_nth_frame">
+<code class="descclassname">bornagain.fileio.streamfileReader.</code><code class="descname">get_nth_frame</code><span class="sig-paren">(</span><em>streamfile_name</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/fileio/streamfileReader.html#get_nth_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.fileio.streamfileReader.get_nth_frame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 
 
@@ -202,10 +204,10 @@ what the Hall numbers are… but there is a useful table here:
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.viewers.html" class="btn btn-neutral float-right" title="bornagain.viewers package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.simulate.html" class="btn btn-neutral float-right" title="bornagain.simulate package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.target.placer.html" class="btn btn-neutral" title="bornagain.target.placer module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.fileio.notest_streamfilegetter.html" class="btn btn-neutral" title="bornagain.fileio.notest_streamfilegetter module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

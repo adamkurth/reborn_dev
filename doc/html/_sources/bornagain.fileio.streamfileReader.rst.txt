@@ -1,0 +1,7 @@
+bornagain.fileio.streamfileReader module
+========================================
+
+.. automodule:: bornagain.fileio.streamfileReader
+    :members:
+    :undoc-members:
+    :show-inheritance:

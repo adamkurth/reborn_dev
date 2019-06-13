@@ -18,37 +18,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="bornagain.target.density module" href="bornagain.target.density.html" />
     <link rel="prev" title="bornagain.target package" href="bornagain.target.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -188,6 +185,24 @@
 and we will likey always deal with Angstrom scale coordinates?</p>
 <p>for example print( “Lattice dim is %.3f”%(0.0000008)) will print 0.000, which can
 cause problems…</p>
+<dl class="function">
+<dt id="bornagain.target.crystal.get_pdb_file">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">get_pdb_file</code><span class="sig-paren">(</span><em>pdb_id</em>, <em>save_path='.'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#get_pdb_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.get_pdb_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch a pdb file from the web and return the path to the file.
+The default location for the file is bornagain/simulate/data/pdb/ .
+If the file already exists, just return the path to the existint file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pdb_id</strong> – for example: “101M” or “101M.pdb”</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string path to file</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="class">
 <dt id="bornagain.target.crystal.UnitCell">
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">UnitCell</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>alpha</em>, <em>beta</em>, <em>gamma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#UnitCell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.UnitCell" title="Permalink to this definition">¶</a></dt>
@@ -378,7 +393,7 @@ same spacegroup – e.g. some may apply rotations around different axes than oth
 
 <dl class="class">
 <dt id="bornagain.target.crystal.CrystalStructure">
-<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">CrystalStructure</code><span class="sig-paren">(</span><em>pdbFilePath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#CrystalStructure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">CrystalStructure</code><span class="sig-paren">(</span><em>pdbFilePath=None</em>, <em>spacegroup=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#CrystalStructure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A container class for stuff needed when dealing with crystal structures.</p>
 <dl class="attribute">
@@ -395,11 +410,6 @@ same spacegroup – e.g. some may apply rotations around different axes than oth
 <dl class="attribute">
 <dt id="bornagain.target.crystal.CrystalStructure.unitcell">
 <code class="descname">unitcell</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.unitcell" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="bornagain.target.crystal.CrystalStructure.spacegroup">
-<code class="descname">spacegroup</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.spacegroup" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -430,6 +440,11 @@ same spacegroup – e.g. some may apply rotations around different axes than oth
 <dl class="attribute">
 <dt id="bornagain.target.crystal.CrystalStructure.cryst1">
 <code class="descname">cryst1</code><em class="property"> = ''</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.cryst1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.spacegroup">
+<code class="descname">spacegroup</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.spacegroup" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -583,11 +598,16 @@ same spacegroup – e.g. some may apply rotations around different axes than oth
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="bornagain.target.crystal.CrystalStructure.x">
-<code class="descname">x</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.x" title="Permalink to this definition">¶</a></dt>
+<dt id="bornagain.target.crystal.CrystalStructure.x_vecs">
+<code class="descname">x_vecs</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.x_vecs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fractional coordinates of atoms.</p>
 <p>Returns: Nx3 numpy array</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="bornagain.target.crystal.CrystalStructure.x">
+<code class="descname">x</code><a class="headerlink" href="#bornagain.target.crystal.CrystalStructure.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="bornagain.target.crystal.CrystalStructure.get_symmetry_expanded_coordinates">
@@ -649,6 +669,12 @@ occupancies, shaping of crystals by zeroing occupancies beyond arbitrary lattice
 <code class="descname">make_hexagonal_prism</code><span class="sig-paren">(</span><em>n_cells=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#FiniteLattice.make_hexagonal_prism"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.make_hexagonal_prism" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="bornagain.target.crystal.pdb_to_dict">
+<code class="descclassname">bornagain.target.crystal.</code><code class="descname">pdb_to_dict</code><span class="sig-paren">(</span><em>pdb_file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#pdb_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.pdb_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#bornagain.target.crystal.CrystalStructure" title="bornagain.target.crystal.CrystalStructure"><code class="xref py py-class docutils literal notranslate"><span class="pre">CrystalStructure</span></code></a> object with PDB information.</p>
 </dd></dl>
 
 <dl class="function">
@@ -747,7 +773,7 @@ finding your spacegroup check that it is contained in the output of print(crysta
         <a href="bornagain.target.density.html" class="btn btn-neutral float-right" title="bornagain.target.density module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.target.html" class="btn btn-neutral float-left" title="bornagain.target package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.target.html" class="btn btn-neutral" title="bornagain.target package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -772,16 +798,33 @@ finding your spacegroup check that it is contained in the output of print(crysta
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -18,37 +18,34 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.simulate package" href="bornagain.simulate.html" />
+    <link rel="next" title="bornagain.fileio.notest_streamfilegetter module" href="bornagain.fileio.notest_streamfilegetter.html" />
     <link rel="prev" title="bornagain.fileio package" href="bornagain.fileio.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -193,7 +190,7 @@ that have entries for diffraction data, peak positions, x-ray source, and so on.
 methods are available, even if they just return None by default.</p>
 <p>Minimally, a “frame getter” should have a simple means to provide infomation on how many frames there are, and
 methods for getting next frame, previous frame, and arbitrary frames.</p>
-<p>Once could imagine making things fast by having parallel threads or processes that are pulling data of disk and
+<p>Once could imagine making things fast by having parallel threads or processes that are pulling data off disk and
 cleaning it up prior to serving it up to a top-level program.  Or, the getter just serves up raw data.</p>
 <p>We could also have getters that serve up simulated data.</p>
 <p>It is expected that these getters need a lot of customization, since we simply cannot avoid the many ways in which
@@ -271,6 +268,11 @@ data is created and stored…</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="bornagain.fileio.getters.CheetahFrameGetter.load_cxidb_file">
+<code class="descname">load_cxidb_file</code><span class="sig-paren">(</span><em>cxi_file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/fileio/getters.html#CheetahFrameGetter.load_cxidb_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.fileio.getters.CheetahFrameGetter.load_cxidb_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="bornagain.fileio.getters.CheetahFrameGetter.get_peaks">
 <code class="descname">get_peaks</code><span class="sig-paren">(</span><em>h5file</em>, <em>frame_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/fileio/getters.html#CheetahFrameGetter.get_peaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.fileio.getters.CheetahFrameGetter.get_peaks" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -278,6 +280,25 @@ data is created and stored…</p>
 <dl class="method">
 <dt id="bornagain.fileio.getters.CheetahFrameGetter.get_frame">
 <code class="descname">get_frame</code><span class="sig-paren">(</span><em>frame_number=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/fileio/getters.html#CheetahFrameGetter.get_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.fileio.getters.CheetahFrameGetter.get_frame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bornagain.fileio.getters.StreamfileFrameGetter">
+<em class="property">class </em><code class="descclassname">bornagain.fileio.getters.</code><code class="descname">StreamfileFrameGetter</code><span class="sig-paren">(</span><em>streamfile_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/fileio/getters.html#StreamfileFrameGetter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.fileio.getters.StreamfileFrameGetter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bornagain.fileio.getters.FrameGetter" title="bornagain.fileio.getters.FrameGetter"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.fileio.getters.FrameGetter</span></code></a></p>
+<p>A frame getter that reads a CrystFEL streamfile. More specifically, it:
+1. Extracts the geom file info.
+2. Gets the A star matrix, the cxi file path, and the cxi file frame number for the nth frame in the streamfile.</p>
+<dl class="attribute">
+<dt id="bornagain.fileio.getters.StreamfileFrameGetter.streamfile_name">
+<code class="descname">streamfile_name</code><em class="property"> = None</em><a class="headerlink" href="#bornagain.fileio.getters.StreamfileFrameGetter.streamfile_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bornagain.fileio.getters.StreamfileFrameGetter.get_frame">
+<code class="descname">get_frame</code><span class="sig-paren">(</span><em>frame_number=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/fileio/getters.html#StreamfileFrameGetter.get_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.fileio.getters.StreamfileFrameGetter.get_frame" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -292,10 +313,10 @@ data is created and stored…</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.simulate.html" class="btn btn-neutral float-right" title="bornagain.simulate package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="bornagain.fileio.notest_streamfilegetter.html" class="btn btn-neutral float-right" title="bornagain.fileio.notest_streamfilegetter module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.fileio.html" class="btn btn-neutral float-left" title="bornagain.fileio package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bornagain.fileio.html" class="btn btn-neutral" title="bornagain.fileio package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -320,16 +341,33 @@ data is created and stored…</p>
   
 
 
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2018.9.9',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
