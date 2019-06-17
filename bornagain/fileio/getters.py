@@ -4,8 +4,6 @@ from __future__ import (absolute_import, division,
 import h5py
 import numpy as np
 from bornagain.external import crystfel, cheetah
-#from streamfileReader import get_total_number_of_frames, get_nth_frame
-# @Joe - the above was causing problems for me.  Best if CrystFEL stuff is kept in the crystfel module.
 
 class FrameGetter(object):
 
@@ -216,8 +214,8 @@ class StreamfileFrameGetter(FrameGetter):
 
     r"""
     
-    A frame getter that reads a CrystFEL streamfile. More specifically, it:
-    1. Extracts the geom file info.
+    A frame getter that reads a CrystFEL stream file. More specifically, it:
+    1. Extracts the geometry file (from within the stream file).
     2. Gets the A star matrix, the cxi file path, and the cxi file frame number for the nth frame in the streamfile.
 
     """
@@ -232,7 +230,7 @@ class StreamfileFrameGetter(FrameGetter):
 
         StreamfileFrameGetter.streamfile_name = streamfile_name
         
-        self.n_frames = get_total_number_of_frames(streamfile_name)
+        self.n_frames = crystfel.readStreamfile_get_total_number_of_frames(streamfile_name)
         self.current_frame = 0
         
         # self.geom_dict = load_crystfel_geometry(geom_file_name)
@@ -242,10 +240,10 @@ class StreamfileFrameGetter(FrameGetter):
     def get_frame(self, frame_number=0):
 
         dat = {}
-        dat['A_matrix'], cxiFilepath, cxiFileFrameNumber = get_nth_frame(StreamfileFrameGetter.streamfile_name, frame_number)
+        dat['A_matrix'], dat['cxiFilepath'], dat['cxiFileFrameNumber'] = crystfel.readStreamfile_get_nth_frame(StreamfileFrameGetter.streamfile_name, frame_number)
 
-        print(cxiFilepath)
-        print(cxiFileFrameNumber)
+        # print(cxiFilepath)
+        # print(cxiFileFrameNumber)
 
         # Extract data from the cxi file corresponding to the cxiFileFrameNumber (not necessarily the same as frame_number)
         # h5File = h5py.File(cxiFilepath, 'r')

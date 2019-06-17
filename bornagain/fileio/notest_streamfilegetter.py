@@ -10,4 +10,12 @@ c = getters.StreamfileFrameGetter(streamfile_path)
 
 print(c.n_frames)
 print(c.streamfile_name)
-print(c.get_frame(2))
+print(c.get_frame(0))
+
+a = c.get_frame(0)
+print(a['A_matrix'])
+print(a['cxiFilepath'])
+print(a['cxiFileFrameNumber'])
+
+
+# Think about zeroth frame, last frame, frame that does not contain crystal
