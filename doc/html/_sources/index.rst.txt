@@ -10,8 +10,9 @@ Contents
    overview
    installation
    beams
-   targets
    geometry
+   targets
+   crystals
    simulations
    coding
    numpy

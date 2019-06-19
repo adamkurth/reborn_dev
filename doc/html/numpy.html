@@ -85,17 +85,18 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Setting up bornagain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
-<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crystals.html">Working with crystals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Numpy, vectors, rotations, etc.</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#about-indexing-and-memory">About indexing and memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#how-to-store-many-vectors-in-a-numpy-array">How to store many vectors in a numpy array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#indexing-and-internal-memory-layout-of-ndarray-objects">Indexing and internal memory layout of ndarray objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#arrays-of-vectors">Arrays of vectors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-rotate-vectors">How to rotate vectors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#how-to-store-many-3d-density-intensity-maps-in-numpy-arrays">How to store many 3D density/intensity maps in numpy arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#representation-of-3d-density-intensity-maps-in-numpy-arrays">Representation of 3D density/intensity maps in numpy arrays</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
@@ -166,30 +167,42 @@
   <div class="section" id="numpy-vectors-rotations-etc">
 <h1>Numpy, vectors, rotations, etc.<a class="headerlink" href="#numpy-vectors-rotations-etc" title="Permalink to this headline">¶</a></h1>
 <p>We use numpy a lot, and there are a few important conventions within bornagain to be aware of.</p>
-<div class="section" id="about-indexing-and-memory">
-<h2>About indexing and memory<a class="headerlink" href="#about-indexing-and-memory" title="Permalink to this headline">¶</a></h2>
-<p>By default, increments in the right-most index of a numpy array correspond to the smallest increments
-in the memory buffer.  In other words, the right-most index has the shortest stride.  Some people refer to this as
-the “row-major” format, as opposed to the “column-major” format whereby the left-most index corresponds to
-the shortest stride.  (If these concepts are new to you, make sure you do the relevant background reading – perhaps
-<a class="reference external" href="https://www.jessicayung.com/numpy-arrays-memory-and-strides/">this</a> helps).  Importantly, when certain operations are
-performed on a numpy array, a row-major array might become a column-major array.  Other operations in numpy might cause
-the memory buffer to be wiped out and re-written.  It is also common that the modification of an array might affect
-another another one, if the two have a shared memory buffer.  Basically, you need to be careful with how you use
-numpy arrays if this matters, and in fact it does matter when moving numpy arrays into memory on a GPU or when
-interfacing with C or Fortran code.</p>
+<div class="section" id="indexing-and-internal-memory-layout-of-ndarray-objects">
+<h2>Indexing and internal memory layout of ndarray objects<a class="headerlink" href="#indexing-and-internal-memory-layout-of-ndarray-objects" title="Permalink to this headline">¶</a></h2>
+<p>According to the <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html#internal-memory-layout-of-an-ndarray">docs</a>,
+Numpy ndarray objects can accommodate any strided indexing scheme.  The bornagain package uses some
+Fortran and OpenCL routines that make assumptions about the internal memory layout of ndarrays.  We assume that
+all ndarrays are in the “c-contiguous order”, which means that incrmements in the right-most index correspond to the
+smallest steps in the internal memory buffer.  The following example illustrates this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]])</span>
+<span class="k">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">c_contiguous</span><span class="p">)</span>
+<span class="bp">True</span>
+<span class="k">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">]</span>
+</pre></div>
 </div>
-<div class="section" id="how-to-store-many-vectors-in-a-numpy-array">
-<h2>How to store many vectors in a numpy array<a class="headerlink" href="#how-to-store-many-vectors-in-a-numpy-array" title="Permalink to this headline">¶</a></h2>
-<p>If you have <em>N</em> vectors of dimension <em>D</em>, you should store them in a numpy array of shape <em>N</em> x <em>D</em>.  This choice was
+</div>
+<div class="section" id="arrays-of-vectors">
+<h2>Arrays of vectors<a class="headerlink" href="#arrays-of-vectors" title="Permalink to this headline">¶</a></h2>
+<p>If you have <em>N</em> vectors of dimension <em>D</em>, bornagain assumes they are stored with a shape of (<em>N</em>, <em>D</em>).  This choice was
 made because the right-most index of a numpy array has the smallest stride by default, and because it usually makes
 most sense to have vector components stored close to each other in memory.  This convention is assumed in every function
-in bornagain.</p>
+in bornagain.  This note is to avoid ambiguity in the case of a (<em>D</em>, <em>D</em>) array.</p>
 </div>
 <div class="section" id="how-to-rotate-vectors">
 <h2>How to rotate vectors<a class="headerlink" href="#how-to-rotate-vectors" title="Permalink to this headline">¶</a></h2>
-<p>The short answer is to store your set of <em>N</em> vectors of dimension <em>D</em> as an <em>N</em> x <em>D</em> numpy array, and then apply your
-<em>D</em> x <em>D</em> rotation matrix via the <a class="reference internal" href="bornagain.utils.html#bornagain.utils.rotate" title="bornagain.utils.rotate"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate</span></code></a> function.  Here is what you should expect:</p>
+<p>If you need to rotate a vector or an array of vectors with the matrix <em>R</em>, you can do the following</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vec_rotated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+<p>The above is equivalent to:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vec_rotated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also use the <a class="reference internal" href="bornagain.utils.html#bornagain.utils.rotate" title="bornagain.utils.rotate"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate</span></code></a> function for consistency.  Here is what you should expect:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
 <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
 <span class="n">vec_rotated</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">vec</span><span class="p">)</span>
@@ -198,20 +211,11 @@ in bornagain.</p>
   <span class="p">[</span> <span class="mf">2.</span> <span class="o">-</span><span class="mf">1.</span>  <span class="mf">3.</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>The <a class="reference internal" href="bornagain.utils.html#bornagain.utils.rotate" title="bornagain.utils.rotate"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate</span></code></a> function simply does the following:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vec_rotated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-</pre></div>
-</div>
-<p>The above is equivalent to:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vec_rotated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Interestingly, the former method is faster than the latter.</p>
 <p>Note that the <a class="reference internal" href="bornagain.utils.html#bornagain.utils.rotate" title="bornagain.utils.rotate"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate</span></code></a> function carried out via numpy is consistent with rotation
 operations performed on GPU devices within the <a class="reference internal" href="bornagain.simulate.clcore.html#module-bornagain.simulate.clcore" title="bornagain.simulate.clcore"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulate.clcore</span></code></a> module.</p>
 </div>
-<div class="section" id="how-to-store-many-3d-density-intensity-maps-in-numpy-arrays">
-<h2>How to store many 3D density/intensity maps in numpy arrays<a class="headerlink" href="#how-to-store-many-3d-density-intensity-maps-in-numpy-arrays" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="representation-of-3d-density-intensity-maps-in-numpy-arrays">
+<h2>Representation of 3D density/intensity maps in numpy arrays<a class="headerlink" href="#representation-of-3d-density-intensity-maps-in-numpy-arrays" title="Permalink to this headline">¶</a></h2>
 <p>This needs to be specified some day…</p>
 </div>
 </div>

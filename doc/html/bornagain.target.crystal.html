@@ -85,10 +85,11 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Setting up bornagain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
-<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crystals.html">Working with crystals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
@@ -189,8 +190,8 @@ cause problems…</p>
 <dt id="bornagain.target.crystal.get_pdb_file">
 <code class="descclassname">bornagain.target.crystal.</code><code class="descname">get_pdb_file</code><span class="sig-paren">(</span><em>pdb_id</em>, <em>save_path='.'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#get_pdb_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.get_pdb_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch a pdb file from the web and return the path to the file.
-The default location for the file is bornagain/simulate/data/pdb/ .
-If the file already exists, just return the path to the existint file.</p>
+The default location for the file is the current working directory.
+If the file already exists, just return the path to the existing file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -276,52 +277,62 @@ If the file already exists, just return the path to the existint file.</p>
 <dl class="method">
 <dt id="bornagain.target.crystal.UnitCell.r2x">
 <code class="descname">r2x</code><span class="sig-paren">(</span><em>r_vecs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#UnitCell.r2x"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.UnitCell.r2x" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Transform orthogonal coordinates to fractional coordinates.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.target.crystal.UnitCell.x2r">
 <code class="descname">x2r</code><span class="sig-paren">(</span><em>x_vecs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#UnitCell.x2r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.UnitCell.x2r" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Transform fractional coordinates to orthogonal coordinates.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.target.crystal.UnitCell.q2h">
 <code class="descname">q2h</code><span class="sig-paren">(</span><em>q_vecs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#UnitCell.q2h"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.UnitCell.q2h" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Transform reciprocal coordinates to fractional Miller coordinates.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="bornagain.target.crystal.UnitCell.h2q">
 <code class="descname">h2q</code><span class="sig-paren">(</span><em>h_vecs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#UnitCell.h2q"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.UnitCell.h2q" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Transform fractional Miller coordinates to reciprocal coordinates.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.target.crystal.UnitCell.a_vec">
 <code class="descname">a_vec</code><a class="headerlink" href="#bornagain.target.crystal.UnitCell.a_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Crystal basis vector a.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.target.crystal.UnitCell.b_vec">
 <code class="descname">b_vec</code><a class="headerlink" href="#bornagain.target.crystal.UnitCell.b_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Crystal basis vector b.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.target.crystal.UnitCell.c_vec">
 <code class="descname">c_vec</code><a class="headerlink" href="#bornagain.target.crystal.UnitCell.c_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Crystal basis vector c.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.target.crystal.UnitCell.as_vec">
 <code class="descname">as_vec</code><a class="headerlink" href="#bornagain.target.crystal.UnitCell.as_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Reciprocal basis vector a*.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.target.crystal.UnitCell.bs_vec">
 <code class="descname">bs_vec</code><a class="headerlink" href="#bornagain.target.crystal.UnitCell.bs_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Reciprocal basis vector b*.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="bornagain.target.crystal.UnitCell.cs_vec">
 <code class="descname">cs_vec</code><a class="headerlink" href="#bornagain.target.crystal.UnitCell.cs_vec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Reciprocal basis vector c*.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -633,7 +644,7 @@ same spacegroup – e.g. some may apply rotations around different axes than oth
 <em class="property">class </em><code class="descclassname">bornagain.target.crystal.</code><code class="descname">FiniteLattice</code><span class="sig-paren">(</span><em>max_size=None</em>, <em>unitcell=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#FiniteLattice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A utility for creating finite crystal lattices.  Enables the generation of lattice vector positions, lattice
-occupancies, shaping of crystals by zeroing occupancies beyond arbitrary lattice planes.</p>
+occupancies, shaping of crystals. Under development.</p>
 <dl class="attribute">
 <dt id="bornagain.target.crystal.FiniteLattice.all_r_coordinates">
 <code class="descname">all_r_coordinates</code><a class="headerlink" href="#bornagain.target.crystal.FiniteLattice.all_r_coordinates" title="Permalink to this definition">¶</a></dt>
@@ -674,7 +685,29 @@ occupancies, shaping of crystals by zeroing occupancies beyond arbitrary lattice
 <dl class="function">
 <dt id="bornagain.target.crystal.pdb_to_dict">
 <code class="descclassname">bornagain.target.crystal.</code><code class="descname">pdb_to_dict</code><span class="sig-paren">(</span><em>pdb_file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/target/crystal.html#pdb_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.target.crystal.pdb_to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a <a class="reference internal" href="#bornagain.target.crystal.CrystalStructure" title="bornagain.target.crystal.CrystalStructure"><code class="xref py py-class docutils literal notranslate"><span class="pre">CrystalStructure</span></code></a> object with PDB information.</p>
+<dd><p>Return a <a class="reference internal" href="#bornagain.target.crystal.CrystalStructure" title="bornagain.target.crystal.CrystalStructure"><code class="xref py py-class docutils literal notranslate"><span class="pre">CrystalStructure</span></code></a> object with PDB information.  The PDB information is converted to
+the units of bornagain.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pdb_file_path</strong> – path to pdb file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">‘orthogonalization_matrix’: S,<p>’fractional_coordinates’: fractional_coordinates,</p>
+<p>’orthogonal_coordinates’: coordinates*1e-10,</p>
+<p>’atomic_symbols’: atomic_symbols,</p>
+<p>’cell’: (a*1e-10, b*1e-10, c*1e-10, alpha*np.pi/180.0, beta*np.pi/180.0, gamma*np.pi/180.0),</p>
+<p>’sg_symbol’: sg_symbol,</p>
+<p>’orthogonal_rotations’: orthogonal_rotations,</p>
+<p>’orthogonal_translations’: orthogonal_translations*1e-10,</p>
+<p>’fractional_rotations’: orthogonal_rotations,</p>
+<p>’fractional_translations’: orthogonal_translations * 1e-10</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">A dictionary with the following keys</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">

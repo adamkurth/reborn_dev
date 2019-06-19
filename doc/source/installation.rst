@@ -1,15 +1,17 @@
-Installation
-============
+Setting up bornagain
+====================
 
-System-wide installation
-------------------------
+"Installation" of bornagain
+---------------------------
 
 There are no install scripts (e.g. setup.py) that will automatically add bornagain to your python installation.
 Since bornagain is changing frequently at this time, it is recommended that you keep a local copy of bornagain
 where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving
 code alongside results is good practice anyways.
 
-You need to make sure that Python can load the bornagain package.  There are several ways to do this.
+The main setup task is to simply ensure that Python can load the bornagain package.  If you do not know how to do this,
+you should take some time to learn a little bit about how Python imports work in general.  Here are three suggestions
+for how to get your path set up:
 
 1) Within your shell, you can set an environment variable so that Python looks in the right place for bornagain.
 If you are using the bash shell, you can do the following:
@@ -41,9 +43,21 @@ If you do any of the above correctly, you should then be able to import bornagai
 
     import bornagain
 
-The fact that you are reading this suggests that you should take some time to learn a little bit about how Python
-imports work in general.
-`This <https://www.digitalocean.com/community/tutorials/how-to-import-modules-in-python-3>`_ hit from Google might help.
+
+Compillation of Fortran code
+----------------------------
+
+There are a couple of bornagain modules that rely on Fortran.  In principle, they are not necessary, but they will speed
+up some routines.  We use the f2py program to compile Fortran code and create Python modules.  Most likely, you can
+simply do the following:
+
+.. code-block:: bash
+
+    cd developer
+    ./compile-fortran.sh
+
+You will see some warnings (due to Numpy -- this is out of our control).  So long as there are no errors you should be
+all set.
 
 Dependencies
 ------------

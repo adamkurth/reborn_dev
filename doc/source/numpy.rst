@@ -4,45 +4,38 @@ Numpy, vectors, rotations, etc.
 We use numpy a lot, and there are a few important conventions within bornagain to be aware of.
 
 
-About indexing and memory
--------------------------
+Indexing and internal memory layout of ndarray objects
+------------------------------------------------------
 
-By default, increments in the right-most index of a numpy array correspond to the smallest increments
-in the memory buffer.  In other words, the right-most index has the shortest stride.  Some people refer to this as
-the "row-major" format, as opposed to the "column-major" format whereby the left-most index corresponds to
-the shortest stride.  (If these concepts are new to you, make sure you do the relevant background reading -- perhaps
-`this <https://www.jessicayung.com/numpy-arrays-memory-and-strides/>`_ helps).  Importantly, when certain operations are
-performed on a numpy array, a row-major array might become a column-major array.  Other operations in numpy might cause
-the memory buffer to be wiped out and re-written.  It is also common that the modification of an array might affect
-another another one, if the two have a shared memory buffer.  Basically, you need to be careful with how you use
-numpy arrays if this matters, and in fact it does matter when moving numpy arrays into memory on a GPU or when
-interfacing with C or Fortran code.
+According to the `docs <https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html#internal-memory-layout-of-an-ndarray>`_,
+Numpy ndarray objects can accommodate any strided indexing scheme.  The bornagain package uses some
+Fortran and OpenCL routines that make assumptions about the internal memory layout of ndarrays.  We assume that
+all ndarrays are in the "c-contiguous order", which means that incrmements in the right-most index correspond to the
+smallest steps in the internal memory buffer.  The following example illustrates this:
 
+.. code-block:: python
 
-How to store many vectors in a numpy array
-------------------------------------------
+    import numpy as np
+    a = np.array([[1,2,3],[4,5,6]])
+    print(a.shape)
+    (2, 3)
+    print(a.flags.c_contiguous)
+    True
+    print(a.ravel())
+    [1 2 3 4 5 6]
 
-If you have *N* vectors of dimension *D*, you should store them in a numpy array of shape *N* x *D*.  This choice was
+Arrays of vectors
+-----------------
+
+If you have *N* vectors of dimension *D*, bornagain assumes they are stored with a shape of (*N*, *D*).  This choice was
 made because the right-most index of a numpy array has the smallest stride by default, and because it usually makes
 most sense to have vector components stored close to each other in memory.  This convention is assumed in every function
-in bornagain.
+in bornagain.  This note is to avoid ambiguity in the case of a (*D*, *D*) array.
 
 How to rotate vectors
 ---------------------
 
-The short answer is to store your set of *N* vectors of dimension *D* as an *N* x *D* numpy array, and then apply your
-*D* x *D* rotation matrix via the :func:`rotate <bornagain.utils.rotate>` function.  Here is what you should expect:
-
-.. code-block:: python
-
-    R = np.array([[0, 1., 0], [-1, 0, 0], [0, 0, 1.]])
-    vec = np.array([1, 2, 3])
-    vec_rotated = utils.rotate(R, vec)
-    print(vec_rotated)
-
-      [ 2. -1.  3.]
-
-The :func:`rotate <bornagain.utils.rotate>` function simply does the following:
+If you need to rotate a vector or an array of vectors with the matrix *R*, you can do the following
 
 .. code-block:: python
 
@@ -54,12 +47,21 @@ The above is equivalent to:
 
     vec_rotated = np.dot(vec, R.T)
 
-Interestingly, the former method is faster than the latter.
+You can also use the :func:`rotate <bornagain.utils.rotate>` function for consistency.  Here is what you should expect:
+
+.. code-block:: python
+
+    R = np.array([[0, 1., 0], [-1, 0, 0], [0, 0, 1.]])
+    vec = np.array([1, 2, 3])
+    vec_rotated = utils.rotate(R, vec)
+    print(vec_rotated)
+
+      [ 2. -1.  3.]
 
 Note that the :func:`rotate <bornagain.utils.rotate>` function carried out via numpy is consistent with rotation
 operations performed on GPU devices within the :mod:`simulate.clcore <bornagain.simulate.clcore>` module.
 
-How to store many 3D density/intensity maps in numpy arrays
+Representation of 3D density/intensity maps in numpy arrays
 -----------------------------------------------------------
 
 This needs to be specified some day...

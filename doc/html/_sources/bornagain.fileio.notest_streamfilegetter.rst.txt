@@ -1,7 +1,0 @@
-bornagain.fileio.notest\_streamfilegetter module
-================================================
-
-.. automodule:: bornagain.fileio.notest_streamfilegetter
-    :members:
-    :undoc-members:
-    :show-inheritance:

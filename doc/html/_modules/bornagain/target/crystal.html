@@ -82,10 +82,11 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Setting up bornagain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../beams.html">Beams</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../targets.html">Targets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../crystals.html">Working with crystals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../coding.html">Notes for Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
@@ -179,7 +180,7 @@
 <span class="kn">import</span> <span class="nn">pkg_resources</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sqrt</span>
-
+<span class="kn">import</span> <span class="nn">spglib</span>
 <span class="kn">import</span> <span class="nn">bornagain.target</span>
 <span class="kn">from</span> <span class="nn">bornagain</span> <span class="k">import</span> <span class="n">utils</span>
 <span class="kn">from</span> <span class="nn">bornagain.utils</span> <span class="k">import</span> <span class="n">rotate</span>
@@ -191,8 +192,8 @@
 <div class="viewcode-block" id="get_pdb_file"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.get_pdb_file">[docs]</a><span class="k">def</span> <span class="nf">get_pdb_file</span><span class="p">(</span><span class="n">pdb_id</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fetch a pdb file from the web and return the path to the file.</span>
-<span class="sd">    The default location for the file is bornagain/simulate/data/pdb/ .</span>
-<span class="sd">    If the file already exists, just return the path to the existint file.</span>
+<span class="sd">    The default location for the file is the current working directory.</span>
+<span class="sd">    If the file already exists, just return the path to the existing file.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pdb_id: for example: &quot;101M&quot; or &quot;101M.pdb&quot;</span>
@@ -271,39 +272,49 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">vol</span>
 
 <div class="viewcode-block" id="UnitCell.r2x"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.UnitCell.r2x">[docs]</a>    <span class="k">def</span> <span class="nf">r2x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r_vecs</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Transform orthogonal coordinates to fractional coordinates. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">o_mat_inv</span><span class="p">,</span> <span class="n">r_vecs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="UnitCell.x2r"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.UnitCell.x2r">[docs]</a>    <span class="k">def</span> <span class="nf">x2r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_vecs</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Transform fractional coordinates to orthogonal coordinates. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">o_mat</span><span class="p">,</span> <span class="n">x_vecs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="UnitCell.q2h"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.UnitCell.q2h">[docs]</a>    <span class="k">def</span> <span class="nf">q2h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_vecs</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Transform reciprocal coordinates to fractional Miller coordinates. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_mat_inv</span><span class="p">,</span> <span class="n">q_vecs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="UnitCell.h2q"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.UnitCell.h2q">[docs]</a>    <span class="k">def</span> <span class="nf">h2q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_vecs</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Transform fractional Miller coordinates to reciprocal coordinates. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">rotate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_mat</span><span class="p">,</span> <span class="n">h_vecs</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">a_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Crystal basis vector a. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">o_mat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">b_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Crystal basis vector b. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">o_mat</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">c_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Crystal basis vector c. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">o_mat</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">as_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Reciprocal basis vector a*. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_mat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bs_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Reciprocal basis vector b*. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_mat</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cs_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Reciprocal basis vector c*. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_mat</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -394,10 +405,10 @@
 
         <span class="k">if</span> <span class="n">pdbFilePath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dic</span> <span class="o">=</span> <span class="n">pdb_to_dict</span><span class="p">(</span><span class="n">pdbFilePath</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_molecule</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">],</span> <span class="n">atomic_symbols</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;atomic_symbols&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_molecule</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;orthogonal_coordinates&#39;</span><span class="p">],</span> <span class="n">atomic_symbols</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;atomic_symbols&#39;</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="o">*</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;cell&#39;</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">spacegroup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">set_spacegroup</span><span class="p">(</span><span class="n">hermann_mauguin_symbol</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;hermann_mauguin_symbol&#39;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_spacegroup</span><span class="p">(</span><span class="n">hermann_mauguin_symbol</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;sg_symbol&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">spacegroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spacegroup</span> <span class="o">=</span> <span class="n">spacegroup</span>
 
@@ -599,12 +610,13 @@
 <div class="viewcode-block" id="FiniteLattice"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.FiniteLattice">[docs]</a><span class="k">class</span> <span class="nc">FiniteLattice</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A utility for creating finite crystal lattices.  Enables the generation of lattice vector positions, lattice</span>
-<span class="sd">    occupancies, shaping of crystals by zeroing occupancies beyond arbitrary lattice planes.</span>
+<span class="sd">    occupancies, shaping of crystals. Under development.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unitcell</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
+<span class="sd">        Arguments:</span>
+
 <span class="sd">            max_size: Integer N that sets the size of the lattice to N x N x N.</span>
 <span class="sd">            unitcell: A crystal.UnitCell type that is needed to generate</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -675,8 +687,38 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_facet</span><span class="p">(</span><span class="n">plane</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">length</span><span class="o">=</span><span class="n">n_cells</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_facet</span><span class="p">(</span><span class="n">plane</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">length</span><span class="o">=</span><span class="n">n_cells</span><span class="p">)</span></div></div>
 
+
 <div class="viewcode-block" id="pdb_to_dict"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.pdb_to_dict">[docs]</a><span class="k">def</span> <span class="nf">pdb_to_dict</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a :class:`CrystalStructure` object with PDB information. &quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a :class:`CrystalStructure` object with PDB information.  The PDB information is converted to</span>
+<span class="sd">    the units of bornagain.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        pdb_file_path: path to pdb file</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A dictionary with the following keys:</span>
+
+<span class="sd">           &#39;orthogonalization_matrix&#39;: S,</span>
+
+<span class="sd">           &#39;fractional_coordinates&#39;: fractional_coordinates,</span>
+
+<span class="sd">           &#39;orthogonal_coordinates&#39;: coordinates*1e-10,</span>
+
+<span class="sd">           &#39;atomic_symbols&#39;: atomic_symbols,</span>
+
+<span class="sd">           &#39;cell&#39;: (a*1e-10, b*1e-10, c*1e-10, alpha*np.pi/180.0, beta*np.pi/180.0, gamma*np.pi/180.0),</span>
+
+<span class="sd">           &#39;sg_symbol&#39;: sg_symbol,</span>
+
+<span class="sd">           &#39;orthogonal_rotations&#39;: orthogonal_rotations,</span>
+
+<span class="sd">           &#39;orthogonal_translations&#39;: orthogonal_translations*1e-10,</span>
+
+<span class="sd">           &#39;fractional_rotations&#39;: orthogonal_rotations,</span>
+
+<span class="sd">           &#39;fractional_translations&#39;: orthogonal_translations * 1e-10</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">max_atoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e6</span><span class="p">)</span>
     <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">max_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
@@ -687,6 +729,8 @@
     <span class="c1"># else:</span>
     <span class="c1">#     cryst = crystal_structure</span>
     <span class="n">SCALE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+    <span class="n">SMTRY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">96</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+    <span class="n">n_SMTRY</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">pdbfile</span><span class="p">:</span>
 
@@ -708,21 +752,34 @@
                 <span class="n">cryst1</span> <span class="o">=</span> <span class="n">line</span>
                 <span class="c1"># As always, everything in our programs are in SI units.</span>
                 <span class="c1"># PDB files use angstrom units.</span>
-                <span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">15</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="n">b</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">24</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="n">c</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">33</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">15</span><span class="p">])</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">24</span><span class="p">])</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">33</span><span class="p">])</span>
                 <span class="c1"># And of course degrees are converted to radians (though we</span>
                 <span class="c1"># loose the perfection of rational quotients like 360/4=90...)</span>
-                <span class="n">alpha</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">33</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
-                <span class="n">beta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">47</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
-                <span class="n">gamma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">47</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+                <span class="n">alpha</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">33</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span>
+                <span class="n">beta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">47</span><span class="p">])</span>
+                <span class="n">gamma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">47</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span>
+                <span class="n">sg_symbol</span> <span class="o">=</span> <span class="n">cryst1</span><span class="p">[</span><span class="mi">55</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-                <span class="n">hermann_mauguin_symbol</span> <span class="o">=</span> <span class="n">cryst1</span><span class="p">[</span><span class="mi">55</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="c1"># These are the crystallographic symmetry operations.  I&#39;m not sure if these are mandatory entries in a pdb</span>
+            <span class="c1"># file since they do not appear here:</span>
+            <span class="c1"># http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html</span>
+            <span class="c1"># I got the parsing information from here:</span>
+            <span class="c1"># http://ambermd.org/tutorials/advanced/tutorial13/Selection.html</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">13</span><span class="p">:</span><span class="mi">18</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SMTRY&#39;</span><span class="p">:</span>
+                <span class="n">SMTRY</span><span class="p">[</span><span class="n">n_SMTRY</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">18</span><span class="p">])</span>
+                <span class="n">SMTRY</span><span class="p">[</span><span class="n">n_SMTRY</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">19</span><span class="p">:</span><span class="mi">23</span><span class="p">])</span>
+                <span class="n">SMTRY</span><span class="p">[</span><span class="n">n_SMTRY</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">34</span><span class="p">])</span>
+                <span class="n">SMTRY</span><span class="p">[</span><span class="n">n_SMTRY</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">34</span><span class="p">:</span><span class="mi">44</span><span class="p">])</span>
+                <span class="n">SMTRY</span><span class="p">[</span><span class="n">n_SMTRY</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">44</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span>
+                <span class="n">SMTRY</span><span class="p">[</span><span class="n">n_SMTRY</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">54</span><span class="p">:</span><span class="mi">69</span><span class="p">])</span>
+                <span class="n">n_SMTRY</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ATOM  &#39;</span> <span class="ow">or</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;HETATM&quot;</span><span class="p">:</span>
-                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">38</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">38</span><span class="p">:</span><span class="mi">46</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">46</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
+                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">38</span><span class="p">])</span>
+                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">38</span><span class="p">:</span><span class="mi">46</span><span class="p">])</span>
+                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">46</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span>
                 <span class="n">atomic_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">76</span><span class="p">:</span><span class="mi">78</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
                 <span class="n">atom_index</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -733,12 +790,34 @@
     <span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[:</span><span class="n">atom_index</span><span class="p">,</span> <span class="p">:]</span>
     <span class="n">atomic_symbols</span> <span class="o">=</span> <span class="n">atomic_symbols</span><span class="p">[:</span><span class="n">atom_index</span><span class="p">]</span>
 
-    <span class="c1"># T = SCALE[:, 3]</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">SCALE</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">SCALE</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="n">fractional_coordinates</span> <span class="o">=</span> <span class="n">rotate</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">)</span> <span class="o">+</span> <span class="n">U</span>
 
-    <span class="n">dic</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;coordinates&#39;</span><span class="p">:</span> <span class="n">coordinates</span><span class="p">,</span>
+    <span class="n">orthogonal_rotations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">orthogonal_translations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fractional_rotations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fractional_translations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_SMTRY</span><span class="o">/</span><span class="mi">3</span><span class="p">)):</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">SMTRY</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">3</span><span class="p">:</span><span class="n">i</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">SMTRY</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">3</span><span class="p">:</span><span class="n">i</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+        <span class="n">orthogonal_rotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+        <span class="n">orthogonal_translations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">fractional_rotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rotate</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">R</span><span class="p">))</span>
+        <span class="n">fractional_translations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rotate</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">))</span>
+
+
+    <span class="n">dic</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;orthogonalization_matrix&#39;</span><span class="p">:</span> <span class="n">S</span><span class="o">*</span><span class="mf">1e-10</span><span class="p">,</span>
+           <span class="s1">&#39;fractional_coordinates&#39;</span><span class="p">:</span> <span class="n">fractional_coordinates</span><span class="p">,</span>
+           <span class="s1">&#39;orthogonal_coordinates&#39;</span><span class="p">:</span> <span class="n">coordinates</span><span class="o">*</span><span class="mf">1e-10</span><span class="p">,</span>
            <span class="s1">&#39;atomic_symbols&#39;</span><span class="p">:</span> <span class="n">atomic_symbols</span><span class="p">,</span>
-           <span class="s1">&#39;cell&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">),</span>
-           <span class="s1">&#39;hermann_mauguin_symbol&#39;</span><span class="p">:</span> <span class="n">hermann_mauguin_symbol</span><span class="p">}</span>
+           <span class="s1">&#39;cell&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">b</span><span class="o">*</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">c</span><span class="o">*</span><span class="mf">1e-10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span><span class="p">,</span> <span class="n">beta</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span><span class="p">,</span> <span class="n">gamma</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span><span class="p">),</span>
+           <span class="s1">&#39;sg_symbol&#39;</span><span class="p">:</span> <span class="n">sg_symbol</span><span class="p">,</span>
+           <span class="s1">&#39;orthogonal_rotations&#39;</span><span class="p">:</span> <span class="n">orthogonal_rotations</span><span class="p">,</span>
+           <span class="s1">&#39;orthogonal_translations&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">t</span><span class="o">*</span><span class="mf">1e-10</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">orthogonal_translations</span><span class="p">],</span>
+           <span class="s1">&#39;fractional_rotations&#39;</span><span class="p">:</span> <span class="n">fractional_rotations</span><span class="p">,</span>
+           <span class="s1">&#39;fractional_translations&#39;</span><span class="p">:</span> <span class="n">fractional_translations</span>
+           <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">dic</span></div>
 
@@ -746,66 +825,13 @@
 <div class="viewcode-block" id="parse_pdb"><a class="viewcode-back" href="../../../bornagain.target.crystal.html#bornagain.target.crystal.parse_pdb">[docs]</a><span class="k">def</span> <span class="nf">parse_pdb</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">,</span> <span class="n">crystal_structure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return a :class:`CrystalStructure` object with PDB information. &quot;&quot;&quot;</span>
 
-    <span class="n">max_atoms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e6</span><span class="p">)</span>
-    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">max_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-    <span class="n">atomic_symbols</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">atom_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">crystal_structure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cryst</span> <span class="o">=</span> <span class="n">CrystalStructure</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">cryst</span> <span class="o">=</span> <span class="n">crystal_structure</span>
-    <span class="n">SCALE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">pdbfile</span><span class="p">:</span>
-
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pdbfile</span><span class="p">:</span>
-
-            <span class="c1"># This is the inverse of the &quot;orthogonalization matrix&quot;  along with</span>
-            <span class="c1"># translation vector.  See Rupp for an explanation.</span>
-
-            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SCALE&#39;</span><span class="p">:</span>
-                <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
-                <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">])</span>
-                <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span><span class="p">])</span>
-                <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span>
-                <span class="n">SCALE</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">45</span><span class="p">:</span><span class="mi">55</span><span class="p">])</span>
-
-            <span class="c1"># The crystal lattice and symmetry</span>
-
-            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;CRYST1&#39;</span><span class="p">:</span>
-                <span class="n">cryst1</span> <span class="o">=</span> <span class="n">line</span>
-                <span class="c1"># As always, everything in our programs are in SI units.</span>
-                <span class="c1"># PDB files use angstrom units.</span>
-                <span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">15</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="n">b</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">24</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="n">c</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">33</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="c1"># And of course degrees are converted to radians (though we</span>
-                <span class="c1"># loose the perfection of rational quotients like 360/4=90...)</span>
-                <span class="n">alpha</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">33</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
-                <span class="n">beta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">47</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
-                <span class="n">gamma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cryst1</span><span class="p">[</span><span class="mi">47</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
-
-                <span class="n">hermann_mauguin_symbol</span> <span class="o">=</span> <span class="n">cryst1</span><span class="p">[</span><span class="mi">55</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-            <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ATOM  &#39;</span> <span class="ow">or</span> <span class="n">line</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;HETATM&quot;</span><span class="p">:</span>
-                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">30</span><span class="p">:</span><span class="mi">38</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">38</span><span class="p">:</span><span class="mi">46</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="n">coordinates</span><span class="p">[</span><span class="n">atom_index</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">46</span><span class="p">:</span><span class="mi">54</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-10</span>
-                <span class="n">atomic_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">76</span><span class="p">:</span><span class="mi">78</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
-                <span class="n">atom_index</span> <span class="o">+=</span> <span class="mi">1</span>
-
-            <span class="k">if</span> <span class="n">atom_index</span> <span class="o">==</span> <span class="n">max_atoms</span><span class="p">:</span>
-                <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_atoms</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="c1"># Truncate atom list since we pre-allocated extra memory</span>
-    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[:</span><span class="n">atom_index</span><span class="p">,</span> <span class="p">:]</span>
-    <span class="n">atomic_symbols</span> <span class="o">=</span> <span class="n">atomic_symbols</span><span class="p">[:</span><span class="n">atom_index</span><span class="p">]</span>
-
-    <span class="n">T</span> <span class="o">=</span> <span class="n">SCALE</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
-
-    <span class="n">cryst</span><span class="o">.</span><span class="n">set_molecule</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">atomic_symbols</span><span class="o">=</span><span class="n">atomic_symbols</span><span class="p">)</span>
-    <span class="n">cryst</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
-    <span class="n">cryst</span><span class="o">.</span><span class="n">set_spacegroup</span><span class="p">(</span><span class="n">hermann_mauguin_symbol</span><span class="o">=</span><span class="n">hermann_mauguin_symbol</span><span class="p">)</span>
+    <span class="n">dic</span> <span class="o">=</span> <span class="n">pdb_to_dict</span><span class="p">(</span><span class="n">pdb_file_path</span><span class="p">)</span>
+    <span class="n">cryst</span><span class="o">.</span><span class="n">set_molecule</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;orthogonal_coordinates&#39;</span><span class="p">],</span> <span class="n">atomic_symbols</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;atomic_symbols&#39;</span><span class="p">])</span>
+    <span class="n">cryst</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="o">*</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;cell&#39;</span><span class="p">])</span>
+    <span class="n">cryst</span><span class="o">.</span><span class="n">set_spacegroup</span><span class="p">(</span><span class="n">hermann_mauguin_symbol</span><span class="o">=</span><span class="n">dic</span><span class="p">[</span><span class="s1">&#39;sg_symbol&#39;</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">cryst</span></div>
 

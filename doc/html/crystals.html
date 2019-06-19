@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>bornagain.fileio.notest_streamfilegetter module &mdash; bornagain 0.2018.9.9 documentation</title>
+  <title>Working with crystals &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -29,8 +29,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="bornagain.fileio.streamfileReader module" href="bornagain.fileio.streamfileReader.html" />
-    <link rel="prev" title="bornagain.fileio.getters module" href="bornagain.fileio.getters.html" /> 
+    <link rel="next" title="Simulations" href="simulations.html" />
+    <link rel="prev" title="Targets" href="targets.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -85,29 +85,19 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Setting up bornagain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="beams.html">Beams</a></li>
-<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="geometry.html">Detectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targets.html">Targets</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with crystals</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-little-bit-of-math">A little bit of math</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loading-a-pdb-file">Loading a PDB file</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="bornagain.analysis.html">bornagain.analysis package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.external.html">bornagain.external package</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="bornagain.fileio.html">bornagain.fileio package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.simulate.html">bornagain.simulate package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.target.html">bornagain.target package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bornagain.viewers.html">bornagain.viewers package</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="bornagain.html#submodules">Submodules</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">bornagain</a></li>
 </ul>
 
             
@@ -153,19 +143,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="modules.html">bornagain</a> &raquo;</li>
-        
-          <li><a href="bornagain.html">bornagain package</a> &raquo;</li>
-        
-          <li><a href="bornagain.fileio.html">bornagain.fileio package</a> &raquo;</li>
-        
-      <li>bornagain.fileio.notest_streamfilegetter module</li>
+      <li>Working with crystals</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/bornagain.fileio.notest_streamfilegetter.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/crystals.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -178,8 +162,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="bornagain-fileio-notest-streamfilegetter-module">
-<h1>bornagain.fileio.notest_streamfilegetter module<a class="headerlink" href="#bornagain-fileio-notest-streamfilegetter-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="working-with-crystals">
+<h1>Working with crystals<a class="headerlink" href="#working-with-crystals" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="a-little-bit-of-math">
+<h2>A little bit of math<a class="headerlink" href="#a-little-bit-of-math" title="Permalink to this headline">¶</a></h2>
+<p>Here we briefly outline some conventions assumed in bornagain.</p>
+<p>We firstly define the <em>orthogonal coordinates</em>, which we denote as <span class="math notranslate nohighlight">\(\mathbf{r}\)</span>.  These are the usual “Cartesian”
+coordinates.  The other coordinate system taht is relevant to us is the <em>fractional coordinates</em>, which we denote here
+as <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>.  These two vectors are related by the <em>orthogonalization matrix</em> <span class="math notranslate nohighlight">\(\mathbf{O}\)</span> as follows:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{r} = \mathbf{O}\mathbf{x}\]</div>
+<p>The columns of the orthogonalization matrix are the basis vectors <span class="math notranslate nohighlight">\(\mathbf{a}\)</span>, <span class="math notranslate nohighlight">\(\mathbf{b}\)</span>,
+<span class="math notranslate nohighlight">\(\mathbf{c}\)</span> of the crystal:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{O} = \begin{bmatrix}  | &amp; |  &amp; | \\ \mathbf{a} &amp;  \mathbf{b} &amp; \mathbf{c} \\ | &amp; | &amp; | \end{bmatrix}\end{split}\]</div>
+<p>In reciprocal space, we have analogous mathematics for the <em>reciprocal coordinates</em> <span class="math notranslate nohighlight">\(\mathbf{q}\)</span> and <em>fractional
+Miller indices</em> <span class="math notranslate nohighlight">\(\mathbf{h}\)</span>.  They are related by the <span class="math notranslate nohighlight">\(\mathbf{A}\)</span> matrix:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{q} = \mathbf{A} \mathbf{h}\]</div>
+<p>which contains the reciprocal lattice vectors in its columns:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{A} = \begin{bmatrix}  | &amp; |  &amp; | \\ \mathbf{a}^* &amp;  \mathbf{b}^* &amp; \mathbf{c}^* \\ | &amp; | &amp; | \end{bmatrix}\end{split}\]</div>
+<p>The reciprocal lattice vectors are defined as</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\mathbf{a}_1^* = \mathbf{a}_2\times \mathbf{a}_3 / V_c\\\mathbf{a}_2^* = \mathbf{a}_3\times \mathbf{a}_1  / V_c\\\mathbf{a}_3^* = \mathbf{a}_1\times \mathbf{a}_2  / V_c\end{aligned}\end{align} \]</div>
+<p>where <span class="math notranslate nohighlight">\(V_c = \mathbf{a}_1\cdot(\mathbf{a}_2\times\mathbf{a}_3)\)</span> is the volume of the unit cell.</p>
+<p>It is useful to know the following relations:</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\mathbf{A} = (\mathbf{O}^{-1})^{T}\\\mathbf{q}^T \mathbf{r} = \mathbf{h}^T \mathbf{x}\end{aligned}\end{align} \]</div>
+</div>
+<div class="section" id="loading-a-pdb-file">
+<h2>Loading a PDB file<a class="headerlink" href="#loading-a-pdb-file" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
@@ -190,10 +204,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="bornagain.fileio.streamfileReader.html" class="btn btn-neutral float-right" title="bornagain.fileio.streamfileReader module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="simulations.html" class="btn btn-neutral float-right" title="Simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="bornagain.fileio.getters.html" class="btn btn-neutral" title="bornagain.fileio.getters module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="targets.html" class="btn btn-neutral" title="Targets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
