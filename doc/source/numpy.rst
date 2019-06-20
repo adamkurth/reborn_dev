@@ -1,8 +1,5 @@
-Numpy, vectors, rotations, etc.
-===============================
-
-We use numpy a lot, and there are a few important conventions within bornagain to be aware of.
-
+Working with Numpy
+==================
 
 Indexing and internal memory layout of ndarray objects
 ------------------------------------------------------
@@ -51,6 +48,7 @@ You can also use the :func:`rotate <bornagain.utils.rotate>` function for consis
 
 .. code-block:: python
 
+    from bornagain import utils
     R = np.array([[0, 1., 0], [-1, 0, 0], [0, 0, 1.]])
     vec = np.array([1, 2, 3])
     vec_rotated = utils.rotate(R, vec)

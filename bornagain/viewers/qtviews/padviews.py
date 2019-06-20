@@ -734,7 +734,7 @@ class PADView(object):
             if self.show_true_fast_scans:  # For testing - show fast scan axis
                 d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
 
-            im = ImageItem(d) #, autoDownsample='mean')
+            im = ImageItem(d, autoDownsample='mean')
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 

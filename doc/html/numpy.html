@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Numpy, vectors, rotations, etc. &mdash; bornagain 0.2018.9.9 documentation</title>
+  <title>Working with Numpy &mdash; bornagain 0.2018.9.9 documentation</title>
   
 
   
@@ -92,7 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="crystals.html">Working with crystals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Numpy, vectors, rotations, etc.</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Working with Numpy</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#indexing-and-internal-memory-layout-of-ndarray-objects">Indexing and internal memory layout of ndarray objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#arrays-of-vectors">Arrays of vectors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-rotate-vectors">How to rotate vectors</a></li>
@@ -145,7 +145,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Numpy, vectors, rotations, etc.</li>
+      <li>Working with Numpy</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -164,9 +164,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="numpy-vectors-rotations-etc">
-<h1>Numpy, vectors, rotations, etc.<a class="headerlink" href="#numpy-vectors-rotations-etc" title="Permalink to this headline">¶</a></h1>
-<p>We use numpy a lot, and there are a few important conventions within bornagain to be aware of.</p>
+  <div class="section" id="working-with-numpy">
+<h1>Working with Numpy<a class="headerlink" href="#working-with-numpy" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="indexing-and-internal-memory-layout-of-ndarray-objects">
 <h2>Indexing and internal memory layout of ndarray objects<a class="headerlink" href="#indexing-and-internal-memory-layout-of-ndarray-objects" title="Permalink to this headline">¶</a></h2>
 <p>According to the <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html#internal-memory-layout-of-an-ndarray">docs</a>,
@@ -203,7 +202,8 @@ in bornagain.  This note is to avoid ambiguity in the case of a (<em>D</em>, <em
 </pre></div>
 </div>
 <p>You can also use the <a class="reference internal" href="bornagain.utils.html#bornagain.utils.rotate" title="bornagain.utils.rotate"><code class="xref py py-func docutils literal notranslate"><span class="pre">rotate</span></code></a> function for consistency.  Here is what you should expect:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bornagain</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
 <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
 <span class="n">vec_rotated</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">vec</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="n">vec_rotated</span><span class="p">)</span>

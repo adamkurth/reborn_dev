@@ -22,7 +22,7 @@ except NameError:
 import pkg_resources
 import numpy as np
 from numpy import sin, cos, sqrt
-
+import spglib
 import bornagain.target
 from bornagain import utils
 from bornagain.utils import rotate
@@ -34,8 +34,8 @@ pdb_data_path = pkg_resources.resource_filename('bornagain.simulate', os.path.jo
 def get_pdb_file(pdb_id, save_path='.'):
     r"""
     Fetch a pdb file from the web and return the path to the file.
-    The default location for the file is bornagain/simulate/data/pdb/ .
-    If the file already exists, just return the path to the existint file.
+    The default location for the file is the current working directory.
+    If the file already exists, just return the path to the existing file.
 
     Args:
         pdb_id: for example: "101M" or "101M.pdb"
@@ -114,39 +114,49 @@ class UnitCell(object):
         self.volume = vol
 
     def r2x(self, r_vecs):
+        r""" Transform orthogonal coordinates to fractional coordinates. """
         return rotate(self.o_mat_inv, r_vecs)
 
     def x2r(self, x_vecs):
+        r""" Transform fractional coordinates to orthogonal coordinates. """
         return rotate(self.o_mat, x_vecs)
 
     def q2h(self, q_vecs):
+        r""" Transform reciprocal coordinates to fractional Miller coordinates. """
         return rotate(self.a_mat_inv, q_vecs)
 
     def h2q(self, h_vecs):
+        r""" Transform fractional Miller coordinates to reciprocal coordinates. """
         return rotate(self.a_mat, h_vecs)
 
     @property
     def a_vec(self):
+        r""" Crystal basis vector a. """
         return self.o_mat[:, 0].copy()
 
     @property
     def b_vec(self):
+        r""" Crystal basis vector b. """
         return self.o_mat[:, 1].copy()
 
     @property
     def c_vec(self):
+        r""" Crystal basis vector c. """
         return self.o_mat[:, 2].copy()
 
     @property
     def as_vec(self):
+        r""" Reciprocal basis vector a*. """
         return self.a_mat[:, 0].copy()
 
     @property
     def bs_vec(self):
+        r""" Reciprocal basis vector b*. """
         return self.a_mat[:, 1].copy()
 
     @property
     def cs_vec(self):
+        r""" Reciprocal basis vector c*. """
         return self.a_mat[:, 2].copy()
 
     def __str__(self):
@@ -237,10 +247,10 @@ class CrystalStructure(object):
 
         if pdbFilePath is not None:
             dic = pdb_to_dict(pdbFilePath)
-            self.set_molecule(dic['coordinates'], atomic_symbols=dic['atomic_symbols'])
+            self.set_molecule(dic['orthogonal_coordinates'], atomic_symbols=dic['atomic_symbols'])
             self.set_cell(*dic['cell'])
             if spacegroup is None:
-                self.set_spacegroup(hermann_mauguin_symbol=dic['hermann_mauguin_symbol'])
+                self.set_spacegroup(hermann_mauguin_symbol=dic['sg_symbol'])
         if spacegroup is not None:
             self.spacegroup = spacegroup
 
@@ -442,12 +452,13 @@ class structure(CrystalStructure):
 class FiniteLattice(object):
     r"""
     A utility for creating finite crystal lattices.  Enables the generation of lattice vector positions, lattice
-    occupancies, shaping of crystals by zeroing occupancies beyond arbitrary lattice planes.
+    occupancies, shaping of crystals. Under development.
     """
 
     def __init__(self, max_size=None, unitcell=None):
         r"""
-        Args:
+        Arguments:
+
             max_size: Integer N that sets the size of the lattice to N x N x N.
             unitcell: A crystal.UnitCell type that is needed to generate
         """
@@ -518,8 +529,38 @@ class FiniteLattice(object):
         self.add_facet(plane=[-1, 0, 0], length=n_cells)
         self.add_facet(plane=[0, -1, 0], length=n_cells)
 
+
 def pdb_to_dict(pdb_file_path):
-    r"""Return a :class:`CrystalStructure` object with PDB information. """
+    r"""Return a :class:`CrystalStructure` object with PDB information.  The PDB information is converted to
+    the units of bornagain.
+
+    Arguments:
+        pdb_file_path: path to pdb file
+
+    Returns:
+        A dictionary with the following keys:
+
+           'orthogonalization_matrix': S,
+
+           'fractional_coordinates': fractional_coordinates,
+
+           'orthogonal_coordinates': coordinates*1e-10,
+
+           'atomic_symbols': atomic_symbols,
+
+           'cell': (a*1e-10, b*1e-10, c*1e-10, alpha*np.pi/180.0, beta*np.pi/180.0, gamma*np.pi/180.0),
+
+           'sg_symbol': sg_symbol,
+
+           'orthogonal_rotations': orthogonal_rotations,
+
+           'orthogonal_translations': orthogonal_translations*1e-10,
+
+           'fractional_rotations': orthogonal_rotations,
+
+           'fractional_translations': orthogonal_translations * 1e-10
+
+    """
 
     max_atoms = int(1e6)
     coordinates = np.zeros([max_atoms, 3])
@@ -530,6 +571,8 @@ def pdb_to_dict(pdb_file_path):
     # else:
     #     cryst = crystal_structure
     SCALE = np.zeros([3, 4])
+    SMTRY = np.zeros([96*3, 6])
+    n_SMTRY = 0
 
     with open(pdb_file_path) as pdbfile:
 
@@ -551,21 +594,34 @@ def pdb_to_dict(pdb_file_path):
                 cryst1 = line
                 # As always, everything in our programs are in SI units.
                 # PDB files use angstrom units.
-                a = float(cryst1[6:15]) * 1e-10
-                b = float(cryst1[15:24]) * 1e-10
-                c = float(cryst1[24:33]) * 1e-10
+                a = float(cryst1[6:15])
+                b = float(cryst1[15:24])
+                c = float(cryst1[24:33])
                 # And of course degrees are converted to radians (though we
                 # loose the perfection of rational quotients like 360/4=90...)
-                alpha = float(cryst1[33:40]) * np.pi / 180.0
-                beta = float(cryst1[40:47]) * np.pi / 180.0
-                gamma = float(cryst1[47:54]) * np.pi / 180.0
+                alpha = float(cryst1[33:40])
+                beta = float(cryst1[40:47])
+                gamma = float(cryst1[47:54])
+                sg_symbol = cryst1[55:66].strip()
 
-                hermann_mauguin_symbol = cryst1[55:66].strip()
+            # These are the crystallographic symmetry operations.  I'm not sure if these are mandatory entries in a pdb
+            # file since they do not appear here:
+            # http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html
+            # I got the parsing information from here:
+            # http://ambermd.org/tutorials/advanced/tutorial13/Selection.html
+            if line[13:18] == 'SMTRY':
+                SMTRY[n_SMTRY, 0] = float(line[18])
+                SMTRY[n_SMTRY, 1] = float(line[19:23])
+                SMTRY[n_SMTRY, 2] = float(line[24:34])
+                SMTRY[n_SMTRY, 3] = float(line[34:44])
+                SMTRY[n_SMTRY, 4] = float(line[44:54])
+                SMTRY[n_SMTRY, 5] = float(line[54:69])
+                n_SMTRY += 1
 
             if line[:6] == 'ATOM  ' or line[:6] == "HETATM":
-                coordinates[atom_index, 0] = float(line[30:38]) * 1e-10
-                coordinates[atom_index, 1] = float(line[38:46]) * 1e-10
-                coordinates[atom_index, 2] = float(line[46:54]) * 1e-10
+                coordinates[atom_index, 0] = float(line[30:38])
+                coordinates[atom_index, 1] = float(line[38:46])
+                coordinates[atom_index, 2] = float(line[46:54])
                 atomic_symbols.append(line[76:78].strip().capitalize())
                 atom_index += 1
 
@@ -576,12 +632,34 @@ def pdb_to_dict(pdb_file_path):
     coordinates = coordinates[:atom_index, :]
     atomic_symbols = atomic_symbols[:atom_index]
 
-    # T = SCALE[:, 3]
+    S = SCALE[:, 0:3]
+    U = SCALE[:, 3]
+    fractional_coordinates = rotate(S, coordinates) + U
 
-    dic = {'coordinates': coordinates,
+    orthogonal_rotations = []
+    orthogonal_translations = []
+    fractional_rotations = []
+    fractional_translations = []
+    for i in range(int(n_SMTRY/3)):
+        R = SMTRY[i*3:i*3+3, 2:5]
+        T = SMTRY[i * 3:i * 3 + 3, 5]
+        orthogonal_rotations.append(R)
+        orthogonal_translations.append(T)
+        fractional_rotations.append(rotate(S, R))
+        fractional_translations.append(rotate(S, T))
+
+
+    dic = {'orthogonalization_matrix': S*1e-10,
+           'fractional_coordinates': fractional_coordinates,
+           'orthogonal_coordinates': coordinates*1e-10,
            'atomic_symbols': atomic_symbols,
-           'cell': (a, b, c, alpha, beta, gamma),
-           'hermann_mauguin_symbol': hermann_mauguin_symbol}
+           'cell': (a*1e-10, b*1e-10, c*1e-10, alpha*np.pi/180.0, beta*np.pi/180.0, gamma*np.pi/180.0),
+           'sg_symbol': sg_symbol,
+           'orthogonal_rotations': orthogonal_rotations,
+           'orthogonal_translations': [t*1e-10 for t in orthogonal_translations],
+           'fractional_rotations': fractional_rotations,
+           'fractional_translations': fractional_translations
+           }
 
     return dic
 
@@ -589,66 +667,13 @@ def pdb_to_dict(pdb_file_path):
 def parse_pdb(pdb_file_path, crystal_structure=None):
     r"""Return a :class:`CrystalStructure` object with PDB information. """
 
-    max_atoms = int(1e6)
-    coordinates = np.zeros([max_atoms, 3])
-    atomic_symbols = []
-    atom_index = int(0)
     if crystal_structure is None:
         cryst = CrystalStructure()
-    else:
-        cryst = crystal_structure
-    SCALE = np.zeros([3, 4])
 
-    with open(pdb_file_path) as pdbfile:
-
-        for line in pdbfile:
-
-            # This is the inverse of the "orthogonalization matrix"  along with
-            # translation vector.  See Rupp for an explanation.
-
-            if line[:5] == 'SCALE':
-                n = int(line[5]) - 1
-                SCALE[n, 0] = float(line[10:20])
-                SCALE[n, 1] = float(line[20:30])
-                SCALE[n, 2] = float(line[30:40])
-                SCALE[n, 3] = float(line[45:55])
-
-            # The crystal lattice and symmetry
-
-            if line[:6] == 'CRYST1':
-                cryst1 = line
-                # As always, everything in our programs are in SI units.
-                # PDB files use angstrom units.
-                a = float(cryst1[6:15]) * 1e-10
-                b = float(cryst1[15:24]) * 1e-10
-                c = float(cryst1[24:33]) * 1e-10
-                # And of course degrees are converted to radians (though we
-                # loose the perfection of rational quotients like 360/4=90...)
-                alpha = float(cryst1[33:40]) * np.pi / 180.0
-                beta = float(cryst1[40:47]) * np.pi / 180.0
-                gamma = float(cryst1[47:54]) * np.pi / 180.0
-
-                hermann_mauguin_symbol = cryst1[55:66].strip()
-
-            if line[:6] == 'ATOM  ' or line[:6] == "HETATM":
-                coordinates[atom_index, 0] = float(line[30:38]) * 1e-10
-                coordinates[atom_index, 1] = float(line[38:46]) * 1e-10
-                coordinates[atom_index, 2] = float(line[46:54]) * 1e-10
-                atomic_symbols.append(line[76:78].strip().capitalize())
-                atom_index += 1
-
-            if atom_index == max_atoms:
-                coordinates = np.append(coordinates, np.zeros([3, max_atoms]), axis=1)
-
-    # Truncate atom list since we pre-allocated extra memory
-    coordinates = coordinates[:atom_index, :]
-    atomic_symbols = atomic_symbols[:atom_index]
-
-    T = SCALE[:, 3]
-
-    cryst.set_molecule(coordinates, atomic_symbols=atomic_symbols)
-    cryst.set_cell(a, b, c, alpha, beta, gamma)
-    cryst.set_spacegroup(hermann_mauguin_symbol=hermann_mauguin_symbol)
+    dic = pdb_to_dict(pdb_file_path)
+    cryst.set_molecule(dic['orthogonal_coordinates'], atomic_symbols=dic['atomic_symbols'])
+    cryst.set_cell(*dic['cell'])
+    cryst.set_spacegroup(hermann_mauguin_symbol=dic['sg_symbol'])
 
     return cryst
 

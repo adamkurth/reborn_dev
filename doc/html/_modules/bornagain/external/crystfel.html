@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../crystals.html">Working with crystals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../coding.html">Notes for Developers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../numpy.html">Numpy, vectors, rotations, etc.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../numpy.html">Working with Numpy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modules.html">bornagain</a></li>
 </ul>
 
@@ -171,6 +171,16 @@
 <span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">units</span>
 <span class="kn">from</span> <span class="nn">cfelpyutils</span> <span class="k">import</span> <span class="n">crystfel_utils</span>
 
+<span class="c1">#------------------------------------------------</span>
+<span class="c1"># Stream file delimiters</span>
+<span class="n">sta_geom</span>    <span class="o">=</span> <span class="s2">&quot;----- Begin geometry file -----&quot;</span>
+<span class="n">sta_chunk</span>   <span class="o">=</span> <span class="s2">&quot;----- Begin chunk -----&quot;</span>
+<span class="n">sta_crystal</span> <span class="o">=</span> <span class="s2">&quot;--- Begin crystal&quot;</span>
+
+<span class="n">end_geom</span>    <span class="o">=</span> <span class="s2">&quot;----- End geometry file -----&quot;</span>
+<span class="n">end_chunk</span>   <span class="o">=</span> <span class="s2">&quot;----- End chunk -----&quot;</span>
+<span class="n">end_crystal</span> <span class="o">=</span> <span class="s2">&quot;--- End crystal&quot;</span>
+<span class="c1">#------------------------------------------------</span>
 
 <div class="viewcode-block" id="load_crystfel_geometry"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.load_crystfel_geometry">[docs]</a><span class="k">def</span> <span class="nf">load_crystfel_geometry</span><span class="p">(</span><span class="n">geometry_file</span><span class="p">):</span>
 
@@ -262,6 +272,8 @@
 
 <div class="viewcode-block" id="write_geom_file_single_pad"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.write_geom_file_single_pad">[docs]</a><span class="k">def</span> <span class="nf">write_geom_file_single_pad</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">beam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad_geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;  &quot;&quot;&quot;</span>
+
     <span class="n">pad</span> <span class="o">=</span> <span class="n">pad_geometry</span>
     <span class="n">geom_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
     <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">geom_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
@@ -278,6 +290,88 @@
     <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;0/fs = x</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;0/ss = y</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="readStreamfile_get_total_number_of_frames"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.readStreamfile_get_total_number_of_frames">[docs]</a><span class="k">def</span> <span class="nf">readStreamfile_get_total_number_of_frames</span><span class="p">(</span><span class="n">streamfile_name</span><span class="p">):</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the total number of frames from a stream file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Load the streamfile.</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">streamfile_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> 
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sta_chunk</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># close the file</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">count</span></div>
+
+
+<div class="viewcode-block" id="readStreamfile_get_nth_frame"><a class="viewcode-back" href="../../../bornagain.external.crystfel.html#bornagain.external.crystfel.readStreamfile_get_nth_frame">[docs]</a><span class="k">def</span> <span class="nf">readStreamfile_get_nth_frame</span><span class="p">(</span><span class="n">streamfile_name</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the A matrix, CXI file path and CXI frame number from the nth frame in a stream file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Load the streamfile</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">streamfile_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sta_chunk</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
+            <span class="k">break</span>
+
+
+    <span class="c1"># Initialising </span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">cxiFilepath</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">cxiFileFrameNumber</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">astar_exist</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;Image filename:&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">cxiFilepath</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;Event:&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">cxiFileFrameNumber</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">9</span><span class="p">:])</span>
+
+        <span class="k">if</span> <span class="s2">&quot;astar = &quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">19</span><span class="p">])</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">19</span><span class="p">:</span><span class="mi">30</span><span class="p">])</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">29</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span>
+            <span class="n">astar_exist</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;bstar = &quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">19</span><span class="p">])</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">19</span><span class="p">:</span><span class="mi">30</span><span class="p">])</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">29</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="s2">&quot;cstar = &quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">19</span><span class="p">])</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">19</span><span class="p">:</span><span class="mi">30</span><span class="p">])</span>
+            <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">29</span><span class="p">:</span><span class="mi">40</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">end_chunk</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="c1"># If frame does not contain a star, etc. set the A star matrix to None</span>
+    <span class="k">if</span> <span class="n">astar_exist</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># close the file</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">A</span><span class="p">,</span> <span class="n">cxiFilepath</span><span class="p">,</span> <span class="n">cxiFileFrameNumber</span></div>
 </pre></div>
 
            </div>

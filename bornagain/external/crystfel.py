@@ -114,6 +114,8 @@ def split_image(data, geom_dict):
 
 def write_geom_file_single_pad(file_path=None, beam=None, pad_geometry=None):
 
+    r"""  """
+
     pad = pad_geometry
     geom_file = os.path.join(file_path)
     fid = open(geom_file, 'w')

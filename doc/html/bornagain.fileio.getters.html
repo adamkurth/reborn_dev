@@ -92,7 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="crystals.html">Working with crystals</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulations.html">Simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="coding.html">Notes for Developers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="numpy.html">Numpy, vectors, rotations, etc.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="numpy.html">Working with Numpy</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">bornagain</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="bornagain.html">bornagain package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="bornagain.html#subpackages">Subpackages</a><ul class="current">
@@ -289,8 +289,8 @@ data is created and stored…</p>
 <dt id="bornagain.fileio.getters.StreamfileFrameGetter">
 <em class="property">class </em><code class="descclassname">bornagain.fileio.getters.</code><code class="descname">StreamfileFrameGetter</code><span class="sig-paren">(</span><em>streamfile_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bornagain/fileio/getters.html#StreamfileFrameGetter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bornagain.fileio.getters.StreamfileFrameGetter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#bornagain.fileio.getters.FrameGetter" title="bornagain.fileio.getters.FrameGetter"><code class="xref py py-class docutils literal notranslate"><span class="pre">bornagain.fileio.getters.FrameGetter</span></code></a></p>
-<p>A frame getter that reads a CrystFEL streamfile. More specifically, it:
-1. Extracts the geom file info.
+<p>A frame getter that reads a CrystFEL stream file. More specifically, it:
+1. Extracts the geometry file (from within the stream file).
 2. Gets the A star matrix, the cxi file path, and the cxi file frame number for the nth frame in the streamfile.</p>
 <dl class="attribute">
 <dt id="bornagain.fileio.getters.StreamfileFrameGetter.streamfile_name">

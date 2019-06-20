@@ -235,7 +235,7 @@ class CrystalSimulatorV1(object):
             approximate_shape_transform: Use a Gaussian approximation to shape transforms, else analytic parallelepiped
                 shape transform
             cromer_mann: Not yet implemented
-            expand_symmetry: Duplicate the asymmetric unit according to spacegroup symmetr in crystal_structure
+            expand_symmetry: Duplicate the asymmetric unit according to spacegroup symmetry in crystal_structure
             cl_double_precision: Use double precision if available on GPU device
             cl_group_size: GPU group size (default is 32)
             poisson_noise: Add Poisson noise to the resulting pattern
