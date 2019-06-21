@@ -11,7 +11,6 @@ from . import target
 from . import units
 from . import utils
 
-
 CONFIG_OPTIONS = {'warn_depreciated': True,
                   'force_depreciated': False,
                   'verbose': False,

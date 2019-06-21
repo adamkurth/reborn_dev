@@ -10,7 +10,10 @@ import numpy as np
 from numpy import sin, cos
 import bornagain as ba
 from numba import jit
-
+try:
+    from bornagain import fortran
+except:
+    fortran = None
 
 def vec_norm(vec):
     r"""
@@ -386,3 +389,46 @@ def max_pair_distance(vecs):
             if d > d_max:
                 d_max = d
     return np.sqrt(d_max)
+
+
+def trilinear_interpolation(data, min_corners, max_corners, samples, mask=None):
+    r""""
+    Trilinear interpolation on a regular grid with arbitrary sample points.
+
+    Note: all input arrays should be C contiguous.
+
+    Arguments:
+        data : 3D Numpy array that you wish to sample
+        min_corners : An array with the three minimum values corresponding to the data grid center points
+        max_corners : An array with the three maximum values corresponding to the data grid center points
+        samples : An Nx3 array of 3-vectors containing coordinates of points that you wish to sample
+        mask : Numpy array specifying which voxels in data to ignore.  Zero means ignore.
+
+    Returns:
+        Numpy arrays with interpolated values
+    """
+
+    if fortran is None:
+        raise ImportError('You need to compile fortran code to use utils.trilinear_interpolation()')
+
+    min_corners = np.array(min_corners)
+    max_corners = np.array(max_corners)
+    shape = np.array(data.shape)
+
+    # TODO: fix this
+    min_corners = -max_corners
+    deltas = (max_corners - min_corners)/(shape-1)
+    ####################################
+
+    data = data.astype(np.double)
+    shape = shape.astype(np.int)
+
+    assert data.flags.c_contiguous
+    assert samples.flags.c_contiguous
+    if mask is not None:
+        assert mask.flags.c_contiguous
+
+    dataout = np.empty((samples.shape[0]), dtype=np.double)
+    fortran.interpolations_f.trilinear_interpolation(data, samples, max_corners, deltas, dataout)
+
+    return dataout
