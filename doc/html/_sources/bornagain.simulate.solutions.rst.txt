@@ -1,7 +1,0 @@
-bornagain.simulate.solutions module
-===================================
-
-.. automodule:: bornagain.simulate.solutions
-    :members:
-    :undoc-members:
-    :show-inheritance:
