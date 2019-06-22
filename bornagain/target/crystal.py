@@ -22,11 +22,15 @@ except NameError:
 import pkg_resources
 import numpy as np
 from numpy import sin, cos, sqrt
-import spglib
 import bornagain.target
 from bornagain import utils
 from bornagain.utils import rotate
 from bornagain.simulate import simutils
+
+try:
+    import spglib
+except ImportError:
+    spglib = None
 
 pdb_data_path = pkg_resources.resource_filename('bornagain.simulate', os.path.join('data', 'pdb'))
 
@@ -65,9 +69,9 @@ class UnitCell(object):
     beta = None  #: Lattice angle
     gamma = None  #: Lattice angle
     volume = None  #: Unit cell volume
-    o_mat = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
+    o_mat = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = O.x on fractional coordinates x.
     o_mat_inv = None  #: Inverse orthogonalization matrix (3x3 array)
-    a_mat = None  #: Orthogonalization matrix transpose (3x3 array). Does the transform q = dot(A, h), with fractional Miller indices h.
+    a_mat = None  #: Orthogonalization matrix transpose (3x3 array). Does the transform q = A.h, with Miller indices h.
     a_mat_inv = None  #: A inverse
 
     def __init__(self, a, b, c, alpha, beta, gamma):
@@ -250,7 +254,7 @@ class CrystalStructure(object):
             self.set_molecule(dic['orthogonal_coordinates'], atomic_symbols=dic['atomic_symbols'])
             self.set_cell(*dic['cell'])
             if spacegroup is None:
-                self.set_spacegroup(hermann_mauguin_symbol=dic['sg_symbol'])
+                self.set_spacegroup(hermann_mauguin_symbol=dic['spacegroup_symbol'])
         if spacegroup is not None:
             self.spacegroup = spacegroup
 
@@ -550,7 +554,7 @@ def pdb_to_dict(pdb_file_path):
 
            'cell': (a*1e-10, b*1e-10, c*1e-10, alpha*np.pi/180.0, beta*np.pi/180.0, gamma*np.pi/180.0),
 
-           'sg_symbol': sg_symbol,
+           'spacegroup_symbol': spacegroup_symbol,
 
            'orthogonal_rotations': orthogonal_rotations,
 
@@ -562,61 +566,71 @@ def pdb_to_dict(pdb_file_path):
 
     """
 
-    max_atoms = int(1e6)
-    coordinates = np.zeros([max_atoms, 3])
+    coordinates = np.zeros([10000, 3])
     atomic_symbols = []
-    atom_index = int(0)
-    # if crystal_structure is None:
-    #     cryst = CrystalStructure()
-    # else:
-    #     cryst = crystal_structure
-    SCALE = np.zeros([3, 4])
-    SMTRY = np.zeros([96*3, 6])
-    n_SMTRY = 0
+    atom_index = 0
+    scale = np.zeros([3, 4])
+    smtry = np.zeros([1000, 6])
+    n_smtry = 0
+    mtrix = np.zeros([10000, 4])
+    n_mtrix = 0
+    model_number = 1
 
     with open(pdb_file_path) as pdbfile:
 
         for line in pdbfile:
 
-            # This is the inverse of the "orthogonalization matrix"  along with
-            # translation vector.  See Rupp for an explanation.
+            # Check for a model ID; we will only load in the first model for now
+
+            if line[0:5] == 'MODEL':
+                model_number = int(line[10:14])
+                if model_number > 1:
+                    break
+
+            # Transformations from orthogonal coordinates to fractional coordinates
 
             if line[:5] == 'SCALE':
                 n = int(line[5]) - 1
-                SCALE[n, 0] = float(line[10:20])
-                SCALE[n, 1] = float(line[20:30])
-                SCALE[n, 2] = float(line[30:40])
-                SCALE[n, 3] = float(line[45:55])
+                scale[n, 0] = float(line[10:20])
+                scale[n, 1] = float(line[20:30])
+                scale[n, 2] = float(line[30:40])
+                scale[n, 3] = float(line[45:55])
 
-            # The crystal lattice and symmetry
+            # The crystal lattice and spacegroup
 
             if line[:6] == 'CRYST1':
                 cryst1 = line
-                # As always, everything in our programs are in SI units.
-                # PDB files use angstrom units.
                 a = float(cryst1[6:15])
                 b = float(cryst1[15:24])
                 c = float(cryst1[24:33])
-                # And of course degrees are converted to radians (though we
-                # loose the perfection of rational quotients like 360/4=90...)
                 alpha = float(cryst1[33:40])
                 beta = float(cryst1[40:47])
                 gamma = float(cryst1[47:54])
-                sg_symbol = cryst1[55:66].strip()
+                spacegroup_symbol = cryst1[55:66].strip()
 
-            # These are the crystallographic symmetry operations.  I'm not sure if these are mandatory entries in a pdb
-            # file since they do not appear here:
-            # http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html
-            # I got the parsing information from here:
-            # http://ambermd.org/tutorials/advanced/tutorial13/Selection.html
+            # Spacegroup symmetry operations
+
             if line[13:18] == 'SMTRY':
-                SMTRY[n_SMTRY, 0] = float(line[18])
-                SMTRY[n_SMTRY, 1] = float(line[19:23])
-                SMTRY[n_SMTRY, 2] = float(line[24:34])
-                SMTRY[n_SMTRY, 3] = float(line[34:44])
-                SMTRY[n_SMTRY, 4] = float(line[44:54])
-                SMTRY[n_SMTRY, 5] = float(line[54:69])
-                n_SMTRY += 1
+                smtry[n_smtry, 0] = float(line[18])
+                smtry[n_smtry, 1] = float(line[19:23])
+                smtry[n_smtry, 2] = float(line[24:34])
+                smtry[n_smtry, 3] = float(line[34:44])
+                smtry[n_smtry, 4] = float(line[44:54])
+                smtry[n_smtry, 5] = float(line[54:69])
+                n_smtry += 1
+
+            # Non-crystallographic symmetry operations
+            # TODO: check if we should skip entries with iGiven == 1.  See PDB documentation.  I'm confused.
+
+            if line[0:5] == 'MTRIX':
+                mtrix[n_mtrix, 0] = float(line[10:20])
+                mtrix[n_mtrix, 1] = float(line[20:30])
+                mtrix[n_mtrix, 2] = float(line[30:40])
+                mtrix[n_mtrix, 3] = float(line[45:55])
+                igiven = int(line[59])
+                n_mtrix += 1
+
+            # Atomic (orthogonal) coordinates
 
             if line[:6] == 'ATOM  ' or line[:6] == "HETATM":
                 coordinates[atom_index, 0] = float(line[30:38])
@@ -624,41 +638,58 @@ def pdb_to_dict(pdb_file_path):
                 coordinates[atom_index, 2] = float(line[46:54])
                 atomic_symbols.append(line[76:78].strip().capitalize())
                 atom_index += 1
-
-            if atom_index == max_atoms:
-                coordinates = np.append(coordinates, np.zeros([3, max_atoms]), axis=1)
+            if atom_index == coordinates.shape[0]:  # Make the array larger if need be.  Double it.
+                coordinates = np.append(coordinates, np.zeros([3, coordinates.shape[0]]), axis=1)
 
     # Truncate atom list since we pre-allocated extra memory
     coordinates = coordinates[:atom_index, :]
     atomic_symbols = atomic_symbols[:atom_index]
 
-    S = SCALE[:, 0:3]
-    U = SCALE[:, 3]
+    S = scale[:, 0:3]
+    U = scale[:, 3]
     fractional_coordinates = rotate(S, coordinates) + U
 
     orthogonal_rotations = []
     orthogonal_translations = []
     fractional_rotations = []
     fractional_translations = []
-    for i in range(int(n_SMTRY/3)):
-        R = SMTRY[i*3:i*3+3, 2:5]
-        T = SMTRY[i * 3:i * 3 + 3, 5]
+    for i in range(int(n_smtry/3)):
+        R = smtry[i*3:i*3+3, 2:5]
+        T = smtry[i * 3:i * 3 + 3, 5]
         orthogonal_rotations.append(R)
         orthogonal_translations.append(T)
-        fractional_rotations.append(rotate(S, R))
-        fractional_translations.append(rotate(S, T))
+        fractional_rotations.append(np.round(np.dot(S, np.dot(R, np.linalg.inv(S)))))
+        TT = np.dot(S, T)
+        w = np.where(TT != 0)
+        TT[w] = 1/np.round(1/TT[w])
+        fractional_translations.append(TT)
 
+    ncs_orthogonal_rotations = []
+    ncs_orthogonal_translations = []
+    ncs_fractional_rotations = []
+    ncs_fractional_translations = []
+    for i in range(int(n_mtrix/3)):
+        R = mtrix[i*3:i*3+3, 0:3]
+        T = mtrix[i*3:i*3+3, 3]
+        ncs_orthogonal_rotations.append(R)
+        ncs_orthogonal_translations.append(T)
+        ncs_fractional_rotations.append(np.dot(S, np.dot(R, np.linalg.inv(S))))
+        ncs_fractional_translations.append(np.dot(S, T))
 
     dic = {'orthogonalization_matrix': S*1e-10,
            'fractional_coordinates': fractional_coordinates,
            'orthogonal_coordinates': coordinates*1e-10,
            'atomic_symbols': atomic_symbols,
-           'cell': (a*1e-10, b*1e-10, c*1e-10, alpha*np.pi/180.0, beta*np.pi/180.0, gamma*np.pi/180.0),
-           'sg_symbol': sg_symbol,
+           'unit_cell': (a*1e-10, b*1e-10, c*1e-10, alpha*np.pi/180.0, beta*np.pi/180.0, gamma*np.pi/180.0),
+           'spacegroup_symbol': spacegroup_symbol,
            'orthogonal_rotations': orthogonal_rotations,
            'orthogonal_translations': [t*1e-10 for t in orthogonal_translations],
            'fractional_rotations': fractional_rotations,
-           'fractional_translations': fractional_translations
+           'fractional_translations': fractional_translations,
+           'ncs_orthogonal_rotations': orthogonal_rotations,
+           'ncs_orthogonal_translations': [t * 1e-10 for t in orthogonal_translations],
+           'ncs_fractional_rotations': fractional_rotations,
+           'ncs_fractional_translations': fractional_translations
            }
 
     return dic
@@ -673,92 +704,12 @@ def parse_pdb(pdb_file_path, crystal_structure=None):
     dic = pdb_to_dict(pdb_file_path)
     cryst.set_molecule(dic['orthogonal_coordinates'], atomic_symbols=dic['atomic_symbols'])
     cryst.set_cell(*dic['cell'])
-    cryst.set_spacegroup(hermann_mauguin_symbol=dic['sg_symbol'])
+    cryst.set_spacegroup(hermann_mauguin_symbol=dic['spacegroup_symbol'])
 
     return cryst
 
 
-def get_hm_symbols():
-
-    symbols = []
-    for idx in range(0, 530):
-        symbols.append(bornagain.target.spgrp._hmsym[idx].strip())
-
-    return symbols
-
-# hermann_mauguin_symbols = get_hm_symbols()
-
-
-def hermann_mauguin_symbol_from_hall_number(hall_number):
-
-    if hall_number < 0 or hall_number > 530:
-        raise ValueError('hall_number must be between 1 and 530')
-
-    return bornagain.target.spgrp._hmsym[hall_number - 1]
-
-
-def itoc_number_from_hall_number(hall_number):
-
-    return bornagain.target.spgrp._sgnum[hall_number - 1]
-
-
-def hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
-
-    idx = None
-    hermann_mauguin_symbol = hermann_mauguin_symbol.strip()
-    for idx in range(0, 530):
-        if hermann_mauguin_symbol == bornagain.target.spgrp._hmsym[idx]:
-            break
-
-    if idx is None:
-        raise ValueError('Cannot find Hermann Mauguin symbol')
-
-    return idx+1
-
-
-def itoc_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
-
-    return itoc_number_from_hall_number(hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol))
-
-
-def hall_number_from_itoc_number(itoc_number):
-
-    if itoc_number < 1 or itoc_number > 230:
-        raise ValueError('ITOC spacegroup number must be in the range 1 to 230')
-
-    idx = -1
-    for idx in range(0, 530):
-        if itoc_number == bornagain.target.spgrp._sgnum[idx]:
-            break
-    return idx+1
-
-
-def hermann_mauguin_symbol_from_itoc_number(itoc_number):
-
-    return hermann_mauguin_symbol_from_hall_number(hall_number_from_itoc_number(itoc_number))
-
-
-def spacegroup_ops_from_hall_number(hall_number):
-
-    rot = bornagain.target.spgrp._spgrp_ops[hall_number - 1]["rotations"]
-    trans = [T for T in bornagain.target.spgrp._spgrp_ops[hall_number - 1]['translations']]
-
-    return rot, trans
-
-
-def get_symmetry_operators_from_hall_number(hall_number):
-
-    if hall_number < 1 or hall_number > 530:
-        raise ValueError("Hall number must be between 1 and 530")
-
-    idx = hall_number - 1
-    Rs = bornagain.target.spgrp._spgrp_ops[idx]["rotations"]
-    Ts = [T for T in bornagain.target.spgrp._spgrp_ops[idx]['translations']]
-
-    return Rs, Ts
-
-
-def get_symmetry_operators_from_space_group(hm_symbol):
+def get_symmetry_operators_from_space_group(spacegroup_symbol):
 
     r"""
     For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
@@ -768,68 +719,66 @@ def get_symmetry_operators_from_space_group(hm_symbol):
     finding your spacegroup check that it is contained in the output of print(crystal.get_hm_symbols()).
 
     Input:
-        hm_symbol (str): A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)
+        spacegroup_symbol (str): A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)
 
     Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy
             arrays) and translation vectors (1x3 numpy arrays)
     """
 
-    # First we try to find the "Hall number" corresponding to the Hermann-Mauguin symbol.
-    # This is done in a hacked way using the spglib module.  However, we do not use the
-    # spglib module directly in order to avoid that dependency.  Instead, the operators
-    # that result from the spglib.get_symmetry_from_database() method have been dumped
-    # into the spgrp module included in bornagain.
+    if spglib is None:
+        raise ImportError('You need to install the "spglib" python package')
+    sgsym = spacegroup_symbol
+    sgsym = sgsym.strip()
+    n_found = 0
+    hall_number = 0
+    for i in range(1, 531):
+        # Spacegroup symbol madness.... is there some kind of standard for representing these in ASCII text?
+        itoc_full = spglib.get_spacegroup_type(i)['international_full'].replace('_', '').strip()
+        if sgsym == itoc_full:
+            n_found += 1
+            hall_number = i
+    if n_found == 0:
+        print('Did not find matching spacegroup')
+        return None, None, None
+    if n_found > 1:
+        print('Found multiple spacegroup matches')
+        # return None, None, None
+    ops = spglib.get_symmetry_from_database(hall_number)
+    n_ops = ops['rotations'].shape[0]
+    rotations = []
+    translations = []
+    for i in range(n_ops):
+        rotations.append(ops['rotations'][i, :, :])
+        translations.append(ops['translations'][i, :])
+    return rotations, translations, hall_number
 
-    # Simply iterate through all HM symbols until we find one that matches:
-    symbol_found = False
-    idx = None
-    if isinstance(hm_symbol, basestring):
-        hm_symbol = hm_symbol.strip()
-        for idx in range(0, 530):
-            if hm_symbol == bornagain.target.spgrp._hmsym[idx].strip():
-                symbol_found = True
-                break
-    else:
-        idx = hm_symbol
-        if idx < 530:
-            symbol_found = True
-
-    if not symbol_found:
-        return None, None
-
-    Rs = bornagain.target.spgrp._spgrp_ops[idx]["rotations"]
-    Ts = [T for T in bornagain.target.spgrp._spgrp_ops[idx]['translations']]
-
-    return Rs, Ts
-
-
-def assemble(O, n_unit=10, spherical=False):
-    r"""
-    From Derek: assemble and assemble3 are identical functions, hence the try/except at the start
-        n_unit can be a tuple or an integer
-
-    Creates a finite lattice
-    Args:
-        O, Structure attribute O (3x3 ndarray), orientation matrix of crystal
-            (columns are the lattice vectors a,b,c)
-        n_unit (int or 3-tuple): Number of unit cells along each crystal axis
-        spherical (bool): If true, apply a spherical boundary to the crystal.
-    """
-
-    #lattice coordinates
-    try:
-        n_unit_a, n_unit_b, n_unit_c = n_unit
-    except TypeError:
-        n_unit_a = n_unit_b = n_unit_c = n_unit
-
-    a_vec, b_vec, c_vec = O.T
-    vecs = np.array([i * a_vec + j * b_vec + k * c_vec
-                          for i in range(n_unit_a)
-                          for j in range(n_unit_b)
-                          for k in range(n_unit_c)])
-
-    # sphericalize the lattice..
-    if spherical:
-        vecs = simutils.sphericalize(vecs)
-
-    return vecs
+# def assemble(O, n_unit=10, spherical=False):
+#     r"""
+#     From Derek: assemble and assemble3 are identical functions, hence the try/except at the start
+#         n_unit can be a tuple or an integer
+#
+#     Creates a finite lattice
+#     Args:
+#         O, Structure attribute O (3x3 ndarray), orientation matrix of crystal
+#             (columns are the lattice vectors a,b,c)
+#         n_unit (int or 3-tuple): Number of unit cells along each crystal axis
+#         spherical (bool): If true, apply a spherical boundary to the crystal.
+#     """
+#
+#     #lattice coordinates
+#     try:
+#         n_unit_a, n_unit_b, n_unit_c = n_unit
+#     except TypeError:
+#         n_unit_a = n_unit_b = n_unit_c = n_unit
+#
+#     a_vec, b_vec, c_vec = O.T
+#     vecs = np.array([i * a_vec + j * b_vec + k * c_vec
+#                           for i in range(n_unit_a)
+#                           for j in range(n_unit_b)
+#                           for k in range(n_unit_c)])
+#
+#     # sphericalize the lattice..
+#     if spherical:
+#         vecs = simutils.sphericalize(vecs)
+#
+#     return vecs

@@ -12,7 +12,7 @@ import bornagain as ba
 from numba import jit
 try:
     from bornagain import fortran
-except:
+except ImportError:
     fortran = None
 
 def vec_norm(vec):
