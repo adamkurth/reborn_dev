@@ -225,6 +225,7 @@ class CrystalStructure(object):
         ncs_partners = [r]
         n_ncs_partners = len(dic['ncs_rotations'])
         if n_ncs_partners > 0:
+            print('Adding NCS partners')
             for i in range(n_ncs_partners):
                 R = dic['ncs_rotations'][i]
                 T = dic['ncs_translations'][i]
@@ -240,15 +241,20 @@ class CrystalStructure(object):
         for i in range(n_sym):
             R = dic['spacegroup_rotations'][i]
             T = dic['spacegroup_translations'][i]
-            W = np.round(np.dot(S, np.dot(R, np.linalg.inv(S))))
+            W = np.dot(S, np.dot(R, np.linalg.inv(S)))
+            print(W)
+            W = np.round(W)
+            print(W)
             Z = np.dot(S, T) + np.dot(np.eye(3)-W, U)
+            print(Z)
             w = Z != 0
             Z[w] = 1/np.round(1/Z[w])
+            print(Z)
             rotations.append(W)
             translations.append(Z)
         self.spacegroup = SpaceGroup(dic['spacegroup_symbol'], rotations, translations)
 
-        r_au_mod = np.dot(np.linalg.inv(S), x_au.T).T
+        r_au_mod = np.dot(x_au, self.unitcell.o_mat.T)
         self.molecule = Molecule(coordinates=r_au_mod, atomic_symbols=dic['atomic_symbols'])
 
     @property
@@ -262,9 +268,7 @@ class CrystalStructure(object):
 
         """
 
-        if self._x is None:
-            self._x = np.dot(self.unitcell.o_mat_inv, self.molecule.coordinates.T).T
-        return self._x
+        return self.fractional_coordinates
 
     @property
     def x(self):
@@ -405,6 +409,7 @@ def pdb_to_dict(pdb_file_path):
             if line[0:5] == 'MODEL':
                 model_number = int(line[10:14])
                 if model_number > 1:
+                    print('Warning: found more than one atomic model in PDB file.  Keeping only the first one.')
                     break
 
             # Transformations from orthogonal coordinates to fractional coordinates

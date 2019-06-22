@@ -56,9 +56,11 @@ Testing
 -------
 
 We use `pytest <http://doc.pytest.org/>`_ to test the bornagain codebase.  It is very simple to make a new test.
-Just create a file that has a name that beginning with `test_`, and within this file write functions that begin with
-`test_`, and within those functions you include assert() statements.  These functions go into the test directory.  We
-then run pytest from within the test directory, and all tests will be ran.
+
+1) Create a file that has a name that beginning with `test_` in the bornagain/test directory
+2) Within this file, write functions with names that begin with `test_`
+3) Within those functions, include assert statements.
+4) Run pytest in the test directory, and all tests will run.
 
 
 Generation of documentation

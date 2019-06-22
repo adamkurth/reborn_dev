@@ -32,7 +32,7 @@ if plot and 0:
 # Look up atomic scattering factors (they are complex numbers)
 print('Getting scattering factors')
 wavelength = 1.5e-10
-f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
+f = cryst.molecule.get_scattering_factors(ba.units.hc / wavelength)
 
 print('Setting up 3D mesh')
 d = 0.5e-9  # Minimum resolution

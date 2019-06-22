@@ -325,8 +325,8 @@ class PADGeometry(object):
             weight = beam.polarization_weight
 
         v = vec_norm(self.position_vecs())
-        u = vec_norm(polarization_vec)
-        b = vec_norm(beam_vec)
+        u = vec_norm(np.array(polarization_vec))
+        b = vec_norm(np.array(beam_vec))
         up = np.cross(u, b)
 
         if weight is None:
