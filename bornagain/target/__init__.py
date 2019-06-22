@@ -7,4 +7,3 @@ from . import crystal
 from . import density
 from . import molecule
 from . import placer
-from . import spgrp

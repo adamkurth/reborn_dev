@@ -6,7 +6,6 @@ except ImportError:
 import bornagain as ba
 from bornagain import detector
 from bornagain import source
-from bornagain.utils import rotate
 from bornagain.simulate.examples import lysozyme_pdb_file
 from bornagain.target import crystal, density
 
@@ -70,11 +69,11 @@ def test_mappings():
     intensities1 = pad.reshape(np.abs(amps_slice_gpu.get())**2)
     intensities2 = pad.reshape(np.abs(amps_mol_gpu.get())**2)
     intensities3 = pad.reshape(np.abs(amps_mol_gpu2.get())**2)
-    import pyqtgraph as pg
-    pg.image(np.concatenate([intensities1-intensities2, intensities2-intensities3]))
-    pg.image(np.concatenate([intensities1, intensities2, intensities3]))
-    pg.QtGui.QApplication.exec_()
-    # Is this reasonable?  10% error is a lot larger than I expected from the trilinear interpolation...
-    assert np.mean(np.abs(intensities1 - intensities2))/np.mean(np.abs(intensities2)) < 1e-1
-    assert np.mean(np.abs(intensities1 - intensities3))/np.mean(np.abs(intensities2)) < 1e-1
+    # import pyqtgraph as pg
+    # pg.image(np.concatenate([intensities1-intensities2, intensities2-intensities3]))
+    # pg.image(np.concatenate([intensities1, intensities2, intensities3]))
+    # pg.QtGui.QApplication.exec_()
+    # Is this reasonable?  1% error is a lot larger than I expected from the trilinear interpolation...
+    assert np.mean(np.abs(intensities1 - intensities2))/np.mean(np.abs(intensities2)) < 1e-2
+    assert np.mean(np.abs(intensities1 - intensities3))/np.mean(np.abs(intensities2)) < 1e-2
     assert np.mean(np.abs(intensities3 - intensities2))/np.mean(np.abs(intensities2)) < 1e-5

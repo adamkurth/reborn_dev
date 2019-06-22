@@ -10,6 +10,7 @@ import urllib
 import pkg_resources
 import numpy as np
 from bornagain.target.molecule import Molecule
+from bornagain.utils import warn
 
 pdb_data_path = pkg_resources.resource_filename('bornagain.simulate', os.path.join('data', 'pdb'))
 
@@ -41,8 +42,8 @@ def get_pdb_file(pdb_id, save_path='.'):
 class UnitCell(object):
 
     r"""
-    Simple class for unit cell information.  Provides the convenience methods r2x, x2r, q2h and h2q for transforming
-    between fractional and orthogonal coordinates in real space and reciprocal space.
+    Simple class for unit cell information.  Provides the convenience methods r2x(), x2r(), q2h() and h2q() for
+    transforming between fractional and orthogonal coordinates in real space and reciprocal space.
     """
 
     a = None  #: Lattice constant
@@ -154,8 +155,12 @@ class UnitCell(object):
 class SpaceGroup(object):
     r"""
     Container for crystallographic spacegroup information.  Most importantly, transformation matices and vectors.  These
-    transformations are in the fractional coordinate basis; this class has no awareness of a unit cell and hence
-    cannot work with real-space orthogonal coordinates.
+    transformations are purely in the fractional coordinate basis.  This class has no awareness of a unit cell and hence
+    cannot work with real-space orthogonal coordinates.  Note that we make no effort to translate the meaning of
+    the spacegroup symbol; I have yet to find a good piece of documentation that describes how to consistently translate
+    a spacegroup symbol string into a set of symmetry operations.  The typical thing to do in order to generate the
+    correct operations is to use the information in a PDB file, but even then you only get the operations that act on
+    orthogonal coordinates and thus you must transform them into the fractional basis.  This is an ugly mess!!!
     """
 
     spacegroup_symbol = None  #: Spacegroup symbol (free format...)
@@ -164,7 +169,8 @@ class SpaceGroup(object):
 
     def __init__(self, spacegroup_symbol, sym_rotations, sym_translations):
         r"""
-        Initialization requires that you determine the rotations and translations.
+        Initialization requires that you determine the lists of rotations and translations yourself and provide them
+        upon instantiation.
         """
         self.spacegroup_symbol = spacegroup_symbol
         self.sym_rotations = sym_rotations
@@ -172,13 +178,19 @@ class SpaceGroup(object):
 
     @property
     def n_molecules(self):
+        r""" The number of symmetry operations. """
+        return self.n_operations
+
+    @property
+    def n_operations(self):
+        r""" The number of symmetry operations. """
         return len(self.sym_rotations)
 
     def apply_symmetry_operation(self, op_num, x_vecs):
         r"""
         Apply a symmetry operation to an asymmetric unit.
 
-        Args:
+        Arguments:
             op_num (int): The number of the operation to be applied.
             x_vecs (Nx3 array): The atomic coordinates in the crystal basis.
 
@@ -186,7 +198,21 @@ class SpaceGroup(object):
         """
         rot = self.sym_rotations[op_num]
         trans = self.sym_translations[op_num]
-        return np.dot(rot, x_vecs.T).T + trans
+        return np.dot(x_vecs, rot.T) + trans
+
+    def apply_inverse_symmetry_operation(self, op_num, x_vecs):
+        r"""
+        Apply an inverse symmetry operation to an asymmetric unit.
+
+        Arguments:
+            op_num (int): The number of the operation to be applied.
+            x_vecs (Nx3 array): The atomic coordinates in the crystal basis.
+
+        Returns: Nx3 array.
+        """
+        rot = self.sym_rotations[op_num]
+        trans = self.sym_translations[op_num]
+        return np.dot((x_vecs - trans), np.linalg.inv(rot).T)
 
 
 class CrystalStructure(object):
@@ -217,7 +243,6 @@ class CrystalStructure(object):
         self.unitcell = UnitCell(a*1e-10, b*1e-10, c*1e-10, al*np.pi/180, be*np.pi/180, ga*np.pi/180)
         S = dic['scale_matrix']
         U = dic['scale_translation']
-        # print(self.unitcell.o_mat_inv - S)
 
         # These are the initial coordinates with strange origin
         r = dic['atomic_coordinates']
@@ -225,7 +250,7 @@ class CrystalStructure(object):
         ncs_partners = [r]
         n_ncs_partners = len(dic['ncs_rotations'])
         if n_ncs_partners > 0:
-            print('Adding NCS partners')
+            warn('Adding NCS partners')
             for i in range(n_ncs_partners):
                 R = dic['ncs_rotations'][i]
                 T = dic['ncs_translations'][i]
@@ -242,14 +267,10 @@ class CrystalStructure(object):
             R = dic['spacegroup_rotations'][i]
             T = dic['spacegroup_translations'][i]
             W = np.dot(S, np.dot(R, np.linalg.inv(S)))
-            print(W)
             W = np.round(W)
-            print(W)
             Z = np.dot(S, T) + np.dot(np.eye(3)-W, U)
-            print(Z)
             w = Z != 0
             Z[w] = 1/np.round(1/Z[w])
-            print(Z)
             rotations.append(W)
             translations.append(Z)
         self.spacegroup = SpaceGroup(dic['spacegroup_symbol'], rotations, translations)
@@ -409,7 +430,7 @@ def pdb_to_dict(pdb_file_path):
             if line[0:5] == 'MODEL':
                 model_number = int(line[10:14])
                 if model_number > 1:
-                    print('Warning: found more than one atomic model in PDB file.  Keeping only the first one.')
+                    warn('Found more than one atomic model in PDB file.  Keeping only the first one.')
                     break
 
             # Transformations from orthogonal coordinates to fractional coordinates
