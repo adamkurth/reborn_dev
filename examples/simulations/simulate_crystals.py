@@ -1,3 +1,4 @@
+import numpy as np
 from bornagain import detector, source, target
 from bornagain.simulate.examples import CrystalSimulatorV1
 from bornagain.simulate import examples
@@ -22,7 +23,9 @@ cryst.crystal_size_fwhm = cryst.crystal_size * 0.001
 cryst.mosaic_domain_size_fwhm = cryst.mosaic_domain_size * 0.001
 cryst.mosaicity_fwhm = 0.01
 
-simulator = CrystalSimulatorV1(pad_geometry=pad, beam=beam, crystal_structure=cryst, n_iterations=1,
+mask = pad.beamstop_mask(q_min=2*np.pi/500e-10, beam=beam)
+
+simulator = CrystalSimulatorV1(pad_geometry=pad, beam=beam, crystal_structure=cryst, n_iterations=10,
                                approximate_shape_transform=False, cromer_mann=False, expand_symmetry=False,
                                cl_double_precision=False, cl_group_size=32, poisson_noise=True)
 
@@ -30,14 +33,15 @@ simulator.generate_pattern()
 
 class MyFrameGetter(FrameGetter):
     generate_pattern = None
-
+    mask = None
     def get_frame(self, frame_number=1):
-        dat = {'pad_data': [self.generate_pattern()]}
+        dat = {'pad_data': [self.generate_pattern()*self.mask]}
         return dat
 
 
 frame_getter = MyFrameGetter()
 frame_getter.generate_pattern = simulator.generate_pattern
+frame_getter.mask = mask
 
-padview = PADView(pad_geometry=[pad], frame_getter=frame_getter)
+padview = PADView(pad_geometry=[pad], frame_getter=frame_getter, mask_data=[mask])
 padview.start()
