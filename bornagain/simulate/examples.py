@@ -311,10 +311,8 @@ class CrystalSimulatorV1(object):
             rotation_matrix = ba.utils.random_rotation()
 
         if not self.cromer_mann:
-            self.clcore.phase_factor_pad(self.r_dev, self.f_dev, self.pad_geometry.t_vec, self.pad_geometry.fs_vec,
-                                         self.pad_geometry.ss_vec, beam.beam_vec, self.pad_geometry.n_fs,
-                                         self.pad_geometry.n_ss, beam.wavelength, rotation_matrix, self.F_dev,
-                                         add=False)
+            self.clcore.phase_factor_pad(self.r_dev, f=self.f_dev, beam=beam, pad=pad, R=rotation_matrix,
+                                         a=self.F_dev, add=False)
             moltrans = np.abs(self.F_dev.get()) ** 2
         else:
             raise ValueError('Cromer-Mann needs to be re-implemented')
