@@ -40,13 +40,7 @@ The reciprocal lattice vectors are defined as
 
 where :math:`V_c = \mathbf{a}_1\cdot(\mathbf{a}_2\times\mathbf{a}_3)` is the volume of the unit cell.
 
-It is useful to note the following relations:
-
-.. math::
-
-    \mathbf{A} = (\mathbf{O}^{-1})^{T}
-
-    \mathbf{q}^T \mathbf{r} = \mathbf{h}^T \mathbf{x}
+It is useful to note the relation :math:`\mathbf{A} = (\mathbf{O}^{-1})^{T}`
 
 We define the Fourier transform in orthogonal coordinates as
 
@@ -57,7 +51,8 @@ Fourier transform is
 
 .. math:: f(\mathbf{r}) =\frac{1}{(2\pi)^3}\int F(\mathbf{q}) \exp(i 2 \pi \mathbf{q}^T \mathbf{r}) d^3q
 
-We may also define the Fourier transform in the fractional coordinate basis:
+In noting the relation :math:`\mathbf{q}^T \mathbf{r} = \mathbf{h}^T \mathbf{x}` we may also define the Fourier
+transform in the fractional coordinate basis:
 
 .. math:: F(\mathbf{h}) = V_c \int f(\mathbf{x}) \exp(-i 2 \pi \mathbf{h}^T \mathbf{x}) d^3x
 
