@@ -8,7 +8,6 @@ from scipy.stats import binned_statistic_dd
 try:
     from numba import jit
 except ImportError:
-    # Define a phony jit decorator that does nothing.  Beware of very slow execution...
     from bornagain.numba_ import jit
 
 

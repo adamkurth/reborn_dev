@@ -1,9 +1,9 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import numpy                 as np
-import pyqtgraph             as pg
-import pyqtgraph.opengl      as gl
-from   pyqtgraph.Qt import QtCore, QtGui
+import numpy as np
+import pyqtgraph as pg
+import pyqtgraph.opengl as gl
+from pyqtgraph.Qt import QtGui
 
 """
 This is supposed to have various viewers that use pyqtgraph.  It's mostly useless right now.

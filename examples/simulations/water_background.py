@@ -1,10 +1,8 @@
 import sys
-sys.path.append('../..')
-
 import numpy as np
 import matplotlib.pyplot as plt
 import bornagain
-from bornagain.simulate import solutions, examples
+from bornagain.simulate import solutions
 from bornagain.units import r_e, keV
 
 
