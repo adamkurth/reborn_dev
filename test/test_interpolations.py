@@ -23,7 +23,7 @@ def test_1():
             [ 0. ,  0.1,  0. ],
             [ 0. ,  0. ,  0. ]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -48,7 +48,7 @@ def test_2():
             [ 0.   ,  0.125,  0.125],
             [ 0.   ,  0.125,  0.125]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -72,7 +72,7 @@ def test_3():
             [ 0.,  0.,  0.],
             [ 0.,  0.,  0.]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -96,7 +96,7 @@ def test_4():
             [ 0.,  0.,  0.],
             [ 0.,  0.,  1.]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -120,7 +120,7 @@ def test_5():
             [ 0.   ,  0.   ,  0.   ],
             [ 0.   ,  0.   ,  0.   ]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -144,7 +144,7 @@ def test_6():
             [ 0.,  0.,  0.],
             [ 0.,  0.,  0.]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -169,7 +169,7 @@ def test_7():
             [ 0.        ,  0.        ,  0.        ]]])
 
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-6
 
 
@@ -193,7 +193,7 @@ def test_8():
             [ 0.        ,  0.        ,  0.        ],
             [ 0.        ,  0.        ,  0.12507502]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-6
 
 
@@ -217,7 +217,7 @@ def test_9():
             [  0. ,   0. ,   0. ],
             [  0. ,   0. ,   0. ]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -241,7 +241,7 @@ def test_10():
             [  0.     ,   0.     ,   0.     ],
             [  0.     ,   0.     ,   0.     ]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -275,7 +275,7 @@ def test_11():
             [ 0.        ,  1.74489971,  1.12437026],
             [ 0.        ,  2.56917323,  1.03009865]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-7
 
 
@@ -304,7 +304,7 @@ def test_12():
             [ 0.  ,  0.  ,  0.  ,  0.  ],
             [ 0.  ,  0.  ,  0.  ,  1.  ]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -335,7 +335,7 @@ def test_13():
             [ 0.   ,  0.   ,  0.   ,  0.   ],
             [ 0.   ,  0.   ,  0.   ,  0.   ]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -366,6 +366,14 @@ def test_14(): # Out of bounds test
             [ 0.,  0.,  0.,  0.],
             [ 0.,  0.,  0.,  0.]]])
 
-    dataout =  trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
+
+
+
+
+
+
+
+
 
