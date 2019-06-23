@@ -1,1 +1,0 @@
-from .simpleview import SimplePAD

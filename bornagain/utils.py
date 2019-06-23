@@ -9,7 +9,10 @@ import sys
 import numpy as np
 from numpy import sin, cos
 import bornagain as ba
-from numba import jit
+try:
+    from numba import jit
+except ImportError:
+    from bornagain.numba_ import jit
 try:
     from bornagain import fortran
 except ImportError:
@@ -356,6 +359,26 @@ def random_mosaic_rotation(mosaicity_fwhm):
     rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
     rind = np.random.permutation([0, 1, 2])
     return rs[rind[0]].dot(rs[rind[1]].dot(rs[rind[2]]))
+
+
+def triangle_solid_angle(r1, r2, r3):
+    r"""
+    Compute solid angle of a triangle whose vertices are r1,r2,r3, using the method of
+    Van Oosterom, A. & Strackee, J. Biomed. Eng., IEEE Transactions on BME-30, 125-126 (1983).
+    """
+
+    numer = np.abs(np.dot(r1, np.cross(r2, r3)))
+
+    r1_n = np.linalg.norm(r1)
+    r2_n = np.linalg.norm(r2)
+    r3_n = np.linalg.norm(r3)
+    denom = r1_n * r2_n * r2_n
+    denom += np.dot(r1, r2) * r3_n
+    denom += np.dot(r2, r3) * r1_n
+    denom += np.dot(r3, r1) * r2_n
+    s_ang = np.arctan2(numer, denom) * 2
+
+    return s_ang
 
 
 def memoize(function):
