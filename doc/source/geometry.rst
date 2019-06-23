@@ -65,7 +65,7 @@ where the vector normal to the PAD is
 
     :math:`\hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}`
 
-The :any:`PADGeometry` class can currently generate the above quantities for you, along with other helpful functions.
+The :class:`PADGeometry <bornagain.detector.PADGeometry>` class can currently generate the above quantities for you, along with other helpful functions.
 
 
 Data and geometry formats

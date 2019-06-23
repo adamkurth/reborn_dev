@@ -9,9 +9,8 @@ Since bornagain is changing frequently at this time, it is recommended that you 
 where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving
 code alongside results is good practice anyways.
 
-The main setup task is to simply ensure that Python can load the bornagain package.  If you do not know how to do this,
-you should take some time to learn a little bit about how Python imports work in general.  Here are three suggestions
-for how to get your path set up:
+The main setup task is to simply ensure that Python can load the bornagain package.  Here are three different
+suggestions for how to get your path set up:
 
 1) Within your shell, you can set an environment variable so that Python looks in the right place for bornagain.
 If you are using the bash shell, you can do the following:
@@ -24,8 +23,8 @@ If you are using the bash shell, you can do the following:
 
 .. code-block:: python
 
-	import sys
-	sys.path.append("example/path/to/bornagain")
+    import sys
+    sys.path.append("example/path/to/bornagain")
 
 3) You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
 example:
@@ -44,8 +43,8 @@ If you do any of the above correctly, you should then be able to import bornagai
     import bornagain
 
 
-Compillation of Fortran code
-----------------------------
+Compilation of Fortran code
+---------------------------
 
 There are a couple of bornagain modules that rely on Fortran.  In principle, they are not necessary, but they will speed
 up some routines.  We use the f2py program to compile Fortran code and create Python modules.  Most likely, you can
@@ -62,44 +61,49 @@ all set.
 Dependencies
 ------------
 
-The current dependencies of bornagain are:
+The most basic classes in bornagain should work so long as you have the following dependencies installed:
 
 * h5py
 * numpy
 * scipy
-* matplotlib
-* ipython
+* future
+
+Some functions will run faster if you install:
+
+* numba
+
+If you want to run simulations, you'll need
+
+* pyopencl
+
+If you are developing bornagain you will need
+
 * pytest
 * sphinx
+
+There are some visualization tools that depend on:
+
+* matplotlib
 * pyqtgraph
-* pyopencl
 * pyopengl
-* future
-* numba
+
+A couple of specialized packages are used for dealing with LCLS XTC data and CrystFEL geometry files:
+
+* psana
 * cfelpyutils
 
-You can use bornagain with only a subset of of the above dependencies (e.g. skip pyopencl if you don't want to simulate,
-and skip sphinx if you won't be modifying the documentation, skip pyqtgraph if you won't use those GUIs, etc.),
-but it's usually not difficult to install all of them for completeness.
-
 We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
-compatibility with both pyqt4 and pyqt5 (which is proving to be somewhat difficult...). If you're deciding on which
-version to use, here are a couple things to consider:
-
-- At the time of this writing, the LCLS psana module requires Python 2.7.
-- It doesn't appear to be easy to install both pyqt4 and pyqt5 in the same Python installation
-- `Anaconda and Miniconda <https://conda.io/miniconda.html>`_ python do not support pyqt4 in Python 3.7.
-
-It's hard to say what's best for you, but hopefully things work no matter what versions of software you use.
+compatibility with both pyqt4 and pyqt5.
 
 Example setup
 -------------
 
-`Miniconda <https://conda.io/miniconda.html>`_ is a reliable and lightweight distribution of python.  The
-`Conda <https://conda.io/docs/>`_ package manager that comes with it makes it fast and easy to set up Python.  You might
+`Miniconda <https://conda.io/miniconda.html>`_ is a reliable and lightweight distribution of python that is known to
+work well with bornagain.  The `Conda <https://conda.io/docs/>`_ package manager that comes with it makes it fast and
+easy to install the dependencies of bornagain.  You might
 consider making a `conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_ to check that
-everything works well, since packages like opengl, opencl, pyqt seem to have complicated, and occasionally conflicting
-requirments.
+everything works well, since packages like opengl, opencl, pyqt have had conflicting requirments in the past (however,
+not many problems have been noticed since 2019).
 
 Assuming that you've installed conda, here's an example of how to set up a new conda environment:
 
