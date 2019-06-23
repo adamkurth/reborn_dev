@@ -20,7 +20,7 @@ matrix".   The columns of the orthogonalization matrix are the basis vectors :ma
 .. math:: \mathbf{O} = \begin{bmatrix}  | & |  & | \\ \mathbf{a}_1 &  \mathbf{a}_2 & \mathbf{a}_3 \\ | & | & | \end{bmatrix}
 
 In reciprocal space, we have analogous mathematics for the *reciprocal coordinates* :math:`\mathbf{q}` and *fractional
-Miller indices* :math:`\mathbf{h}`.  They are related by the :math:`\mathbf{A}` matrix:
+Miller indices* :math:`\mathbf{h}`.  They are related by the matrix :math:`\mathbf{A} = (\mathbf{O}^{-1})^{T}`:
 
 .. math:: \mathbf{q} = \mathbf{A} \mathbf{h}
 
@@ -39,8 +39,6 @@ The reciprocal lattice vectors are defined as
     \mathbf{a}_3^* = \mathbf{a}_1\times \mathbf{a}_2  / V_c
 
 where :math:`V_c = \mathbf{a}_1\cdot(\mathbf{a}_2\times\mathbf{a}_3)` is the volume of the unit cell.
-
-It is useful to note the relation :math:`\mathbf{A} = (\mathbf{O}^{-1})^{T}`
 
 We define the Fourier transform in orthogonal coordinates as
 
