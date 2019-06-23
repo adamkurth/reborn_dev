@@ -1,35 +1,18 @@
 # coding=utf-8
 '''
 Basic utilities for dealing with crystalline objects.
-
-from Derek: Is using meters really the best here, given the PDB standard is Angstrom
-and we will likey always deal with Angstrom scale coordinates?
-
-for example print( "Lattice dim is %.3f"%(0.0000008)) will print 0.000, which can
-cause problems...
 '''
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
 import urllib
-# Python 2 and 3 compatibility...
-try:
-    basestring
-except NameError:
-    basestring = str
-
 import pkg_resources
 import numpy as np
-from numpy import sin, cos, sqrt
-import spglib
-import bornagain.target
-from bornagain import utils
-from bornagain.utils import rotate
-from bornagain.simulate import simutils
+from bornagain.target.molecule import Molecule
+from bornagain.utils import warn
 
 pdb_data_path = pkg_resources.resource_filename('bornagain.simulate', os.path.join('data', 'pdb'))
-
 
 def get_pdb_file(pdb_id, save_path='.'):
     r"""
@@ -58,6 +41,11 @@ def get_pdb_file(pdb_id, save_path='.'):
 
 class UnitCell(object):
 
+    r"""
+    Simple class for unit cell information.  Provides the convenience methods r2x(), x2r(), q2h() and h2q() for
+    transforming between fractional and orthogonal coordinates in real space and reciprocal space.
+    """
+
     a = None  #: Lattice constant
     b = None  #: Lattice constant
     c = None  #: Lattice constant
@@ -65,15 +53,15 @@ class UnitCell(object):
     beta = None  #: Lattice angle
     gamma = None  #: Lattice angle
     volume = None  #: Unit cell volume
-    o_mat = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = dot(O, x), with fractional coordinates x.
+    o_mat = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = O.x on fractional coordinates x.
     o_mat_inv = None  #: Inverse orthogonalization matrix (3x3 array)
-    a_mat = None  #: Orthogonalization matrix transpose (3x3 array). Does the transform q = dot(A, h), with fractional Miller indices h.
+    a_mat = None  #: Orthogonalization matrix transpose (3x3 array). Does the transform q = A.h, with Miller indices h.
     a_mat_inv = None  #: A inverse
 
     def __init__(self, a, b, c, alpha, beta, gamma):
         r"""
 
-        Set the unit cell lattice.
+        Always initialize with the lattice parameters.  Units are SI and radians.
 
         Args:
             a: Lattice constant
@@ -95,17 +83,17 @@ class UnitCell(object):
         self.beta = be
         self.gamma = ga
 
-        vol = a * b * c * sqrt(1 - cos(al)**2 - cos(be) **
-                             2 - cos(ga)**2 + 2 * cos(al) * cos(be) * cos(ga))
+        vol = a * b * c * np.sqrt(1 - np.cos(al)**2 - np.cos(be) **
+                             2 - np.cos(ga)**2 + 2 * np.cos(al) * np.cos(be) * np.cos(ga))
         o_mat = np.array([
-                [a, b * cos(ga), c * cos(be)],
-                [0, b * sin(ga), c * (cos(al) - cos(be) * cos(ga)) / sin(ga)],
-                [0, 0, vol / (a * b * sin(ga))]
+                [a, b * np.cos(ga), c * np.cos(be)],
+                [0, b * np.sin(ga), c * (np.cos(al) - np.cos(be) * np.cos(ga)) / np.sin(ga)],
+                [0, 0, vol / (a * b * np.sin(ga))]
                 ])
         o_inv = np.array([
-                [1 / a, -cos(ga) / (a * sin(ga)), 0],
-                [0, 1 / (b * sin(ga)), 0],
-                [0, 0, a * b * sin(ga) / vol]
+                [1 / a, -np.cos(ga) / (a * np.sin(ga)), 0],
+                [0, 1 / (b * np.sin(ga)), 0],
+                [0, 0, a * b * np.sin(ga) / vol]
                 ])
         self.o_mat = o_mat
         self.o_mat_inv = o_inv
@@ -115,19 +103,19 @@ class UnitCell(object):
 
     def r2x(self, r_vecs):
         r""" Transform orthogonal coordinates to fractional coordinates. """
-        return rotate(self.o_mat_inv, r_vecs)
+        return np.dot(r_vecs, self.o_mat_inv.T)
 
     def x2r(self, x_vecs):
         r""" Transform fractional coordinates to orthogonal coordinates. """
-        return rotate(self.o_mat, x_vecs)
+        return np.dot(x_vecs, self.o_mat.T)
 
     def q2h(self, q_vecs):
         r""" Transform reciprocal coordinates to fractional Miller coordinates. """
-        return rotate(self.a_mat_inv, q_vecs)
+        return np.dot(q_vecs, self.a_mat_inv.T)
 
     def h2q(self, h_vecs):
         r""" Transform fractional Miller coordinates to reciprocal coordinates. """
-        return rotate(self.a_mat, h_vecs)
+        return np.dot(h_vecs, self.a_mat.T)
 
     @property
     def a_vec(self):
@@ -166,242 +154,129 @@ class UnitCell(object):
 
 class SpaceGroup(object):
     r"""
-    Container for crystallographic spacegroup information.  Note that the 230 ITOC numbers that
-    specify space groups refer only to the actual symmetry properties.  There are multiple Hall numbers and Hermann
-    Mauguin symbols that correspond to the same spacegroup.  The duplicates are just different ways of specifying the
-    same spacegroup -- e.g. some may apply rotations around different axes than others.
+    Container for crystallographic spacegroup information.  Most importantly, transformation matices and vectors.  These
+    transformations are purely in the fractional coordinate basis.  This class has no awareness of a unit cell and hence
+    cannot work with real-space orthogonal coordinates.  Note that we make no effort to translate the meaning of
+    the spacegroup symbol; I have yet to find a good piece of documentation that describes how to consistently translate
+    a spacegroup symbol string into a set of symmetry operations.  The typical thing to do in order to generate the
+    correct operations is to use the information in a PDB file, but even then you only get the operations that act on
+    orthogonal coordinates and thus you must transform them into the fractional basis.  This is an ugly mess!!!
     """
 
-    hall_number = None  #: Space group Hall number
-    itoc_number = None  #: Space group number in the International Tables of Crystallography (ITOC)
-    hermann_mauguin_symbol = None  #: Spacegroup Hermann Mauguin symbol (e.g. as it appears in a PDB file for example)
-    sym_rotations = None  #: Symmetry 3x3 transformation matrices (in crystal basis)
-    sym_translations = None  #: Symmetry translations (in crystal basis)
-    n_molecules = None  #: Number of symmetry-related molecules
+    spacegroup_symbol = None  #: Spacegroup symbol (free format...)
+    sym_rotations = None      #: 3x3 transformation matrices (fractional coordinates)
+    sym_translations = None   #: Symmetry translations (fractional coordinates)
 
-    def __init__(self, hermann_mauguin_symbol=None, hall_number=None, itoc_number=None):
+    def __init__(self, spacegroup_symbol, sym_rotations, sym_translations):
         r"""
-        Initialize the spacegroup.  You must identify the spacegroup by either a Hall number, a
-        Hermann Mauguin symbol, or an ITOC number (see International Tables of Crystallography).
-
-        Args:
-            hermann_mauguin_symbol (string): Hermann Mauguin symbol (for example: P63)
-            hall_number (int): One of the 1-530 Hall numbers.
-            itoc_number (int): One of the 230 ITOC numbers.
+        Initialization requires that you determine the lists of rotations and translations yourself and provide them
+        upon instantiation.
         """
+        self.spacegroup_symbol = spacegroup_symbol
+        self.sym_rotations = sym_rotations
+        self.sym_translations = sym_translations
 
-        if hall_number is not None:
-            self.hall_number = hall_number
-            self.itoc_number = itoc_number_from_hall_number(hall_number)
-            self.hermann_mauguin_symbol = hermann_mauguin_symbol_from_hall_number(hall_number)
-        elif hermann_mauguin_symbol is not None:
-            self.hermann_mauguin_symbol = hermann_mauguin_symbol
-            self.itoc_number = itoc_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol)
-            self.hall_number = hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol)
-        elif itoc_number is not None:
-            self.itoc_number = itoc_number
-            self.hall_number = hall_number_from_itoc_number(itoc_number)
-            self.hermann_mauguin_symbol = hermann_mauguin_symbol_from_hall_number(self.hall_number)
-        else:
-            raise ValueError('You must initialize SpaceGroup with a spacegroup identifier')
+    @property
+    def n_molecules(self):
+        r""" The number of symmetry operations. """
+        return self.n_operations
 
-        self.sym_rotations, self.sym_translations = get_symmetry_operators_from_hall_number(self.hall_number)
-        self.n_molecules = len(self.sym_rotations)
+    @property
+    def n_operations(self):
+        r""" The number of symmetry operations. """
+        return len(self.sym_rotations)
 
-    def apply_symmetry_operation(self, op_num=None, x_vecs=None, inverse=False):
+    def apply_symmetry_operation(self, op_num, x_vecs):
         r"""
         Apply a symmetry operation to an asymmetric unit.
 
-        Args:
+        Arguments:
             op_num (int): The number of the operation to be applied.
             x_vecs (Nx3 array): The atomic coordinates in the crystal basis.
-            inverse (bool): If true, do the inverse operation.  Default is False.
 
         Returns: Nx3 array.
         """
         rot = self.sym_rotations[op_num]
         trans = self.sym_translations[op_num]
-        return utils.rotate(rot, x_vecs) + trans
+        return np.dot(x_vecs, rot.T) + trans
+
+    def apply_inverse_symmetry_operation(self, op_num, x_vecs):
+        r"""
+        Apply an inverse symmetry operation to an asymmetric unit.
+
+        Arguments:
+            op_num (int): The number of the operation to be applied.
+            x_vecs (Nx3 array): The atomic coordinates in the crystal basis.
+
+        Returns: Nx3 array.
+        """
+        rot = self.sym_rotations[op_num]
+        trans = self.sym_translations[op_num]
+        return np.dot((x_vecs - trans), np.linalg.inv(rot).T)
 
 
 class CrystalStructure(object):
     r"""
-    A container class for stuff needed when dealing with crystal structures.
+    A container class for stuff needed when dealing with crystal structures.  Combines information regarding the
+    asymmetric unit, unit cell, and spacegroup.
     """
     # TODO: Needs documentation!
 
-    _x = None  #: Fractional coordinates (3xN array)
-    T = None  #: Translation vector that goes with orthogonalization matrix (What is this used for???)
-
-    molecule = None
-    unitcell = None
-    spacegroup = None
+    fractional_coordinates = None  # : Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
+    molecule = None  # : Molecule class instance containing the asymmetric unit
+    unitcell = None  # : UnitCell class instance
+    spacegroup = None  # : Spacegroup class instance
     mosaicity_fwhm = 0
     crystal_size = 1e-6
     crystal_size_fwhm = 0.0
     mosaic_domain_size = 0.5e-6
     mosaic_domain_size_fwhm = 0.0
     cryst1 = ""
+    pdb_dict = None
 
-    def __init__(self, pdbFilePath=None, spacegroup=None):
+    def __init__(self, pdb_file_path):
 
-        if pdbFilePath is not None:
-            dic = pdb_to_dict(pdbFilePath)
-            self.set_molecule(dic['orthogonal_coordinates'], atomic_symbols=dic['atomic_symbols'])
-            self.set_cell(*dic['cell'])
-            if spacegroup is None:
-                self.set_spacegroup(hermann_mauguin_symbol=dic['sg_symbol'])
-        if spacegroup is not None:
-            self.spacegroup = spacegroup
+        dic = pdb_to_dict(pdb_file_path)
+        self.pdb_dict = dic
 
-    def load_pdb(self, pdb_file_path):
+        a, b, c, al, be, ga = dic['unit_cell']
+        self.unitcell = UnitCell(a*1e-10, b*1e-10, c*1e-10, al*np.pi/180, be*np.pi/180, ga*np.pi/180)
+        S = dic['scale_matrix']
+        U = dic['scale_translation']
 
-        r"""
+        # These are the initial coordinates with strange origin
+        r = dic['atomic_coordinates']
+        # Check for non-crystallographic symmetry.  Construct asymmetric unit from them.
+        ncs_partners = [r]
+        n_ncs_partners = len(dic['ncs_rotations'])
+        if n_ncs_partners > 0:
+            warn('Adding NCS partners')
+            for i in range(n_ncs_partners):
+                R = dic['ncs_rotations'][i]
+                T = dic['ncs_translations'][i]
+                ncs_partners.append(np.dot(r, R.T) + T)
+        r_au = np.vstack(ncs_partners)
+        # Transform to fractional coordinates
+        x_au = np.dot(S, r_au.T).T + U
+        self.fractional_coordinates = x_au
 
-        Populate the class with all the info from a PDB file.
+        n_sym = len(dic['spacegroup_rotations'])
+        rotations = []
+        translations = []
+        for i in range(n_sym):
+            R = dic['spacegroup_rotations'][i]
+            T = dic['spacegroup_translations'][i]
+            W = np.dot(S, np.dot(R, np.linalg.inv(S)))
+            W = np.round(W)
+            Z = np.dot(S, T) + np.dot(np.eye(3)-W, U)
+            w = Z != 0
+            Z[w] = 1/np.round(1/Z[w])
+            rotations.append(W)
+            translations.append(Z)
+        self.spacegroup = SpaceGroup(dic['spacegroup_symbol'], rotations, translations)
 
-        Args:
-            pdb_file_path: Path to the PDB file
-
-        """
-        parse_pdb(pdb_file_path, self)
-
-    def set_cell(self, *args, **kwargs):
-        r"""
-
-        Set the unit cell lattice.  Takes the same arguments as ``
-
-        """
-
-        self.unitcell = UnitCell(*args, **kwargs)
-
-    def set_spacegroup(self, *args, **kwargs):
-
-        r"""
-
-        Set the spacegroup of the crystal.  This produces a cache of the symmetry transformation operations.
-
-        Args:
-            hermann_mauguin_symbol:  A string like 'P 63'
-            hall_number: Hall number (between 1-530)
-            itoc_number: Spacegroup number from International Tables of Crystallography (between 1-230)
-
-        """
-
-        self.spacegroup = SpaceGroup(*args, **kwargs)
-
-    def set_molecule(self, *args, **kwargs):
-
-        r"""
-        See docs for target.Molecule
-        """
-
-        self.molecule = bornagain.target.molecule.Molecule(*args, **kwargs)
-
-    @property
-    def elements(self):
-        utils.depreciate('Use CrystalStructure.molecule')
-        return self.molecule.atomic_symbols
-
-    @property
-    def Z(self):
-        utils.depreciate('Use CrystalStructure.molecule')
-        return self.molecule.atomic_numbers
-
-    @property
-    def nAtoms(self):
-        utils.depreciate('Use CrystalStructure.molecule')
-        return self.molecule.n_atoms
-
-    @property
-    def r(self):
-        utils.depreciate('Use CrystalStructure.molecule')
-        return self.molecule.coordinates
-
-    @property
-    def a(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.a
-
-    @property
-    def b(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.b
-
-    @property
-    def c(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.c
-
-    @property
-    def alpha(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.alpha
-
-    @property
-    def beta(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.beta
-
-    @property
-    def gamma(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.gamma
-
-    @property
-    def V(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.volume
-
-    @property
-    def O(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.o_mat
-
-    @property
-    def Oinv(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.o_mat_inv
-
-    @property
-    def A(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.a_mat
-
-    @property
-    def Ainv(self):
-        utils.depreciate('Use CrystalStructure.unitcell')
-        return self.unitcell.a_mat_inv
-
-    @property
-    def hermannMauguinSymbol(self):
-        utils.depreciate('Use CrystalStructure.spacegroup')
-        return self.spacegroup.hermann_mauguin_symbol
-
-    @property
-    def spaceGroupNumber(self):
-        utils.depreciate('Use CrystalStructure.spacegroup')
-        return self.spacegroup.itoc_number
-
-    @property
-    def nMolecules(self):
-        utils.depreciate('Use CrystalStructure.spacegroup')
-        return self.n_molecules
-
-    @property
-    def n_molecules(self):
-        utils.depreciate('Use CrystalStructure.spacegroup')
-        return self.spacegroup.n_molecules
-
-    @property
-    def symRs(self):
-        utils.depreciate('Use CrystalStructure.spacegroup')
-        return self.spacegroup.sym_rotations
-
-    @property
-    def symTs(self):
-        utils.depreciate('Use CrystalStructure.spacegroup')
-        return self.spacegroup.sym_translations
+        r_au_mod = np.dot(x_au, self.unitcell.o_mat.T)
+        self.molecule = Molecule(coordinates=r_au_mod, atomic_symbols=dic['atomic_symbols'])
 
     @property
     def x_vecs(self):
@@ -414,39 +289,23 @@ class CrystalStructure(object):
 
         """
 
-        if self._x is None:
-            self._x = np.dot(self.unitcell.o_mat_inv, self.molecule.coordinates.T).T
-        return self._x
+        return self.fractional_coordinates
 
     @property
     def x(self):
         return self.x_vecs
 
     def get_symmetry_expanded_coordinates(self):
+        r"""
 
+        Returns: All atomic coordinates including spacegroup symmetry partners.
+
+        """
         x0 = self.x
         xs = []
         for (R, T) in zip(self.spacegroup.sym_rotations, self.spacegroup.sym_translations):
-            xs.append(utils.rotate(R, x0) + T)
-        return utils.rotate(self.unitcell.o_mat, np.concatenate(xs))
-
-
-class Structure(CrystalStructure):
-
-    def __init__(self, *args, **kwargs):
-
-        utils.depreciate('The class "crystal.Structure" is depreciated.  Use "crystal.CrystalStructure" instead.')
-
-        CrystalStructure.__init__(self, *args, **kwargs)
-
-
-class structure(CrystalStructure):
-
-    def __init__(self, *args, **kwargs):
-
-        utils.depreciate('The class "crystal.structure" is depreciated.  Use "crystal.CrystalStructure" instead.')
-
-        CrystalStructure.__init__(self, *args, **kwargs)
+            xs.append(np.dot(x0, R.T) + T)
+        return np.dot(np.concatenate(xs), self.unitcell.o_mat.T)
 
 
 class FiniteLattice(object):
@@ -488,7 +347,7 @@ class FiniteLattice(object):
     def all_r_coordinates(self):
 
         if self._all_r_coordinates is None:
-            self._all_r_coordinates = rotate(self.unitcell.o_mat, self.all_x_coordinates)
+            self._all_r_coordinates = np.dot(self.all_x_coordinates, self.unitcell.o_mat.T)
             self._all_r_coordinates.flags.writeable = False
 
         return self._all_r_coordinates
@@ -506,7 +365,7 @@ class FiniteLattice(object):
     @property
     def occupied_r_coordinates(self):
 
-        return rotate(self.unitcell.o_mat, self.occupied_x_coordinates)
+        return np.dot(self.occupied_x_coordinates, self.unitcell.o_mat.T)
 
     def add_facet(self, plane=None, length=None, shift=0):
 
@@ -531,8 +390,8 @@ class FiniteLattice(object):
 
 
 def pdb_to_dict(pdb_file_path):
-    r"""Return a :class:`CrystalStructure` object with PDB information.  The PDB information is converted to
-    the units of bornagain.
+    r"""Return a :class:`CrystalStructure` object with a subset of PDB information.  If there are multiple atomic
+    models, only the first will be extracted.  Units are the standard PDB units: angstrom and degrees.
 
     Arguments:
         pdb_file_path: path to pdb file
@@ -540,296 +399,111 @@ def pdb_to_dict(pdb_file_path):
     Returns:
         A dictionary with the following keys:
 
-           'orthogonalization_matrix': S,
-
-           'fractional_coordinates': fractional_coordinates,
-
-           'orthogonal_coordinates': coordinates*1e-10,
-
-           'atomic_symbols': atomic_symbols,
-
-           'cell': (a*1e-10, b*1e-10, c*1e-10, alpha*np.pi/180.0, beta*np.pi/180.0, gamma*np.pi/180.0),
-
-           'sg_symbol': sg_symbol,
-
-           'orthogonal_rotations': orthogonal_rotations,
-
-           'orthogonal_translations': orthogonal_translations*1e-10,
-
-           'fractional_rotations': orthogonal_rotations,
-
-           'fractional_translations': orthogonal_translations * 1e-10
+           'scale_matrix'
+           'scale_translation'
+           'atomic_coordinates'
+           'atomic_symbols'
+           'unit_cell'
+           'spacegroup_symbol'
+           'spacegroup_rotations'
+           'spacegroup_translations'
+           'ncs_rotations'
+           'ncs_translations'
 
     """
 
-    max_atoms = int(1e6)
-    coordinates = np.zeros([max_atoms, 3])
+    atomic_coordinates = np.zeros([10000, 3])
     atomic_symbols = []
-    atom_index = int(0)
-    # if crystal_structure is None:
-    #     cryst = CrystalStructure()
-    # else:
-    #     cryst = crystal_structure
-    SCALE = np.zeros([3, 4])
-    SMTRY = np.zeros([96*3, 6])
-    n_SMTRY = 0
+    scale = np.zeros([3, 4])
+    smtry = np.zeros([1000, 6])
+    mtrix = np.zeros([10000, 4])
+
+    smtry_index = 0
+    mtrix_index = 0
+    atom_index = 0
 
     with open(pdb_file_path) as pdbfile:
 
         for line in pdbfile:
 
-            # This is the inverse of the "orthogonalization matrix"  along with
-            # translation vector.  See Rupp for an explanation.
+            # Check for a model ID; we will only load in the first model for now
+            if line[0:5] == 'MODEL':
+                model_number = int(line[10:14])
+                if model_number > 1:
+                    warn('Found more than one atomic model in PDB file.  Keeping only the first one.')
+                    break
 
+            # Transformations from orthogonal coordinates to fractional coordinates
             if line[:5] == 'SCALE':
                 n = int(line[5]) - 1
-                SCALE[n, 0] = float(line[10:20])
-                SCALE[n, 1] = float(line[20:30])
-                SCALE[n, 2] = float(line[30:40])
-                SCALE[n, 3] = float(line[45:55])
+                scale[n, 0] = float(line[10:20])
+                scale[n, 1] = float(line[20:30])
+                scale[n, 2] = float(line[30:40])
+                scale[n, 3] = float(line[45:55])
 
-            # The crystal lattice and symmetry
-
+            # The crystal lattice and spacegroup
             if line[:6] == 'CRYST1':
                 cryst1 = line
-                # As always, everything in our programs are in SI units.
-                # PDB files use angstrom units.
                 a = float(cryst1[6:15])
                 b = float(cryst1[15:24])
                 c = float(cryst1[24:33])
-                # And of course degrees are converted to radians (though we
-                # loose the perfection of rational quotients like 360/4=90...)
                 alpha = float(cryst1[33:40])
                 beta = float(cryst1[40:47])
                 gamma = float(cryst1[47:54])
-                sg_symbol = cryst1[55:66].strip()
+                spacegroup_symbol = cryst1[55:66].strip()
 
-            # These are the crystallographic symmetry operations.  I'm not sure if these are mandatory entries in a pdb
-            # file since they do not appear here:
-            # http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html
-            # I got the parsing information from here:
-            # http://ambermd.org/tutorials/advanced/tutorial13/Selection.html
+            # Spacegroup symmetry operations
             if line[13:18] == 'SMTRY':
-                SMTRY[n_SMTRY, 0] = float(line[18])
-                SMTRY[n_SMTRY, 1] = float(line[19:23])
-                SMTRY[n_SMTRY, 2] = float(line[24:34])
-                SMTRY[n_SMTRY, 3] = float(line[34:44])
-                SMTRY[n_SMTRY, 4] = float(line[44:54])
-                SMTRY[n_SMTRY, 5] = float(line[54:69])
-                n_SMTRY += 1
+                smtry[smtry_index, 0] = float(line[18])
+                smtry[smtry_index, 1] = float(line[19:23])
+                smtry[smtry_index, 2] = float(line[24:34])
+                smtry[smtry_index, 3] = float(line[34:44])
+                smtry[smtry_index, 4] = float(line[44:54])
+                smtry[smtry_index, 5] = float(line[54:69])
+                smtry_index += 1
 
+            # Non-crystallographic symmetry operations
+            # TODO: check if we should skip entries with iGiven == 1.  See PDB documentation.  I'm confused.
+            if line[0:5] == 'MTRIX':
+                mtrix[mtrix_index, 0] = float(line[10:20])
+                mtrix[mtrix_index, 1] = float(line[20:30])
+                mtrix[mtrix_index, 2] = float(line[30:40])
+                mtrix[mtrix_index, 3] = float(line[45:55])
+                igiven = int(line[59])
+                mtrix_index += 1
+
+            # Atomic (orthogonal) coordinates
             if line[:6] == 'ATOM  ' or line[:6] == "HETATM":
-                coordinates[atom_index, 0] = float(line[30:38])
-                coordinates[atom_index, 1] = float(line[38:46])
-                coordinates[atom_index, 2] = float(line[46:54])
+                atomic_coordinates[atom_index, 0] = float(line[30:38])
+                atomic_coordinates[atom_index, 1] = float(line[38:46])
+                atomic_coordinates[atom_index, 2] = float(line[46:54])
                 atomic_symbols.append(line[76:78].strip().capitalize())
                 atom_index += 1
+            if atom_index == atomic_coordinates.shape[0]:  # Make the array larger if need be.
+                atomic_coordinates = np.vstack([atomic_coordinates, np.zeros((atomic_coordinates.shape[0], 3))])
 
-            if atom_index == max_atoms:
-                coordinates = np.append(coordinates, np.zeros([3, max_atoms]), axis=1)
+    spacegroup_rotations = []
+    spacegroup_translations = []
+    for i in range(int(smtry_index/3)):
+        spacegroup_rotations.append(smtry[i*3:i*3+3, 2:5])
+        spacegroup_translations.append(smtry[i * 3:i * 3 + 3, 5])
 
-    # Truncate atom list since we pre-allocated extra memory
-    coordinates = coordinates[:atom_index, :]
-    atomic_symbols = atomic_symbols[:atom_index]
+    ncs_rotations = []
+    ncs_translations = []
+    for i in range(int(mtrix_index/3)):
+        ncs_rotations.append(mtrix[i*3:i*3+3, 0:3])
+        ncs_translations.append(mtrix[i*3:i*3+3, 3])
 
-    S = SCALE[:, 0:3]
-    U = SCALE[:, 3]
-    fractional_coordinates = rotate(S, coordinates) + U
-
-    orthogonal_rotations = []
-    orthogonal_translations = []
-    fractional_rotations = []
-    fractional_translations = []
-    for i in range(int(n_SMTRY/3)):
-        R = SMTRY[i*3:i*3+3, 2:5]
-        T = SMTRY[i * 3:i * 3 + 3, 5]
-        orthogonal_rotations.append(R)
-        orthogonal_translations.append(T)
-        fractional_rotations.append(rotate(S, R))
-        fractional_translations.append(rotate(S, T))
-
-
-    dic = {'orthogonalization_matrix': S*1e-10,
-           'fractional_coordinates': fractional_coordinates,
-           'orthogonal_coordinates': coordinates*1e-10,
-           'atomic_symbols': atomic_symbols,
-           'cell': (a*1e-10, b*1e-10, c*1e-10, alpha*np.pi/180.0, beta*np.pi/180.0, gamma*np.pi/180.0),
-           'sg_symbol': sg_symbol,
-           'orthogonal_rotations': orthogonal_rotations,
-           'orthogonal_translations': [t*1e-10 for t in orthogonal_translations],
-           'fractional_rotations': fractional_rotations,
-           'fractional_translations': fractional_translations
+    dic = {'scale_matrix': scale[:, 0:3],
+           'scale_translation': scale[:, 3],
+           'atomic_coordinates': atomic_coordinates[:atom_index, :],
+           'atomic_symbols': atomic_symbols[:atom_index],
+           'unit_cell': (a, b, c, alpha, beta, gamma),
+           'spacegroup_symbol': spacegroup_symbol,
+           'spacegroup_rotations': spacegroup_rotations,
+           'spacegroup_translations': spacegroup_translations,
+           'ncs_rotations': ncs_rotations,
+           'ncs_translations': ncs_translations
            }
 
     return dic
-
-
-def parse_pdb(pdb_file_path, crystal_structure=None):
-    r"""Return a :class:`CrystalStructure` object with PDB information. """
-
-    if crystal_structure is None:
-        cryst = CrystalStructure()
-
-    dic = pdb_to_dict(pdb_file_path)
-    cryst.set_molecule(dic['orthogonal_coordinates'], atomic_symbols=dic['atomic_symbols'])
-    cryst.set_cell(*dic['cell'])
-    cryst.set_spacegroup(hermann_mauguin_symbol=dic['sg_symbol'])
-
-    return cryst
-
-
-def get_hm_symbols():
-
-    symbols = []
-    for idx in range(0, 530):
-        symbols.append(bornagain.target.spgrp._hmsym[idx].strip())
-
-    return symbols
-
-# hermann_mauguin_symbols = get_hm_symbols()
-
-
-def hermann_mauguin_symbol_from_hall_number(hall_number):
-
-    if hall_number < 0 or hall_number > 530:
-        raise ValueError('hall_number must be between 1 and 530')
-
-    return bornagain.target.spgrp._hmsym[hall_number - 1]
-
-
-def itoc_number_from_hall_number(hall_number):
-
-    return bornagain.target.spgrp._sgnum[hall_number - 1]
-
-
-def hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
-
-    idx = None
-    hermann_mauguin_symbol = hermann_mauguin_symbol.strip()
-    for idx in range(0, 530):
-        if hermann_mauguin_symbol == bornagain.target.spgrp._hmsym[idx]:
-            break
-
-    if idx is None:
-        raise ValueError('Cannot find Hermann Mauguin symbol')
-
-    return idx+1
-
-
-def itoc_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol):
-
-    return itoc_number_from_hall_number(hall_number_from_hermann_mauguin_symbol(hermann_mauguin_symbol))
-
-
-def hall_number_from_itoc_number(itoc_number):
-
-    if itoc_number < 1 or itoc_number > 230:
-        raise ValueError('ITOC spacegroup number must be in the range 1 to 230')
-
-    idx = -1
-    for idx in range(0, 530):
-        if itoc_number == bornagain.target.spgrp._sgnum[idx]:
-            break
-    return idx+1
-
-
-def hermann_mauguin_symbol_from_itoc_number(itoc_number):
-
-    return hermann_mauguin_symbol_from_hall_number(hall_number_from_itoc_number(itoc_number))
-
-
-def spacegroup_ops_from_hall_number(hall_number):
-
-    rot = bornagain.target.spgrp._spgrp_ops[hall_number - 1]["rotations"]
-    trans = [T for T in bornagain.target.spgrp._spgrp_ops[hall_number - 1]['translations']]
-
-    return rot, trans
-
-
-def get_symmetry_operators_from_hall_number(hall_number):
-
-    if hall_number < 1 or hall_number > 530:
-        raise ValueError("Hall number must be between 1 and 530")
-
-    idx = hall_number - 1
-    Rs = bornagain.target.spgrp._spgrp_ops[idx]["rotations"]
-    Ts = [T for T in bornagain.target.spgrp._spgrp_ops[idx]['translations']]
-
-    return Rs, Ts
-
-
-def get_symmetry_operators_from_space_group(hm_symbol):
-
-    r"""
-    For a given Hermann-Mauguin spacegroup, provide the symmetry operators in the form of
-    translation and rotation operators.  These operators are in the crystal basis.
-    As of now, this is a rather unreliable function.  My brain hurts badly after attempting
-    to make sense of the ways in which space groups are specified... if you are having trouble
-    finding your spacegroup check that it is contained in the output of print(crystal.get_hm_symbols()).
-
-    Input:
-        hm_symbol (str): A string indicating the spacegroup in Hermann–Mauguin notation (as found in a PDB file)
-
-    Output: Two lists: Rs and Ts.  These correspond to lists of rotation matrices (3x3 numpy
-            arrays) and translation vectors (1x3 numpy arrays)
-    """
-
-    # First we try to find the "Hall number" corresponding to the Hermann-Mauguin symbol.
-    # This is done in a hacked way using the spglib module.  However, we do not use the
-    # spglib module directly in order to avoid that dependency.  Instead, the operators
-    # that result from the spglib.get_symmetry_from_database() method have been dumped
-    # into the spgrp module included in bornagain.
-
-    # Simply iterate through all HM symbols until we find one that matches:
-    symbol_found = False
-    idx = None
-    if isinstance(hm_symbol, basestring):
-        hm_symbol = hm_symbol.strip()
-        for idx in range(0, 530):
-            if hm_symbol == bornagain.target.spgrp._hmsym[idx].strip():
-                symbol_found = True
-                break
-    else:
-        idx = hm_symbol
-        if idx < 530:
-            symbol_found = True
-
-    if not symbol_found:
-        return None, None
-
-    Rs = bornagain.target.spgrp._spgrp_ops[idx]["rotations"]
-    Ts = [T for T in bornagain.target.spgrp._spgrp_ops[idx]['translations']]
-
-    return Rs, Ts
-
-
-def assemble(O, n_unit=10, spherical=False):
-    r"""
-    From Derek: assemble and assemble3 are identical functions, hence the try/except at the start
-        n_unit can be a tuple or an integer
-
-    Creates a finite lattice
-    Args:
-        O, Structure attribute O (3x3 ndarray), orientation matrix of crystal
-            (columns are the lattice vectors a,b,c)
-        n_unit (int or 3-tuple): Number of unit cells along each crystal axis
-        spherical (bool): If true, apply a spherical boundary to the crystal.
-    """
-
-    #lattice coordinates
-    try:
-        n_unit_a, n_unit_b, n_unit_c = n_unit
-    except TypeError:
-        n_unit_a = n_unit_b = n_unit_c = n_unit
-
-    a_vec, b_vec, c_vec = O.T
-    vecs = np.array([i * a_vec + j * b_vec + k * c_vec
-                          for i in range(n_unit_a)
-                          for j in range(n_unit_b)
-                          for k in range(n_unit_c)])
-
-    # sphericalize the lattice..
-    if spherical:
-        vecs = simutils.sphericalize(vecs)
-
-    return vecs

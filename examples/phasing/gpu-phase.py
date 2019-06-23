@@ -1,4 +1,3 @@
-import sys
 from time import time
 
 if 0:
@@ -10,8 +9,7 @@ else:
 
 import matplotlib.pyplot as plt
 
-sys.path.append("../..")
-import bornagain as ba
+from bornagain import units
 from bornagain.viewers import qtviews
 from bornagain.target import crystal, density
 
@@ -40,14 +38,14 @@ if 0:  # Make a phony water molecule
 
 else:  # Alternatively, load a pdb file
 
-    pdbFile = '../data/pdb/1JB0.pdb'
-    print('Loading pdb file (%s)' % pdbFile)
-    cryst = crystal.structure(pdbFile)
+    pdb_file = '../data/pdb/1JB0.pdb'
+    print('Loading pdb file (%s)' % pdb_file)
+    cryst = crystal.CrystalStructure(pdb_file)
     # print(cryst.cryst1.strip())
 
     print('Getting scattering factors')
     wavelength = 1.5e-10
-    f = ba.simulate.atoms.get_scattering_factors(cryst.Z, ba.units.hc / wavelength)
+    f = cryst.molecule.get_scattering_factors(units.hc / wavelength)
 
     print('Setting up 3D mesh')
     d = 0.5e-9  # Minimum resolution in SI units (as always!)
@@ -67,19 +65,22 @@ else:  # Alternatively, load a pdb file
 
     N = mt.N
 
+rho0 = np.abs(rho0)
+
+
 if 0:
     print("Showing intial density (volumetric)")
     view = qtviews.Volumetric3D()
-    view.add_density(rho0)
+    view.add_density(np.abs(rho0))
     view.show()
 
 if 0:
     print("Showing initial density (slices)")
-    qtviews.MapSlices(rho0)
+    qtviews.MapSlices(np.abs(rho0))
 
-if 1:
+if 0:
     print("Showing initial density (projections)")
-    qtviews.MapProjection(rho0, axis=0)
+    qtviews.MapProjection(np.abs(rho0), axis=0)
 
 # Create the initial support
 S0 = np.zeros([N, N, N])
@@ -129,4 +130,3 @@ if 1:
 if 1:
     print("Showing reconstruction (projections)")
     qtviews.MapProjection(np.abs(rho), axis=0)
-

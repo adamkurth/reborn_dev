@@ -1,16 +1,16 @@
 import sys
-sys.path.append('../..')
-
 import numpy as np
 import matplotlib.pyplot as plt
 import bornagain
-from bornagain.simulate import solutions, examples
-from bornagain.units import r_e, keV
+from bornagain.simulate import solutions
+from scipy import constants as const
 
+r_e = const.value('classical electron radius')
+eV = const.value('electron volt')
 
 pad = bornagain.detector.PADGeometry()
 pad.simple_setup(distance=0.1, n_pixels=1000, pixel_size=200e-6)
-beam = bornagain.source.Beam(photon_energy=9/keV, diameter_fwhm=5e-6, pulse_energy=5e-3)
+beam = bornagain.source.Beam(photon_energy=9000*eV, diameter_fwhm=5e-6, pulse_energy=5e-3)
 jet_diameter = 3e-6
 n_water_molecules = jet_diameter * beam.diameter_fwhm**2 * solutions.water_number_density()
 q = pad.q_vecs(beam=beam)

@@ -29,12 +29,16 @@ def make_pad_list():
 
     return pad_geom
 
+
 def test_PADGeometry():
 
     # TODO: actually test something...
 
-    pad = ba.detector.PADGeometry()
-    assert(pad.t_vec is None)
+    pad = detector.PADGeometry()
+    assert pad.t_vec is None
+    pad = detector.PADGeometry(pixel_size=100e-6, distance=1, n_pixels=100)
+    assert np.max(pad.solid_angles1() - pad.solid_angles2())/np.max(pad.solid_angles2()) < 1e-6
+
 
 def test_beam():
 
@@ -48,15 +52,15 @@ def test_beam():
     # TODO: put some thought into these tests...
 
     out = pad_geom.scattering_angles(beam=beam)
-    assert(np.min(out >= 0))
+    assert np.min(out >= 0)
     out = pad_geom.polarization_factors(beam=beam)
-    assert(np.min(out > 0))
+    assert np.min(out > 0)
     out = pad_geom.ds_vecs(beam=beam)
-    assert(np.min(np.abs(out) >= 0))
+    assert np.min(np.abs(out) >= 0)
     out = pad_geom.q_mags(beam=beam)
-    assert(np.min(out >= 0))
+    assert np.min(out >= 0)
     out = pad_geom.q_vecs(beam=beam)
-    assert(np.min(np.abs(out) >= 0))
+    assert np.min(np.abs(out) >= 0)
 
 
 def test_PADAssembler():

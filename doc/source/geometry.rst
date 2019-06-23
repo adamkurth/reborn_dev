@@ -10,7 +10,8 @@ Pixel-Array Detectors
 
     Schematic of a Pixel-Array Detector.
 
-The :any:`PADGeometry` class contains the data and methods needed to deal with "pixel-array detectors" (PADs).  This
+The :class:`PADGeometry <bornagain.detector.PADGeometry>` class contains the data and methods needed to deal
+with "pixel-array detectors" (PADs).  This
 detector is like a CCD and is assumed to consist of an orthogonal 2D grid of pixels.  The 2D grid is described by the
 following vectors:
 
@@ -64,7 +65,7 @@ where the vector normal to the PAD is
 
     :math:`\hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}`
 
-The :any:`PADGeometry` class can currently generate the above quantities for you, along with other helpful functions.
+The :class:`PADGeometry <bornagain.detector.PADGeometry>` class can currently generate the above quantities for you, along with other helpful functions.
 
 
 Data and geometry formats

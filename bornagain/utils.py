@@ -9,10 +9,13 @@ import sys
 import numpy as np
 from numpy import sin, cos
 import bornagain as ba
-from numba import jit
+try:
+    from numba import jit
+except ImportError:
+    jit = None
 try:
     from bornagain import fortran
-except:
+except ImportError:
     fortran = None
 
 def vec_norm(vec):
@@ -358,6 +361,26 @@ def random_mosaic_rotation(mosaicity_fwhm):
     return rs[rind[0]].dot(rs[rind[1]].dot(rs[rind[2]]))
 
 
+def triangle_solid_angle(r1, r2, r3):
+    r"""
+    Compute solid angle of a triangle whose vertices are r1,r2,r3, using the method of
+    Van Oosterom, A. & Strackee, J. Biomed. Eng., IEEE Transactions on BME-30, 125-126 (1983).
+    """
+
+    numer = np.abs(np.dot(r1, np.cross(r2, r3)))
+
+    r1_n = np.linalg.norm(r1)
+    r2_n = np.linalg.norm(r2)
+    r3_n = np.linalg.norm(r3)
+    denom = r1_n * r2_n * r2_n
+    denom += np.dot(r1, r2) * r3_n
+    denom += np.dot(r2, r3) * r1_n
+    denom += np.dot(r3, r1) * r2_n
+    s_ang = np.arctan2(numer, denom) * 2
+
+    return s_ang
+
+
 def memoize(function):
     r"""
     This is a function decorator for caching results from a function, to avoid
@@ -380,16 +403,25 @@ def memoize(function):
     return wrapper
 
 
-@jit(nopython=True)
-def max_pair_distance(vecs):
-    d_max = 0
-    for i in range(vecs.shape[0]):
-        for j in range(vecs.shape[0]):
-            d = np.sum((vecs[i, :] - vecs[j, :])**2)
-            if d > d_max:
-                d_max = d
-    return np.sqrt(d_max)
-
+if jit is not None:
+    @jit(nopython=True)
+    def max_pair_distance(vecs):
+        d_max = 0
+        for i in range(vecs.shape[0]):
+            for j in range(vecs.shape[0]):
+                d = np.sum((vecs[i, :] - vecs[j, :])**2)
+                if d > d_max:
+                    d_max = d
+        return np.sqrt(d_max)
+else:
+    def max_pair_distance(vecs):
+        d_max = 0
+        for i in range(vecs.shape[0]):
+            for j in range(vecs.shape[0]):
+                d = np.sum((vecs[i, :] - vecs[j, :])**2)
+                if d > d_max:
+                    d_max = d
+        return np.sqrt(d_max)
 
 def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask=None):
     r""""
@@ -501,3 +533,15 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask=None):
     # fortran.interpolations_f.trilinear_interpolation(data, samples, max_corners, deltas, dataout)
 
     return dataout
+
+
+def passthrough_decorator(*args1, **kwargs1):
+    r"""
+    A function decorator that does nothing.  It is useful for dealing with the absence of the numba package; then
+    we can define a jit decorator that does nothing.
+    """
+    def real_decorator(function):
+        def wrapper():
+            function(*args, **kwargs)
+        return wrapper
+    return real_decorator

@@ -8,8 +8,8 @@ from bornagain.target import crystal, density
 beta = 0.90        # Difference Map parameter
 gamma_s = -1/beta  # Difference Map parameter
 gamma_m = 1/beta   # Difference Map parameter
-n_iter = 500       # Number of phase-retrieval iterations
-solv_frac = 0.6    # Solvent fraction
+n_iter = 200       # Number of phase-retrieval iterations
+solv_frac = 0.7    # Solvent fraction
 
 try:
     a = pdb_file

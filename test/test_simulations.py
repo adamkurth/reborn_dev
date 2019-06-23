@@ -6,7 +6,6 @@ except ImportError:
 import bornagain as ba
 from bornagain import detector
 from bornagain import source
-from bornagain.utils import rotate
 from bornagain.simulate.examples import lysozyme_pdb_file
 from bornagain.target import crystal, density
 
@@ -23,7 +22,7 @@ def test_mappings():
     unitcell = cryst.unitcell
 
     # Coordinates of asymmetric unit in crystal basis x
-    au_x_vecs = rotate(unitcell.o_mat_inv, cryst.molecule.coordinates)
+    au_x_vecs = np.dot(cryst.molecule.coordinates, unitcell.o_mat_inv.T)
 
     # Setup beam and detector
     beam = source.Beam(wavelength=3e-10)
@@ -34,16 +33,20 @@ def test_mappings():
     # Atomic scattering factors
     f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, ba.units.hc / beam.wavelength)*0 + 1
 
+    # Initialize opencl core
     clcore = ClCore()
-    amps_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
+
+    # Pass data buffers to GPU device
+    # amps_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
     amps_mol_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
     amps_mol_gpu2 = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
     amps_slice_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
-    amps_mol_interp_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
+    # amps_mol_interp_gpu = clcore.to_device(shape=pad.shape(), dtype=clcore.complex_t)*0
     q_vecs_gpu = clcore.to_device(q_vecs, dtype=clcore.real_t)
     h_vecs_gpu = clcore.to_device(h_vecs, dtype=clcore.real_t)*2*np.pi
     au_x_vecs_gpu = clcore.to_device(au_x_vecs, dtype=clcore.real_t)
     au_f_gpu = clcore.to_device(f, dtype=clcore.complex_t)
+
 
     resolution = 0.5*2*np.pi/np.max(pad.q_mags(beam=beam))
     oversampling = 10
@@ -68,9 +71,9 @@ def test_mappings():
     intensities3 = pad.reshape(np.abs(amps_mol_gpu2.get())**2)
     # import pyqtgraph as pg
     # pg.image(np.concatenate([intensities1-intensities2, intensities2-intensities3]))
-    # pg.image(np.concatenate([intensities1, intensities2]))
+    # pg.image(np.concatenate([intensities1, intensities2, intensities3]))
     # pg.QtGui.QApplication.exec_()
-    # Is this reasonable?  10% error is a lot larger than I expected from the trilinear interpolation...
-    assert np.mean(np.abs(intensities1 - intensities2))/np.mean(np.abs(intensities2)) < 1e-1
-    assert np.mean(np.abs(intensities1 - intensities3))/np.mean(np.abs(intensities2)) < 1e-1
+    # Is this reasonable?  1% error is a lot larger than I expected from the trilinear interpolation...
+    assert np.mean(np.abs(intensities1 - intensities2))/np.mean(np.abs(intensities2)) < 1e-2
+    assert np.mean(np.abs(intensities1 - intensities3))/np.mean(np.abs(intensities2)) < 1e-2
     assert np.mean(np.abs(intensities3 - intensities2))/np.mean(np.abs(intensities2)) < 1e-5

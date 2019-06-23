@@ -56,9 +56,11 @@ Testing
 -------
 
 We use `pytest <http://doc.pytest.org/>`_ to test the bornagain codebase.  It is very simple to make a new test.
-Just create a file that has a name that beginning with `test_`, and within this file write functions that begin with
-`test_`, and within those functions you include assert() statements.  These functions go into the test directory.  We
-then run pytest from within the test directory, and all tests will be ran.
+
+1) Create a file that has a name that beginning with `test_` in the bornagain/test directory
+2) Within this file, write functions with names that begin with `test_`
+3) Within those functions, include assert statements.
+4) Run pytest in the test directory, and all tests will run.
 
 
 Generation of documentation
@@ -82,22 +84,29 @@ bornagian in a few places and appears to be reasonably stable, though still lack
 Integration of Fortran and Numpy
 --------------------------------
 
-The f2py utility included with numpy makes it quite easy to integrate simple Fortran code with Numpy.  However, there
-are some issues that can arise when passing numpy array pointers into a fortran function.  This is especially
-problematic when you want to use a Fortran routine to modify a memory buffer.  The root of the issues are due to the
-complicated ways in which numpy ndarrays maintain their underlying memory buffers and the ways in which indexing is
-used to access that memory at the Python level.  Examples of such complications can be found
-in the `test_numpy.py` unit test.  It appears that the following recipe can be used to avoid any possible memory
-issues
+The f2py utility included with numpy makes it quite easy to integrate simple Fortran code with Numpy.  Typically,
+we wish to pass memory buffers from numpy ndarrays into a Fortran subroutine, and we modify those buffers with Fortran,
+which is almost invariably the task at hand.
+There are some very annoying issues that can arise because the ways in which the Numpy package manipulates
+the inernal memory buffers of ndarrays, which might surprise you.  These under-the-hood manipulations might be
+harmless... until the day you really care
+about operating directly on memory buffers. Examples of such complications can be found in the `test_numpy.py` unit
+test.  Presently, the following recipe appears to be a good way to avoid all possible memory issues:
 
 (1) Always work with the default C-contiguous ndarray memory layout in Python code.
 
-(2) Use assert statements in function wrappers: `assert a.flags.c_contiguous == True`.
+(2) Use assert statements in function wrappers: e.g. assert a.flags.c_contiguous == True.
 
-(3) Transpose ndarrays before passing them into Fortran functions.  This will *not* make a memory copy.
+(3) Transpose ndarrays before passing them to Fortran routines.  This will *not* copy memory.
 
 (4) In your Fortran code, simply reverse the ordering of your indices as compared to your Numpy code.
 
 Although it may be inconvenient to reverse your indexing when going between the Fortran and Python code, bear in mind
-that this can only be avoided by (a) making copies of array memory, or (b) using a non-default memory layout for Numpy
-arrays.  Both options (a) and (b) are very bad.
+that this can only be avoided by (a) making copies of array memory, or (b) enforcing a consistent non-default internal
+memory layout for all Numpy arrays that touch a Fortran routine.  Both options (a) and (b) are highly undesirable.  We
+choose option (c), reverse the index
+order, because it holds the big advantage that we get to think about memory in the most natural way for both Numpy
+*and* Fortran coding, rather than insisting that Fortran and Numpy syntax *look* the same at the expense of speed and
+potential memory issues.
+
+It is possible that I am wrong in the above analysis... please let me know if you think that is the case...

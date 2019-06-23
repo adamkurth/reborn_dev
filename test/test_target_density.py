@@ -1,10 +1,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import sys
-
 import numpy as np
 
-sys.path.append("..")
 from bornagain.simulate.examples import lysozyme_pdb_file, psi_pdb_file
 from bornagain.target import crystal, density
 
@@ -16,9 +13,11 @@ except ImportError:
 
 def test_crystal_density():
 
-    cryst = crystal.CrystalStructure()
-    cryst.set_cell(1e-9, 2e-9, 4e-9, np.pi/2, np.pi/2, np.pi/2)
-    cryst.set_spacegroup(hall_number=1)
+    cryst = crystal.CrystalStructure(psi_pdb_file)
+    # Manually reconfigure P1 with rectangular lattice
+    cryst.unitcell = crystal.UnitCell(1e-9, 2e-9, 4e-9, np.pi/2, np.pi/2, np.pi/2)
+    cryst.spacegroup.sym_translations = [np.zeros((3,))]
+    cryst.spacegroup.sym_rotations = [np.eye((3))]
     dens = density.CrystalDensityMap(cryst, 2e-9, 2)
     assert np.sum(np.abs(dens.n_vecs[8, :] - np.array([1, 0, 0]))) < 1e-8
     assert np.allclose(dens.x_vecs[9, :], np.array([1., 0., 0.5]))
@@ -46,9 +45,8 @@ def test_crystal_density():
 
 def test_transforms():
 
-    cryst = crystal.CrystalStructure()
-    cryst.set_spacegroup('P 63')
-    cryst.set_cell(28e-9, 28e-9, 16e-9, 90*np.pi/180, 90*np.pi/180, 120*np.pi/180)
+
+    cryst = crystal.CrystalStructure(psi_pdb_file)
 
     for d in [0.2, 0.3, 0.4, 0.5]:
 
@@ -174,58 +172,3 @@ def test_insertions():
     val = func1(np.array([[2, 3, 4]], dtype=float_t))
     assert np.max(np.abs(densities)) > 0
     assert (np.abs((val - densities[2, 3, 4]/counts[2, 3, 4]) / val)) < 1e-2
-
-
-def test_wtf():
-
-    # This is important to note when using f2py:
-    #
-    # "In general, if a NumPy array is proper-contiguous and has a proper type then it is directly passed to wrapped
-    # Fortran/C function. Otherwise, an element-wise copy of an input array is made and the copy, being
-    # proper-contiguous and with proper type, is used as an array argument."
-    #
-    # The tests below show how the above can cause a lot of confusion...
-
-    if density_f is None:
-        return
-
-    # The fortran function "wtf" does the following:
-    # out1(2) = 10
-    # out2(2,1) = 10
-    # out3(2,1,1) = 10
-
-    out1 = np.zeros(10)
-    out2 = np.zeros((10, 10))
-    out3 = np.zeros((10, 10, 10))
-    density_f.wtf(np.asfortranarray(out1), np.asfortranarray(out2), np.asfortranarray(out3))
-    assert out1.flags.f_contiguous
-    assert out1[1] == 10  # A 1D array can be passed into a fortran function and the function can modify the data
-    assert out2.flags.c_contiguous
-    assert out2[1, 0] != 10  # Look: the asfortranarray function will not let you modify the data; it makes a copy
-    assert out3.flags.c_contiguous
-    assert out3[1, 0, 0] != 10  # Once again, a copy is made.  Note that this issue pertains to multi-dimensional arrays
-
-    out1 = np.zeros(10)
-    out2_0 = np.zeros((10, 10))
-    out2 = np.asfortranarray(out2_0)
-    assert out2_0.data == out2.data  # This line shows that asfortranarray does not make a data copy immediately
-    out3 = np.zeros((10, 10, 10))
-    density_f.wtf(np.asfortranarray(out1), out2, np.asfortranarray(out3))
-    assert out1.flags.f_contiguous
-    assert out1[1] == 10
-    assert out2.flags.f_contiguous
-    assert out2[1, 0] == 10
-    assert out2_0.data != out2.data  # Compare to the above - the wtf function
-    assert not out3.flags.f_contiguous
-    assert out3[1, 0, 0] != 10
-
-    out1 = np.zeros(10)
-    out2 = np.asfortranarray(np.zeros((10, 10)))
-    out3 = np.zeros((10, 10, 10)).T  # This array is now fortran contiguous, as a result of the transpose.
-    density_f.wtf(out1, out2, out3)
-    assert out1.flags.f_contiguous
-    assert out1[1] == 10
-    assert out2.flags.f_contiguous
-    assert out2[1, 0] == 10
-    assert out3.flags.f_contiguous
-    assert out3[1, 0, 0] == 10

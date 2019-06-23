@@ -1,7 +1,0 @@
-bornagain.viewers.qtviews.qtviews module
-========================================
-
-.. automodule:: bornagain.viewers.qtviews.qtviews
-    :members:
-    :undoc-members:
-    :show-inheritance:

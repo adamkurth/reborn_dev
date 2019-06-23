@@ -80,11 +80,3 @@ subroutine trilinear_insertion(densities, weights, vectors, vals, corners, delta
         weights(i1, j1, k1) = weights(i1, j1, k1) + x0 * y0 * z0 * weight
     enddo
 end subroutine trilinear_insertion
-
-subroutine wtf(out1, out2, out3)
-    implicit none
-    real(kind=8), intent(inout) :: out1(:), out2(:,:), out3(:,:,:)
-    out1(2) = 10
-    out2(2,1) = 10
-    out3(2,1,1) = 10
-end subroutine wtf

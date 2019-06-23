@@ -12,4 +12,4 @@ cd $rootdir/bornagain/analysis
 python -m numpy.f2py -c peaks.f90 -m peaks_f --quiet -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 
 cd $rootdir/bornagain/fortran
-python -m numpy.f2py -c interpolations.f90 -m interpolations_f --quiet -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
+./compile-fortran.sh

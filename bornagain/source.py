@@ -5,7 +5,9 @@ Classes related to x-ray sources.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-from bornagain.units import hc
+from scipy import constants as const
+
+hc = const.h*const.c
 
 
 class Beam(object):

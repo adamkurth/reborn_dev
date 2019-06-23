@@ -1,7 +1,0 @@
-bornagain.simulate.numbacore module
-===================================
-
-.. automodule:: bornagain.simulate.numbacore
-    :members:
-    :undoc-members:
-    :show-inheritance:

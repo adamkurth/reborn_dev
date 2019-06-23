@@ -26,3 +26,4 @@ __pycache__
 doc/source/bornagain.*
 examples/phasing/*.pdb
 bornagain/simulate/data/pdb/*.pdb
+doc/html

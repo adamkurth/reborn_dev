@@ -3,10 +3,12 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import numpy as np
 
 from bornagain.target import crystal
-from bornagain import utils
 from bornagain.utils import vec_mag
 from scipy.stats import binned_statistic_dd
-from numba import jit
+try:
+    from numba import jit
+except ImportError:
+    from bornagain.utils import passthrough_decorator as jit
 
 
 class DensityMap(object):

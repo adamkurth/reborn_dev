@@ -9,11 +9,10 @@ from __future__ import (absolute_import, division,
 import numpy as np
 import h5py
 
-from .utils import vec_norm, vec_mag
+from .utils import vec_norm, vec_mag, triangle_solid_angle
 
 
 class PADGeometry(object):
-
     r"""
     A container for pixel-array detector (PAD) geometry specification, with hepful methods for generating:
 
@@ -37,7 +36,6 @@ class PADGeometry(object):
     _t_vec = None  #: The overall translation vector.
 
     def __init__(self, n_pixels=None, distance=None, pixel_size=None):
-
         """
 
         High-level initialization.  Centers the detector in the x-y plane.
@@ -243,51 +241,18 @@ class PADGeometry(object):
 
         return vec_mag(self.q_vecs(beam_vec=beam_vec, wavelength=wavelength))
 
-    def solid_angles2(self):
-        r"""
-        this should be sped up by vectorizing, but its more readable for now
-        and only has to be done once per PAD geometry...
-
-        Divide each pixel up into two triangles with vertices R1,R2,R3
-        and R2,R3,R4. Then use analytical form to find the solid angle of
-        each triangle. Sum them to get the solid angle of pixel.
-        """
-        k = self.position_vecs()
-        R1 = k - self.fs_vec * .5 - self.ss_vec * .5
-        R2 = k + self.fs_vec * .5 - self.ss_vec * .5
-        R3 = k - self.fs_vec * .5 + self.ss_vec * .5
-        R4 = k + self.fs_vec * .5 + self.ss_vec * .5
-        sa_1 = np.array([self._comp_solid_ang(r1, r2, r3)
-                         for r1, r2, r3 in zip(R1, R2, R3)])
-        sa_2 = np.array([self._comp_solid_ang(r4, r2, r3)
-                         for r4, r2, r3 in zip(R4, R2, R3)])
-        return sa_1 + sa_2
-
-    def _comp_solid_ang(self, r1, r2, r3):
-        r"""
-        compute solid angle of a triangle whose vertices are r1,r2,r3
-        Ref:thanks Jonas ...
-        Van Oosterom, A. & Strackee, J.
-        The Solid Angle of a Plane Triangle. Biomedical Engineering,
-        IEEE Transactions on BME-30, 125-126 (1983).
-        """
-
-        numer = np.abs(np.dot(r1, np.cross(r2, r3)))
-
-        r1_n = np.linalg.norm(r1)
-        r2_n = np.linalg.norm(r2)
-        r3_n = np.linalg.norm(r3)
-        denom = r1_n * r2_n * r2_n
-        denom += np.dot(r1, r2) * r3_n
-        denom += np.dot(r2, r3) * r1_n
-        denom += np.dot(r3, r1) * r2_n
-        s_ang = np.arctan2(numer, denom) * 2
-
-        return s_ang
-
     def solid_angles(self):
         r"""
-        Calculate solid angles of pixels, assuming the pixels have small angular extent.
+        Calculate solid angles of pixels.  See solid_angles1 method.
+
+        Returns: numpy array
+        """
+
+        return self.solid_angles1()
+
+    def solid_angles1(self):
+        r"""
+        Calculate solid angles of pixels vectorally, assuming the pixels have small angular extent.
 
         Returns: numpy array
         """
@@ -301,6 +266,29 @@ class PADGeometry(object):
         sa = (a / r2) * cs  # Solid angle
 
         return np.abs(sa.ravel())
+
+    def solid_angles2(self):
+        r"""
+        Pixel solid angles calculated using the method of Van Oosterom, A. & Strackee, J. Biomed. Eng., IEEE T
+        ransactions on BME-30, 125-126 (1983).  Divide each pixel up into two triangles with vertices R1,R2,R3 and
+        R2,R3,R4. Then use analytical form to find the solid angle of each triangle. Sum them to get the solid angle of
+        pixel.
+
+        Thanks to Derek Mendez, who thanks Jonas Sellberg.
+
+        Returns: numpy array
+        """
+        # TODO: this is extremely slow!
+        k = self.position_vecs()
+        R1 = k - self.fs_vec * .5 - self.ss_vec * .5
+        R2 = k + self.fs_vec * .5 - self.ss_vec * .5
+        R3 = k - self.fs_vec * .5 + self.ss_vec * .5
+        R4 = k + self.fs_vec * .5 + self.ss_vec * .5
+        sa_1 = np.array([triangle_solid_angle(r1, r2, r3)
+                         for r1, r2, r3 in zip(R1, R2, R3)])
+        sa_2 = np.array([triangle_solid_angle(r4, r2, r3)
+                         for r4, r2, r3 in zip(R4, R2, R3)])
+        return sa_1 + sa_2
 
     def polarization_factors(self, polarization_vec=None, beam_vec=None, weight=None, beam=None):
         r"""
@@ -325,8 +313,8 @@ class PADGeometry(object):
             weight = beam.polarization_weight
 
         v = vec_norm(self.position_vecs())
-        u = vec_norm(polarization_vec)
-        b = vec_norm(beam_vec)
+        u = vec_norm(np.array(polarization_vec))
+        b = vec_norm(np.array(beam_vec))
         up = np.cross(u, b)
 
         if weight is None:
@@ -365,7 +353,6 @@ class PADGeometry(object):
         return np.arccos(vec_norm(self.position_vecs()).dot(beam_vec.ravel()))
 
     def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
-
         r"""
 
         Args:
@@ -404,19 +391,33 @@ class PADGeometry(object):
         return dat.reshape(self.shape())
 
     def zeros(self):
-
+        r"""
+        For convenience: np.zeros((self.n_ss, self.n_fs))
+        """
         return np.zeros((self.n_ss, self.n_fs))
 
     def ones(self):
-
+        r"""
+        For convenience: np.ones((self.n_ss, self.n_fs))
+        """
         return np.ones((self.n_ss, self.n_fs))
 
     def random(self):
-
+        r"""
+        For convenience: np.random.random((self.n_ss, self.n_fs))
+        """
         return np.random.random((self.n_ss, self.n_fs))
 
     def max_resolution(self, beam=None):
+        r"""
+        Maximum resolution over all pixels: 2*pi/q
 
+        Args:
+            beam: A Beam class instance.
+
+        Returns:
+            float
+        """
         return 2 * np.pi / np.max(self.q_mags(beam=beam))
 
 
@@ -445,7 +446,6 @@ def split_pad_data(pad_list, data):
 
 
 def edge_mask(data, n):
-
     r"""
     Make an "edge mask"; an array of ones with zeros around the edges.
     The mask will be the same type as the data (e.g. double).
@@ -460,9 +460,9 @@ def edge_mask(data, n):
     mask = np.ones_like(data)
     ns, nf = data.shape
     mask[0:n, :] = 0
-    mask[(ns-n):ns, :] = 0
+    mask[(ns - n):ns, :] = 0
     mask[:, 0:n] = 0
-    mask[:, (nf-n):nf] = 0
+    mask[:, (nf - n):nf] = 0
 
     return mask
 
@@ -578,6 +578,10 @@ class IcosphereGeometry(object):
         return index
 
     def compute_vertices_and_faces(self):
+        r"""
+        Compute vertex and face coordinates.  Needs documentation on output.
+        """
+        # TODO: documentation.
 
         # Make the base icosahedron
 
@@ -671,17 +675,19 @@ class RadialProfiler(object):
     Helper class to create radial profiles.
     """
 
+    n_bins = None
+    bins = None
+    bin_size = None
+    bin_indices = None
+    q_mags = None
+    mask = None
+    counts = None
+    q_range = None
+    counts_non_zero = None
+
     def __init__(self):
 
-        self.n_bins = None
-        self.bins = None
-        self.bin_size = None
-        self.bin_indices = None
-        self.q_mags = None
-        self.mask = None
-        self.counts = None
-        self.q_range = None
-        self.counts_non_zero = None
+        pass
 
     def make_plan(self, q_mags, mask=None, n_bins=100, q_range=None):
         r"""

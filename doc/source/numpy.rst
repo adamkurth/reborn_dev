@@ -32,32 +32,34 @@ in bornagain.  This note is to avoid ambiguity in the case of a (*D*, *D*) array
 How to rotate vectors
 ---------------------
 
-If you need to rotate a vector or an array of vectors with the matrix *R*, you can do the following
+We must be certain that we adhere to a convention with regard to vector rotations.  If you need to rotate a vector or an
+array of vectors with shape (*N*, 3) with the matrix *R*, you can do either of the following:
 
 .. code-block:: python
 
     vec_rotated = np.dot(R, vec.T).T
 
-The above is equivalent to:
-
-.. code-block:: python
-
     vec_rotated = np.dot(vec, R.T)
 
-You can also use the :func:`rotate <bornagain.utils.rotate>` function for consistency.  Here is what you should expect:
+For clarity, here is what you should expect:
 
 .. code-block:: python
 
-    from bornagain import utils
     R = np.array([[0, 1., 0], [-1, 0, 0], [0, 0, 1.]])
     vec = np.array([1, 2, 3])
-    vec_rotated = utils.rotate(R, vec)
+    vec_rotated = np.dot(vec, R.T)
+    print(R)
+    print(vec)
     print(vec_rotated)
 
-      [ 2. -1.  3.]
+    [[ 0.  1.  0.]
+     [-1.  0.  0.]
+     [ 0.  0.  1.]]
+    [1 2 3]
+    [ 2. -1.  3.]
 
-Note that the :func:`rotate <bornagain.utils.rotate>` function carried out via numpy is consistent with rotation
-operations performed on GPU devices within the :mod:`simulate.clcore <bornagain.simulate.clcore>` module.
+Note that the above is consistent with rotation operations performed on GPU devices within the
+:mod:`simulate.clcore <bornagain.simulate.clcore>` module.
 
 Representation of 3D density/intensity maps in numpy arrays
 -----------------------------------------------------------
