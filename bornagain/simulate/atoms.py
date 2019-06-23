@@ -2,8 +2,10 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import pkg_resources
 import numpy as np
-from bornagain import units, utils
+from bornagain import utils
+from scipy import constants as const
 
+eV = const.value('electron volt')
 
 henke_data_path = pkg_resources.resource_filename(
     'bornagain.simulate', 'data/henke')
@@ -198,7 +200,7 @@ def get_henke_data(atomic_number):
     data = {}
     data['Atomic Number'] = atomic_number
     data['Element Symbol'] = sym
-    data['Photon Energy'] = table[:, 0] / units.eV
+    data['Photon Energy'] = table[:, 0] * eV
     data['Scatter Factor'] = table[:, 1] + 1j * table[:, 2]
 
     return data

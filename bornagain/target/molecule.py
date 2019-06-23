@@ -6,10 +6,11 @@ Utilities for manipulating molecules
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-from bornagain import units
 from bornagain.utils import max_pair_distance
 from bornagain.simulate import atoms
+from scipy import constants as const
 
+hc = const.h*const.c
 
 class Molecule(object):
 
@@ -38,7 +39,7 @@ class Molecule(object):
 
         if beam is not None:
             wavelength = beam.wavelength
-        return atoms.get_scattering_factors(self.atomic_numbers, units.hc / wavelength)
+        return atoms.get_scattering_factors(self.atomic_numbers, hc / wavelength)
 
     @property
     def max_atomic_pair_distance(self):

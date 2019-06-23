@@ -10,7 +10,6 @@ import pkg_resources
 import numpy as np
 import bornagain as ba
 from bornagain import detector
-from bornagain.units import hc, r_e
 from bornagain import utils
 import bornagain.external
 from bornagain.simulate import atoms
@@ -20,6 +19,10 @@ try:
 except ImportError:
     utils.warn("simulate.clcore cannot be imported, probably because pyopencl is not installed.")
     ClCore = None
+from scipy import constants as const
+
+hc = const.h*const.c
+r_e = const.value('classical electron radius')
 
 lysozyme_pdb_file = pkg_resources.resource_filename('bornagain.simulate', 'data/pdb/2LYZ.pdb')
 psi_pdb_file = pkg_resources.resource_filename('bornagain.simulate', 'data/pdb/1jb0.pdb')
