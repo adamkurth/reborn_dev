@@ -6,12 +6,13 @@ import numpy as np
 from numpy.fft import ifftn, fftshift
 import matplotlib.pyplot as plt
 
-sys.path.append("../..")
 import bornagain as ba
 from bornagain.viewers.qtviews import qtviews
 from bornagain.target import crystal, density
 import bornagain.simulate.clcore as core
+from scipy import constants as const
 
+hc = const.h*const.c
 
 plot = True
 if 'noplots' in sys.argv:
@@ -32,7 +33,7 @@ if plot and 0:
 # Look up atomic scattering factors (they are complex numbers)
 print('Getting scattering factors')
 wavelength = 1.5e-10
-f = cryst.molecule.get_scattering_factors(ba.units.hc / wavelength)
+f = cryst.molecule.get_scattering_factors(hc / wavelength)
 
 print('Setting up 3D mesh')
 d = 0.5e-9  # Minimum resolution

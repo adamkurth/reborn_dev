@@ -243,12 +243,12 @@ class PADGeometry(object):
 
     def solid_angles(self):
         r"""
-        Calculate solid angles of pixels.  See solid_angles2 method.
+        Calculate solid angles of pixels.  See solid_angles1 method.
 
         Returns: numpy array
         """
 
-        return self.solid_angles2()
+        return self.solid_angles1()
 
     def solid_angles1(self):
         r"""
@@ -278,6 +278,7 @@ class PADGeometry(object):
 
         Returns: numpy array
         """
+        # TODO: this is extremely slow!
         k = self.position_vecs()
         R1 = k - self.fs_vec * .5 - self.ss_vec * .5
         R2 = k + self.fs_vec * .5 - self.ss_vec * .5

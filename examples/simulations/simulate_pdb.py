@@ -1,5 +1,4 @@
 import sys
-sys.path.append('..')
 import time
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,7 +7,9 @@ import bornagain.target.crystal as crystal
 import bornagain.simulate.clcore as core
 from bornagain.simulate.examples import lysozyme_pdb_file
 from bornagain.utils import rotate, rotation_about_axis
+from scipy import constants as const
 
+hc = const.h*const.c
 
 show = True     # Display the simulated patterns
 double = False  # Use double precision if available
@@ -54,7 +55,7 @@ n_atoms = r.shape[0]
 
 # Look up atomic scattering factors (they are complex numbers)
 print('Getting scattering factors')
-f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, ba.units.hc / wavelength)
+f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, hc / wavelength)
 
 n_trials = 3
 
