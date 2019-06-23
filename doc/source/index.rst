@@ -14,6 +14,7 @@ Contents
    targets
    crystals
    simulations
+   sampling_binning
    coding
    numpy
    modules

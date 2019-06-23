@@ -11,24 +11,22 @@ We define the *orthogonal coordinates*, denoted as :math:`\mathbf{r}`.  These ar
 coordinates.  The *fractional coordinates* are denoted
 as :math:`\mathbf{x}`.  These two vectors are related by the *orthogonalization matrix* :math:`\mathbf{O}` as follows:
 
-.. math::\mathbf{r} = \mathbf{O}\mathbf{x}
+.. math:: \mathbf{r} = \mathbf{O}\mathbf{x}
 
 The inverse of the orthogonalization matrix, :math:`\mathbf{O}^{-1}`, is sometimes called the "deorthogonalization
-matrix"
-
-The columns of the orthogonalization matrix are the basis vectors :math:`\mathbf{a}_1`, :math:`\mathbf{a}_2`,
+matrix".   The columns of the orthogonalization matrix are the basis vectors :math:`\mathbf{a}_1`, :math:`\mathbf{a}_2`,
 :math:`\mathbf{a}_3` of the crystal:
 
-.. math::\mathbf{O} = \begin{bmatrix}  | & |  & | \\ \mathbf{a}_1 &  \mathbf{a}_2 & \mathbf{a}_3 \\ | & | & | \end{bmatrix}
+.. math:: \mathbf{O} = \begin{bmatrix}  | & |  & | \\ \mathbf{a}_1 &  \mathbf{a}_2 & \mathbf{a}_3 \\ | & | & | \end{bmatrix}
 
 In reciprocal space, we have analogous mathematics for the *reciprocal coordinates* :math:`\mathbf{q}` and *fractional
 Miller indices* :math:`\mathbf{h}`.  They are related by the :math:`\mathbf{A}` matrix:
 
-.. math::\mathbf{q} = \mathbf{A} \mathbf{h}
+.. math:: \mathbf{q} = \mathbf{A} \mathbf{h}
 
 which contains the reciprocal lattice vectors in its columns:
 
-.. math::\mathbf{A} = \begin{bmatrix}  | & |  & | \\ \mathbf{a}^*_1 &  \mathbf{a}^*_2 & \mathbf{a}^*_3 \\ | & | & | \end{bmatrix}
+.. math:: \mathbf{A} = \begin{bmatrix}  | & |  & | \\ \mathbf{a}^*_1 &  \mathbf{a}^*_2 & \mathbf{a}^*_3 \\ | & | & | \end{bmatrix}
 
 The reciprocal lattice vectors are defined as
 
@@ -42,7 +40,7 @@ The reciprocal lattice vectors are defined as
 
 where :math:`V_c = \mathbf{a}_1\cdot(\mathbf{a}_2\times\mathbf{a}_3)` is the volume of the unit cell.
 
-It is useful to know the following relations:
+It is useful to note the following relations:
 
 .. math::
 
@@ -52,16 +50,16 @@ It is useful to know the following relations:
 
 We define the Fourier transform in orthogonal coordinates as
 
-.. math::F(\mathbf{q}) = \int f(\mathbf{r}) \exp(-i 2 \pi \mathbf{q}^T \mathbf{r}) d^3r
+.. math:: F(\mathbf{q}) = \int f(\mathbf{r}) \exp(-i 2 \pi \mathbf{q}^T \mathbf{r}) d^3r
 
 Note that there is no factor of :math:`2\pi` in the definition of :math:`\mathbf{q}` in this section.  The inverse
 Fourier transform is
 
-.. math::f(\mathbf{r}) =\frac{1}{(2\pi)^3}\int F(\mathbf{q}) \exp(i 2 \pi \mathbf{q}^T \mathbf{r}) d^3q
+.. math:: f(\mathbf{r}) =\frac{1}{(2\pi)^3}\int F(\mathbf{q}) \exp(i 2 \pi \mathbf{q}^T \mathbf{r}) d^3q
 
 We may also define the Fourier transform in the fractional coordinate basis:
 
-.. math::F(\mathbf{h}) = V_c \int f(\mathbf{x}) \exp(-i 2 \pi \mathbf{h}^T \mathbf{x}) d^3x
+.. math:: F(\mathbf{h}) = V_c \int f(\mathbf{x}) \exp(-i 2 \pi \mathbf{h}^T \mathbf{x}) d^3x
 
 The factor of :math:`V_c` in the above is due to the Jacobian determinant :math:`| \mathbf{O} |`.
 
@@ -77,7 +75,8 @@ PDB files can be downloaded from the `PDB website <http://www.rcsb.org>`_ or usi
 PDB files have a well-defined `specification <http://www.wwpdb.org/documentation/file-format>`_ and may be divided into
 various "records".  Some of the important ones are:
 
-0) MODEL, which distinguishes different atomic models,
+0) `MODEL <http://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#MODEL>`_,
+   which distinguishes different atomic models,
 1) `ATOM <http://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#ATOM>`_ and
    `HETATM <http://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#HETATM>`_, which contain
    orthogonal coordinates of atomic models,
@@ -95,7 +94,7 @@ that you need in your project.  If there is non-crystallographic symmetry (NCS),
 capsid, you should first generate the NCS symmetry partners using the matrices :math:`\mathbf{R}_\text{ncs}` and
 translation vectors :math:`\mathbf{T}_\text{ncs}` found in the MTRIX record as follows:
 
-.. math::\mathbf{r}_\text{ncs} = \mathbf{R}_\text{ncs} \mathbf{r} + \mathbf{T}_\text{ncs}
+.. math:: \mathbf{r}_\text{ncs} = \mathbf{R}_\text{ncs} \mathbf{r} + \mathbf{T}_\text{ncs}
 
 After you do the above you have all the atomic coordinates that comprise the crystal asymmetric unit (AU).  We
 concatenate all of these coordinates to form the coordinates of the AU, denoted as :math:`\mathbf{r}_\text{au}`.
@@ -168,28 +167,30 @@ Now we see that the transformations we desire, in terms of what we get from a PD
 
     \mathbf{Z}_n = \mathbf{S}\mathbf{T}_n + (\mathbf{I} - \mathbf{W}_n)\mathbf{U}
 
-
-
-
-
-
-To load a PDB file using bornagain, use :func:`CrystalStructure()<bornagain.target.crystal.CrystalStructure()>` and pass in the PDB file, something like:
+The :func:`CrystalStructure() <bornagain.target.crystal.CrystalStructure()>` class can be used to easily load in a PDB
+file and generate symmetry partners.  For example, the following script will produce the coordinates
+:math:`\mathbf{x}_\text{au}` and transformations :math:`\mathbf{W}_n`, :math:`\mathbf{Z}_n`, and then use them to
+generate the second crystallographic symmetry partner :math:`\mathbf{x}_2`:
 
 .. code-block:: python
 
-	import bornagain.target.crystal as crystal
-	prot = crystal.CrystalStructure(pdbFile)
+    import numpy as np
+    from bornagain.data import lysozyme_pdb_file
+    from bornagain.target import crystal
+    cryst = crystal.CrystalStructure(lysozyme_pdb_file)
+    x_au = cryst.fractional_coordinates
+    W2 = cryst.spacegroup.sym_rotations[1]
+    Z2 = cryst.spacegroup.sym_translations[1]
+    x2 = np.dot(x_au, W2.T) + Z2
 
-this will return an object called prot which has methods for making a density map etc.
-
-
-Getting scattering factors
----------------------------
-The scattering factors are the Fourier transform. They are complex numbers. You can get the scattering factors of a molecule by 
+We could go on to get other quantities such as atomic scattering factors:
 
 .. code-block:: python
 
-	f = bornagain.simulate.atoms.get_scattering_factors(prot.Z, bornagain.units.hc / wavelength)
+    import scipy
+    eV = scipy.constants.value('electron volt')
+    photon_energy = 9500 * eV
+    f = cryst.molecule.get_scattering_factors(photon_energy)
 
 
 
