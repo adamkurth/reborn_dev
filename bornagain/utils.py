@@ -12,7 +12,7 @@ import bornagain as ba
 try:
     from numba import jit
 except ImportError:
-    from bornagain.numba_ import jit
+    jit = None
 try:
     from bornagain import fortran
 except ImportError:
@@ -403,16 +403,25 @@ def memoize(function):
     return wrapper
 
 
-@jit(nopython=True)
-def max_pair_distance(vecs):
-    d_max = 0
-    for i in range(vecs.shape[0]):
-        for j in range(vecs.shape[0]):
-            d = np.sum((vecs[i, :] - vecs[j, :])**2)
-            if d > d_max:
-                d_max = d
-    return np.sqrt(d_max)
-
+if jit is not None:
+    @jit(nopython=True)
+    def max_pair_distance(vecs):
+        d_max = 0
+        for i in range(vecs.shape[0]):
+            for j in range(vecs.shape[0]):
+                d = np.sum((vecs[i, :] - vecs[j, :])**2)
+                if d > d_max:
+                    d_max = d
+        return np.sqrt(d_max)
+else:
+    def max_pair_distance(vecs):
+        d_max = 0
+        for i in range(vecs.shape[0]):
+            for j in range(vecs.shape[0]):
+                d = np.sum((vecs[i, :] - vecs[j, :])**2)
+                if d > d_max:
+                    d_max = d
+        return np.sqrt(d_max)
 
 def trilinear_interpolation(data, min_corners, max_corners, samples, mask=None):
     r""""
@@ -455,3 +464,15 @@ def trilinear_interpolation(data, min_corners, max_corners, samples, mask=None):
     fortran.interpolations_f.trilinear_interpolation(data, samples, max_corners, deltas, dataout)
 
     return dataout
+
+
+def passthrough_decorator(*args1, **kwargs1):
+    r"""
+    A function decorator that does nothing.  It is useful for dealing with the absence of the numba package; then
+    we can define a jit decorator that does nothing.
+    """
+    def real_decorator(function):
+        def wrapper():
+            function(*args, **kwargs)
+        return wrapper
+    return real_decorator

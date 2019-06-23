@@ -8,7 +8,7 @@ from scipy.stats import binned_statistic_dd
 try:
     from numba import jit
 except ImportError:
-    from bornagain.numba_ import jit
+    from bornagain.utils import passthrough_decorator as jit
 
 
 class DensityMap(object):
