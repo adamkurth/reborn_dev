@@ -1,6 +1,6 @@
 #image: continuumio/miniconda3:latest # This image doesn't seem to have make or gfortran
-#image: ubuntu:latest # This image doesn't work with GPU stuff
-image: nvidia:opencl
+image: ubuntu:latest # This image doesn't work with GPU stuff
+#image: nvidia:opencl # Can't seem to use this one
 
 before_script:
   - uname -a
@@ -16,20 +16,22 @@ before_script:
 tests:
   stage: test
   script:
-  - conda env create -f bornagain3-env.yml # gitlab-ci-env3.yml
+  - conda env create -f $basepath/bornagain3-env.yml # gitlab-ci-env3.yml
   - source activate bornagain3
-  - cd test
-  - pytest #--ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py  --ignore=test_mplviews.py --ignore=test_interpolations.py
+  - cd $basepath/developer
+  - ./compile-fortran.sh
+  - cd $basepath/test
+  - pytest --ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py  --ignore=test_mplviews.py --ignore=test_interpolations.py
 
 pages:
   script:
-  - conda env create -f bornagain3-env.yml # gitlab-ci-env3.yml
+  - conda env create -f $basepath/bornagain3-env.yml # gitlab-ci-env3.yml
   - source activate bornagain3
-  - cd doc
+  - cd $basepath/doc
   - ./update-documentation.sh
-  - cd ..
+  - cd $basepath
   - mkdir public
-  - cp -r doc/html/* public
+  - cp -r $basepath/doc/html/* $basepath/public
   artifacts:
     paths:
     - public
