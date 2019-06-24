@@ -336,6 +336,12 @@ def test_13():
             [ 0.   ,  0.   ,  0.   ,  0.   ]]])
 
     dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+
+    # print(dataout)
+    # print(np.sum(dataout))
+    # print(np.sum(np.abs(dataout - ans)))
+
+
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
@@ -368,12 +374,6 @@ def test_14(): # Out of bounds test
 
     dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
-
-
-
-
-
-
 
 
 

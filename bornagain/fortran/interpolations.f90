@@ -1,39 +1,78 @@
-subroutine trilinear_interpolation(data, samples, corners, deltas, out)
+subroutine trilinear_insert(data_coord, data_val, x_min, mask, &
+                            N_data, Delta_x, one_over_bin_volume, c1, c2, c3, &
+                            dataout)
+    ! Note this Fortran funtion populates dataout which is defined to be shape N+2  
+    ! where the addition of 2 is for the boundary samples.
+    ! The Python code in utils.py then crops this out to the correct size.
     implicit none
-    real(kind=8), intent(inout) :: out(:)
-    real(kind=8), intent(in) :: data(:,:,:), samples(:,:), corners(3), deltas(3)
-    real(kind=8) :: i_f,j_f,k_f,x0,y0,z0,x1,y1,z1
-    integer(kind=4) :: nn,i0,j0,k0,i1,j1,k1,ii,nx,ny,nz
-    nn = size(out, 1)
-    nx = size(data, 1)
-    ny = size(data, 2)
-    nz = size(data, 3)
-    do ii=1,nn
-        k_f = 1.0 + (samples(1, ii) - corners(1)) / deltas(1)
-        j_f = 1.0 + (samples(2, ii) - corners(2)) / deltas(2)
-        i_f = 1.0 + (samples(3, ii) - corners(3)) / deltas(3)
-        i0 = modulo(floor(i_f) - 1, nx) + 1
-        j0 = modulo(floor(j_f) - 1, ny) + 1
-        k0 = modulo(floor(k_f) - 1, nz) + 1
-        i1 = modulo(i0, nx) + 1
-        j1 = modulo(j0, ny) + 1
-        k1 = modulo(k0, nz) + 1
-        x0 = i_f - floor(i_f)
-        y0 = j_f - floor(j_f)
-        z0 = k_f - floor(k_f)
-        x1 = 1.0 - x0
-        y1 = 1.0 - y0
-        z1 = 1.0 - z0
-        out(ii) = data(i0, j0, k0) * x1 * y1 * z1 + &
-                  data(i1, j0, k0) * x0 * y1 * z1 + &
-                  data(i0, j1, k0) * x1 * y0 * z1 + &
-                  data(i0, j0, k1) * x1 * y1 * z0 + &
-                  data(i1, j0, k1) * x0 * y1 * z0 + &
-                  data(i0, j1, k1) * x1 * y0 * z0 + &
-                  data(i1, j1, k0) * x0 * y0 * z1 + &
-                  data(i1, j1, k1) * x0 * y0 * z0
+    real(kind=8), intent(inout) :: dataout(:,:,:)
+    real(kind=8), intent(in)    :: data_coord(:,:), data_val(:), x_min(3), mask(:), &
+                                   Delta_x(3), one_over_bin_volume, c1(3), c2(3), c3(3)
+    integer(kind=4), intent(in) :: N_data
+
+    real(kind=8)    :: data_coord_curr(3), data_val_curr_scaled, x_ind_fl(3), x_ind_cl(3), Delta_x_1(3), Delta_x_0(3), &
+                       N_000, N_100, N_010, N_110, N_001, N_101, N_011, N_111
+    integer(kind=4) :: i, ind_fl(3), ind_cl(3)
+
+    do i=1,N_data
+        if (mask(i).ne.0) then
+            data_coord_curr = data_coord(i,:)
+            data_val_curr_scaled = data_val(i) * one_over_bin_volume ! Multiply the data value by the inverse bin volume here to save computations later.
+
+            ! Check if the data point is within the bounds [x_min-0.5, x_max+0.5).
+            ! Only insert that data point if this is the case.
+            if (maxval(data_coord_curr - c2).lt.0) then
+                if (minval(data_coord_curr - c3).ge.0) then
+
+                    ! Bin index
+                    ind_fl = floor(data_coord_curr / Delta_x + c1)
+                    ind_cl = ind_fl + 1
+
+                    ! Bin position
+                    x_ind_fl = x_min + ind_fl * Delta_x
+                    x_ind_cl = x_ind_fl + Delta_x ! This is the same as x_min + ind_cl*Delta_x
+
+                    Delta_x_1 = x_ind_cl - data_coord_curr
+                    Delta_x_0 = data_coord_curr - x_ind_fl
+
+                    ! The weights
+                    N_000 = Delta_x_1(1) * Delta_x_1(2) * Delta_x_1(3)
+                    N_100 = Delta_x_0(1) * Delta_x_1(2) * Delta_x_1(3)
+                    N_010 = Delta_x_1(1) * Delta_x_0(2) * Delta_x_1(3)
+                    N_110 = Delta_x_0(1) * Delta_x_0(2) * Delta_x_1(3)
+                    N_001 = Delta_x_1(1) * Delta_x_1(2) * Delta_x_0(3)
+                    N_101 = Delta_x_0(1) * Delta_x_1(2) * Delta_x_0(3)
+                    N_011 = Delta_x_1(1) * Delta_x_0(2) * Delta_x_0(3)
+                    N_111 = Delta_x_0(1) * Delta_x_0(2) * Delta_x_0(3)
+
+                    ! Add 1 to the bin indices - this is to correspond to the plus two boundary padding for the edge cases.
+                    ! Add another 1 for default Fortran indexing starting at 1.
+                    ind_fl = ind_fl + 2
+                    ind_cl = ind_cl + 2
+
+                    dataout(ind_fl(1), ind_fl(2), ind_fl(3)) = dataout(ind_fl(1), ind_fl(2), ind_fl(3)) & 
+                                                               + N_000 * data_val_curr_scaled
+                    dataout(ind_cl(1), ind_fl(2), ind_fl(3)) = dataout(ind_cl(1), ind_fl(2), ind_fl(3)) &
+                                                               + N_100 * data_val_curr_scaled
+                    dataout(ind_fl(1), ind_cl(2), ind_fl(3)) = dataout(ind_fl(1), ind_cl(2), ind_fl(3)) &
+                                                               + N_010 * data_val_curr_scaled
+                    dataout(ind_cl(1), ind_cl(2), ind_fl(3)) = dataout(ind_cl(1), ind_cl(2), ind_fl(3)) &
+                                                               + N_110 * data_val_curr_scaled
+                    dataout(ind_fl(1), ind_fl(2), ind_cl(3)) = dataout(ind_fl(1), ind_fl(2), ind_cl(3)) &
+                                                               + N_001 * data_val_curr_scaled
+                    dataout(ind_cl(1), ind_fl(2), ind_cl(3)) = dataout(ind_cl(1), ind_fl(2), ind_cl(3)) &
+                                                               + N_101 * data_val_curr_scaled
+                    dataout(ind_fl(1), ind_cl(2), ind_cl(3)) = dataout(ind_fl(1), ind_cl(2), ind_cl(3)) &
+                                                               + N_011 * data_val_curr_scaled
+                    dataout(ind_cl(1), ind_cl(2), ind_cl(3)) = dataout(ind_cl(1), ind_cl(2), ind_cl(3)) &
+                                                               + N_111 * data_val_curr_scaled
+                endif
+            endif
+        endif
     enddo
-end subroutine trilinear_interpolation
+end subroutine trilinear_insert
+
+
 
 ! subroutine nn_binning(data, samples, min_corners, max_corners, shape, out)
 ! subroutine trilinear_binning(data, samples, min_corners, max_corners, shape, out)

@@ -469,68 +469,23 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask=None):
     bin_volume = Delta_x[0] * Delta_x[1] * Delta_x[2]
     one_over_bin_volume = 1 / bin_volume
 
-    # The plus two is for padding the boundary of the array to deal with edge cases.
-    A_out = np.zeros(N_bin+2, dtype=np.double)
-
     # To safeguard against round-off errors
     epsilon = 1e-9
 
-    # Constants
+    # Constants (these are 3 element arrays)
     c1 = 0.0 - x_min / Delta_x
+    c2 = x_max + 0.5 - epsilon
+    c3 = x_min - 0.5 + epsilon
 
-    for i in range(N_data):
-        if (mask[i] == 1):
-            data_coord_curr = data_coord[i,:]
-            data_val_curr_scaled = data_val[i] * one_over_bin_volume # Multiply the data value by the inverse bin volume here to save computations later.
-
-            # Check if the data point is within the bounds [x_min-0.5, x_max+0.5).
-            # Only insert that data point if this is the case.
-            if (np.max(data_coord_curr - (x_max + 0.5 - epsilon)) < 0):
-                if (np.min(data_coord_curr - (x_min - 0.5 + epsilon)) >= 0):
-
-                    # Bin index
-                    ind_fl = np.floor(data_coord_curr / Delta_x + c1)
-                    ind_fl = ind_fl.astype(np.int)
-
-                    ind_cl = ind_fl + 1 # cl for ceiling
-
-                    # Bin position
-                    x_ind_fl = x_min + ind_fl * Delta_x
-                    x_ind_cl = x_ind_fl + Delta_x # This is the same as x_min + ind_cl*Delta_x
-
-                    Delta_x_1 = x_ind_cl - data_coord_curr
-                    Delta_x_0 = data_coord_curr - x_ind_fl
-
-                    # The weights
-                    N_000 = Delta_x_1[0] * Delta_x_1[1] * Delta_x_1[2]
-                    N_100 = Delta_x_0[0] * Delta_x_1[1] * Delta_x_1[2]
-                    N_010 = Delta_x_1[0] * Delta_x_0[1] * Delta_x_1[2]
-                    N_110 = Delta_x_0[0] * Delta_x_0[1] * Delta_x_1[2]
-                    N_001 = Delta_x_1[0] * Delta_x_1[1] * Delta_x_0[2]
-                    N_101 = Delta_x_0[0] * Delta_x_1[1] * Delta_x_0[2]
-                    N_011 = Delta_x_1[0] * Delta_x_0[1] * Delta_x_0[2]
-                    N_111 = Delta_x_0[0] * Delta_x_0[1] * Delta_x_0[2]
-
-                    # Add 1 to the bin indices - this is to correspond to the plus two boundary padding for the edge cases.
-                    ind_fl = ind_fl + 1
-                    ind_cl = ind_cl + 1
-
-                    A_out[ind_fl[0], ind_fl[1], ind_fl[2]] += N_000 * data_val_curr_scaled
-                    A_out[ind_cl[0], ind_fl[1], ind_fl[2]] += N_100 * data_val_curr_scaled
-                    A_out[ind_fl[0], ind_cl[1], ind_fl[2]] += N_010 * data_val_curr_scaled
-                    A_out[ind_cl[0], ind_cl[1], ind_fl[2]] += N_110 * data_val_curr_scaled
-                    A_out[ind_fl[0], ind_fl[1], ind_cl[2]] += N_001 * data_val_curr_scaled
-                    A_out[ind_cl[0], ind_fl[1], ind_cl[2]] += N_101 * data_val_curr_scaled
-                    A_out[ind_fl[0], ind_cl[1], ind_cl[2]] += N_011 * data_val_curr_scaled
-                    A_out[ind_cl[0], ind_cl[1], ind_cl[2]] += N_111 * data_val_curr_scaled
-
+    dataout = np.zeros(N_bin+2, dtype=np.double, order='C')
+    dataout = np.asfortranarray(dataout)
+    
+    fortran.interpolations_f.trilinear_insert(data_coord, data_val, x_min, mask, N_data, \
+                                              Delta_x, one_over_bin_volume, c1, c2, c3,  \
+                                              dataout)
 
     # Keep only the inner array - get rid of the boundary padding.
-    dataout = A_out[1:N_bin[0]+1, 1:N_bin[1]+1, 1:N_bin[2]+1]
-
-
-    # dataout = np.empty((samples.shape[0]), dtype=np.double)
-    # fortran.interpolations_f.trilinear_interpolation(data, samples, max_corners, deltas, dataout)
+    dataout = dataout[1:N_bin[0]+1, 1:N_bin[1]+1, 1:N_bin[2]+1]
 
     return dataout
 
