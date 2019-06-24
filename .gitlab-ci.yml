@@ -2,8 +2,9 @@ image: ubuntu:latest #continuumio/miniconda3:latest # Annoyingly, this image doe
 
 before_script:
   - uname -a
-  - pwd
   - basepath=$(pwd)
+  - echo $basepath
+  - apt-get update
   - apt-get install wget
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $basepath/miniconda.sh
   - bash $basepath/miniconda.sh -b -p $basepath/miniconda
