@@ -15,9 +15,9 @@ tests:
 
 pages:
   script:
-#  - cd doc
-#  - ./update-documentation.sh
-#  - cd ..
+  - cd doc
+  - ./update-documentation.sh
+  - cd ..
   - mkdir public
   - cp -r doc/html/* public
   artifacts:
@@ -25,4 +25,3 @@ pages:
     - public
   only:
   - master
-
