@@ -8,7 +8,6 @@ from . import detector
 # from . import simulate
 from . import source
 from . import target
-from . import units
 from . import utils
 
 CONFIG_OPTIONS = {'warn_depreciated': True,

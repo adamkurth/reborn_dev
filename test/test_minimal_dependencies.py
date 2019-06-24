@@ -5,7 +5,6 @@ def test_minimal():
     from bornagain import detector
     from bornagain import source
     from bornagain import utils
-    from bornagain import units
 
     assert bornagain is not None
 
