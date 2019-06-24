@@ -1,3 +1,4 @@
-This is a python package for handling diffraction data analysis and simulations under the Born approximation.
+This is a python package for x-ray diffraction data analysis and simulations under the Born approximation.  The
+documentation for bornagain is found here:
 
-Documentation has been moved to the html pages so that we don't need to maintain two sources.  You can find this documentation in the doc/html directory.  Just open the index.html file in your web browser.
+https://rkirian.gitlab.io/bornagain

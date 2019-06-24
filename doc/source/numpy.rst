@@ -1,3 +1,5 @@
+.. _numpy_anchor:
+
 Working with Numpy
 ==================
 

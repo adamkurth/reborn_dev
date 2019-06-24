@@ -77,16 +77,17 @@ def docs():
     docs_file_path = pkg_resources.resource_filename('bornagain', '')
     docs_file_path = os.path.join(docs_file_path, '..', 'doc', 'html', 'index.html')
 
-    if not os.path.exists(docs_file_path):
-        print("Can't seem to locate the html index %s" % (docs_file_path))
+    if os.path.exists(docs_file_path):
+        docs_file_path = 'file://' + docs_file_path
+    else:
+        docs_file_path = 'https://rkirian.gitlab.io/bornagain'
 
     try:
         import webbrowser
     except ImportError:
         print("Can't open docs because you need to install the webbrowser Python package.")
-        print("If using conda, perhaps you could run 'conda install webbrowser?'")
-        print('You can otherwise point your webbrowser to the directory %s' % (docs_file_path))
-        print("On Mac OS, you can do that from the terminal using the command 'open %s'" % (docs_file_path))
+        print("If using conda, perhaps you could run 'conda install webbrowser'")
+        print('You can otherwise point your webbrowser to https://rkirian.gitlab.io/bornagain')
         return
 
     webbrowser.open('file://' + docs_file_path)
