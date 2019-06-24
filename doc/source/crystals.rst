@@ -40,10 +40,10 @@ The reciprocal lattice vectors are defined as
 
 where :math:`V_c = \mathbf{a}_1\cdot(\mathbf{a}_2\times\mathbf{a}_3)` is the volume of the unit cell.
 
-Often times a crystallographic unit cell is specified in terms of three lattice constants (:math:`a`, :math:`b`,
+Oftentimes a crystallographic unit cell is specified in terms of three lattice constants (:math:`a`, :math:`b`,
 :math:`c`) and three angles (:math:`\alpha`, :math:`\beta`, :math:`\gamma`).  This of course leads to some ambiguity
-since there are only six parameters; the three orientational parameters are missing.  Te "standard" way to convert to
-the orthogonalization matrix appears to be in the appendix of
+since there are only six parameters; the three orientational parameters are missing.  The "standard" way to convert to
+the orthogonalization matrix appears to be in appendix A of
 `this <https://cdn.rcsb.org/wwpdb/docs/documentation/file-format/PDB_format_1992.pdf>`_ document, for example.
 
 
@@ -83,7 +83,7 @@ various "records".  Some of the important ones are:
    orthogonal coordinates of atomic models.
 2) `CRYST1 <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#CRYST1>`_, which contains
    the unit cell lattice constants and angles (:math:`a`, :math:`b`, :math:`c`, :math:`\alpha`, :math:`\beta`,
-   :math:`\gamma`), the full International Table’s Hermann-Mauguin symbol, and the Z value (number of polymeric chains
+   :math:`\gamma`), the full International Tables for Crystallography’s Hermann-Mauguin symbol, and the Z value (number of polymeric chains
    in a unit cell).
 3) `SCALE <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#SCALEn>`_, which contains
    "transformation from the orthogonal coordinates as contained in the PDB entry to fractional crystallographic
