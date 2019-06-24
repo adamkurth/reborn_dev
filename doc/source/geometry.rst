@@ -19,7 +19,7 @@ following vectors:
     be the first in memory.
 
     :math:`\vec{f}` is the vector that points along the "fast-scan" direction.  This is the distance and direction that
-    points to the next pixel. that is adjacent in physical space, as well as in computer memory.  The length of this
+    points to the next pixel that is adjacent in physical space as well as in computer memory.  The length of this
     vector indicates the pixel size.
 
     :math:`n_f` is the number of fast-scan pixels in the detector.
@@ -31,8 +31,8 @@ following vectors:
     :math:`n_s` is the number of slow-scan pixels in the detector.
 
 Note that there are no angles involved in describing the detector geometry.  That is because angles are confusing due
-to the many different conventions used by different reference books and software.  Also, importantly, rotation
-operations do not commute, which only adds to the confusion.
+to the many different conventions used by different literature and software.  Importantly, *rotation
+operations do not commute*, which only adds to the confusion.
 
 With the above vectors specified, we may now generate the quantities that will be useful when doing diffraction analysis
 and simulations.  The vector pointing from the origin (where the target is located) to a detector pixel indexed by
@@ -74,12 +74,12 @@ Data and geometry formats
 A central task in diffraction analysis is the assignment of physical locations (3D vectors) to each detector pixel.
 Actually, our task is two-fold:
 
-1) Transform the data found on disk or in RAM to a useful numpy arrays.
-2) Determine the vectors that specify 3D positions corresonding to the elements of the numpy arrays.
+1) Transform the data found on disk or in memory to numpy arrays.
+2) Determine the 3D positions corresonding to the elements of the numpy arrays.
 
 The :class:`PADGeometry <bornagain.detector.PADGeometry>` class contains the needed information to perform step (2), but
 does not have any involvement in step (1).  Step (1) is often a messy process that requires specialized code, and
-therefore we make no effort to standardize that process.  However, once you have a
+we have made no effort to standardize that process.  However, once you have a
 :class:`PADGeometry <bornagain.detector.PADGeometry>` instance along with corresponding numpy arrays, your analsis code
 can hopefully be written in a source-agnostic way.
 
@@ -109,3 +109,31 @@ Most importantly, geom files contain the three principal vectors that bornagain 
 at first glance when you look into the geom file.  If you just want this information, then you can simply use a geom
 file to generate a list of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances via the
 :func:`geometry_file_to_pad_geometry_list() <bornagain.external.crystfel.geometry_file_to_pad_geometry_list>` function.
+
+A note on detector "geometry complications"
+-------------------------------------------
+
+There is much to say about the complications that arise in analyzing PAD data.  One of the first points of confusion
+is due to the entanglement of detector geometry with detector data formats.  Some programs re-format the raw data
+found on disk and then re-write to an intermediate file format that is used later in the analysis pipeline.  This is
+what occurrs, for example, when the program `Cheetah <http://www.desy.de/~barty/cheetah/Cheetah/Welcome.html>`_ reads
+data from an XTC file [1] created at the LCLS; it immediately re-formats the data internally and then writes processed
+data in the form of a CXIDB file [2].
+In the case of CSPAD detector data from LCLS, the data are re-written by Cheetah in a way that the
+detector PADs are no longer contiguous in memory, which is somtimes nice for the purpose of viewing raw data, but this
+also means that it is a real puzzle to figure out how to map a CrystFEL geom file, which almost invariably corresponds
+to a Cheetah-formatted CXIDB file, to the original raw XTC data source.  We will include some "cookbook" notes on this
+in the future, but it is probably best to view the process of mapping data to geometry more like a specialized function
+rather than a generic specification.
+
+Footnotes
+---------
+
+[1] I have not been able to find documention of the XTC file format in the
+`LCLS Data Analysis <https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis>`_ documentation, but there
+are some "recipies" for accessing this data with Python that are helpful, and the LCLS staff are *extremely* helpful
+in this regard so you should email them with questions!
+
+[2] CXIDB files do indeed have
+have `documentation <https://www.cxidb.org/>`_), but so far it does not appear that the specification is enforced
+strictly by anyone.  Reading a CXIDB file is not as deterministic as, for example, reading a `PDB file <https://www.rcsb.org/pdb/static.do?p=file_formats/pdb/index.html>`_.

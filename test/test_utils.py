@@ -14,13 +14,13 @@ def test_rotation():
                   [-1, 0, 0],
                   [0, 0, 1.]])
     vec = np.array([3, np.pi, np.pi*4])
-    vec_rotated = utils.rotate(R, vec)
+    vec_rotated = np.dot(vec, R.T)
     vec_expected = np.array([np.pi, -3, np.pi*4])
 
     assert(np.max(np.abs(vec_rotated - vec_expected)) < 1e-10)
 
     vec10 = np.random.rand(10, 3)
-    vec_rotated = utils.rotate(R, vec10)
+    vec_rotated = np.dot(vec10, R.T)
     vec_expected = vec10.copy()
     vec_expected[:, 0] = vec10[:, 1]
     vec_expected[:, 1] = -vec10[:, 0]

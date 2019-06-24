@@ -23,7 +23,7 @@ import pyopencl as cl
 import pyopencl.array
 
 import bornagain as ba
-from bornagain.utils import rotate, depreciate
+from bornagain.utils import depreciate
 from bornagain.simulate import refdata
 
 cl_array = cl.array.Array
@@ -468,7 +468,7 @@ class ClCore(object):
 
         if U is None:
             U = np.zeros(3, dtype=self.real_t)
-        U = rotate(R.T, U)
+        U = np.dot(R.T, U)
 
         if add:
             add = 1
@@ -548,7 +548,7 @@ class ClCore(object):
 
         if U is None:
             U = np.zeros(3, dtype=self.real_t)
-        U = rotate(R.T, U)
+        U = np.dot(R.T, U)
 
         if add:
             add = 1
@@ -639,7 +639,7 @@ class ClCore(object):
 
         if U is None:
             U = np.zeros(3, dtype=self.real_t)
-        U = rotate(R.T, U)
+        U = np.dot(R.T, U)
 
         R = self.vec16(R.T, dtype=self.real_t)
         U = self.vec4(U, dtype=self.real_t)
@@ -738,7 +738,7 @@ class ClCore(object):
             U = np.zeros(3, dtype=self.real_t)
         else:
             do_translate = self.int_t(1)
-            U = rotate(R.T, U)
+            U = np.dot(R.T, U)
 
         R = self.vec16(R.T, dtype=self.real_t)
         U = self.vec4(U, dtype=self.real_t)
