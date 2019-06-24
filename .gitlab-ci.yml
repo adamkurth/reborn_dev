@@ -1,15 +1,16 @@
-image: continuumio/miniconda3:latest # Annoyingly, this image doesn't seem to have make or gfortran
+image: ubuntu:latest #continuumio/miniconda3:latest # Annoyingly, this image doesn't seem to have make or gfortran
 
 before_script:
   - uname -a
   - pwd
+  - basepath=$(pwd)
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $basepath/miniconda.sh
+  - bash $basepath/miniconda.sh -b -p $basepath/miniconda
+  - export PATH=$basepath/miniconda/bin:$PATH
 
 tests:
   stage: test
   script:
-  - pwd
-  - uname -a
-  - echo $PATH
   - conda env create -f gitlab-ci-env3.yml
   - source activate bornagain3
   - cd test
