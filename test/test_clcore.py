@@ -114,7 +114,7 @@ def test_rotations(double_precision=False):
     vec1 = np.array([1, 2, 0], dtype=core.real_t)
 
     vec2 = core.test_rotate_vec(rot, trans, vec1)
-    vec3 = utils.rotate(rot, vec1) + trans
+    vec3 = np.dot(vec1, rot.T) + trans
 
     # Rotation on gpu and rotation with utils.rotate should do the same thing
     assert np.max(np.abs(vec2-vec3)) <= 1e-6
@@ -123,7 +123,7 @@ def test_rotations(double_precision=False):
     vec2 = core.test_rotate_vec(rot, trans, vec1)
     vec4 = np.random.rand(10, 3).astype(core.real_t)
     vec4[0, :] = vec1
-    vec3 = utils.rotate(rot, vec4) + trans
+    vec3 = np.dot(vec4, rot.T) + trans
     vec3 = vec3[0, :]
 
     # Rotation on gpu and rotation with utils.rotate should do the same thing (even for many vectors; shape Nx3)
@@ -135,7 +135,7 @@ def test_rotations(double_precision=False):
     trans = np.zeros((3,), dtype=core.real_t)
     vec1 = np.array([1.0, 0, 0], dtype=core.real_t)
     vec2 = core.test_rotate_vec(rot, trans, vec1)
-    vec3 = utils.rotate(rot, vec1) + trans
+    vec3 = np.dot(vec1, rot.T) + trans
     vec_pred = np.array([0, -1.0, 0])
 
     # Check that results are as expected

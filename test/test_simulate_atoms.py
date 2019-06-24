@@ -4,7 +4,9 @@ import numpy as np
 
 sys.path.append('..')
 from bornagain import simulate as sim
-from bornagain import units
+from scipy import constants as const
+
+hc = const.h*const.c
 
 def test_element_numbers_and_symbols():
         
@@ -36,7 +38,7 @@ def test_get_scattering_factors():
     
     Z = [1,2,3,4,1,2,3,4,5,6,7,8,9,10]
     
-    f = sim.atoms.get_scattering_factors(Z,units.hc/1.5e-10)
+    f = sim.atoms.get_scattering_factors(Z, hc/1.5e-10)
     
     assert(np.abs(np.real(f) - np.array(Z)).max() < 0.1)
     assert(all(np.imag(f) > 0))

@@ -35,7 +35,7 @@ except ImportError:
     havecl = False
 
 import bornagain.simulate.numbacore as numbacore
-from bornagain.utils import rotation_about_axis, rotate
+from bornagain.utils import rotation_about_axis
 
 view = False
 
@@ -277,13 +277,13 @@ def _clcore(double_precision=False):
     f = np.random.random([n_atoms]).astype(core.complex_t)
 
     # Do rotation and translation on CPU
-    amps1 = core.phase_factor_qrf(q, rotate(rot, r0) + trans, f, R=None, U=None)
+    amps1 = core.phase_factor_qrf(q, np.dot(r0, rot.T) + trans, f, R=None, U=None)
     # Rotation and translation on GPU
     amps2 = core.phase_factor_qrf(q, r0, f, R=rot, U=trans)
     # Rotation on CPU, translation on GPU
-    amps3 = core.phase_factor_qrf(q, rotate(rot, r0), f, R=None, U=trans)
+    amps3 = core.phase_factor_qrf(q, np.dot(r0, rot.T), f, R=None, U=trans)
     # Rotation on GPU, translation on CPU
-    amps4 = core.phase_factor_qrf(q, r0 + rotate(rot.T, trans), f, R=rot, U=None)
+    amps4 = core.phase_factor_qrf(q, r0 + np.dot(trans, rot), f, R=rot, U=None)
 
     if double_precision:
         tol = 1e-6
@@ -299,13 +299,13 @@ def _clcore(double_precision=False):
         assert (np.mean(np.abs(amps3 - amps4)) / np.mean(np.abs(amps4)) < tol)
 
     # Do rotation and translation on CPU
-    amps1 = core.phase_factor_pad(rotate(rot, r0) + trans, f, R=None, U=None, beam=beam, pad=pad)
+    amps1 = core.phase_factor_pad(np.dot(r0, rot.T) + trans, f, R=None, U=None, beam=beam, pad=pad)
     # Rotation and translation on GPU
     amps2 = core.phase_factor_pad(r0, f, R=rot, U=trans, beam=beam, pad=pad)
     # Rotation on CPU, translation on GPU
-    amps3 = core.phase_factor_pad(rotate(rot, r0), f, R=None, U=trans, beam=beam, pad=pad)
+    amps3 = core.phase_factor_pad(np.dot(r0, rot.T), f, R=None, U=trans, beam=beam, pad=pad)
     # Rotation on GPU, translation on CPU
-    amps4 = core.phase_factor_pad(r0 + rotate(rot.T, trans), f, R=rot, U=None, beam=beam, pad=pad)
+    amps4 = core.phase_factor_pad(r0 + np.dot(trans, rot), f, R=rot, U=None, beam=beam, pad=pad)
 
     if double_precision:
         tol = 1e-6
@@ -340,7 +340,7 @@ def _test_rotations(double_precision=False):
     vec1 = np.array([1, 2, 0], dtype=core.real_t)
 
     vec2 = core.test_rotate_vec(rot, trans, vec1)
-    vec3 = utils.rotate(rot, vec1) + trans
+    vec3 = np.dot(vec1, rot.T) + trans
 
     # Rotation on gpu and rotation with utils.rotate should do the same thing
     assert np.max(np.abs(vec2-vec3)) <= 1e-6
@@ -349,7 +349,7 @@ def _test_rotations(double_precision=False):
     vec2 = core.test_rotate_vec(rot, trans, vec1)
     vec4 = np.random.rand(10, 3).astype(core.real_t)
     vec4[0, :] = vec1
-    vec3 = utils.rotate(rot, vec4) + trans
+    vec3 = np.dot(vec4, rot.T) + trans
     vec3 = vec3[0, :]
 
     # Rotation on gpu and rotation with utils.rotate should do the same thing (even for many vectors; shape Nx3)
@@ -361,7 +361,7 @@ def _test_rotations(double_precision=False):
     trans = np.zeros((3,), dtype=core.real_t)
     vec1 = np.array([1.0, 0, 0], dtype=core.real_t)
     vec2 = core.test_rotate_vec(rot, trans, vec1)
-    vec3 = utils.rotate(rot, vec1) + trans
+    vec3 = np.dot(vec1, rot.T) + trans
     vec_pred = np.array([0, -1.0, 0])
 
     # Check that results are as expected

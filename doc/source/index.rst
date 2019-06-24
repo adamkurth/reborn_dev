@@ -58,7 +58,7 @@ Code found in bornagain has been inspired by numerous open-source software packa
 contributions to bornagain have been made by Derek Mendez, Rick Hewitt, Cameron Howard, and Joe Chen.
 
 Contents
-========
+--------
 
 .. toctree::
    :maxdepth: 1
@@ -72,10 +72,10 @@ Contents
    sampling_binning
    coding
    numpy
-   modules
+   api/modules
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

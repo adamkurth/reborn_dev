@@ -1,40 +1,47 @@
 Setting up bornagain
 ====================
 
-"Installation" of bornagain
----------------------------
+The following should work on Linux or MacOS.  We have not thoroughly tested bornagain on MS Windows.
+
+Setting up your path
+--------------------
 
 There are no install scripts (e.g. setup.py) that will automatically add bornagain to your python installation.
 Since bornagain is changing frequently at this time, it is recommended that you keep a local copy of bornagain
-where you are doing your analysis or simulations so that you can reproduce them in the future if need be.  Archiving
-code alongside results is good practice anyways.
+where you are doing your analysis or simulations so that you can reproduce them in the future.  Archiving
+code alongside results is good practice anyways.  A good way to track the *exact* version of bornagain that is used in
+your project is to add it as a `submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's
+git repository.
 
-The main setup task is to simply ensure that Python can load the bornagain package.  Here are three different
-suggestions for how to get your path set up:
+The main setup task is to simply ensure that Python can load the bornagain package, which means that it must be
+found in path where python searches for packages.  Here are three different suggestions that you might use to get your
+path set up:
 
 1) Within your shell, you can set an environment variable so that Python looks in the right place for bornagain.
 If you are using the bash shell, you can do the following:
 
 .. code-block:: bash
 
-    export PYTHONPATH=example/path/to/bornagain
+    export PYTHONPATH=example/path/to/bornagain/repository
 
 2) You can specify the location of bornagain directly in your python path.  For example:
 
 .. code-block:: python
 
     import sys
-    sys.path.append("example/path/to/bornagain")
+    sys.path.append("example/path/to/bornagain/repository")
 
 3) You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
 example:
 
 .. code-block:: bash
 
-    ln -s example/path/to/bornagain/bornagain path/to/where/your/script/is/located
+    ln -s example/path/to/bornagain/repository/bornagain path/to/where/your/script/is/located
 
 Note that "bornagain/bornagain" is not a typo in the above -- in the case of a symbolic link you need to link to the
-actual bornagain package, which is not the same as the git repository bornagain that contains the bornagain package.
+actual bornagain package, which lies *within* the git repository that is also named bornagain.  If you use this method,
+you will need to run your scripts from the specific directory where the symbolic link is created, so this is not
+the best method.
 
 If you do any of the above correctly, you should then be able to import bornagain in the usual way:
 
@@ -42,13 +49,12 @@ If you do any of the above correctly, you should then be able to import bornagai
 
     import bornagain
 
-
 Compilation of Fortran code
 ---------------------------
 
-There are a couple of bornagain modules that rely on Fortran.  In principle, they are not necessary, but they will speed
-up some routines.  We use the f2py program to compile Fortran code and create Python modules.  Most likely, you can
-simply do the following:
+There are a couple of bornagain modules that rely on Fortran.  In some cases they are not strictly necessary, but they
+will speed up some routines.  We use the f2py program to compile Fortran code and create Python modules.  Most likely,
+you can simply do the following:
 
 .. code-block:: bash
 
@@ -72,7 +78,7 @@ Some functions will run faster if you install:
 
 * numba
 
-If you want to run simulations, you'll need
+If you want to run GPU simulations, you'll need
 
 * pyopencl
 
@@ -95,17 +101,17 @@ A couple of specialized packages are used for dealing with LCLS XTC data and Cry
 We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
 compatibility with both pyqt4 and pyqt5.
 
-Example setup
--------------
+Example setup with Miniconda
+----------------------------
 
 `Miniconda <https://conda.io/miniconda.html>`_ is a reliable and lightweight distribution of python that is known to
 work well with bornagain.  The `Conda <https://conda.io/docs/>`_ package manager that comes with it makes it fast and
-easy to install the dependencies of bornagain.  You might
-consider making a `conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_ to check that
-everything works well, since packages like opengl, opencl, pyqt have had conflicting requirments in the past (however,
-not many problems have been noticed since 2019).
+easy to install the dependencies of bornagain.  You might consider making a trial
+`conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_ to check that
+everything works well, since packages like opengl, opencl, pyqt are complex and may have conflicting requirments
+(however, not many problems have been noticed at least since 2019).
 
-Assuming that you've installed conda, here's an example of how to set up a new conda environment:
+Assuming that you have installed conda, here's an example of how to set up a new conda environment:
 
 .. code-block:: bash
 
@@ -119,6 +125,12 @@ bornagain, like this:
 
     source activate bornagain
 
+or like this
+
+.. code-block:: bash
+
+    conda activate bornagain
+
 Note that cfelpyutils currently requires that you use pip to install.  It can be installed (after activating your
 environment) as follows:
 
@@ -126,7 +138,7 @@ environment) as follows:
 
     pip install cfelpyutils
 
-An even easier way to setup your environment is to use the provided environmen files:
+An even easier way to setup your environment is to use the provided environment files:
 
 .. code-block:: bash
 
@@ -141,19 +153,48 @@ If you don't want to use a conda environment you can just install the modules in
   sphinx pyqtgraph pyopencl pyopengl future
   pip instlall cfelpyutils
 
-You can check if you've got all the dependencies sorted out by running the following:
-
-.. code-block:: bash
-
-    cd bornagain/test
-    pytest
-
 You can uninstall a conda environment as follows:
 
 .. code-block:: bash
 
     conda env remove -n bornagain3
 
+Testing your setup
+------------------
+
+You can simply move into the test directory and run pytest:
+
+.. code-block:: bash
+
+    cd path/to/bornagain/repository
+    cd test
+    pytest
+
+With some luck, you will get a nice clean output from pytest:
+
+.. code-block:: bash
+
+    ============================= test session starts ==============================
+    platform darwin -- Python 3.6.7, pytest-3.9.3, py-1.7.0, pluggy-0.8.0
+    rootdir: /Users/rkirian/work/projects/bornagain/test, inifile:collected 36 items
+
+    test_analysis.py ..                                                      [  5%]
+    test_clcore.py .....                                                     [ 19%]
+    test_clcore_interpolations.py .                                          [ 22%]
+    test_crystal.py .....                                                    [ 36%]
+    test_crystfel.py .                                                       [ 38%]
+    test_detector.py ....                                                    [ 50%]
+    test_interpolations.py .                                                 [ 52%]
+    test_minimal_dependencies.py .                                           [ 55%]
+    test_numpy.py ...                                                        [ 63%]
+    test_simulate_atoms.py ...                                               [ 72%]
+    test_simulate_clcore.py ..                                               [ 77%]
+    test_simulate_cromer_mann.py .                                           [ 80%]
+    test_simulations.py .                                                    [ 83%]
+    test_target_density.py ....                                              [ 94%]
+    test_utils.py ..                                                         [100%]
+
+    ========================== 36 passed in 19.55 seconds ==========================
 
 Possible issues
 ---------------
