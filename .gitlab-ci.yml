@@ -9,6 +9,7 @@ before_script:
   - apt-get -qq -y update
 #  - apt-get -qq -y apt-utils
   - apt-get -qq -y install wget
+  - apt-get install gfortran
   - wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $basepath/miniconda.sh
   - bash $basepath/miniconda.sh -b -p $basepath/miniconda
   - export PATH=$basepath/miniconda/bin:$PATH
