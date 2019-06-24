@@ -1,10 +1,13 @@
-image: ubuntu:latest #continuumio/miniconda3:latest # Annoyingly, this image doesn't seem to have make or gfortran
+#image: continuumio/miniconda3:latest # This image doesn't seem to have make or gfortran
+#image: ubuntu:latest # This image doesn't work with GPU stuff
+image: nvidia:opencl
 
 before_script:
   - uname -a
   - basepath=$(pwd)
   - echo $basepath
   - apt-get -qq -y update
+  - apt-get -qq -y apt-utils
   - apt-get -qq -y install wget
   - wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $basepath/miniconda.sh
   - bash $basepath/miniconda.sh -b -p $basepath/miniconda
