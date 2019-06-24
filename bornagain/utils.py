@@ -423,45 +423,114 @@ else:
                     d_max = d
         return np.sqrt(d_max)
 
-def trilinear_interpolation(data, min_corners, max_corners, samples, mask=None):
+def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask=None):
     r""""
-    Trilinear interpolation on a regular grid with arbitrary sample points.
+    Trilinear insertion on a regular grid with arbitrary sample points.
+    The boundary is defined as [x_min-0.5, x_max+0.5).
 
-    Note: all input arrays should be C contiguous.
+    Note 1: All input arrays should be C contiguous.
+    Note 2: This code will break if you put a 1 in any of the N_bin entries.
 
     Arguments:
-        data : 3D Numpy array that you wish to sample
-        min_corners : An array with the three minimum values corresponding to the data grid center points
-        max_corners : An array with the three maximum values corresponding to the data grid center points
-        samples : An Nx3 array of 3-vectors containing coordinates of points that you wish to sample
-        mask : Numpy array specifying which voxels in data to ignore.  Zero means ignore.
+        data_coord: An Nx3 array of 3-vectors containing coordinates of the data points that you wish to insert into the regular grid.
+        data_val  : An array with the N values containing the values of the data points.
+        x_min     : An array with the three values corresponding to the smallest data grid center points.
+        x_max     : An array with the three values corresponding to the largest data grid center points.
+        N_bin     : An array with the three values corresponding to the number of bins in each direction.
+        mask      : An array with the N values specifying which data points to ignore. Zero means ignore.
 
     Returns:
-        Numpy arrays with interpolated values
+        A 3D numpy array with trilinearly inserted values.
     """
 
+    #------------------------------------------
+    # Checks
     if fortran is None:
         raise ImportError('You need to compile fortran code to use utils.trilinear_interpolation()')
 
-    min_corners = np.array(min_corners)
-    max_corners = np.array(max_corners)
-    shape = np.array(data.shape)
+    # Check if the non-1D arrays are c_contiguous
+    assert data_coord.flags.c_contiguous
 
-    # TODO: fix this
-    min_corners = -max_corners
-    deltas = (max_corners - min_corners)/(shape-1)
-    ####################################
+    # Convert to appropriate types
+    data_coord = data_coord.astype(np.double)
+    data_val = data_val.astype(np.double)
+    x_min = x_min.astype(np.double)
+    x_max = x_max.astype(np.double)
+    N_bin = N_bin.astype(np.int)
+    #------------------------------------------
 
-    data = data.astype(np.double)
-    shape = shape.astype(np.int)
+    # Number of data points
+    N_data = len(data_val)
 
-    assert data.flags.c_contiguous
-    assert samples.flags.c_contiguous
-    if mask is not None:
-        assert mask.flags.c_contiguous
+    # Bin width
+    Delta_x = (x_max - x_min) / (N_bin - 1)
 
-    dataout = np.empty((samples.shape[0]), dtype=np.double)
-    fortran.interpolations_f.trilinear_interpolation(data, samples, max_corners, deltas, dataout)
+    # Bin volume
+    bin_volume = Delta_x[0] * Delta_x[1] * Delta_x[2]
+    one_over_bin_volume = 1 / bin_volume
+
+    # The plus two is for padding the boundary of the array to deal with edge cases.
+    A_out = np.zeros(N_bin+2, dtype=np.double)
+
+    # To safeguard against round-off errors
+    epsilon = 1e-9
+
+    # Constants
+    c1 = 0.0 - x_min / Delta_x
+
+    for i in range(N_data):
+        if (mask[i] == 1):
+            data_coord_curr = data_coord[i,:]
+            data_val_curr_scaled = data_val[i] * one_over_bin_volume # Multiply the data value by the inverse bin volume here to save computations later.
+
+            # Check if the data point is within the bounds [x_min-0.5, x_max+0.5).
+            # Only insert that data point if this is the case.
+            if (np.max(data_coord_curr - (x_max + 0.5 - epsilon)) < 0):
+                if (np.min(data_coord_curr - (x_min - 0.5 + epsilon)) >= 0):
+
+                    # Bin index
+                    ind_fl = np.floor(data_coord_curr / Delta_x + c1)
+                    ind_fl = ind_fl.astype(np.int)
+
+                    ind_cl = ind_fl + 1 # cl for ceiling
+
+                    # Bin position
+                    x_ind_fl = x_min + ind_fl * Delta_x
+                    x_ind_cl = x_ind_fl + Delta_x # This is the same as x_min + ind_cl*Delta_x
+
+                    Delta_x_1 = x_ind_cl - data_coord_curr
+                    Delta_x_0 = data_coord_curr - x_ind_fl
+
+                    # The weights
+                    N_000 = Delta_x_1[0] * Delta_x_1[1] * Delta_x_1[2]
+                    N_100 = Delta_x_0[0] * Delta_x_1[1] * Delta_x_1[2]
+                    N_010 = Delta_x_1[0] * Delta_x_0[1] * Delta_x_1[2]
+                    N_110 = Delta_x_0[0] * Delta_x_0[1] * Delta_x_1[2]
+                    N_001 = Delta_x_1[0] * Delta_x_1[1] * Delta_x_0[2]
+                    N_101 = Delta_x_0[0] * Delta_x_1[1] * Delta_x_0[2]
+                    N_011 = Delta_x_1[0] * Delta_x_0[1] * Delta_x_0[2]
+                    N_111 = Delta_x_0[0] * Delta_x_0[1] * Delta_x_0[2]
+
+                    # Add 1 to the bin indices - this is to correspond to the plus two boundary padding for the edge cases.
+                    ind_fl = ind_fl + 1
+                    ind_cl = ind_cl + 1
+
+                    A_out[ind_fl[0], ind_fl[1], ind_fl[2]] += N_000 * data_val_curr_scaled
+                    A_out[ind_cl[0], ind_fl[1], ind_fl[2]] += N_100 * data_val_curr_scaled
+                    A_out[ind_fl[0], ind_cl[1], ind_fl[2]] += N_010 * data_val_curr_scaled
+                    A_out[ind_cl[0], ind_cl[1], ind_fl[2]] += N_110 * data_val_curr_scaled
+                    A_out[ind_fl[0], ind_fl[1], ind_cl[2]] += N_001 * data_val_curr_scaled
+                    A_out[ind_cl[0], ind_fl[1], ind_cl[2]] += N_101 * data_val_curr_scaled
+                    A_out[ind_fl[0], ind_cl[1], ind_cl[2]] += N_011 * data_val_curr_scaled
+                    A_out[ind_cl[0], ind_cl[1], ind_cl[2]] += N_111 * data_val_curr_scaled
+
+
+    # Keep only the inner array - get rid of the boundary padding.
+    dataout = A_out[1:N_bin[0]+1, 1:N_bin[1]+1, 1:N_bin[2]+1]
+
+
+    # dataout = np.empty((samples.shape[0]), dtype=np.double)
+    # fortran.interpolations_f.trilinear_interpolation(data, samples, max_corners, deltas, dataout)
 
     return dataout
 
