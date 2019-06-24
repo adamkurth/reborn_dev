@@ -4,8 +4,8 @@ before_script:
   - uname -a
   - basepath=$(pwd)
   - echo $basepath
-  - apt-get -y update
-  - apt-get -y install wget
+  - apt-get -qq -y update
+  - apt-get -qq -y install wget
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $basepath/miniconda.sh
   - bash $basepath/miniconda.sh -b -p $basepath/miniconda
   - export PATH=$basepath/miniconda/bin:$PATH
@@ -16,7 +16,7 @@ tests:
   - conda env create -f gitlab-ci-env3.yml
   - source activate bornagain3
   - cd test
-  - pytest --ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py  --ignore=test_mplviews.py --ignore=test_interpolations.py
+  - pytest #--ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py  --ignore=test_mplviews.py --ignore=test_interpolations.py
 
 pages:
   script:
