@@ -423,10 +423,11 @@ else:
                     d_max = d
         return np.sqrt(d_max)
 
-def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask=None):
+def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, N_pattern, mask=None):
     r""""
     Trilinear insertion on a regular grid with arbitrary sample points.
     The boundary is defined as [x_min-0.5, x_max+0.5).
+    N_pattern specifies the number of patterns to insert so that we can divide by it to get the average.
 
     Note 1: All input arrays should be C contiguous.
     Note 2: This code will break if you put a 1 in any of the N_bin entries.
@@ -438,6 +439,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask=None):
         x_max     : An array with the three values corresponding to the largest data grid center points.
         N_bin     : An array with the three values corresponding to the number of bins in each direction.
         mask      : An array with the N values specifying which data points to ignore. Zero means ignore.
+        N_pattern : Number of patterns that have been inserted. So that we can average the resultant 3D volume by it. The terminology is due to the fact that we want to use this function to merge Ewald slices into a 3D volume.
 
     Returns:
         A 3D numpy array with trilinearly inserted values.
@@ -486,6 +488,9 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask=None):
 
     # Keep only the inner array - get rid of the boundary padding.
     dataout = dataout[1:N_bin[0]+1, 1:N_bin[1]+1, 1:N_bin[2]+1]
+
+    # Divide by the total number of patterns inserted to get the average.
+    dataout /= N_pattern
 
     return dataout
 
