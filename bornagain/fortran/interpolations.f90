@@ -1,11 +1,11 @@
 subroutine trilinear_insert(data_coord, data_val, x_min, mask, &
                             N_data, Delta_x, one_over_bin_volume, c1, c2, c3, &
-                            dataout)
-    ! Note this Fortran funtion populates dataout which is defined to be shape N+2  
-    ! where the addition of 2 is for the boundary samples.
-    ! The Python code in utils.py then crops this out to the correct size.
+                            dataout, weightout)
+    ! Note this Fortran funtion populates dataout which is defined to be of shape N+2  
+    ! where the addition of 2 is for the boundary samples. The Python code in utils.py then 
+    ! crops this N+2 array out to the correct shape of N.
     implicit none
-    real(kind=8), intent(inout) :: dataout(:,:,:)
+    real(kind=8), intent(inout) :: dataout(:,:,:), weightout(:,:,:)
     real(kind=8), intent(in)    :: data_coord(:,:), data_val(:), x_min(3), mask(:), &
                                    Delta_x(3), one_over_bin_volume, c1(3), c2(3), c3(3)
     integer(kind=4), intent(in) :: N_data
@@ -32,10 +32,11 @@ subroutine trilinear_insert(data_coord, data_val, x_min, mask, &
                     x_ind_fl = x_min + ind_fl * Delta_x
                     x_ind_cl = x_ind_fl + Delta_x ! This is the same as x_min + ind_cl*Delta_x
 
+                    ! Distances from the data point to the fl and cl bins
                     Delta_x_1 = x_ind_cl - data_coord_curr
                     Delta_x_0 = data_coord_curr - x_ind_fl
 
-                    ! The weights
+                    ! The trilinear weights
                     N_000 = Delta_x_1(1) * Delta_x_1(2) * Delta_x_1(3)
                     N_100 = Delta_x_0(1) * Delta_x_1(2) * Delta_x_1(3)
                     N_010 = Delta_x_1(1) * Delta_x_0(2) * Delta_x_1(3)
@@ -50,6 +51,7 @@ subroutine trilinear_insert(data_coord, data_val, x_min, mask, &
                     ind_fl = ind_fl + 2
                     ind_cl = ind_cl + 2
 
+                    ! Accumulate the data values
                     dataout(ind_fl(1), ind_fl(2), ind_fl(3)) = dataout(ind_fl(1), ind_fl(2), ind_fl(3)) & 
                                                                + N_000 * data_val_curr_scaled
                     dataout(ind_cl(1), ind_fl(2), ind_fl(3)) = dataout(ind_cl(1), ind_fl(2), ind_fl(3)) &
@@ -66,6 +68,27 @@ subroutine trilinear_insert(data_coord, data_val, x_min, mask, &
                                                                + N_011 * data_val_curr_scaled
                     dataout(ind_cl(1), ind_cl(2), ind_cl(3)) = dataout(ind_cl(1), ind_cl(2), ind_cl(3)) &
                                                                + N_111 * data_val_curr_scaled
+
+                    ! Accumulate the number of times data values had been placed into these bins.
+                    ! The trilinear weights are by definition bewteen 0 and 1 so use ceiling to deal with
+                    ! data points that situate excatly on the centre of a bin.
+                    ! The -1e-10 is to safeguard against small values close to zero.
+                    weightout(ind_fl(1), ind_fl(2), ind_fl(3)) = weightout(ind_fl(1), ind_fl(2), ind_fl(3)) & 
+                                                               + ceiling(N_000 * one_over_bin_volume - 1e-10)
+                    weightout(ind_cl(1), ind_fl(2), ind_fl(3)) = weightout(ind_cl(1), ind_fl(2), ind_fl(3)) &
+                                                               + ceiling(N_100 * one_over_bin_volume - 1e-10)
+                    weightout(ind_fl(1), ind_cl(2), ind_fl(3)) = weightout(ind_fl(1), ind_cl(2), ind_fl(3)) &
+                                                               + ceiling(N_010 * one_over_bin_volume - 1e-10)
+                    weightout(ind_cl(1), ind_cl(2), ind_fl(3)) = weightout(ind_cl(1), ind_cl(2), ind_fl(3)) &
+                                                               + ceiling(N_110 * one_over_bin_volume - 1e-10)
+                    weightout(ind_fl(1), ind_fl(2), ind_cl(3)) = weightout(ind_fl(1), ind_fl(2), ind_cl(3)) &
+                                                               + ceiling(N_001 * one_over_bin_volume - 1e-10)
+                    weightout(ind_cl(1), ind_fl(2), ind_cl(3)) = weightout(ind_cl(1), ind_fl(2), ind_cl(3)) &
+                                                               + ceiling(N_101 * one_over_bin_volume - 1e-10)
+                    weightout(ind_fl(1), ind_cl(2), ind_cl(3)) = weightout(ind_fl(1), ind_cl(2), ind_cl(3)) &
+                                                               + ceiling(N_011 * one_over_bin_volume - 1e-10)
+                    weightout(ind_cl(1), ind_cl(2), ind_cl(3)) = weightout(ind_cl(1), ind_cl(2), ind_cl(3)) &
+                                                               + ceiling(N_111 * one_over_bin_volume - 1e-10)
                 endif
             endif
         endif
