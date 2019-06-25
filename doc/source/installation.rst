@@ -24,12 +24,17 @@ If you are using the bash shell, you can do the following:
 
     export PYTHONPATH=example/path/to/bornagain/repository
 
+The above method is probably the best option, but you must remember to set your path every time you use bornagain.
+
 2) You can specify the location of bornagain directly in your python path.  For example:
 
 .. code-block:: python
 
     import sys
     sys.path.append("example/path/to/bornagain/repository")
+
+This option is ok, but then you must remember to always run your script from the appropriate directory if the above
+path is a relative path.
 
 3) You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
 example:
@@ -38,30 +43,34 @@ example:
 
     ln -s example/path/to/bornagain/repository/bornagain path/to/where/your/script/is/located
 
-Note that "bornagain/bornagain" is not a typo in the above -- in the case of a symbolic link you need to link to the
-actual bornagain package, which lies *within* the git repository that is also named bornagain.  If you use this method,
-you will need to run your scripts from the specific directory where the symbolic link is created, so this is not
-the best method.
+Note that "bornagain/repository/bornagain" is not a typo in the above -- in the case of a symbolic link you need to link
+to the actual bornagain package, which lies *within* the git repository that is also named bornagain.  If you use this
+method, you will need to run your scripts from the specific directory where the symbolic link is created.
 
-If you do any of the above correctly, you should then be able to import bornagain in the usual way:
+If you do any of the above correctly, you might be able to import bornagain in the usual way:
 
 .. code-block:: python
 
     import bornagain
 
+The above might fail if you are missing dependencies, which are describe below.  Another possible mode of failure is
+that you have not compiled the fortran code that bornagain uses, which is discussed in the next section.
+
 Compilation of Fortran code
 ---------------------------
 
-There are a couple of bornagain modules that rely on Fortran.  In some cases they are not strictly necessary, but they
-will speed up some routines.  We use the f2py program to compile Fortran code and create Python modules.  Most likely,
-you can simply do the following:
+There are a couple of bornagain modules that use modules formed from compiled Fortran code.  In some cases they are not
+strictly necessary, but they will speed up some routines.  We use the f2py program to compile Fortran code and create
+Python modules.  Although it *shouldn't* be strictly necessary to compile these to use some of the basic bornagain
+classes, you should go ahead and compile them since the f2py program that is included with numpy makes this relatively
+painless.  Try the following:
 
 .. code-block:: bash
 
     cd developer
     ./compile-fortran.sh
 
-You will see some warnings (due to Numpy -- this is out of our control).  So long as there are no errors you should be
+You will see some warnings due to Numpy (these is out of our control), but so long as there are no errors you should be
 all set.
 
 Dependencies
