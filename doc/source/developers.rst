@@ -75,38 +75,11 @@ If you modify code and wish to update this documentation, the easiest way to do 
 because sphinx must be able to import all of the bornagain modules in order to auto-generate module/package
 documentation.
 
-Speeding up code with Numba
----------------------------
+Speeding up code with numba and f2py
+------------------------------------
 
 Numba is one way to speed up Python code in cases where there is not an existing numpy function.  It is used within
 bornagian in a few places and appears to be reasonably stable, though still lacking some basic functionality.
 
-Integration of Fortran and Numpy
---------------------------------
+A better way to speed up code is to use fortran.  There are notes on this elsewere in this documentation.
 
-The f2py utility included with numpy makes it quite easy to integrate simple Fortran code with Numpy.  Typically,
-we wish to pass memory buffers from numpy ndarrays into a Fortran subroutine, and we modify those buffers with Fortran,
-which is almost invariably the task at hand.
-There are some very annoying issues that can arise because the ways in which the Numpy package manipulates
-the inernal memory buffers of ndarrays, which might surprise you.  These under-the-hood manipulations might be
-harmless... until the day you really care
-about operating directly on memory buffers. Examples of such complications can be found in the `test_numpy.py` unit
-test.  Presently, the following recipe appears to be a good way to avoid all possible memory issues:
-
-(1) Always work with the default C-contiguous ndarray memory layout in Python code.
-
-(2) Use assert statements in function wrappers: e.g. assert a.flags.c_contiguous == True.
-
-(3) Transpose ndarrays before passing them to Fortran routines.  This will *not* copy memory.
-
-(4) In your Fortran code, simply reverse the ordering of your indices as compared to your Numpy code.
-
-Although it may be inconvenient to reverse your indexing when going between the Fortran and Python code, bear in mind
-that this can only be avoided by (a) making copies of array memory, or (b) enforcing a consistent non-default internal
-memory layout for all Numpy arrays that touch a Fortran routine.  Both options (a) and (b) are highly undesirable.  We
-choose option (c), reverse the index
-order, because it holds the big advantage that we get to think about memory in the most natural way for both Numpy
-*and* Fortran coding, rather than insisting that Fortran and Numpy syntax *look* the same at the expense of speed and
-potential memory issues.
-
-It is possible that I am wrong in the above analysis... please let me know if you think that is the case...
