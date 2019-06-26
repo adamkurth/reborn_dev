@@ -81,6 +81,14 @@ class CrystalDensityMap(object):
     '''
 
     sym_luts = None
+    cryst = None  # :  CrystalStructure class used to initiate the map
+    oversampling = None  # : Oversampling ratio
+    dx = None  # : Length increments for fractional coordinates
+    deltas = None
+    cshape = None  # :  Number of samples along edges of unit cell within density map
+    shape = None  # :  Number of samples along edge of full density map (includes oversampling)
+    size = None  # :  Total number of elements in density map (np.prod(self.shape)
+    strides = None # :  The stride vector (mostly for internal use)
 
     def __init__(self, cryst, resolution, oversampling):
         r'''
@@ -117,34 +125,30 @@ class CrystalDensityMap(object):
         self.cryst = cryst  # :  crystal class object used to initiate the map
         self.oversampling = np.int(np.ceil(oversampling))  # :  Oversampling ratio
         self.dx = 1.0 / cshape  # :  Crystal basis length increment
-        self.deltas = self.dx
         self.cshape = cshape.astype(int)  # :  Number of samples along edge of unit cell
         self.shape = (cshape * self.oversampling).astype(int)  # :  Number of samples along edge of whole map (includes oversampling)
         self.size = np.prod(self.shape)
-        self.n_voxels = np.int(np.product(self.shape))  # :  Linear length of map (=N^3)
         self.strides = np.array([self.shape[2]*self.shape[1], self.shape[2], 1])  # :  The stride vector (mostly for internal use)
 
     @property
     def n_vecs(self):
         r"""
-
         Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:
 
         [[0,  0,  0  ],
          [0,  0,  1  ],
          [0,  0,  2  ],
-               ...    ,
+         ...          ,
          [N-1,N-1,N-1]]
 
         Note that it is the third index, which we might associate with "z", that increments most rapidly.
 
         Returns: numpy array
-
         """
 
         shp = self.shape
-        ind = np.arange(0, self.n_voxels)
-        n_vecs = np.zeros([self.n_voxels, 3])
+        ind = np.arange(0, self.size)
+        n_vecs = np.zeros([self.size, 3])
         n_vecs[:, 0] = np.floor(ind / (shp[1]*shp[2]))
         n_vecs[:, 1] = np.floor(ind / shp[2]) % shp[1]
         n_vecs[:, 2] = ind % shp[2]
@@ -153,7 +157,6 @@ class CrystalDensityMap(object):
     @property
     def x_vecs(self):
         r"""
-
         Get an Nx3 array that contains the fractional coordinates.  For example, if there were four samples per unit
         cell, the array looks like this:
 
@@ -162,11 +165,10 @@ class CrystalDensityMap(object):
          [    0,    0,  0.5],
          [    0,    0, 0.75],
          [    0, 0.25,    0],
-               ...       ,
+         ...                ,
          [ 0.75, 0.75, 0.75]]
 
         Returns: numpy array
-
         """
 
         return self.n_vecs * self.dx
@@ -221,7 +223,7 @@ class CrystalDensityMap(object):
         h2 = np.fft.fftshift(np.fft.fftfreq(self.shape[2], d=self.oversampling/self.shape[2]))
         hh0, hh1, hh2 = np.meshgrid(h0, h1, h2, indexing='ij')
         print(hh0.shape)
-        h_vecs = np.empty((self.n_voxels, 3))
+        h_vecs = np.empty((self.size, 3))
         h_vecs[:, 0] = hh0.ravel()
         h_vecs[:, 1] = hh1.ravel()
         h_vecs[:, 2] = hh2.ravel()
@@ -373,7 +375,7 @@ class CrystalDensityMap(object):
             f_map_tmp = np.zeros([n_map_voxels], dtype=np.double)
             s = self.oversampling
             place_atoms_in_map(atom_x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp)
-            return self.reshape(f_map)
+            return np.reshape(f_map, self.shape)
         elif mode == 'nearest':
             mm = [0, self.oversampling]
             rng = [mm, mm, mm]

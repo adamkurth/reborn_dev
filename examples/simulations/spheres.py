@@ -60,7 +60,7 @@ pos[0:3, 2] = -sep
 pos[3:6, 2] = +sep
 angle = np.pi/4
 rot = np.array([[1, 0, 0], [0, np.cos(angle), -np.sin(angle)], [0, np.sin(angle), np.cos(angle)]])
-pos = bornagain.utils.rotate(rot, pos)
+pos = np.dot(pos, rot.T)
 
 # Display the arrangement of spheres:
 if False:
