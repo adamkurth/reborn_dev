@@ -22,6 +22,8 @@ For clarity, bornagain is not a "program".  In order to use it you must write Py
 to be a *general* or *complete* tool at this time -- its content is dictated by what is needed for work done in the
 Kirian Lab.  It is nonetheless available for anyone to use under the GNU V3 License.
 
+You can find bornagain on gitlab here: https://gitlab.com/rkirian/bornagain
+
 
 What's in bornagain?
 --------------------
