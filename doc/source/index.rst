@@ -34,9 +34,6 @@ In a nutshell, the basic elements bornagain are:
 - Classes for describing detector geometries.
 - Classes for describing objects that we shoot with x-rays.
 - GPU-based simulation utilities.
-
-In the future, we will add:
-
 - Tools for reading/writing a few file formats.
 - Tools for displaying diffraction data.
 - A few analysis algorithms.
@@ -56,12 +53,12 @@ Before you start using bornagain...
 If you plan to develop bornagain...
 -----------------------------------
 
-See the page for developers.  See :ref:`developers_anchor`.
+See :ref:`developers_anchor`.
 
 Acknowledgements
 ----------------
 
-The bornagain package has been developed by Rick Kirian (rkirian at asu dot edu) with conbributions from Derek Mendez,
+The bornagain package is maintained by Rick Kirian (rkirian at asu dot edu) with conbributions from Derek Mendez,
 Joe Chen, Rick Hewitt, and Cameron Howard.  Code found in bornagain has been inspired by numerous open-source software
 packages listed above.
 

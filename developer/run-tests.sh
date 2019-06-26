@@ -1,4 +1,5 @@
 #!/bin/bash
 
+./compile-fortran.sh
 cd ../test
-py.test -p no:cacheprovider -m 'not gui'
+pytest #py.test -p no:cacheprovider -m 'not gui'

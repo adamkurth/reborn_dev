@@ -139,4 +139,6 @@ imwin = pg.image(np.hstack([np.abs(rho0), np.zeros(rho.shape)[:, 0:int(rho.shape
 imwin.setPredefinedGradient('flame')
 # pg.image(, title='rho')
 
+print('Note the horizontal slider on the bottom of the window that shows the density maps.')
+
 pg.QtGui.QApplication.instance().exec_()
