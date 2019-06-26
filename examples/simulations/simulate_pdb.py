@@ -6,7 +6,7 @@ import bornagain as ba
 import bornagain.target.crystal as crystal
 import bornagain.simulate.clcore as core
 from bornagain.simulate.examples import lysozyme_pdb_file
-from bornagain.utils import rotate, rotation_about_axis
+from bornagain.utils import rotation_about_axis
 from scipy import constants as const
 
 hc = const.h*const.c
@@ -228,7 +228,7 @@ if 1:
     r0 = r
     clcore.phase_factor_pad(r0, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=None,
                             a=a_dev, U=None, add=False)
-    r0 = rotate(RR, r) + U
+    r0 = np.dot(r, RR.T) + U
     clcore.phase_factor_pad(r0, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=None,
                             a=a_dev, U=None, add=True)
     if show:
@@ -258,7 +258,7 @@ if 1:
     r0 = r.copy()
     clcore.phase_factor_pad(r0, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=None,
                             a=a_dev, U=None, add=False)
-    r0 = rotate(RR, r.copy())
+    r0 = np.dot(r.copy(), RR.T)
     clcore.phase_factor_pad(r0, f, pad.t_vec, pad.fs_vec, pad.ss_vec, beam_vec, pad.n_fs, pad.n_ss, wavelength, R=None,
                             a=a_dev, U=U, add=True)
     if show:

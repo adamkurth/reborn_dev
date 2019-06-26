@@ -23,7 +23,7 @@ except NameError:
 
     f = cryst.molecule.get_scattering_factors(wavelength=1.5e-10)
 
-    dens = density.CrystalDensityMap(cryst, d, s)
+    dens = crystal.CrystalDensityMap(cryst, d, s)
     n_molecules = len(dens.get_sym_luts())
     print('Grid size: (%d, %d, %d)' % tuple(dens.shape))
 
