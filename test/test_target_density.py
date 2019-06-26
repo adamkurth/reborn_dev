@@ -50,8 +50,9 @@ def test_transforms():
 
     for d in [0.2, 0.3, 0.4, 0.5]:
 
-        mt = density.CrystalMeshTool(cryst, d, 1)
-        dat0 = mt.reshape(np.arange(0, mt.N**3)).astype(np.float)
+        mt = density.CrystalDensityMap(cryst, d, 1)
+        zero = mt.zeros()
+        dat0 = mt.reshape(np.arange(0, zero.size)).astype(np.float)
         dat1 = mt.symmetry_transform(0, 1, dat0)
         dat2 = mt.symmetry_transform(1, 0, dat1)
 

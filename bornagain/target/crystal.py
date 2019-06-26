@@ -6,7 +6,7 @@ Basic utilities for dealing with crystalline objects.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
-import urllib
+import urllib.request
 import pkg_resources
 import numpy as np
 from bornagain.target.molecule import Molecule
@@ -33,7 +33,9 @@ def get_pdb_file(pdb_id, save_path='.'):
     pdb_path = os.path.join(save_path, pdb_id)
     if not os.path.isfile(pdb_id):
         try:
-            urllib.request.urlretrieve('https://files.rcsb.org/download/' + pdb_id, pdb_path)
+            pdb_web_path = 'https://files.rcsb.org/download/' + pdb_id
+            print('Attempting to download %s to %s' % (pdb_web_path, pdb_path))
+            urllib.request.urlretrieve(pdb_web_path, pdb_path)
         except urllib.error.HTTPError:
             return None
     return pdb_path

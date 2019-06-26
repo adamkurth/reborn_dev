@@ -66,30 +66,30 @@ class DensityMap(object):
 
 
 class CrystalDensityMap(object):
-
     r'''
-    A helper class for working with 3D density maps.  Most importantly, it allows one to do spacegroup symmetry
-    transformations.  Once provided information about a crystal (spacegroup, lattice), along with desired resolution and
-    oversampling ratio, this tool intelligently chooses the shape of the map and creates lookup tables for the symmetry
-    transformations.  It also produces the Fourier-space frequency samples that are helpful when connecting direct
-    all-atom simulations with FFTs.  In general, the maps are cubic NxNxN array.  This class does not maintain the data
-    array; it provides methods needed to work on the data arrays.
+    A helper class for working with 3D crystal density maps.  Most importantly, it helps with spacegroup symmetry
+    transformations.  Once initialized with a crystal spacegroup and lattice, along with desired resolution and
+    oversampling ratio (this is one for normal crystallography), this tool chooses the shape of the map
+    and creates lookup tables for the symmetry transformations.
 
-    Importantly, this class is focused on operations in the crystal basis, because the symmetry operations are most
-    elegant in that basis.
+    It is generally assumed that you are working in the crystal basis (fractional coordinates) -- the symmetry
+    transforms provided apply only to the crystal basis because that is the only way that we may avoid interpolation
+    artifacts for an arbitrary spacegroup/lattice.
+
+    This class does not maintain the data array as the name might suggest; it provides methods needed to work on the
+    data arrays.
     '''
 
     sym_luts = None
 
     def __init__(self, cryst, resolution, oversampling):
-
         r'''
-        This should intelligently pick the limits of a map.  On initialization, you only need to provide a
-        target.crystal.Structure() class instance, along with your desired resolution and oversampling.  You can create
-        the target.crystal.Structure() class most easily if you have a pdb file as follows:
+        On initialization, you provide a CrystalStructure class instance, along with your desired resolution
+        and oversampling.
 
         Arguments:
-            cryst (crystal.CrystalStructure) : A crystal structure that contains the spacegroup and lattice information.
+            cryst (CrystalStructure class instance) : A crystal structure that contains the spacegroup and lattice
+                                                      information.
             resolution (float) : The desired resolution of the map (will be modified to suit integer samples and a
                                   square 3D mesh)
             oversampling (int) : An oversampling of 2 gives a real-space map that is twice as large as the unit cell. In
@@ -98,16 +98,16 @@ class CrystalDensityMap(object):
 
         # Given desired resolution and unit cell, these are the number of voxels along along each edge of unit cell.
         cshape = np.ceil((1/resolution) * (1/vec_mag(cryst.unitcell.a_mat.T)))
-        # cshape = (2*np.ceil(np.array(1/(resolution*np.array(utils.vec_mag(cryst.unitcell.a_mat.T)))))-1).astype(np.int)
+
         # The number of cells along an edge must be a multple of the shortest translation.  E.g., if an operation
         # consists of a translation of 1/3 distance along the cell, we must have a multiple of 3.
         multiples = np.ones(3, dtype=np.int)
         for vec in cryst.spacegroup.sym_translations:
             for j in range(0, 3):
                 comp = vec[j] % 1
-                comp = min(comp, 1-comp)
+                comp = min(comp, 1-comp)  # This takes care of the fact that e.g. a 2/3 translation is the same as -1/3
                 if comp == 0:
-                    comp = 1
+                    comp = 1  # Avoid divide-by-zero problem
                 comp = int(np.round(1/comp))
                 if comp > multiples[j]:
                     multiples[j] = comp
@@ -125,12 +125,15 @@ class CrystalDensityMap(object):
 
     @property
     def n_vecs(self):
-
         r"""
 
         Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:
 
-        [[0,0,0],[0,0,1],[0,0,2], ... ,[N-1,N-1,N-1]]
+        [[0,  0,  0  ],
+         [0,  0,  1  ],
+         [0,  0,  2  ],
+               ...    ,
+         [N-1,N-1,N-1]]
 
         Returns: numpy array
 
@@ -146,13 +149,18 @@ class CrystalDensityMap(object):
 
     @property
     def x_vecs(self):
-
         r"""
 
-        Get an Nx3 array of vectors in the crystal basis.  If there were four samples per unit cell, the array looks a
-        bit like this:
+        Get an Nx3 array of vectors in the crystal basis.  If there were four samples per unit cell, the array looks
+        like this:
 
-        [[0,0,0],[0,0,0.25],[0,0,0.5],[0,0,0.75],[0,0.25,0], ... ,[0.75,0.75,0.75]]
+        [[    0,    0,    0],
+         [    0,    0, 0.25],
+         [    0,    0,  0.5],
+         [    0,    0, 0.75],
+         [    0, 0.25,    0],
+               ...       ,
+         [ 0.75, 0.75, 0.75]]
 
         Returns: numpy array
 
@@ -173,16 +181,11 @@ class CrystalDensityMap(object):
         return self.limits[:, 1].copy().ravel()
 
     @property
-    def corner(self):
-        return self.corner_min
-
-    @property
     def x_limits(self):
         r"""
         Return a 3x2 array with the limits of the density map.  These limits correspond to the centers of the voxels.
 
         Returns:
-
         """
 
         shp = self.shape
@@ -191,29 +194,14 @@ class CrystalDensityMap(object):
 
     @property
     def r_vecs(self):
-
         r"""
-
-        Creates an Nx3 array of 3-vectors contain the Cartesian-basis vectors of each voxel in the map.  This is done
-        by taking the crystal-basis position vectors x, and applying the orthogonalization matrix O to them.
+        Creates an Nx3 array of 3-vectors contain the fractional coordinates of each voxel in the map.  This is done
+        by applying the orthogonalization matrix to the fractional coordinates.
 
         Returns: numpy array
-
         """
 
         return np.dot(self.cryst.unitcell.o_mat, self.x_vecs.T).T
-
-    # @property
-    # def h_vecs(self):
-    #
-    #
-    #
-    #     h = self.n_vecs.copy()
-    #     h = h / self.dx / self.shape
-    #     for i in range(3):
-    #         f = np.where(h[:, i] > (self.shape[i] / 2))
-    #         h[f, i] = h[f, i] - self.shape[i]
-    #     return h
 
     @property
     def h_vecs(self):
@@ -419,323 +407,6 @@ class CrystalDensityMap(object):
         mm = [np.min(hh)-0.5, np.max(hh)+0.5]
         rng = [mm, mm, mm]
         a, _, _ = binned_statistic_dd(h, f, statistic='mean', bins=[self.shape] * 3, range=rng)
-
-        return a
-
-
-class CrystalMeshTool(object):
-
-    r'''
-    A helper class for working with 3D density maps.  Most importantly, it allows one to do spacegroup symmetry
-    transformations.  Once provided information about a crystal (spacegroup, lattice), along with desired resolution and
-    oversampling ratio, this tool intelligently chooses the shape of the map and creates lookup tables for the symmetry
-    transformations.  It also produces the Fourier-space frequency samples that are helpful when connecting direct
-    all-atom simulations with FFTs.  In general, the maps are cubic NxNxN array.  This class does not maintain the data
-    array; it provides methods needed to work on the data arrays.
-
-    Importantly, this class is focused on operations in the crystal basis, because the symmetry operations are most
-    elegant in that basis.
-    '''
-
-    sym_luts = None  #:  Cached lookup tables
-    # n_vecs = None
-    # x_vecs = None
-    # r_vecs = None
-    # h_vecs = None
-    cryst1 = None
-
-    def __init__(self, cryst, resolution, oversampling):
-
-        r'''
-        This should intelligently pick the limits of a map.  On initialization, you only need to provide a
-        target.crystal.Structure() class instance, along with your desired resolution and oversampling.  You can create
-        the target.crystal.Structure() class most easily if you have a pdb file as follows:
-
-        Arguments:
-            cryst (crystal.Structure) : A crystal structure that contains the spacegroup and lattice information.
-            resolution (float) : The desired resolution of the map (will be modified to suit integer samples and a
-                                  square 3D mesh)
-            oversampling (int) : An oversampling of 2 gives a real-space map that is twice as large as the unit cell. In
-                                  Fourier space, there will be one sample between Bragg samples.  And so on for 3,4,...
-        '''
-
-
-
-        d = resolution
-        s = np.ceil(oversampling)
-
-        abc = np.array([cryst.unitcell.a, cryst.unitcell.b, cryst.unitcell.c])
-
-        m = 1
-        for T in cryst.spacegroup.sym_translations:
-            for mp in np.arange(1, 10):
-                Tp = T*mp
-                if np.round(np.max(Tp % 1.0)*100)/100 == 0:
-                    if mp > m:
-                        m = mp
-                    break
-
-        # The idea here is that if, for example, we have a 3-fold screw axis in the spacegroup, then the number of
-        # samples in the map should be a multiple of 3.  Hopefully this works...
-        Nc = np.max(np.ceil(abc / (d * m)) * m)
-
-        self.cryst = cryst  #:  crystal.target class object used to initiate the map
-        # self.m = np.int(m)  #:  Due to symmetry translations, map must consit of integer multiple of this number
-        self.s = np.int(s)  #:  Oversampling ratio
-        self.d = abc / Nc   #:  Length-3 array of "actual" resolutions (different from "requested" resolution)
-        self.dx = 1 / Nc    #:  Crystal basis length increment
-        self.Nc = np.int(Nc)  #:  Number of samples along edge of unit cell
-        self.N = np.int(Nc * s)  #:  Number of samples along edge of whole map (includes oversampling)
-        self.P = np.int(self.N**3)  #:  Linear length fo map (=N^3)
-        self.w = np.array([self.N**2, self.N, 1])  #:  The stride vector (mostly for internal use)
-
-    def get_n_vecs(self):
-
-        r"""
-
-        Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:
-
-        [[0,0,0],[0,0,1],[0,0,2], ... ,[N-1,N-1,N-1]]
-
-        Returns: numpy array
-
-        """
-
-        P = self.P
-        N = self.N
-        p = np.arange(0, P)
-        n_vecs = np.zeros([P, 3])
-        n_vecs[:, 0] = np.floor(p / (N**2))
-        n_vecs[:, 1] = np.floor(p / N) % N
-        n_vecs[:, 2] = p % N
-        # n_vecs = n_vecs[:, ::-1]
-        return n_vecs
-
-    def get_x_vecs(self):
-
-        r"""
-
-        Get an Nx3 array of vectors in the crystal basis.  If there were four samples per unit cell, the array looks a
-        bit like this:
-
-        [[0,0,0],[0,0,0.25],[0,0,0.5],[0,0,0.75],[0,0.25,0], ... ,[0.75,0.75,0.75]]
-
-        Returns: numpy array
-
-        """
-
-        x_vecs = self.get_n_vecs()
-        x_vecs = x_vecs * self.dx
-        return x_vecs
-
-    def get_r_vecs(self):
-
-        r"""
-
-        Creates an Nx3 array of 3-vectors contain the Cartesian-basis vectors of each voxel in the map.  This is done
-        by taking the crystal-basis position vectors x, and applying the orthogonalization matrix O to them.
-
-        Returns: numpy array
-
-        """
-
-        x = self.get_x_vecs()
-
-        return np.dot(self.cryst.unitcell.o_mat, x.T).T
-
-    def get_h_vecs(self):
-
-        r"""
-
-        This provides an Nx3 array of Fourier-space vectors "h".  These coordinates can be understood as "fractional
-        Miller indices" that coorespond to the density samples upon taking an FFT of the real-space map.  With atomic
-        coordinates x (in the crystal basis) one can take the Fourier transform F(h) = sum_n f_n exp(i h*x)
-
-        Returns: numpy array
-
-        """
-
-        h = self.get_n_vecs()
-        h = h / self.dx / self.N
-        f = np.where(h.ravel() > (self.Nc/2))
-        h.flat[f] = h.flat[f] - self.Nc
-        return h
-
-    def get_q_vecs(self):
-
-        r"""
-
-		This provides an Nx3 array of momentum-transfer vectors (with the usual 2 pi factor).
-
-		Returns: numpy array
-
-		"""
-
-        return 2*np.pi*np.dot(self.cryst.unitcell.a_mat, self.get_h_vecs().T).T
-
-
-    def get_sym_luts(self):
-
-        r"""
-
-        This provides a list of "symmetry transform lookup tables".  These are the linearized array indices. For a
-        transformation that consists of an identity matrix along with zero translation, the lut is just an array
-        p = [0,1,2,3,...,N^3-1].  Other transforms are like a "scrambling" of that ordering, such that a remapping of
-        density samples is done with an operation like this: newmap.flat[p2] = oldmap.flat[p1].   Note that the luts are
-        kept in memory for future use - beware of the memory requirement.
-
-        Returns: list of numpy arrays
-
-        """
-
-        if self.sym_luts is None:
-
-            sym_luts = []
-            x0 = self.get_x_vecs()
-
-            for (R, T) in zip(self.cryst.spacegroup.sym_rotations, self.cryst.spacegroup.sym_translations):
-                lut = np.dot(R, x0.T).T + T    # transform x vectors in 3D grid
-                lut = np.round(lut / self.dx)  # switch from x to n vectors
-                lut = lut % self.N             # wrap around
-                lut = np.dot(self.w, lut.T)    # in p space
-                sym_luts.append(lut.astype(np.int))
-            self.sym_luts = sym_luts
-
-        return self.sym_luts
-
-    def symmetry_transform(self, i, j, data):
-
-        r"""
-
-        This applies symmetry transformations to a data array (i.e. density map).  The crystal spacegroup gives rise
-        to Ns symmetry transformation operations (e.g. each operation consists of a rotation matrix paired with
-        translation vector).  Of those Ns symmetry transformations, this function will take a map from the ith
-        configuration to the jth configuration.
-
-        Arguments:
-            i (int) : The "from" index; symmetry transforms are performed from this index to the j index
-            j (int) : The "to" index; symmetry transforms are performed from the i index to this index
-
-        Returns: A transformed data array (i.e. density map)
-
-
-        """
-
-        luts = self.get_sym_luts()
-        data_trans = np.zeros_like(data)
-        data_trans.flat[luts[j]] = data.flat[luts[i]]
-
-        return data_trans
-
-    def shape(self):
-
-        r"""
-
-        For convenience, return the map shape [N,N,N]
-
-        Returns: numpy array
-
-        """
-
-        return np.array([self.N, self.N, self.N])
-
-    def reshape(self, data):
-
-        r"""
-
-        For convenience, this will reshape a data array to the shape NxNxN.
-
-        Args:
-            data: the data array
-
-        Returns: the same data array as the input, but with shape NxNxN
-
-        """
-
-        N = self.N
-        return data.reshape([N, N, N])
-
-    def reshape3(self, data):
-
-        r"""
-
-        Args:
-            data: A data array of length 3*N^3 that consists of 3-vectors (one for each density voxel)
-
-        Returns: A re-shaped data array of shape NxNxNx3
-
-        """
-
-        N = self.N
-        return data.reshape([N, N, N, 3])
-
-    def zeros(self):
-
-        r"""
-
-        A convenience function: simply returns an array of zeros of shape NxNxN
-
-        Returns: numpy array
-
-        """
-
-        N = self.N
-        return np.zeros([N, N, N])
-
-    def place_atoms_in_map(self, atom_x_vecs, atom_fs, mode='gaussian', fixed_atom_sigma=0.5e-10):
-
-        r"""
-
-        This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
-        should be in the crystal basis, and the densities must be real (because the scipy function that we use does
-        not allow for complex numbers...).  
-        There are currently two modes - one mode, called 'gaussian', places Guassian atoms of a fixed width and sums them
-        to form the density map. The other mode, called 'nearest', just placed the atom Z values in the nearest
-        voxel. Both of these modes will need to be replaced with something more realistic later, probably based on the 
-        Cromer-Mann coefficients.
-
-        Args:
-            x (numpy array):  An nx3 array of position vectors
-            f (numpy array):  An n-length array of densities (must be real)
-
-        Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
-
-        """
-        if mode == 'gaussian':
-            sigma = fixed_atom_sigma # Gaussian sigma (i.e. atom "size"); this is a fudge factor and needs to be updated
-            # n_atoms = atom_x_vecs.shape[0]
-            orth_mat = self.cryst.unitcell.o_mat.copy()
-            map_x_vecs = self.get_x_vecs()
-            n_map_voxels = map_x_vecs.shape[0]
-            f_map = np.zeros([n_map_voxels], dtype=np.complex)
-            f_map_tmp = np.zeros([n_map_voxels], dtype=np.double)
-            s = self.s
-            place_atoms_in_map(atom_x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp)
-            return self.reshape(f_map)
-        elif mode == 'nearest':
-            mm = [0, self.s]
-            rng = [mm, mm, mm]
-            a, _, _ = binned_statistic_dd(atom_x_vecs, atom_fs, statistic='sum', bins=[self.N] * 3, range=rng)
-            return a
-
-    def place_intensities_in_map(self, h, f):
-
-        r"""
-
-        This will take a list of Miller index vectors and intensities and place them in a 3D map.
-
-        Args:
-            h (numpy array):  An Nx3 array of hkl vectors
-            f (numpy array):  An N-length array of intensities (must be real)
-
-        Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
-
-        """
-
-        hh = self.get_h_vecs()
-        mm = [np.min(hh)-0.5, np.max(hh)+0.5]
-        rng = [mm, mm, mm]
-        a, _, _ = binned_statistic_dd(h, f, statistic='mean', bins=[self.N] * 3, range=rng)
 
         return a
 

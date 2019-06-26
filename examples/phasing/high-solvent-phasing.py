@@ -13,7 +13,7 @@ solv_frac = 0.7    # Solvent fraction
 
 try:
     a = pdb_file
-except:
+except NameError:
 
     d = 0.5e-9         # Minimum resolution in SI units
     s = 1              # Oversampling factor.  s = 1 means Bragg sampling
@@ -23,16 +23,17 @@ except:
 
     f = cryst.molecule.get_scattering_factors(wavelength=1.5e-10)
 
-    mt = density.CrystalMeshTool(cryst, d, s)
-    n_molecules = len(mt.get_sym_luts())
-    print('Grid size: (%d, %d, %d)' % (mt.N, mt.N, mt.N))
+    dens = density.CrystalDensityMap(cryst, d, s)
+    n_molecules = len(dens.get_sym_luts())
+    print('Grid size: (%d, %d, %d)' % tuple(dens.shape))
 
     x = cryst.x
-    rho0 = mt.place_atoms_in_map(cryst.x % mt.s, np.abs(f))
+    print('Placing atoms in density map (this is slow... will speed up later...)')
+    rho0 = dens.place_atoms_in_map(cryst.x % dens.oversampling, np.abs(f))
 
     rho_cell = np.zeros_like(rho0)
     for i in range(0, n_molecules):
-        rho_cell += mt.symmetry_transform(0, i, rho0)
+        rho_cell += dens.symmetry_transform(0, i, rho0)
     rho0 = rho_cell
 
     rho0.flags.writeable = False
@@ -54,11 +55,11 @@ sqrtI0 = np.sqrt(I0)
 
 def symmetrize(rho):
 
-    n_molecules = len(mt.get_sym_luts())
+    n_molecules = len(dens.get_sym_luts())
 
     rhosym = 0
     for i in range(0, n_molecules):
-        rhosym += mt.symmetry_transform(0, i, rho)
+        rhosym += dens.symmetry_transform(0, i, rho)
 
     return rhosym/n_molecules
 
@@ -87,7 +88,7 @@ def ER(rho, S, sqrtI0):
     return PM(PS(rho, S), sqrtI0)
 
 # Initial phases
-phi = np.random.random([mt.N]*3) * 2 * np.pi
+phi = np.random.random(dens.shape) * 2 * np.pi
 # Iterate
 rho = ifftn(np.exp(phi) * sqrtI0)
 # Initial support

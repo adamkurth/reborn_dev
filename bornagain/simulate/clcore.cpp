@@ -832,118 +832,114 @@ kernel void gaussian_lattice_transform_intensities_pad(
     }
 }
 
-// Compute approximate gaussian-shaped lattice transform for a crystal convolved
-// with a normal distribution for mosaicity: PROD_i  N_i^2 exp(- N_i^2 x_i^2 / 4pi)
-// This variant internallly computes scattering vectors for a pixel-array detector
+//// Compute approximate gaussian-shaped lattice transform for a crystal convolved
+//// with a normal distribution for mosaicity: PROD_i  N_i^2 exp(- N_i^2 x_i^2 / 4pi)
+//// This variant internallly computes scattering vectors for a pixel-array detector
+//
+//kernel void mosaic_gaussian_lattice_transform_intensities_pad(
+//    const dsfloat16 abc,   // Real-space lattice vectors a,b,c, each contiguous in memory
+//    const dsfloat16 R,     // Rotation matrix
+//    global dsfloat *S_eff,     // Effective Lattice transform  (output)
+//    const dsfloat D,       // Crystal size N*a
+//    const dsfloat sigm,   // Crystal mosaicity standard deviation
+//    const dsfloat n,     // Number of sigmas to tolerate being within for Bragg peaks
+//    const int n_pixels,  // Number of pixels
+//    const int nF,        // Refer to phase_factor_pad
+//    const int nS,        // Refer to phase_factor_pad
+//    const dsfloat w,       // Refer to phase_factor_pad
+//    const dsfloat4 T,      // Refer to phase_factor_pad
+//    const dsfloat4 F,      // Refer to phase_factor_pad
+//    const dsfloat4 S,      // Refer to phase_factor_pad
+//    const dsfloat4 B,      // Refer to phase_factor_pad
+//    const int add        // Refer to phase_factor_pad
+//){
+//
+//    const int gi = get_global_id(0); /* Global index */
+//    const int i = gi % nF;           /* Pixel coordinate i */
+//    const int j = gi/nF;             /* Pixel coordinate j */
+//
+//    // Get the q vector
+//    dsfloat4 q4r = q_pad( i,j,w,T,F,S,B);
+//
+//    // Rotate the q vector
+//    q4r = rotate_vec(R, q4r);
+//
+//    // Calculate reciprocal lattice vectors
+//    dsfloat4 a;
+//    dsfloat4 b;
+//    dsfloat4 c;
+//    dsfloat4 astar;
+//    dsfloat4 bstar;
+//    dsfloat4 cstar;
+//    dsfloat denom;
+//
+//    a = (dsfloat4)(abc.s0,abc.s1,abc.s2,0.0);
+//    b = (dsfloat4)(abc.s3,abc.s4,abc.s5,0.0);
+//    c = (dsfloat4)(abc.s6,abc.s7,abc.s5,0.0);
+//    (dsfloat)denom = dot(a, cross(b, c))
+//    astar = cross(b, c)/denom;
+//    bstar = cross(c, a)/denom;
+//    cstar = cross(a, b)/denom;
+//
+//    // Find hkl of q vector
+//    // TODO: Decompose q vectors into astar,bstar,cstar basis vectors
+//
+//    // Find nearest 8 neighboring Bragg peaks
+//    dsfloat4 hkl1;
+//    dsfloat4 hkl2;
+//    dsfloat4 hkl3;
+//    dsfloat4 hkl4;
+//    dsfloat4 hkl5;
+//    dsfloat4 hkl6;
+//    dsfloat4 hkl7;
+//    dsfloat4 hkl8;
+//    dsfloat8 hkls;
+//
+//    hkl1 = (floor(h), floor(k), floor(l), 0.0);
+//    hkl2 = (floor(h), floor(k), ceil(l), 0.0);
+//    hkl3 = (floor(h), ceil(k), floor(l), 0.0);
+//    hkl4 = (floor(h), ceil(k), ceil(l), 0.0);
+//    hkl5 = (ceil(h), floor(k), floor(l), 0.0);
+//    hkl6 = (ceil(h), floor(k), ceil(l), 0.0);
+//    hkl7 = (ceil(h), ceil(k), floor(l), 0.0);
+//    hkl8 = (ceil(h), ceil(k), ceil(l), 0.0);
+//
+//    hkls = (hkl1,hkl2,hkl3,hkl4,hkl5,hkl6,hkl7,hkl8);
+//
+//    // Allocate memory
+//    dsfloat dq;
+//    dsfloat sigq;
+//    dsfloat dtheta;
+//    dsfloat sigtheta;
+//    bool valid;
+//    S = 0.0;
+//
+//    for(int i=0, i < 8, i++)
+//    {
+//        // Calculate Gaussian parameters
+//        dq = length(q - hkl);
+//        sigq = sqrt(PI2)/D;
+//        dtheta = acos(normalize(q), normalize(hkl));
+//        sigtheta = atan(sigq/length(q));
+//        valid = (dq / sigq) < (n*sigq);
+//
+//        // Calculate S_eff
+//        if(valid)
+//        {
+//            S += 1.0; // TODO: PUT FORMULA HERE
+//        }
+//    }
+//
+//    if (gi < n_pixels ){
+//        if (add == 1){
+//            S_eff[gi] += S;
+//        } else {
+//            S_eff[gi] = S;
+//        }
+//    }
+//}
 
-kernel void mosaic_gaussian_lattice_transform_intensities_pad(
-    const dsfloat16 abc,   // Real-space lattice vectors a,b,c, each contiguous in memory
-    const dsfloat16 R,     // Rotation matrix
-    global dsfloat *S_eff,     // Effective Lattice transform  (output)
-    const dsfloat D,       // Crystal size N*a
-    const dsfloat sigm,   // Crystal mosaicity standard deviation
-    const dsfloat n,     // Number of sigmas to tolerate being within for Bragg peaks
-    const int n_pixels,  // Number of pixels
-    const int nF,        // Refer to phase_factor_pad
-    const int nS,        // Refer to phase_factor_pad
-    const dsfloat w,       // Refer to phase_factor_pad
-    const dsfloat4 T,      // Refer to phase_factor_pad
-    const dsfloat4 F,      // Refer to phase_factor_pad
-    const dsfloat4 S,      // Refer to phase_factor_pad
-    const dsfloat4 B,      // Refer to phase_factor_pad
-    const int add        // Refer to phase_factor_pad
-){
 
-    const int gi = get_global_id(0); /* Global index */
-    const int i = gi % nF;           /* Pixel coordinate i */
-    const int j = gi/nF;             /* Pixel coordinate j */
-
-    // Get the q vector
-    dsfloat4 q4r = q_pad( i,j,w,T,F,S,B);
-
-    // Rotate the q vector
-    q4r = rotate_vec(R, q4r);
-
-    // Calculate reciprocal lattice vectors
-    dsfloat4 a;
-    dsfloat4 b;
-    dsfloat4 c;
-    dsfloat4 astar;
-    dsfloat4 bstar;
-    dsfloat4 cstar;
-    dsfloat denom;
-
-    a = (dsfloat4)(abc.s0,abc.s1,abc.s2,0.0);
-    b = (dsfloat4)(abc.s3,abc.s4,abc.s5,0.0);
-    c = (dsfloat4)(abc.s6,abc.s7,abc.s5,0.0);
-    (dsfloat)denom = dot(a, cross(b, c))
-    astar = cross(b, c)/denom;
-    bstar = cross(c, a)/denom;
-    cstar = cross(a, b)/denom;
-
-    // Find hkl of q vector
-    // TODO: Decompose q vectors into astar,bstar,cstar basis vectors
-    
-    // Find nearest 8 neighboring Bragg peaks
-    dsfloat4 hkl1;
-    dsfloat4 hkl2;
-    dsfloat4 hkl3;
-    dsfloat4 hkl4;
-    dsfloat4 hkl5;
-    dsfloat4 hkl6;
-    dsfloat4 hkl7;
-    dsfloat4 hkl8;
-    dsfloat8 hkls;
-
-    hkl1 = (floor(h), floor(k), floor(l), 0.0);
-    hkl2 = (floor(h), floor(k), ceil(l), 0.0);
-    hkl3 = (floor(h), ceil(k), floor(l), 0.0);
-    hkl4 = (floor(h), ceil(k), ceil(l), 0.0);
-    hkl5 = (ceil(h), floor(k), floor(l), 0.0);
-    hkl6 = (ceil(h), floor(k), ceil(l), 0.0);
-    hkl7 = (ceil(h), ceil(k), floor(l), 0.0);
-    hkl8 = (ceil(h), ceil(k), ceil(l), 0.0);
-
-    hkls = (hkl1,hkl2,hkl3,hkl4,hkl5,hkl6,hkl7,hkl8);
-
-    // Allocate memory
-    dsfloat dq;
-    dsfloat sigq;
-    dsfloat dtheta;
-    dsfloat sigtheta;
-    bool valid;
-    S = 0.0;
-
-    for(int i=0, i < 8, i++)
-    {
-        // Calculate Gaussian parameters
-        dq = length(q - hkl);
-        sigq = sqrt(PI2)/D;
-        dtheta = acos(normalize(q), normalize(hkl));
-        sigtheta = atan(sigq/length(q));
-        valid = (dq / sigq) < (n*sigq);   
-
-        // Calculate S_eff
-        if(valid)
-        {
-            S += 1.0; // TODO: PUT FORMULA HERE
-        }
-    }
-
-    if (gi < n_pixels ){
-        if (add == 1){
-            S_eff[gi] += S;
-        } else {
-            S_eff[gi] = S;
-        }
-    }
-}
-
-
-__kernel void qrf_cromer_mann(
-    __global dsfloat16 *q_vecs, // reciprocal space vectors, followed by cromer mann lookups, see clcore.py for details
-    __global dsfloat4 *r_vecs, // atom vectors and atomic number
-    __constant dsfloat *R, // rotation matrix acting on molecules (note it is transposed and used to rotate q for speed)
 __kernel void qrf_cromer_mann(
     __global dsfloat16 *q_vecs, // reciprocal space vectors, followed by cromer mann lookups, see clcore.py for details
     __global dsfloat4 *r_vecs, // atom vectors and atomic number
