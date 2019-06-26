@@ -96,7 +96,7 @@ class CrystalDensityMap(object):
                                   Fourier space, there will be one sample between Bragg samples.  And so on for 3,4,...
         '''
 
-        # Given desired resolution and unit cell, these are the number of voxels along along each edge of unit cell.
+        # Given desired resolution and unit cell, these are the number of voxels along each edge of unit cell.
         cshape = np.ceil((1/resolution) * (1/vec_mag(cryst.unitcell.a_mat.T)))
 
         # The number of cells along an edge must be a multple of the shortest translation.  E.g., if an operation
@@ -120,6 +120,7 @@ class CrystalDensityMap(object):
         self.deltas = self.dx
         self.cshape = cshape.astype(int)  # :  Number of samples along edge of unit cell
         self.shape = (cshape * self.oversampling).astype(int)  # :  Number of samples along edge of whole map (includes oversampling)
+        self.size = np.prod(self.shape)
         self.n_voxels = np.int(np.product(self.shape))  # :  Linear length of map (=N^3)
         self.strides = np.array([self.shape[2]*self.shape[1], self.shape[2], 1])  # :  The stride vector (mostly for internal use)
 
@@ -134,6 +135,8 @@ class CrystalDensityMap(object):
          [0,  0,  2  ],
                ...    ,
          [N-1,N-1,N-1]]
+
+        Note that it is the third index, which we might associate with "z", that increments most rapidly.
 
         Returns: numpy array
 
@@ -151,8 +154,8 @@ class CrystalDensityMap(object):
     def x_vecs(self):
         r"""
 
-        Get an Nx3 array of vectors in the crystal basis.  If there were four samples per unit cell, the array looks
-        like this:
+        Get an Nx3 array that contains the fractional coordinates.  For example, if there were four samples per unit
+        cell, the array looks like this:
 
         [[    0,    0,    0],
          [    0,    0, 0.25],
@@ -168,17 +171,17 @@ class CrystalDensityMap(object):
 
         return self.n_vecs * self.dx
 
-    @property
-    def limits(self):
-        return self.x_limits.copy()
-
-    @property
-    def corner_min(self):
-        return self.limits[:, 0].copy().ravel()
-
-    @property
-    def corner_max(self):
-        return self.limits[:, 1].copy().ravel()
+    # @property
+    # def limits(self):
+    #     return self.x_limits.copy()
+    #
+    # @property
+    # def corner_min(self):
+    #     return self.limits[:, 0].copy().ravel()
+    #
+    # @property
+    # def corner_max(self):
+    #     return self.limits[:, 1].copy().ravel()
 
     @property
     def x_limits(self):
@@ -192,28 +195,25 @@ class CrystalDensityMap(object):
         dx = self.dx
         return np.array([[0, dx[0]*(shp[0]-1)], [0, dx[1]*(shp[1]-1)], [0, dx[2]*(shp[2]-1)]])
 
-    @property
-    def r_vecs(self):
-        r"""
-        Creates an Nx3 array of 3-vectors contain the fractional coordinates of each voxel in the map.  This is done
-        by applying the orthogonalization matrix to the fractional coordinates.
-
-        Returns: numpy array
-        """
-
-        return np.dot(self.cryst.unitcell.o_mat, self.x_vecs.T).T
+    # @property
+    # def r_vecs(self):
+    #     r"""
+    #     Creates an Nx3 array of 3-vectors contain the fractional coordinates of each voxel in the map.  This is done
+    #     by applying the orthogonalization matrix to the fractional coordinates.
+    #
+    #     Returns: numpy array
+    #     """
+    #
+    #     return np.dot(self.cryst.unitcell.o_mat, self.x_vecs.T).T
 
     @property
     def h_vecs(self):
-
         r"""
-
         This provides an Nx3 array of Fourier-space vectors "h".  These coordinates can be understood as "fractional
         Miller indices" that coorespond to the density samples upon taking an FFT of the real-space map.  With atomic
         coordinates x (in the crystal basis) one can take the Fourier transform F(h) = sum_n f_n exp(i h*x)
 
         Returns: numpy array
-
         """
 
         h0 = np.fft.fftshift(np.fft.fftfreq(self.shape[0], d=self.oversampling/self.shape[0]))
@@ -234,39 +234,37 @@ class CrystalDensityMap(object):
         limits[:, 0] = -np.floor(self.shape/2)/self.oversampling
         limits[:, 1] = np.floor((self.shape-1) / 2)/self.oversampling
         return limits
+    #
+    # @property
+    # def h_corner(self):
+    #     return self.h_limits[:, 0].copy()
+    #
+    # @property
+    # def h_deltas(self):
+    #     return np.array([1.0/self.oversampling]*3)
+    #
+    # @property
+    # def h_density_map(self):
+    #
+    #     hlim = self.h_limits
+    #     dens = DensityMap(self.shape, hlim[:, 0], hlim[:, 1])
+    #     return dens
 
-    @property
-    def h_corner(self):
-        return self.h_limits[:, 0].copy()
-
-    @property
-    def h_deltas(self):
-        return np.array([1.0/self.oversampling]*3)
-
-    @property
-    def h_density_map(self):
-
-        hlim = self.h_limits
-        dens = DensityMap(self.shape, hlim[:, 0], hlim[:, 1])
-        return dens
-
-    @property
-    def q_vecs(self):
-
-        r"""
-
-        This provides an Nx3 array of momentum-transfer vectors (with the usual 2 pi factor).
-
-        Returns: numpy array
-
-        """
-
-        return 2*np.pi*np.dot(self.cryst.unitcell.a_mat, self.h_vecs.T).T
+    # @property
+    # def q_vecs(self):
+    #
+    #     r"""
+    #
+    #     This provides an Nx3 array of momentum-transfer vectors (with the usual 2 pi factor).
+    #
+    #     Returns: numpy array
+    #
+    #     """
+    #
+    #     return 2*np.pi*np.dot(self.cryst.unitcell.a_mat, self.h_vecs.T).T
 
     def get_sym_luts(self):
-
         r"""
-
         This provides a list of "symmetry transform lookup tables".  These are the linearized array indices. For a
         transformation that consists of an identity matrix along with zero translation, the lut is just an array
         p = [0,1,2,3,...,N^3-1].  Other transforms are like a "scrambling" of that ordering, such that a remapping of
@@ -274,7 +272,6 @@ class CrystalDensityMap(object):
         kept in memory for future use - beware of the memory requirement.
 
         Returns: list of numpy arrays
-
         """
 
         if self.sym_luts is None:
@@ -283,9 +280,9 @@ class CrystalDensityMap(object):
             x0 = self.x_vecs
 
             for (R, T) in zip(self.cryst.spacegroup.sym_rotations, self.cryst.spacegroup.sym_translations):
-                lut = np.dot(R, x0.T).T + T    # transform x vectors in 3D grid
-                lut = np.round(lut / self.dx)  # switch from x to n vectors
-                lut = lut % self.shape             # wrap around
+                lut = np.dot(R, x0.T).T + T          # transform x vectors in 3D grid
+                lut = np.round(lut / self.dx)        # switch from x to n vectors
+                lut = lut % self.shape               # wrap around
                 lut = np.dot(self.strides, lut.T)    # in p space
                 sym_luts.append(lut.astype(np.int))
             self.sym_luts = sym_luts
@@ -293,21 +290,15 @@ class CrystalDensityMap(object):
         return self.sym_luts
 
     def symmetry_transform(self, i, j, data):
-
         r"""
-
-        This applies symmetry transformations to a data array (i.e. density map).  The crystal spacegroup gives rise
-        to Ns symmetry transformation operations (e.g. each operation consists of a rotation matrix paired with
-        translation vector).  Of those Ns symmetry transformations, this function will take a map from the ith
-        configuration to the jth configuration.
+        Apply crystallographic symmetry transformation to a density map (3D numpy array).  This applies the mapping from
+        symmetry element i to symmetry element j, where i=0,1,...,N-1 for a spacegroup with N symmetry operations.
 
         Arguments:
             i (int) : The "from" index; symmetry transforms are performed from this index to the j index
             j (int) : The "to" index; symmetry transforms are performed from the i index to this index
 
-        Returns: A transformed data array (i.e. density map)
-
-
+        Returns: Numpy array with transformed densities
         """
 
         luts = self.get_sym_luts()
@@ -316,43 +307,43 @@ class CrystalDensityMap(object):
 
         return data_trans
 
-    def reshape(self, data):
-        r"""
-        For convenience, this will reshape a data array to the shape NxNxN.
+    # def reshape(self, data):
+    #     r"""
+    #     For convenience, this will reshape an array to the correct 3D shape.
+    #
+    #     Args:
+    #         data: the data array
+    #
+    #     Returns: the same data array as the input, but with shape NxNxN
+    #     """
+    #
+    #     return data.reshape(self.shape)
 
-        Args:
-            data: the data array
+    # def reshape3(self, data):
+    #     r"""
+    #
+    #
+    #     Args:
+    #         data: A data array of length 3*N^3 that consists of 3-vectors (one for each density voxel)
+    #
+    #     Returns: A re-shaped data array of shape
+    #
+    #     """
+    #
+    #     N = self.shape
+    #     return data.reshape([N[0], N[1], N[2], 3])
 
-        Returns: the same data array as the input, but with shape NxNxN
-        """
-
-        return data.reshape(self.shape)
-
-    def reshape3(self, data):
-
-        r"""
-
-        Args:
-            data: A data array of length 3*N^3 that consists of 3-vectors (one for each density voxel)
-
-        Returns: A re-shaped data array of shape NxNxNx3
-
-        """
-
-        N = self.shape
-        return data.reshape([N[0], N[1], N[2], 3])
-
-    def zeros(self, *args, **kwargs):
-
-        r"""
-
-        A convenience function: simply returns an array of zeros of shape NxNxN
-
-        Returns: numpy array
-
-        """
-
-        return np.zeros(self.shape, *args, **kwargs)
+    # def zeros(self, *args, **kwargs):
+    #
+    #     r"""
+    #
+    #     A convenience function: simply returns an array of zeros of shape NxNxN
+    #
+    #     Returns: numpy array
+    #
+    #     """
+    #
+    #     return np.zeros(self.shape, *args, **kwargs)
 
     def place_atoms_in_map(self, atom_x_vecs, atom_fs, mode='gaussian', fixed_atom_sigma=0.5e-10):
 
@@ -389,26 +380,26 @@ class CrystalDensityMap(object):
             a, _, _ = binned_statistic_dd(atom_x_vecs, atom_fs, statistic='sum', bins=[self.shape] * 3, range=rng)
             return a
 
-    def place_intensities_in_map(self, h, f):
-
-        r"""
-
-        This will take a list of Miller index vectors and intensities and place them in a 3D map.
-
-        Args:
-            h (numpy array):  An Nx3 array of hkl vectors
-            f (numpy array):  An N-length array of intensities (must be real)
-
-        Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
-
-        """
-
-        hh = self.h_vecs
-        mm = [np.min(hh)-0.5, np.max(hh)+0.5]
-        rng = [mm, mm, mm]
-        a, _, _ = binned_statistic_dd(h, f, statistic='mean', bins=[self.shape] * 3, range=rng)
-
-        return a
+    # def place_intensities_in_map(self, h, f):
+    #
+    #     r"""
+    #
+    #     This will take a list of Miller index vectors and intensities and place them in a 3D map.
+    #
+    #     Args:
+    #         h (numpy array):  An Nx3 array of hkl vectors
+    #         f (numpy array):  An N-length array of intensities (must be real)
+    #
+    #     Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
+    #
+    #     """
+    #
+    #     hh = self.h_vecs
+    #     mm = [np.min(hh)-0.5, np.max(hh)+0.5]
+    #     rng = [mm, mm, mm]
+    #     a, _, _ = binned_statistic_dd(h, f, statistic='mean', bins=[self.shape] * 3, range=rng)
+    #
+    #     return a
 
 
 @jit(nopython=True)

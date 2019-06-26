@@ -50,10 +50,9 @@ def test_mappings():
     resolution = 0.1*2*np.pi/np.max(pad.q_mags(beam=beam))
     oversampling = 20
     dens = density.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
-    dens_h = dens.h_density_map
-    mesh_h_lims = dens_h.limits*2*np.pi
-    a_map_dev = clcore.to_device(shape=dens_h.shape, dtype=clcore.complex_t)
-    clcore.phase_factor_mesh(au_x_vecs_gpu, au_f_gpu, N=dens_h.shape, q_min=mesh_h_lims[:, 0], q_max=mesh_h_lims[:, 1],
+    mesh_h_lims = dens.h_limits*2*np.pi
+    a_map_dev = clcore.to_device(shape=dens.shape, dtype=clcore.complex_t)
+    clcore.phase_factor_mesh(au_x_vecs_gpu, au_f_gpu, N=dens.shape, q_min=mesh_h_lims[:, 0], q_max=mesh_h_lims[:, 1],
                              a=a_map_dev)
 
     for i in range(spacegroup.n_molecules):
@@ -62,7 +61,7 @@ def test_mappings():
         clcore.phase_factor_qrf(q_vecs_gpu, unitcell.x2r(mol_x_vecs), au_f_gpu, a=amps_mol_gpu2, add=True)
         rot = spacegroup.sym_rotations[i]
         trans = spacegroup.sym_translations[i]
-        clcore.mesh_interpolation(a_map_dev, h_vecs_gpu, N=dens_h.shape, q_min=mesh_h_lims[:, 0],
+        clcore.mesh_interpolation(a_map_dev, h_vecs_gpu, N=dens.shape, q_min=mesh_h_lims[:, 0],
                                   q_max=mesh_h_lims[:, 1], a=amps_slice_gpu, R=rot, U=trans, add=True)
 
     intensities1 = pad.reshape(np.abs(amps_slice_gpu.get())**2)  # From 3D mesh
