@@ -7,7 +7,7 @@ from numpy.fft import fftn, ifftn, fftshift
 import matplotlib.pyplot as plt
 
 from bornagain.viewers.qtviews import qtviews
-from bornagain.target import crystal, density
+from bornagain.target import crystal
 from bornagain.data import lysozyme_pdb_file
 import bornagain.simulate.clcore as core
 from scipy import constants as const
@@ -40,7 +40,7 @@ f = cryst.molecule.get_scattering_factors(hc / wavelength)
 print('Setting up 3D mesh')
 d = 0.5e-9  # Minimum resolution
 s = 2       # Oversampling factor
-mt = density.CrystalDensityMap(cryst, d, s)
+mt = crystal.CrystalDensityMap(cryst, d, s)
 print('Grid size: (%d, %d, %d)' % tuple(mt.shape))
 h = mt.h_vecs  # Miller indices (fractional)
 

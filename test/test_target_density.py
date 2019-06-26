@@ -18,14 +18,14 @@ def test_crystal_density():
     cryst.unitcell = crystal.UnitCell(1e-9, 2e-9, 4e-9, np.pi/2, np.pi/2, np.pi/2)
     cryst.spacegroup.sym_translations = [np.zeros((3,))]
     cryst.spacegroup.sym_rotations = [np.eye((3))]
-    dens = density.CrystalDensityMap(cryst, 2e-9, 2)
+    dens = crystal.CrystalDensityMap(cryst, 2e-9, 2)
     assert np.sum(np.abs(dens.n_vecs[8, :] - np.array([1, 0, 0]))) < 1e-8
     assert np.allclose(dens.x_vecs[9, :], np.array([1., 0., 0.5]))
 
     cryst = crystal.CrystalStructure(lysozyme_pdb_file)
     for d in np.array([5, 10])*1e-10:
 
-        dens = density.CrystalDensityMap(cryst, d, 1)
+        dens = crystal.CrystalDensityMap(cryst, d, 1)
         dat0 = np.reshape(np.arange(0, dens.size), dens.shape).astype(np.float)
         dat1 = dens.symmetry_transform(0, 1, dat0)
         dat2 = dens.symmetry_transform(1, 0, dat1)
@@ -35,7 +35,7 @@ def test_crystal_density():
     cryst = crystal.CrystalStructure(psi_pdb_file)
     for d in np.array([5, 10])*1e-10:
 
-        dens = density.CrystalDensityMap(cryst, d, 2)
+        dens = crystal.CrystalDensityMap(cryst, d, 2)
         dat0 = np.reshape(np.arange(0, dens.size), dens.shape).astype(np.float)
         dat1 = dens.symmetry_transform(0, 1, dat0)
         dat2 = dens.symmetry_transform(1, 0, dat1)
@@ -50,7 +50,7 @@ def test_transforms():
 
     for d in [0.2, 0.3, 0.4, 0.5]:
 
-        mt = density.CrystalDensityMap(cryst, d, 1)
+        mt = crystal.CrystalDensityMap(cryst, d, 1)
         dat0 = np.reshape(np.arange(0, mt.size), mt.shape).astype(np.float)
         dat1 = mt.symmetry_transform(0, 1, dat0)
         dat2 = mt.symmetry_transform(1, 0, dat1)

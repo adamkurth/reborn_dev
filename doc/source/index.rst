@@ -61,13 +61,9 @@ See the page for developers.  See :ref:`developers_anchor`.
 Acknowledgements
 ----------------
 
-Code found in bornagain has been inspired by numerous open-source software packages listed above.  Contributions to
-bornagain have been made by
-
-- Derek Mendez
-- Joe Chen
-- Rick Hewitt
-- Cameron Howard
+The bornagain package has been developed by Rick Kirian (rkirian at asu dot edu) with conbributions from Derek Mendez,
+Joe Chen, Rick Hewitt, and Cameron Howard.  Code found in bornagain has been inspired by numerous open-source software
+packages listed above.
 
 Contents
 --------
