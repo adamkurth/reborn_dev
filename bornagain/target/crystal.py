@@ -161,17 +161,14 @@ class UnitCell(object):
 class SpaceGroup(object):
     r"""
     Container for crystallographic spacegroup information.  Most importantly, transformation matices and vectors.  These
-    transformations are purely in the fractional coordinate basis.  This class has no awareness of a unit cell and hence
-    cannot work with real-space orthogonal coordinates.  Note that we make no effort to translate the meaning of
-    the spacegroup symbol; I have yet to find a good piece of documentation that describes how to consistently translate
-    a spacegroup symbol string into a set of symmetry operations.  The typical thing to do in order to generate the
-    correct operations is to use the information in a PDB file, but even then you only get the operations that act on
-    orthogonal coordinates and thus you must transform them into the fractional basis.  This is an ugly mess!!!
+    transformations are purely in the fractional coordinate basis.  Note that this class has no awareness of the
+    meanings of spacegroup symbols -- I have not yet found a good way to programatically go from a spacegroup symbol
+    string to a set of symmetry operators.
     """
 
-    spacegroup_symbol = None  #: Spacegroup symbol (free format...)
-    sym_rotations = None      #: 3x3 transformation matrices (fractional coordinates)
-    sym_translations = None   #: Symmetry translations (fractional coordinates)
+    spacegroup_symbol = None  #: Spacegroup symbol (free format... has no effect)
+    sym_rotations = None      #: List of 3x3 transformation matrices (fractional coordinates)
+    sym_translations = None   #: List of symmetry translation vectors (fractional coordinates)
 
     def __init__(self, spacegroup_symbol, sym_rotations, sym_translations):
         r"""
@@ -228,10 +225,10 @@ class CrystalStructure(object):
     """
     # TODO: Needs documentation!
 
-    fractional_coordinates = None  # : Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
-    molecule = None  # : Molecule class instance containing the asymmetric unit
-    unitcell = None  # : UnitCell class instance
-    spacegroup = None  # : Spacegroup class instance
+    fractional_coordinates = None  #  : Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
+    molecule = None  #  : Molecule class instance containing the asymmetric unit
+    unitcell = None  #  : UnitCell class instance
+    spacegroup = None  #  : Spacegroup class instance
     mosaicity_fwhm = 0
     crystal_size = 1e-6
     crystal_size_fwhm = 0.0
@@ -410,14 +407,14 @@ class CrystalDensityMap(object):
     data arrays.
     '''
 
-    sym_luts = None
-    cryst = None  # :  CrystalStructure class used to initiate the map
-    oversampling = None  # : Oversampling ratio
-    dx = None  # : Length increments for fractional coordinates
-    cshape = None  # :  Number of samples along edges of unit cell within density map
-    shape = None  # :  Number of samples along edge of full density map (includes oversampling)
-    size = None  # :  Total number of elements in density map (np.prod(self.shape)
-    strides = None # :  The stride vector (mostly for internal use)
+    sym_luts = None  #: Symmetry lookup tables -- indices that map AU to sym. partner
+    cryst = None  #: CrystalStructure class used to initiate the map
+    oversampling = None  #: Oversampling ratio
+    dx = None   #: Length increments for fractional coordinates
+    cshape = None   #: Number of samples along edges of unit cell within density map
+    shape = None   #: Number of samples along edge of full density map (includes oversampling)
+    size = None   #: Total number of elements in density map (np.prod(self.shape)
+    strides = None  #: The stride vector (mostly for internal use)
 
     def __init__(self, cryst, resolution, oversampling):
         r'''
@@ -457,7 +454,7 @@ class CrystalDensityMap(object):
         self.cshape = cshape.astype(int)
         self.shape = (cshape * self.oversampling).astype(int)
         self.size = np.prod(self.shape)
-        self.strides = np.array([self.shape[2]*self.shape[1], self.shape[2], 1])  # :  The stride vector (mostly for internal use)
+        self.strides = np.array([self.shape[2]*self.shape[1], self.shape[2], 1])
 
     @property
     def n_vecs(self):
