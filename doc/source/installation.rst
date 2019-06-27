@@ -14,7 +14,7 @@ your project is to add it as a `submodule <https://git-scm.com/book/en/v2/Git-To
 git repository.
 
 The main setup task is to simply ensure that Python can load the bornagain package, which means that it must be
-found in path where python searches for packages.  Here are three different suggestions that you might use to get your
+found in a path where python searches for packages.  Here are three different suggestions that you might use to get your
 path set up:
 
 1) Within your shell, you can set an environment variable so that Python looks in the right place for bornagain.
@@ -26,7 +26,7 @@ If you are using the bash shell, you can do the following:
 
 The above method is probably the best option, but you must remember to set your path every time you use bornagain.
 
-2) You can specify the location of bornagain directly in your python path.  For example:
+2) You can specify the location of bornagain directly in your python scripts.  For example:
 
 .. code-block:: python
 

@@ -59,8 +59,8 @@ Acknowledgements
 ----------------
 
 The bornagain package is maintained by Rick Kirian (rkirian at asu dot edu) with conbributions from Derek Mendez,
-Joe Chen, Rick Hewitt, and Cameron Howard.  Code found in bornagain has been inspired by numerous open-source software
-packages listed above.
+Joe Chen, Kevin Schmidt, Rick Hewitt, and Cameron Howard.  Code found in bornagain has been inspired by numerous
+open-source software packages listed above.
 
 Contents
 --------
