@@ -520,4 +520,3 @@ def test_17(): # Mask test
     dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
-

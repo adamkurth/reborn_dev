@@ -452,9 +452,6 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     N_bin = N_bin.astype(np.int)
     #------------------------------------------
 
-    # Number of data points
-    N_data = len(data_val)
-
     # Bin width
     Delta_x = (x_max - x_min) / (N_bin - 1)
 
@@ -470,13 +467,20 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     c2 = x_max + 0.5 - epsilon
     c3 = x_min - 0.5 + epsilon
 
+    # Initialise memory for Fortran
     dataout = np.zeros(N_bin+2, dtype=np.double, order='C')
     weightout = np.zeros(N_bin+2, dtype=np.double, order='C')
-
     dataout = np.asfortranarray(dataout)
     weightout = np.asfortranarray(weightout)
+
+    # Mask out data_coord and data_val
+    data_coord = data_coord[mask != 0, :]
+    data_val = data_val[mask != 0]
+
+    # Number of data points
+    N_data = len(data_val)
     
-    fortran.interpolations_f.trilinear_insert(data_coord, data_val, x_min, mask, N_data, \
+    fortran.interpolations_f.trilinear_insert(data_coord, data_val, x_min, N_data, \
                                               Delta_x, one_over_bin_volume, c1, c2, c3,  \
                                               dataout, weightout)
 
