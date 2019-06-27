@@ -404,7 +404,11 @@ else:
 def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     r""""
     Trilinear insertion on a regular grid with arbitrary sample points.
-    The boundary is defined as [x_min-0.5, x_max+0.5).
+    The boundary is defined as [x_min-0.5, x_max+0.5). 
+    This function returns two arrays, dataout and weightout, you need to divide dataout 
+    by weightout (taking care to deal with zeros in weightout) to get the correct trilinear
+    insertion result. This is so that the function can be used to sum over many trilinearly
+    inserted arrays in for example a 3D diffracted intensity merge.
 
     Note 1: All input arrays should be C contiguous.
     Note 2: This code will break if you put a 1 in any of the N_bin entries.
@@ -418,7 +422,8 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
         mask      : An array with the N values specifying which data points to ignore. Zero means ignore.
     
     Returns:
-        A 3D numpy array with trilinearly inserted values.
+        dataout   : A 3D numpy array with trilinearly summed values - this needs to be divided by weightout to give the trilinearly inserted values.
+        weightout : A 3D numpy array that contains the number of times each voxel has a value put into it.
     """
 
     #------------------------------------------
@@ -441,6 +446,9 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     if len(N_bin) != 3:
         raise ValueError('N_bin needs to be an array that contains three elements.')
 
+    if data_coord.shape[1] != 3:
+        raise ValueError('data_coord needs to be an Nx3 array.')
+
     # Check if the non-1D arrays are c_contiguous
     assert data_coord.flags.c_contiguous
 
@@ -462,7 +470,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     # To safeguard against round-off errors
     epsilon = 1e-9
 
-    # Constants (these are 3 element arrays)
+    # Constants (these are arrays with 3 elements in them)
     c1 = 0.0 - x_min / Delta_x
     c2 = x_max + 0.5 - epsilon
     c3 = x_min - 0.5 + epsilon
@@ -493,11 +501,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     # deal with this case by setting weightout to 1.
     assert np.sum(dataout[weightout == 0]) == 0
 
-    weightout[weightout == 0] = 1
-
-    dataout /= weightout
-
-    return dataout
+    return dataout, weightout
 
 
 def passthrough_decorator(*args1, **kwargs1):
