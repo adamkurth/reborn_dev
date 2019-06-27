@@ -3,20 +3,18 @@ channels:
   - conda-forge
 dependencies:
   - python=3.6   # or 2.7
-  - pyqt=5       # or 4
-  - numpy
   - scipy
   - h5py
-  - matplotlib
-  - pyqtgraph
-  - pyopencl
-  - pocl
-  - pyopengl
   - future
+  - numba
+  - pyopencl
   - sphinx
   - pytest
-  - numba
-  - make
+  - matplotlib
+  - pyqt=5       # or 4
+  - pocl
+  - pyqtgraph
+  - pyopengl
   - pip
   - pip:
     - cfelpyutils

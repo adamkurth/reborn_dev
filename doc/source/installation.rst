@@ -53,13 +53,13 @@ If you do any of the above correctly, you might be able to import bornagain in t
 
     import bornagain
 
-The above might fail if you are missing dependencies, which are describe below.  Another possible mode of failure is
+The above might fail if you are missing dependencies, which are described below.  Another possible mode of failure is
 that you have not compiled the fortran code that bornagain uses, which is discussed in the next section.
 
 Compilation of Fortran code
 ---------------------------
 
-There are a couple of bornagain modules that use modules formed from compiled Fortran code.  In some cases they are not
+There are a couple of bornagain modules that use compiled Fortran code.  In some cases they are not
 strictly necessary, but they will speed up some routines.  We use the f2py program to compile Fortran code and create
 Python modules.  Although it *shouldn't* be strictly necessary to compile these to use some of the basic bornagain
 classes, you should go ahead and compile them since the f2py program that is included with numpy makes this relatively
@@ -70,45 +70,30 @@ painless.  Try the following:
     cd developer
     ./compile-fortran.sh
 
-You will see some warnings due to Numpy (these is out of our control), but so long as there are no errors you should be
+You will see some warnings due to Numpy (these are out of our control), but so long as there are no errors you should be
 all set.
 
 Dependencies
 ------------
 
-The most basic classes in bornagain should work so long as you have the following dependencies installed:
-
-* h5py
-* numpy
-* scipy
-* future
-
-Some functions will run faster if you install:
-
-* numba
-
-If you want to run GPU simulations, you'll need
-
-* pyopencl
-
-If you are developing bornagain you will need
-
-* pytest
-* sphinx
-
-There are some visualization tools that depend on:
-
-* matplotlib
-* pyqtgraph
-* pyopengl
-
-A couple of specialized packages are used for dealing with LCLS XTC data and CrystFEL geometry files:
-
-* psana
-* cfelpyutils
-
 We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
-compatibility with both pyqt4 and pyqt5.
+compatibility with both pyqt4 and pyqt5.  Below are the minimal dependencies that you should need for various features.
+Note that each of them have additional dependencies; you must also satisfy those dependencies.
+
++--------------------------------------------------------------------+-------------------------------------------------+
+|The **basic classes** in bornagain require:                         |scipy, h5py, future                              |
++--------------------------------------------------------------------+-------------------------------------------------+
+|Some functions will run **faster** if you install:                  |numba                                            |
++--------------------------------------------------------------------+-------------------------------------------------+
+|**GPU simulations** require:                                        |pyopencl(, sometimes pocl)                       |
++--------------------------------------------------------------------+-------------------------------------------------+
+|If you are **developing** bornagain you will need:                  |pytest, sphinx, sphinx_rtd_theme                 |
++--------------------------------------------------------------------+-------------------------------------------------+
+|Some **visualization tools** depend on:                             |matplotlib, pyqtgraph, pyopengl                  |
++--------------------------------------------------------------------+-------------------------------------------------+
+|A couple of **specialized modules** depend on:                      |psana, cfelpyutils                               |
++--------------------------------------------------------------------+-------------------------------------------------+
+
 
 Example setup with Miniconda
 ----------------------------
@@ -124,8 +109,7 @@ Assuming that you have installed conda, here's an example of how to set up a new
 
 .. code-block:: bash
 
-  conda create -n bornagain -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image \
-  matplotlib ipython pytest sphinx pyqtgraph pyopencl pyopengl future
+  conda create -n bornagain -c conda-forge python=3.6 pyqt=5 scipy, h5py, future, numba, pyopencl, pocl, pytest, matplotlib, pyqtgraph, pyopengl
 
 The only downside to the conda environment is that you need to remember to activate the environment every time you use
 bornagain, like this:
@@ -158,8 +142,7 @@ If you don't want to use a conda environment you can just install the modules in
 
 .. code-block:: bash
 
-  conda install -c conda-forge python=3.6 pyqt=5 h5py numpy scipy scikit-image matplotlib ipython pytest \
-  sphinx pyqtgraph pyopencl pyopengl future
+  conda install -c conda-forge pyqt=5 scipy, h5py, future, numba, pyopencl, pocl, pytest, matplotlib, pyqtgraph, pyopengl
   pip instlall cfelpyutils
 
 You can uninstall a conda environment as follows:
