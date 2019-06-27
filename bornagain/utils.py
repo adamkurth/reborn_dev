@@ -401,7 +401,7 @@ else:
                     d_max = d
         return np.sqrt(d_max)
 
-def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask=None):
+def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     r""""
     Trilinear insertion on a regular grid with arbitrary sample points.
     The boundary is defined as [x_min-0.5, x_max+0.5).
@@ -425,6 +425,21 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask=None):
     # Checks
     if fortran is None:
         raise ImportError('You need to compile fortran code to use utils.trilinear_interpolation()')
+
+    if len(data_coord) != len(data_val):
+        raise ValueError('The data coordinates and data values must be of the same length.')
+
+    if len(data_coord) != len(mask):
+        raise ValueError('The data coordinates and data mask must be of the same length.')
+
+    if len(x_min) != 3:
+        raise ValueError('x_min needs to be an array that contains three elements.')
+
+    if len(x_max) != 3:
+        raise ValueError('x_max needs to be an array that contains three elements.')
+
+    if len(N_bin) != 3:
+        raise ValueError('N_bin needs to be an array that contains three elements.')
 
     # Check if the non-1D arrays are c_contiguous
     assert data_coord.flags.c_contiguous

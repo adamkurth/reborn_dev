@@ -394,7 +394,7 @@ def test_15(): # More-than-one-patterns test
     data_coord = np.array([[1.0, 1.0, 1.0], [0,0,0]])
     data_coord = np.tile(data_coord, (N_pattern,1))
     data_val = np.array([1, 10, 1, 10, 1, 10])
-    mask = np.ones(N_data)
+    mask = np.ones(N_data * N_pattern)
 
     N_bin = np.array([3, 5, 4])
     x_min = np.array([-3, -1, -6])
@@ -491,6 +491,33 @@ def test_16():
     assert np.sum(np.abs(dataout - ans)) < 1e-7
 
 
+def test_17(): # Mask test
+    N_data = 2
+    data_coord = np.array([[1.0, 1.0, 1.0], [0,0,0]])
+    data_val = np.array([1, 1])
+    mask = np.array([0,1])
 
+    N_bin = np.array([4, 3, 4])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    ans = np.array([[[ 0.  ,  0.  ,  0.  ,  0.  ],
+            [ 0.  ,  0.  ,  0.  ,  0.  ],
+            [ 0.  ,  0.  ,  0.  ,  0.  ]],
+
+           [[ 0.  ,  0.  ,  0.  ,  0.  ],
+            [ 0.  ,  0.25,  0.25,  0.  ],
+            [ 0.  ,  0.  ,  0.  ,  0.  ]],
+
+           [[ 0.  ,  0.  ,  0.  ,  0.  ],
+            [ 0.  ,  0.25,  0.25,  0.  ],
+            [ 0.  ,  0.  ,  0.  ,  0.  ]],
+
+           [[ 0.  ,  0.  ,  0.  ,  0.  ],
+            [ 0.  ,  0.  ,  0.  ,  0.  ],
+            [ 0.  ,  0.  ,  0.  ,  0.  ]]])
+
+    dataout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
