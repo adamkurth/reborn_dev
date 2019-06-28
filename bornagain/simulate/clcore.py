@@ -81,7 +81,7 @@ class ClCore(object):
 
         The raw opencl kernel code will be compiled when an instance of this class is created.
 
-        Args:
+        Arguments:
             context: An opencl context
             queue: An opencl queue
             group_size (int): The desired opencl group size (most common is 32, and this is default).
@@ -195,7 +195,7 @@ class ClCore(object):
         This just does a trivial operation:
         return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
 
-        Args:
+        Arguments:
             x np.ndarray:
 
             dtype np.dtype: Examples: np.complex, np.double
@@ -218,7 +218,7 @@ class ClCore(object):
 
         See the vec4 function documentation also.
 
-        Args:
+        Arguments:
             R numpy.ndarray: input array
 
             dtype numpy.dtype: default is np.float32
@@ -293,7 +293,7 @@ class ClCore(object):
 
         Apply rotation followed by translation on GPU.
 
-        Args:
+        Arguments:
             rot: rotation matrix
             trans: translation vector
             v_in (Nx3 array): input vectors
@@ -1084,7 +1084,7 @@ class ClCoreDerek(ClCore):
 
         Initialize amplitudes for cromer-mann simulator as zeros
 
-        Args:
+        Arguments:
             Npix:
 
         Returns:
@@ -1099,7 +1099,7 @@ class ClCoreDerek(ClCore):
 
         retrieve scattering amplitudes from cromer-mann simulator
 
-        Args:
+        Arguments:
             reset:
                 whether to reset the amplitudes to zeros
 

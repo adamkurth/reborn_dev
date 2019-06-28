@@ -75,7 +75,7 @@ A central task in diffraction analysis is the assignment of physical locations (
 Actually, our task is two-fold:
 
 1) Transform the data found on disk or in memory to numpy arrays.
-2) Determine the 3D positions corresonding to the elements of the numpy arrays.
+2) Determine the 3D positions corresponding to the elements of the numpy arrays.
 
 The :class:`PADGeometry <bornagain.detector.PADGeometry>` class contains the needed information to perform step (2), but
 does not have any involvement in step (1).  Step (1) is often a messy process that requires specialized code, and

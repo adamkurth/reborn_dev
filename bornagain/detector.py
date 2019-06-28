@@ -40,7 +40,7 @@ class PADGeometry(object):
 
         High-level initialization.  Centers the detector in the x-y plane.
 
-        Args:
+        Arguments:
             n_pixels (int):
             distance (float):
             pixel_size (float):
@@ -187,7 +187,7 @@ class PADGeometry(object):
         (`beam_vec`) and  s is the outgoing vector for a given pixel.  This does **not** have
         the 2*pi/lambda factor included.
 
-        Args:
+        Arguments:
             beam_vec (tuple or numpy array): specify the unit vector of the incident beam
             beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
                                          of beam_vec ect.
@@ -207,7 +207,7 @@ class PADGeometry(object):
 
             :math:`\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)`
 
-        Args:
+        Arguments:
             beam_vec (tuple or numpy array): specify the unit vector of the incident beam
             wavelength (float): wavelength
             beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
@@ -226,7 +226,7 @@ class PADGeometry(object):
         r"""
         Calculate scattering vector magnitudes:
 
-        Args:
+        Arguments:
             beam_vec (tuple or numpy array): specify the unit vector of the incident beam
             wavelength (float): wavelength
             beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
@@ -355,7 +355,7 @@ class PADGeometry(object):
     def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
         r"""
 
-        Args:
+        Arguments:
             beam: Instance of the Beam class (for wavelength)
             wavelength: Specify wavelength (needed for q_mags)
             q_min: Minimum q magnitude
@@ -381,7 +381,7 @@ class PADGeometry(object):
 
         Re-shape a flattened array to a 2D array.
 
-        Args:
+        Arguments:
             dat (numpy array): The flattened data array
 
         Returns: a 2D numpy array
@@ -412,7 +412,7 @@ class PADGeometry(object):
         r"""
         Maximum resolution over all pixels: 2*pi/q
 
-        Args:
+        Arguments:
             beam: A Beam class instance.
 
         Returns:
@@ -426,7 +426,7 @@ def split_pad_data(pad_list, data):
 
     Given a contiguous block of data, split it up into individual PAD panels
 
-    Args:
+    Arguments:
         pad_list: A list of PADGeometry instances
         data: A contiguous array with data values (total pixels to add up to sum of pixels in all PADs)
 
@@ -450,7 +450,7 @@ def edge_mask(data, n):
     Make an "edge mask"; an array of ones with zeros around the edges.
     The mask will be the same type as the data (e.g. double).
 
-    Args:
+    Arguments:
         data (2D numpy array): a data array (for shape reference)
         n (int): number of pixels to mask around edges
 

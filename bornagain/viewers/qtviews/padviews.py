@@ -29,7 +29,7 @@ def padview_debug(msg, val=1):
     """
     Print debug messages according to the padview_debug_config variable.
 
-    Args:
+    Arguments:
         msg: The text message to print.
         val: How verbose to be.
             0: don't print anything
@@ -48,7 +48,7 @@ def write(msg):
     """
     Write a message to the terminal.
 
-    Args:
+    Arguments:
         msg: The text message to write
 
     Returns: None
@@ -112,7 +112,7 @@ class PADView(object):
 
         """
 
-        Args:
+        Arguments:
             pad_geometry: a list of PADGeometry instances
             mask_data: a list of numpy arrays
             logscale: apply log to data before viewing
@@ -1004,7 +1004,7 @@ class PADView(object):
 
         Update display with new data, e.g. when moving to next frame.
 
-        Args:
+        Arguments:
             dat: input dictionary with keys 'pad_data', 'peaks'
 
         Returns:

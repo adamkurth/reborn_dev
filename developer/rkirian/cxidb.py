@@ -15,7 +15,7 @@ class CxidbWriter(object):
         This is a generic file writing.  It splits cxidb files into separate files, each of which it should be possible
         to load the whole thing into memory.
 
-        Args:
+        Arguments:
             stack_size: Number of frames before making new file
             base_file_name: File name (and path if need be), onto which a file number will be appended.
             file_start_number: Number of first file, which will be appended to the first file.

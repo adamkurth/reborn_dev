@@ -23,7 +23,7 @@ class DensityMap(object):
     def __init__(self, shape=None, corner_min=None, corner_max=None, deltas=None, molecule=None):
         r"""
 
-        Args:
+        Arguments:
             shape: shape of the 3d map
             corner_min:  a 3-vector with the coordinate of the center of the corner pixel
             corner_max:  opposit corner to corner_min
@@ -265,7 +265,7 @@ class DensityMap(object):
 #         not allow for complex numbers...).  This is done in a lazy way - the density samples are placed in the nearest
 #         voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy...
 #
-#         Args:
+#         Arguments:
 #             atom_x_vecs (numpy array):  An nx3 array of position vectors
 #             atom_fs (numpy array):  An n-length array of densities (must be real)
 #             mode (str): Either 'gaussian' or 'nearest'
@@ -368,7 +368,7 @@ def trilinear_interpolation_numba(densities=None, vectors=None, corners=None, de
     r"""
     Trilinear interpolation of a 3D map.
 
-    Args:
+    Arguments:
         densities: A 3D array of shape AxBxC
         vectors: An Nx3 array of 3-vectors
         limits: A 3x2 array specifying the limits of the density map samples.  These values specify the voxel centers.
@@ -442,7 +442,7 @@ def trilinear_insertion(densities, weights, vectors, vals, corners, deltas, weig
 #     Trilinear "insertion" -- basically the opposite of trilinear interpolation.  This places densities into a grid
 #     using the same weights as in trilinear interpolation.
 #
-#     Args:
+#     Arguments:
 #         densities (NxMxP array):
 #         weights (NxMxP array):
 #         vectors (Qx3 array):

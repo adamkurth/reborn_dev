@@ -22,7 +22,7 @@ def set_global(option, value):
 
     Set global configurations.
 
-    Args:
+    Arguments:
         option: One of the following:
     ==================================  ================================================================
     Option                              Effect
@@ -54,7 +54,7 @@ def get_global(option):
 
     Get global configurations.
 
-    Args:
+    Arguments:
         option: See :func:`set_global` for the relevant options.
 
     Returns: The value associated with the option.

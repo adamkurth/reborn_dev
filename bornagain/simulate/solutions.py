@@ -37,7 +37,7 @@ def get_water_profile(q, temperature=298):
     Note that this is the scattering factor F for a single water molecule.  The number density of water is approximately
     n = 33.3679e27 / m^3 .
 
-    Args:
+    Arguments:
         q: The momentum transfer vector magnitudes (i.e. 2 pi sin(theta/lambda)/wavelength )
         temperature: Desired water temperature in Kelvin
         volume: if this is not None, the scattering factor will be multiplied by the number of molecules in volume
@@ -81,7 +81,7 @@ def water_scattering_factor_squared(q, temperature=298, volume=None):
     Note that this is the scattering factor F for a single water molecule.  The number density of water is approximately
     n = 33.3679e27 / m^3 .
 
-    Args:
+    Arguments:
         q: The momentum transfer vector magnitudes (i.e. 2 pi sin(theta/lambda)/wavelength )
         temperature: Desired water temperature in Kelvin
         volume: if this is not None, the scattering factor will be multiplied by the number of molecules in volume

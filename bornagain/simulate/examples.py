@@ -64,7 +64,7 @@ def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=Tru
 
     Simple simulation of lysozyme molecule using :class:`ClCore <bornagain.simulate.clcore.ClCore>`.
 
-    Args:
+    Arguments:
         pad_geometry: List of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances.
         wavelength: As always, in SI units.
         random_rotation: If True generate a random rotation.  Default is True.
@@ -114,7 +114,7 @@ class PDBMoleculeSimulator(object):
 
         This will setup the opencl simulation core.
 
-        Args:
+        Arguments:
             pdb_file: path to a pdb file
             pad_geometry: array of :class:`PADGeometry bornagain.detector.PADGeometry` intances
             wavelength: in SI units of course
@@ -230,7 +230,7 @@ class CrystalSimulatorV1(object):
 
         r"""
 
-        Args:
+        Arguments:
             pad_geometry: An instance of bornagain.detector.PADGeometry
             beam: An instance of bornagain.source.Beam
             crystal_structure: An instance of bornagain.target.crystal.CrystalStructure
@@ -289,7 +289,7 @@ class CrystalSimulatorV1(object):
 
         r"""
 
-        Args:
+        Arguments:
             rotation_matrix: Specify a rotation matrix, else a random rotation is generated.
 
         Returns: A numpy array with diffraction intensities

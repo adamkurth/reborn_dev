@@ -13,7 +13,7 @@ def sphere_form_factor(radius, q_mags, check_divide_by_zero=True):
     amorphous bodies".  There are no approximations in this formula beyond the 1st Born approximation; it is not a
     small-angle formula.
 
-    Args:
+    Arguments:
         radius (float): In SI units of course
         q_mags (numpy array): Also in SI units.
         check_divide_by_zero (bool): Check for divide by zero.  True by default.

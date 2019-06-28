@@ -22,12 +22,12 @@ except ImportError:
 def vec_norm(vec):
     r"""
 
-    Compute the normal vector, which has a length of one.
+    Compute normal vectors, which have lengths of one.
 
-    Args:
-        vec: input vector, usually of shape (3) of (N, 3)
+    Arguments:
+        vec: input vector of shape (N, 3)
 
-    Returns: new vector of length 1.
+    Returns: new vector of length N.
 
     """
 
@@ -38,9 +38,9 @@ def vec_norm(vec):
 def vec_mag(vec):
     r"""
 
-    Compute the scalar magnitude sqrt(sum(x^2)) of an array of vectors, usually shape (N, 3)
+    Compute the scalar magnitude of an array of vectors of shape (N, 3)
 
-    Args:
+    Arguments:
         vec: input vector or array of vectors
 
     Returns: scalar vector magnitudes
@@ -60,7 +60,7 @@ def depreciate(message):
     The output can be silenced with the function bornagain.set_global('warn_depreciated', False), or you can force
     an error to occur if you do bornagain.set_global('force_depreciated', True).
 
-    Args:
+    Arguments:
         message: whatever you want to have printed to the screen
 
     Returns: nothing
@@ -83,7 +83,7 @@ def warn(message):
     The purpose of this function is that folks can search for "WARNING:" to find all warning messages, e.g. with grep.
 
 
-    Args:
+    Arguments:
         message: the message you want to have printed.
 
     Returns: nothing
@@ -101,7 +101,7 @@ def error(message):
     sys.stdout.write("ERROR: %s\n" % message)
 
 
-    Args:
+    Arguments:
         message: the message you want to have printed.
 
     Returns: nothing

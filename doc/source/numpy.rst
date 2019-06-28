@@ -29,7 +29,7 @@ there are no "gaps".  The following example illustrates this:
 Arrays of vectors
 -----------------
 
-If you have *N* vectors of dimension *D*, bornagain assumes they are stored with a shape of (*N*, *D*).  This choice was
+If you have *N* vectors of dimension 3, bornagain assumes they are stored with a shape of (*N*, 3).  This choice was
 made because the right-most index of a numpy array has the smallest stride by default, and because it usually makes
 most sense to have vector components stored close to each other in memory.  This convention is assumed in every function
 in bornagain.  This note is to avoid ambiguity in the case of a (3, 3) array.

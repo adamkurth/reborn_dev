@@ -222,7 +222,7 @@ def get_pad_geometry(detector, run):
 #     is needed because people mostly make geom files that work with the Cheetah format.  See the function
 #     :func:`reshape_psana_cspad_array_to_cheetah_array <bornagain.external.cheetah.reshape_psana_cspad_array_to_cheetah_array>` for more details on array shapes.
 #
-#     Args:
+#     Arguments:
 #         cheetah_array: The data in Cheetah format
 #         geom_dict: The dictionary created from a CrystFEL geom file via :func:``
 #

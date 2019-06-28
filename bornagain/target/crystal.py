@@ -24,7 +24,7 @@ def get_pdb_file(pdb_id, save_path='.'):
     The default location for the file is the current working directory.
     If the file already exists, just return the path to the existing file.
 
-    Args:
+    Arguments:
         pdb_id: for example: "101M" or "101M.pdb"
 
     Returns:
@@ -69,7 +69,7 @@ class UnitCell(object):
 
         Always initialize with the lattice parameters.  Units are SI and radians.
 
-        Args:
+        Arguments:
             a: Lattice constant
             b: Lattice constant
             c: Lattice constant
@@ -593,7 +593,7 @@ class CrystalDensityMap(object):
         not allow for complex numbers...).  This is done in a lazy way - the density samples are placed in the nearest
         voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy...
 
-        Args:
+        Arguments:
             atom_x_vecs (numpy array):  An nx3 array of position vectors
             atom_fs (numpy array):  An n-length array of densities (must be real)
             mode (str): Either 'gaussian' or 'nearest'
