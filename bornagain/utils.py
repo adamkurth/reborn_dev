@@ -247,26 +247,14 @@ def triangle_solid_angle(r1, r2, r3):
     r"""
     Compute solid angle of a triangle whose vertices are r1,r2,r3, using the method of
     Van Oosterom, A. & Strackee, J. Biomed. Eng., IEEE Transactions on BME-30, 125-126 (1983).
-    """
 
-    numer = np.abs(np.dot(r1, np.cross(r2, r3)))
+    Arguments:
+        r1 (numpy array): Vectors to vertices 1; array of shape (N, 3)
+        r2 (numpy array): Vectors to vertices 1; array of shape (N, 3)
+        r3 (numpy array): Vectors to vertices 1; array of shape (N, 3)
 
-    r1_n = np.linalg.norm(r1)
-    r2_n = np.linalg.norm(r2)
-    r3_n = np.linalg.norm(r3)
-    denom = r1_n * r2_n * r2_n
-    denom += np.dot(r1, r2) * r3_n
-    denom += np.dot(r2, r3) * r1_n
-    denom += np.dot(r3, r1) * r2_n
-    s_ang = np.arctan2(numer, denom) * 2
-
-    return s_ang
-
-
-def triangle_solid_angle2(r1, r2, r3):
-    r"""
-    Compute solid angle of a triangle whose vertices are r1,r2,r3, using the method of
-    Van Oosterom, A. & Strackee, J. Biomed. Eng., IEEE Transactions on BME-30, 125-126 (1983).
+    Returns:
+        (numpy array) of length N with solid angles
     """
 
     numer = np.abs(np.sum(r1*np.cross(r2, r3), axis=-1))
@@ -275,9 +263,6 @@ def triangle_solid_angle2(r1, r2, r3):
     r2_n = np.linalg.norm(r2, axis=-1)
     r3_n = np.linalg.norm(r3, axis=-1)
     denom = r1_n * r2_n * r2_n
-    print(r1.shape)
-    print(r3_n.shape)
-    print(np.sum(r1*r2, axis=-1).shape)
     denom += np.sum(r1*r2, axis=-1) * r3_n
     denom += np.sum(r2*r3, axis=-1) * r1_n
     denom += np.sum(r3*r1, axis=-1) * r2_n
@@ -328,8 +313,9 @@ else:
                     d_max = d
         return np.sqrt(d_max)
 
+
 def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
-    r""""
+    r"""
     Trilinear insertion on a regular grid with arbitrary sample points.
     The boundary is defined as [x_min-0.5, x_max+0.5). 
     This function returns two arrays, dataout and weightout, you need to divide dataout 

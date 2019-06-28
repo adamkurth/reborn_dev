@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division,
 import numpy as np
 import h5py
 
-from .utils import vec_norm, vec_mag, triangle_solid_angle2
+from .utils import vec_norm, vec_mag, triangle_solid_angle
 
 
 class PADGeometry(object):
@@ -243,12 +243,12 @@ class PADGeometry(object):
 
     def solid_angles(self):
         r"""
-        Calculate solid angles of pixels.  See solid_angles1 method.
+        Calculate solid angles of pixels.  See solid_angles2 method.
 
         Returns: numpy array
         """
 
-        return self.solid_angles1()
+        return self.solid_angles2()
 
     def solid_angles1(self):
         r"""
@@ -284,8 +284,8 @@ class PADGeometry(object):
         r2 = k + self.fs_vec * .5 - self.ss_vec * .5
         r3 = k - self.fs_vec * .5 + self.ss_vec * .5
         r4 = k + self.fs_vec * .5 + self.ss_vec * .5
-        sa_1 = triangle_solid_angle2(r1, r2, r3)
-        sa_2 = triangle_solid_angle2(r4, r2, r3)
+        sa_1 = triangle_solid_angle(r1, r2, r3)
+        sa_2 = triangle_solid_angle(r4, r2, r3)
         return sa_1 + sa_2
 
     def polarization_factors(self, polarization_vec=None, beam_vec=None, weight=None, beam=None):

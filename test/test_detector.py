@@ -32,7 +32,7 @@ def make_pad_list():
 
 def test_PADGeometry():
 
-    # TODO: actually test something...
+    # Check that the two solid angle calculations are in agreement
 
     pad = detector.PADGeometry()
     assert pad.t_vec is None
