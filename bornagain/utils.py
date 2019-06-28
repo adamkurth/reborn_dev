@@ -21,14 +21,13 @@ except ImportError:
 
 def vec_norm(vec):
     r"""
-
     Compute normal vectors, which have lengths of one.
 
     Arguments:
-        vec: input vector of shape (N, 3)
+        vec: Input vector of shape (N, 3)
 
-    Returns: new vector of length N.
-
+    Returns:
+        (numpy array) New unit vectors, shape (N, 3)
     """
 
     vecnorm = np.sqrt(np.sum(vec**2, axis=(vec.ndim-1)))
@@ -37,14 +36,12 @@ def vec_norm(vec):
 
 def vec_mag(vec):
     r"""
-
-    Compute the scalar magnitude of an array of vectors of shape (N, 3)
+    Compute the scalar magnitude of an array of vectors.
 
     Arguments:
-        vec: input vector or array of vectors
+        vec (numpy array): Input array of vectors, shape (N, 3)
 
     Returns: scalar vector magnitudes
-
     """
 
     return np.sqrt(np.sum(vec * vec, axis=(vec.ndim-1)))
@@ -52,10 +49,9 @@ def vec_mag(vec):
 
 def depreciate(message):
     r"""
-
     Utility for sending warnings when some class, method, function, etc. is depreciated.  By default, a message of the
-    form "WARNING: blah blah blah" will be printed with sys.stdout.write().  You get to choose the "blah blah blah" part
-    of the message, which is the input to this function.
+    form "WARNING: DEPRECIATION: blah blah blah" will be printed with sys.stdout.write().  You get to choose the
+    "blah blah blah" part of the message, which is the input to this function.
 
     The output can be silenced with the function bornagain.set_global('warn_depreciated', False), or you can force
     an error to occur if you do bornagain.set_global('force_depreciated', True).
@@ -63,31 +59,27 @@ def depreciate(message):
     Arguments:
         message: whatever you want to have printed to the screen
 
-    Returns: nothing
-
+    Returns: None
     """
 
     if ba.get_global('force_depreciated') is True:
-        error(message)
+        error('DEPRECIATION: ' + message)
     elif ba.get_global('warn_depreciated') is True:
-        warn(message)
+        warn('DEPRECIATION: ' + message)
 
 
 def warn(message):
     r"""
-
     Standard way of sending a warning message.  As of now this simply results in a function call
 
     sys.stdout.write("WARNING: %s\n" % message)
 
     The purpose of this function is that folks can search for "WARNING:" to find all warning messages, e.g. with grep.
 
-
     Arguments:
         message: the message you want to have printed.
 
-    Returns: nothing
-
+    Returns: None
     """
 
     sys.stdout.write("WARNING: %s\n" % message)
@@ -95,129 +87,32 @@ def warn(message):
 
 def error(message):
     r"""
-
     Standard way of sending an error message.  As of now this simply results in a function call
 
     sys.stdout.write("ERROR: %s\n" % message)
 
-
     Arguments:
         message: the message you want to have printed.
 
-    Returns: nothing
+    Returns: None
     """
 
     sys.stderr.write("ERROR: %s\n" % message)
-
-
-# def axisAndAngleToMatrix(axis, angle):
-#     """Generate the rotation matrix from the axis-angle notation.
-#
-#     Conversion equations
-#     ====================
-#
-#     From Wikipedia (http://en.wikipedia.org/wiki/Rotation_matrix),
-#     the conversion is given by::
-#
-#         c = cos(angle); s = sin(angle); C = 1-c
-#         xs = x*s;   ys = y*s;   zs = z*s
-#         xC = x*C;   yC = y*C;   zC = z*C
-#         xyC = x*yC; yzC = y*zC; zxC = z*xC
-#         [ x*xC+c   xyC-zs   zxC+ys ]
-#         [ xyC+zs   y*yC+c   yzC-xs ]
-#         [ zxC-ys   yzC+xs   z*zC+c ]
-#
-#
-#     @param matrix:  The 3x3 rotation matrix to update.
-#     @type matrix:   3x3 numpy array
-#     @param axis:    The 3D rotation axis.
-#     @type axis:     numpy array, len 3
-#     @param angle:   The rotation angle.
-#     @type angle:    float
-#     """
-#
-#     # Trig factors.
-#     ca = np.cos(angle)
-#     sa = np.sin(angle)
-#     C = 1 - ca
-#
-#     # Depack the axis.
-#     a = axis.ravel()
-#     x = a[0]
-#     y = a[1]
-#     z = a[2]
-# #     x, y, z = axis
-#
-#     # Multiplications (to remove duplicate calculations).
-#     xs = x * sa
-#     ys = y * sa
-#     zs = z * sa
-#     xC = x * C
-#     yC = y * C
-#     zC = z * C
-#     xyC = x * yC
-#     yzC = y * zC
-#     zxC = z * xC
-#
-#     matrix = np.zeros([3, 3])
-#
-#     # Update the rotation matrix.
-#     matrix[0, 0] = x * xC + ca
-#     matrix[0, 1] = xyC - zs
-#     matrix[0, 2] = zxC + ys
-#     matrix[1, 0] = xyC + zs
-#     matrix[1, 1] = y * yC + ca
-#     matrix[1, 2] = yzC - xs
-#     matrix[2, 0] = zxC - ys
-#     matrix[2, 1] = yzC + xs
-#     matrix[2, 2] = z * zC + ca
-#
-#     return matrix
-#
-#
-# class ScalarMonitor(object):
-#
-#     """ Class for monitoring a scalar for which we expect many observations.
-#         Array will grow as needed, and basic calculations can be done."""
-#
-#     def __init__(self, size=1000):
-#
-#         self.idx = 0         # Current index of observation
-#         self.size = size     # Size of array
-#         self.data = np.zeros([size])  # Data array
-#         self.maxSize = 10e6  # Don't grow array larger than this
-#
-#     def append(self, value):
-#
-#         if (self.idx + 1) > self.size:
-#             if (self.size * 2) > self.maxSize:
-#                 print("Cannot grow array larger than %d" % self.size * 2)
-#                 return None
-#             self.data = np.concatenate([self.data, np.zeros([self.size])])
-#             self.size = self.data.shape[0]
-#         self.data[self.idx] = value
-#         self.idx += 1
-#
-#     def getData(self):
-#
-#         return self.data[0:self.idx]
-#
-#     def getMean(self):
-#
-#         return np.mean(self.getData())
-#
-#     def getStd(self):
-#
-#         return np.std(self.getData())
 
 
 def random_rotation(deflection=1.0, randnums=None):
     r"""
     Creates a random rotation matrix.
 
-    deflection: the magnitude of the rotation. For 0, no rotation; for 1, competely random
-    rotation. Small deflection => small perturbation.
-    randnums: 3 random numbers in the range [0, 1]. If `None`, they will be auto-generated.
+    TODO: documentation
+
+    Arguments:
+        deflection (float): the magnitude of the rotation. For 0, no rotation; for 1, competely random
+                            rotation. Small deflection => small perturbation.
+        randnums (numpy array): 3 random numbers in the range [0, 1]. If `None`, they will be auto-generated.
+
+    Returns:
+        (numpy array) Rotation matrix
     """
 
     # from
@@ -255,24 +150,30 @@ def random_rotation(deflection=1.0, randnums=None):
     return mat.reshape(3, 3)
 
 
-def rotation_about_axis(theta, u):
+def rotation_about_axis(theta, vec):
     r"""
     This needs to be tested.  It was taken from
     https://stackoverflow.com/questions/17763655/rotation-of-a-point-in-3d-about-an-arbitrary-axis-using-python
+
+    Arguments:
+        theta (float): Rotation angle
+        vec (numpy array): 3D vector specifying rotation axis
+
+    Returns (numpy array): The shape (3, 3) rotation matrix
     """
 
-    u = vec_norm(np.array(u)).reshape(3)
+    vec = vec_norm(np.array(vec)).reshape(3)
     ct = cos(theta)
     st = sin(theta)
-    rot = np.array([[ct + u[0]**2 * (1 - ct),
-                      u[0] * u[1] * (1 - ct) - u[2] * st,
-                      u[0] * u[2] * (1 - ct) + u[1] * st],
-                     [u[0] * u[1] * (1 - ct) + u[2] * st,
-                      ct + u[1]**2 * (1 - ct),
-                      u[1] * u[2] * (1 - ct) - u[0] * st],
-                     [u[0] * u[2] * (1 - ct) - u[1] * st,
-                      u[1] * u[2] * (1 - ct) + u[0] * st,
-                      ct + u[2]**2 * (1 - ct)]])
+    rot = np.array([[ct + vec[0] ** 2 * (1 - ct),
+                     vec[0] * vec[1] * (1 - ct) - vec[2] * st,
+                     vec[0] * vec[2] * (1 - ct) + vec[1] * st],
+                    [vec[0] * vec[1] * (1 - ct) + vec[2] * st,
+                     ct + vec[1] ** 2 * (1 - ct),
+                     vec[1] * vec[2] * (1 - ct) - vec[0] * st],
+                    [vec[0] * vec[2] * (1 - ct) - vec[1] * st,
+                     vec[1] * vec[2] * (1 - ct) + vec[0] * st,
+                     ct + vec[2] ** 2 * (1 - ct)]])
     return rot.reshape(3, 3)
 
 
@@ -294,8 +195,11 @@ def random_beam_vector(div_fwhm):
     distributed and centered about zero) followed by a random rotation about the
     [0,0,1] axis with uniform distribution in the interval [0,2*pi).
 
-    :param div_fwhm:
-    :return:
+    Arguments:
+        div_fwhm (float):  FWHM of divergence angle.  Assuming Gaussian, where sigma = FWHM / 2.3548
+
+    Returns:
+        (numpy array) of length 3
     """
 
     # Don't do anything if no divergence
@@ -318,25 +222,25 @@ def random_beam_vector(div_fwhm):
     return bvec
 
 
-def random_mosaic_rotation(mosaicity_fwhm):
-    r"""
-    Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.
-    We take the matrix product of three rotations, each of the same FWHM, about the three
-    orthogonal axis.  The order of this product is a random permutation.
-
-    :param mosaicity_fwhm:
-    :return:
-    """
-
-    if mosaicity_fwhm == 0:
-        return np.eye(3)
-
-    rs = list()
-    rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [1.0, 0, 0]))
-    rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 1.0, 0]))
-    rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
-    rind = np.random.permutation([0, 1, 2])
-    return rs[rind[0]].dot(rs[rind[1]].dot(rs[rind[2]]))
+# def random_mosaic_rotation(mosaicity_fwhm):
+#     r"""
+#     Attempt to generate a random orientation for a crystal mosaic domain.  This is a hack.
+#     We take the matrix product of three rotations, each of the same FWHM, about the three
+#     orthogonal axis.  The order of this product is a random permutation.
+#
+#     :param mosaicity_fwhm:
+#     :return:
+#     """
+#
+#     if mosaicity_fwhm == 0:
+#         return np.eye(3)
+#
+#     rs = list()
+#     rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [1.0, 0, 0]))
+#     rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 1.0, 0]))
+#     rs.append(rotation_about_axis(np.random.normal(0, mosaicity_fwhm / 2.354820045, [1])[0], [0, 0, 1.0]))
+#     rind = np.random.permutation([0, 1, 2])
+#     return rs[rind[0]].dot(rs[rind[1]].dot(rs[rind[2]]))
 
 
 def triangle_solid_angle(r1, r2, r3):
@@ -354,6 +258,29 @@ def triangle_solid_angle(r1, r2, r3):
     denom += np.dot(r1, r2) * r3_n
     denom += np.dot(r2, r3) * r1_n
     denom += np.dot(r3, r1) * r2_n
+    s_ang = np.arctan2(numer, denom) * 2
+
+    return s_ang
+
+
+def triangle_solid_angle2(r1, r2, r3):
+    r"""
+    Compute solid angle of a triangle whose vertices are r1,r2,r3, using the method of
+    Van Oosterom, A. & Strackee, J. Biomed. Eng., IEEE Transactions on BME-30, 125-126 (1983).
+    """
+
+    numer = np.abs(np.sum(r1*np.cross(r2, r3), axis=-1))
+
+    r1_n = np.linalg.norm(r1, axis=-1)
+    r2_n = np.linalg.norm(r2, axis=-1)
+    r3_n = np.linalg.norm(r3, axis=-1)
+    denom = r1_n * r2_n * r2_n
+    print(r1.shape)
+    print(r3_n.shape)
+    print(np.sum(r1*r2, axis=-1).shape)
+    denom += np.sum(r1*r2, axis=-1) * r3_n
+    denom += np.sum(r2*r3, axis=-1) * r1_n
+    denom += np.sum(r3*r1, axis=-1) * r2_n
     s_ang = np.arctan2(numer, denom) * 2
 
     return s_ang

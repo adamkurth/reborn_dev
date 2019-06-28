@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division,
 import numpy as np
 import h5py
 
-from .utils import vec_norm, vec_mag, triangle_solid_angle
+from .utils import vec_norm, vec_mag, triangle_solid_angle2
 
 
 class PADGeometry(object):
@@ -280,14 +280,12 @@ class PADGeometry(object):
         """
         # TODO: this is extremely slow!
         k = self.position_vecs()
-        R1 = k - self.fs_vec * .5 - self.ss_vec * .5
-        R2 = k + self.fs_vec * .5 - self.ss_vec * .5
-        R3 = k - self.fs_vec * .5 + self.ss_vec * .5
-        R4 = k + self.fs_vec * .5 + self.ss_vec * .5
-        sa_1 = np.array([triangle_solid_angle(r1, r2, r3)
-                         for r1, r2, r3 in zip(R1, R2, R3)])
-        sa_2 = np.array([triangle_solid_angle(r4, r2, r3)
-                         for r4, r2, r3 in zip(R4, R2, R3)])
+        r1 = k - self.fs_vec * .5 - self.ss_vec * .5
+        r2 = k + self.fs_vec * .5 - self.ss_vec * .5
+        r3 = k - self.fs_vec * .5 + self.ss_vec * .5
+        r4 = k + self.fs_vec * .5 + self.ss_vec * .5
+        sa_1 = triangle_solid_angle2(r1, r2, r3)
+        sa_2 = triangle_solid_angle2(r4, r2, r3)
         return sa_1 + sa_2
 
     def polarization_factors(self, polarization_vec=None, beam_vec=None, weight=None, beam=None):
