@@ -246,6 +246,12 @@ class CrystalStructure(object):
         self.unitcell = UnitCell(a*1e-10, b*1e-10, c*1e-10, al*np.pi/180, be*np.pi/180, ga*np.pi/180)
         S = dic['scale_matrix']
         U = dic['scale_translation']
+        if np.sum(np.abs(U)) > 0:
+            raise ValueError('\nThe U vector is not equal to zero.  Look here:\n'
+                             'https://rkirian.gitlab.io/bornagain/crystals.html.'
+                             'Please email your patch for this issue to rkirian@asu.edu\n'
+                             'Good luck!')
+
 
         # These are the initial coordinates with strange origin
         r = dic['atomic_coordinates']
@@ -260,7 +266,7 @@ class CrystalStructure(object):
                 ncs_partners.append(np.dot(r, R.T) + T)
         r_au = np.vstack(ncs_partners)
         # Transform to fractional coordinates
-        x_au = np.dot(S, r_au.T).T + U
+        x_au = np.dot(S, r_au.T).T # + U
         self.fractional_coordinates = x_au
 
         n_sym = len(dic['spacegroup_rotations'])
@@ -270,10 +276,9 @@ class CrystalStructure(object):
             R = dic['spacegroup_rotations'][i]
             T = dic['spacegroup_translations'][i]
             W = np.dot(S, np.dot(R, np.linalg.inv(S)))
-            W = np.round(W)
-            Z = np.dot(S, T) + np.dot(np.eye(3)-W, U)
-            w = Z != 0
-            Z[w] = 1/np.round(1/Z[w])
+            # W = np.round(W)
+            Z = np.dot(S, T) # + np.dot(np.eye(3)-W, U)
+            # Z = np.round(Z*12)/12
             rotations.append(W)
             translations.append(Z)
         self.spacegroup = SpaceGroup(dic['spacegroup_symbol'], rotations, translations)

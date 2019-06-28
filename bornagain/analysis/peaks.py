@@ -5,10 +5,12 @@ from __future__ import (absolute_import, division,
 import numpy as np
 from scipy.ndimage import measurements
 from numba import jit
+from bornagain.utils import warn
 
 try:
-    from bornagain.analysis import peaks_f
+    from bornagain.fortran import peaks_f
 except ImportError:
+    warn('You need to compile the fortran code.  See the documentation: https://rkirian.gitlab.io/bornagain')
     peaks_f = None
 
 
