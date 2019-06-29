@@ -46,7 +46,6 @@ def get_pdb_file(pdb_id, save_path='.'):
 
 
 class UnitCell(object):
-
     r"""
     Simple class for unit cell information.  Provides the convenience methods r2x(), x2r(), q2h() and h2q() for
     transforming between fractional and orthogonal coordinates in real space and reciprocal space.
@@ -66,7 +65,6 @@ class UnitCell(object):
 
     def __init__(self, a, b, c, alpha, beta, gamma):
         r"""
-
         Always initialize with the lattice parameters.  Units are SI and radians.
 
         Arguments:
@@ -154,7 +152,6 @@ class UnitCell(object):
         return self.a_mat[:, 2].copy()
 
     def __str__(self):
-
         return 'a=%g b=%g c=%g, alpha=%g beta=%g gamma=%g' % (self.a, self.b, self.c, self.alpha, self.beta, self.gamma)
 
 
@@ -252,15 +249,14 @@ class CrystalStructure(object):
                              'Please email your patch for this issue to rkirian@asu.edu\n'
                              'Good luck!')
 
-
         # These are the initial coordinates with strange origin
         r = dic['atomic_coordinates']
         # Check for non-crystallographic symmetry.  Construct asymmetric unit from them.
         ncs_partners = [r]
         n_ncs_partners = len(dic['ncs_rotations'])
-        if n_ncs_partners > 0:
-            warn('Adding NCS partners')
-            for i in range(n_ncs_partners):
+        i_given = dic['i_given']
+        for i in range(n_ncs_partners):
+            if i_given[i] == 0:
                 R = dic['ncs_rotations'][i]
                 T = dic['ncs_translations'][i]
                 ncs_partners.append(np.dot(r, R.T) + T)
@@ -276,9 +272,12 @@ class CrystalStructure(object):
             R = dic['spacegroup_rotations'][i]
             T = dic['spacegroup_translations'][i]
             W = np.dot(S, np.dot(R, np.linalg.inv(S)))
-            # W = np.round(W)
+            print(np.max(np.abs(W - np.round(W))))
+            assert np.max(np.abs(W - np.round(W))) < 5e-2  # 5% error OK?
+            W = np.round(W)
             Z = np.dot(S, T) # + np.dot(np.eye(3)-W, U)
-            # Z = np.round(Z*12)/12
+            assert np.max(np.abs(Z - np.round(Z*12)/12)) < 5e-2  # 5% error OK?
+            Z = np.round(Z*12)/12
             rotations.append(W)
             translations.append(Z)
         self.spacegroup = SpaceGroup(dic['spacegroup_symbol'], rotations, translations)
@@ -288,13 +287,10 @@ class CrystalStructure(object):
 
     @property
     def x_vecs(self):
-
         r"""
-
         Fractional coordinates of atoms.
 
         Returns: Nx3 numpy array
-
         """
 
         return self.fractional_coordinates
@@ -590,9 +586,7 @@ class CrystalDensityMap(object):
         return data_trans
 
     def place_atoms_in_map(self, atom_x_vecs, atom_fs, mode='gaussian', fixed_atom_sigma=0.5e-10):
-
         r"""
-
         This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
         should be in the crystal basis, and the densities must be real (because the scipy function that we use does
         not allow for complex numbers...).  This is done in a lazy way - the density samples are placed in the nearest
@@ -605,8 +599,8 @@ class CrystalDensityMap(object):
             fixed_atom_sigma (float): Standard deviation of
 
         Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
-
         """
+
         if mode == 'gaussian':
             sigma = fixed_atom_sigma # Gaussian sigma (i.e. atom "size"); this is a fudge factor and needs to be updated
             # n_atoms = atom_x_vecs.shape[0]
@@ -627,11 +621,8 @@ class CrystalDensityMap(object):
 
 @jit(nopython=True)
 def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp):
-
         r"""
-
         Needs documentation...
-
         """
 
         n_atoms = x_vecs.shape[0]
@@ -671,7 +662,6 @@ def pdb_to_dict(pdb_file_path):
 
     Returns:
         A dictionary with the following keys:
-
            'scale_matrix'
            'scale_translation'
            'atomic_coordinates'
@@ -682,7 +672,6 @@ def pdb_to_dict(pdb_file_path):
            'spacegroup_translations'
            'ncs_rotations'
            'ncs_translations'
-
     """
 
     atomic_coordinates = np.zeros([10000, 3])
@@ -690,6 +679,7 @@ def pdb_to_dict(pdb_file_path):
     scale = np.zeros([3, 4])
     smtry = np.zeros([1000, 6])
     mtrix = np.zeros([10000, 4])
+    i_given = np.zeros([1000], dtype=int)
 
     smtry_index = 0
     mtrix_index = 0
@@ -742,7 +732,7 @@ def pdb_to_dict(pdb_file_path):
                 mtrix[mtrix_index, 1] = float(line[20:30])
                 mtrix[mtrix_index, 2] = float(line[30:40])
                 mtrix[mtrix_index, 3] = float(line[45:55])
-                igiven = int(line[59])
+                i_given[mtrix_index] = int(line[59])
                 mtrix_index += 1
 
             # Atomic (orthogonal) coordinates
@@ -766,6 +756,8 @@ def pdb_to_dict(pdb_file_path):
     for i in range(int(mtrix_index/3)):
         ncs_rotations.append(mtrix[i*3:i*3+3, 0:3])
         ncs_translations.append(mtrix[i*3:i*3+3, 3])
+        i_given[i] = i_given[i*3]
+    i_given = i_given[:i+1]
 
     dic = {'scale_matrix': scale[:, 0:3],
            'scale_translation': scale[:, 3],
@@ -776,7 +768,8 @@ def pdb_to_dict(pdb_file_path):
            'spacegroup_rotations': spacegroup_rotations,
            'spacegroup_translations': spacegroup_translations,
            'ncs_rotations': ncs_rotations,
-           'ncs_translations': ncs_translations
+           'ncs_translations': ncs_translations,
+           'i_given': i_given
            }
 
     return dic

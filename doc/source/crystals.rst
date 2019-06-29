@@ -1,4 +1,4 @@
-Working with crystals
+Working with Crystals
 =====================
 
 Here we briefly outline some conventions assumed in bornagain, and how to use the classes that expose crystal
@@ -19,10 +19,11 @@ matrix".   The columns of the orthogonalization matrix are the basis vectors :ma
 
 .. math:: \mathbf{O} = \begin{bmatrix}  | & |  & | \\ \mathbf{a}_1 &  \mathbf{a}_2 & \mathbf{a}_3 \\ | & | & | \end{bmatrix}
 
-In reciprocal space, we have analogous mathematics for the *reciprocal coordinates* :math:`\mathbf{q}` and *fractional
-Miller indices* :math:`\mathbf{h}`.  They are related by the matrix :math:`\mathbf{A} = (\mathbf{O}^{-1})^{T}`:
+In reciprocal space, we have analogous mathematics for the *reciprocal coordinates* :math:`\mathbf{g} = \mathbf{q}/2\pi`
+and *fractional Miller indices* :math:`\mathbf{h}`.  They are related by the matrix
+:math:`\mathbf{A} = (\mathbf{O}^{-1})^{T}`:
 
-.. math:: \mathbf{q} = \mathbf{A} \mathbf{h}
+.. math:: \mathbf{g} = \mathbf{A} \mathbf{h}
 
 which contains the reciprocal lattice vectors in its columns:
 
@@ -44,20 +45,17 @@ Oftentimes a crystallographic unit cell is specified in terms of three lattice c
 :math:`c`) and three angles (:math:`\alpha`, :math:`\beta`, :math:`\gamma`).  This of course leads to some ambiguity
 since there are only six parameters; the three orientational parameters are missing.  The "standard" way to convert to
 the orthogonalization matrix appears to be in appendix A of
-`this <https://cdn.rcsb.org/wwpdb/docs/documentation/file-format/PDB_format_1992.pdf>`_ document, for example.
-
-
+`this <https://cdn.rcsb.org/wwpdb/docs/documentation/file-format/PDB_format_1992.pdf>`_ document.
 
 We define the Fourier transform in orthogonal coordinates as
 
-.. math:: F(\mathbf{q}) = \int f(\mathbf{r}) \exp(-i 2 \pi \mathbf{q}^T \mathbf{r}) d^3r
+.. math:: F(\mathbf{g}) = \int f(\mathbf{r}) \exp(-i 2 \pi \mathbf{g}^T \mathbf{r}) d^3r
 
-Note that there is no factor of :math:`2\pi` in the definition of :math:`\mathbf{q}` in this section.  The inverse
-Fourier transform is
+The inverse Fourier transform is
 
-.. math:: f(\mathbf{r}) =\frac{1}{(2\pi)^3}\int F(\mathbf{q}) \exp(i 2 \pi \mathbf{q}^T \mathbf{r}) d^3q
+.. math:: f(\mathbf{r}) = \int F(\mathbf{g}) \exp(i 2 \pi \mathbf{g}^T \mathbf{r}) d^3q
 
-In noting the relation :math:`\mathbf{q}^T \mathbf{r} = \mathbf{h}^T \mathbf{x}` we may also define the Fourier
+In noting the relation :math:`\mathbf{g}^T \mathbf{r} = \mathbf{h}^T \mathbf{x}` we may also define the Fourier
 transform in the fractional coordinate basis:
 
 .. math:: F(\mathbf{h}) = V_c \int f(\mathbf{x}) \exp(-i 2 \pi \mathbf{h}^T \mathbf{x}) d^3x
@@ -65,8 +63,8 @@ transform in the fractional coordinate basis:
 The factor of :math:`V_c` in the above is due to the Jacobian determinant :math:`| \mathbf{O} |`.
 
 
-Loading (and understanding) a PDB file
---------------------------------------
+Loading (and *mis*understanding?) a PDB file
+-----------------------------------------
 
 PDB (Protein Data Bank) files are text files that contain information about molecular structures, in particular the
 positions and types of all the atoms that make up one or more molecular models, along with symmetry operations, and
@@ -86,34 +84,36 @@ various "records".  Some of the important ones are:
    :math:`\gamma`), the full International Tables for Crystallography’s Hermann-Mauguin symbol, and the Z value (number of polymeric chains
    in a unit cell).
 3) `SCALE <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#SCALEn>`_, which contains
-   "transformation from the orthogonal coordinates as contained in the PDB entry to fractional crystallographic
-   coordinates".  Not that this comprises both a rotation and a translation -- what is the purpose of the translation?
+   *"transformation from the orthogonal coordinates as contained in the PDB entry to fractional crystallographic
+   coordinates"*.  Not that this comprises both a rotation and a translation -- what is the purpose of the translation?
 4) `MTRIX <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#MTRIXn>`_, which contains
-   "transformations expressing non-crystallographic symmetry... [that] operate on the coordinates in the entry to yield
-   equivalent representations of the molecule in the same coordinate frame".  I remain puzzled by this comment: "If
+   *"transformations expressing non-crystallographic symmetry... [that] operate on the coordinates in the entry to yield
+   equivalent representations of the molecule in the same coordinate frame"*.  I remain puzzled by this comment: *"If
    coordinates for the representations which are approximately related by the given transformation are present in the
-   file, the last “iGiven” field is set to 1" -- does this mean that we should ignore entries for which iGiven=1?
+   file, the last “iGiven” field is set to 1"* -- does this mean that we should ignore entries for which iGiven=1?
 5) `REMARK 290 <https://www.wwpdb.org/documentation/file-format-content/format32/remarks1.html#REMARK%20290>`_, which
    has the crystallographic symmetry operations.  This entry seems reasonably clear though it is not documented well.
-6) `ORIGX <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#ORIGXn>`_, which contains "the
-   transformation from the orthogonal coordinates contained in the entry to the submitted coordinates".  We are
+6) `ORIGX <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#ORIGXn>`_, which contains *"the
+   transformation from the orthogonal coordinates contained in the entry to the submitted coordinates"*.  We are
    not interested in the original coordinates; we only care about the coordinates in the file.
 
-Given the above, here is my present understanding of how we should interpret the entries in a PDB file:
+Based on the above, we present our understanding of how we should interpret the entries in a PDB file.
 
-The orthogonal coordinates :math:`\mathbf{r}` of a model contained in a PDB file are likely only a subset of the
-coordinates that you need in your project.  If there are non-crystallographic symmetry (NCS) operations, for example
-in the case of a virus
-capsid, you should *first* generate the NCS symmetry partners using the matrices :math:`\mathbf{R}_\text{ncs}` and
-translation vectors :math:`\mathbf{T}_\text{ncs}` found in the MTRIX record as follows:
+We begin with the orthogonal coordinates :math:`\mathbf{r}_0` of a model contained in a PDB file.  If there are
+non-crystallographic symmetry (NCS) operations, for example in the case of a virus capsid, we *first* generate the NCS
+symmetry partners using the matrices :math:`\mathbf{M}_i` and translation vectors
+:math:`\mathbf{V}_i` found in the MTRIX record as follows:
 
-.. math:: \mathbf{r}_\text{ncs} = \mathbf{R}_\text{ncs} \mathbf{r} + \mathbf{T}_\text{ncs}
+.. math:: \mathbf{r}_\text{ncs, i} = \mathbf{M}_i \mathbf{r}_0 + \mathbf{V}_i
 
-After you do the above you have all the atomic coordinates that comprise the crystal asymmetric unit (AU).  We
-concatenate all of these coordinates to form the coordinates of the AU, denoted as :math:`\mathbf{r}_\text{au}`.
-In order to
-generate the crystallographic symmetry partners, you can use the matrices :math:`\mathbf{R}_n` and translation vectors
-:math:`\mathbf{T}_n` found in the REMARK 290 record.  Apply the following to the AU orthogonal coordinates:
+From the documentation, there are some entries in the list of :math:`\mathbf{M}`, :math:`\mathbf{V}` that are only
+"approximate" symmetries, which I gather are "just FYI", and which should *not* be applied to :math:`\mathbf{r}_0`
+because the symmetry-related coordinates already appear explicitly in the stored :math:`\mathbf{r}_0`.
+
+After we do the above we build the crystal asymmetric unit (AU) by concatenating all of the above coordinates to form
+:math:`\mathbf{r}_\text{au} = \{\mathbf{r}_\text{ncs}\}`.  In order to generate the crystallographic symmetry partners,
+we use the rotation matrices :math:`\mathbf{R}_n` and translation vectors :math:`\mathbf{T}_n` found in the REMARK 290
+record.  We may apply them to the AU orthogonal coordinates as follows:
 
 .. math:: \mathbf{r}_n = \mathbf{R}_n \mathbf{r}_\text{au} + \mathbf{T}_n
     :label: stupidTrans
@@ -121,26 +121,26 @@ generate the crystallographic symmetry partners, you can use the matrices :math:
 Finally, we may transform to fractional coordinates via the matrix :math:`\mathbf{S}` and translation vector
 :math:`\mathbf{U}` found in the SCALE record:
 
-.. math:: \mathbf{x}_n = \mathbf{S} \mathbf{r}_n + \mathbf{U}
+.. math:: \mathbf{x} = \mathbf{S} \mathbf{r} + \mathbf{U}
     :label: stupidU
 
-All of the above quantities can be loaded using the
-:func:`pdb_to_dict()<bornagain.target.crystal.pdb_to_dict()>` function, which returns a Python dictionary with the
-following mappings to the notation above:
+All of the above quantities can be loaded using the :func:`pdb_to_dict()<bornagain.target.crystal.pdb_to_dict()>`
+function, which returns a Python dictionary with the following mappings to the notation above:
 
 ========================= =========================== ================================================================================
 Dictionary key            Data type                   Mathematical symbol
 ========================= =========================== ================================================================================
 'scale_matrix'            Shape (3, 3) array          :math:`\mathbf{S}`
 'scale_translation'       Shape (3) array             :math:`\mathbf{U}`
-'atomic_coordinates'      Shape (N, 3) array          :math:`\mathbf{r}`
+'atomic_coordinates'      Shape (N, 3) array          :math:`\mathbf{r}_0`
 'atomic_symbols'          List of strings             e.g. "H", "He", "Li", etc.
 'unit_cell'               Length 6 tuple              (:math:`a`, :math:`b`, :math:`c`, :math:`\alpha`, :math:`\beta`, :math:`\gamma`)
 'spacegroup_symbol'       String                      e.g. "P 63"
 'spacegroup_rotations'    List of shape (3, 3) arrays :math:`\mathbf{R}_n`
 'spacegroup_translations' List of shape (3) arrays    :math:`\mathbf{T}_n`
-'ncs_rotations'           List of shape (3, 3) arrays :math:`\mathbf{R}_\text{ncs}`
-'ncs_translations'        List of shape (3) arrays    :math:`\mathbf{T}_\text{ncs}`
+'ncs_rotations'           List of shape (3, 3) arrays :math:`\mathbf{M}`
+'ncs_translations'        List of shape (3) arrays    :math:`\mathbf{V}`
+'i_given'                 Shape (M) array of integers N/A
 ========================= =========================== ================================================================================
 
 Note that the units are not modified from PDB format; angles are degrees and distances are in Angstrom units.
@@ -160,12 +160,37 @@ We also wish to have a simple way to move to the orthogonal coordinate system ac
 
 The benefit of working in the :math:`\mathbf{x}` coordinates in the above way is that the "rotations"
 :math:`\mathbf{W}_n` are strictly permutation operators comprised of elements with values -1, 0, 1, and the translations
-:math:`\mathbf{Z}_n` are strictly integer multiples of 1/6 or 1/4.
-As a result, we can define a mesh of density samples in which crystallographic operations
-do not result in interpolations.
+:math:`\mathbf{Z}_n` are strictly integer multiples of 1/6 or 1/4.  As a result, we can define a mesh of density samples
+in which crystallographic operations do not result in interpolations.
 
-Combining :eq:`stupidU` and :eq:`stupidTrans`, we see that the PDB specification does not provide such a simple mapping.
-Symmetry-related fractional coordinates are determined by the following operation:
+We first consider the case in which :math:`\mathbf{U}=0`.  Suppose we have the following from the PDB file:
+
+.. math::
+
+    \mathbf{r}_n = \mathbf{R}_n \mathbf{r}_\text{au} + \mathbf{T}_n
+
+    \mathbf{x} = \mathbf{S} \mathbf{r}
+
+It is now clear that :math:`\mathbf{O}=\mathbf{S}^{-1}`.  We do two manipulations of the above equations to get
+
+.. math::
+
+    \mathbf{S} \mathbf{r}_n = \mathbf{S} \mathbf{R}_n \mathbf{r}_\text{au} + \mathbf{S} \mathbf{T}_n
+
+    \mathbf{x}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1}\mathbf{x}_\text{au} + \mathbf{S} \mathbf{T}_n
+
+which gives us our desired transformations:
+
+.. math::
+
+    \mathbf{O} = \mathbf{S}^{-1}
+
+    \mathbf{W}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1}
+
+    \mathbf{Z}_n = \mathbf{S}\mathbf{T}_n
+
+We have a problem if :math:`\mathbf{U} \ne 0`.  Combining :eq:`stupidU` and :eq:`stupidTrans` and performing a few
+manipulations gives
 
 .. math::
 
@@ -177,7 +202,7 @@ or, equivalently,
 
     \mathbf{x}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1} (\mathbf{x}_\text{au} - \mathbf{U})  + \mathbf{S}\mathbf{T}_n + \mathbf{U}
 
-Now we see that the transformations we desire, in terms of what we get from a PDB file, are either
+The transformations we desire are now ambiguous.  One option is the following:
 
 .. math::
 
@@ -187,7 +212,7 @@ Now we see that the transformations we desire, in terms of what we get from a PD
 
     \mathbf{Z}_n = \mathbf{S}\mathbf{T}_n + (\mathbf{I} - \mathbf{W}_n)\mathbf{U}
 
-or we can re-define the asymmetric unit first and define
+Another option is to re-define the asymmetric unit and then define
 
 .. math::
 
@@ -199,10 +224,11 @@ or we can re-define the asymmetric unit first and define
 
     \mathbf{Z}_n = \mathbf{S}\mathbf{T}_n + \mathbf{U}
 
-Which of the above is correct?  We want to ensure that :math:`\mathbf{Z}_n` is composed of integer multiples of 1/6 or
-1/4.
+Which of the above is correct?  So far, our tests have not yielded a clear answer.  We want to ensure that
+:math:`\mathbf{Z}_n` is composed of integer multiples of 1/6 or 1/4.
 
-The :func:`CrystalStructure() <bornagain.target.crystal.CrystalStructure()>` class can be used to easily load in a PDB
+Assuming :math:`\mathbf{U}=0`,
+the :func:`CrystalStructure() <bornagain.target.crystal.CrystalStructure()>` class can be used to easily load in a PDB
 file and generate symmetry partners.  For example, the following script will produce the coordinates
 :math:`\mathbf{x}_\text{au}` and transformations :math:`\mathbf{W}_n`, :math:`\mathbf{Z}_n`, and then use them to
 generate the second crystallographic symmetry partner :math:`\mathbf{x}_2`:
