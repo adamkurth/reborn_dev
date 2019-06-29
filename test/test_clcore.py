@@ -30,6 +30,38 @@ except ImportError:
     havecl = False
 
 
+def test_clmath():
+
+    platform = pyopencl.get_platforms()
+    my_gpu_devices = platform[0].get_devices(device_type=pyopencl.device_type.GPU)
+    c = pyopencl.Context(devices=my_gpu_devices)
+    q = pyopencl.CommandQueue(c)
+
+    a = np.random.random((5, 5)).astype(np.complex64)
+    a_gpu = pyopencl.array.to_device(q, a)
+
+    b = np.random.random((5, 5)).astype(np.complex64)
+    b_gpu = pyopencl.array.to_device(q, b)
+
+    # Test addition
+    c = a + b
+    c_gpu = a_gpu + b_gpu
+    c_gpu = c_gpu.get()
+    assert np.max(np.abs(c - c_gpu)) < 1e-6
+
+    # Test multiplication
+    c = a * b
+    c_gpu = a_gpu * b_gpu
+    c_gpu = c_gpu.get()
+    assert np.max(np.abs(c - c_gpu)) < 1e-6
+
+    # Test exponentiation
+    c = a ** 2
+    c_gpu = a_gpu ** 2
+    c_gpu = c_gpu.get()
+    assert np.max(np.abs(c - c_gpu)) < 1e-6
+
+
 def test_atomics_01():
 
     if not havecl:
