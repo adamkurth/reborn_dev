@@ -1,5 +1,8 @@
-from .qtviews import *
+try:
+    from .qtviews import *
+except ImportError:
+    print('ImportError on qtviews -- probably because you do not have the pyopengl package.')
 try:
     from .padviews import *
 except ImportError:
-    print('Import error on padviews -- probably because you do not have the pyopengl package.')
+    print('ImportIrror on padviews -- probably because you do not have the pyopengl package.')

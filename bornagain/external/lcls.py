@@ -135,8 +135,8 @@ def get_pad_geometry(detector, run):
 
     psf = detector.geometry(run).get_psf()
     geom = []
-    n_fs = detector.shape[2]
-    n_ss = detector.shape[1]
+    n_fs = detector.shape()[2]
+    n_ss = detector.shape()[1]
     if detector.is_cspad():
         # We must deal with the fact that the 32 PADs returned by psana are really 64 PADs.
         shift = 194. * 109.92 + (274.8 - 109.92) * 2.
