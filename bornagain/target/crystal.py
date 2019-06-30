@@ -6,6 +6,7 @@ Basic utilities for dealing with crystalline objects.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
+import shutil
 try:
     import urllib.request
 except ImportError:
@@ -16,7 +17,7 @@ from bornagain.target.molecule import Molecule
 from bornagain.utils import warn, vec_mag
 from numba import jit
 
-pdb_data_path = pkg_resources.resource_filename('bornagain.simulate', os.path.join('data', 'pdb'))
+pdb_data_path = pkg_resources.resource_filename('bornagain.data', 'pdb')
 
 def get_pdb_file(pdb_id, save_path='.'):
     r"""
@@ -30,19 +31,36 @@ def get_pdb_file(pdb_id, save_path='.'):
     Returns:
         string path to file
     """
+
     if save_path is None:
         save_path = pdb_data_path
     if not pdb_id.endswith('.pdb'):
         pdb_id += '.pdb'
     pdb_path = os.path.join(save_path, pdb_id)
-    if not os.path.isfile(pdb_id):
+
+    # Check if the file was downloaded already
+    if os.path.isfile(pdb_path):
+        return pdb_path
+
+    # Check if this file is in the bornagain repository
+    cache_path = os.path.join(pdb_data_path, pdb_id)
+    print(cache_path)
+    if os.path.isfile(cache_path):
+        print('Copying pdb file from %s to %s' % (cache_path, pdb_path))
+        shutil.copy(cache_path, pdb_path)
+        return pdb_path
+
+    # Finally, download from web if all else fails
+    if not os.path.isfile(pdb_path):
         try:
             pdb_web_path = 'https://files.rcsb.org/download/' + pdb_id
-            print('Attempting to download %s to %s' % (pdb_web_path, pdb_path))
+            print('Downloading %s to %s' % (pdb_web_path, pdb_path))
             urllib.request.urlretrieve(pdb_web_path, pdb_path)
         except urllib.error.HTTPError:
             return None
-    return pdb_path
+        return pdb_path
+
+    return None
 
 
 class UnitCell(object):
@@ -223,8 +241,8 @@ class CrystalStructure(object):
     # TODO: Needs documentation!
 
     fractional_coordinates = None  #  : Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
-    molecule = None  #  : Molecule class instance containing the asymmetric unit
-    unitcell = None  #  : UnitCell class instance
+    molecule = None    #  : Molecule class instance containing the asymmetric unit
+    unitcell = None    #  : UnitCell class instance
     spacegroup = None  #  : Spacegroup class instance
     mosaicity_fwhm = 0
     crystal_size = 1e-6
@@ -234,7 +252,12 @@ class CrystalStructure(object):
     cryst1 = ""
     pdb_dict = None
 
-    def __init__(self, pdb_file_path):
+    def __init__(self, pdb_file_path, no_warnings=False):
+        r"""
+        Arguments:
+            pdb_file_path (string): Path to a pdb file
+            no_warnings (bool): Suppress warnings concerning ambiguities in symmetry operations
+        """
 
         dic = pdb_to_dict(pdb_file_path)
         self.pdb_dict = dic
@@ -244,10 +267,9 @@ class CrystalStructure(object):
         S = dic['scale_matrix']
         U = dic['scale_translation']
         if np.sum(np.abs(U)) > 0:
-            raise ValueError('\nThe U vector is not equal to zero.  Look here:\n'
-                             'https://rkirian.gitlab.io/bornagain/crystals.html.'
-                             'Please email your patch for this issue to rkirian@asu.edu\n'
-                             'Good luck!')
+            if not no_warnings:
+                warn('\nThe U vector is not equal to zero, which could be a serious problem.  Look here:\n'
+                       'https://rkirian.gitlab.io/bornagain/crystals.html.\n')
 
         # These are the initial coordinates with strange origin
         r = dic['atomic_coordinates']
@@ -272,11 +294,11 @@ class CrystalStructure(object):
             R = dic['spacegroup_rotations'][i]
             T = dic['spacegroup_translations'][i]
             W = np.dot(S, np.dot(R, np.linalg.inv(S)))
-            print(np.max(np.abs(W - np.round(W))))
-            assert np.max(np.abs(W - np.round(W))) < 5e-2  # 5% error OK?
+            # print(np.max(np.abs(W - np.round(W))))
+            # assert np.max(np.abs(W - np.round(W))) < 5e-2  # 5% error OK?
             W = np.round(W)
             Z = np.dot(S, T) # + np.dot(np.eye(3)-W, U)
-            assert np.max(np.abs(Z - np.round(Z*12)/12)) < 5e-2  # 5% error OK?
+            # assert np.max(np.abs(Z - np.round(Z*12)/12)) < 5e-2  # 5% error OK?
             Z = np.round(Z*12)/12
             rotations.append(W)
             translations.append(Z)
@@ -526,7 +548,7 @@ class CrystalDensityMap(object):
         h1 = np.fft.fftshift(np.fft.fftfreq(self.shape[1], d=self.oversampling/self.shape[1]))
         h2 = np.fft.fftshift(np.fft.fftfreq(self.shape[2], d=self.oversampling/self.shape[2]))
         hh0, hh1, hh2 = np.meshgrid(h0, h1, h2, indexing='ij')
-        print(hh0.shape)
+        # print(hh0.shape)
         h_vecs = np.empty((self.size, 3))
         h_vecs[:, 0] = hh0.ravel()
         h_vecs[:, 1] = hh1.ravel()
@@ -580,6 +602,8 @@ class CrystalDensityMap(object):
         """
 
         luts = self.get_sym_luts()
+        for lut in luts:
+            print(lut.shape)
         data_trans = np.zeros_like(data)
         data_trans.flat[luts[j]] = data.flat[luts[i]]
 

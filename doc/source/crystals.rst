@@ -33,11 +33,9 @@ The reciprocal lattice vectors are defined as
 
 .. math::
 
-    \mathbf{a}_1^* = \mathbf{a}_2\times \mathbf{a}_3 / V_c
-
-    \mathbf{a}_2^* = \mathbf{a}_3\times \mathbf{a}_1  / V_c
-
-    \mathbf{a}_3^* = \mathbf{a}_1\times \mathbf{a}_2  / V_c
+    \mathbf{a}_1^* &= \mathbf{a}_2\times \mathbf{a}_3 / V_c \\
+    \mathbf{a}_2^* &= \mathbf{a}_3\times \mathbf{a}_1  / V_c \\
+    \mathbf{a}_3^* &= \mathbf{a}_1\times \mathbf{a}_2  / V_c
 
 where :math:`V_c = \mathbf{a}_1\cdot(\mathbf{a}_2\times\mathbf{a}_3)` is the volume of the unit cell.
 
@@ -63,8 +61,8 @@ transform in the fractional coordinate basis:
 The factor of :math:`V_c` in the above is due to the Jacobian determinant :math:`| \mathbf{O} |`.
 
 
-Loading (and *mis*understanding?) a PDB file
------------------------------------------
+Loading a PDB file
+------------------
 
 PDB (Protein Data Bank) files are text files that contain information about molecular structures, in particular the
 positions and types of all the atoms that make up one or more molecular models, along with symmetry operations, and
@@ -97,23 +95,27 @@ various "records".  Some of the important ones are:
    transformation from the orthogonal coordinates contained in the entry to the submitted coordinates"*.  We are
    not interested in the original coordinates; we only care about the coordinates in the file.
 
-Based on the above, we present our understanding of how we should interpret the entries in a PDB file.
+Based on the above, and on appendix A of
+`this <https://cdn.rcsb.org/wwpdb/docs/documentation/file-format/PDB_format_1992.pdf>`_, we present our understanding of
+how we should interpret the coordinates and transformations found in a PDB file.
 
-We begin with the orthogonal coordinates :math:`\mathbf{r}_0` of a model contained in a PDB file.  If there are
-non-crystallographic symmetry (NCS) operations, for example in the case of a virus capsid, we *first* generate the NCS
+We begin with the orthogonal coordinates :math:`\mathbf{r}_0` of a model that are contained in a PDB file.  If there are
+non-crystallographic symmetry (NCS) operations, for example in the case of a virus capsid, we *first* generate the
+the complete set of atomic coordinates that comprise the asymmetric unit (AU).  To do this, we generate the NCS
 symmetry partners using the matrices :math:`\mathbf{M}_i` and translation vectors
 :math:`\mathbf{V}_i` found in the MTRIX record as follows:
 
 .. math:: \mathbf{r}_\text{ncs, i} = \mathbf{M}_i \mathbf{r}_0 + \mathbf{V}_i
 
 From the documentation, there are some entries in the list of :math:`\mathbf{M}`, :math:`\mathbf{V}` that are only
-"approximate" symmetries, which I gather are "just FYI", and which should *not* be applied to :math:`\mathbf{r}_0`
-because the symmetry-related coordinates already appear explicitly in the stored :math:`\mathbf{r}_0`.
+"approximate" symmetries, which I gather are provided "just FYI", and which should *not* be applied to
+:math:`\mathbf{r}_0` because the symmetry-related coordinates already appear explicitly in the stored
+:math:`\mathbf{r}_0`.
 
 After we do the above we build the crystal asymmetric unit (AU) by concatenating all of the above coordinates to form
 :math:`\mathbf{r}_\text{au} = \{\mathbf{r}_\text{ncs}\}`.  In order to generate the crystallographic symmetry partners,
-we use the rotation matrices :math:`\mathbf{R}_n` and translation vectors :math:`\mathbf{T}_n` found in the REMARK 290
-record.  We may apply them to the AU orthogonal coordinates as follows:
+we could use the rotation matrices :math:`\mathbf{R}_n` and translation vectors :math:`\mathbf{T}_n` found in the
+REMARK 290 record.  We may apply them to the AU orthogonal coordinates as follows:
 
 .. math:: \mathbf{r}_n = \mathbf{R}_n \mathbf{r}_\text{au} + \mathbf{T}_n
     :label: stupidTrans
@@ -138,12 +140,14 @@ Dictionary key            Data type                   Mathematical symbol
 'spacegroup_symbol'       String                      e.g. "P 63"
 'spacegroup_rotations'    List of shape (3, 3) arrays :math:`\mathbf{R}_n`
 'spacegroup_translations' List of shape (3) arrays    :math:`\mathbf{T}_n`
-'ncs_rotations'           List of shape (3, 3) arrays :math:`\mathbf{M}`
-'ncs_translations'        List of shape (3) arrays    :math:`\mathbf{V}`
+'ncs_rotations'           List of shape (3, 3) arrays :math:`\mathbf{M}_i`
+'ncs_translations'        List of shape (3) arrays    :math:`\mathbf{V}_i`
 'i_given'                 Shape (M) array of integers N/A
 ========================= =========================== ================================================================================
 
-Note that the units are not modified from PDB format; angles are degrees and distances are in Angstrom units.
+Note that the units are not modified from PDB format; angles are degrees and distances are in Angstrom units.  This is
+one of the rare cases in which non-SI units are used in bornagain (but we convert to SI immediately when we create a
+class from this dictionary).
 
 
 Crystallographic symmetry operations
@@ -167,71 +171,39 @@ We first consider the case in which :math:`\mathbf{U}=0`.  Suppose we have the f
 
 .. math::
 
-    \mathbf{r}_n = \mathbf{R}_n \mathbf{r}_\text{au} + \mathbf{T}_n
+    \mathbf{r}_n &= \mathbf{R}_n \mathbf{r}_\text{au} + \mathbf{T}_n \\
+    \mathbf{x} &= \mathbf{S} \mathbf{r}
 
-    \mathbf{x} = \mathbf{S} \mathbf{r}
-
-It is now clear that :math:`\mathbf{O}=\mathbf{S}^{-1}`.  We do two manipulations of the above equations to get
+From the second line we see that :math:`\mathbf{O}=\mathbf{S}^{-1}`.  We do two manipulations of the above equations to
+get
 
 .. math::
 
-    \mathbf{S} \mathbf{r}_n = \mathbf{S} \mathbf{R}_n \mathbf{r}_\text{au} + \mathbf{S} \mathbf{T}_n
-
-    \mathbf{x}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1}\mathbf{x}_\text{au} + \mathbf{S} \mathbf{T}_n
+    \mathbf{S} \mathbf{r}_n &= \mathbf{S} \mathbf{R}_n \mathbf{r}_\text{au} + \mathbf{S} \mathbf{T}_n \\
+    \mathbf{x}_n &= \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1}\mathbf{x}_\text{au} + \mathbf{S} \mathbf{T}_n
 
 which gives us our desired transformations:
 
 .. math::
 
-    \mathbf{O} = \mathbf{S}^{-1}
+    \mathbf{O} &= \mathbf{S}^{-1} \\
+    \mathbf{W}_n &= \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1} \\
+    \mathbf{Z}_n &= \mathbf{S}\mathbf{T}_n
 
-    \mathbf{W}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1}
+Assuming :math:`\mathbf{U}=0`, the :func:`CrystalStructure() <bornagain.target.crystal.CrystalStructure()>` class can be
+used to easily load in a PDB file and get :math:`\mathbf{x}_\text{au}` and the transformations :math:`\mathbf{W}_n`, :math:`\mathbf{Z}_n`.
 
-    \mathbf{Z}_n = \mathbf{S}\mathbf{T}_n
+In the uncommon situation where :math:`\mathbf{U} \ne 0`, we do not have an understanding of how to determine the
+:math:`\mathbf{x}_\text{au}` and transformations :math:`\mathbf{W}_n`, :math:`\mathbf{Z}_n`.  You will get a warning,
+and our best guess as to what the transformations are.  See the Appendix below for more information.
 
-We have a problem if :math:`\mathbf{U} \ne 0`.  Combining :eq:`stupidU` and :eq:`stupidTrans` and performing a few
-manipulations gives
 
-.. math::
+Putting it all together
+-----------------------
 
-    \mathbf{x}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1} \mathbf{x}_\text{au}  + \mathbf{S}\mathbf{T}_n + (\mathbf{I} - \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1})\mathbf{U}
-
-or, equivalently,
-
-.. math::
-
-    \mathbf{x}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1} (\mathbf{x}_\text{au} - \mathbf{U})  + \mathbf{S}\mathbf{T}_n + \mathbf{U}
-
-The transformations we desire are now ambiguous.  One option is the following:
-
-.. math::
-
-    \mathbf{O} = \mathbf{S}^{-1}
-
-    \mathbf{W}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1}
-
-    \mathbf{Z}_n = \mathbf{S}\mathbf{T}_n + (\mathbf{I} - \mathbf{W}_n)\mathbf{U}
-
-Another option is to re-define the asymmetric unit and then define
-
-.. math::
-
-    \mathbf{x}_\text{au} \leftarrow \mathbf{x}_\text{au} - \mathbf{U}
-
-    \mathbf{O} = \mathbf{S}^{-1}
-
-    \mathbf{W}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1}
-
-    \mathbf{Z}_n = \mathbf{S}\mathbf{T}_n + \mathbf{U}
-
-Which of the above is correct?  So far, our tests have not yielded a clear answer.  We want to ensure that
-:math:`\mathbf{Z}_n` is composed of integer multiples of 1/6 or 1/4.
-
-Assuming :math:`\mathbf{U}=0`,
-the :func:`CrystalStructure() <bornagain.target.crystal.CrystalStructure()>` class can be used to easily load in a PDB
-file and generate symmetry partners.  For example, the following script will produce the coordinates
-:math:`\mathbf{x}_\text{au}` and transformations :math:`\mathbf{W}_n`, :math:`\mathbf{Z}_n`, and then use them to
-generate the second crystallographic symmetry partner :math:`\mathbf{x}_2`:
+As an example, the following script will use a PDB file to produce the
+coordinates :math:`\mathbf{x}_\text{au}` and transformations :math:`\mathbf{W}_n`, :math:`\mathbf{Z}_n`, and then use
+them to generate the second crystallographic symmetry partner :math:`\mathbf{x}_2`:
 
 .. code-block:: python
 
@@ -254,9 +226,52 @@ We could go on to get other quantities such as atomic scattering factors:
     f = cryst.molecule.get_scattering_factors(photon_energy)
 
 
+Appendix
+--------
+
+**PDB transformation confusion**
+
+We have a problem if :math:`\mathbf{U} \ne 0`.  Combining :eq:`stupidU` and :eq:`stupidTrans` and performing a few
+manipulations gives
+
+.. math::
+
+    \mathbf{x}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1} \mathbf{x}_\text{au}  + \mathbf{S}\mathbf{T}_n + (\mathbf{I} - \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1})\mathbf{U}
+
+or, equivalently,
+
+.. math::
+
+    \mathbf{x}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1} (\mathbf{x}_\text{au} - \mathbf{U})  + \mathbf{S}\mathbf{T}_n + \mathbf{U}
+
+The transformations we desire are now ambiguous.  One option is to re-define
+:math:`\mathbf{x}_\text{au} - \mathbf{U} \rightarrow \mathbf{x}_\text{au}` and choose the translation
+:math:`\mathbf{Z}_n = \mathbf{S}\mathbf{T}_n + \mathbf{U}`.  A second option is to leave :math:`\mathbf{x}_\text{au}`
+alone, but then we have a different expression for :math:`\mathbf{Z}_n`.  The correct answer should ensure that
+:math:`\mathbf{Z}_n` is composed of integer multiples of 1/6 or 1/4.  The strange thing is that we get the correct
+operations only if we set :math:`\mathbf{U} = 0`.  This can be seen for example in the case of the PDB file 1lsp.pdb.
+Look to the test file ``test_pdb.py`` for more details.
 
 
+.. .. math::
 
+        \mathbf{O} = \mathbf{S}^{-1}
 
+        \mathbf{W}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1}
 
+        \mathbf{Z}_n = \mathbf{S}\mathbf{T}_n + (\mathbf{I} - \mathbf{W}_n)\mathbf{U}
 
+    Another option is to re-define the asymmetric unit and then define
+
+    .. math::
+
+        \mathbf{x}_\text{au} \leftarrow \mathbf{x}_\text{au} - \mathbf{U}
+
+        \mathbf{O} = \mathbf{S}^{-1}
+
+        \mathbf{W}_n = \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1}
+
+        \mathbf{Z}_n = \mathbf{S}\mathbf{T}_n + \mathbf{U}
+
+    Which of the above is correct?  So far, our tests have not yielded a clear answer.  We want to ensure that
+    :math:`\mathbf{Z}_n` is composed of integer multiples of 1/6 or 1/4.
