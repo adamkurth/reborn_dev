@@ -238,6 +238,164 @@ end module peaker
 
 
 
+subroutine boxsnr2(dat,mask,snr,signal,n_inner,n_center,n_outer) !npx,npy,n_inner,n_center,n_outer)
+!
+! p(npx,npy) input array, overwritten to give output array
+! sums pixels in outer square from i-nosx to i+nosx, j-nosy to j+nosy
+! not contained in inner square from i-nisx to i+nisx, j-nisy to j+nisy
+!
+    real(kind=8), intent(in) :: dat(npx,npy), mask(npx,npy)
+    real(kind=8), intent(inout) :: snr(npx,npy), signal(npx,npy)
+    integer(kind=4), intent(in) :: n_inner, n_center, n_outer!, npx, npy
+    real(kind=8) :: cumx(0:npx,npy), cum2x(0:npx,npy), cummx(0:npx,npy), &
+                    sqix(npx,npy), sq2ix(npx,npy), sqmix(npx,npy), &
+                    sqcx(npx,npy), sq2cx(npx,npy), sqmcx(npx,npy), &
+                    sqox(npx,npy), sq2ox(npx,npy), sqmox(npx,npy), &
+                    cumiy(npx,0:npy), cum2iy(npx,0:npy), cummiy(npx,0:npy), &
+                    cumcy(npx,0:npy), cum2cy(npx,0:npy), cummcy(npx,0:npy), &
+                    cumoy(npx,0:npy), cum2oy(npx,0:npy), cummoy(npx,0:npy)
+    real(kind=8) :: small
+    integer(kind=4) :: ix,iy,mn,mx,npx,npy
+
+    small=1.0e-15_8
+    npx = size(dat,2)
+    npy = size(dat,1)
+
+    !$OMP parallel default(None) shared(dat,mask,cumx,cum2x,cummx,cumiy,sqix, &
+    !$OMP & cum2iy,sq2ix,cummiy,sqmix,cumcy,sqcx, cum2cy,sq2cx,cummcy,sqmcx, &
+    !$OMP & cumoy,sqox,cum2oy,sq2ox,cummoy,sqmox,npx,npy,n_inner,n_center,n_outer,small,snr,signal) private(ix,iy,mn,mx)
+
+    !$OMP do schedule(static)
+    do iy=1,npy
+        cumx(0,iy)=0.0_8
+        cum2x(0,iy)=0.0_8
+        cummx(0,iy)=0.0_8
+    enddo
+    !$OMP enddo nowait
+
+    !$OMP do schedule(static)
+    do ix=1,npx
+        cumiy(ix,0)=0.0_8
+        cum2iy(ix,0)=0.0_8
+        cummiy(ix,0)=0.0_8
+
+        cumcy(ix,0)=0.0_8
+        cum2cy(ix,0)=0.0_8
+        cummcy(ix,0)=0.0_8
+
+        cumoy(ix,0)=0.0_8
+        cum2oy(ix,0)=0.0_8
+        cummoy(ix,0)=0.0_8
+    enddo
+    !$OMP enddo
+
+    !$OMP do schedule(static)
+    do ix=1,npx  ! cumulative sums
+        cumx(ix,:)=cumx(ix-1,:)+dat(ix,:)*mask(ix,:)
+        cum2x(ix,:)=cum2x(ix-1,:)+(dat(ix,:)*mask(ix,:))**2
+        cummx(ix,:)=cummx(ix-1,:)+mask(ix,:)
+    enddo
+    !$OMP enddo
+
+    !$OMP do schedule(static)
+    do ix=1,npx  ! windowed sums on one axis
+
+        mn=min(npx,ix+n_inner)
+        mx=max(0,ix-n_inner-1)
+        sqix(ix,:) =cumx(mn,:)-cumx(mx,:)
+        sq2ix(ix,:)=cum2x(mn,:)-cum2x(mx,:)
+        sqmix(ix,:)=cummx(mn,:)-cummx(mx,:)
+
+        mn=min(npx,ix+n_center)
+        mx=max(0,ix-n_center-1)
+        sqcx(ix,:) =cumx(mn,:) -cumx(mx,:)
+        sq2cx(ix,:)=cum2x(mn,:)-cum2x(mx,:)
+        sqmcx(ix,:)=cummx(mn,:)-cummx(mx,:)
+
+        mn=min(npx,ix+n_outer)
+        mx=max(0,ix-n_outer-1)
+        sqox(ix,:) =cumx(mn,:) -cumx(mx,:)
+        sq2ox(ix,:)=cum2x(mn,:)-cum2x(mx,:)
+        sqmox(ix,:)=cummx(mn,:)-cummx(mx,:)
+
+    enddo
+    !$OMP enddo
+
+    !$OMP do schedule(static)
+    do iy=1,npy
+
+        cumiy(:,iy) =cumiy(:,iy-1) +sqix(1:npx,iy)
+        cum2iy(:,iy) =cum2iy(:,iy-1)+sq2ix(1:npx,iy)
+        cummiy(:,iy)=cummiy(:,iy-1)+sqmix(1:npx,iy)
+
+        cumcy(:,iy) =cumcy(:,iy-1) +sqcx(1:npx,iy)
+        cum2cy(:,iy)=cum2cy(:,iy-1)+sq2cx(1:npx,iy)
+        cummcy(:,iy)=cummcy(:,iy-1)+sqmcx(1:npx,iy)
+
+        cumoy(:,iy) =cumoy(:,iy-1) +sqox(1:npx,iy)
+        cum2oy(:,iy)=cum2oy(:,iy-1)+sq2ox(1:npx,iy)
+        cummoy(:,iy)=cummoy(:,iy-1)+sqmox(1:npx,iy)
+
+    enddo
+    !$OMP end do
+
+    !$OMP do schedule(static)
+    do iy=1,npy
+
+        mn=min(npy,iy+n_inner)
+        mx=max(0,iy-n_inner-1)
+        sqix(:,iy) =cumiy (:,mn)-cumiy(:,mx)
+        sq2ix(:,iy) =cum2iy (:,mn)-cum2iy(:,mx)
+        sqmix(:,iy)=cummiy(:,mn)-cummiy(:,mx)
+
+        mn=min(npy,iy+n_center)
+        mx=max(0,iy-n_center-1)
+        sqcx(:,iy) =cumcy (:,mn)-cumcy(:,mx)
+        sq2cx(:,iy) =cum2cy (:,mn)-cum2cy(:,mx)
+        sqmcx(:,iy)=cummcy(:,mn)-cummcy(:,mx)
+
+        mn=min(npy,iy+n_outer)
+        mx=max(0,iy-n_outer-1)
+        sqox(:,iy) =cumoy (:,mn)-cumoy(:,mx)
+        sq2ox(:,iy)=cum2oy(:,mn)-cum2oy(:,mx)
+        sqmox(:,iy)=cummoy(:,mn)-cummoy(:,mx)
+
+    enddo
+    !$OMP end do
+
+
+    !$OMP do schedule(static)
+    do iy=1,npy
+        sqox(:,iy) = sqox(:,iy) - sqcx(:,iy)
+        sq2ox(:,iy) = sq2ox(:,iy) - sq2cx(:,iy)
+        sqmox(:,iy) = sqmox(:,iy) - sqmcx(:,iy) + small ! avoid divide by zero
+        sqmix(:,iy) = sqmix(:,iy) + small         ! avoid divide by zero
+        signal(:,iy) = sqix(:,iy) - sqox(:,iy)*sqmix(:,iy)/sqmox(:,iy)
+        snr(:,iy) = signal(:,iy)/(sqrt(sqmix(:,iy))*(sqrt(sq2ox(:,iy)/sqmox(:,iy) - (sqox(:,iy)/sqmox(:,iy))**2)+small))
+    enddo
+    !$OMP end do
+    !$OMP end parallel
+end subroutine boxsnr2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 !subroutine peak_snr_filter2(data, bind, cind, mask, local_max_only, snr, signal)
 !    implicit none
 !    real(kind=8), intent(in)     :: data(:, :), mask(:, :)

@@ -51,6 +51,9 @@ def test_fortran():
     noise = np.sqrt(((0+1+16)*3-1)/8. - (((0+1+4)*3-1)/8.)**2)
     sig = 1 - ((0+1+4)*3-1)/8.
     assert np.abs(out[1, 1] - sig/noise) < 1e-6
+    peaks_f.boxsnr2(dat, mask, out, signal, nin, ncent, nout)
+    assert np.abs(out[1, 1] - sig/noise) < 1e-6
+
 
 
 # def test_numba():

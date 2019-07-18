@@ -680,7 +680,7 @@ class PADView(object):
             if 'pad_data' in self.processed_data.keys():
                 dat = self.processed_data['pad_data']
                 if dat:
-                    padview_debug("Got self.processed_data['pad_data']")
+                    # padview_debug("Got self.processed_data['pad_data']")
                     return dat
 
         if self.raw_data is not None:
