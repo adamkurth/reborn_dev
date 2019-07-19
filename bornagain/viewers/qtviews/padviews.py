@@ -1094,7 +1094,7 @@ class PADView(object):
     def apply_snr_filter(self):
 
         padview_debug('apply_snr_filter()')
-
+        t = time()
         if self.snr_filter_params is None:
             return
 
@@ -1120,6 +1120,7 @@ class PADView(object):
         if self.processed_data is None:
             self.processed_data = {}
         self.processed_data['pad_data'] = processed_pads
+        padview_debug('%g seconds' % (time()-t,))
 
     def update_snr_filter_params(self):
 

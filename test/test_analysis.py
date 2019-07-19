@@ -1,3 +1,4 @@
+from time import time
 import numpy as np
 from bornagain.fortran import peaks_f
 
@@ -31,8 +32,8 @@ def test_fortran():
     # except ImportError:
     #     return
 
-    npx = 100
-    npy = 200
+    npx = 1000
+    npy = 2000
     x, _ = np.meshgrid(np.arange(0, npx), np.arange(0, npy), indexing='ij')
     assert x.shape[0] == npx
     dat = x**2
@@ -47,12 +48,14 @@ def test_fortran():
     nin = 0
     ncent = 0
     nout = 1
-    peaks_f.peaker.boxsnr(dat, mask, out, signal, nin, ncent, nout)
+    t = time()
+    peaks_f.boxsnr(dat, mask, out, signal, nin, ncent, nout)
+    print('time:', time()-t)
     noise = np.sqrt(((0+1+16)*3-1)/8. - (((0+1+4)*3-1)/8.)**2)
     sig = 1 - ((0+1+4)*3-1)/8.
     assert np.abs(out[1, 1] - sig/noise) < 1e-6
-    peaks_f.boxsnr2(dat, mask, out, signal, nin, ncent, nout)
-    assert np.abs(out[1, 1] - sig/noise) < 1e-6
+    # peaks_f.boxsnr2(dat, mask, out, signal, nin, ncent, nout)
+    # assert np.abs(out[1, 1] - sig/noise) < 1e-6
 
 
 

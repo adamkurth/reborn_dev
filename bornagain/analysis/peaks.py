@@ -76,25 +76,25 @@ def boxsnr_fortran(dat, mask, nin, ncent, nout):
     float_t = np.float64
     snr = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
     signal = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
-    peaks_f.peaker.boxsnr(np.asfortranarray(dat.astype(float_t)), np.asfortranarray(mask.astype(float_t)), snr, signal, nin, ncent, nout)
+    peaks_f.boxsnr(np.asfortranarray(dat.astype(float_t)), np.asfortranarray(mask.astype(float_t)), snr, signal, nin, ncent, nout)
     return snr, signal
 
 
-def boxsnr2(dat, mask, nin, ncent, nout):
-    # if peaks_f is not None:
-    snr, signal = boxsnr2_fortran(dat, mask, nin, ncent, nout)
-    # else:
-    #     snr, signal = boxsnr_numba(dat, mask, nin, ncent, nout)
-    return snr, signal
-
-
-def boxsnr2_fortran(dat, mask, nin, ncent, nout):
-
-    float_t = np.float64
-    snr = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
-    signal = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
-    peaks_f.boxsnr2(np.asfortranarray(dat.astype(float_t)), np.asfortranarray(mask.astype(float_t)), snr, signal, nin, ncent, nout)
-    return snr, signal
+# def boxsnr2(dat, mask, nin, ncent, nout):
+#     # if peaks_f is not None:
+#     snr, signal = boxsnr2_fortran(dat, mask, nin, ncent, nout)
+#     # else:
+#     #     snr, signal = boxsnr_numba(dat, mask, nin, ncent, nout)
+#     return snr, signal
+#
+#
+# def boxsnr2_fortran(dat, mask, nin, ncent, nout):
+#
+#     float_t = np.float64
+#     snr = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
+#     signal = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
+#     peaks_f.boxsnr2(np.asfortranarray(dat.astype(float_t)), np.asfortranarray(mask.astype(float_t)), snr, signal, nin, ncent, nout)
+#     return snr, signal
 
 
 # @jit(nopython=True)
