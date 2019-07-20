@@ -322,10 +322,9 @@ class PADGeometry(object):
             w1 = weight
             w2 = 1 - weight
 
-        p1 = w1 * (1 - np.abs(np.dot(u, v.T)) ** 2)
-        p2 = w2 * (1 - np.abs(np.dot(up, v.T)) ** 2)
+        p1 = w1 * (1 - np.abs(np.dot(v, u)) ** 2)
+        p2 = w2 * (1 - np.abs(np.dot(v, up)) ** 2)
         p = p1 + p2
-
         return p.ravel()
 
     def scattering_angles(self, beam_vec=None, beam=None):
