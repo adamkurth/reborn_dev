@@ -1,47 +1,55 @@
-subroutine boxsnr(dat,mask,snr,signal,npx,npy,n_inner,n_center,n_outer)
+subroutine boxsnr(dat,mask,mask2,snr,signal,npx,npy,n_inner,n_center,n_outer)
 !
-! p(npx,npy) input array, overwritten to give output array
-! sums pixels in outer square from i-nosx to i+nosx, j-nosy to j+nosy
-! not contained in inner square from i-nisx to i+nisx, j-nisy to j+nisy
 !
-    real(kind=8), intent(in) :: dat(npx,npy), mask(npx,npy)
+! dat : The 2D array to run the SNR filter over.
+! mask : Ignore pixels where mask == 0
+! snr : The
+!
+!
+    real(kind=8), intent(in) :: dat(npx,npy), mask(npx,npy), mask2(npx,npy)
     real(kind=8), intent(inout) :: snr(npx,npy), signal(npx,npy)
-    integer(kind=4), intent(in) :: n_inner, n_center, n_outer!, npx, npy
-    real(kind=8) :: cumx(0:npx,npy), cum2x(0:npx,npy), cummx(0:npx,npy), &
-                    sqix(npx,npy), sq2ix(npx,npy), sqmix(npx,npy), &
-                    sqcx(npx,npy), sq2cx(npx,npy), sqmcx(npx,npy), &
-                    sqox(npx,npy), sq2ox(npx,npy), sqmox(npx,npy), &
+    integer(kind=4), intent(in) :: n_inner, n_center, n_outer
+    real(kind=8) :: cumix(0:npx,npy), cum2ix(0:npx,npy), cummix(0:npx,npy), &
+                    cumox(0:npx,npy), cum2ox(0:npx,npy), cummox(0:npx,npy), &
                     cumiy(npx,0:npy), cum2iy(npx,0:npy), cummiy(npx,0:npy), &
                     cumcy(npx,0:npy), cum2cy(npx,0:npy), cummcy(npx,0:npy), &
-                    cumoy(npx,0:npy), cum2oy(npx,0:npy), cummoy(npx,0:npy)
+                    cumoy(npx,0:npy), cum2oy(npx,0:npy), cummoy(npx,0:npy), &
+                    sqix(npx,npy), sq2ix(npx,npy), sqmix(npx,npy), &
+                    sqcx(npx,npy), sq2cx(npx,npy), sqmcx(npx,npy), &
+                    sqox(npx,npy), sq2ox(npx,npy), sqmox(npx,npy)
     real(kind=8) :: small
     integer(kind=4) :: ix,iy,mn,mx,npx,npy
 
     small=1.0e-15_8
 
-    !$OMP parallel default(None) shared(dat,mask,cumx,cum2x,cummx,cumiy,sqix, &
-    !$OMP & cum2iy,sq2ix,cummiy,sqmix,cumcy,sqcx, cum2cy,sq2cx,cummcy,sqmcx, &
-    !$OMP & cumoy,sqox,cum2oy,sq2ox,cummoy,sqmox,npx,npy,n_inner,n_center,n_outer,small,snr,signal) private(ix,iy,mn,mx)
+    !$OMP parallel default(None) private(ix,iy,mn,mx) &
+    !$OMP shared(dat,mask,mask2,cumix,cum2ix,cummix,cumox,cum2ox,cummox,cumiy,sqix,cum2iy,sq2ix,cummiy,sqmix,cumcy, &
+    !$OMP sqcx,cum2cy,sq2cx,cummcy,sqmcx,cumoy,sqox,cum2oy,sq2ox,cummoy,sqmox,npx,npy,n_inner,n_center,n_outer, &
+    !$OMP small,snr,signal)
 
     !$OMP do schedule(static)
     do iy=1,npy
-        cumx(0,iy)=0.0_8
-        cum2x(0,iy)=0.0_8
-        cummx(0,iy)=0.0_8
+        cumix(0,iy)=0.0_8  ! cumulative data inner x
+        cum2ix(0,iy)=0.0_8 ! cumulative squared inner x
+        cummix(0,iy)=0.0_8 ! cumulative mask inner x
+
+        cumox(0,iy)=0.0_8  ! outer
+        cum2ox(0,iy)=0.0_8
+        cummox(0,iy)=0.0_8
     enddo
     !$OMP enddo nowait
 
     !$OMP do schedule(static)
     do ix=1,npx
-        cumiy(ix,0)=0.0_8
+        cumiy(ix,0)=0.0_8  ! inner
         cum2iy(ix,0)=0.0_8
         cummiy(ix,0)=0.0_8
 
-        cumcy(ix,0)=0.0_8
+        cumcy(ix,0)=0.0_8  ! center
         cum2cy(ix,0)=0.0_8
         cummcy(ix,0)=0.0_8
 
-        cumoy(ix,0)=0.0_8
+        cumoy(ix,0)=0.0_8  ! outer
         cum2oy(ix,0)=0.0_8
         cummoy(ix,0)=0.0_8
     enddo
@@ -50,9 +58,13 @@ subroutine boxsnr(dat,mask,snr,signal,npx,npy,n_inner,n_center,n_outer)
     !$OMP do schedule(static)
     do iy=1,npy
         do ix=1,npx  ! cumulative sums
-            cumx(ix,iy)=cumx(ix-1,iy)+dat(ix,iy)*mask(ix,iy)
-            cum2x(ix,iy)=cum2x(ix-1,iy)+(dat(ix,iy)*mask(ix,iy))**2
-            cummx(ix,iy)=cummx(ix-1,iy)+mask(ix,iy)
+            cumix(ix,iy)=cumix(ix-1,iy)+dat(ix,iy)*mask(ix,iy)
+            cum2ix(ix,iy)=cum2ix(ix-1,iy)+(dat(ix,iy)*mask(ix,iy))**2
+            cummix(ix,iy)=cummix(ix-1,iy)+mask(ix,iy)
+
+            cumox(ix,iy)=cumox(ix-1,iy)+dat(ix,iy)*mask2(ix,iy)
+            cum2ox(ix,iy)=cum2ox(ix-1,iy)+(dat(ix,iy)*mask2(ix,iy))**2
+            cummox(ix,iy)=cummox(ix-1,iy)+mask2(ix,iy)
         enddo
     enddo
     !$OMP enddo
@@ -63,21 +75,21 @@ subroutine boxsnr(dat,mask,snr,signal,npx,npy,n_inner,n_center,n_outer)
         do iy=1,npy
             mn=min(npx,ix+n_inner)
             mx=max(0,ix-n_inner-1)
-            sqix(ix,iy) =cumx(mn,iy)-cumx(mx,iy)
-            sq2ix(ix,iy)=cum2x(mn,iy)-cum2x(mx,iy)
-            sqmix(ix,iy)=cummx(mn,iy)-cummx(mx,iy)
+            sqix(ix,iy) =cumix(mn,iy)-cumix(mx,iy)
+            sq2ix(ix,iy)=cum2ix(mn,iy)-cum2ix(mx,iy)
+            sqmix(ix,iy)=cummix(mn,iy)-cummix(mx,iy)
 
             mn=min(npx,ix+n_center)
             mx=max(0,ix-n_center-1)
-            sqcx(ix,iy) =cumx(mn,iy)-cumx(mx,iy)
-            sq2cx(ix,iy)=cum2x(mn,iy)-cum2x(mx,iy)
-            sqmcx(ix,iy)=cummx(mn,iy)-cummx(mx,iy)
+            sqcx(ix,iy) =cumox(mn,iy)-cumox(mx,iy)
+            sq2cx(ix,iy)=cum2ox(mn,iy)-cum2ox(mx,iy)
+            sqmcx(ix,iy)=cummox(mn,iy)-cummox(mx,iy)
 
             mn=min(npx,ix+n_outer)
             mx=max(0,ix-n_outer-1)
-            sqox(ix,iy) =cumx(mn,iy)-cumx(mx,iy)
-            sq2ox(ix,iy)=cum2x(mn,iy)-cum2x(mx,iy)
-            sqmox(ix,iy)=cummx(mn,iy)-cummx(mx,iy)
+            sqox(ix,iy) =cumox(mn,iy)-cumox(mx,iy)
+            sq2ox(ix,iy)=cum2ox(mn,iy)-cum2ox(mx,iy)
+            sqmox(ix,iy)=cummox(mn,iy)-cummox(mx,iy)
         enddo
     enddo
     !$OMP enddo

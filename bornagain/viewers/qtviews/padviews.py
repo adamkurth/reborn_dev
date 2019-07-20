@@ -537,7 +537,7 @@ class PADView(object):
 
             mask_rgba = self._make_mask_rgba(d)
 
-            im = ImageItem(mask_rgba, autoDownsample='mean')
+            im = ImageItem(mask_rgba) #, autoDownsample='mean')
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 
@@ -734,7 +734,7 @@ class PADView(object):
             if self.show_true_fast_scans:  # For testing - show fast scan axis
                 d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
 
-            im = ImageItem(d, autoDownsample='mean')
+            im = ImageItem(d) #, autoDownsample='mean')
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 
@@ -1019,9 +1019,7 @@ class PADView(object):
         self.remove_scatter_plots()
         if self.do_peak_finding is True:
             self.find_peaks()
-        peaks = self.get_peak_data()
-        if self.show_peaks is True and peaks is not None:
-            self.display_peaks()
+        self.display_peaks()
         self.update_status_string(frame_number=self.frame_getter.current_frame, n_frames=self.frame_getter.n_frames)
         self._mouse_moved(self.evt)
 
@@ -1115,7 +1113,9 @@ class PADView(object):
         processed_pads = [None]*self.n_pads
         padview_debug('boxsnr()')
         for i in range(self.n_pads):
-            snr, signal = boxsnr(raw[i], mask[i], a, b, c)
+            snr, signal = boxsnr(raw[i], mask[i], mask[i], a, b, c)
+            m = mask[i]*(snr < 6)
+            snr, signal = boxsnr(raw[i], mask[i], m, a, b, c)
             processed_pads[i] = snr
         if self.processed_data is None:
             self.processed_data = {}

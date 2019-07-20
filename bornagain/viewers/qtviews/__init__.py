@@ -5,4 +5,4 @@ except ImportError:
 try:
     from .padviews import *
 except ImportError:
-    print('ImportIrror on padviews -- probably because you do not have the pyopengl package.')
+    print('ImportError on padviews -- probably because you do not have the pyopengl package.')
