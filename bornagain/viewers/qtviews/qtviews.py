@@ -28,6 +28,7 @@ pens = [pg.mkPen([255, 0, 0]),
         pg.mkPen([255, 255, 255]),
         pg.mkPen([255, 128, 128])]
 
+
 def bright_colors(i, alpha=1):
 
     """ Some nice colors.  Only 8 available, which loops around as the input index increments."""
@@ -35,7 +36,6 @@ def bright_colors(i, alpha=1):
     col = list(colors[i % len(colors)])
     col[3] = alpha
     return col
-
 
 
 class Volumetric3D(object):
@@ -120,7 +120,7 @@ class Volumetric3D(object):
         self.w.setCameraPosition(distance=self.maxDist * 2)
         self.w.show()
 
-        QtGui.QApplication.instance().exec_()
+        # QtGui.QApplication.instance().exec_()
 
 
 def MapProjection(data, axis=None):
@@ -140,10 +140,10 @@ def MapProjection(data, axis=None):
     win.resize(800, 800)
     imv = pg.ImageView()
     win.setCentralWidget(imv)
-    win.show()
-    # 	win.setWindowTitle('pyqtgraph example: ImageView')
+    # win.setWindowTitle('pyqtgraph example: ImageView')
     imv.setImage(dat, xvals=np.linspace(1., 3., dat.shape[0]))
-    QtGui.QApplication.instance().exec_()
+    win.show()
+    # QtGui.QApplication.instance().exec_()
 
 
 def MapSlices(data, axis=None, levels=None):
@@ -175,14 +175,14 @@ def MapSlices(data, axis=None, levels=None):
     win.resize(800, 800)
     imv = pg.ImageView()
     win.setCentralWidget(imv)
-    win.show()
-    # 	win.setWindowTitle('pyqtgraph example: ImageView')
+    # win.setWindowTitle('pyqtgraph example: ImageView')
     if levels is not None:
         autoLevels = False
     else:
         autoLevels = True
     imv.setImage(dat, xvals=np.linspace(1., 3., dat.shape[0]), levels=levels, autoLevels=autoLevels)
-    QtGui.QApplication.instance().exec_()
+    win.show()
+    # QtGui.QApplication.instance().exec_()
 
 
 class Scatter3D(object):
@@ -250,8 +250,32 @@ class Scatter3D(object):
         self.add_lines(np.array([[0, 0, 0], [0, 1, 0]]) * axlen, [0, 255, 0], width=wid)
         self.add_lines(np.array([[0, 0, 0], [0, 0, 1]]) * axlen, [0, 0, 255], width=wid)
 
+    def add_unit_cell(self, cell, width=None):
+
+        if width is None:
+            wid = self.defaultWidth
+        else:
+            wid = width
+
+        a = cell.a_vec
+        b = cell.b_vec
+        c = cell.c_vec
+
+        self.add_lines(np.array([[0, 0, 0], a]), [255, 0, 0], width=wid)
+        self.add_lines(np.array([[0, 0, 0], b]), [0, 255, 0], width=wid)
+        self.add_lines(np.array([[0, 0, 0], c]), [0, 0, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], a]) + b, [255, 255, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], a]) + c, [255, 255, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], a]) + b + c, [255, 255, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], b]) + a, [255, 255, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], b]) + c, [255, 255, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], b]) + a + c, [255, 255, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], c]) + a, [255, 255, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], c]) + b, [255, 255, 255], width=wid)
+        self.add_lines(np.array([[0, 0, 0], c]) + a + b, [255, 255, 255], width=wid)
+
     def show(self):
 
         self.w.setCameraPosition(distance=self.maxDist * 5)
         self.w.show()
-        pg.QtGui.QApplication.exec_()
+        # pg.QtGui.QApplication.exec_()

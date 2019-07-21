@@ -17,7 +17,7 @@ def test_crystal_density():
     # Manually reconfigure P1 with rectangular lattice
     cryst.unitcell = crystal.UnitCell(1e-9, 2e-9, 4e-9, np.pi/2, np.pi/2, np.pi/2)
     cryst.spacegroup.sym_translations = [np.zeros((3,))]
-    cryst.spacegroup.sym_rotations = [np.eye((3))]
+    cryst.spacegroup.sym_rotations = [np.eye(3)]
     dens = crystal.CrystalDensityMap(cryst, 2e-9, 2)
     assert np.sum(np.abs(dens.n_vecs[8, :] - np.array([1, 0, 0]))) < 1e-8
     assert np.allclose(dens.x_vecs[9, :], np.array([1., 0., 0.5]))
@@ -44,7 +44,6 @@ def test_crystal_density():
 
 
 def test_transforms():
-
 
     cryst = crystal.CrystalStructure(psi_pdb_file)
 
