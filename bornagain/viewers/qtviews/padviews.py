@@ -8,18 +8,12 @@ import numpy as np
 
 import pkg_resources
 
-import pyqtgraph as pg
-# pg.setConfigOptions(imageAxisOrder='row-major')
-
 # We are using pyqtgraph's wrapper for pyqt because it helps deal with the different APIs in pyqt5 and pyqt4...
+import pyqtgraph as pg
 from pyqtgraph.Qt import uic, QtGui, QtCore #, QtWidgets
-
-import bornagain
-# import bornagain.external.pyqtgraph as bpg
-from bornagain.fileio.getters import FrameGetter, CheetahFrameGetter
-from bornagain.external.crystfel import geometry_file_to_pad_geometry_list
-# from bornagain.external.pyqtgraph.mods import ImageItem
 from pyqtgraph import ImageItem
+import bornagain
+from bornagain.fileio.getters import FrameGetter
 from bornagain.analysis.peaks import boxsnr, PeakFinder
 
 padview_debug_config = 1  # 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
@@ -1147,8 +1141,10 @@ class PADView(object):
             return
 
         if file_type == "CrystFEL geom (*.geom)":
-            self.pad_geometry = geometry_file_to_pad_geometry_list(file_name)
-            self.crystfel_geom_file_name = file_name
+            print('CrystFEL geom not implemented.')
+            pass
+            # self.pad_geometry = geometry_file_to_pad_geometry_list(file_name)
+            # self.crystfel_geom_file_name = file_name
 
     def open_data_file(self):
 
@@ -1160,36 +1156,19 @@ class PADView(object):
             return
 
         if file_type == 'Cheetah CXI (*.cxi)':
-            if self.crystfel_geom_file_name is None:
-                msg = QtGui.QMessageBox()
-                msg.setText("You must load a CrystFEL Geometry file before loading a Cheetah CXI file.")
-                msg.exec_()
-                self.load_geometry_file()
-                if self.crystfel_geom_file_name is None:
-                    return
-                self.main_window.setWindowTitle(file_name)
+            print('Cheetah CXI not implemented.')
+            pass
+            # if self.crystfel_geom_file_name is None:
+            #     msg = QtGui.QMessageBox()
+            #     msg.setText("You must load a CrystFEL Geometry file before loading a Cheetah CXI file.")
+            #     msg.exec_()
+            #     self.load_geometry_file()
+            #     if self.crystfel_geom_file_name is None:
+            #         return
+            #     self.main_window.setWindowTitle(file_name)
+            #
+            # self.frame_getter = CheetahFrameGetter(file_name, self.crystfel_geom_file_name)
 
-            self.frame_getter = CheetahFrameGetter(file_name, self.crystfel_geom_file_name)
-
-        self.show_frame(frame_number=0)
-
-    def load_cheetah_cxi_file(self, cxi_file_name, crystfel_geom_file_name=None):
-
-        padview_debug('load_cheetah_cxi_file()')
-
-        if crystfel_geom_file_name is not None:
-            self.crystfel_geom_file_name = crystfel_geom_file_name
-
-        if self.crystfel_geom_file_name is None:
-            msg = QtGui.QMessageBox()
-            msg.setText("You must load a CrystFEL Geometry file before loading a Cheetah CXI file.")
-            msg.exec_()
-            self.load_geometry_file()
-            if self.crystfel_geom_file_name is None:
-                return
-        self.main_window.setWindowTitle(cxi_file_name)
-        self.frame_getter = CheetahFrameGetter(cxi_file_name, self.crystfel_geom_file_name)
-        self.pad_geometry = self.frame_getter.pad_geometry
         self.show_frame(frame_number=0)
 
     def toggle_peak_finding(self):
