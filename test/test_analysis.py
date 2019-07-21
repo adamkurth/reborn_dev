@@ -49,7 +49,7 @@ def test_fortran():
     ncent = 0
     nout = 1
     t = time()
-    peaks_f.boxsnr(dat, mask, out, signal, nin, ncent, nout)
+    peaks_f.boxsnr(dat, mask, mask, out, signal, nin, ncent, nout)
     print('time:', time()-t)
     noise = np.sqrt(((0+1+16)*3-1)/8. - (((0+1+4)*3-1)/8.)**2)
     sig = 1 - ((0+1+4)*3-1)/8.

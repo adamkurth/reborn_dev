@@ -44,7 +44,6 @@ def get_pdb_file(pdb_id, save_path='.'):
 
     # Check if this file is in the bornagain repository
     cache_path = os.path.join(pdb_data_path, pdb_id)
-    print(cache_path)
     if os.path.isfile(cache_path):
         print('Copying pdb file from %s to %s' % (cache_path, pdb_path))
         shutil.copy(cache_path, pdb_path)
@@ -294,7 +293,6 @@ class CrystalStructure(object):
             R = dic['spacegroup_rotations'][i]
             T = dic['spacegroup_translations'][i]
             W = np.dot(S, np.dot(R, np.linalg.inv(S)))
-            # print(np.max(np.abs(W - np.round(W))))
             # assert np.max(np.abs(W - np.round(W))) < 5e-2  # 5% error OK?
             W = np.round(W)
             Z = np.dot(S, T) # + np.dot(np.eye(3)-W, U)
@@ -571,7 +569,6 @@ class CrystalDensityMap(object):
         h1 = np.fft.fftshift(np.fft.fftfreq(self.shape[1], d=self.oversampling/self.shape[1]))
         h2 = np.fft.fftshift(np.fft.fftfreq(self.shape[2], d=self.oversampling/self.shape[2]))
         hh0, hh1, hh2 = np.meshgrid(h0, h1, h2, indexing='ij')
-        # print(hh0.shape)
         h_vecs = np.empty((self.size, 3))
         h_vecs[:, 0] = hh0.ravel()
         h_vecs[:, 1] = hh1.ravel()
@@ -625,8 +622,6 @@ class CrystalDensityMap(object):
         """
 
         luts = self.get_sym_luts()
-        for lut in luts:
-            print(lut.shape)
         data_trans = np.zeros_like(data)
         data_trans.flat[luts[j]] = data.flat[luts[i]]
 

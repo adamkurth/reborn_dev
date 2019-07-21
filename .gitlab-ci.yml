@@ -17,8 +17,8 @@ before_script:
 tests:
   stage: test
   script:
-  - conda env create -f gitlab-ci-env3.yml
-  - source activate bornagain3
+  - conda env create -f gitlab-ci-env.yml
+  - source activate bornagain
   - cd $basepath/developer
   - ./compile-fortran.sh
   - cd $basepath/test
@@ -26,8 +26,8 @@ tests:
 
 pages:
   script:
-  - conda env create -f gitlab-ci-env3.yml
-  - source activate bornagain3
+  - conda env create -f gitlab-ci-env.yml
+  - source activate bornagain
   - cd $basepath/doc
   - ./update-documentation.sh
   - cd $basepath
