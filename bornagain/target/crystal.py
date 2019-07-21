@@ -395,6 +395,29 @@ class FiniteLattice(object):
 
     def add_facet(self, plane=None, length=None, shift=0):
 
+        r""" Rejects all lattice sites for which
+
+        .. math::
+
+            `(\mathbf{x}+\mathbf{s})\cdot\mathbf{p} > L`
+
+        where :math:`\mathbf{x}` are the nominal lattice positions (with one lattice point sitting on the origin),
+        :math:`\mathbf{s}` is an optional shift (which might correspond to the center of mass of one molecule
+        symmetry partner in a spacegroup), :math:`\mathbf{p}` defines the facet orientation (a vector that points from
+        the origin to the normal of the facet surface), and :math:`L` is the length from the origin to the facet
+        surface.
+
+        This operation will set the occupancies of the rejected lattice sites to zero.
+
+        Arguments:
+
+            plane:
+            length:
+            shift:
+
+        Returns: None
+        """
+
         proj = (self.all_x_coordinates+shift).dot(np.array(plane))
         w = np.where(proj > length)[0]
         if len(w) > 0:

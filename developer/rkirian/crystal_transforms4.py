@@ -81,8 +81,8 @@ if show_packing:
 max_size = 41  # Make sure we have an odd value... for making hexagonal prisms
 lats = [crystal.FiniteLattice(max_size=max_size, unitcell=unitcell) for i in range(spacegroup.n_molecules)]
 # Construct a finite lattice in the form of a hexagonal prism
-width = 3
-length = 6
+width = 1
+length = 2
 for i in range(spacegroup.n_molecules):
     lat = lats[i]
     com = mol_x_coms[i, :]
@@ -96,7 +96,7 @@ for i in range(spacegroup.n_molecules):
     lat.add_facet(plane=[0, 0, -1], length=length, shift=com)
 
 # Create a 3D scatterplot showing the crystal
-viewcrystal = False
+viewcrystal = True
 if viewcrystal:
     scat = Scatter3D()
     for i in range(spacegroup.n_molecules):
@@ -145,7 +145,7 @@ for c in range(1):
         clcore.phase_factor_qrf(q_rot_gpu, r, f_gpu, a=amps_mol_gpu, add=False)
         amps_gpu += amps_lat_gpu * amps_mol_gpu
     intensities = scale * np.abs(amps_gpu.get()) ** 2
-    intensities = np.random.poisson(intensities).astype(np.float64)
+    # intensities = np.random.poisson(intensities).astype(np.float64)
     density.trilinear_insertion(densities=dens, weights=denswt, vectors=unitcell.q2h(q_rot_gpu.get()/np.pi/2.),
                                 vals=intensities.ravel(), corners=dmap.h_limits[:, 0].copy(),
                                 deltas=(dmap.h_limits[:, 1]-dmap.h_limits[:, 0]))
