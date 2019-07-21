@@ -135,8 +135,8 @@ An even easier way to setup your environment is to use the provided environment 
 
 .. code-block:: bash
 
-    conda env create -f bornagain3-env.yml
-    conda activate bornagain3
+    conda env create -f bornagain-env.yml
+    conda activate bornagain
 
 If you don't want to use a conda environment you can just install the modules in the current environment.  For example:
 
@@ -149,7 +149,7 @@ You can uninstall a conda environment as follows:
 
 .. code-block:: bash
 
-    conda env remove -n bornagain3
+    conda env remove -n bornagain
 
 Testing your setup
 ------------------
