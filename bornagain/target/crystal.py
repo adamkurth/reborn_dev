@@ -1,7 +1,7 @@
 # coding=utf-8
-'''
+"""
 Basic utilities for dealing with crystalline objects.
-'''
+"""
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
@@ -18,6 +18,7 @@ from bornagain.utils import warn, vec_mag
 from numba import jit
 
 pdb_data_path = pkg_resources.resource_filename('bornagain.data', 'pdb')
+
 
 def get_pdb_file(pdb_id, save_path='.'):
     r"""
@@ -105,7 +106,7 @@ class UnitCell(object):
         self.gamma = ga
 
         vol = a * b * c * np.sqrt(1 - np.cos(al)**2 - np.cos(be) **
-                             2 - np.cos(ga)**2 + 2 * np.cos(al) * np.cos(be) * np.cos(ga))
+              2 - np.cos(ga)**2 + 2 * np.cos(al) * np.cos(be) * np.cos(ga))
         o_mat = np.array([
                 [a, b * np.cos(ga), c * np.cos(be)],
                 [0, b * np.sin(ga), c * (np.cos(al) - np.cos(be) * np.cos(ga)) / np.sin(ga)],
@@ -239,10 +240,10 @@ class CrystalStructure(object):
     """
     # TODO: Needs documentation!
 
-    fractional_coordinates = None  #  : Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
-    molecule = None    #  : Molecule class instance containing the asymmetric unit
-    unitcell = None    #  : UnitCell class instance
-    spacegroup = None  #  : Spacegroup class instance
+    fractional_coordinates = None  # : Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
+    molecule = None    # : Molecule class instance containing the asymmetric unit
+    unitcell = None    # : UnitCell class instance
+    spacegroup = None  # : Spacegroup class instance
     mosaicity_fwhm = 0
     crystal_size = 1e-6
     crystal_size_fwhm = 0.0
@@ -268,7 +269,7 @@ class CrystalStructure(object):
         if np.sum(np.abs(U)) > 0:
             if not no_warnings:
                 warn('\nThe U vector is not equal to zero, which could be a serious problem.  Look here:\n'
-                       'https://rkirian.gitlab.io/bornagain/crystals.html.\n')
+                     'https://rkirian.gitlab.io/bornagain/crystals.html.\n')
 
         # These are the initial coordinates with strange origin
         r = dic['atomic_coordinates']
@@ -437,7 +438,7 @@ class FiniteLattice(object):
 
 
 class CrystalDensityMap(object):
-    r'''
+    r"""
     A helper class for working with 3D crystal density maps.  Most importantly, it helps with spacegroup symmetry
     transformations.  Once initialized with a crystal spacegroup and lattice, along with desired resolution and
     oversampling ratio (this is one for normal crystallography), this tool chooses the shape of the map
@@ -449,19 +450,19 @@ class CrystalDensityMap(object):
 
     This class does not maintain the data array as the name might suggest; it provides methods needed to work on the
     data arrays.
-    '''
+    """
 
-    sym_luts = None  #: Symmetry lookup tables -- indices that map AU to sym. partner
-    cryst = None  #: CrystalStructure class used to initiate the map
-    oversampling = None  #: Oversampling ratio
-    dx = None   #: Length increments for fractional coordinates
-    cshape = None   #: Number of samples along edges of unit cell within density map
-    shape = None   #: Number of samples along edge of full density map (includes oversampling)
-    size = None   #: Total number of elements in density map (np.prod(self.shape)
-    strides = None  #: The stride vector (mostly for internal use)
+    sym_luts = None  # : Symmetry lookup tables -- indices that map AU to sym. partner
+    cryst = None  # : CrystalStructure class used to initiate the map
+    oversampling = None  # : Oversampling ratio
+    dx = None   # : Length increments for fractional coordinates
+    cshape = None   # : Number of samples along edges of unit cell within density map
+    shape = None   # : Number of samples along edge of full density map (includes oversampling)
+    size = None   # : Total number of elements in density map (np.prod(self.shape)
+    strides = None  # : The stride vector (mostly for internal use)
 
     def __init__(self, cryst, resolution, oversampling):
-        r'''
+        r"""
         On initialization, you provide a CrystalStructure class instance, along with your desired resolution
         and oversampling.
 
@@ -472,7 +473,7 @@ class CrystalDensityMap(object):
                                   square 3D mesh)
             oversampling (int) : An oversampling of 2 gives a real-space map that is twice as large as the unit cell. In
                                   Fourier space, there will be one sample between Bragg samples.  And so on for 3,4,...
-        '''
+        """
 
         # Given desired resolution and unit cell, these are the number of voxels along each edge of unit cell.
         cshape = np.ceil((1/resolution) * (1/vec_mag(cryst.unitcell.a_mat.T)))
@@ -617,6 +618,7 @@ class CrystalDensityMap(object):
         Arguments:
             i (int) : The "from" index; symmetry transforms are performed from this index to the j index
             j (int) : The "to" index; symmetry transforms are performed from the i index to this index
+            data (numpy array) : The 3D block of data to apply the symmetry transform on
 
         Returns: Numpy array with transformed densities
         """
@@ -644,8 +646,8 @@ class CrystalDensityMap(object):
         """
 
         if mode == 'gaussian':
-            sigma = fixed_atom_sigma # Gaussian sigma (i.e. atom "size"); this is a fudge factor and needs to be updated
-            # n_atoms = atom_x_vecs.shape[0]
+            sigma = fixed_atom_sigma  # Gaussian sigma (i.e. atom "size"); this is a fudge factor and needs to be
+            # updated n_atoms = atom_x_vecs.shape[0]
             orth_mat = self.cryst.unitcell.o_mat.copy()
             map_x_vecs = self.x_vecs
             n_map_voxels = map_x_vecs.shape[0]
@@ -654,45 +656,45 @@ class CrystalDensityMap(object):
             s = self.oversampling
             place_atoms_in_map(atom_x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp)
             return np.reshape(f_map, self.shape)
-        elif mode == 'nearest':
-            mm = [0, self.oversampling]
-            rng = [mm, mm, mm]
-            a, _, _ = binned_statistic_dd(atom_x_vecs, atom_fs, statistic='sum', bins=[self.shape] * 3, range=rng)
-            return a
+        # elif mode == 'nearest':
+        #     mm = [0, self.oversampling]
+        #     rng = [mm, mm, mm]
+        #     a, _, _ = binned_statistic_dd(atom_x_vecs, atom_fs, statistic='sum', bins=[self.shape] * 3, range=rng)
+        #     return a
 
 
 @jit(nopython=True)
 def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp):
-        r"""
-        Needs documentation...
-        """
+    r"""
+    Needs documentation...
+    """
 
-        n_atoms = x_vecs.shape[0]
-        n_map_voxels = map_x_vecs.shape[0]
-        # f_map = np.empty([n_map_voxels], dtype=atom_fs.dtype)
-        # f_map_tmp = np.empty([n_map_voxels], dtype=x_vecs.dtype)
-        for n in range(n_atoms):
-            x = x_vecs[n, 0] % s
-            y = x_vecs[n, 1] % s
-            z = x_vecs[n, 2] % s
-            w_tot = 0
-            for i in range(n_map_voxels):
-                mx = map_x_vecs[i, 0]
-                my = map_x_vecs[i, 1]
-                mz = map_x_vecs[i, 2]
-                dx = np.abs(x - mx)
-                dy = np.abs(y - my)
-                dz = np.abs(z - mz)
-                dx = min(dx, s - dx)
-                dy = min(dy, s - dy)
-                dz = min(dz, s - dz)
-                dr2 = (orth_mat[0, 0] * dx + orth_mat[0, 1] * dy + orth_mat[0, 2] * dz)**2 + \
-                      (orth_mat[1, 0] * dx + orth_mat[1, 1] * dy + orth_mat[1, 2] * dz)**2 + \
-                      (orth_mat[2, 0] * dx + orth_mat[2, 1] * dy + orth_mat[2, 2] * dz)**2
-                w = np.exp(-dr2/(2*sigma**2))
-                f_map_tmp[i] = w
-                w_tot += w
-            f_map += atom_fs[n] * f_map_tmp/w_tot
+    n_atoms = x_vecs.shape[0]
+    n_map_voxels = map_x_vecs.shape[0]
+    # f_map = np.empty([n_map_voxels], dtype=atom_fs.dtype)
+    # f_map_tmp = np.empty([n_map_voxels], dtype=x_vecs.dtype)
+    for n in range(n_atoms):
+        x = x_vecs[n, 0] % s
+        y = x_vecs[n, 1] % s
+        z = x_vecs[n, 2] % s
+        w_tot = 0
+        for i in range(n_map_voxels):
+            mx = map_x_vecs[i, 0]
+            my = map_x_vecs[i, 1]
+            mz = map_x_vecs[i, 2]
+            dx = np.abs(x - mx)
+            dy = np.abs(y - my)
+            dz = np.abs(z - mz)
+            dx = min(dx, s - dx)
+            dy = min(dy, s - dy)
+            dz = min(dz, s - dz)
+            dr2 = (orth_mat[0, 0] * dx + orth_mat[0, 1] * dy + orth_mat[0, 2] * dz)**2 + \
+                  (orth_mat[1, 0] * dx + orth_mat[1, 1] * dy + orth_mat[1, 2] * dz)**2 + \
+                  (orth_mat[2, 0] * dx + orth_mat[2, 1] * dy + orth_mat[2, 2] * dz)**2
+            w = np.exp(-dr2/(2*sigma**2))
+            f_map_tmp[i] = w
+            w_tot += w
+        f_map += atom_fs[n] * f_map_tmp/w_tot
 
 
 def pdb_to_dict(pdb_file_path):
