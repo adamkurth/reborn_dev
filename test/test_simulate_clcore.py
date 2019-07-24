@@ -15,24 +15,24 @@ import numpy as np
 import bornagain as ba
 from bornagain import utils
 
-try:
-    from bornagain.simulate import clcore
-    import pyopencl
-    from pyopencl import array as clarray
-    cl_array = clarray.Array
-    havecl = True
-    # Check for double precision:
-    test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
-    if test_core.double_precision:
-        have_double = True
-    else:
-        have_double = False
-    ctx = clcore.create_some_gpu_context()
-except ImportError:
-    clcore = None
-    clarray = None
-    pyopencl = None
-    havecl = False
+# try:
+from bornagain.simulate import clcore
+# import pyopencl
+from pyopencl import array as clarray
+cl_array = clarray.Array
+havecl = True
+# Check for double precision:
+test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
+if test_core.double_precision:
+    have_double = True
+else:
+    have_double = False
+ctx = clcore.create_some_gpu_context()
+# except ImportError:
+#     clcore = None
+#     clarray = None
+#     pyopencl = None
+#     havecl = False
 
 import bornagain.simulate.numbacore as numbacore
 from bornagain.utils import rotation_about_axis
@@ -324,8 +324,8 @@ def _clcore(double_precision=False):
 @pytest.mark.cl
 def _test_rotations(double_precision=False):
 
-    if not havecl:
-        return
+    # if not havecl:
+    #     return
 
     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 
@@ -371,8 +371,8 @@ def _test_rotations(double_precision=False):
 
 def _test_ridiculous_sum(double_precision=False):
 
-    if not havecl:
-        return
+    # if not havecl:
+    #     return
 
     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 

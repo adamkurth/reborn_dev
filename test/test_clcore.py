@@ -9,33 +9,32 @@ If you want to view results just add the keyword "view"
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-from bornagain import utils
 
-try:
-    from bornagain.simulate import clcore
-    import pyopencl
-    from pyopencl import array as clarray
-    cl_array = clarray.Array
-    havecl = True
-    test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
-    if test_core.double_precision:
-        have_double = True
-    else:
-        have_double = False
-    ctx = clcore.create_some_gpu_context()
-except ImportError:
-    clcore = None
-    clarray = None
-    pyopencl = None
-    havecl = False
+# try:
+from bornagain.simulate import clcore
+import pyopencl
+from pyopencl import array as clarray
+cl_array = clarray.Array
+havecl = True
+test_core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=True)
+if test_core.double_precision:
+    have_double = True
+else:
+    have_double = False
+ctx = clcore.create_some_gpu_context()
+# except ImportError:
+#     clcore = None
+#     clarray = None
+#     pyopencl = None
+#     havecl = False
 
 
 def test_clmath():
 
-    platform = pyopencl.get_platforms()
-    my_gpu_devices = platform[0].get_devices(device_type=pyopencl.device_type.GPU)
-    c = pyopencl.Context(devices=my_gpu_devices)
-    q = pyopencl.CommandQueue(c)
+    # platform = pyopencl.get_platforms()
+    # my_gpu_devices = platform[0].get_devices(device_type=pyopencl.device_type.GPU)
+    # c = pyopencl.Context(devices=my_gpu_devices)
+    q = pyopencl.CommandQueue(ctx)
 
     a = np.random.random((5, 5)).astype(np.complex64)
     a_gpu = pyopencl.array.to_device(q, a)
@@ -130,8 +129,8 @@ def test_clmath():
 
 def test_rotations(double_precision=False):
 
-    if not havecl:
-        return
+    # if not havecl:
+    #     return
 
     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 
