@@ -7,7 +7,7 @@ before_script:
   - basepath=$(pwd)
   - echo $basepath
   - apt-get -qq -y update
-  - apt-get -qq -y apt-utils
+  - apt-get -qq -y install apt-utils
   - apt-get -qq -y install wget
   - apt-get -qq -y install gfortran
   - wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $basepath/miniconda.sh
