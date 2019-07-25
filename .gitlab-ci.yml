@@ -22,13 +22,11 @@ before_script:
 tests:
   stage: test
   script:
-  - allow_failure: true
   - cd $basepath/test
   - pytest --ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py
 
 pages:
   script:
-  - allow_failure: true
   - cd $basepath/doc
   - ./update-documentation.sh
   - cd $basepath
