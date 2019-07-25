@@ -16,6 +16,7 @@ dependencies:
   - pyqtgraph
 #  - pyopengl
   - pip
+  - make
   - pip:
     - cfelpyutils
     - sphinx_bootstrap_theme
