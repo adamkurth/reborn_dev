@@ -133,15 +133,17 @@ for c in range(1):
     print('Pattern %d; %.3f seconds' % (c, time()-t,))
 
 
-padview = PADView()
-image = pg.image(intensities*mask)
-image.setLevels(0, np.percentile(intensities*mask, 90))
-image.setPredefinedGradient('flame')
+dat = intensities*mask
+padview = PADView(pad_geometry=[pad], raw_data=[dat])
+padview.show()
+# image = pg.image()
+# image.setLevels(0, np.percentile(intensities*mask, 90))
+# image.setPredefinedGradient('flame')
 
 #
 # w = np.where(denswt > 0)[0]
 # d = dens.copy()
 # d.flat[w] /= denswt.flat[w]
 # pg.image(dens)
-
+print('Keeping open...')
 keep_open()

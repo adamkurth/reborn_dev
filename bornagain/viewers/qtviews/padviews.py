@@ -5,18 +5,23 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from time import time
 import pickle
 import numpy as np
-
 import pkg_resources
-
-# We are using pyqtgraph's wrapper for pyqt because it helps deal with the different APIs in pyqt5 and pyqt4...
-import pyqtgraph as pg
-from pyqtgraph.Qt import uic, QtGui, QtCore #, QtWidgets
-from pyqtgraph import ImageItem
 import bornagain
+from bornagain.utils import warn_pyqtgraph
 from bornagain.fileio.getters import FrameGetter
 from bornagain.analysis.peaks import boxsnr, PeakFinder
+# We are using pyqtgraph's wrapper for pyqt because it helps deal with the different APIs in pyqt5 and pyqt4...
+try:
+    import pyqtgraph as pg
+    from pyqtgraph.Qt import uic, QtGui, QtCore #, QtWidgets
+    from pyqtgraph import ImageItem
+except ImportError:
+    warn_pyqtgraph()
 
 padview_debug_config = 1  # 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
+
+padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
+snrconfigui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'configs.ui')
 
 
 def padview_debug(msg, val=1):
@@ -50,9 +55,6 @@ def write(msg):
     """
 
     print(msg)
-
-padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
-snrconfigui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'configs.ui')
 
 
 class PADView(object):

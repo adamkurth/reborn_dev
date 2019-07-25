@@ -2,8 +2,12 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import weakref
 import numpy as np
-from bornagain.external.pyqtgraph.mods import ImageItem
-import pyqtgraph as pg
+from bornagain.utils import warn_pyqtgraph
+try:
+    from bornagain.external.pyqtgraph.mods import ImageItem
+    import pyqtgraph as pg
+except ImportError:
+    warn_pyqtgraph()
 
 
 def keep_open():

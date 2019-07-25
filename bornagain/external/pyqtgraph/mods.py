@@ -1,12 +1,16 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from pyqtgraph.Qt import QtGui, QtCore
 import numpy as np
 import collections
-from pyqtgraph import functions as fn
-from pyqtgraph import debug as debug
-from pyqtgraph.graphicsItems.GraphicsObject import GraphicsObject
-from pyqtgraph.Point import Point
+from bornagain.utils import warn_pyqtgraph
+try:
+    from pyqtgraph.Qt import QtGui, QtCore
+    from pyqtgraph import functions as fn
+    from pyqtgraph import debug as debug
+    from pyqtgraph.graphicsItems.GraphicsObject import GraphicsObject
+    from pyqtgraph.Point import Point
+except ImportError:
+    warn_pyqtgraph()
 
 __all__ = ['ImageItem']
 

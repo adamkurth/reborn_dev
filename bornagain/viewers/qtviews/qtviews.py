@@ -1,9 +1,13 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-import pyqtgraph as pg
-import pyqtgraph.opengl as gl
-from pyqtgraph.Qt import QtGui
+from bornagain.utils import warn_pyqtgraph
+try:
+    import pyqtgraph as pg
+    import pyqtgraph.opengl as gl
+    from pyqtgraph.Qt import QtGui
+except ImportError:
+    warn_pyqtgraph()
 
 """
 This is supposed to have various viewers that use pyqtgraph.  It's mostly useless right now.

@@ -100,6 +100,10 @@ def error(message):
     sys.stderr.write("ERROR: %s\n" % message)
 
 
+def warn_pyqtgraph():
+    warn('pyqtgraph is not installed.  Viewers will fail.')
+
+
 def random_rotation(deflection=1.0, randnums=None):
     r"""
     Creates a random rotation matrix.
