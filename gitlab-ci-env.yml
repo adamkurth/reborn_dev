@@ -14,7 +14,7 @@ dependencies:
   - pyqt=5       # or 4
   - pocl
   - pyqtgraph
-  - pyopengl
+#  - pyopengl
   - pip
   - pip:
     - cfelpyutils
