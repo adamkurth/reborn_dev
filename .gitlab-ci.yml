@@ -16,9 +16,9 @@ before_script:
   - conda update -n base -c defaults conda
   - conda env create -f gitlab-ci-env.yml
   - source activate bornagain
-  - cd $basepath/developer
-  - ./compile-fortran.sh
-  - cd $basepath
+#  - cd $basepath/developer
+#  - ./compile-fortran.sh
+#  - cd $basepath
 
 tests:
   stage: test
@@ -29,9 +29,12 @@ tests:
 pages:
   script:
   - cd $basepath/doc
+  - pwd
   - ls
   - ./update-documentation.sh
   - cd $basepath
+  - pwd
+  - ls
   - mkdir public
   - cp -r $basepath/doc/html/* $basepath/public
   artifacts:
