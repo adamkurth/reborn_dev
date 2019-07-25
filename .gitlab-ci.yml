@@ -13,12 +13,13 @@ before_script:
   - wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $basepath/miniconda.sh
   - bash $basepath/miniconda.sh -b -p $basepath/miniconda
   - export PATH=$basepath/miniconda/bin:$PATH
+  - conda update -n base -c defaults conda
+  - conda env create -f gitlab-ci-env.yml
+  - source activate bornagain
 
 tests:
   stage: test
   script:
-  - conda env create -f gitlab-ci-env.yml
-  - source activate bornagain
   - cd $basepath/developer
   - ./compile-fortran.sh
   - cd $basepath/test
@@ -26,8 +27,6 @@ tests:
 
 pages:
   script:
-  - conda env create -f gitlab-ci-env.yml
-  - source activate bornagain
   - cd $basepath/doc
   - ./update-documentation.sh
   - cd $basepath

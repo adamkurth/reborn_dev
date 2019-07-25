@@ -153,7 +153,7 @@ subroutine boxsnr(dat,mask,mask2,snr,signal,npx,npy,n_inner,n_center,n_outer)
 end subroutine boxsnr
 
 
-subroutine boxconv(dat,datconv,npx,npy,n)
+subroutine boxconv(dat,datconv,n)
 
 !
 ! dat : The 2D array to convolve
@@ -161,16 +161,20 @@ subroutine boxconv(dat,datconv,npx,npy,n)
 ! n : The width of the convolution kernel
 !
 
-    real(kind=8), intent(in) :: dat(npx,npy)
-    real(kind=8), intent(inout) :: datconv(npx,npy)
+    real(kind=8), intent(in) :: dat(:,:)
+    real(kind=8), intent(inout) :: datconv(:,:)
     integer(kind=4), intent(in) :: n
-    real(kind=8) :: cumix(0:npx,npy), cumiy(npx,0:npy)
+    real(kind=8), allocatable :: cumix(:,:), cumiy(:,:)
     integer(kind=4) :: ix,iy,mn,mx,npx,npy
 
     !$OMP parallel default(None) private(ix,iy,mn,mx) &
     !$OMP shared(dat,cumix,cumiy,datconv,sqcx,cum2cy,sq2cx,npx,npy,n)
 
+    npx = size(dat,1)
+    npy = size(dat,2)
 
+    allocate(cumix(0:npx,npy))
+    allocate(cumiy(npx,0:npy))
 
     !$OMP do schedule(static)
     do iy=1,npy
@@ -220,6 +224,9 @@ subroutine boxconv(dat,datconv,npx,npy,n)
     enddo
     !$OMP enddo
     !$OMP end parallel
+
+    deallocate(cumix)
+    deallocate(cumiy)
 
 end subroutine boxconv
 
