@@ -59,6 +59,18 @@ class PeakFinder(object):
 
 def boxsnr(dat, mask, mask2, nin, ncent, nout):
 
+    r"""
+    Arguments:
+        dat: The image to analyze
+        mask: The mask for the square central integration region
+        mask2: The mask for the square annulus integration region
+        nin: Size of the central integration region; integrate from (-nin, nin), inclusively.
+        ncent: Define the annulus integration region; we ignore the box from (-ncent, ncent), inclusively
+        nout: Define the annulus integration region; we include the box from (-nout, nout), inclusively
+
+    Returns: snr (numpy array), signal (numpy array)
+    """
+
     float_t = np.float64
     snr = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
     signal = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
@@ -67,3 +79,25 @@ def boxsnr(dat, mask, mask2, nin, ncent, nout):
     m2 = np.asfortranarray(mask2.astype(float_t))
     peaks_f.boxsnr(d, m, m2, snr, signal, nin, ncent, nout)
     return snr, signal
+
+
+def boxconv(dat, width):
+
+    r"""
+    Arguments:
+        dat: The image to analyze
+        mask: The mask for the square central integration region
+        mask2: The mask for the square annulus integration region
+        nin: Size of the central integration region; integrate from (-nin, nin), inclusively.
+        ncent: Define the annulus integration region; we ignore the box from (-ncent, ncent), inclusively
+        nout: Define the annulus integration region; we include the box from (-nout, nout), inclusively
+
+    Returns: snr (numpy array), signal (numpy array)
+    """
+
+    float_t = np.float64
+    datconv = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
+    d = np.asfortranarray(dat.astype(float_t))
+    peaks_f.boxconv(d, datconv, width)
+    return datconv
+

@@ -153,6 +153,76 @@ subroutine boxsnr(dat,mask,mask2,snr,signal,npx,npy,n_inner,n_center,n_outer)
 end subroutine boxsnr
 
 
+subroutine boxconv(dat,datconv,npx,npy,n)
+
+!
+! dat : The 2D array to convolve
+! datconv : The output convolved array
+! n : The width of the convolution kernel
+!
+
+    real(kind=8), intent(in) :: dat(npx,npy)
+    real(kind=8), intent(inout) :: datconv(npx,npy)
+    integer(kind=4), intent(in) :: n
+    real(kind=8) :: cumix(0:npx,npy), cumiy(npx,0:npy)
+    integer(kind=4) :: ix,iy,mn,mx,npx,npy
+
+    !$OMP parallel default(None) private(ix,iy,mn,mx) &
+    !$OMP shared(dat,cumix,cumiy,datconv,sqcx,cum2cy,sq2cx,npx,npy,n)
+
+
+
+    !$OMP do schedule(static)
+    do iy=1,npy
+        cumix(0,iy) = 0.0_8  ! cumulative data inner x
+    enddo
+    !$OMP enddo nowait
+
+    !$OMP do schedule(static)
+    do ix=1,npx
+        cumiy(ix,0) = 0.0_8  ! inner
+    enddo
+    !$OMP enddo
+
+    !$OMP do schedule(static)
+    do iy=1,npy
+        do ix=1,npx  ! cumulative sums
+            cumix(ix,iy) = cumix(ix-1,iy)+dat(ix,iy)
+        enddo
+    enddo
+    !$OMP enddo
+
+    !$OMP do schedule(static)
+    do ix=1,npx  ! windowed sums on one axis
+        do iy=1,npy
+            mn=min(npx,ix+n)
+            mx=max(0,ix-n-1)
+            datconv(ix,iy) = cumix(mn,iy)-cumix(mx,iy)
+        enddo
+    enddo
+    !$OMP enddo
+
+    !$OMP do schedule(static)
+    do ix=1,npx
+        do iy=1,npy
+            cumiy(ix,iy) = cumiy(ix,iy-1) + datconv(ix,iy)
+        enddo
+    enddo
+    !$OMP enddo
+
+    !$OMP do schedule(static)
+    do iy=1,npy
+        do ix=1,npx
+            mn=min(npy,iy+n)
+            mx=max(0,iy-n-1)
+            datconv(ix,iy) = cumiy(ix,mn)-cumiy(ix,mx)
+        enddo
+    enddo
+    !$OMP enddo
+    !$OMP end parallel
+
+end subroutine boxconv
+
 !module peaker
 !   implicit none
 !!   integer, private, parameter :: 4=selected_int_kind(9)
