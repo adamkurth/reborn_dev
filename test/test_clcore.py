@@ -9,8 +9,6 @@ If you want to view results just add the keyword "view"
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-
-# try:
 from bornagain.simulate import clcore
 import pyopencl
 from pyopencl import array as clarray
@@ -22,11 +20,6 @@ if test_core.double_precision:
 else:
     have_double = False
 ctx = clcore.create_some_gpu_context()
-# except ImportError:
-#     clcore = None
-#     clarray = None
-#     pyopencl = None
-#     havecl = False
 
 
 def test_clmath():
