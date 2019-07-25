@@ -18,6 +18,7 @@ before_script:
   - source activate bornagain
   - cd $basepath/developer
   - ./compile-fortran.sh
+  - cd $basepath
 
 tests:
   stage: test
@@ -28,6 +29,7 @@ tests:
 pages:
   script:
   - cd $basepath/doc
+  - ls
   - ./update-documentation.sh
   - cd $basepath
   - mkdir public
