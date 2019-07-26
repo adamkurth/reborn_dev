@@ -4,7 +4,7 @@ import weakref
 import numpy as np
 from bornagain.utils import warn_pyqtgraph
 try:
-    from bornagain.external.pyqtgraph.mods import ImageItem
+    # from bornagain.external.pyqtgraph.mods import ImageItem
     import pyqtgraph as pg
 except ImportError:
     warn_pyqtgraph()

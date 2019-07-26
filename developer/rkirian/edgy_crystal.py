@@ -24,8 +24,8 @@ n_pixels = 500
 
 # Load up the pdb file
 cryst = crystal.CrystalStructure(psi_pdb_file)
-cryst.spacegroup.sym_rotations = [cryst.spacegroup.sym_rotations[0]]  # TODO: fix this
-cryst.spacegroup.sym_translations = [cryst.spacegroup.sym_translations[0]]  # TODO: fix this
+cryst.spacegroup.sym_rotations = cryst.spacegroup.sym_rotations[0:2] # TODO: fix this
+cryst.spacegroup.sym_translations = cryst.spacegroup.sym_translations[0:2]  # TODO: fix this
 cryst.fractional_coordinates = np.array([[0, 0, 0], [0, 0, 0]])  # TODO: fix this
 spacegroup = cryst.spacegroup
 unitcell = cryst.unitcell
@@ -135,6 +135,7 @@ for c in range(1):
 
 dat = intensities*mask
 padview = PADView(pad_geometry=[pad], raw_data=[dat])
+padview.show_coordinate_axes()
 padview.show()
 # image = pg.image()
 # image.setLevels(0, np.percentile(intensities*mask, 90))
