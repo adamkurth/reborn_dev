@@ -4,5 +4,5 @@ This contains some extra functions for working with `pyqtgraph <http://pyqtgraph
 
 # from pyqtgraph import *
 from .extras import *
-from .mods import *
+# from .mods import *
 
