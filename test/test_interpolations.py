@@ -587,6 +587,45 @@ def test_17(): # Mask test
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
+def test_18(): # Out of bounds test2
+    N_data = 2
+    data_coord = np.array([[0.2, 0.7, 14.0], [-0.1,-16,-63]])
+    data_val = np.array([1, 10])
+    mask = np.ones(N_data)
+
+    N_bin = np.array([3, 5, 4])
+    x_min = np.array([-3, -1, -6])
+    x_max = np.array([2, 3, 2])
+
+    ans = np.array([[[ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.]],
+
+           [[ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.]],
+
+           [[ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.],
+            [ 0.,  0.,  0.,  0.]]])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
+
+
+test_14()
+test_17()
+
 
 
 

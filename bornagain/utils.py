@@ -398,15 +398,24 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     dataout = np.asfortranarray(dataout)
     weightout = np.asfortranarray(weightout)
 
-    # Mask out data_coord and data_val
+    # Mask out data_coord and data_val - user input mask
     data_coord = data_coord[mask != 0, :]
     data_val = data_val[mask != 0]
+
+    # Mask out data_coord and data_val - user input x_min and x_max, i.e. mask out out-of-bounds data points
+    ind_outofbound_max = np.sum((data_coord - c2) > 0, axis=1) == 0 # If any coordinate is greater than the maximum range (c2), throw it away.
+    data_coord = data_coord[ind_outofbound_max] 
+    data_val = data_val[ind_outofbound_max]
+
+    ind_outofbound_min = np.sum((data_coord - c3) < 0, axis=1) == 0 # If any coordinate is less than the minimum range (c3), throw it away
+    data_coord = data_coord[ind_outofbound_min] 
+    data_val = data_val[ind_outofbound_min] 
 
     # Number of data points
     N_data = len(data_val)
     
     fortran.interpolations_f.trilinear_insert(data_coord, data_val, x_min, N_data, \
-                                              Delta_x, one_over_bin_volume, c1, c2, c3,  \
+                                              Delta_x, one_over_bin_volume, c1,  \
                                               dataout, weightout)
 
     # Keep only the inner array - get rid of the boundary padding.
