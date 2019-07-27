@@ -623,8 +623,6 @@ def test_18(): # Out of bounds test2
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
-test_14()
-test_17()
 
 
 
