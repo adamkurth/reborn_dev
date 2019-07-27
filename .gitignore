@@ -1,3 +1,5 @@
+*.npz
+*.npy
 *.tmp
 developer/rkirian/old
 developer/rkirian/data

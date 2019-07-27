@@ -200,6 +200,7 @@ class Scatter3D(object):
         self.defaultSize = 1
         self.defaultWidth = 1
         self.maxDist = 0
+        self.orthographic = False
 
     def add_points(self, r, color=None, size=None):
 
@@ -277,8 +278,18 @@ class Scatter3D(object):
         self.add_lines(np.array([[0, 0, 0], c]) + b, [255, 255, 255], width=wid)
         self.add_lines(np.array([[0, 0, 0], c]) + a + b, [255, 255, 255], width=wid)
 
+    def set_orthographic_projection(self):
+
+        self.orthographic = True
+        dist = self.maxDist*100000
+        fov = 200*self.maxDist/dist
+        print(fov, dist)
+        self.w.opts['distance'] = dist
+        self.w.opts['fov'] = fov
+
     def show(self):
 
-        self.w.setCameraPosition(distance=self.maxDist * 5)
+        if not self.orthographic:
+            self.w.setCameraPosition(distance=self.maxDist * 5)
         self.w.show()
         # pg.QtGui.QApplication.exec_()

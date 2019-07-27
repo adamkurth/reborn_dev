@@ -263,6 +263,10 @@ class PADView(object):
         self.main_window.histogram.gradient.loadPreset('flame')
         self.main_window.histogram.setImageItems(self.images)
 
+    def set_levels(self, min_value, max_value):
+
+        self.main_window.histogram.item.setLevels(min_value, max_value)
+
     def add_roi(self, type='rect', pos=None, size=None):
 
         if type == 'rect':
@@ -1126,7 +1130,6 @@ class PADView(object):
         vals = self.widgets['SNR Config'].get_values()
         if vals['activate']:
             self.snr_filter_params = vals
-            # self.apply_snr_filter()
             self.data_processor = self.apply_snr_filter
             self.update_display_data()
         else:
@@ -1212,13 +1215,21 @@ class PADView(object):
     def start(self):
 
         padview_debug('start()')
+        self.app.aboutToQuit.connect(self.stop)
         self.app.exec_()
+
+    def stop(self):
+
+        print('about to quit')
+        self.app.quit_()
 
     def show(self):
 
         padview_debug('show()')
         self.main_window.show()
         # self.main_window.callback_pb_load()
+
+
 
 
 

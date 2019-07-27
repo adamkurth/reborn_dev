@@ -109,7 +109,7 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
         phonyarray = phonyarray[0:(len(phonyarray) - (len(phonyarray) % 2))]
         phonyarray = phonyarray.reshape([2, int(len(phonyarray) / 2)])
 
-        self.imageItemStrong = ImageItem(phonyarray)
+        self.imageItemStrong = pg.ImageItem(phonyarray)
         self.imageItem = weakref.ref(self.imageItemStrong)  # TODO: fix this up
         self.regionChanged()
         self.imageChanged(autoLevel=False)
