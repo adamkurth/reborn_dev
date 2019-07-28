@@ -745,6 +745,7 @@ class PADView(object):
 
         self.setup_histogram_tool()
         self.setup_masks()
+        self.set_levels(np.percentile(np.ravel(pad_data), 10), np.percentile(np.ravel(pad_data), 90))
 
     def update_pads(self):
 

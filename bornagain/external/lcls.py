@@ -81,7 +81,7 @@ class AreaDetector(object):
             pads.append(data[i, :, :])
         return pads
 
-    def cspad_data_splitter(data):
+    def cspad_data_splitter(self, data):
         return cspad_data_splitter(data)
 
 
