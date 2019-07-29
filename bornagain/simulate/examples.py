@@ -10,14 +10,15 @@ import pkg_resources
 import numpy as np
 import bornagain as ba
 from bornagain import detector
-from bornagain import utils
+from bornagain.utils import warn, random_rotation, rotation_about_axis, random_unit_vector, random_beam_vector, \
+                            max_pair_distance
 import bornagain.external
 from bornagain.simulate import atoms
 from bornagain.target.crystal import CrystalStructure
 try:
     from bornagain.simulate.clcore import ClCore
 except ImportError:
-    utils.warn("simulate.clcore cannot be imported, probably because pyopencl is not installed.")
+    warn("simulate.clcore cannot be imported, probably because pyopencl is not installed.")
     ClCore = None
 from scipy import constants as const
 
@@ -87,7 +88,7 @@ def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=Tru
     q = np.ravel(q)
 
     if random_rotation:
-        rot = utils.random_rotation()
+        rot = random_rotation()
     else:
         rot = None
 
@@ -156,7 +157,7 @@ class PDBMoleculeSimulator(object):
         """
 
         if self.random_rotation:
-            rot = utils.random_rotation()
+            rot = random_rotation()
         else:
             rot = None
 
@@ -185,7 +186,7 @@ class MoleculeSimulatorV1(object):
         self.intensity_prefactor = pad.reshape(beam.photon_number_fluence * r_e ** 2 * pad.solid_angles() *
                                           pad.polarization_factors(beam=beam))
         self.resolution = pad.max_resolution(beam=beam)
-        self.mol_size = utils.max_pair_distance(molecule.coordinates)
+        self.mol_size = max_pair_distance(molecule.coordinates)
         self.qmax = 2 * np.pi / self.resolution
         self.mesh_size = int(np.ceil(10 * self.mol_size / self.resolution))
         self.mesh_size = int(min(self.mesh_size, max_mesh_size))
@@ -198,7 +199,7 @@ class MoleculeSimulatorV1(object):
     def generate_pattern(self, rotation=None, poisson=False):
 
         if rotation is None:
-            rotation = utils.random_rotation()
+            rotation = random_rotation()
         self.clcore.mesh_interpolation(self.a_map_dev, self.q_dev, N=self.mesh_size, q_min=-self.qmax,
                                        q_max=self.qmax, R=rotation, a=self.a_out_dev)
         if poisson:
@@ -311,7 +312,7 @@ class CrystalSimulatorV1(object):
             np.ceil(min(self.beam_area, this_mosaic_domain_size ** 2) * this_mosaic_domain_size / self.cell_volume)
 
         if rotation_matrix is None:
-            rotation_matrix = ba.utils.random_rotation()
+            rotation_matrix = random_rotation()
 
         if not self.cromer_mann:
             self.clcore.phase_factor_pad(self.r_dev, f=self.f_dev, beam=beam, pad=pad, R=rotation_matrix,
@@ -324,9 +325,14 @@ class CrystalSimulatorV1(object):
 
         for _ in np.arange(1, (self.n_iterations + 1)):
 
-            b_in = ba.utils.random_beam_vector(beam.beam_divergence_fwhm)
+            # Random incoming beam vector
+            b_in = random_beam_vector(beam.beam_divergence_fwhm)
+            # Random wavelength
             wav = hc / np.random.normal(beam.photon_energy, beam.photon_energy_fwhm / 2.354820045)
-            rot = ba.utils.random_mosaic_rotation(cryst.mosaicity_fwhm).dot(rotation_matrix)
+            # Random crystal mosaic domain rotation
+            rot = np.dot(rotation_about_axis(cryst.mosaicity_fwhm/2.354820045*np.random.normal(), random_unit_vector()),
+                         rotation_matrix)
+            # Random location within pixels (pixel solid angle)
             t_vec = pad.t_vec + pad.fs_vec * (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
 
             self.shape_transform(cryst.unitcell.o_mat.T, np.array([np.ceil(n_cells_mosaic_domain ** (1 / 3.))] * 3),

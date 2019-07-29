@@ -1222,7 +1222,7 @@ class PADView(object):
     def stop(self):
 
         print('about to quit')
-        self.app.quit_()
+        self.app.quit()
 
     def show(self):
 

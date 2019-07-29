@@ -751,8 +751,7 @@ class RadialProfiler(object):
                 The requested radial profile.
         """
 
-        profile = np.bincount(self.bin_indices, data.ravel()
-                              * self.mask, self.n_bins)
+        profile = np.bincount(self.bin_indices, data.ravel() * self.mask, self.n_bins)
         if average:
             profile.flat[self.counts_non_zero] /= self.counts.flat[self.counts_non_zero]
 
