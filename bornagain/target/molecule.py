@@ -12,6 +12,7 @@ from scipy import constants as const
 
 hc = const.h*const.c
 
+
 class Molecule(object):
 
     coordinates = None
@@ -21,7 +22,12 @@ class Molecule(object):
     _max_atomic_pair_distance = None
 
     def __init__(self, coordinates=None, atomic_numbers=None, atomic_symbols=None):
-
+        r"""
+        Args:
+            coordinates (numpy array): An array of shape Nx3 vectors in cartesiaon coordinates
+            atomic_numbers (numpy array): Array of integer atomic numbers
+            atomic_symbols (numpy array): Array of atomic symbols (as an alternative to providing atomic numbers)
+        """
         self.coordinates = coordinates
         if atomic_numbers is not None:
             self.atomic_numbers = atomic_numbers
@@ -35,14 +41,31 @@ class Molecule(object):
         self.n_atoms = len(self.atomic_symbols)
         self.occupancies = np.ones(self.n_atoms)
 
-    def get_scattering_factors(self, wavelength=None, beam=None):
+    def get_scattering_factors(self, photon_energy=None, beam=None):
+        r"""
+        Get atomic scattering factors.  You need to specify the photon energy or pass a Beam class instance in.
 
+        This wraps the function :func:`bornagain.simulate.atoms.get_scattering_factors` for more details; see the docs
+        for more details.
+
+        Args:
+            photon_energy: In SI units as always
+            beam: Optionally, provide a :class:`bornagain.beam.Beam` instance instead of photon_energy
+
+        Returns:
+            Numpy array of complex scattering factors
+        """
         if beam is not None:
-            wavelength = beam.wavelength
-        return atoms.get_scattering_factors(self.atomic_numbers, hc / wavelength)
+            photon_energy = beam.photon_energy
+
+        return atoms.get_scattering_factors(self.atomic_numbers, photon_energy)
 
     @property
     def max_atomic_pair_distance(self):
+        r"""
+        Return the maximum distance between two atoms in the molecule.  This was intended to be useful for determining an
+        appropriate angular or q-space sampling frequency.
+        """
         if self._max_atomic_pair_distance is None:
             self._max_atomic_pair_distance = max_pair_distance(self.coordinates)
         return self._max_atomic_pair_distance

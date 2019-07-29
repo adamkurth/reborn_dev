@@ -95,7 +95,7 @@ def get_henke_data(atomic_number):
 
 def get_scattering_factors(atomic_numbers, photon_energy):
     r"""
-    Get complex atomic scattering factors.
+    Get complex atomic scattering factors for a given photon energy and a range of atomic numbers.
 
     Arguments:
         atomic_numbers (int/list-like): Atomic numbers.
@@ -116,7 +116,7 @@ def get_scattering_factors(atomic_numbers, photon_energy):
 
 def get_scattering_factors_fixed_z(atomic_number, photon_energies):
     r"""
-    Get complex atomic scattering factors for one Z and a range of energies.
+    Get complex atomic scattering factors for one atomic number and a range of energies.
 
     Arguments:
         atomic_number (int): Atomic number.
