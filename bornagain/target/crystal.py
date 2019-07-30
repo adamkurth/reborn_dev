@@ -242,10 +242,10 @@ class CrystalStructure(object):
     """
     # TODO: Needs documentation!
 
-    fractional_coordinates = None  # : Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
-    molecule = None    # : Molecule class instance containing the asymmetric unit
-    unitcell = None    # : UnitCell class instance
-    spacegroup = None  # : Spacegroup class instance
+    fractional_coordinates = None  #: Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
+    molecule = None    #: Molecule class instance containing the asymmetric unit
+    unitcell = None    #: UnitCell class instance
+    spacegroup = None  #: Spacegroup class instance
     mosaicity_fwhm = 0
     crystal_size = 1e-6
     crystal_size_fwhm = 0.0
@@ -454,14 +454,14 @@ class CrystalDensityMap(object):
     data arrays.
     """
 
-    sym_luts = None  # : Symmetry lookup tables -- indices that map AU to sym. partner
-    cryst = None  # : CrystalStructure class used to initiate the map
-    oversampling = None  # : Oversampling ratio
-    dx = None   # : Length increments for fractional coordinates
-    cshape = None   # : Number of samples along edges of unit cell within density map
-    shape = None   # : Number of samples along edge of full density map (includes oversampling)
-    size = None   # : Total number of elements in density map (np.prod(self.shape)
-    strides = None  # : The stride vector (mostly for internal use)
+    sym_luts = None  #: Symmetry lookup tables -- indices that map AU to sym. partner
+    cryst = None  #: CrystalStructure class used to initiate the map
+    oversampling = None  #: Oversampling ratio
+    dx = None   #: Length increments for fractional coordinates
+    cshape = None   #: Number of samples along edges of unit cell within density map
+    shape = None   #: Number of samples along edge of full density map (includes oversampling)
+    size = None   #: Total number of elements in density map (np.prod(self.shape)
+    strides = None  #: The stride vector (mostly for internal use)
 
     def __init__(self, cryst, resolution, oversampling):
         r"""

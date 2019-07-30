@@ -14,25 +14,45 @@ except ImportError:
 
 
 class PeakFinder(object):
+    r"""
+    A crude peak finder.  It works by firstly running a signal-to-noise filter over an entire image, and then searching
+    for connected regions with SNR above some threshold.  It is not fully developed.  For example, it does not yet
+    check for the minimum distance between peaks.
+    """
 
-    mask = None
-    snr_threshold = None
-    radii = None
+    mask = None  #: Ignore pixels where mask == 0.
+    snr_threshold = 10  # : Peaks must have a signal-to-noise ratio above this value.
+    radii = [1, 20, 30]  # : These are the radii associated with the :func:`boxsnr <bornagain.analysis.peaks.boxsnr>` function.
 
-    snr = None
-    signal = None
-    labels = None
-    n_labels = 0
-    centroids = None
+    snr = None  # : The SNR array from the most recent call to the find_peaks method.
+    signal = None  # : The signal array from the most recent call to the find_peaks method.
+    labels = None  # : Labeled regions of peak candidates
+    n_labels = 0  # : Number of peak candidates
+    centroids = None  # : Centroids of each peak candidate
 
     def __init__(self, snr_threshold=10, radii=(3, 8, 10), mask=None):
-
+        r"""
+        Args:
+            snr_threshold: Peaks must have a signal-to-noise ratio above this value
+            radii: These are the radii associated with the :func:`boxsnr <bornagain.analysis.peaks.boxsnr>` function.
+            mask: Ignore pixels where mask == 0.
+        """
         self.snr_threshold = snr_threshold
         self.radii = radii
         self.mask = mask
 
     def find_peaks(self, data, mask=None):
+        r"""
+        Do peak finding on a data array.
 
+        Args:
+            data: The data to perform peak finding on.
+            mask: A mask, if desired.  By default, the mask used on creation of a PeakFinder instance will be used.
+                  This defaults to ones everywhere.
+
+        Returns:
+
+        """
         if mask is None:
             if self.mask is None:
                 self.mask = np.ones_like(data)
