@@ -665,7 +665,7 @@ class CrystalDensityMap(object):
             x_max = np.max(atom_x_vecs, axis=0)
             num_atoms = len(atom_fs)
 
-            rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=x_min, x_max=x_max, N_bin=bins, mask=np.ones(num_atoms))
+            rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=x_min, x_max=x_max, N_bin=bins, mask=np.full(num_atoms, True, dtype=bool))
 
             weightout[weightout == 0] = 1
 
