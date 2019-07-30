@@ -5,7 +5,7 @@ This is the documentation for the bornagain package.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from . import detector
-# from . import simulate
+from . import simulate
 from . import source
 from . import target
 from . import utils
@@ -24,16 +24,16 @@ def set_global(option, value):
 
     Arguments:
         option: One of the following:
-    ==================================  ================================================================
-    Option                              Effect
-    ==================================  ================================================================
-    'warn_depreciated' (True/False):    Print warnings when depreciated classes etc. are used.
-    'force_depreciated' (True/False):   Like 'warn_depreciated' but raise RunTimeError instead of warn.
-    'verbose' (True/False):             Attempt to print useful information
-    'debug' (integer):                  This is intended for developers.  If the argument is 0,
-                                        bornagain will run as usual.  The other numbers will have some
-                                        special meaning that is not yet defined.
-    ==================================  ================================================================
+        ==================================  ================================================================
+        Option                              Effect
+        ==================================  ================================================================
+        'warn_depreciated' (True/False):    Print warnings when depreciated classes etc. are used.
+        'force_depreciated' (True/False):   Like 'warn_depreciated' but raise RunTimeError instead of warn.
+        'verbose' (True/False):             Attempt to print useful information
+        'debug' (integer):                  This is intended for developers.  If the argument is 0,
+                                            bornagain will run as usual.  The other numbers will have some
+                                            special meaning that is not yet defined.
+        ==================================  ================================================================
 
         value: The value that you wish to associate with one of the above options.
 
