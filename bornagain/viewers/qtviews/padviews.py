@@ -1231,10 +1231,6 @@ class PADView(object):
         # self.main_window.callback_pb_load()
 
 
-
-
-
-
 class SNRConfigWidget(QtGui.QWidget):
 
     values_changed = QtCore.pyqtSignal()
