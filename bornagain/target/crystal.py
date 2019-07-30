@@ -17,6 +17,8 @@ from bornagain.target.molecule import Molecule
 from bornagain.utils import warn, vec_mag
 from numba import jit
 
+from bornagain.utils import trilinear_insert
+
 pdb_data_path = pkg_resources.resource_filename('bornagain.data', 'pdb')
 
 
@@ -639,8 +641,8 @@ class CrystalDensityMap(object):
         Arguments:
             atom_x_vecs (numpy array):  An nx3 array of position vectors
             atom_fs (numpy array):  An n-length array of densities (must be real)
-            mode (str): Either 'gaussian' or 'nearest'
-            fixed_atom_sigma (float): Standard deviation of
+            mode (str): Either 'gaussian' or 'trilinear'
+            fixed_atom_sigma (float): Standard deviation of the Gaussian atoms
 
         Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
         """
@@ -656,6 +658,19 @@ class CrystalDensityMap(object):
             s = self.oversampling
             place_atoms_in_map(atom_x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp)
             return np.reshape(f_map, self.shape)
+
+        elif mode == 'trilinear':
+            bins = self.shape
+            x_min = np.min(atom_x_vecs, axis=0)
+            x_max = np.max(atom_x_vecs, axis=0)
+            num_atoms = len(atom_fs)
+
+            rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=x_min, x_max=x_max, N_bin=bins, mask=np.full(num_atoms, True, dtype=bool))
+
+            weightout[weightout == 0] = 1
+
+            return rho_unweighted / weightout
+
         # elif mode == 'nearest':
         #     mm = [0, self.oversampling]
         #     rng = [mm, mm, mm]
