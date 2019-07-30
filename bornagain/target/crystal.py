@@ -660,16 +660,25 @@ class CrystalDensityMap(object):
             return np.reshape(f_map, self.shape)
 
         elif mode == 'trilinear':
-            bins = self.shape
+            bins = self.cshape
             x_min = np.min(atom_x_vecs, axis=0)
             x_max = np.max(atom_x_vecs, axis=0)
             num_atoms = len(atom_fs)
 
+            # Make the atom_x_vecs C-contiguous
+            atom_x_vecs = np.ascontiguousarray(atom_x_vecs)
+
+            # Begin trilinear insert
             rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=x_min, x_max=x_max, N_bin=bins, mask=np.full(num_atoms, True, dtype=bool))
 
+            # Avoid division by zero
             weightout[weightout == 0] = 1
 
-            return rho_unweighted / weightout
+            # Assign the weighted rho to the oversampled array
+            rho = np.zeros(self.shape, dtype=np.double)
+            rho[0:self.cshape[0], 0:self.cshape[1], 0:self.cshape[2]] = rho_unweighted / weightout
+
+            return rho
 
         # elif mode == 'nearest':
         #     mm = [0, self.oversampling]
