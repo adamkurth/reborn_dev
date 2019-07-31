@@ -19,4 +19,4 @@ dependencies:
   - make
   - pip:
     - cfelpyutils
-    - sphinx_bootstrap_theme
+    - sphinx_rtd_theme
