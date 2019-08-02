@@ -86,10 +86,10 @@ def test_density_map_1():
 
 
     # Calculate the intensity via the numpy fft
-    I_fft = np.abs(np.fft.fftn(rho0))**2
+    I_fft = np.abs(np.fft.fftn(rho))**2
 
     # Calculate the intensity via the dft function above
-    I_dft = np.abs(dftn(rho0))**2
+    I_dft = np.abs(dftn(rho))**2
     I_dft = np.fft.ifftshift(I_dft)
 
     # Calculate the relative error and assert that it be less than some small value
