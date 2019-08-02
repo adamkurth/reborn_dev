@@ -8,14 +8,14 @@ from bornagain.simulate.clcore import ClCore
 from bornagain.simulate.examples import psi_pdb_file, lysozyme_pdb_file
 from bornagain.target import crystal, density
 from bornagain.viewers.qtviews import Scatter3D, bright_colors, colors, PADView
-from bornagain.external.pyqtgraph.extras import keep_open
+from bornagain.external.pyqtgraph import keep_open
 import scipy.constants as const
 eV = const.value('electron volt')
 r_e = const.value("classical electron radius")
 
 run_number = 1
 save_interval = 10
-viewcrystal = False
+viewcrystal = True
 addfacets = True
 photon_energy = 50000*eV
 pulse_energy = 1e-3
@@ -105,8 +105,8 @@ for c in range(30):
     trans = np.zeros(3)
     A = np.dot(rot, unitcell.a_mat)
     # Construct a finite lattice in the form of a hexagonal prism
-    width = 7 + np.random.rand(1)*3
-    length = 20 + np.random.rand(1)*3
+    width = 2 + np.random.rand(1)*3
+    length = 5 + np.random.rand(1)*3
     if addfacets:
         for i in range(spacegroup.n_molecules):
             lat = lats[i]

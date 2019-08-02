@@ -226,7 +226,7 @@ class CrystalSimulatorV1(object):
     """
 
     def __init__(self, pad_geometry=None, beam=None, crystal_structure=None, n_iterations=1,
-                 approximate_shape_transform=True, cromer_mann=False, expand_symmetry=False,
+                 approximate_shape_transform=True, expand_symmetry=False,
                  cl_double_precision=False, cl_group_size=32, poisson_noise=False):
 
         r"""
@@ -291,12 +291,6 @@ class CrystalSimulatorV1(object):
 
         self.beam_area = np.pi * self.beam.diameter_fwhm ** 2 / 4.0
         self.cell_volume = self.crystal_structure.unitcell.volume
-        # self.solid_angles = self.pad_geometry.solid_angles()
-        # self.polarization_factor = self.pad_geometry.polarization_factors(beam=self.beam)
-        # self.intensity_prefactor = []
-        #
-        # self.intensity_prefactor = self.beam.photon_number_fluence * r_e ** 2 * self.solid_angles * self.polarization_factor
-        # self.intensity_prefactor = self.pad_geometry.reshape(self.intensity_prefactor)
 
     def generate_pattern(self, rotation_matrix=None):
 
