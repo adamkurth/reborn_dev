@@ -135,11 +135,11 @@ class UnitCell(object):
 
     def q2h(self, q_vecs):
         r""" Transform reciprocal coordinates to fractional Miller coordinates. """
-        return np.dot(q_vecs, self.a_mat_inv.T)
+        return np.dot(q_vecs, self.a_mat_inv.T)/2./np.pi
 
     def h2q(self, h_vecs):
         r""" Transform fractional Miller coordinates to reciprocal coordinates. """
-        return np.dot(h_vecs, self.a_mat.T)
+        return 2.*np.pi*np.dot(h_vecs, self.a_mat.T)
 
     @property
     def a_vec(self):
