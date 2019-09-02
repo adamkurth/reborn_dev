@@ -148,8 +148,8 @@ def _clcore(double_precision=False):
 
     n_atoms = 10
     n_mesh = np.array([2, 3, 4])
-    q_min = np.array([-1] * 3)
-    q_max = np.array([+1] * 3)
+    q_min = np.array([-10] * 3)
+    q_max = np.array([+10] * 3)
     r_vecs = np.random.random([n_atoms, 3])
     f = np.random.random([n_atoms]) * 1j
 
@@ -172,8 +172,8 @@ def _clcore(double_precision=False):
 
     n_atoms = 10
     n_mesh = np.array([2, 3, 4])
-    q_min = np.array([-1] * 3)
-    q_max = np.array([+1] * 3)
+    q_min = np.array([-10] * 3)
+    q_max = np.array([+10] * 3)
     r_vecs = np.random.random([n_atoms, 3])
     f = np.random.random([n_atoms]) * 1j
     
