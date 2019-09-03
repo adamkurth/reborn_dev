@@ -15,7 +15,7 @@ r_e = const.value("classical electron radius")
 
 run_number = 1
 save_interval = 10
-viewcrystal = False
+viewcrystal = True 
 addfacets = True
 photon_energy = 50000*eV
 pulse_energy = 1e-3
@@ -100,6 +100,9 @@ for i in range(spacegroup.n_molecules):
     mol_r_vecs_gpu.append(clcore.to_device(mol_vecs, dtype=clcore.real_t))
 
 
+
+scat = None
+
 for c in range(30):
     rot = random_rotation()
     trans = np.zeros(3)
@@ -120,7 +123,13 @@ for c in range(30):
             lat.add_facet(plane=[0, 0, 1], length=length, shift=com)
             lat.add_facet(plane=[0, 0, -1], length=length, shift=com)
     if viewcrystal:
+        if scat != None:
+            del scat
+            
         scat = Scatter3D()
+
+
+
     t = time()
     clcore.rotate_translate_vectors(rot, trans, q_vecs_gpu, q_rot_gpu)
     amps_gpu *= 0
