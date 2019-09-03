@@ -41,9 +41,11 @@ def test_fortranarray():
     c_flat = c.reshape(200)
     f_flat = f.reshape(200)
 
+    print(type(c.data))
+    print(type(c_flat.data))
     assert c.data != c_flat.data
     assert f.data != f_flat.data
-    assert c.data == f.data      # ndarray.data is: "Python buffer object pointing to the start of the array’s data."
+    assert c.data == f.data      # ndarray.data is: "Python buffer object pointing to the start of the array's data."
     assert c_flat.data == f_flat.data
     assert c.shape[0] == 10      # They are still the same shape
     assert f.shape[0] == 10
@@ -62,3 +64,4 @@ def test_fortranarray():
     assert c.data != f.data      # But they no longer share the same memory.  The operation on c created a new array.
     assert c.data == c_original.data
     assert f.data == f_original.data
+test_fortranarray()
