@@ -1,11 +1,53 @@
 subroutine boxsnr(dat,mask,mask2,snr,signal,npx,npy,n_inner,n_center,n_outer)
 !
+! This routine computes a local signal-to-noise ratio by the following equivalent steps:
+!
+!   (1) For every pixel in the input data, do a local signal integration within a square region of size n_inner*2+1.
+!   (2) Estimate background via a local integration within a square annulus of outer size n_outer*2 + 1 and inner size
+!       n_center*2 - 1.
+!   (3) From every pixel in the local signal integration square, subtract the average background value from step (2).
+!   (4) Compute the standard deviation (sigma) in the square annulus.
+!   (5) Divide the locally-integrated signal-minus-background by the standard error.  This standard error is equal to
+!       sigma*sqrt(M) where M is the number of pixels in the locally integratied signal region, and sigma comes from
+!       step (4).
+!
+!   Note: There are two masks that are used: one mask is for the local signal integration, and the other mask is used
+!         for the local background and error annulus calculations.  The value M above, for example, is computed
+!         according to the number of valid pixels, which are indicated by mask == 1.  The use of two masks allows for
+!         multi-pass SNR computations in which the results of the first pass may be used to exclude high-SNR regions
+!         from contributing to error estimates in the annulus.
+!
+!   Note: This routine will attempt to use openmp to parallelize the computations.  It is affected by the environment
+!         variable OMP_NUM_THREADS
+!
+!                        ----------------------------------------
+!                        |                                      |
+!                        |Compute NOISE & BACKGROUND in annulus |
+!                        |                                      |
+!                        |      |------------------------|      |
+!                        |      |                        |      |
+!                        |      |    |--------------|    |      |
+!                        |      |    | Compute      |    |      |
+!                        |      |    | integrated   |    |      |
+!                        |      |    | SIGNAL minus |    |      |
+!                        |      |    | BACKGROUND   |    |      |
+!                        |      |    | here         |    |      |
+!                        |      |    |--------------|    |      |
+!                        |      |        n_inner         |      |
+!                        |      |------------------------|      |
+!                        |               n_center               |
+!                        |                                      |
+!                        |                                      |
+!                        ----------------------------------------
+!                                        n_outer
 !
 ! dat : The 2D array to run the SNR filter over.
-! mask : Ignore pixels where mask == 0
-! snr : The
-!
-!
+! mask : Ignore signal pixels where mask == 0 (the signal is multiplied by this mask).
+! mask2 : Ignore background/noise pixels where mask2 == 0 (the background is multiplied by this mask).
+! snr : The output SNR
+! signal : The output background subtracted signal
+! n_inner, n_center, n_outer : define the integration regions: see figure above
+
     real(kind=8), intent(in) :: dat(npx,npy), mask(npx,npy), mask2(npx,npy)
     real(kind=8), intent(inout) :: snr(npx,npy), signal(npx,npy)
     integer(kind=4), intent(in) :: n_inner, n_center, n_outer
@@ -153,7 +195,7 @@ subroutine boxsnr(dat,mask,mask2,snr,signal,npx,npy,n_inner,n_center,n_outer)
 end subroutine boxsnr
 
 
-subroutine boxconv(dat,datconv,n)
+subroutine boxconv(dat,datconv,n, npx, npy)
 
 !
 ! dat : The 2D array to convolve
@@ -161,20 +203,14 @@ subroutine boxconv(dat,datconv,n)
 ! n : The width of the convolution kernel
 !
 
-    real(kind=8), intent(in) :: dat(:,:)
-    real(kind=8), intent(inout) :: datconv(:,:)
+    real(kind=8), intent(in) :: dat(npx,npy)
+    real(kind=8), intent(inout) :: datconv(npx,npy)
     integer(kind=4), intent(in) :: n
-    real(kind=8), allocatable :: cumix(:,:), cumiy(:,:)
+    real(kind=8) :: cumix(0:npx,npy), cumiy(npx,0:npy)
     integer(kind=4) :: ix,iy,mn,mx,npx,npy
 
     !$OMP parallel default(None) private(ix,iy,mn,mx) &
     !$OMP shared(dat,cumix,cumiy,datconv,sqcx,cum2cy,sq2cx,npx,npy,n)
-
-    npx = size(dat,1)
-    npy = size(dat,2)
-
-    allocate(cumix(0:npx,npy))
-    allocate(cumiy(npx,0:npy))
 
     !$OMP do schedule(static)
     do iy=1,npy
@@ -224,9 +260,6 @@ subroutine boxconv(dat,datconv,n)
     enddo
     !$OMP enddo
     !$OMP end parallel
-
-    deallocate(cumix)
-    deallocate(cumiy)
 
 end subroutine boxconv
 

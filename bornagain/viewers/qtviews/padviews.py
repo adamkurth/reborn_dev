@@ -745,6 +745,7 @@ class PADView(object):
 
         self.setup_histogram_tool()
         self.setup_masks()
+        self.set_levels(np.percentile(np.ravel(pad_data), 10), np.percentile(np.ravel(pad_data), 90))
 
     def update_pads(self):
 
@@ -1221,17 +1222,13 @@ class PADView(object):
     def stop(self):
 
         print('about to quit')
-        self.app.quit_()
+        self.app.quit()
 
     def show(self):
 
         padview_debug('show()')
         self.main_window.show()
         # self.main_window.callback_pb_load()
-
-
-
-
 
 
 class SNRConfigWidget(QtGui.QWidget):

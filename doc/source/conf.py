@@ -86,7 +86,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['scatter.py', 'buffer_mesh_lookup']
+# exclude_patterns = ['scatter.py', 'buffer_mesh_lookup']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -120,13 +120,14 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-import sphinx_bootstrap_theme
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-html_theme = 'bootstrap'
+# import sphinx_bootstrap_theme
+# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+# html_theme = 'bootstrap'
 # html_theme = 'alabaster'
 # html_theme = 'sphinxdoc'
-# html_theme = "sphinx_rtd_theme"
-#html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+import sphinx_rtd_theme
+html_theme = "sphinx_rtd_theme"
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

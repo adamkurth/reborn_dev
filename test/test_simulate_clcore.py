@@ -1,6 +1,5 @@
 """
-Test the clcore simulation engine in bornagain.simulate.  This requires pytest.  You can also run from main
-like this: 
+Test the clcore simulation engine in bornagain.simulate. 
 > python test_simulate_clcore.py
 If you want to view results just add the keyword "view" 
 > python test_simulate_clcore.py view
@@ -10,7 +9,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import sys
 sys.path.append('..')
-import pytest
 import numpy as np
 import bornagain as ba
 from bornagain import utils
@@ -43,7 +41,6 @@ if len(sys.argv) > 1:
     view = True
 
 
-@pytest.mark.cl
 def test_clcore_float():
 
     if havecl:
@@ -52,7 +49,6 @@ def test_clcore_float():
         _test_ridiculous_sum(double_precision=False)
 
 
-@pytest.mark.cl
 def test_clcore_double():
 
     if havecl and have_double:
@@ -152,8 +148,8 @@ def _clcore(double_precision=False):
 
     n_atoms = 10
     n_mesh = np.array([2, 3, 4])
-    q_min = np.array([-1] * 3)
-    q_max = np.array([+1] * 3)
+    q_min = np.array([-10] * 3)
+    q_max = np.array([+10] * 3)
     r_vecs = np.random.random([n_atoms, 3])
     f = np.random.random([n_atoms]) * 1j
 
@@ -176,8 +172,8 @@ def _clcore(double_precision=False):
 
     n_atoms = 10
     n_mesh = np.array([2, 3, 4])
-    q_min = np.array([-1] * 3)
-    q_max = np.array([+1] * 3)
+    q_min = np.array([-10] * 3)
+    q_max = np.array([+10] * 3)
     r_vecs = np.random.random([n_atoms, 3])
     f = np.random.random([n_atoms]) * 1j
     
@@ -321,7 +317,6 @@ def _clcore(double_precision=False):
         assert (np.mean(np.abs(amps3 - amps4)) / np.mean(np.abs(amps4)) < tol)
 
 
-@pytest.mark.cl
 def _test_rotations(double_precision=False):
 
     # if not havecl:

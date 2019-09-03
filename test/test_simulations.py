@@ -29,7 +29,7 @@ def test_mappings():
     beam = source.Beam(wavelength=3e-10)
     pad = detector.PADGeometry(pixel_size=300e-6, distance=0.2, n_pixels=20)
     q_vecs = pad.q_vecs(beam=beam)
-    h_vecs = unitcell.q2h(q_vecs)/2/np.pi  # These are the scattering vectors in reciprocal lattice basis
+    h_vecs = unitcell.q2h(q_vecs)  # These are the scattering vectors in reciprocal lattice basis
 
     # Atomic scattering factors (just ones for now -- problems with mapping complex numbers)
     f = 1 + 0 * cryst.molecule.get_scattering_factors(hc / beam.wavelength)

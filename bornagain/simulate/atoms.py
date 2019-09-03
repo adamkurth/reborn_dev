@@ -66,10 +66,10 @@ def atomic_numbers_to_symbols(numbers):
 @utils.memoize
 def get_henke_data(atomic_number):
     r"""
-    Load Henke scattering factor data from disk, cache for future retrieval. The
-    Henke data was gathered from the Center for X-Ray Optics web page at the
-    Lawrence Berkeley National Laboratory.  There is a publication with details
-    (reference to be added).
+    Load the `Henke scattering factor data <http://henke.lbl.gov/optical_constants/asf.html>`_ from disk.  The
+    Henke data was gathered from the Center for X-Ray Optics web page at the Lawrence Berkeley National Laboratory.
+
+    The data are cached on the first call to this function so that subsequent requests load faster.
 
     Arguments:
         atomic_number (int): Atomic number
@@ -95,7 +95,8 @@ def get_henke_data(atomic_number):
 
 def get_scattering_factors(atomic_numbers, photon_energy):
     r"""
-    Get complex atomic scattering factors.
+    Get complex atomic scattering factors for a given photon energy and a range of atomic numbers.  The scattering
+    factor data come from the function :func:`bornagain.simulate.atoms.get_henke_data()`.
 
     Arguments:
         atomic_numbers (int/list-like): Atomic numbers.
@@ -116,7 +117,7 @@ def get_scattering_factors(atomic_numbers, photon_energy):
 
 def get_scattering_factors_fixed_z(atomic_number, photon_energies):
     r"""
-    Get complex atomic scattering factors for one Z and a range of energies.
+    Get complex atomic scattering factors for one atomic number and a range of energies.
 
     Arguments:
         atomic_number (int): Atomic number.

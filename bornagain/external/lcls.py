@@ -81,7 +81,7 @@ class AreaDetector(object):
             pads.append(data[i, :, :])
         return pads
 
-    def cspad_data_splitter(data):
+    def cspad_data_splitter(self, data):
         return cspad_data_splitter(data)
 
 
@@ -112,8 +112,8 @@ def get_pad_geometry(detector, run):
     Detector class in the psana package.
 
     Special considerations are taken for the case of the CSPAD detector, since it has rows of pixels that are elongated
-    (did you know that?).  The nominal pixel size is 109.92 × 109.92 microns, but the central two columns (193 and 194)
-    have pixels of size 274.80 × 109.92 microns.  This is documented here:
+    (did you know that?).  The nominal pixel size is 109.92 x 109.92 microns, but the central two columns (193 and 194)
+    have pixels of size 274.80 x 109.92 microns.  This is documented here:
     https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry
 
     Credit goes to Derek Mendez for this.

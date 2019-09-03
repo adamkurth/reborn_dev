@@ -10,14 +10,15 @@ import pkg_resources
 import numpy as np
 import bornagain as ba
 from bornagain import detector
-from bornagain import utils
+from bornagain.utils import warn, random_rotation, rotation_about_axis, random_unit_vector, random_beam_vector, \
+                            max_pair_distance
 import bornagain.external
 from bornagain.simulate import atoms
 from bornagain.target.crystal import CrystalStructure
 try:
     from bornagain.simulate.clcore import ClCore
 except ImportError:
-    utils.warn("simulate.clcore cannot be imported, probably because pyopencl is not installed.")
+    warn("simulate.clcore cannot be imported, probably because pyopencl is not installed.")
     ClCore = None
 from scipy import constants as const
 
@@ -87,7 +88,7 @@ def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=Tru
     q = np.ravel(q)
 
     if random_rotation:
-        rot = utils.random_rotation()
+        rot = random_rotation()
     else:
         rot = None
 
@@ -156,7 +157,7 @@ class PDBMoleculeSimulator(object):
         """
 
         if self.random_rotation:
-            rot = utils.random_rotation()
+            rot = random_rotation()
         else:
             rot = None
 
@@ -185,7 +186,7 @@ class MoleculeSimulatorV1(object):
         self.intensity_prefactor = pad.reshape(beam.photon_number_fluence * r_e ** 2 * pad.solid_angles() *
                                           pad.polarization_factors(beam=beam))
         self.resolution = pad.max_resolution(beam=beam)
-        self.mol_size = utils.max_pair_distance(molecule.coordinates)
+        self.mol_size = max_pair_distance(molecule.coordinates)
         self.qmax = 2 * np.pi / self.resolution
         self.mesh_size = int(np.ceil(10 * self.mol_size / self.resolution))
         self.mesh_size = int(min(self.mesh_size, max_mesh_size))
@@ -198,7 +199,7 @@ class MoleculeSimulatorV1(object):
     def generate_pattern(self, rotation=None, poisson=False):
 
         if rotation is None:
-            rotation = utils.random_rotation()
+            rotation = random_rotation()
         self.clcore.mesh_interpolation(self.a_map_dev, self.q_dev, N=self.mesh_size, q_min=-self.qmax,
                                        q_max=self.qmax, R=rotation, a=self.a_out_dev)
         if poisson:
@@ -225,19 +226,18 @@ class CrystalSimulatorV1(object):
     """
 
     def __init__(self, pad_geometry=None, beam=None, crystal_structure=None, n_iterations=1,
-                 approximate_shape_transform=True, cromer_mann=False, expand_symmetry=False,
+                 approximate_shape_transform=True, expand_symmetry=False,
                  cl_double_precision=False, cl_group_size=32, poisson_noise=False):
 
         r"""
 
         Arguments:
-            pad_geometry: An instance of bornagain.detector.PADGeometry
+            pad_geometry: A :class:`PADGeometry <bornagain.detector.PADGeometry>` class instance, or a list of instances.
             beam: An instance of bornagain.source.Beam
             crystal_structure: An instance of bornagain.target.crystal.CrystalStructure
             n_iterations: Number of iterations to average over
             approximate_shape_transform: Use a Gaussian approximation to shape transforms, else analytic parallelepiped
                 shape transform
-            cromer_mann: Not yet implemented
             expand_symmetry: Duplicate the asymmetric unit according to spacegroup symmetry in crystal_structure
             cl_double_precision: Use double precision if available on GPU device
             cl_group_size: GPU group size (default is 32)
@@ -245,17 +245,26 @@ class CrystalSimulatorV1(object):
 
         """
 
+        if not isinstance(pad_geometry, list):
+            pad_geometry = [pad_geometry]
         self.pad_geometry = pad_geometry
         self.beam = beam
         self.crystal_structure = crystal_structure
         self.n_iterations = n_iterations
-        self.cromer_mann = cromer_mann
         self.poisson_noise = poisson_noise
 
-        self.q = self.pad_geometry.q_vecs(beam=beam)
-        self.qmag = self.pad_geometry.q_mags(beam=beam)
-        self.sa = self.pad_geometry.solid_angles()
-        self.pol = self.pad_geometry.polarization_factors(beam=beam)
+        self.q = []
+        self.qmag = []
+        # self.sa = []
+        # self.pol = []
+        self.ipf = []
+        for p in pad_geometry:
+            self.q.append(p.q_vecs(beam=beam))
+            self.qmag.append(p.q_mags(beam=beam))
+            # self.sa.append(p.solid_angles())
+            # self.pol.append(p.polarization_factors(beam=beam))
+            ipf = self.beam.photon_number_fluence*r_e**2*p.solid_angles()*p.polarization_factors(beam=beam)
+            self.ipf.append(p.reshape(ipf))
 
         if expand_symmetry:
             self.r = self.crystal_structure.get_symmetry_expanded_coordinates()
@@ -264,14 +273,16 @@ class CrystalSimulatorV1(object):
         else:
             self.r = self.crystal_structure.molecule.coordinates
             self.Z = self.crystal_structure.molecule.atomic_numbers
-
         self.f = ba.simulate.atoms.get_scattering_factors(self.Z, photon_energy=beam.photon_energy)
 
         self.clcore = ClCore(group_size=cl_group_size, double_precision=cl_double_precision)
         self.r_dev = self.clcore.to_device(self.r, dtype=self.clcore.real_t)
         self.f_dev = self.clcore.to_device(self.f, dtype=self.clcore.complex_t)
-        self.F_dev = self.clcore.to_device(shape=self.pad_geometry.shape(), dtype=self.clcore.complex_t)
-        self.S2_dev = self.clcore.to_device(shape=self.pad_geometry.shape(), dtype=self.clcore.real_t)
+        self.F_dev = []
+        self.S2_dev = []
+        for p in pad_geometry:
+            self.F_dev.append(self.clcore.to_device(shape=p.shape(), dtype=self.clcore.complex_t))
+            self.S2_dev.append(self.clcore.to_device(shape=p.shape(), dtype=self.clcore.real_t))
 
         if approximate_shape_transform:
             self.shape_transform = self.clcore.gaussian_lattice_transform_intensities_pad
@@ -280,23 +291,15 @@ class CrystalSimulatorV1(object):
 
         self.beam_area = np.pi * self.beam.diameter_fwhm ** 2 / 4.0
         self.cell_volume = self.crystal_structure.unitcell.volume
-        self.solid_angles = self.pad_geometry.solid_angles()
-        self.polarization_factor = self.pad_geometry.polarization_factors(beam=self.beam)
-        self.intensity_prefactor = self.beam.photon_number_fluence * r_e ** 2 * self.solid_angles * self.polarization_factor
-        self.intensity_prefactor = self.pad_geometry.reshape(self.intensity_prefactor)
 
     def generate_pattern(self, rotation_matrix=None):
 
         r"""
-
         Arguments:
             rotation_matrix: Specify a rotation matrix, else a random rotation is generated.
 
         Returns: A numpy array with diffraction intensities
-
         """
-
-        print('hello')
 
         cryst = self.crystal_structure
         beam = self.beam
@@ -311,32 +314,42 @@ class CrystalSimulatorV1(object):
             np.ceil(min(self.beam_area, this_mosaic_domain_size ** 2) * this_mosaic_domain_size / self.cell_volume)
 
         if rotation_matrix is None:
-            rotation_matrix = ba.utils.random_rotation()
+            rotation_matrix = random_rotation()
 
-        if not self.cromer_mann:
-            self.clcore.phase_factor_pad(self.r_dev, f=self.f_dev, beam=beam, pad=pad, R=rotation_matrix,
-                                         a=self.F_dev, add=False)
-            moltrans = np.abs(self.F_dev.get()) ** 2
-        else:
-            raise ValueError('Cromer-Mann needs to be re-implemented')
-
-        self.S2_dev *= 0
+        moltrans = []
+        for i in range(len(self.pad_geometry)):
+            self.clcore.phase_factor_pad(self.r_dev, f=self.f_dev, beam=beam, pad=self.pad_geometry[i],
+                                         R=rotation_matrix, a=self.F_dev[i], add=False)
+            moltrans.append(np.abs(self.F_dev[i].get()) ** 2)
+            self.S2_dev[i] *= 0
 
         for _ in np.arange(1, (self.n_iterations + 1)):
 
-            b_in = ba.utils.random_beam_vector(beam.beam_divergence_fwhm)
+            # Random incoming beam vector
+            b_in = random_beam_vector(beam.beam_divergence_fwhm)
+            # Random wavelength
             wav = hc / np.random.normal(beam.photon_energy, beam.photon_energy_fwhm / 2.354820045)
-            rot = ba.utils.random_mosaic_rotation(cryst.mosaicity_fwhm).dot(rotation_matrix)
-            t_vec = pad.t_vec + pad.fs_vec * (np.random.random([1]) - 0.5) + pad.ss_vec * (np.random.random([1]) - 0.5)
+            # Random crystal mosaic domain rotation
+            rot = np.dot(rotation_about_axis(cryst.mosaicity_fwhm/2.354820045*np.random.normal(), random_unit_vector()),
+                         rotation_matrix)
+            # Random location within pixels (pixel solid angle)
+            osfs = np.random.random([1]) - 0.5
+            osss = np.random.random([1]) - 0.5
 
-            self.shape_transform(cryst.unitcell.o_mat.T, np.array([np.ceil(n_cells_mosaic_domain ** (1 / 3.))] * 3),
-                                 t_vec, pad.fs_vec, pad.ss_vec, b_in, pad.n_fs, pad.n_ss, wav, rot, self.S2_dev,
-                                 add=True)
+            for i in range(len(self.pad_geometry)):
+                pad = self.pad_geometry[i]
+                t_vec = pad.t_vec + pad.fs_vec * osfs + pad.ss_vec * osss
 
-        shapetrans = self.S2_dev.get() / self.n_iterations
-        intensity = moltrans * shapetrans * self.intensity_prefactor * n_cells_whole_crystal / n_cells_mosaic_domain
+                self.shape_transform(cryst.unitcell.o_mat.T, np.array([np.ceil(n_cells_mosaic_domain ** (1 / 3.))] * 3),
+                                     t_vec, pad.fs_vec, pad.ss_vec, b_in, pad.n_fs, pad.n_ss, wav, rot, self.S2_dev[i],
+                                     add=True)
 
-        if self.poisson_noise:
-            intensity = np.random.poisson(intensity)
+        intensity = []
+        for i in range(len(self.pad_geometry)):
+            shapetrans = self.S2_dev[i].get() / self.n_iterations
+            intensity.append(moltrans[i] * shapetrans * self.ipf[i] * n_cells_whole_crystal / n_cells_mosaic_domain)
+
+            if self.poisson_noise:
+                intensity[i] = np.random.poisson(intensity[i])
 
         return intensity

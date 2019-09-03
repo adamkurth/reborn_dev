@@ -17,6 +17,8 @@ from bornagain.target.molecule import Molecule
 from bornagain.utils import warn, vec_mag
 from numba import jit
 
+from bornagain.utils import trilinear_insert
+
 pdb_data_path = pkg_resources.resource_filename('bornagain.data', 'pdb')
 
 
@@ -133,11 +135,11 @@ class UnitCell(object):
 
     def q2h(self, q_vecs):
         r""" Transform reciprocal coordinates to fractional Miller coordinates. """
-        return np.dot(q_vecs, self.a_mat_inv.T)
+        return np.dot(q_vecs, self.a_mat_inv.T)/2./np.pi
 
     def h2q(self, h_vecs):
         r""" Transform fractional Miller coordinates to reciprocal coordinates. """
-        return np.dot(h_vecs, self.a_mat.T)
+        return 2.*np.pi*np.dot(h_vecs, self.a_mat.T)
 
     @property
     def a_vec(self):
@@ -240,10 +242,10 @@ class CrystalStructure(object):
     """
     # TODO: Needs documentation!
 
-    fractional_coordinates = None  # : Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
-    molecule = None    # : Molecule class instance containing the asymmetric unit
-    unitcell = None    # : UnitCell class instance
-    spacegroup = None  # : Spacegroup class instance
+    fractional_coordinates = None  #: Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
+    molecule = None                #: Molecule class instance containing the asymmetric unit
+    unitcell = None                #: UnitCell class instance
+    spacegroup = None              #: Spacegroup class instance
     mosaicity_fwhm = 0
     crystal_size = 1e-6
     crystal_size_fwhm = 0.0
@@ -452,14 +454,14 @@ class CrystalDensityMap(object):
     data arrays.
     """
 
-    sym_luts = None  # : Symmetry lookup tables -- indices that map AU to sym. partner
-    cryst = None  # : CrystalStructure class used to initiate the map
-    oversampling = None  # : Oversampling ratio
-    dx = None   # : Length increments for fractional coordinates
-    cshape = None   # : Number of samples along edges of unit cell within density map
-    shape = None   # : Number of samples along edge of full density map (includes oversampling)
-    size = None   # : Total number of elements in density map (np.prod(self.shape)
-    strides = None  # : The stride vector (mostly for internal use)
+    sym_luts = None      #: Symmetry lookup tables -- indices that map AU to sym. partner
+    cryst = None         #: CrystalStructure class used to initiate the map
+    oversampling = None  #: Oversampling ratio
+    dx = None            #: Length increments for fractional coordinates
+    cshape = None        #: Number of samples along edges of unit cell within density map
+    shape = None         #: Number of samples along edge of full density map (includes oversampling)
+    size = None          #: Total number of elements in density map (np.prod(self.shape)
+    strides = None       #: The stride vector (mostly for internal use)
 
     def __init__(self, cryst, resolution, oversampling):
         r"""
@@ -632,15 +634,13 @@ class CrystalDensityMap(object):
     def place_atoms_in_map(self, atom_x_vecs, atom_fs, mode='gaussian', fixed_atom_sigma=0.5e-10):
         r"""
         This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
-        should be in the crystal basis, and the densities must be real (because the scipy function that we use does
-        not allow for complex numbers...).  This is done in a lazy way - the density samples are placed in the nearest
-        voxel.  There are no Gaussian shapes asigned to the atomic form.  Nothing fancy...
+        should be in the crystal basis, and the densities must be real.
 
         Arguments:
-            atom_x_vecs (numpy array):  An nx3 array of position vectors
-            atom_fs (numpy array):  An n-length array of densities (must be real)
-            mode (str): Either 'gaussian' or 'nearest'
-            fixed_atom_sigma (float): Standard deviation of
+            atom_x_vecs      (numpy array) : An nx3 array of position vectors
+            atom_fs          (numpy array) : An n-length array of densities (must be real)
+            mode             (str)         : Either 'gaussian' or 'trilinear'
+            fixed_atom_sigma (float)       : Standard deviation of the Gaussian atoms
 
         Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
         """
@@ -656,6 +656,24 @@ class CrystalDensityMap(object):
             s = self.oversampling
             place_atoms_in_map(atom_x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp)
             return np.reshape(f_map, self.shape)
+
+        elif mode == 'trilinear':
+            bins = self.shape
+            x_min = np.zeros(3)
+            x_max = x_min + self.shape * self.dx
+            num_atoms = len(atom_fs)
+
+            # Make the atom_x_vecs C-contiguous
+            atom_x_vecs = np.ascontiguousarray(atom_x_vecs)
+
+            # Trilinear insert the 
+            rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=x_min, x_max=x_max, N_bin=bins, mask=np.full(num_atoms, True, dtype=bool))
+
+            # Avoid division by zero
+            weightout[weightout == 0] = 1
+
+            return rho_unweighted / weightout
+
         # elif mode == 'nearest':
         #     mm = [0, self.oversampling]
         #     rng = [mm, mm, mm]
