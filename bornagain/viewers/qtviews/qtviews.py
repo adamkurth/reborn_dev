@@ -202,6 +202,13 @@ class Scatter3D(object):
         self.maxDist = 0
         self.orthographic = False
 
+    def __del__(self):
+        r'''
+        Delete reference C++ will call destructor.
+        '''
+        del self.app
+
+
     def add_points(self, r, color=None, size=None):
 
         r'''
