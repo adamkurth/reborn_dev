@@ -35,20 +35,20 @@ class PADGeometry(object):
     _ss_vec = None  #: The slow-scan basis vector.
     _t_vec = None  #: The overall translation vector.
 
-    def __init__(self, n_pixels=None, distance=None, pixel_size=None):
-        """
-
+    def __init__(self, n_pixels=None, distance=None, pixel_size=None, shape=None):
+        r"""
         High-level initialization.  Centers the detector in the x-y plane.
 
         Arguments:
-            n_pixels (int):
-            distance (float):
-            pixel_size (float):
+            n_pixels (int or numpy array): Shape of the panels.  The first element is the slow-scan shape.  If there is
+                                           only one element, or if it is an int, then it will be a square panel.
+            distance (float): Sample-to-detector distance, where the beam is taken along the third ("Z") axis
+            pixel_size (float): Size of the pixels in SI units.
         """
 
-        if n_pixels is not None and distance is not None and pixel_size is not None:
+        if distance is not None and pixel_size is not None:
 
-            self.simple_setup(n_pixels=n_pixels, distance=distance, pixel_size=pixel_size)
+            self.simple_setup(n_pixels=n_pixels, distance=distance, pixel_size=pixel_size, shape=shape)
 
     def __str__(self):
 
@@ -114,19 +114,23 @@ class PADGeometry(object):
                 setattr(pad, name, data)
         return pad
 
-    def simple_setup(self, n_pixels=(1000, 1000), pixel_size=100e-6, distance=0.1):
+    def simple_setup(self, n_pixels=None, pixel_size=100e-6, distance=0.1, shape=(1000, 1000)):
         r""" Make this a square PAD with beam at center.
 
         Returns:
             object:
         """
 
-        try:
-            self.n_fs = n_pixels[0]
-            self.n_ss = n_pixels[1]
-        except TypeError:
-            self.n_fs = n_pixels
-            self.n_ss = n_pixels
+        if shape is not None:
+            self.n_fs = shape[1]
+            self.n_ss = shape[0]
+        else:
+            try:
+                self.n_fs = n_pixels[1]
+                self.n_ss = n_pixels[0]
+            except TypeError:
+                self.n_fs = n_pixels
+                self.n_ss = n_pixels
         self.fs_vec = [pixel_size, 0, 0]
         self.ss_vec = [0, pixel_size, 0]
         self.t_vec = [-pixel_size * (self.n_fs / 2.0 - 0.5), -pixel_size * (self.n_ss / 2.0 - 0.5), distance]
@@ -416,6 +420,38 @@ class PADGeometry(object):
             float
         """
         return 2 * np.pi / np.max(self.q_mags(beam=beam))
+
+
+def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0.1, tiling_shape=(4, 2), pad_gap=50):
+    r"""
+    Make a list of PADGeometry instances with identical panel sizes, tiled in a regular grid.
+
+    Arguments:
+        pad_shape (tuple): Shape of the pads (slow scan, fast scan)
+        pixel_size (float): Pixel size in SI units
+        distance (float): Detector distance in SI units
+        tiling_shape (tuple): Shape of tiling (n tiles along slow scan, n tiles along fast scan)
+        pad_gap (float): Gap between pad tiles in SI units
+
+    Returns:
+        list of PADGeometry instances
+    """
+
+    pads = []
+
+    tilefs_sep = pad_shape[1] + pad_gap/pixel_size / 2 #+ 0.5
+    tilefs_pos = (np.arange(tiling_shape[1]) - (tiling_shape[1] - 1) / 2) * tilefs_sep
+    tiless_sep = pad_shape[0] + pad_gap/pixel_size / 2 #+ 0.5
+    tiless_pos = (np.arange(tiling_shape[0]) - (tiling_shape[0] - 1) / 2) * tiless_sep
+
+    for fs_cent in tilefs_pos:  # fast scan
+        for ss_cent in tiless_pos:  # slow scan
+            pad = PADGeometry(shape=pad_shape, pixel_size=pixel_size, distance=distance)
+            pad.t_vec += pad.fs_vec * fs_cent - 0.5*pixel_size
+            pad.t_vec += pad.ss_vec * ss_cent - 0.5*pixel_size
+            pads.append(pad)
+
+    return pads
 
 
 def split_pad_data(pad_list, data):
