@@ -616,9 +616,12 @@ class ClCore(object):
                These values specify the *center* of the first voxel.
             q_max (numpy array length 3): Naximum q-space magnitudes in the 3d mesh.
                These values specify the *center* of the voxel.
+            dq (numpy array of length 3): For legacy reasons, you can specify dq instead of N.
+                                          Note that the relation between dq and N is dq = (q_max-q_min)/(N-1).
             a (clArray): device buffer, if available
             R (3x3 array): Rotation matrix, to be applied to r vectors
             add (bool): If True, add to device buffer a, else overwrite the buffer.
+            density_map (an instance of ):
 
         Returns:
             An array of complex scattering amplitudes.  By default this is a normal
