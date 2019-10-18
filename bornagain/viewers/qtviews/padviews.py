@@ -225,6 +225,9 @@ class PADView(object):
         mw.actionShow_scan_directions.triggered.connect(self.toggle_fast_scan_directions)
         mw.actionMask_panel_edges.triggered.connect(self.mask_panel_edges)
         mw.actionFind_peaks.triggered.connect(self.toggle_peak_finding)
+        mw.actionMask_upper_limit.triggered.connect(self.mask_upper_level)
+        mw.actionMask_lower_limit.triggered.connect(self.mask_lower_level)
+        mw.actionMask_limits.triggered.connect(self.mask_levels)
 
     def setup_shortcuts(self):
 
@@ -607,6 +610,31 @@ class PADView(object):
         for i in range(len(self.mask_data)):
             self.mask_data[i] *= bornagain.detector.edge_mask(self.mask_data[i], n_pixels)
 
+        self.update_masks()
+
+    def mask_upper_level(self):
+
+        val = self.main_window.histogram.item.getLevels()[1]
+        dat = self.get_pad_display_data()
+        for i in range(len(dat)):
+            self.mask_data[i][dat[i] > val] = 0
+        self.update_masks()
+
+    def mask_lower_level(self):
+
+        val = self.main_window.histogram.item.getLevels()[0]
+        dat = self.get_pad_display_data()
+        for i in range(len(dat)):
+            self.mask_data[i][dat[i] < val] = 0
+        self.update_masks()
+
+    def mask_levels(self):
+
+        val = self.main_window.histogram.item.getLevels()
+        dat = self.get_pad_display_data()
+        for i in range(len(dat)):
+            self.mask_data[i][dat[i] < val[0]] = 0
+            self.mask_data[i][dat[i] > val[1]] = 0
         self.update_masks()
 
     def hide_masks(self):

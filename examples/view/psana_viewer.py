@@ -1,4 +1,4 @@
-print("Loading python modules...")
+print("Loading python modules... not my fault if this takes forever...")
 # import h5py
 import re
 import os
@@ -7,6 +7,7 @@ import sys
 import argparse
 import psana
 # import numpy as np
+import bornagain
 from bornagain.viewers.qtviews import PADView
 from bornagain.external import crystfel, lcls, cheetah
 from bornagain.fileio.getters import FrameGetter
