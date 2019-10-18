@@ -369,15 +369,23 @@ class FiniteLattice(object):
         self.all_x_coordinates = np.vstack([x.ravel(), y.ravel(), z.ravel()]).T.copy()
         self.all_x_coordinates.flags.writeable = False
         self._all_r_coordinates = None
+        self._all_r_mags = None
 
     @property
     def all_r_coordinates(self):
 
         if self._all_r_coordinates is None:
             self._all_r_coordinates = np.dot(self.all_x_coordinates, self.unitcell.o_mat.T)
-            self._all_r_coordinates.flags.writeable = False
-
+            # self._all_r_coordinates.flags.writeable = False
         return self._all_r_coordinates
+
+    @property
+    def all_r_mags(self):
+
+        if self._all_r_mags is None:
+            self._all_r_mags = vec_mag(self.all_r_coordinates)
+            # self._all_r_mags.flags.writable = False
+        return self._all_r_mags
 
     @property
     def occupied_indices(self):
@@ -437,6 +445,11 @@ class FiniteLattice(object):
         self.add_facet(plane=[0, 1, 0], length=n_cells)
         self.add_facet(plane=[-1, 0, 0], length=n_cells)
         self.add_facet(plane=[0, -1, 0], length=n_cells)
+
+    def sphericalize(self, radius):
+
+        self.occupancies.flat[self.all_r_mags > radius] = 0
+
 
 
 class CrystalDensityMap(object):
@@ -716,7 +729,7 @@ def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f
 
 
 def pdb_to_dict(pdb_file_path):
-    r"""Return a :class:`CrystalStructure` object with a subset of PDB information.  If there are multiple atomic
+    r"""Return a dictionary with a subset of PDB information.  If there are multiple atomic
     models, only the first will be extracted.  Units are the standard PDB units: angstrom and degrees.
 
     Arguments:
@@ -742,6 +755,11 @@ def pdb_to_dict(pdb_file_path):
     smtry = np.zeros([1000, 6])
     mtrix = np.zeros([10000, 4])
     i_given = np.zeros([1000], dtype=int)
+    a = b = c = None
+    alpha = beta = gamma = None
+    spacegroup_rotations = []
+    spacegroup_symbol = None
+    spacegroup_translations = []
 
     smtry_index = 0
     mtrix_index = 0
@@ -815,6 +833,7 @@ def pdb_to_dict(pdb_file_path):
 
     ncs_rotations = []
     ncs_translations = []
+    i = 0
     for i in range(int(mtrix_index/3)):
         ncs_rotations.append(mtrix[i*3:i*3+3, 0:3])
         ncs_translations.append(mtrix[i*3:i*3+3, 3])

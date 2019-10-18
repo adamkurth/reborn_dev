@@ -520,6 +520,7 @@ class PADAssembler(object):
         a = np.zeros([m[0] + 1, m[1] + 1])
         self.v = v
         self.a = a
+        self.shape = (m[0] + 1, m[1] + 1)
 
     def assemble_data(self, data):
         r"""

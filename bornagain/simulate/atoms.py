@@ -5,7 +5,14 @@ import numpy as np
 from bornagain import utils
 from scipy import constants as const
 
+try:
+    import xraylib
+except ImportError:
+    pass
+
 eV = const.value('electron volt')
+NA = const.value('Avogadro constant')
+
 
 henke_data_path = pkg_resources.resource_filename('bornagain.simulate', 'data/henke')
 
@@ -29,7 +36,6 @@ def atomic_symbols_to_numbers(symbols):
     Returns:
         numbers (numpy array): Atomic numbers.
     """
-
     symbols = np.array(symbols)
     if symbols.ndim > 0:
         Z = np.zeros([len(symbols)])
@@ -130,3 +136,63 @@ def get_scattering_factors_fixed_z(atomic_number, photon_energies):
     dat = get_henke_data(atomic_number)
     return np.interp(np.array(photon_energies), dat['Photon Energy'], dat['Scatter Factor'], left=-9999, right=-9999)
 
+
+def xraylib_scattering_factors(qmags, atomic_number, photon_energy):
+    r"""
+    Get the q-dependent atomic scattering factors from the xraylib package.
+
+    Args:
+        qmags (numpy array):
+        atomic_number:
+        photon_energy:
+
+    Returns:
+    """
+
+    Z = atomic_number
+    E = photon_energy/eV/1000
+    qq = qmags/4.0/np.pi/1e10
+    from xraylib import FF_Rayl, Fi, Fii
+    return np.array([FF_Rayl(Z, q) for q in qq]) + Fi(Z, E) - 1j*Fii(Z, E)
+
+
+def hubbel_atomic_form_factor(qmags, atomic_number, photon_energy):
+    r"""
+    Fetch the q-dependent atomic form factors.  This allows for an arbitrary list of q magnitudes and returns an array.
+    The scattering factors come from Hubbel et al 1975, and are accessed through the xraylib package.
+
+    Args:
+        qmags (numpy array):
+        atomic_number:
+        photon_energy:
+
+    Returns:
+        Numpy array
+    """
+
+    Z = atomic_number
+    E = photon_energy/eV/1000
+    qq = qmags/4.0/np.pi/1e10
+    f = np.array([xraylib.FF_Rayl(Z, q) for q in qq])
+    return f
+
+
+@utils.memoize
+def hubbel_atomic_form_factor_table(atomic_number, photon_energy):
+    r"""
+    This calls hubbel_atomic_form_factor() and gets a 1D uniformly-spaced sampling for pre-defined q magnitude spacing.
+
+    Args:
+        atomic_number:
+        photon_energy:
+
+    Returns:
+        Numpy array
+    """
+
+    Z = atomic_number
+    E = photon_energy/eV/1000
+    dq = 10e10/1000
+    qq = np.arange(0, 10e10, dq)/4.0/np.pi/1e10
+    f = np.array([xraylib.FF_Rayl(Z, q) for q in qq])
+    return f

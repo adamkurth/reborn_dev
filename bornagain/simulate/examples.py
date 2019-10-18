@@ -12,7 +12,7 @@ import bornagain as ba
 from bornagain import detector
 from bornagain.utils import warn, random_rotation, rotation_about_axis, random_unit_vector, random_beam_vector, \
                             max_pair_distance
-import bornagain.external
+import bornagain.external.crystfel
 from bornagain.simulate import atoms
 from bornagain.target.crystal import CrystalStructure
 try:
@@ -135,8 +135,8 @@ class PDBMoleculeSimulator(object):
 
         self.random_rotation = random_rotation
 
-        r = cryst.r
-        f = atoms.get_scattering_factors(cryst.Z, photon_energy=photon_energy)
+        r = cryst.molecule.coordinates
+        f = cryst.molecule.get_scattering_factors(photon_energy=photon_energy)
         q = [pad.q_vecs(beam_vec=[0, 0, 1], wavelength=wavelength) for pad in pad_geometry]
         q = np.ravel(q)
         nq = int(len(q)/3)

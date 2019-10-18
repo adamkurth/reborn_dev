@@ -7,6 +7,7 @@ import pickle
 import numpy as np
 import pkg_resources
 import bornagain
+from bornagain.detector import PADGeometry
 from bornagain.utils import warn_pyqtgraph
 from bornagain.fileio.getters import FrameGetter
 from bornagain.analysis.peaks import boxsnr, PeakFinder
@@ -18,29 +19,10 @@ try:
 except ImportError:
     warn_pyqtgraph()
 
-padview_debug_config = 1  # 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
+# from bornagain.external.pyqtgraph import ImageItem
 
 padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
 snrconfigui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'configs.ui')
-
-
-def padview_debug(msg, val=1):
-    """
-    Print debug messages according to the padview_debug_config variable.
-
-    Arguments:
-        msg: The text message to print.
-        val: How verbose to be.
-            0: don't print anything
-            1: basic messages
-            2: more verbose messages
-            3: extremely verbose
-
-    Returns: None
-
-    """
-    if padview_debug_config >= val:
-        print(msg)
 
 
 def write(msg):
@@ -69,7 +51,7 @@ class PADView(object):
 
     # Note that most of the interface was created using the QT Designer tool.  There are many attributes that are
     # not visible here.
-
+    debug_level = 0  # Levels are 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
     logscale = False
     raw_data = None   # Dictionary with 'pad_data' and 'peaks' keys
     processed_data = None  # Dictionary with 'pad_data' and 'peaks' keys
@@ -104,7 +86,8 @@ class PADView(object):
 
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': False}
 
-    def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None):
+    def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None,
+                 debug_level=0):
 
         """
 
@@ -115,7 +98,8 @@ class PADView(object):
             frame_getter: a subclass of the FrameGetter class
         """
 
-        padview_debug('__init__()')
+        self.debug_level = debug_level
+        self.debug('__init__()')
 
         self.logscale = logscale
         self.mask_data = mask_data
@@ -135,14 +119,25 @@ class PADView(object):
             try:
                 self.raw_data = self.frame_getter.get_frame(0)
             except:
-                padview_debug('Failed to get raw data from frame_getter')
+                self.debug('Failed to get raw data from frame_getter')
 
         # Possibly, the frame getter has pad_geometry info -- let's have a look:
         if self.pad_geometry is None:
+            self.debug('PAD geometry was not supplied at initialization.')
             try:
                 self.pad_geometry = self.frame_getter.pad_geometry
-            except:
-                padview_debug('Failed to get geometry from frame_getter')
+            except AttributeError:
+                self.debug('Failed to get geometry from frame_getter')
+        if self.pad_geometry is None:
+            self.debug('Making up some garbage PAD geometry instances')
+            pad_geometry = []
+            shft = 0
+            for dat in self.raw_data['pad_data']:
+                pad = PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
+                pad.t_vec[0] += shft
+                shft += pad.shape()[0]
+                pad_geometry.append(pad)
+            self.pad_geometry = pad_geometry
 
         self.app = pg.mkQApp()
         self.main_window = uic.loadUi(padviewui)
@@ -161,7 +156,23 @@ class PADView(object):
             self.show_frame()
         self.main_window.show()
 
-        padview_debug('__init__ complete')
+        self.debug('__init__ complete')
+
+    def debug(self, msg, val=1):
+        r"""
+        Print debug messages according to the self.debug variable.
+
+        Arguments:
+            msg: The text message to print.
+            val: How verbose to be.
+                0: don't print anything
+                1: basic messages
+                2: more verbose messages
+                3: extremely verbose
+        Returns: None
+        """
+        if self.debug_level >= val:
+            print(msg)
 
     def _do_nothing(self):
 
@@ -173,7 +184,7 @@ class PADView(object):
 
     def close_main_window(self):
 
-        padview_debug('close_main_window()')
+        self.debug('close_main_window()')
 
         for key in self.widgets.keys():
             self.widgets[key].close()
@@ -181,7 +192,7 @@ class PADView(object):
 
     def setup_widgets(self):
 
-        padview_debug('setup_widgets()')
+        self.debug('setup_widgets()')
 
         snr_config = SNRConfigWidget()
         snr_config.values_changed.connect(self.update_snr_filter_params)
@@ -189,19 +200,20 @@ class PADView(object):
 
     def setup_mouse_interactions(self):
 
-        padview_debug('setup_mouse_interactions()')
+        self.debug('setup_mouse_interactions()')
 
         self.proxy = pg.SignalProxy(self.viewbox.scene().sigMouseMoved, rateLimit=60, slot=self._mouse_moved)
 
     def setup_menu(self):
 
-        padview_debug('setup_menu()')
+        self.debug('setup_menu()')
 
         mw = self.main_window
         mw.actionGrid.triggered.connect(self.toggle_grid)
         mw.actionRings.triggered.connect(self.edit_ring_radii)
         mw.actionMaskVisible.triggered.connect(self.toggle_masks)
         mw.actionRectangleROIVisible.triggered.connect(self.toggle_rois)
+        mw.actionMask_circle.triggered.connect(self.add_circle_roi)
         mw.actionPeaksVisible.triggered.connect(self.toggle_peaks)
         mw.actionCustomFilter.triggered.connect(self.toggle_filter)
         mw.actionLocal_SNR.triggered.connect(self.show_snr_filter_widget)
@@ -216,7 +228,7 @@ class PADView(object):
 
     def setup_shortcuts(self):
 
-        padview_debug('setup_shortcuts()')
+        self.debug('setup_shortcuts()')
 
         if self._shortcuts is None:
             self._shortcuts = []
@@ -259,7 +271,7 @@ class PADView(object):
 
     def setup_histogram_tool(self):
 
-        padview_debug('setup_histogram_tool()')
+        self.debug('setup_histogram_tool()')
         self.main_window.histogram.gradient.loadPreset('flame')
         self.main_window.histogram.setImageItems(self.images)
 
@@ -267,21 +279,34 @@ class PADView(object):
 
         self.main_window.histogram.item.setLevels(min_value, max_value)
 
-    def add_roi(self, type='rect', pos=None, size=None):
+    def add_rectangle_roi(self, pos=(0, 0), size=(100, 100)):
 
-        if type == 'rect':
-            if pos is None:
-                pos = (0, 0)
-            if size is None:
-                size = (100, 100)
-            roi = pg.RectROI(pos=pos, size=size, centered=True, sideScalers=True)
-            roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
-            if self._mask_rois is None:
-                self._mask_rois = []
-            self._mask_rois.append(roi)
-            self.viewbox.addItem(roi)
-        else:
-            pass
+        roi = pg.RectROI(pos=pos, size=size, centered=True, sideScalers=True)
+        roi.name = 'rectangle'
+        roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
+        if self._mask_rois is None:
+            self._mask_rois = []
+        self._mask_rois.append(roi)
+        self.viewbox.addItem(roi)
+
+    def add_ellipse_roi(self, pos=(0, 0), size=(100, 100)):
+
+        roi = pg.EllipseROI(pos=pos, size=size, centered=True, sideScalers=True)
+        roi.name = 'ellipse'
+        roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
+        if self._mask_rois is None:
+            self._mask_rois = []
+        self._mask_rois.append(roi)
+        self.viewbox.addItem(roi)
+
+    def add_circle_roi(self, pos=(0, 0), size=100):
+
+        roi = pg.CircleROI(pos=pos, size=size)
+        roi.name = 'circle'
+        if self._mask_rois is None:
+            self._mask_rois = []
+        self._mask_rois.append(roi)
+        self.viewbox.addItem(roi)
 
     def hide_rois(self):
 
@@ -293,7 +318,7 @@ class PADView(object):
     def toggle_rois(self):
 
         if self._mask_rois is None:
-            self.add_roi()
+            self.add_rectangle_roi()
         else:
             self.hide_rois()
 
@@ -450,7 +475,7 @@ class PADView(object):
         t = t[0:2]
 
         # Offset translation since pixel should be centered.
-        t += np.array([0.5, -0.5])
+        # t += np.array([0.5, -0.5])
 
         # These two operations set the "home" position of the panel such that the fast-scan direction
         # is along the viewbox "x" axis.  I don't know if this is the corret thing to do -- needs further
@@ -480,8 +505,10 @@ class PADView(object):
         # Translate the scaled/rotated image.  Turns out we need to flip the sign of the translation vector
         # coordinate corresponding to the axis we flipped.  I don't know why, but I've completely given up on the
         # idea of understanding the many layers of coordinate systems and transformations...
+        # im.translate(sign * (t[1] + sign*0.5*scf), t[0]-0.5*scs)
         im.translate(sign * t[1], t[0])
         im.rotate(-sign * ang * 180 / np.pi)
+        im.translate(-sign*0.5*scf, -0.5*scs)
 
         # Now, one would *think* that we could define a simple matrix transform, and then translate the resulting
         # image (which has been rotated and possibly skewed to imitate a 3D rotation).  I tried and failed.  But
@@ -513,7 +540,7 @@ class PADView(object):
 
     def setup_masks(self, mask_data=None):
 
-        padview_debug('setup_masks()')
+        self.debug('setup_masks()')
 
         if self.pad_geometry is None:
             return
@@ -537,7 +564,7 @@ class PADView(object):
 
             mask_rgba = self._make_mask_rgba(d)
 
-            im = ImageItem(mask_rgba) #, autoDownsample='mean')
+            im = ImageItem(mask_rgba, autoDownsample='max')
 
             self._apply_pad_transform(im, self.pad_geometry[i])
 
@@ -551,7 +578,7 @@ class PADView(object):
 
     def update_masks(self, mask_data=None):
 
-        padview_debug('update_masks()')
+        self.debug('update_masks()')
 
         if mask_data is not None:
             self.mask_data = mask_data
@@ -643,30 +670,41 @@ class PADView(object):
             for (ind, im, dat, geom) in zip(range(self.n_pads), self.images, pad_data, self.pad_geometry):
 
                 # Using builtin function of pyqtgraph ROI to identify panels associated with the ROI...
-                pslice = roi.getArraySlice(dat, im, axes=(0, 1), returnSlice=True)[0]
+                pslice, _ = roi.getArraySlice(dat, im, axes=(0, 1), returnSlice=True)
                 if pslice[0] == noslice and pslice[1] == noslice:
                     continue
+                if roi.name == 'rectangle':
+                    # To find pixels in the rectangular ROI, project pixel coordinates onto the two basis vectors of
+                    # the ROI.  I couldn't figure out how to do this directly with the ROI class methods.
+                    sides = [roi.size()[1], roi.size()[0]]
+                    corner = np.array([roi.pos()[0], roi.pos()[1]])
+                    angle = roi.angle() * np.pi / 180
+                    pix_pos = (geom.position_vecs() * self.scale_factor()).reshape(geom.n_ss, geom.n_fs, 3)
+                    pix_pos = pix_pos[:, :, 0:2] - corner
+                    v1 = np.array([-np.sin(angle), np.cos(angle)])
+                    v2 = np.array([np.cos(angle), np.sin(angle)])
+                    ind1 = np.dot(pix_pos, v1)
+                    ind2 = np.dot(pix_pos, v2)
+                    ind1 = (ind1 >= 0) * (ind1 <= sides[0])
+                    ind2 = (ind2 >= 0) * (ind2 <= sides[1])
+                    inds = ind1*ind2
+                    self.mask_data[ind][inds] = 0
+                    self.mask_images[ind].setImage(self._make_mask_rgba(self.mask_data[ind]))
+                if roi.name == 'circle':
+                    # To find pixels in the rectangular ROI, project pixel coordinates onto the two basis vectors of
+                    # the ROI.  I couldn't figure out how to do this directly with the ROI class methods.
+                    radius = roi.size()[0]/2.
+                    center = np.array([roi.pos()[0], roi.pos()[1]]) + radius
+                    pix_pos = (geom.position_vecs() * self.scale_factor()).reshape(geom.n_ss, geom.n_fs, 3)
+                    pix_pos = pix_pos[:, :, 0:2] - center
+                    r = np.sqrt(pix_pos[:, :, 0]**2 + pix_pos[:, :, 1]**2)
+                    self.mask_data[ind][r < radius] = 0
+                    self.mask_images[ind].setImage(self._make_mask_rgba(self.mask_data[ind]))
 
-                # To find pixels in the rectangular ROI, project pixel coordinates onto the two basis vectors of
-                # the ROI.  I couldn't figure out how to do this directly with the ROI class methods.
-                sides = [roi.size()[1], roi.size()[0]]
-                corner = np.array([roi.pos()[0], roi.pos()[1]])
-                angle = roi.angle() * np.pi / 180
-                pix_pos = (geom.position_vecs() * self.scale_factor()).reshape(geom.n_ss, geom.n_fs, 3)
-                pix_pos = pix_pos[:, :, 0:2] - corner
-                v1 = np.array([-np.sin(angle), np.cos(angle)])
-                v2 = np.array([np.cos(angle), np.sin(angle)])
-                ind1 = np.dot(pix_pos, v1)
-                ind2 = np.dot(pix_pos, v2)
-                ind1 = (ind1 >= 0) * (ind1 <= sides[0])
-                ind2 = (ind2 >= 0) * (ind2 <= sides[1])
-                inds = ind1*ind2
+    def stupid_pyqtgraph_fix(self, dat):
 
-                # Here comes the mask update for this pad:
-                m = self.mask_data[ind]
-                m[inds] = 0
-                self.mask_data[ind] = m
-                self.mask_images[ind].setImage(self._make_mask_rgba(m))
+        # Deal with this stupid problem: https://github.com/pyqtgraph/pyqtgraph/issues/769
+        return [np.double(d) for d in dat]
 
     def get_pad_display_data(self, debug=False):
 
@@ -674,24 +712,24 @@ class PADView(object):
         # available, else we display raw data, else we display zeros based on the pad geometry.  If none of these
         # are available, this function returns none.
 
-        # padview_debug('get_pad_display_data()')
+        # self.debug('get_pad_display_data()')
 
         if self.processed_data is not None:
             if 'pad_data' in self.processed_data.keys():
                 dat = self.processed_data['pad_data']
                 if dat:
-                    # padview_debug("Got self.processed_data['pad_data']")
-                    return dat
+                    # self.debug("Got self.processed_data['pad_data']")
+                    return self.stupid_pyqtgraph_fix(dat)
 
         if self.raw_data is not None:
             if 'pad_data' in self.raw_data.keys():
                 dat = self.raw_data['pad_data']
                 if dat:
-                    # padview_debug("Got self.raw_data['pad_data']")
-                    return dat
+                    # self.debug("Got self.raw_data['pad_data']")
+                    return self.stupid_pyqtgraph_fix(dat)
 
         if self.pad_geometry is not None:
-            padview_debug('No raw data found - setting display data arrays to zeros')
+            self.debug('No raw data found - setting display data arrays to zeros')
             return [pad.zeros() for pad in self.pad_geometry]
 
         return None
@@ -699,12 +737,12 @@ class PADView(object):
     def get_peak_data(self):
 
         if self.processed_data is not None:
-            padview_debug('Getting processed peak data')
+            self.debug('Getting processed peak data')
             if 'peaks' in self.processed_data.keys():
                 return self.processed_data['peaks']
 
         if self.raw_data is not None:
-            padview_debug('Getting raw peak data')
+            self.debug('Getting raw peak data')
             if 'peaks' in self.raw_data.keys():
                 return self.raw_data['peaks']
 
@@ -712,7 +750,7 @@ class PADView(object):
 
     def setup_pads(self):
 
-        padview_debug('setup_pads()')
+        self.debug('setup_pads()')
 
         pad_data = self.get_pad_display_data()
 
@@ -721,7 +759,7 @@ class PADView(object):
         self.images = []
 
         if self.n_pads == 0:
-            padview_debug("Cannot setup pad display data - there are no pads to display.")
+            self.debug("Cannot setup pad display data - there are no pads to display.")
 
         for i in range(0, self.n_pads):
 
@@ -749,7 +787,7 @@ class PADView(object):
 
     def update_pads(self):
 
-        padview_debug('update_pads()')
+        self.debug('update_pads()')
 
         if self.images is None:
             self.setup_pads()
@@ -923,7 +961,7 @@ class PADView(object):
     def show_history_next(self):
 
         if self.frame_getter is None:
-            padview_debug('no getter')
+            self.debug('no getter')
             return
 
         dat = self.frame_getter.get_history_next()
@@ -934,7 +972,7 @@ class PADView(object):
     def show_history_previous(self):
 
         if self.frame_getter is None:
-            padview_debug('no getter')
+            self.debug('no getter')
             return
 
         dat = self.frame_getter.get_history_previous()
@@ -944,10 +982,10 @@ class PADView(object):
 
     def show_next_frame(self):
 
-        padview_debug('show_next_frame()')
+        self.debug('show_next_frame()')
 
         if self.frame_getter is None:
-            padview_debug('no getter')
+            self.debug('no getter')
             return
 
         dat = self.frame_getter.get_next_frame()
@@ -956,10 +994,10 @@ class PADView(object):
 
     def show_previous_frame(self):
 
-        padview_debug('show_previous_frame()')
+        self.debug('show_previous_frame()')
 
         if self.frame_getter is None:
-            padview_debug('no getter')
+            self.debug('no getter')
             return
 
         dat = self.frame_getter.get_previous_frame()
@@ -969,7 +1007,7 @@ class PADView(object):
 
     def show_random_frame(self):
 
-        padview_debug('show_random_frame()')
+        self.debug('show_random_frame()')
 
         dat = self.frame_getter.get_random_frame()
         self.raw_data = dat
@@ -978,21 +1016,21 @@ class PADView(object):
 
     def show_frame(self, frame_number=0):
 
-        padview_debug('show_frame()')
+        self.debug('show_frame()')
 
         if self.frame_getter is None:
-            padview_debug("Note: there is no frame getter configured.")
+            self.debug("Note: there is no frame getter configured.")
         else:
             raw_data = self.frame_getter.get_frame(frame_number=frame_number)
             if raw_data is None:
-                padview_debug("Note: frame getter returned None.")
+                self.debug("Note: frame getter returned None.")
             else:
                 self.raw_data = raw_data
         self.update_display_data()
 
     def process_data(self):
 
-        padview_debug('process_data()')
+        self.debug('process_data()')
 
         if self.data_processor is not None:
             self.data_processor()
@@ -1012,7 +1050,7 @@ class PADView(object):
 
         """
 
-        padview_debug('update_display_data()')
+        self.debug('update_display_data()')
 
         if self.data_processor is not None:
             self.process_data()
@@ -1043,7 +1081,7 @@ class PADView(object):
 
     def display_peaks(self):
 
-        padview_debug('display_peaks()')
+        self.debug('display_peaks()')
 
         peaks = self.get_peak_data()
 
@@ -1092,7 +1130,7 @@ class PADView(object):
 
     def apply_snr_filter(self):
 
-        padview_debug('apply_snr_filter()')
+        self.debug('apply_snr_filter()')
         t = time()
         if self.snr_filter_params is None:
             return
@@ -1112,7 +1150,7 @@ class PADView(object):
         raw = self.raw_data['pad_data']
         mask = self.mask_data
         processed_pads = [None]*self.n_pads
-        padview_debug('boxsnr()')
+        self.debug('boxsnr()')
         for i in range(self.n_pads):
             snr, signal = boxsnr(raw[i], mask[i], mask[i], a, b, c)
             m = mask[i]*(snr < 6)
@@ -1121,13 +1159,13 @@ class PADView(object):
         if self.processed_data is None:
             self.processed_data = {}
         self.processed_data['pad_data'] = processed_pads
-        padview_debug('%g seconds' % (time()-t,))
+        self.debug('%g seconds' % (time()-t,))
 
     def update_snr_filter_params(self):
 
         # Get info from the widget
 
-        padview_debug("Updating SNR Filter parameters")
+        self.debug("Updating SNR Filter parameters")
         vals = self.widgets['SNR Config'].get_values()
         if vals['activate']:
             self.snr_filter_params = vals
@@ -1188,7 +1226,7 @@ class PADView(object):
 
     def setup_peak_finders(self, params=None):
 
-        padview_debug('setup_peak_finders()')
+        self.debug('setup_peak_finders()')
 
         self.peak_finders = []
         for i in range(self.n_pads):
@@ -1196,7 +1234,7 @@ class PADView(object):
 
     def find_peaks(self):
 
-        padview_debug('find_peaks()')
+        self.debug('find_peaks()')
 
         if self.peak_finders is None:
             self.setup_peak_finders()
@@ -1209,24 +1247,25 @@ class PADView(object):
             n_peaks += pfind.n_labels
             centroids[i] = pfind.centroids
 
-        padview_debug('Found %d peaks' % (n_peaks))
+        self.debug('Found %d peaks' % (n_peaks))
 
         self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
 
     def start(self):
 
-        padview_debug('start()')
+        self.debug('start()')
         self.app.aboutToQuit.connect(self.stop)
         self.app.exec_()
 
     def stop(self):
 
-        print('about to quit')
+        self.debug('stop()')
         self.app.quit()
+        del self.app
 
     def show(self):
 
-        padview_debug('show()')
+        self.debug('show()')
         self.main_window.show()
         # self.main_window.callback_pb_load()
 
@@ -1245,14 +1284,20 @@ class SNRConfigWidget(QtGui.QWidget):
 
     def send_values(self):
 
-        padview_debug('send_values()')
+        self.debug('send_values()')
         self.values_changed.emit()
 
     def get_values(self):
-        padview_debug('get_values()')
+        self.debug('get_values()')
         dat = {}
         dat['activate'] = self.activateBox.isChecked()
         dat['inner'] = self.spinBoxInnerRadius.value()
         dat['center'] = self.spinBoxCenterRadius.value()
         dat['outer'] = self.spinBoxOuterRadius.value()
         return dat
+
+    def debug(self, msg):
+
+        print(msg)
+
+

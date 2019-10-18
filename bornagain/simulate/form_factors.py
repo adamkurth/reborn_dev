@@ -1,11 +1,41 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
+try:
+    from xraylib import FF_Rayl, Fi, Fii
+except ImportError:
+    pass
+
+from scipy import constants as const
+
+eV = const.value('electron volt')
+
+
+def atomic_form_factor(qmags, atomic_number, photon_energy, dispersion_correction=True):
+    r"""
+    Get the q-dependent atomic scattering factors from the xraylib package.
+
+    Args:
+        qmags (numpy array):
+        atomic_number:
+        photon_energy:
+
+    Returns:
+
+    """
+
+    Z = atomic_number
+    E = photon_energy/eV/1000
+    qq = qmags/4.0/np.pi/1e10
+    f = np.array([FF_Rayl(Z, q) for q in qq])
+    if dispersion_correction:
+        f += Fi(Z, E) - 1j*Fii(Z, E)
+    return f
 
 
 def sphere_form_factor(radius, q_mags, check_divide_by_zero=True):
 
-    """
+    r"""
 
     Form factor for a sphere of given radius, at given q magnitudes.  Assumes the scattering density is unity inside.
 

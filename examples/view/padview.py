@@ -15,7 +15,7 @@ pad_geometry = examples.cspad_pads()
 # pads = examples.pnccd_pads()
 
 for pad in pad_geometry:
-    pad.t_vec.flat[2] = 0.3
+    pad.t_vec[2] = 0.3
 
 
 class MyFrameGetter(FrameGetter):

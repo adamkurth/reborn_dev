@@ -103,48 +103,56 @@
     <property name="title">
      <string>View</string>
     </property>
-    <widget class="QMenu" name="menuViewPeaks">
-     <property name="title">
-      <string>Peaks</string>
-     </property>
-     <addaction name="actionPeaksVisible"/>
-     <addaction name="actionFind_peaks"/>
-    </widget>
-    <widget class="QMenu" name="menuMask">
-     <property name="title">
-      <string>Mask</string>
-     </property>
-     <addaction name="actionMaskVisible"/>
-     <addaction name="actionMask_panel_edges"/>
-     <addaction name="actionRectangleROIVisible"/>
-     <addaction name="actionSave_Masks"/>
-     <addaction name="actionLoad_Masks"/>
-    </widget>
-    <widget class="QMenu" name="menuCustomFilters">
-     <property name="title">
-      <string>Filters</string>
-     </property>
-     <addaction name="actionLocal_SNR"/>
-    </widget>
-    <widget class="QMenu" name="menuGeometry">
-     <property name="title">
-      <string>Geometry</string>
-     </property>
-     <addaction name="actionRings"/>
-     <addaction name="actionBeam_position"/>
-     <addaction name="actionGrid"/>
-     <addaction name="actionPanel_IDs"/>
-     <addaction name="actionShow_scan_directions"/>
-     <addaction name="actionLoad_geometry"/>
-     <addaction name="actionSave_geometry"/>
-    </widget>
-    <addaction name="menuViewPeaks"/>
-    <addaction name="menuMask"/>
-    <addaction name="menuCustomFilters"/>
-    <addaction name="menuGeometry"/>
+   </widget>
+   <widget class="QMenu" name="menuMask_2">
+    <property name="title">
+     <string>Mask</string>
+    </property>
+    <addaction name="actionMaskVisible"/>
+    <addaction name="actionMask_ROIs_visible"/>
+    <addaction name="separator"/>
+    <addaction name="actionMask_panel_edges"/>
+    <addaction name="actionRectangleROIVisible"/>
+    <addaction name="actionMask_circle"/>
+    <addaction name="actionMask_ellipse"/>
+    <addaction name="actionMask_lower_limit"/>
+    <addaction name="actionMask_upper_limit"/>
+    <addaction name="actionMask_limits"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoad_Masks"/>
+    <addaction name="actionSave_Masks"/>
+   </widget>
+   <widget class="QMenu" name="menuPeaks">
+    <property name="title">
+     <string>Peaks</string>
+    </property>
+    <addaction name="actionPeaksVisible"/>
+    <addaction name="actionFind_peaks"/>
+   </widget>
+   <widget class="QMenu" name="menuFilter">
+    <property name="title">
+     <string>Filter</string>
+    </property>
+    <addaction name="actionLocal_SNR"/>
+   </widget>
+   <widget class="QMenu" name="menuGeometry_2">
+    <property name="title">
+     <string>Geometry</string>
+    </property>
+    <addaction name="actionRings"/>
+    <addaction name="actionBeam_position"/>
+    <addaction name="actionGrid"/>
+    <addaction name="actionPanel_IDs"/>
+    <addaction name="actionShow_scan_directions"/>
+    <addaction name="actionLoad_geometry"/>
+    <addaction name="actionSave_geometry"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
+   <addaction name="menuMask_2"/>
+   <addaction name="menuPeaks"/>
+   <addaction name="menuFilter"/>
+   <addaction name="menuGeometry_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen_data_file">
@@ -222,13 +230,13 @@
   </action>
   <action name="actionMaskVisible">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
-    <string>Visible</string>
+    <string>Show mask</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>
@@ -300,6 +308,36 @@
    </property>
    <property name="text">
     <string>Find peaks</string>
+   </property>
+  </action>
+  <action name="actionMask_circle">
+   <property name="text">
+    <string>Mask circle</string>
+   </property>
+  </action>
+  <action name="actionMask_limits">
+   <property name="text">
+    <string>Mask limits</string>
+   </property>
+  </action>
+  <action name="actionMask_ellipse">
+   <property name="text">
+    <string>Mask ellipse</string>
+   </property>
+  </action>
+  <action name="actionMask_lower_limit">
+   <property name="text">
+    <string>Mask lower limit</string>
+   </property>
+  </action>
+  <action name="actionMask_upper_limit">
+   <property name="text">
+    <string>Mask upper limit</string>
+   </property>
+  </action>
+  <action name="actionMask_ROIs_visible">
+   <property name="text">
+    <string>Show mask ROIs</string>
    </property>
   </action>
  </widget>
