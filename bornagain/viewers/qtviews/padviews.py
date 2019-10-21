@@ -605,7 +605,7 @@ class PADView(object):
             if ok:
                 if text == '':
                     return
-                n_pixels = int(text.strip())
+                n_pixels = int(str(text).strip())
 
         for i in range(len(self.mask_data)):
             self.mask_data[i] *= bornagain.detector.edge_mask(self.mask_data[i], n_pixels)
