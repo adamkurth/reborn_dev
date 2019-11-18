@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division,
 import numpy as np
 import h5py
 
-from .utils import vec_norm, vec_mag, triangle_solid_angle
+from .utils import vec_norm, vec_mag, triangle_solid_angle, depreciate, warn
 
 
 class PADGeometry(object):
@@ -114,23 +114,46 @@ class PADGeometry(object):
                 setattr(pad, name, data)
         return pad
 
-    def simple_setup(self, n_pixels=None, pixel_size=100e-6, distance=0.1, shape=None):
+    def simple_setup(self, n_pixels=None, pixel_size=None, distance=None, shape=None):
         r""" Make this a square PAD with beam at center.
+
+        Arguments:
+            shape : The shape of the panel, consistent with a numpy array shape.
+            pixel_size : Pixel size in SI units.
+            distance : Detector distance in SI units.
+            n_pixels : (DEPRECIATED) Either the shape of the panel, or a single number if a square detector is desired.
+                       Do not use this input as it will be removed in the future.
 
         Returns:
             object:
         """
 
+        if n_pixels is not None:
+            depreciate('The redundant "n_pixels" keyword argument in simple_setup is depreciated.  Use "shape" keyword '
+                       'instead.')
+
+        if pixel_size is None:
+            warn('Setting pixel_size in simple_setup to 100e-6.  You should specify this value explicitly.')
+            pixel_size = 100e-6
+
+        if distance is None:
+            warn('Setting distance in simple_setup to 0.1.  You should specify this value explicitly.')
+            distance = 0.1
+
         if shape is not None:
             self.n_fs = shape[1]
             self.n_ss = shape[0]
         else:
+            if n_pixels is None:
+                warn('Setting n_pixels in simple_setup to 1000.  You should specify this value explicitly.')
+                n_pixels = 1000
             try:
                 self.n_fs = n_pixels[1]
                 self.n_ss = n_pixels[0]
             except TypeError:
                 self.n_fs = n_pixels
                 self.n_ss = n_pixels
+
         self.fs_vec = [pixel_size, 0, 0]
         self.ss_vec = [0, pixel_size, 0]
         self.t_vec = [-pixel_size * (self.n_fs / 2.0 - 0.5), -pixel_size * (self.n_ss / 2.0 - 0.5), distance]

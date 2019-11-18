@@ -5,8 +5,10 @@ from bornagain.detector import RadialProfiler
 from bornagain.source import Beam
 from bornagain.external import crystfel
 from bornagain.viewers.qtviews.padviews import PADView
-from bornagain.units import keV
-from bornagain.external.pyqtgraph.extras import keep_open
+
+import scipy.constants as const
+
+keV = const.value('electron volt')*1000
 
 pads = crystfel.geometry_file_to_pad_geometry_list('./data/cxilu5617-taw10.geom')
 for p in pads:
@@ -50,4 +52,3 @@ showme = [p.reshape(p.q_mags(beam=beam))*1e10 for p in pads]
 
 padview = PADView(raw_data=showme, pad_geometry=pads)
 padview.start()
-keep_open()
