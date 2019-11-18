@@ -87,11 +87,15 @@ class AreaDetector(object):
 
 def cspad_data_splitter(data):
     r"""
-    Split the stack of 32 asics into 64 asics.  While it is true that there are 32 physical asics, they have two columns
-    of pixels that are
+    Split the stack of 32 asics into 64 asics.  Unfortunately, this default data layout is awkward.  While it is true
+    that there are 32 physical asics, which suggests that the data should form a stack of 32 2D images, these asics have
+    two columns of pixels in the middle that are elongated.  This elongation thus requires that the 32 asics cannot
+    be treated as regular grids of pixels -- they form irregular grids.  In order to cope with this without re-writing
+    nearly all software that deals with pixel-array detectors, we split the stack of 32 asics to form a stack of 64
+    asics.
 
     Arguments:
-        data (numpy array): An array of PAD data exactly as it is presented by the psana Detector class
+        data (numpy array): An array of PAD data formatted exactly the same as in the psana Detector class.
 
     Returns:
         A list of separated PADs.
@@ -107,14 +111,14 @@ def cspad_data_splitter(data):
 
 def get_pad_geometry(detector, run):
     r"""
-    Create a list of PADGeometry instances from a psana detector and a run instance.  I have no idea of where this data
-    actually originates; presumabely someone at LCLS tried to estimate the geometry.  The geometry is exposed by the
-    Detector class in the psana package.
+    Create a list of PADGeometry instances from psana Detector and Run instances.  I have no idea of where this data
+    actually originates, but it may be accessed by the psana.Detector class.
 
     Special considerations are taken for the case of the CSPAD detector, since it has rows of pixels that are elongated
     (did you know that?).  The nominal pixel size is 109.92 x 109.92 microns, but the central two columns (193 and 194)
     have pixels of size 274.80 x 109.92 microns.  This is documented here:
     https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry
+    https://confluence.slac.stanford.edu/display/PSDM/CSPAD+Geometry+and+Alignment
 
     Credit goes to Derek Mendez for this.
 
@@ -125,7 +129,6 @@ def get_pad_geometry(detector, run):
     Returns:
         A list of bornagain PADGeometry objects
     """
-
     psf = detector.geometry(run).get_psf()
     geom = []
     n_fs = detector.shape()[2]
@@ -150,3 +153,63 @@ def get_pad_geometry(detector, run):
         g.n_ss = n_ss
         geom.append(g)
     return geom
+
+
+class LCLSFrameGetterV1(object):
+
+    event = None
+
+    def __init__(self, experiment_id=None, run_number=None, pad_ids=None, indexing=':idx'):
+
+        ds = psana.DataSource('exp=%s:run=%d%s' %(experiment_id, run_number, indexing))
+        self.data_source = ds
+        self.pad_detectors = [ds.Detector(p) for p in pad_ids]
+        self.ebeam_detector = ds.Detector('EBeam')
+        self.run = ds.runs().next()
+        self.event_ids = self.run.times()
+        self.n_events = len(self.event_ids)
+
+        self.set_event(0)
+
+    def set_event(self, event_id=None, event_number=None):
+        r"""
+        event_id is a time stamp from data_source.run().next().times()
+        event_number is an integer, which fetches data_source.run().next().times()[event_number]
+        """
+        if event_number is not None:
+            event_id = self.event_ids[event_number]
+        else:
+            pass
+        self.event_id = event_id
+        self.event = self.run.event(event_id)
+
+    def get_event(self, event_id=None, event_number=None):
+        r"""
+        Return an event.  By default the current event is returned, but a specific event number may be provided.
+        Args:
+            event_id:
+            event_number:
+
+        Returns:
+            self.event
+        """
+        if event_number is not None:
+            self.set_event(event_number=event_number)
+        if event_id is not None:
+            self.set_event(event_id=event_id)
+        return self.event
+
+    def set_pad_geometry(self, pad_geometries=None):
+
+        pass
+
+
+
+
+
+
+
+
+
+
+

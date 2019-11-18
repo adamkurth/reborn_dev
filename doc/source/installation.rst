@@ -8,23 +8,23 @@ Setting up your path
 
 There are no install scripts (e.g. setup.py) that will automatically add bornagain to your python installation.
 Since bornagain is changing frequently at this time, it is recommended that you keep a local copy of bornagain
-where you are doing your analysis or simulations so that you can reproduce them in the future.  Archiving
-code alongside results is good practice anyways.  A good way to track the *exact* version of bornagain that is used in
-your project is to add it as a `submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's
-git repository.
+where you are doing your analysis or simulations so that you can reproduce your results in the future.  Archiving
+code alongside results is good practice anyways.  One way to track the *exact* version of bornagain that is used in
+your analysis project is to add it as a `submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your
+project's git repository (this can be a bit complicated, but probably worth the effort for large projects).
 
 The main setup task is to simply ensure that Python can load the bornagain package, which means that it must be
 found in a path where python searches for packages.  Here are three different suggestions that you might use to get your
 path set up:
 
-1) Within your shell, you can set an environment variable so that Python looks in the right place for bornagain.
+1) The best way is to set the appropriate environment variable so that Python looks in the right place for bornagain.
 If you are using the bash shell, you can do the following:
 
 .. code-block:: bash
 
-    export PYTHONPATH=example/path/to/bornagain/repository
+    export PYTHONPATH=$PYTHONPATH:example/path/to/bornagain/repository
 
-The above method is probably the best option, but you must remember to set your path every time you use bornagain.
+You must remember to set your path every time you use bornagain.
 
 2) You can specify the location of bornagain directly in your python scripts.  For example:
 
@@ -59,24 +59,23 @@ that you have not compiled the fortran code that bornagain uses, which is discus
 Compilation of Fortran code
 ---------------------------
 
-There are a couple of bornagain modules that use compiled Fortran code.  In some cases they are not
-strictly necessary, but they will speed up some routines.  We use the f2py program to compile Fortran code and create
-Python modules.  Although it *shouldn't* be strictly necessary to compile these to use some of the basic bornagain
-classes, you should go ahead and compile them since the f2py program that is included with numpy makes this relatively
-painless.  Try the following:
+There are a couple of bornagain modules that use compiled Fortran code.  We use the f2py program to compile Fortran code
+and create Python modules.  Although it *shouldn't* be strictly necessary to compile these to use some of the basic
+bornagain classes, you should go ahead and compile them since the f2py program that is included with numpy makes this
+process quite simple.  Try the following:
 
 .. code-block:: bash
 
     cd developer
     ./compile-fortran.sh
 
-You will see some warnings due to Numpy (these are out of our control), but so long as there are no errors you should be
-all set.
+You will likely see some warnings due to Numpy (these are out of our control), but so long as there are no errors you
+should be all set.
 
 Dependencies
 ------------
 
-We try to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
+We *try* to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
 compatibility with both pyqt4 and pyqt5.  Below are the minimal dependencies that you should need for various features.
 Note that each of them have additional dependencies; you must also satisfy those dependencies.
 
@@ -199,22 +198,15 @@ If you get a runtime error involving
 
     pyopencl.cffi_cl.LogicError: clGetPlatformIDs failed:
 
-it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple as doing the following:
+it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple
+as doing the following:
 
 .. code-block:: bash
 
     cp /etc/OpenCL/vendors/nvidia.icd ~/miniconda3/etc/OpenCL/vendors
 
-For any further issues with pyopencl, there are some helpful notes `here <https://documen.tician.de/pyopencl/misc.html>`_.
-
-If you get a runtime error like this
-
-.. code-block:: bash
-
-    pyopencl._cl.LogicError: clGetPlatformIDs failed: PLATFORM_NOT_FOUND_KHR
-
-you should try installing the package pocl.  I don't know why this fixes the problem but it has worked on a couple
-of Linux systems thus far.
+If the above doesn't work, then you can try to get opencl to run on a CPU by installing the pocl package.  For issues
+with pyopencl, there are some helpful notes `here <https://documen.tician.de/pyopencl/misc.html>`_.
 
 
 **Scientific Linux 6**

@@ -5,7 +5,7 @@ from scipy.sparse.linalg import svds
 
 def addblock_svd_update(U, S, V, A, force_orth=False):
 
-    '''
+    r"""
 
     This is a nearly direct translation of the Matlab code found here:
     https://pcc.byu.edu/scripts/addblock_svd_update.m
@@ -24,7 +24,9 @@ def addblock_svd_update(U, S, V, A, force_orth=False):
     that I am not yet aware of.
 
     Original documenation by D. Wingate 8/17/2007:
-    =================================================================
+
+    *=================================================================*
+
     Given the SVD of
 
       X = U*S*V'
@@ -51,7 +53,8 @@ def addblock_svd_update(U, S, V, A, force_orth=False):
     singular value decomposition".
 
     D. Wingate 8/17/2007
-    =====================================================================
+
+    *=====================================================================*
 
     :param U: Left singular vectors of shape p x q
     :param S: Diagonal matrix (shape q -- only the q diagonal elements specified)
@@ -59,7 +62,7 @@ def addblock_svd_update(U, S, V, A, force_orth=False):
     :param A: The matrix to be appended to X = USV (shape p x n)
     :param force_orth: Force orthogonality
     :return:
-    '''
+    """
 
     current_rank = U.shape[1]
 

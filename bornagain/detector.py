@@ -114,7 +114,7 @@ class PADGeometry(object):
                 setattr(pad, name, data)
         return pad
 
-    def simple_setup(self, n_pixels=None, pixel_size=100e-6, distance=0.1, shape=(1000, 1000)):
+    def simple_setup(self, n_pixels=None, pixel_size=100e-6, distance=0.1, shape=None):
         r""" Make this a square PAD with beam at center.
 
         Returns:

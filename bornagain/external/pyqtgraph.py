@@ -382,7 +382,7 @@ class ImageItem(GraphicsObject):
         self.update()
 
     def setImage(self, image=None, autoLevels=None, **kargs):
-        """
+        r"""
         Update the image displayed by this item. For more information on how the image
         is processed before displaying, see :func:`makeARGB <pyqtgraph.makeARGB>`
 
@@ -420,7 +420,7 @@ class ImageItem(GraphicsObject):
             imageitem.setImage(imagedata.T)
 
         This requirement can be changed by calling ``image.setOpts(axisOrder='row-major')`` or
-        by changing the ``imageAxisOrder`` :ref:`global configuration option <apiref_config>`.
+        by changing the ``imageAxisOrder`` global configuration option apiref_config.
 
 
         """
