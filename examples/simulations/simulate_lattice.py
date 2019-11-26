@@ -5,16 +5,20 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
-sys.path.append("../..")
+# sys.path.append("../..")
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
+
+show = True
+if 'noplots' in sys.argv:
+    show = False
 
 sim = clcore.ClCore()
 
 # Create a detector
 pad = ba.detector.PADGeometry()
 n_pixels = 1000
-pad.simple_setup(n_pixels=n_pixels, pixel_size=100e-6, distance=0.05)
+pad.simple_setup(shape=(n_pixels, n_pixels), pixel_size=100e-6, distance=0.05)
 
 # Scattering vectors
 q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1e-10)
@@ -40,11 +44,12 @@ print(time.time() - t)
 # Display diffraction intensities
 I = np.abs(A) ** 2
 
-dispim = np.reshape(I, pad.shape())
-dispim = np.log10(dispim + 0.1)
-plt.imshow(dispim, interpolation='nearest', cmap='gray', origin='lower')
-plt.title('y: up, x: right, z: beam (towards you)')
-plt.show()
+if show:
+    dispim = np.reshape(I, pad.shape())
+    dispim = np.log10(dispim + 0.1)
+    plt.imshow(dispim, interpolation='nearest', cmap='gray', origin='lower')
+    plt.title('y: up, x: right, z: beam (towards you)')
+    plt.show()
 
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection='3d')

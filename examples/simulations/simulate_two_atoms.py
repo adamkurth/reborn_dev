@@ -4,15 +4,19 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.append("../..")
+# sys.path.append("../..")
 import bornagain as ba
 import bornagain.simulate.clcore as clcore
+
+show = True
+if 'noplots' in sys.argv:
+    show = False
 
 sim = clcore.ClCore(group_size=32, double_precision=False)
 
 # Create a detector
 pad = ba.detector.PADGeometry()
-pad.simple_setup(n_pixels=1000, pixel_size=100e-6, distance=0.05)
+pad.simple_setup(shape=(1000, 1000), pixel_size=100e-6, distance=0.05)
 
 beam_vec = [0, 0, 1]
 
@@ -38,6 +42,7 @@ I *= pad.polarization_factors(beam_vec=beam_vec, polarization_vec=[1, 0, 0])
 
 I = np.reshape(I, pad.shape())
 
-plt.imshow(I, interpolation='nearest', cmap='gray', origin='lower')
-plt.title('y: up, x: right, z: beam (towards you)')
-plt.show()
+if show:
+    plt.imshow(I, interpolation='nearest', cmap='gray', origin='lower')
+    plt.title('y: up, x: right, z: beam (towards you)')
+    plt.show()
