@@ -28,3 +28,11 @@ The bin index :math:`n_{\mathrm{s}}` for a sample at position :math:`x_{\mathrm{
     :math:`n_{\mathrm{s}} = \mathrm{floor} \left( \frac{x_{\mathrm{s}} - (x_{\mathrm{min}} - \Delta x / 2)}{\Delta x} \right)`
 
 The sanity checks are (1) If :math:`x_{\mathrm{s}} = x_{\mathrm{min}} - \Delta x /2` the index should be zero. (2) If :math:`x_{\mathrm{s}} = x_{\mathrm{min}} + \Delta x /2` the index should be one.
+
+Handling multi-dimensional arrays
+---------------------------------
+
+When we specify the bins for multi-dimensional arrays, we provide tuples of :math:`x_{\mathrm{min}}`,
+:math:`x_{\mathrm{max}}`, and :math:`N_{\mathrm{bin}}`.  Importantly the tuples should
+correspond to the shapes of numpy arrays; the *first* element (index 0) corresponds to the dimension with
+*largest* stride between array elements.  Google search "numpy stride" if you do not understand this.

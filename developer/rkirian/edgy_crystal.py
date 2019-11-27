@@ -10,23 +10,27 @@ from bornagain.target import crystal, density
 from bornagain.viewers.qtviews import Scatter3D, bright_colors, colors, PADView
 from bornagain.external.pyqtgraph import keep_open
 import scipy.constants as const
+import argparse
+
 eV = const.value('electron volt')
 r_e = const.value("classical electron radius")
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--n_pixels', type=int, default=500, required=False)
+parser.add_argument('--n_patterns', type=int, default=1, required=False)
+args = parser.parse_args()
+
+
 run_number = 1
 save_interval = 10
-<<<<<<< HEAD
-viewcrystal = True 
-=======
-viewcrystal = True
->>>>>>> fc8656f95ef9d0b3046f14b2f1088a1e373f91fb
+viewcrystal = False
 addfacets = True
 photon_energy = 50000*eV
 pulse_energy = 1e-3
 beam_diameter = 1e-6
 pixel_size = 300e-6
 detector_distance = 10
-n_pixels = 500
 
 # Load up the pdb file
 cryst = crystal.CrystalStructure(psi_pdb_file)
@@ -52,7 +56,7 @@ for i in range(spacegroup.n_molecules):
 
 # Setup beam and detector
 beam = source.Beam(photon_energy=photon_energy, pulse_energy=pulse_energy, diameter_fwhm=beam_diameter)
-pad = detector.PADGeometry(pixel_size=pixel_size, distance=detector_distance, n_pixels=n_pixels)
+pad = detector.PADGeometry(pixel_size=pixel_size, distance=detector_distance, shape=[args.n_pixels]*2)
 q_vecs = pad.q_vecs(beam=beam).copy()
 q_max = np.max(pad.q_mags(beam=beam))
 resolution = 2*np.pi/q_max
@@ -107,7 +111,7 @@ for i in range(spacegroup.n_molecules):
 
 scat = None
 
-for c in range(30):
+for c in range(args.n_patterns):
     rot = random_rotation()
     trans = np.zeros(3)
     A = np.dot(rot, unitcell.a_mat)

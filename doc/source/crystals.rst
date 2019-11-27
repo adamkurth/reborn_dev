@@ -7,14 +7,17 @@ symmetry operations.
 A little bit of math
 --------------------
 
-We define the *orthogonal coordinates*, denoted as :math:`\mathbf{r}`.  These are the usual "Cartesian" laboratory
-coordinates.  The *fractional coordinates* are denoted
-as :math:`\mathbf{x}`.  These two vectors are related by the *orthogonalization matrix* :math:`\mathbf{O}` as follows:
+In crystallography applications we frequently work in four different coordinate systems.  We firstly define the usual
+*cartesian coordinates* (sometimes called *orthogonal coordinates*), denoted as :math:`\mathbf{r}`.  These are the
+usual laboratory coordinates in which the basis vectors are orthogonal and of equal magnitude.  The
+*fractional coordinates* are denoted as :math:`\mathbf{x}`.  These coordinates are convenient to use when dealing with
+crystallographic symmetry operations (for example).  The basis vectors are related by the
+*orthogonalization matrix* :math:`\mathbf{O}` as follows:
 
 .. math:: \mathbf{r} = \mathbf{O}\mathbf{x}
 
-The inverse of the orthogonalization matrix, :math:`\mathbf{O}^{-1}`, is sometimes called the "deorthogonalization
-matrix".   The columns of the orthogonalization matrix are the basis vectors :math:`\mathbf{a}_1`, :math:`\mathbf{a}_2`,
+The inverse of the orthogonalization matrix, :math:`\mathbf{O}^{-1}`, is sometimes called the *deorthogonalization
+matrix*.   The columns of the orthogonalization matrix are the basis vectors :math:`\mathbf{a}_1`, :math:`\mathbf{a}_2`,
 :math:`\mathbf{a}_3` of the crystal:
 
 .. math:: \mathbf{O} = \begin{bmatrix}  | & |  & | \\ \mathbf{a}_1 &  \mathbf{a}_2 & \mathbf{a}_3 \\ | & | & | \end{bmatrix}
