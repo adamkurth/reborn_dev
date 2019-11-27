@@ -586,6 +586,10 @@ def test_17(): # Mask test
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
+    # Check that the shape of the output is equal to N_bin and the shape of the answer
+    assert np.sum(N_bin - np.array(dataout.shape)) == 0
+    assert np.sum(ans.shape - np.array(dataout.shape)) == 0
+
 
 def test_18(): # Out of bounds test2
     N_data = 2
@@ -621,6 +625,11 @@ def test_18(): # Out of bounds test2
     dataout /= weightout
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
+
+    # Check that the shape of the output is equal to N_bin and the shape of the answer
+    assert np.sum(N_bin - np.array(dataout.shape)) == 0
+    assert np.sum(ans.shape - np.array(dataout.shape)) == 0
+
 
 
 
