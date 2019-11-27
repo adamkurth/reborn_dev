@@ -36,7 +36,7 @@ def test_PADGeometry():
 
     pad = detector.PADGeometry()
     assert pad.t_vec is None
-    pad = detector.PADGeometry(pixel_size=100e-6, distance=1, n_pixels=100)
+    pad = detector.PADGeometry(pixel_size=100e-6, distance=1, shape=(100, 100))
     assert np.max(pad.solid_angles1() - pad.solid_angles2())/np.max(pad.solid_angles2()) < 1e-6
 
 
@@ -46,8 +46,8 @@ def test_beam():
     beam.wavelength = 1.5e-10
     beam.beam_vec = np.array([0, 0, 1])
 
-    pad_geom = detector.PADGeometry()
-    pad_geom.simple_setup()
+    pad_geom = detector.PADGeometry(pixel_size=100e-6, distance=1, shape=(100, 100))
+    # pad_geom.simple_setup()
 
     # TODO: put some thought into these tests...
 

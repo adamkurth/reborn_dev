@@ -1,5 +1,4 @@
 import sys
-sys.path.append('../..')
 from time import time
 
 import numpy as np
@@ -8,6 +7,10 @@ import matplotlib.pyplot as plt
 import bornagain
 from bornagain import simulate
 from bornagain.simulate.form_factors import sphere_form_factor
+
+show = True
+if 'noplots' in sys.argv:
+    show = False
 
 use_numba = False
 try:
@@ -43,8 +46,6 @@ if use_numba:
 #     - The "x" compoment completes the right-handed coordinate system
 #     - Usually beam polarization from an undulator is in the horizontal, which would be "x"
 
-
-
 # Generic container for an x-ray beam.  Holds beam direction, polarization, wavelength, etc.
 beam = bornagain.source.Beam(wavelength=13.49e-9, beam_vec=[0, 0, 1])
 
@@ -63,7 +64,7 @@ rot = np.array([[1, 0, 0], [0, np.cos(angle), -np.sin(angle)], [0, np.sin(angle)
 pos = np.dot(pos, rot.T)
 
 # Display the arrangement of spheres:
-if False:
+if show:
     fig = plt.figure(1)
     ax = fig.add_subplot(111, projection='3d')
     p = pos*1e6
@@ -90,7 +91,7 @@ scat = detector.reshape(scat)
 beam_mask = detector.reshape(beam_mask)
 
 # Display the diffraction intensities:
-if True:
+if show:
     cmap = 'CMRmap'
     fig = plt.figure(2)
     ax1 = fig.add_subplot(121)
