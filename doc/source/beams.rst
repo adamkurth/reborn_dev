@@ -23,21 +23,24 @@ might be accompanied by the beam divergence FWHM.
 
 Another important parameter is the beam direction:
 
-    :math:`\hat{b}` : The incident beam direction.
+    :math:`\hat{k}_0` : The incident beam direction.
 
 Code in the bornagain package does not in general assume a particular beam direction, but the
-:class:`Beam <bornagain.source.Beam>` class does set the default to [0, 0, 1].   If you think the "z" direction is the
-only "obvious" choice for the beam direction, you should read the documentation for popular software such as MOSFLM.
-There is one place where a beam direction is presently assumed in bornagain: the viewers presently assume the [0, 0, 1]
-beam direction.
+:class:`Beam <bornagain.source.Beam>` class does set the default to :math:`\hat{k}_0 = (0, 0, 1)` which we might call
+the :math:`\hat{z}` direction.   Note that virtually all concievable coordinate systems have been used by at least one
+popular diffraction analysis package, which is why bornagain focuses on vectorized math that removes all assumptions of
+the beam direction.  There is, however, one place where a beam direction is presently assumed: the diffraction viewer
+interfaces presently assume the :math:`\hat{k}_0 = (0, 0, 1)` beam direction (but this will be more flexible in the
+future).
 
-Beam polarization can also be important:
+Beam polarization can also be important if you care about differential scattering cross sections.  The polarization axis
+is defined as
 
-   :math:`\hat{u}` : Defines a unique axis through which polarization is specified.
+   :math:`\hat{E}_0` : "Polarization axis" that defines a unique axis through which polarization is specified.
 
-This single vector :math:`\hat{u}` is appropriate for linearly polarized beams, and the default value is the [1, 0, 0]
-direction.  For beams that are not purely linearly polarized, you will most likely sum the intensity contributions from
-each of the two polarizations, and the weights of those two contributions may be specified within the
+This single vector :math:`\hat{E}_0` is appropriate for linearly polarized beams, and the default value is
+:math:`\hat{E}_0 = (1, 0, 0)`.  For beams that are not purely linearly polarized, you will most likely sum the intensity
+contributions from each of the two polarizations, and the weights of those two contributions may be specified within the
 :class:`Beam <bornagain.source.Beam>` class.  The second polarization vector is not specified explicitly; it is *always*
 equal to :math:`\hat{u}\times\hat{b}` due to the nature of Elecrodynamics. We do not presently support circularly or
 elliptically polarized light but that can be added if need be.

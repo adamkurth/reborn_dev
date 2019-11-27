@@ -78,8 +78,7 @@ def _clcore(double_precision=False):
     # TODO: check that the amplitudes are correct
     ###########################################################################
 
-    pad = ba.detector.PADGeometry()
-    pad.simple_setup(n_pixels=4, pixel_size=1, distance=1)
+    pad = ba.detector.PADGeometry(shape=(4, 4), pixel_size=1, distance=1)
     n_atoms = 10
     rot = np.eye(3, dtype=core.real_t)
     q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
@@ -177,8 +176,7 @@ def _clcore(double_precision=False):
     r_vecs = np.random.random([n_atoms, 3])
     f = np.random.random([n_atoms]) * 1j
     
-    pad = ba.detector.PADGeometry()
-    pad.simple_setup(n_pixels=4, pixel_size=1, distance=1)
+    pad = ba.detector.PADGeometry(shape=(4, 4), pixel_size=1, distance=1)
     rot = np.eye(3, dtype=core.real_t)
     q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
 
@@ -204,8 +202,7 @@ def _clcore(double_precision=False):
     # Check phase_factor_qrf_chunk_r
     ###########################################################################
 
-    pad = ba.detector.PADGeometry()
-    pad.simple_setup(n_pixels=4, pixel_size=1, distance=1)
+    pad = ba.detector.PADGeometry(shape=(4, 4), pixel_size=1, distance=1)
     n_atoms = 10
     rot = np.eye(3, dtype=core.real_t)
     q = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1)
@@ -260,7 +257,7 @@ def _clcore(double_precision=False):
     pixel_size = 300e-6
     distance = 0.5
     wavelength = 2e-10
-    pad = ba.detector.PADGeometry(n_pixels=n_pixels, pixel_size=pixel_size, distance=distance)
+    pad = ba.detector.PADGeometry(shape=(n_pixels, n_pixels), pixel_size=pixel_size, distance=distance)
     beam = ba.source.Beam(wavelength=wavelength)
     q = pad.q_vecs(beam=beam)
 

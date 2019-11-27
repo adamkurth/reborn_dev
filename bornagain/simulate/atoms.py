@@ -14,7 +14,7 @@ eV = const.value('electron volt')
 NA = const.value('Avogadro constant')
 
 
-henke_data_path = pkg_resources.resource_filename('bornagain.simulate', 'data/henke')
+henke_data_path = pkg_resources.resource_filename('bornagain', 'data/scatter/henke')
 
 
 atomic_symbols = np.array(['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca',

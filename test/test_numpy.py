@@ -41,8 +41,8 @@ def test_fortranarray():
     c_flat = c.reshape(200)
     f_flat = f.reshape(200)
 
-    print(type(c.data))
-    print(type(c_flat.data))
+    # print(type(c.data))
+    # print(type(c_flat.data))
     assert c.data != c_flat.data
     assert f.data != f_flat.data
     assert c.data == f.data      # ndarray.data is: "Python buffer object pointing to the start of the array's data."

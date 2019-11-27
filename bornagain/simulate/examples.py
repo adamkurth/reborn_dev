@@ -25,10 +25,10 @@ from scipy import constants as const
 hc = const.h*const.c
 r_e = const.value('classical electron radius')
 
-lysozyme_pdb_file = pkg_resources.resource_filename('bornagain.simulate', 'data/pdb/2LYZ.pdb')
-psi_pdb_file = pkg_resources.resource_filename('bornagain.simulate', 'data/pdb/1jb0.pdb')
-pnccd_geom_file = pkg_resources.resource_filename('bornagain.simulate', 'data/geom/pnccd_front.geom')
-cspad_geom_file = pkg_resources.resource_filename('bornagain.simulate', 'data/geom/cspad.geom')
+lysozyme_pdb_file = pkg_resources.resource_filename('bornagain', 'data/pdb/2LYZ.pdb')
+psi_pdb_file = pkg_resources.resource_filename('bornagain', 'data/pdb/1jb0.pdb')
+pnccd_geom_file = pkg_resources.resource_filename('bornagain', 'data/geom/pnccd_front.geom')
+cspad_geom_file = pkg_resources.resource_filename('bornagain', 'data/geom/cspad.geom')
 
 
 def pnccd_pads():
