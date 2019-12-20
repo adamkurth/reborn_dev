@@ -14,6 +14,7 @@ except ImportError:
 import pkg_resources
 import numpy as np
 from bornagain.target.molecule import Molecule
+from bornagain.simulate import atoms
 from bornagain.utils import warn, vec_mag
 from numba import jit
 
@@ -35,15 +36,21 @@ def get_pdb_file(pdb_id, save_path='.'):
         string path to file
     """
 
-    if save_path is None:
-        save_path = pdb_data_path
+    # if save_path is None:
+    #     save_path = pdb_data_path
     if not pdb_id.endswith('.pdb'):
         pdb_id += '.pdb'
+
     pdb_path = os.path.join(save_path, pdb_id)
 
     # Check if the file was downloaded already
     if os.path.isfile(pdb_path):
         return pdb_path
+
+    # Check if the file is already in bornagain
+    if os.path.exists(pdb_data_path+'/'+pdb_id):
+        print('Fetching pdb file %s from bornagain data directory %s' % (pdb_id, pdb_data_path))
+        return pdb_data_path+'/'+pdb_id
 
     # Check if this file is in the bornagain repository
     cache_path = os.path.join(pdb_data_path, pdb_id)
@@ -242,7 +249,7 @@ class CrystalStructure(object):
     """
     # TODO: Needs documentation!
 
-    fractional_coordinates = None  #: Fractional coordinates of the asymmetric unit (expanded w/ non-cryst. symmetry)
+    fractional_coordinates = None  #: Fractional coords of the asymmetric unit, possibly with NCS partners
     molecule = None                #: Molecule class instance containing the asymmetric unit
     unitcell = None                #: UnitCell class instance
     spacegroup = None              #: Spacegroup class instance
@@ -253,13 +260,17 @@ class CrystalStructure(object):
     mosaic_domain_size_fwhm = 0.0
     cryst1 = ""
     pdb_dict = None
+    _au_com = None
 
-    def __init__(self, pdb_file_path, no_warnings=False):
+    def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False, tight_packing=False):
         r"""
         Arguments:
             pdb_file_path (string): Path to a pdb file
             no_warnings (bool): Suppress warnings concerning ambiguities in symmetry operations
         """
+
+        if not os.path.exists(pdb_file_path):
+            pdb_file_path = get_pdb_file(pdb_file_path, save_path='.')
 
         dic = pdb_to_dict(pdb_file_path)
         self.pdb_dict = dic
@@ -275,19 +286,26 @@ class CrystalStructure(object):
 
         # These are the initial coordinates with strange origin
         r = dic['atomic_coordinates']
+
         # Check for non-crystallographic symmetry.  Construct asymmetric unit from them.
-        ncs_partners = [r]
-        n_ncs_partners = len(dic['ncs_rotations'])
-        i_given = dic['i_given']
-        for i in range(n_ncs_partners):
-            if i_given[i] == 0:
-                R = dic['ncs_rotations'][i]
-                T = dic['ncs_translations'][i]
-                ncs_partners.append(np.dot(r, R.T) + T)
-        r_au = np.vstack(ncs_partners)
+        if expand_ncs_coordinates:
+            ncs_partners = [r]
+            n_ncs_partners = len(dic['ncs_rotations'])
+            i_given = dic['i_given']
+            for i in range(n_ncs_partners):
+                if i_given[i] == 0:
+                    R = dic['ncs_rotations'][i]
+                    T = dic['ncs_translations'][i]
+                    ncs_partners.append(np.dot(r, R.T) + T)
+            r_au = np.vstack(ncs_partners)
+        else:
+            r_au = r
+
         # Transform to fractional coordinates
         x_au = np.dot(S, r_au.T).T # + U
-        self.fractional_coordinates = x_au
+        # Get center of mass (estimate based on atomic number only)
+        Z = atoms.atomic_symbols_to_numbers(dic['atomic_symbols'])
+        x_au_com = np.sum((Z*x_au.T).T, axis=0)/np.sum(Z)
 
         n_sym = len(dic['spacegroup_rotations'])
         rotations = []
@@ -304,6 +322,15 @@ class CrystalStructure(object):
             rotations.append(W)
             translations.append(Z)
         self.spacegroup = SpaceGroup(dic['spacegroup_symbol'], rotations, translations)
+
+        # Redefine spacegroup operators so that all molecule COMs are in the unit cell
+        if tight_packing:
+            for i in range(self.spacegroup.n_molecules):
+                com = self.spacegroup.apply_symmetry_operation(i, x_au_com)
+                self.spacegroup.sym_translations[i] -= com - (com % 1)
+
+        self.fractional_coordinates = x_au
+        self.fractional_coordinates_com = x_au_com
 
         r_au_mod = np.dot(x_au, self.unitcell.o_mat.T)
         self.molecule = Molecule(coordinates=r_au_mod, atomic_symbols=dic['atomic_symbols'])

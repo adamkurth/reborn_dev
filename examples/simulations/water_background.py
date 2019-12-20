@@ -8,9 +8,9 @@ from scipy import constants as const
 r_e = const.value('classical electron radius')
 eV = const.value('electron volt')
 
-pad = bornagain.detector.PADGeometry(distance=0.1, n_pixels=2000, pixel_size=100e-6)
-beam = bornagain.source.Beam(photon_energy=9000*eV, diameter_fwhm=5e-6, pulse_energy=5e-3*1e-4)
-jet_diameter = 1e-3
+pad = bornagain.detector.PADGeometry(distance=0.2, shape=[4000]*2, pixel_size=100e-6)
+beam = bornagain.source.Beam(photon_energy=8000*eV, diameter_fwhm=5e-6, pulse_energy=1e8*8000*eV)
+jet_diameter = 100e-6
 n_water_molecules = jet_diameter * beam.diameter_fwhm**2 * solutions.water_number_density()
 q = pad.q_vecs(beam=beam)
 qmag = bornagain.utils.vec_mag(q)

@@ -32,6 +32,8 @@ The sanity checks are (1) If :math:`x_{\mathrm{s}} = x_{\mathrm{min}} - \Delta x
 Handling multi-dimensional arrays
 ---------------------------------
 
+.. _nd_array_handling:
+
 When we specify the bins for multi-dimensional arrays, we provide tuples of :math:`x_{\mathrm{min}}`,
 :math:`x_{\mathrm{max}}`, and :math:`N_{\mathrm{bin}}`.  Importantly the tuples should
 correspond to the shapes of numpy arrays; the *first* element (index 0) corresponds to the dimension with

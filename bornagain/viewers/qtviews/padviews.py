@@ -268,6 +268,8 @@ class PADView(object):
     def n_pads(self):
 
         if self.pad_geometry is not None:
+            if not isinstance(self.pad_geometry, list):
+                self.pad_geometry = [self.pad_geometry]
             return len(self.pad_geometry)
         if self.get_pad_display_data() is not None:
             return len(self.get_pad_display_data())

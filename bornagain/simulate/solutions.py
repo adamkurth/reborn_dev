@@ -5,8 +5,7 @@ import numpy as np
 from bornagain.utils import memoize
 # import matplotlib.pyplot as plt
 
-file_name = pkg_resources.resource_filename('bornagain.simulate',
-                                            'data/water_scattering_data.txt')
+file_name = pkg_resources.resource_filename('bornagain', 'data/scatter/water_scattering_data.txt')
 
 
 

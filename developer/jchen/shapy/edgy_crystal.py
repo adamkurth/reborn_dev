@@ -156,7 +156,7 @@ for c in range(N_pattern):
     weight_sum += weight
     print('Pattern %d; %.3f seconds' % (c, time()-t,))
     if ((c+1) % save_interval) == 0:
-        # if c+1 == save_interval:
+        # if c+1 == checkpoint_save_interval:
         #     print('saving extra data')
         #     np.savez('run%04d_extras.npz' % (run_number,), q_corner_min=q_corner_min, q_corner_max=q_corner_max, n_q_bins=n_q_bins)
         print('saving checkpoint on pattern %d run %d' % (c+1, run_number))
