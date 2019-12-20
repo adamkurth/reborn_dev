@@ -1,5 +1,3 @@
-from bornagain.detector import PADGeometry
-
 
 deluxe = True
 
@@ -9,13 +7,15 @@ if not deluxe:
     # This chunk simply gets the q-vectors
     ###################################################################
 
+    from bornagain.detector import PADGeometry
+
     # Everything in bornagain is SI units
     detector_distance = 0.07
     pixel_size = 110e-6
     beam_direction = [0, 0, 1]
     n_pixels = 256
 
-    # Create an instance of a pixel-array detector (PAD) geometry class
+    # Create an instance of a bornagain pixel-array detector (PAD) geometry class
     pad = PADGeometry(shape=[n_pixels, n_pixels], pixel_size=pixel_size, distance=detector_distance)
     q_vecs = pad.q_vecs(beam=beam_direction)
     # If the only thing you need are q-vectors (2*pi/lambda) then we are done.  The above is an N^2x3 array, where N is
@@ -28,14 +28,11 @@ if deluxe:
     ########################################################################
 
     import numpy as np
-    import matplotlib.pyplot as plt
-    import xraylib
-    import pyqtgraph as pg
     from bornagain.detector import PADGeometry
     from bornagain.source import Beam
     from bornagain.target.crystal import CrystalStructure
-    from bornagain.viewers.qtviews import PADView, Scatter3D
-    from bornagain.simulate.atoms import xraylib_scattering_factors, atomic_symbols_to_numbers
+    from bornagain.viewers.qtviews import PADView
+    from bornagain.simulate.atoms import xraylib_scattering_factors
     from bornagain.simulate.clcore import ClCore
     from bornagain.utils import random_rotation
     import scipy.constants as const
@@ -78,25 +75,21 @@ if deluxe:
 
     # This creates an instance of the OpenCL GPU simulation engine, which manages GPU context etc.
     clcore = ClCore()
+    # This moves the q-vectors to the GPU device.  Do this only once since it is a costly memory operation.
     q_vecs_gpu = clcore.to_device(q_vecs)
 
-    n_patterns = 1
     R = random_rotation()
     print('Simulating pattern...')
     amps = 0
     for j in range(len(uniq_z)):
         f = grp_fs[j]
         r = grp_r_vecs[j]
-        a = clcore.phase_factor_qrf(q_vecs_gpu, r, R=R)
+        a = clcore.phase_factor_qrf(q_vecs_gpu, r, R=R)  # GPU sum over f(q)*exp(i Rq.r), where f(q) is 1 in this case
         amps += a*f
     intensities = r_e**2*fluence*solid_angles*polarization_factors*np.abs(amps)**2  #*np.abs(fs[i])**2
     intensities = np.random.poisson(intensities)
+    intensities = pad.reshape(intensities)  # Make it a 2D array for display purposes
 
-    dat = pad.reshape(intensities)
-    # dat = [pads[i].reshape(np.abs(grp_fs[3][i])**2) for i in range(len(pads))]
-    # dat = [np.reshape(qmags[i], pads[i].shape()) for i in range(len(pads))]
-    padview = PADView(raw_data=dat, pad_geometry=pad)
+    padview = PADView(raw_data=intensities, pad_geometry=pad)
     padview.set_levels(-0.1, 10)
-    # padview.show_all_geom_info()
     padview.start()
-    print('done')
