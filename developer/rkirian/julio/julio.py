@@ -1,3 +1,16 @@
+from xyz import xyz_reader
+import numpy as np
+# from glob import glob
+# import os
+# dirlist = os.listdir(".")
+# print('hello')
+
+file_name = "Ar4631.xyz"
+file_name = "Ar_1000.xyz"
+xyz = xyz_reader(file_name)
+
+atomic_numbers = xyz[0, :].astype(np.int)
+r_vecs = xyz[1:, :].T/1e10
 
 deluxe = True
 
@@ -42,7 +55,7 @@ if deluxe:
 
     # Everything in bornagain is SI units
     photon_energy = 9000 * eV  # Joules
-    detector_distance = 0.07  # Meters
+    detector_distance = 0.03  # Meters
     pulse_energy = 200e-3  # Joules
     pixel_size = 110e-6  # Meters
     beam_direction = [0, 0, 1]  # Incident beam direction
@@ -62,8 +75,8 @@ if deluxe:
     # Gather atomic coordinates etc. from a PDB file
     pdb_id = '1jb0'
     cryst = CrystalStructure(pdb_id)
-    r_vecs = cryst.molecule.coordinates
-    atomic_numbers = cryst.molecule.atomic_numbers
+    # r_vecs = cryst.molecule.coordinates
+    # atomic_numbers = cryst.molecule.atomic_numbers
     # We will group atoms with the same atomic number since they have a common form factor
     uniq_z = np.unique(atomic_numbers)
     grp_r_vecs = []
@@ -78,7 +91,8 @@ if deluxe:
     # This moves the q-vectors to the GPU device.  Do this only once since it is a costly memory operation.
     q_vecs_gpu = clcore.to_device(q_vecs)
 
-    R = random_rotation()
+    R = np.eye(3)
+    # R = random_rotation()
     print('Simulating pattern...')
     amps = 0
     for j in range(len(uniq_z)):
@@ -87,7 +101,7 @@ if deluxe:
         a = clcore.phase_factor_qrf(q_vecs_gpu, r, R=R)  # GPU sum over f(q)*exp(i Rq.r), where f(q) is 1 in this case
         amps += a*f
     intensities = r_e**2*fluence*solid_angles*polarization_factors*np.abs(amps)**2  #*np.abs(fs[i])**2
-    intensities = np.random.poisson(intensities)
+    # intensities = np.random.poisson(intensities)
     intensities = pad.reshape(intensities)  # Make it a 2D array for display purposes
 
     padview = PADView(raw_data=intensities, pad_geometry=pad)
