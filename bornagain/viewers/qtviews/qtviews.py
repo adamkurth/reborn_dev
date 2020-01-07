@@ -111,7 +111,7 @@ class Volumetric3D(object):
         self.add_lines(np.array([[0, 0, 0], [0, 1, 0]]) * axlen, [0, 255, 0], width=wid)
         self.add_lines(np.array([[0, 0, 0], [0, 0, 1]]) * axlen, [0, 0, 255], width=wid)
 
-    def show(self, smooth=True):
+    def show(self, smooth=True, hold=True, kill=True):
 
         self.dat[..., 0:-1] *= 255. / self.dat[..., 0:-1].max()
         self.dat[..., 3] *= 255. / self.dat[..., 3].max()
@@ -122,70 +122,88 @@ class Volumetric3D(object):
         self.w.addItem(v)
         self.w.setCameraPosition(distance=self.maxDist * 2)
         self.w.show()
+        app = pg.QtGui.QApplication.instance()
+        if hold:
+            app.exec_()
+        if kill:
+            del app
 
-        # QtGui.QApplication.instance().exec_()
 
+def plot_multiple_images(images, title=None, n_rows=None, hold=True, kill=True):
 
-def MapProjection(data, axis=None):
-    ''' View a 3D density map as a projection along selected axes (which can be a list)'''
-
-    if axis is not None:
-        if type(axis) is not list:
-            axis = [axis]
-        dat = []
-        for ax in axis:
-            dat.append(np.sum(data, axis=ax))
-        dat = np.concatenate(dat)
-    else:
-        dat = data
-    app = QtGui.QApplication([])
-    win = QtGui.QMainWindow()
-    win.resize(800, 800)
-    imv = pg.ImageView()
-    win.setCentralWidget(imv)
-    # win.setWindowTitle('pyqtgraph example: ImageView')
-    imv.setImage(dat, xvals=np.linspace(1., 3., dat.shape[0]))
+    app = pg.mkQApp()
+    win = pg.GraphicsLayoutWidget()
+    if title is not None:
+        win.setWindowTitle(title)
+    plots = []
+    image_items = []
+    for i in range(len(images)):
+        plot = win.addPlot()
+        plots.append(plot)
+        img = pg.ImageItem(images[i])
+        image_items.append(img)
+        plot.addItem(img)
+        plot.setXRange(0, np.max(images[i].shape))
+        plot.setYRange(0, np.max(images[i].shape))
+        if n_rows is not None:
+            if (i % np.ceil(len(images)/n_rows)) == 0:
+                win.nextRow()
     win.show()
-    # QtGui.QApplication.instance().exec_()
+    if hold:
+        app.exec_()
+    if kill:
+        del app
 
 
-def MapSlices(data, axis=None, levels=None):
-    ''' View a 3D density map as a projection along selected axes (which can be a list)'''
+def MapProjection(data, axis=None, hold=True, kill=True):
+    r""" View a 3D density map as a projection along selected axes (which can be a list) """
+    if axis is None:
+        axis = [0, 1, 2]
+    if type(axis) is not list:
+        axis = [axis]
+    dat = []
+    for ax in axis:
+        dat.append(np.sum(data, axis=ax))
+    plot_multiple_images(dat, hold=hold, kill=kill)
 
-    # This assumes we have a cube...
-    n = data.shape[0]
-    m = int((data.shape[0] - 1) / 2)
+
+def MapSlices(data, axis=None, levels=None, hold=True, kill=True):
+    r""" View a 3D density map as a projection along selected axes (which can be a list) """
 
     if axis is None:
         axis = [0, 1, 2]
 
-    if axis is not None:
-        if type(axis) is not list:
-            axis = [axis]
-        dat = []
-        for ax in axis:
-            if ax == 0:
-                dat.append(np.reshape(data[m, :, :], [n, n]))
-            elif ax == 1:
-                dat.append(np.reshape(data[:, m, :], [n, n]))
-            elif ax == 2:
-                dat.append(np.reshape(data[:, :, m], [n, n]))
-        dat = np.concatenate(dat)
-    else:
-        dat = data
-    app = QtGui.QApplication([])
-    win = QtGui.QMainWindow()
-    win.resize(800, 800)
-    imv = pg.ImageView()
-    win.setCentralWidget(imv)
-    # win.setWindowTitle('pyqtgraph example: ImageView')
-    if levels is not None:
-        autoLevels = False
-    else:
-        autoLevels = True
-    imv.setImage(dat, xvals=np.linspace(1., 3., dat.shape[0]), levels=levels, autoLevels=autoLevels)
-    win.show()
-    # QtGui.QApplication.instance().exec_()
+    if not type(axis) is list:
+        axis = [axis]
+
+    dat = []
+
+    for ax in axis:
+        if ax == 0:
+            dat.append(np.squeeze(data[int(np.floor(data.shape[0]/2)), :, :]))
+        elif ax == 1:
+            dat.append(np.squeeze(data[:, int(np.floor(data.shape[1]/2)), :]))
+        elif ax == 2:
+            dat.append(np.squeeze(data[:, :, int(np.floor(data.shape[2]/2))]))
+
+    plot_multiple_images(dat, hold=hold, kill=kill)
+
+    #     dat = np.concatenate(dat)
+    # else:
+    #     dat = data
+
+    # app = QtGui.QApplication([])
+    # win = QtGui.QMainWindow()
+    # win.resize(800, 800)
+    # imv = pg.ImageView()
+    # win.setCentralWidget(imv)
+    # # win.setWindowTitle('pyqtgraph example: ImageView')
+    # if levels is not None:
+    #     autoLevels = False
+    # else:
+    #     autoLevels = True
+    # imv.setImage(dat, xvals=np.linspace(1., 3., dat.shape[0]), levels=levels, autoLevels=autoLevels)
+    # win.show()
 
 
 class Scatter3D(object):
@@ -294,9 +312,20 @@ class Scatter3D(object):
         self.w.opts['distance'] = dist
         self.w.opts['fov'] = fov
 
-    def show(self):
+    def show(self, hold=True, kill=True):
 
         if not self.orthographic:
             self.w.setCameraPosition(distance=self.maxDist * 5)
         self.w.show()
-        # pg.QtGui.QApplication.exec_()
+        if hold:
+            pg.QtGui.QApplication.instance().exec_()
+        if kill:
+            app = pg.QtGui.QApplication.instance()
+            del app
+
+
+if __name__ == '__main__':
+
+    images = [np.random.rand(5, 5), np.random.rand(5, 6), np.random.rand(5, 10)]
+    images[0][0:2, 0:2] = -1
+    plot_multiple_images(images, title='test', n_rows=2)
