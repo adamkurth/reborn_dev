@@ -36,6 +36,9 @@ def get_pdb_file(pdb_id, save_path='.'):
         string path to file
     """
 
+    if pdb_id == 'lysozyme':
+        pdb_id = '2LYZ'
+
     # if save_path is None:
     #     save_path = pdb_data_path
     if not pdb_id.endswith('.pdb'):
@@ -391,7 +394,7 @@ class FiniteLattice(object):
         self.max_size = max_size
         self.occupancies = np.ones([self.max_size]*3)
         self.unitcell = unitcell
-        ran = np.arange(-(self.max_size-1)/2.0, (self.max_size+1)/2.0)
+        ran = np.arange(max_size) - np.floor((max_size-1)/2)  # e.g. [-1, 0, 1, 2] or [-1, 0, 1]
         x, y, z = np.meshgrid(ran, ran, ran, indexing='ij')
         self.all_x_coordinates = np.vstack([x.ravel(), y.ravel(), z.ravel()]).T.copy()
         self.all_x_coordinates.flags.writeable = False
@@ -460,18 +463,20 @@ class FiniteLattice(object):
             self.occupancies.flat[w] = 0
 
     def reset_occupancies(self):
-
+        r""" Set all occupancies to 1 """
         self.occupancies = np.ones([self.max_size]*3)
 
-    def make_hexagonal_prism(self, n_cells=None):
-
+    def make_hexagonal_prism(self, width=3, length=10, shift=0):
+        r""" Specialized: assumes "standard" hexagonal cell, i.e. alpha=90, beta=90, gamma=120 """
         self.reset_occupancies()
-        self.add_facet(plane=[-1, 1, 0], length=n_cells)
-        self.add_facet(plane=[1, -1, 0], length=n_cells)
-        self.add_facet(plane=[1, 0, 0], length=n_cells)
-        self.add_facet(plane=[0, 1, 0], length=n_cells)
-        self.add_facet(plane=[-1, 0, 0], length=n_cells)
-        self.add_facet(plane=[0, -1, 0], length=n_cells)
+        self.add_facet(plane=[-1, 1, 0], length=width, shift=shift)
+        self.add_facet(plane=[1, -1, 0], length=width, shift=shift)
+        self.add_facet(plane=[1, 0, 0], length=width, shift=shift)
+        self.add_facet(plane=[0, 1, 0], length=width, shift=shift)
+        self.add_facet(plane=[-1, 0, 0], length=width, shift=shift)
+        self.add_facet(plane=[0, -1, 0], length=width, shift=shift)
+        self.add_facet(plane=[0, 0, 1], length=length, shift=shift)
+        self.add_facet(plane=[0, 0, -1], length=length, shift=shift)
 
     def sphericalize(self, radius):
 
