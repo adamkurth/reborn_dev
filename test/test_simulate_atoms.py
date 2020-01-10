@@ -10,7 +10,7 @@ def test_element_numbers_and_symbols():
         
     """Round trip conversion of atomic numbers to element symbols"""
         
-    Z1 = np.arange(1,119)
+    Z1 = np.arange(1, 119)
     sym = sim.atoms.atomic_numbers_to_symbols(Z1)
     Z2 = sim.atoms.atomic_symbols_to_numbers(sym)
     
@@ -19,8 +19,8 @@ def test_element_numbers_and_symbols():
     Z3 = 5
     sym = sim.atoms.atomic_numbers_to_symbols(Z3)
     Z4 = sim.atoms.atomic_symbols_to_numbers(sym)
-    
-    assert(all(Z3 == Z4))
+
+    assert(Z3 == Z4)
 
 
 def test_get_henke_data():
@@ -35,3 +35,8 @@ def test_get_henke_data():
     assert np.abs(f_lookup - f_correct) == 0
     f_lookup = sim.atoms.get_scattering_factors_fixed_z(Z, np.array([798.570 * eV]))[0]
     assert np.abs(f_lookup - f_correct) == 0
+
+
+if __name__ == '__main__':
+    test_element_numbers_and_symbols()
+    test_get_henke_data()

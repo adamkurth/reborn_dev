@@ -28,7 +28,7 @@ atomic_symbols = np.array(['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg'
 
 def atomic_symbols_to_numbers(symbols):
     r"""
-    Convert atomic symbols (such as C, N, He, Be) to atomic numbers.
+    Convert atomic symbol strings (such as C, N, He, Be) to atomic numbers.
 
     Arguments:
         symbols (string/list-like): Atomic symbol strings. Case insensitive.
@@ -43,10 +43,10 @@ def atomic_symbols_to_numbers(symbols):
         for u in U:
             w = np.nonzero(atomic_symbols == u.capitalize())
             Z[symbols == u] = w[0] + 1
-            Z = Z.astype(np.int)
+        Z = Z.astype(np.int)
     else:
         w = np.nonzero(atomic_symbols == np.str_(symbols).capitalize())
-        Z = w[0] + 1
+        Z = int(w[0] + 1)
 
     return Z
 
@@ -64,8 +64,6 @@ def atomic_numbers_to_symbols(numbers):
 
     numbers = np.array(numbers, dtype=np.int)
     symbols = atomic_symbols[numbers - 1]
-    if len(symbols) == 1:
-        symbols = symbols[0]
     return symbols
 
 
@@ -101,7 +99,7 @@ def get_henke_data(atomic_number):
 
 def get_scattering_factors(atomic_numbers, photon_energy):
     r"""
-    Get complex atomic scattering factors for a given photon energy and a range of atomic numbers.  The scattering
+    Get complex atomic scattering factors for a single photon energy and a range of atomic numbers.  The scattering
     factor data come from the function :func:`bornagain.simulate.atoms.get_henke_data()`.
 
     Arguments:
@@ -109,7 +107,7 @@ def get_scattering_factors(atomic_numbers, photon_energy):
         photon_energy (float): Photon energy in SI units.
 
     Returns:
-        scattering_factors (complex/numpy array): Complex scattering factors.
+        numpy array: Complex scattering factors.
     """
 
     Z = np.array(atomic_numbers)
@@ -123,7 +121,7 @@ def get_scattering_factors(atomic_numbers, photon_energy):
 
 def get_scattering_factors_fixed_z(atomic_number, photon_energies):
     r"""
-    Get complex atomic scattering factors for one atomic number and a range of energies.
+    Get complex atomic scattering factors for a single atomic number and a range of photon energies.
 
     Arguments:
         atomic_number (int): Atomic number.
@@ -139,14 +137,20 @@ def get_scattering_factors_fixed_z(atomic_number, photon_energies):
 
 def xraylib_scattering_factors(qmags, atomic_number, photon_energy):
     r"""
-    Get the q-dependent atomic scattering factors from the xraylib package.
+    Get the q-dependent atomic scattering factors from the xraylib package.  The scattering factor is equal to
+
+    :math:`\text{FF_Rayl}(Z, q) + \text{Fi}(Z, E) - i \text{Fii}(Z, E)`
+
+    where FF_Rayl, Fi, and Fii are functions in the
+    xraylib package.  Note the strange minus sign in this formula, which is not a typo.
 
     Args:
-        qmags (numpy array):
-        atomic_number:
-        photon_energy:
+        qmags (numpy array):  q-vector magnitudes, where :math:`\vec{q} = \frac{2\pi}{\lambda}(\vec{s}-\vec{s}_0)`
+        atomic_number (int):  The atomic number.
+        photon_energy (float):  The photon energy in SI units.
 
     Returns:
+        numpy array: complex scattering factors as a function of q
     """
 
     Z = atomic_number
@@ -156,25 +160,41 @@ def xraylib_scattering_factors(qmags, atomic_number, photon_energy):
     return np.array([FF_Rayl(Z, q) for q in qq]) + Fi(Z, E) - 1j*Fii(Z, E)
 
 
-def hubbel_atomic_form_factor(qmags, atomic_number, photon_energy):
+def hubbel_atomic_form_factor(qmags, atomic_number):
     r"""
-    Fetch the q-dependent atomic form factors.  This allows for an arbitrary list of q magnitudes and returns an array.
+    Get the q-dependent atomic form factors.  This allows for an arbitrary list of q magnitudes and returns an array.
     The scattering factors come from Hubbel et al 1975, and are accessed through the xraylib package.
 
     Args:
-        qmags (numpy array):
-        atomic_number:
-        photon_energy:
+        qmags (numpy array):  q vector magnitudes.
+        atomic_number (int):  Atomic number.
 
     Returns:
-        Numpy array
+        Numpy array : Atomic form factor :math:`f(q)`
     """
 
-    Z = atomic_number
-    E = photon_energy/eV/1000
-    qq = qmags/4.0/np.pi/1e10
-    f = np.array([xraylib.FF_Rayl(Z, q) for q in qq])
+    qq = qmags*1e10/4.0/np.pi  # xraylib is in inv. angstrom units without the 4 pi
+    f = np.array([xraylib.FF_Rayl(atomic_number, q) for q in qq])
     return f
+
+
+def hubbel_henke_atomic_form_factors(qmags, atomic_number, photon_energy):
+    r"""
+    Get the q-dependent atomic form factors for a single atomic number and single photon energy, using the Hubbel atomic
+    form factors and the Henke dispersion corrections.
+
+    Args:
+        qmags (numpy array):  q vector magnitudes.
+        atomic_number (int):  Atomic number.
+        photon_energy (float):  Photon energy.
+
+    Returns:
+        Numpy array: Atomic form factor :math:`f(q)` with dispersion corrections
+    """
+
+    f0 = hubbel_atomic_form_factor(qmags, atomic_number)
+    df = get_scattering_factors_fixed_z(atomic_number, photon_energy) - atomic_number
+    return f0 + df
 
 
 @utils.memoize
