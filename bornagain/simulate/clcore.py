@@ -1,8 +1,8 @@
 r"""
-This module contains some core functions that are useful for simulating diffraction on GPU devices.  It is not
-finished yet...
+This module contains some core functions that are useful for simulating diffraction on GPU devices.  Look to the
+bornagain documentation to gain an understaning of how this module is meant to be used.
 
-To get some information on compute devices (CPU/GPU) you can run the function clcore.helpme()
+To get some information on compute devices (CPU/GPU) you can run the function clcore.help()
 
 Some environment variables that affect the behaviour of this module:
 
@@ -354,6 +354,7 @@ class ClCore(object):
         return vec_out_dev.get()[0:3]
 
     def test_simple_sum(self, vec):
+        r""" For testing -- appears in the pytest files """
 
         if not hasattr(self, 'test_rotate_vec_cl'):
             self.test_simple_sum_cl = self.programs.test_simple_sum
