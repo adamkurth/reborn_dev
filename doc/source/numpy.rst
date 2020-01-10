@@ -6,9 +6,11 @@ Working with Numpy
 Indexing and internal memory layout of ndarray objects
 ------------------------------------------------------
 
-According to the `docs <https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html#internal-memory-layout-of-an-ndarray>`_,
+According to the
+`docs <https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html#internal-memory-layout-of-an-ndarray>`_,
 Numpy ndarray objects can accommodate any strided indexing scheme.  The bornagain package uses some
-Fortran and OpenCL routines that make assumptions about the internal memory layout of ndarrays.  We assume that
+Fortran and OpenCL routines that make assumptions about the internal memory layout of ndarrays, which means that we
+need to be clear about how we store our arrays in memory.  We assume that
 all ndarrays are in the *default* "c-contiguous order", which defines a syntax in which incremements in the right-most
 index of an array correspond to the smallest steps in the internal memory buffer.  The data buffer is contiguous --
 there are no "gaps".  The following example illustrates this:
@@ -28,6 +30,8 @@ there are no "gaps".  The following example illustrates this:
 
 Arrays of vectors
 -----------------
+
+.. _arrays_of_vectors:
 
 If you have *N* vectors of dimension 3, bornagain assumes they are stored with a shape of (*N*, 3).  This choice was
 made because the right-most index of a numpy array has the smallest stride by default, and because it usually makes
@@ -69,4 +73,6 @@ Note that the above is consistent with rotation operations performed on GPU devi
 Representation of 3D density/intensity maps in numpy arrays
 -----------------------------------------------------------
 
-This needs to be specified some day...
+As with vectors, it is also important that we have an understanding of how we represent density maps as numpy arrays.
+In particular, we need to be clear on how we assign positional coordinate vectors to elements in the density arrays.
+This is discussed in the :ref:`density map <nd_array_handling>` page.

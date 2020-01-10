@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.15.2: http://docutils.sourceforge.net/" />
+<title>Working with Density Maps</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7952 2016-07-26 18:15:59Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left, table.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right, table.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<style type="text/css">
+
+/*
+*   math2html: convert LaTeX equations to HTML output.
+*
+*   Copyright (C) 2009,2010 Alex Fernández
+*
+*   Released under the terms of the `2-Clause BSD license'_, in short:
+*   Copying and distribution of this file, with or without modification,
+*   are permitted in any medium without royalty provided the copyright
+*   notice and this notice are preserved.
+*   This file is offered as-is, without any warranty.
+*
+* .. _2-Clause BSD license: http://www.spdx.org/licenses/BSD-2-Clause
+*
+*   Based on eLyXer: convert LyX source files to HTML output.
+*   http://elyxer.nongnu.org/
+*/
+/* --end--
+* CSS file for LaTeX formulas.
+*/
+
+/* Formulas */
+.formula {
+	text-align: center;
+	font-family: "Droid Serif", "DejaVu Serif", "STIX", serif;
+	margin: 1.2em 0;
+}
+span.formula {
+	white-space: nowrap;
+}
+div.formula {
+	padding: 0.5ex;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* Basic features */
+a.eqnumber {
+	display: inline-block;
+	float: right;
+	clear: right;
+	font-weight: bold;
+}
+span.unknown {
+	color: #800000;
+}
+span.ignored, span.arraydef {
+	display: none;
+}
+.formula i {
+	letter-spacing: 0.1ex;
+}
+
+/* Alignment */
+.align-left, .align-l {
+	text-align: left;
+}
+.align-right, .align-r {
+	text-align: right;
+}
+.align-center, .align-c {
+	text-align: center;
+}
+
+/* Structures */
+span.overline, span.bar {
+	text-decoration: overline;
+}
+.fraction, .fullfraction {
+	display: inline-block;
+	vertical-align: middle;
+	text-align: center;
+}
+.fraction .fraction {
+	font-size: 80%;
+	line-height: 100%;
+}
+span.numerator {
+	display: block;
+}
+span.denominator {
+	display: block;
+	padding: 0ex;
+	border-top: thin solid;
+}
+sup.numerator, sup.unit {
+	font-size: 70%;
+	vertical-align: 80%;
+}
+sub.denominator, sub.unit {
+	font-size: 70%;
+	vertical-align: -20%;
+}
+span.sqrt {
+	display: inline-block;
+	vertical-align: middle;
+	padding: 0.1ex;
+}
+sup.root {
+	font-size: 70%;
+	position: relative;
+	left: 1.4ex;
+}
+span.radical {
+	display: inline-block;
+	padding: 0ex;
+	font-size: 150%;
+	vertical-align: top;
+}
+span.root {
+	display: inline-block;
+	border-top: thin solid;
+	padding: 0ex;
+	vertical-align: middle;
+}
+span.symbol {
+	line-height: 125%;
+	font-size: 125%;
+}
+span.bigsymbol {
+	line-height: 150%;
+	font-size: 150%;
+}
+span.largesymbol {
+	font-size: 175%;
+}
+span.hugesymbol {
+	font-size: 200%;
+}
+span.scripts {
+	display: inline-table;
+	vertical-align: middle;
+}
+.script {
+	display: table-row;
+	text-align: left;
+	line-height: 150%;
+}
+span.limits {
+	display: inline-table;
+	vertical-align: middle;
+}
+.limit {
+	display: table-row;
+	line-height: 99%;
+}
+sup.limit, sub.limit {
+	line-height: 100%;
+}
+span.symbolover {
+	display: inline-block;
+	text-align: center;
+	position: relative;
+	float: right;
+	right: 100%;
+	bottom: 0.5em;
+	width: 0px;
+}
+span.withsymbol {
+	display: inline-block;
+}
+span.symbolunder {
+	display: inline-block;
+	text-align: center;
+	position: relative;
+	float: right;
+	right: 80%;
+	top: 0.3em;
+	width: 0px;
+}
+
+/* Environments */
+span.array, span.bracketcases, span.binomial, span.environment {
+	display: inline-table;
+	text-align: center;
+	border-collapse: collapse;
+	margin: 0em;
+	vertical-align: middle;
+}
+span.arrayrow, span.binomrow {
+	display: table-row;
+	padding: 0ex;
+	border: 0ex;
+}
+span.arraycell, span.bracket, span.case, span.binomcell, span.environmentcell {
+	display: table-cell;
+	padding: 0ex 0.2ex;
+	line-height: 99%;
+	border: 0ex;
+}
+/*
+* CSS file for LaTeX formulas, extra stuff:
+* binomials, vertical braces, stackrel, fonts and colors.
+*/
+
+/* Inline binomials */
+span.binom {
+	display: inline-block;
+	vertical-align: middle;
+	text-align: center;
+	font-size: 80%;
+}
+span.binomstack {
+	display: block;
+	padding: 0em;
+}
+
+/* Over- and underbraces */
+span.overbrace {
+	border-top: 2pt solid;
+}
+span.underbrace {
+	border-bottom: 2pt solid;
+}
+
+/* Stackrel */
+span.stackrel {
+	display: inline-block;
+	text-align: center;
+}
+span.upstackrel {
+	display: block;
+	padding: 0em;
+	font-size: 80%;
+	line-height: 64%;
+	position: relative;
+	top: 0.15em;
+
+}
+span.downstackrel {
+	display: block;
+	vertical-align: bottom;
+	padding: 0em;
+}
+
+/* Fonts */
+span.mathsf, span.textsf {
+	font-style: normal;
+	font-family: sans-serif;
+}
+span.mathrm, span.textrm {
+	font-style: normal;
+	font-family: serif;
+}
+span.text, span.textnormal {
+	font-style: normal;
+}
+span.textipa {
+	color: #008080;
+}
+span.fraktur {
+	font-family: "Lucida Blackletter", eufm10, blackletter;
+}
+span.blackboard {
+	font-family: Blackboard, msbm10, serif;
+}
+span.scriptfont {
+	font-family: "Monotype Corsiva", "Apple Chancery", "URW Chancery L", cursive;
+	font-style: italic;
+}
+
+/* Colors */
+span.colorbox {
+	display: inline-block;
+	padding: 5px;
+}
+span.fbox {
+	display: inline-block;
+	border: thin solid black;
+	padding: 2px;
+}
+span.boxed, span.framebox {
+	display: inline-block;
+	border: thin solid black;
+	padding: 5px;
+}
+
+
+</style>
+</head>
+<body>
+<div class="document" id="working-with-density-maps">
+<h1 class="title">Working with Density Maps</h1>
+
+<p id="working-with-maps">We often need to work with electron/scattering density maps or scattering intesity/amplitude maps in two or three
+dimensions.
+We refer to all of them as &quot;density maps&quot; here.  There are different coordinate representations that we frequently
+encounter, and there is a frequent need to extract 2D slices from 3D maps (for example by trilinear interpolation) or
+to insert 2D slices into 3D maps (for example, by histogramming).  Here we discuss the conventions that will be used
+consistently within bornagain.</p>
+<div class="section" id="sampling-and-binning">
+<h1>Sampling and Binning</h1>
+<div class="figure align-center">
+<img alt="6 bin discrete" src="figures/bins_schematic.png" />
+<p class="caption">Schematic of a 1D discretization with 6 bins.</p>
+</div>
+<p>When we construct density maps, in some cases we need only specify the <em>points</em> at which the density is <em>sampled</em>.  In
+other cases, we are concerned with <em>bins</em>, for example when data are merged or histogrammed.
+In the case of binning, our standard convention for specifying coordinates is illustrated in the above
+figure.
+For each dimension, we provide the total number of bins along the edge, <span class="formula"><i>N</i><sub><span class="mathrm">bin</span></sub></span>, along with
+the minimum and maximum values along each edge, <span class="formula"><i>x</i><sub><span class="mathrm">min</span></sub></span>, <span class="formula"><i>x</i><sub><span class="mathrm">max</span></sub></span>.
+These coordinates refer to the <em>centers</em> of the bins, <em>not the edges</em>.</p>
+<p>By the above definitions, the width of each bin is</p>
+<div class="formula">
+Δ<i>x</i> = <span class="fraction"><span class="ignored">(</span><span class="numerator"><i>x</i><sub><span class="mathrm">max</span></sub> − <i>x</i><sub><span class="mathrm">min</span></sub></span><span class="ignored">)/(</span><span class="denominator"><i>N</i><sub><span class="mathrm">bin</span></sub> − 1</span><span class="ignored">)</span></span>
+</div>
+<p>The center position for the <span class="formula"><i>n</i></span> th bin is</p>
+<div class="formula">
+<i>x</i><sub><i>n</i></sub> = <i>x</i><sub><span class="mathrm">min</span></sub> + <i>n</i>Δ<i>x</i>
+</div>
+<p>where the bin indices range from <span class="formula"><i>n</i> = 0, ⋯, <i>N</i><sub><span class="mathrm">bin</span></sub> − 1</span>.  The bin index <span class="formula"><i>n</i><sub><span class="mathrm">s</span></sub></span> for a
+sample at position <span class="formula"><i>x</i><sub><span class="mathrm">s</span></sub></span> can be calculated via</p>
+<div class="formula">
+<i>n</i><sub><span class="mathrm">s</span></sub> = <span class="mathrm">floor</span><span class="array"><span class="arrayrow"><span class="bracket align-left">⎛</span></span><span class="arrayrow"><span class="bracket align-left">⎝</span></span></span><span class="fraction"><span class="ignored">(</span><span class="numerator"><i>x</i><sub><span class="mathrm">s</span></sub> − (<i>x</i><sub><span class="mathrm">min</span></sub> − Δ<i>x</i> ⁄ 2)</span><span class="ignored">)/(</span><span class="denominator">Δ<i>x</i></span><span class="ignored">)</span></span><span class="array"><span class="arrayrow"><span class="bracket align-right">⎞</span></span><span class="arrayrow"><span class="bracket align-right">⎠</span></span></span>
+</div>
+<p>Note that the above means that (1) If <span class="formula"><i>x</i><sub><span class="mathrm">s</span></sub> = <i>x</i><sub><span class="mathrm">min</span></sub> − Δ<i>x</i> ⁄ 2</span> the index should be zero.
+(2) If <span class="formula"><i>x</i><sub><span class="mathrm">s</span></sub> = <i>x</i><sub><span class="mathrm">min</span></sub> + Δ<i>x</i> ⁄ 2</span> the index should be one.  This is an arbitrary choice,
+but it is important that we be consistent.</p>
+</div>
+<div class="section" id="data-layout-for-multi-dimensional-maps">
+<h1>Data layout for multi-dimensional maps</h1>
+<p>We base our indexing of 3D density maps on the numpy conventions.  By default, numpy uses &quot;c-contiguous order&quot;, which
+means that incremements in the right-most index of an array correspond to the smallest steps in the internal memory
+buffer.
+A particular sample in a 3D density map has a 3-tuple of indices <span class="formula">(<i>i</i>, <i>j</i>, <i>k</i>)</span>, and the array size is
+expressed by a 3-tuple <span class="formula">(<i>N</i><span class="scripts"><sup class="script"><i>i</i></sup><sub class="script"><span class="mathrm">bin</span></sub></span>, <i>N</i><span class="scripts"><sup class="script"><i>j</i></sup><sub class="script"><span class="mathrm">bin</span></sub></span>, <i>N</i><span class="scripts"><sup class="script"><i>k</i></sup><sub class="script"><span class="mathrm">bin</span></sub></span>)</span> .  Similarly, we have
+corresponding 3-tuples of <span class="formula"><i>x</i><sub><span class="mathrm">min</span></sub></span> and <span class="formula"><i>x</i><sub><span class="mathrm">max</span></sub></span>.</p>
+<p>Although multi-dimensional arrays are already built into numpy, it is frequently helpful (when we work with GPU
+simulations for example) to work with flattened data arrays, which means that we convert a 3D density map to a 1D array.
+We then need an <span class="formula"><i>M</i> × 3</span> array that holds the position vectors that correspond to the density samples.
+The example below shows one way to do this:</p>
+<div class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/Users/rkirian/work/projects/bornagain/doc/source/sampling_binning.rst</tt>, line 63)</p>
+<p>Unknown directive type &quot;testcode&quot;.</p>
+<pre class="literal-block">
+.. testcode::
+
+    import numpy as np
+    shape = np.array([2, 3, 4])
+    x_min = np.array([-5, -2.5,  0])
+    x_max = np.array([+5, +2.5, 15])
+    dx = (x_max-x_min)/(shape-1)
+    x = np.arange(shape[0])*dx[0]+x_min[0]
+    y = np.arange(shape[1])*dx[1]+x_min[1]
+    z = np.arange(shape[2])*dx[2]+x_min[2]
+    xx, yy, zz = np.meshgrid(x, y, z, indexing='ij')
+    r = np.vstack([xx.ravel(),yy.ravel(),zz.ravel()]).T.copy()
+    # Note: the .copy() part in the above line makes a c-contiguous array
+    assert np.all(xx.shape == np.array(shape))
+    assert r.flags.c_contiguous is True
+    print(r[0:12,:].T)
+    # Output
+    #  [[-5.  -5.  -5.  -5.  -5.  -5.  -5.  -5.  -5.  -5.  -5.  -5. ]
+    #   [-2.5 -2.5 -2.5 -2.5  0.   0.   0.   0.   2.5  2.5  2.5  2.5]
+    #   [ 0.   5.  10.  15.   0.   5.  10.  15.   0.   5.  10.  15. ]]
+
+</pre>
+</div>
+<p>In the final output of the above example, one might say that the &quot;<span class="formula"><i>z</i></span>&quot; vector component increments fastest, which
+might go against your &quot;intuition&quot; if you automatically throught that &quot;<span class="formula"><i>z</i></span> goes before <span class="formula"><i>z</i></span>&quot;.
+The reason for this is that the right-most index of numpy arrays increments fastest; this index corresponds to the
+shortest stride.
+Note that there is no notion of &quot;<span class="formula"><i>x</i></span>&quot;, &quot;<span class="formula"><i>y</i></span>&quot; and &quot;<span class="formula"><i>z</i></span>&quot; coordinates in bornagain -- the only important
+matter here is that we are consistent in the way that we order our vector components, and the above example defines how
+this is done in bornagain.</p>
+</div>
+<div class="section" id="saving-density-maps">
+<h1>Saving density maps</h1>
+<p id="nd-array-handling"><strong>numpy format</strong>:  If we choose to save in numpy compressed format with &quot;.npz&quot; extension, we agree to the following
+rules.
+There are three types of maps that we routinely deal with (see e.g.
+<a href="#id1"><span class="problematic" id="id2">:ref:`working with crystals &lt;working_with_crystals&gt;`</span></a> ): electron density, diffraction amplitude, and diffraction
+intensity.
+We specify the type of map by the variable &quot;type&quot;, which is a string that is equal to &quot;density&quot;, &quot;amplitude&quot;, or
+&quot;intensity&quot;.  There are four coordinate bases that we routinely use, which correspond to cartesian real space
+coordinats <span class="formula"><i>r⃗</i></span>, crystallographic fractional coordinates <span class="formula"><i>x⃗</i></span>, reciprocal space coordinates
+<span class="formula"><i>q⃗</i></span>,
+or Miller indices <span class="formula"><i>h⃗</i></span>.  Within the npz file, we specify the basis by including a variable named
+&quot;representation&quot; that may be equal to one of the four strings &quot;r&quot;, &quot;x&quot;, &quot;q&quot;, or &quot;h&quot;.
+We then include &quot;map_min&quot; and &quot;map_max&quot; to specify <span class="formula"><i>x</i><sub><span class="mathrm">min</span></sub></span> and <span class="formula"><i>x</i><sub><span class="mathrm">max</span></sub></span> as defined above.
+The actual map should be saved as the variable named &quot;map&quot;, and its shape corresponds to <span class="formula"><i>N</i><sub><span class="mathrm">bin</span></sub></span>.</p>
+<div class="system-message" id="id1">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/Users/rkirian/work/projects/bornagain/doc/source/sampling_binning.rst</tt>, line 97); <em><a href="#id2">backlink</a></em></p>
+Unknown interpreted text role &quot;ref&quot;.</div>
+</div>
+</div>
+</body>
+</html>

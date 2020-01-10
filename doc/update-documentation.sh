@@ -16,6 +16,7 @@ cat tmp.rst >> source/api/modules.rst
 
 rm tmp.rst
 make clean
+make doctest
 make html
 rm -r html
 mv build/html .

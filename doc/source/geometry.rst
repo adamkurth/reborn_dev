@@ -11,12 +11,14 @@ Pixel-Array Detectors
     Schematic of a Pixel-Array Detector.
 
 The :class:`PADGeometry <bornagain.detector.PADGeometry>` class contains the data and methods needed to deal
-with "pixel-array detectors" (PADs).  This
-detector is like a CCD and is assumed to consist of an orthogonal 2D grid of pixels.  The 2D grid is described by the
-following vectors:
+with "pixel-array detectors" (PADs).  This detector is assumed to consist of an orthogonal 2D grid of
+pixels.  We specify the locations of detector pixels with respect to an arbitrary origin that is also
+the origin of the coordinates of the object that creates the diffraction pattern.  Note that we always assume far-field
+diffraction, in which case an overall shift of the origin does not affect diffraction intensities (but this shift does
+effect the phases of the complex diffraction amplitudes).  The 2D grid of pixels is described by the following vectors:
 
-:math:`\vec{t}` is the vector pointing from the origin to the center of the corner detector pixel that is assumed to
-be the first in memory.
+:math:`\vec{t}` is the vector pointing from the origin to the *center* of the detector pixel that is the first pixel in
+memory, which is a pixel at the corner of the PAD.
 
 :math:`\vec{f}` is the vector that points along the "fast-scan" direction.  This is the distance and direction that
 points to the next pixel that is adjacent in physical space as well as in computer memory.  The length of this

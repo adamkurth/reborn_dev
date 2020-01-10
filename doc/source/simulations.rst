@@ -20,21 +20,20 @@ The basic simulation functions are accessed by creating an instance of the
 The above model seems to work well when using a single GPU device, but note that it has not been designed to
 make use of multiple GPU devices (this might be easy to do, but we've not had a need thus far).
 
-Aside from taking care of some low-level management of how the GPU device is used, the
-:class:`ClCore <bornagain.simulate.clcore.ClCore>` class is primarily meant to provide only the most basic building blocks for
+Aside from managing how the GPU device is used, the
+:class:`ClCore <bornagain.simulate.clcore.ClCore>` class is meant to provide only the basic building blocks for
 simulations, in the form of simple functions.  :class:`ClCore <bornagain.simulate.clcore.ClCore>` it is not meant to
-manage data arrays; it is the lowest-level class
-in the simulate package, and the basic idea is that you should make a specialized subclass for any specialized memory management.
-(At the moment, there are some methods within :class:`ClCore <bornagain.simulate.clcore.ClCore>` that manage data arrays,
-but they will be depreciated and moved to subclasses soon.)
+manage data arrays; you should make a specialized subclass for any specialized memory management.  (At the moment, there
+are some methods within :class:`ClCore <bornagain.simulate.clcore.ClCore>` that manage data arrays,
+but they will be depreciated and moved to subclasses.)
 
-Most of the method available through the :class:`ClCore <bornagain.simulate.clcore.ClCore>` class are
-dedicated to computing the sum
+Most of the methods in the :class:`ClCore <bornagain.simulate.clcore.ClCore>` class are dedicated to computing the sum
 
     :math:`F(\vec{q}) = \sum_n f_n(q)e^{i\vec{q}\cdot\vec{r}_n}`
 
-There are a couple of variations on how you can do this basic computation.  The most flexible way to compute the sum is to provide the
-array of :math:`\vec{q}` vectors as an input to the function, in which case you obviously get to choose how those
+Assuming that you have an array of atomic positions :math:`\vec{r}`, there are a couple of variations on how you can do
+this basic computation.  The most flexible way to compute the sum is to explicitly provide an
+array of :math:`\vec{q}` vectors as an input to the function, in which case you get to choose how those
 vectors are defined.  There are two other options that might help improve speed: one variant computes the
 :math:`\vec{q}` vectors corresponding to a PAD on the GPU
 rather than getting them from global memory, and another variant computes the :math:`\vec{q}` vectors on a regular 3D

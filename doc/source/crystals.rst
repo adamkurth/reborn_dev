@@ -1,3 +1,5 @@
+.. _working_with_crystals:
+
 Working with Crystals
 =====================
 
@@ -227,19 +229,6 @@ We could go on to get other quantities such as atomic scattering factors:
     eV = scipy.constants.value('electron volt')
     photon_energy = 9500 * eV
     f = cryst.molecule.get_scattering_factors(photon_energy)
-
-
-Specification of density maps
------------------------------
-
-We agree to save density maps in a numpy compressed format with ".npz" extension.  There are three types of maps that
-we will deal with: electron density, diffraction amplitude, and diffraction intensity.  We specify the type of map by
-the variable "type", which is a string that is equal to "density", "amplitude", or "intensity".  There are four possible
-density maps that we might save, which correspond to the above :math:`r`, :math:`x`, :math:`q`, or :math:`h` bases.
-Thus, within the npz file, we include a variable named "space" that is equal to one of the four strings "r", "x", "q",
-or "h".  We then include "map_min", "map_max", "map_shape" to specify the minimum and maximum coordinates of the centers
-of the corner voxels for a map of given shape.  The actual map should be saved as the variable name "map".  Note that we
-follow the conventions stated in the documentation for :ref:`sampling and binning <nd_array_handling>`.
 
 
 Appendix
