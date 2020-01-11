@@ -165,3 +165,34 @@ def test_rotations(double_precision=False):
     # Check that results are as expected
     assert np.max(np.abs(vec2 - vec3)) < 1e-6
     assert np.max(np.abs(vec2 - vec_pred)) < 1e-6
+
+
+def test_phase_factors(double_precision=False):
+
+    core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
+
+    q_min = np.array([1, 2, 3])
+    q_max = q_min + 1
+    shape = np.array([2, 2, 2])
+    dq = (q_max-q_min)/(shape-1)
+    qx = np.arange(shape[0]) * dq[0] + q_min[0]
+    qy = np.arange(shape[1]) * dq[1] + q_min[1]
+    qz = np.arange(shape[2]) * dq[2] + q_min[2]
+    qxx, qyy, qzz = np.meshgrid(qx, qy, qz, indexing='ij')
+    q = np.vstack([qxx.ravel(), qyy.ravel(), qzz.ravel()]).T.copy()
+    r = np.array([[1, 2, 3], [4, 5, 6]])
+    R = np.array([[0, 1, 0], [-1, 0, 1], [0, 0, 1]])
+    U = np.array([1, 2, 3])
+    f = np.array([1, 2])
+    amps1 = core.phase_factor_mesh(r, f, q_min=q_min, q_max=q_max, N=shape, R=R, U=U)
+    amps2 = core.phase_factor_qrf(q, r, f, R=R, U=U)
+    print(amps1.shape)
+    print(amps2.shape)
+    assert amps1[0] == amps2[0]
+
+    # rp = np.dot(r, R.T)-U
+    # amps0 = f[0]*np.exp(1j*np.dot(q[0, :], rp[0, :])) + f[1]*np.exp(1j*np.dot(q[0, :], rp[1, :]))
+    #
+    # assert np.abs(amps0 - amps1[0])/np.abs(amps0) < 1e-6
+
+

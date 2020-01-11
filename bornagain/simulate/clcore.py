@@ -238,7 +238,7 @@ class ClCore(object):
         r"""
         This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
         array into a pyopencl.array and send it to the device memory.  So far this only
-        deals with float and comlex arrays, and it should figure out which type it is.
+        deals with float and complex arrays, and it should figure out which type it is.
 
         Arguments:
             array (numpy/cl array; float/complex type): Input array.
@@ -606,7 +606,12 @@ class ClCore(object):
                           density_map=None):
 
         r"""
-        Compute phase factors on a regular 3D mesh of q-space samples.
+        Compute the following sum on a regular 3D mesh of q samples:
+
+        .. math:: \sum_n f_n \exp(i \vec{q} \cdot \vec{r})
+
+        The mesh is defined by the shape of the 3D array along with the minimum and maximum values of :math:`q_i` along
+        each edge :math:`i=1,2,3`.
 
         Arguments:
             r (Nx3 numpy array): Atomic coordinates

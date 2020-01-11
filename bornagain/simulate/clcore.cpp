@@ -209,9 +209,12 @@ static dsfloat4 q_pad(
 }
 
 
-// Sum the amplitudes from a collection of atoms for a given scattering vector: SUM_i f_i * exp(i*q.r_i)
+// Given a bunch of vectors q, sum the amplitudes from a collection of atoms for a given scattering vector:
+//
+//    SUM_i f_i * exp(i*q.(r_i+U))
+//
 // ** There is one complication: we attempt to speed up the summation by making workers move atomic coordinates
-// and scattering factors to a local memory buffer in parallele, in hopes of faster computation (is it really faster?)
+// and scattering factors to a local memory buffer in parallel, in hopes of faster computation (is it really faster?)
 
 static dsfloat2 phase_factor(
     const dsfloat4 q,         // Scattering vector

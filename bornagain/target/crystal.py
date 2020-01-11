@@ -52,15 +52,15 @@ def get_pdb_file(pdb_id, save_path='.'):
 
     # Check if the file is already in bornagain
     if os.path.exists(pdb_data_path+'/'+pdb_id):
-        print('Fetching pdb file %s from bornagain data directory %s' % (pdb_id, pdb_data_path))
+        # print('Fetching pdb file %s from bornagain data directory %s' % (pdb_id, pdb_data_path))
         return pdb_data_path+'/'+pdb_id
 
-    # Check if this file is in the bornagain repository
-    cache_path = os.path.join(pdb_data_path, pdb_id)
-    if os.path.isfile(cache_path):
-        print('Copying pdb file from %s to %s' % (cache_path, pdb_path))
-        shutil.copy(cache_path, pdb_path)
-        return pdb_path
+    # # Check if this file is in the bornagain repository
+    # cache_path = os.path.join(pdb_data_path, pdb_id)
+    # if os.path.isfile(cache_path):
+    #     print('Copying pdb file from %s to %s' % (cache_path, pdb_path))
+    #     shutil.copy(cache_path, pdb_path)
+    #     return pdb_path
 
     # Finally, download from web if all else fails
     if not os.path.isfile(pdb_path):

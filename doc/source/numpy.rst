@@ -15,18 +15,50 @@ all ndarrays are in the *default* "c-contiguous order", which defines a syntax i
 index of an array correspond to the smallest steps in the internal memory buffer.  The data buffer is contiguous --
 there are no "gaps".  The following example illustrates this:
 
-.. code-block:: python
+.. testcode::
 
     import numpy as np
     a = np.array([[1,2,3],[4,5,6]])
     print(a.shape)
-    # output: (2, 3)
     print(a.flags.c_contiguous)
-    # output: True
     print(a.ravel())
-    # output: [1 2 3 4 5 6]
     print(a[0, 1])
-    # output: 2
+
+.. testoutput::
+
+    (2, 3)
+    True
+    [1 2 3 4 5 6]
+    2
+
+Matrices
+--------
+
+Numpy has a matrix class but it is not recommended to use it (according to the numpy docs).  So we use regular numpy
+arrays to store matrices.  In order to take a matrix product, we use the np.dot function as illustrated in the following
+example:
+
+.. testcode::
+
+    import numpy as np
+    A = np.array([[0, 1, 0],[-1, 0, 0],[0, 0, 1]])
+    B = np.array([[1, 0, 0],[0, 2, 0],[0, 0, 3]])
+    AB = np.dot(A, B)
+    print(A)
+    print(B)
+    print(AB)
+
+.. testoutput::
+
+    [[ 0  1  0]
+     [-1  0  0]
+     [ 0  0  1]]
+    [[1 0 0]
+     [0 2 0]
+     [0 0 3]]
+    [[ 0  2  0]
+     [-1  0  0]
+     [ 0  0  3]]
 
 Arrays of vectors
 -----------------
@@ -38,41 +70,47 @@ made because the right-most index of a numpy array has the smallest stride by de
 most sense to have vector components stored close to each other in memory.  This convention is assumed in every function
 in bornagain.  This note is to avoid ambiguity in the case of a (3, 3) array.
 
-How to rotate vectors
----------------------
+Rotations
+---------
 
 We must be certain that we adhere to a convention with regard to vector rotations.  If you need to rotate a vector or an
 array of vectors with shape (*N*, 3) with the matrix *R*, you can do either of the following:
 
-.. code-block:: python
+.. testcode::
 
-    vec_rotated = np.dot(R, vec.T).T
-
-    vec_rotated = np.dot(vec, R.T)
+    import numpy as np
+    R = np.array([[0, 1, 0],[-1, 0, 0],[0, 0, 1]])
+    vec = np.array([[1, 2, 3], [4, 5, 6]])
+    v1 = np.dot(R, vec.T).T
+    v2 = np.dot(vec, R.T)
+    assert np.all(v1 == v2)
 
 For clarity, here is what you should expect:
 
-.. code-block:: python
+.. testcode::
 
     R = np.array([[0, 1., 0], [-1, 0, 0], [0, 0, 1.]])
     vec = np.array([1, 2, 3])
     vec_rotated = np.dot(vec, R.T)
     print(R)
-    # output:
-    # [[ 0.  1.  0.]
-    #  [-1.  0.  0.]
-    #  [ 0.  0.  1.]]
     print(vec)
-    # [1 2 3]
     print(vec_rotated)
-    # [ 2. -1.  3.]
+
+.. testoutput::
+
+    [[ 0.  1.  0.]
+     [-1.  0.  0.]
+     [ 0.  0.  1.]]
+    [1 2 3]
+    [ 2. -1.  3.]
+
 
 Note that the above is consistent with rotation operations performed on GPU devices within the
 :mod:`simulate.clcore <bornagain.simulate.clcore>` module.
 
-Representation of 3D density/intensity maps in numpy arrays
------------------------------------------------------------
+Density maps
+------------
 
-As with vectors, it is also important that we have an understanding of how we represent density maps as numpy arrays.
+As with vectors, it is also important that we have an understanding of how to represent density maps as numpy arrays.
 In particular, we need to be clear on how we assign positional coordinate vectors to elements in the density arrays.
 This is discussed in the :ref:`density map <nd_array_handling>` page.

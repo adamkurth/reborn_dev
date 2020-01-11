@@ -47,39 +47,25 @@ parser.add_argument('--random_orientations', action='store_false', required=Fals
                     help='Randomize crystal orientations')
 args = parser.parse_args()
 
-
+# Convert to SI units
 photon_energy = args.photon_energy_ev * eV
 
-# Load up the pdb file
-cryst = crystal.CrystalStructure(args.pdb_file, tight_packing=True)  # Tight packing: put all molecules in unit cell
+# Load the pdb file
+cryst = crystal.CrystalStructure(args.pdb_file, tight_packing=True)  # Tight packing: put molecule COMs inside unit cell
 
-# Coordinates of asymmetric unit in crystal basis x
+# Coordinates of asymmetric unit in crystal fractional coordinate basis
 au_x_vecs = cryst.fractional_coordinates
-# Redefine spacegroup operators so that molecules COMs are tightly packed in the unit cell
-au_x_com = cryst.fractional_coordinates_com
-mol_x_coms = np.zeros((cryst.spacegroup.n_molecules, 3))
-mol_r_coms = np.zeros((cryst.spacegroup.n_molecules, 3))
-for i in range(cryst.spacegroup.n_molecules):
-    com = cryst.spacegroup.apply_symmetry_operation(i, au_x_com)
-    # cryst.spacegroup.sym_translations[i] -= com - (com % 1)
-    mol_x_coms[i, :] = cryst.spacegroup.apply_symmetry_operation(i, au_x_com)
-    mol_r_coms[i, :] = cryst.unitcell.x2r(cryst.spacegroup.apply_symmetry_operation(i, au_x_com))
+# Center of mass coordinates for the symmetry partner molecules
+au_x_coms = [cryst.spacegroup.apply_symmetry_operation(i, cryst.fractional_coordinates_com)
+              for i in range(cryst.spacegroup.n_operations)]
 
 # Setup beam and detector
 beam = source.Beam(photon_energy=photon_energy, pulse_energy=args.pulse_energy, diameter_fwhm=args.beam_diameter)
 pad = detector.PADGeometry(pixel_size=args.pixel_size, distance=args.detector_distance, shape=[args.n_pixels]*2)
 q_vecs = pad.q_vecs(beam=beam)
-q_max = np.max(pad.q_mags(beam=beam))
-resolution = 2*np.pi/q_max
-print('Resolution: %.3g A' % (resolution*1e10,))
 mask = pad.beamstop_mask(beam=beam, q_min=2*np.pi/500e-10)
 scale_to_photon_counts = pad.reshape(r_e**2 * pad.solid_angles() * pad.polarization_factors(beam=beam) *
                                      beam.photon_number_fluence)
-
-# Density map for merging
-# dmap = crystal.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=10)
-# dens = np.zeros(dmap.shape)
-# denswt = np.zeros(dmap.shape)
 
 # Atomic scattering factors
 f = cryst.molecule.get_scattering_factors(beam=beam)
@@ -109,14 +95,15 @@ h_corner_max = h_max*np.ones([3])
 
 # Put all the atomic coordinates on the gpu
 mol_vecs = []
-mol_r_vecs_gpu = []
+mol_x_vecs_gpu = []
 for i in range(cryst.spacegroup.n_molecules):
     mv = cryst.spacegroup.apply_symmetry_operation(i, au_x_vecs)
     mv = cryst.unitcell.x2r(mv)
     mol_vecs.append(mv)
-    mol_r_vecs_gpu.append(clcore.to_device(mv, dtype=clcore.real_t))
+    mol_x_vecs_gpu.append(clcore.to_device(cryst.spacegroup.apply_symmetry_operation(i, au_x_vecs)))
 
 scat = None
+# mask = pad.ones().ravel()
 
 for c in range(args.n_patterns):
     # Rotate the lattice basis vectors
@@ -128,36 +115,26 @@ for c in range(args.n_patterns):
     width = 2 + np.random.rand(1)*3
     length = 5 + np.random.rand(1)*3
     if args.add_facets:
-        for i in range(cryst.spacegroup.n_molecules):
+        for i in range(len(lats)):
             lat = lats[i]
-            com = mol_x_coms[i, :]
-            lat.add_facet(plane=[-1, 1, 0], length=width, shift=com)
-            lat.add_facet(plane=[1, -1, 0], length=width, shift=com)
-            lat.add_facet(plane=[1, 0, 0], length=width, shift=com)
-            lat.add_facet(plane=[0, 1, 0], length=width, shift=com)
-            lat.add_facet(plane=[-1, 0, 0], length=width, shift=com)
-            lat.add_facet(plane=[0, -1, 0], length=width, shift=com)
-            lat.add_facet(plane=[0, 0, 1], length=length, shift=com)
-            lat.add_facet(plane=[0, 0, -1], length=length, shift=com)
+            com = au_x_coms[i]
+            lat.make_hexagonal_prism(width=width, length=length, shift=com)\
     # For viewing the crystal lattice and molecule coordinates
     if args.view_crystal:
         if scat is not None:
             del scat
         scat = Scatter3D()
     t = time()
-    clcore.rotate_translate_vectors(rot, trans, q_vecs_gpu, q_rot_gpu)
-    clcore.rotate_translate_vectors(rot, trans, q_vecs_gpu, h_rot_gpu)
+    # clcore.rotate_translate_vectors(rot, trans, q_vecs_gpu, q_rot_gpu)
+    clcore.rotate_translate_vectors(np.dot(cryst.unitcell.a_mat_inv, rot), trans, q_vecs_gpu, h_rot_gpu)
     amps_gpu *= 0
     for i in range(cryst.spacegroup.n_molecules):
         lat_vecs = lats[i].occupied_x_coordinates # + mol_x_coms[i, :]
-        # lat_vecs = cryst.unitcell.x2r(lat_vecs)
-        clcore.phase_factor_qrf(q_rot_gpu, lat_vecs, a=amps_lat_gpu, add=False)  # All lattice cites
-        # mol_vecs = spacegroup.apply_symmetry_operation(i, au_x_vecs)
-        # mol_vecs = cryst.unitcell.x2r(mol_vecs)
-        clcore.phase_factor_qrf(q_rot_gpu, mol_r_vecs_gpu[i], f_gpu, a=amps_mol_gpu, add=False)  # All atoms in molecule...
+        clcore.phase_factor_qrf((2*np.pi)*h_rot_gpu, lat_vecs, a=amps_lat_gpu, add=False)  # All lattice cites
+        clcore.phase_factor_qrf((2*np.pi)*h_rot_gpu, mol_x_vecs_gpu[i], f_gpu, a=amps_mol_gpu, add=False)
         amps_gpu += amps_lat_gpu * amps_mol_gpu
         if args.view_crystal:
-            scat.add_points(lat_vecs + mol_r_coms[i, :], color=bright_colors(i, alpha=0.5), size=5)
+            scat.add_points(lat_vecs + cryst.unitcell.x2r(au_x_coms[i]), color=bright_colors(i, alpha=0.5), size=5)
             scat.add_points(mol_vecs[i], color=bright_colors(i, alpha=0.5), size=1)
     if args.view_crystal:
         scat.add_rgb_axis()
@@ -167,7 +144,7 @@ for c in range(args.n_patterns):
     intensities = scale_to_photon_counts * np.abs(amps_gpu.get()) ** 2
     # intensities = np.random.poisson(intensities).astype(np.float64)
     h_vecs = cryst.unitcell.q2h(q_rot_gpu.get())
-    merge, weight = trilinear_insert(h_vecs, intensities.ravel(), h_corner_min, h_corner_max, n_h_bins, mask2.ravel())
+    merge, weight = trilinear_insert(h_vecs, intensities.ravel(), h_corner_min, h_corner_max, n_h_bins, mask.ravel())
     merge_sum += merge
     weight_sum += weight
     print('Pattern %d; %.3f seconds' % (c, time()-t,))
@@ -177,7 +154,7 @@ for c in range(args.n_patterns):
                  h_corner_min=h_corner_min, h_corner_max=h_corner_max, n_h_bins=n_h_bins)
 
 if True:
-    dat = intensities*mask
+    dat = intensities
     padview = PADView(pad_geometry=[pad], raw_data=[dat])
     padview.show_coordinate_axes()
     padview.set_levels(0, np.percentile(dat, 90))
