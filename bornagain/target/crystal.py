@@ -81,13 +81,13 @@ class UnitCell(object):
     transforming between fractional and orthogonal coordinates in real space and reciprocal space.
     """
 
-    a = None  #: Lattice constant
-    b = None  #: Lattice constant
-    c = None  #: Lattice constant
-    alpha = None  #: Lattice angle
-    beta = None  #: Lattice angle
-    gamma = None  #: Lattice angle
-    volume = None  #: Unit cell volume
+    a = None  #: Lattice constant (float)
+    b = None  #: Lattice constant (float)
+    c = None  #: Lattice constant (float)
+    alpha = None  #: Lattice angle in radians (float)
+    beta = None  #: Lattice angle in radians (float)
+    gamma = None  #: Lattice angle in radians (float)
+    volume = None  #: Unit cell volume (float)
     o_mat = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = O.x on fractional coordinates x.
     o_mat_inv = None  #: Inverse orthogonalization matrix (3x3 array)
     a_mat = None  #: Orthogonalization matrix transpose (3x3 array). Does the transform q = A.h, with Miller indices h.
@@ -450,9 +450,9 @@ class FiniteLattice(object):
 
         Arguments:
 
-            plane:
-            length:
-            shift:
+            plane (numpy array):  The vector :math:`\vec{p}` defined above.
+            length (numpy array):  The length :math:`L` defined above.
+            shift (numpy array):  The vector :math:`\vec{s}` defined above.
 
         Returns: None
         """
@@ -483,19 +483,18 @@ class FiniteLattice(object):
         self.occupancies.flat[self.all_r_mags > radius] = 0
 
 
-
 class CrystalDensityMap(object):
     r"""
     A helper class for working with 3D crystal density maps.  Most importantly, it helps with spacegroup symmetry
-    transformations.  Once initialized with a crystal spacegroup and lattice, along with desired resolution and
-    oversampling ratio (this is one for normal crystallography), this tool chooses the shape of the map
-    and creates lookup tables for the symmetry transformations.
+    transformations.  Once initialized with a crystal spacegroup and lattice, along with desired resolution
+    (:math:`1/d`) and oversampling ratio (equal to 1 for normal crystallographic Bragg sampling), this tool chooses the
+    shape of the map and creates lookup tables for the symmetry transformations.
 
-    It is generally assumed that you are working in the crystal basis (fractional coordinates) -- the symmetry
-    transforms provided apply only to the crystal basis because that is the only way that we may avoid interpolation
-    artifacts for an arbitrary spacegroup/lattice.
+    It is generally assumed that you are working in the crystal basis (fractional coordinates).  When working in the
+    crystal basis, the symmetry transforms avoid interpolation artifacts.  The shape of the map is chosen specifically
+    to avoid interpolation artifacts.
 
-    This class does not maintain the data array as the name might suggest; it provides methods needed to work on the
+    This class does not maintain the data array as the name might suggest.  It provides methods needed to work on the
     data arrays.
     """
 
@@ -886,3 +885,62 @@ def pdb_to_dict(pdb_file_path):
            }
 
     return dic
+
+
+class FiniteCrystal(object):
+
+    lattices = None  #: List of :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>` instances.
+    cryst = None  #: :class:`CrystalStructure <bornagain.target.crystal.CrystalStructure>` instances.
+    au_x_coms = None  #: List of numpy arrays that specify center-of-mass coordinates of asymmetric unit and symmetry partners.
+
+    def __init__(self, cryst, max_size=[50, 50, 50]):
+        r"""
+        Utility that allows for the shaping of finite crystal lattices, with consideration of the crystal structure
+        (molecular structure, spacegroup, etc.).  This is useful for simulating complete crystals with strange edges
+        or other defects that depart from idealized crystals.
+
+        Args:
+            cryst :class:`CrystalStructure <bornagain.target.crystal.CrystalStructure>` : A crystal structure object.
+                           The center-of-mass of asymmetric unit and spacegroup provided by this object will affect the
+                           centering of the lattices.
+            max_size (3-element array) : Same as in the :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`
+                                         class.
+        """
+        self.cryst = cryst
+        max_size = np.array(max_size)
+
+        # Center of mass coordinates for the symmetry partner molecules
+        self.au_x_coms = [cryst.spacegroup.apply_symmetry_operation(i, cryst.fractional_coordinates_com)
+                     for i in range(cryst.spacegroup.n_operations)]
+
+        self.lattices = [FiniteLattice(max_size=max_size, unitcell=cryst.unitcell)
+                         for i in range(cryst.spacegroup.n_molecules)]
+
+    def add_facet(self, plane=None, length=None):
+        r"""
+        See equivalent method in :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`. In this case, the
+        facet is added to *all* of the finite lattices (one for each symmetry partner).
+        """
+        for k in range(len(self.lattices)):
+            lat = self.lattices[k]
+            com = self.au_x_coms[k]
+            lat.add_facet(plane=plane, length=length, shift=com)
+
+    def reset_occupancies(self):
+        r"""
+        See equivalent method in :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`. In this case, *all*
+        occupancies are reset (i.e. for all symemtry partner lattices).
+        """
+        for k in range(len(self.lattices)):
+            self.lattices[k].reset_occupancies()
+
+    def make_hexagonal_prism(self, width=3, length=10):
+        r"""
+        See equivalent method in :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`. In this case, the
+        facets are added to *all* of the finite lattices (one for each symmetry partner).
+        """
+        for k in range(len(self.lattices)):
+            self.lattices[k].make_hexagonal_prism(width=width, length=length, shift=self.au_x_coms[k])
+
+
+

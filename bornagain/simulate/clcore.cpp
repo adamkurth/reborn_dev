@@ -129,7 +129,22 @@ static dsfloat4 rotate_vec(
     return v_rot;
 }
 
-// Test rotate vector
+// Rotate a vector but use the transpose of the rotation matrix
+
+static dsfloat4 transpose_rotate_vec(
+    const dsfloat16 R,
+    const dsfloat4 v)
+{
+    dsfloat4 v_rot = (dsfloat4)(0.0,0.0,0.0,0.0);
+
+    v_rot.x = R.s0*v.x + R.s3*v.y + R.s6*v.z;
+    v_rot.y = R.s1*v.x + R.s4*v.y + R.s7*v.z;
+    v_rot.z = R.s2*v.x + R.s5*v.y + R.s8*v.z;
+
+    return v_rot;
+}
+
+// Rotate then translate a vector
 
 kernel void rotate_translate_vectors(
     const dsfloat16 R,
@@ -211,14 +226,15 @@ static dsfloat4 q_pad(
 
 // Given a bunch of vectors q, sum the amplitudes from a collection of atoms for a given scattering vector:
 //
-//    SUM_i f_i * exp(i*q.(r_i+U))
+//    SUM_i f_i * exp(-i*q.(r_i+U))
 //
 // ** There is one complication: we attempt to speed up the summation by making workers move atomic coordinates
 // and scattering factors to a local memory buffer in parallel, in hopes of faster computation (is it really faster?)
 
 static dsfloat2 phase_factor(
     const dsfloat4 q,         // Scattering vector
-    const dsfloat4 U,         // Shift applied to positions
+    const dsfloat16 R,        // Rotation applied to positions
+    const dsfloat4 U,         // Shift added to positions (after rotation)
     global const dsfloat *r,  // Atomic coordinates
     global const dsfloat2 *f, // Atomic scattering factors
     const int n_atoms,        // Number of atoms
@@ -241,7 +257,7 @@ static dsfloat2 phase_factor(
         ai = g+li; // Index of the global array of atoms that this worker will move in this particular iteration
 
         if (ai < n_atoms ){
-            rg[li] = (dsfloat4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f) + U;
+            rg[li] = rotate_vec(R, (dsfloat4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f)) + U;
             fg[li] = f[ai];
         } else {
             rg[li] = (dsfloat4)(0.0f,0.0f,0.0f,0.0f);
@@ -323,7 +339,7 @@ kernel void phase_factor_qrf(
         q4r = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
 
         // Rotate the scattering vector
-        q4r = rotate_vec(R, q4r);
+//        q4r = rotate_vec(R, q4r);
 
     } else { q4r = (dsfloat4)(0.0f,0.0f,0.0f,0.0f); }
 
@@ -331,7 +347,7 @@ kernel void phase_factor_qrf(
     dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
     local dsfloat4 rg[GROUP_SIZE];
     local dsfloat2 fg[GROUP_SIZE];
-    a_sum = phase_factor(q4r, U, r, f, n_atoms, rg, fg, li);
+    a_sum = phase_factor(q4r, R, U, r, f, n_atoms, rg, fg, li);
 
     // Again, check that this pixel index is not out of bounds
     if (gi < n_pixels){
@@ -371,13 +387,13 @@ kernel void phase_factor_pad(
     dsfloat4 q4r = q_pad(i,j,w,T,F,S,B);
 
     // Rotate the scattering vector
-    q4r = rotate_vec(R, q4r);
+//    q4r = rotate_vec(R, q4r);
 
     // Sum over atomic scattering amplitudes
     dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
     local dsfloat4 rg[GROUP_SIZE];
     local dsfloat2 fg[GROUP_SIZE];
-    a_sum = phase_factor(q4r, U, r, f, n_atoms, rg, fg, li);
+    a_sum = phase_factor(q4r, R, U, r, f, n_atoms, rg, fg, li);
 
     // Check that this pixel index is not out of bounds
     if (gi < n_pixels){
@@ -413,13 +429,13 @@ kernel void phase_factor_mesh(
     dsfloat4 q4r = (dsfloat4)(i*deltaQ.x+q_min.x, j*deltaQ.y+q_min.y, k*deltaQ.z+q_min.z,0.0f);
 
     // Rotate the scattering vector
-    q4r = rotate_vec(R, q4r);
+//    q4r = rotate_vec(R, q4r);
 
     // Sum over atomic scattering amplitudes
     dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
     local dsfloat4 rg[GROUP_SIZE];
     local dsfloat2 fg[GROUP_SIZE];
-    a_sum = phase_factor(q4r, U, r, f, n_atoms, rg, fg, li);
+    a_sum = phase_factor(q4r, R, U, r, f, n_atoms, rg, fg, li);
 
     // Check that this pixel index is not out of bounds
     if (gi < n_pixels){

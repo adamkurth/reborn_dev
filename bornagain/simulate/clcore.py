@@ -443,20 +443,22 @@ class ClCore(object):
     def phase_factor_qrf(self, q, r, f=None, R=None, U=None, a=None, add=False):
 
         r"""
-        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
+        Calculate diffraction amplitudes according to the sum:
+
+        .. math::
+            a_i = \sum_n f_n \exp(-i \vec{q}_i \cdot (\mathbf{R} \vec{r} + \vec{U}))
 
         Arguments:
-            q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
+            q (numpy/cl float array [N,3]): Scattering vectors.
             r (numpy/cl float array [M,3]): Atomic coordinates.
-            R (numpy array [3,3]): Rotation matrix acting on atom vectors.
-                (we quietly transpose R and let it operate on q-vectors for speedups)
             f (numpy/cl complex array [M]): Complex scattering factors.
-            a (cl complex array [N]): Optional container for complex scattering
-              amplitudes.
+            R (numpy array [3,3]): Rotation matrix.
+            U (numpy array): Translation vector.
+            a (cl complex array [N]): Complex scattering amplitudes (if you wish to manage your own opencl array).
+            add (bool): True means add to the input amplitudes a
 
         Returns:
-            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
-              if there are input cl arrays.
+            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array if there are input cl arrays.
         """
 
         if not hasattr(self, 'phase_factor_qrf_cl'):
@@ -466,10 +468,11 @@ class ClCore(object):
 
         if R is None:
             R = np.eye(3)
+        # R = R.T.copy()  # Transpose R because it will actually rotate q instead of r on the GPU (for speed)
 
         if U is None:
             U = np.zeros(3, dtype=self.real_t)
-        U = np.dot(R.T, U)
+        # U = np.dot(R, U)  # Because we rotate q instead of r on the GPU, we must rotate U by the transpose of R
 
         if add:
             add = 1
@@ -485,7 +488,7 @@ class ClCore(object):
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
-        R = self.vec16(R.T, dtype=self.real_t)
+        R = self.vec16(R, dtype=self.real_t)
         U = self.vec4(U, dtype=self.real_t)
 
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
@@ -505,11 +508,16 @@ class ClCore(object):
                          add=False, beam=None, pad=None):
 
         r"""
-        This should simulate detector panels.
+        Calculate diffraction amplitudes according to the sum:
+
+        .. math::
+            a_i = \sum_n f_n \exp(-i \vec{q}_i \cdot (\mathbf{R} \vec{r} + \vec{U}))
+
+        The :math:`\vec{q}_i` vectors are computed on the GPU.
 
         Arguments:
-            r: An Nx3 numpy array with atomic coordinates (meters)
-            f: A numpy array with complex scattering factors
+            r (numpy/cl float array [M,3]): Atomic coordinates.
+            f (numpy/cl complex array [M]): Complex scattering factors.
             T: A 1x3 numpy array with vector components pointing from sample to
                the center of the first pixel in memory
             F: A 1x3 numpy array containing the basis vector components pointing
@@ -549,7 +557,7 @@ class ClCore(object):
 
         if U is None:
             U = np.zeros(3, dtype=self.real_t)
-        U = np.dot(R.T, U)
+        # U = np.dot(R.T, U)
 
         if add:
             add = 1
@@ -564,7 +572,7 @@ class ClCore(object):
             n_atoms = self.int_t(n_atoms)
             r_dev = self.to_device(r, dtype=self.real_t)
             f_dev = self.to_device(f, dtype=self.complex_t)
-            R = self.vec16(R.T, dtype=self.real_t)
+            R = self.vec16(R, dtype=self.real_t)
             T = self.vec4(T, dtype=self.real_t)
             F = self.vec4(F, dtype=self.real_t)
             S = self.vec4(S, dtype=self.real_t)
@@ -578,7 +586,7 @@ class ClCore(object):
             n_atoms = self.int_t(n_atoms)
             r_dev = self.to_device(r, dtype=self.real_t)
             f_dev = self.to_device(f, dtype=self.complex_t)
-            R = self.vec16(R.T, dtype=self.real_t)
+            R = self.vec16(R, dtype=self.real_t)
             T = self.vec4(pad.t_vec, dtype=self.real_t)
             F = self.vec4(pad.fs_vec, dtype=self.real_t)
             S = self.vec4(pad.ss_vec, dtype=self.real_t)
@@ -602,13 +610,13 @@ class ClCore(object):
         else:
             return a_dev
 
-    def phase_factor_mesh(self, r, f, N=None, q_min=None, q_max=None, dq=None, a=None, R=None, U=None, add=False,
+    def phase_factor_mesh(self, r, f=None, N=None, q_min=None, q_max=None, dq=None, a=None, R=None, U=None, add=False,
                           density_map=None):
 
         r"""
         Compute the following sum on a regular 3D mesh of q samples:
 
-        .. math:: \sum_n f_n \exp(i \vec{q} \cdot \vec{r})
+        .. math:: \sum_n f_n \exp(-i \vec{q} \cdot \vec{r})
 
         The mesh is defined by the shape of the 3D array along with the minimum and maximum values of :math:`q_i` along
         each edge :math:`i=1,2,3`.
@@ -639,6 +647,10 @@ class ClCore(object):
             self.phase_factor_mesh_cl.set_scalar_arg_dtypes(
                 [None, None, None, self.int_t, self.int_t, None, None, None, None, None, self.int_t])
 
+        n_atoms = r.shape[0]
+        if f is None:
+            f = np.ones(n_atoms, dtype=self.complex_t)
+
         if add:
             add = 1
         else:
@@ -648,9 +660,9 @@ class ClCore(object):
 
         if U is None:
             U = np.zeros(3, dtype=self.real_t)
-        U = np.dot(R.T, U)
+        # U = np.dot(R.T, U)
 
-        R = self.vec16(R.T, dtype=self.real_t)
+        R = self.vec16(R, dtype=self.real_t)
         U = self.vec4(U, dtype=self.real_t)
 
         if density_map is None:

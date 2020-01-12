@@ -46,7 +46,7 @@ class Volumetric3D(object):
 
     def __init__(self):
 
-        self.app = QtGui.QApplication([])
+        self.app = pg.mkQApp() #QtGui.QApplication([])
         self.w = gl.GLViewWidget()
         self.maxDist = 0
         self.defaultWidth = 5
@@ -122,11 +122,10 @@ class Volumetric3D(object):
         self.w.addItem(v)
         self.w.setCameraPosition(distance=self.maxDist * 2)
         self.w.show()
-        app = pg.QtGui.QApplication.instance()
         if hold:
-            app.exec_()
+            self.app.exec_()
         if kill:
-            del app
+            del self.app
 
 
 def plot_multiple_images(images, title=None, n_rows=None, hold=True, kill=True):
@@ -139,6 +138,7 @@ def plot_multiple_images(images, title=None, n_rows=None, hold=True, kill=True):
     image_items = []
     for i in range(len(images)):
         plot = win.addPlot()
+        plot.setAspectLocked()
         plots.append(plot)
         img = pg.ImageItem(images[i])
         image_items.append(img)
@@ -155,7 +155,7 @@ def plot_multiple_images(images, title=None, n_rows=None, hold=True, kill=True):
         del app
 
 
-def MapProjection(data, axis=None, hold=True, kill=True):
+def MapProjection(data, axis=None, hold=True, kill=True, title=None):
     r""" View a 3D density map as a projection along selected axes (which can be a list) """
     if axis is None:
         axis = [0, 1, 2]
@@ -164,10 +164,10 @@ def MapProjection(data, axis=None, hold=True, kill=True):
     dat = []
     for ax in axis:
         dat.append(np.sum(data, axis=ax))
-    plot_multiple_images(dat, hold=hold, kill=kill)
+    plot_multiple_images(dat, hold=hold, kill=kill, title=title)
 
 
-def MapSlices(data, axis=None, levels=None, hold=True, kill=True):
+def MapSlices(data, axis=None, levels=None, hold=True, kill=True, title=None):
     r""" View a 3D density map as a projection along selected axes (which can be a list) """
 
     if axis is None:
@@ -186,34 +186,20 @@ def MapSlices(data, axis=None, levels=None, hold=True, kill=True):
         elif ax == 2:
             dat.append(np.squeeze(data[:, :, int(np.floor(data.shape[2]/2))]))
 
-    plot_multiple_images(dat, hold=hold, kill=kill)
-
-    #     dat = np.concatenate(dat)
-    # else:
-    #     dat = data
-
-    # app = QtGui.QApplication([])
-    # win = QtGui.QMainWindow()
-    # win.resize(800, 800)
-    # imv = pg.ImageView()
-    # win.setCentralWidget(imv)
-    # # win.setWindowTitle('pyqtgraph example: ImageView')
-    # if levels is not None:
-    #     autoLevels = False
-    # else:
-    #     autoLevels = True
-    # imv.setImage(dat, xvals=np.linspace(1., 3., dat.shape[0]), levels=levels, autoLevels=autoLevels)
-    # win.show()
+    plot_multiple_images(dat, hold=hold, kill=kill, title=title)
 
 
 class Scatter3D(object):
 
-    ''' Simple viewer for 3D scatter plots. '''
+    r''' Simple viewer for 3D scatter plots. '''
 
-    def __init__(self):
+    app = None
 
-        self.app = pg.QtGui.QApplication([])
+    def __init__(self, title=None):
+
+        self.app = pg.mkQApp() #QtGui.QApplication([])
         self.w = gl.GLViewWidget()
+        self.w.window().setWindowTitle(title)
         self.defaultColor = pg.glColor([255, 255, 255])
         self.defaultSize = 1
         self.defaultWidth = 1
@@ -224,8 +210,8 @@ class Scatter3D(object):
         r'''
         Delete reference C++ will call destructor.
         '''
-        del self.app
-
+        if self.app is not None:
+            del self.app
 
     def add_points(self, r, color=None, size=None):
 
@@ -318,10 +304,9 @@ class Scatter3D(object):
             self.w.setCameraPosition(distance=self.maxDist * 5)
         self.w.show()
         if hold:
-            pg.QtGui.QApplication.instance().exec_()
+            self.app.exec_()
         if kill:
-            app = pg.QtGui.QApplication.instance()
-            del app
+            del self.app
 
 
 if __name__ == '__main__':
