@@ -368,17 +368,29 @@ class ClCore(object):
         self.test_simple_sum_cl(self.queue, (global_size,), (self.group_size,), vec_dev.data, out_dev.data, n)
         return out_dev.get()[0]
 
-    def mod_squared_complex_to_real(self, A, I):
+    def mod_squared_complex_to_real(self, A, I, add=False):
 
         r"""
         Compute the real-valued modulus square of complex numbers.  Good example of a function that
         shouldn't exist, but I needed to add it here because the pyopencl.array.Array class fails to
         do this operation correctly on some computers.
+
+        Arguments:
+            A (clarray) : The complex amplitudes
+            I (clarray) : The real intensities
+            add (bool) : If false, overwrite the I array, else add to I
+
+        Returns:
+
+            None
+
         """
 
         if not hasattr(self, 'mod_squared_complex_to_real_cl'):
             self.mod_squared_complex_to_real_cl = self.programs.mod_squared_complex_to_real
-            self.mod_squared_complex_to_real_cl.set_scalar_arg_dtypes([None, None, self.int_t])
+            self.mod_squared_complex_to_real_cl.set_scalar_arg_dtypes([None, None, self.int_t, self.int_t])
+
+        add = int(add)
 
         A_dev = self.to_device(A, dtype=self.complex_t)
         I_dev = self.to_device(I, dtype=self.real_t)
@@ -386,7 +398,8 @@ class ClCore(object):
 
         global_size = np.int(np.ceil(n / np.float(self.group_size)) * self.group_size)
 
-        self.mod_squared_complex_to_real_cl(self.queue, (global_size,), (self.group_size,), A_dev.data, I_dev.data, n)
+        self.mod_squared_complex_to_real_cl(self.queue, (global_size,), (self.group_size,), A_dev.data, I_dev.data,
+                                            n, add)
 
     def phase_factor_qrf_chunk_r(self, q, r, f=None, R=None, U=None, a=None, add=False, n_chunks=1):
 

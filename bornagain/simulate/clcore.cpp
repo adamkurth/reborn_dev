@@ -299,12 +299,12 @@ kernel void get_group_size(
 
 
 // Take the mod square of an array of complex numbers.  This is supposed to be
-// done with the pyopencl.array.Array class, but I only get seg. faults...
-kernel void mod_squared_complex_to_real(global const dsfloat2 *A, global dsfloat *I, const int n){
+// possible with the pyopencl.array.Array class, but I only get seg. faults...
+kernel void mod_squared_complex_to_real(global const dsfloat2 *A, global dsfloat *I, const int n, const int add){
     const int gi = get_global_id(0);
     if (gi < n){
         dsfloat2 a = A[gi];
-        I[gi] += a.x*a.x + a.y*a.y;
+        I[gi] += I[gi]*add + a.x*a.x + a.y*a.y;
 }}
 
 // Divide A by B wherever B is not zero

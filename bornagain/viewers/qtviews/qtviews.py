@@ -311,25 +311,19 @@ class Scatter3D(object):
 
 def view_finite_crystal(finite_crystal):
 
+    lattices = finite_crystal.lattices
+    cryst = finite_crystal.cryst
     scat = Scatter3D()
-
     for k in range(cryst.spacegroup.n_molecules):
-        x = lats[k].occupied_x_coordinates
-        print(x)
-        clcore.phase_factor_mesh(x, N=cdmap.shape, q_min=cdmap.h_limits[:, 0] * 2 * np.pi,
-                                 q_max=cdmap.h_limits[:, 1] * 2 * np.pi, a=amps, add=False)
-        amps_gpu += amps * mol_amps[k]
-        if args.view_crystal:
-            r = cryst.unitcell.x2r(x + au_x_coms[k])
-            scat.add_points(r, color=bright_colors(k, alpha=0.5), size=5)
-            r = cryst.unitcell.x2r(cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates))
-            scat.add_points(r, color=bright_colors(k, alpha=0.5), size=1)
-    if args.view_crystal:
-        scat.add_rgb_axis()
-        scat.add_unit_cell(cell=cryst.unitcell)
-        scat.set_orthographic_projection()
-        scat.show()
-        args.view_crystal = False
+        x = lattices[k].occupied_x_coordinates
+        r = cryst.unitcell.x2r(x + finite_crystal.au_x_coms[k])
+        scat.add_points(r, color=bright_colors(k, alpha=0.5), size=5)
+        r = cryst.unitcell.x2r(cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates))
+        scat.add_points(r, color=bright_colors(k, alpha=0.5), size=1)
+    scat.add_rgb_axis()
+    scat.add_unit_cell(cell=cryst.unitcell)
+    scat.set_orthographic_projection()
+    scat.show()
 
 if __name__ == '__main__':
 

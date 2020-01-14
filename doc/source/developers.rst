@@ -1,7 +1,7 @@
 .. _developers_anchor:
 
-Notes for Developers
-====================
+Developers
+==========
 
 Before you modify any code:
 ---------------------------

@@ -1,7 +1,11 @@
 .. _numpy_anchor:
 
-Working with Numpy
-==================
+Numpy
+=====
+
+Numpy is the most important Python package that bornagain uses when working with arrays.  Below are a few declarations
+that are meant to resolve possible ambiguities when using numpy arrays within the bornagain framework.  Users who are
+new to numpy should study it -- there are countless tutorials on the web.
 
 Indexing and internal memory layout of ndarray objects
 ------------------------------------------------------

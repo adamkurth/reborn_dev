@@ -1,5 +1,5 @@
-Working with Density Maps
-=========================
+Density Maps
+============
 
 .. _working_with_maps:
 

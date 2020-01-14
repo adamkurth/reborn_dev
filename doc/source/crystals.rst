@@ -1,7 +1,7 @@
 .. _working_with_crystals:
 
-Working with Crystals
-=====================
+Crystals
+========
 
 Here we briefly outline some conventions assumed in bornagain, and how to use the classes that expose crystal
 symmetry operations.

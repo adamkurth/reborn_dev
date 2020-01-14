@@ -1,5 +1,5 @@
-Setting up bornagain
-====================
+Setup
+=====
 
 The following should work on Linux or MacOS.  We have not thoroughly tested bornagain on MS Windows.
 

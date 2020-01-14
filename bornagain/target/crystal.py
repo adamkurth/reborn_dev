@@ -910,7 +910,7 @@ class FiniteCrystal(object):
     cryst = None  #: :class:`CrystalStructure <bornagain.target.crystal.CrystalStructure>` instances.
     au_x_coms = None  #: List of numpy arrays that specify center-of-mass coordinates of asymmetric unit and symmetry partners.
 
-    def __init__(self, cryst, max_size=[50, 50, 50]):
+    def __init__(self, cryst, max_size=20):
         r"""
         Utility that allows for the shaping of finite crystal lattices, with consideration of the crystal structure
         (molecular structure, spacegroup, etc.).  This is useful for simulating complete crystals with strange edges
@@ -924,14 +924,14 @@ class FiniteCrystal(object):
                                          class.
         """
         self.cryst = cryst
-        max_size = np.array(max_size)
+        max_size = max_size
 
         # Center of mass coordinates for the symmetry partner molecules
         self.au_x_coms = [cryst.spacegroup.apply_symmetry_operation(i, cryst.fractional_coordinates_com)
                      for i in range(cryst.spacegroup.n_operations)]
 
         self.lattices = [FiniteLattice(max_size=max_size, unitcell=cryst.unitcell)
-                         for i in range(cryst.spacegroup.n_molecules)]
+                         for _ in range(cryst.spacegroup.n_molecules)]
 
     def add_facet(self, plane=None, length=None):
         r"""
@@ -966,4 +966,3 @@ class FiniteCrystal(object):
         """
         for k in range(len(self.lattices)):
             self.lattices[k].make_parallelepiped(shape=shape, shift=shift)
-

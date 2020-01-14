@@ -1,7 +1,7 @@
 .. _working_with_fortran:
 
-Working with Fortran
-====================
+Fortran
+=======
 
 Integration of Fortran and Numpy
 --------------------------------
