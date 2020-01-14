@@ -117,7 +117,7 @@ class PDBMoleculeSimulator(object):
 
         Arguments:
             pdb_file: path to a pdb file
-            pad_geometry: array of :class:`PADGeometry bornagain.detector.PADGeometry` intances
+            pad_geometry: array of :class:`PADGeometry <bornagain.detector.PADGeometry>` intances
             wavelength: in SI units of course
             random_rotation: True or False
         """
@@ -232,16 +232,17 @@ class CrystalSimulatorV1(object):
         r"""
 
         Arguments:
-            pad_geometry: A :class:`PADGeometry <bornagain.detector.PADGeometry>` class instance, or a list of instances.
-            beam: An instance of bornagain.source.Beam
-            crystal_structure: An instance of bornagain.target.crystal.CrystalStructure
-            n_iterations: Number of iterations to average over
-            approximate_shape_transform: Use a Gaussian approximation to shape transforms, else analytic parallelepiped
-                shape transform
-            expand_symmetry: Duplicate the asymmetric unit according to spacegroup symmetry in crystal_structure
-            cl_double_precision: Use double precision if available on GPU device
-            cl_group_size: GPU group size (default is 32)
-            poisson_noise: Add Poisson noise to the resulting pattern
+            pad_geometry (list of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances): PAD geometry.
+            beam (:class:`Beam <bornagain.source.Beam>`): A beam instance.
+            crystal_structure (:class:`CrystalStructure <bornagain.target.crystal.CrystalStructure>`): A crystal
+                              structure.
+            n_iterations (int): Number of iterations to average over
+            approximate_shape_transform (bool): Use a Gaussian approximation to shape transforms, else use the analytic
+                                         parallelepiped shape transform formula.
+            expand_symmetry (bool): Duplicate the asymmetric unit according to spacegroup symmetry in crystal_structure.
+            cl_double_precision (bool): Use double precision if available on GPU device.
+            cl_group_size (int): GPU group size (see the :class:`ClCore <bornagain.simulate.clcore.ClCore>` class).
+            poisson_noise (bool): Add Poisson noise to the resulting pattern.
 
         """
 

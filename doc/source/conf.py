@@ -44,6 +44,9 @@ extensions = [
 # Don't sort autodocumention alphabetically
 autodoc_member_order = 'bysource'
 
+# Try to document __init__ functions of classes
+autoclass_content = 'both'
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -68,7 +71,8 @@ author = u'Richard A Kirian'
 # built documents.
 #
 # The short X.Y version.
-version = '0.2019.6.30'
+import datetime
+version = datetime.date.today().strftime('%Y.%m.%d') # Yields string like '2019.6.30'
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -87,14 +91,15 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-# exclude_patterns = ['scatter.py', 'buffer_mesh_lookup']
+# THIS DOES NOTHING SO FAR AS I CAN SEE...
+exclude_patterns = ['*placer*']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
 #default_role = None
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
-add_function_parentheses = True
+add_function_parentheses = False
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).

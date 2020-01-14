@@ -23,24 +23,31 @@ from bornagain.utils import trilinear_insert
 pdb_data_path = pkg_resources.resource_filename('bornagain.data', 'pdb')
 
 
-def get_pdb_file(pdb_id, save_path='.'):
+def get_pdb_file(pdb_id, save_path=".", silent=False):
     r"""
-    Fetch a pdb file from the web and return the path to the file.
-    The default location for the file is the current working directory.
-    If the file already exists, just return the path to the existing file.
+    Download a PDB file from the PDB web server and return the path to the downloaded file.  There is a data directory
+    included with bornagain that includes a few PDB files for testing purposes - if the requested PDB file exists there,
+    the path to the file included with bornagain will be returned.
+
+    *Note: After you download a file for the first time, the downloaded file path will be returned on the next call to
+    this function to avoid downloading the same file multiple times.*
 
     Arguments:
-        pdb_id: for example: "101M" or "101M.pdb"
+        pdb_id (string): For example: "101M" or "101M.pdb".  There are also some special strings which so far include
+                         "lysozyme" (2LYZ) and "PSI" (1jb0)
+        save_path (string): Path to the downloaded file.  The default is the current working directory, which depends
+                            on where you run your code.
 
     Returns:
-        string path to file
+        string : Path to PDB file
     """
 
     if pdb_id == 'lysozyme':
         pdb_id = '2LYZ'
 
-    # if save_path is None:
-    #     save_path = pdb_data_path
+    if pdb_id == 'PSI':
+        pdb_id = '1jb0'
+
     if not pdb_id.endswith('.pdb'):
         pdb_id += '.pdb'
 
@@ -469,14 +476,24 @@ class FiniteLattice(object):
     def make_hexagonal_prism(self, width=3, length=10, shift=0):
         r""" Specialized: assumes "standard" hexagonal cell, i.e. alpha=90, beta=90, gamma=120 """
         self.reset_occupancies()
-        self.add_facet(plane=[-1, 1, 0], length=width, shift=shift)
-        self.add_facet(plane=[1, -1, 0], length=width, shift=shift)
-        self.add_facet(plane=[1, 0, 0], length=width, shift=shift)
-        self.add_facet(plane=[0, 1, 0], length=width, shift=shift)
-        self.add_facet(plane=[-1, 0, 0], length=width, shift=shift)
-        self.add_facet(plane=[0, -1, 0], length=width, shift=shift)
-        self.add_facet(plane=[0, 0, 1], length=length, shift=shift)
-        self.add_facet(plane=[0, 0, -1], length=length, shift=shift)
+        self.add_facet(plane=[-1, 1, 0], length=width/2, shift=shift)
+        self.add_facet(plane=[1, -1, 0], length=width/2, shift=shift)
+        self.add_facet(plane=[1, 0, 0], length=width/2, shift=shift)
+        self.add_facet(plane=[0, 1, 0], length=width/2, shift=shift)
+        self.add_facet(plane=[-1, 0, 0], length=width/2, shift=shift)
+        self.add_facet(plane=[0, -1, 0], length=width/2, shift=shift)
+        self.add_facet(plane=[0, 0, 1], length=length/2, shift=shift)
+        self.add_facet(plane=[0, 0, -1], length=length/2, shift=shift)
+
+    def make_parallelepiped(self, shape=(5, 5, 5), shift=0):
+        r""" Specialized: assumes "standard" hexagonal cell, i.e. alpha=90, beta=90, gamma=120 """
+        self.reset_occupancies()
+        self.add_facet(plane=[1, 0, 0],  length=shape[0]/2, shift=shift)
+        self.add_facet(plane=[-1, 0, 0], length=shape[0]/2, shift=shift)
+        self.add_facet(plane=[0, 1, 0],  length=shape[1]/2, shift=shift)
+        self.add_facet(plane=[0, -1, 0], length=shape[1]/2, shift=shift)
+        self.add_facet(plane=[0, 0, 1],  length=shape[2]/2, shift=shift)
+        self.add_facet(plane=[0, 0, -1], length=shape[2]/2, shift=shift)
 
     def sphericalize(self, radius):
 
@@ -942,5 +959,11 @@ class FiniteCrystal(object):
         for k in range(len(self.lattices)):
             self.lattices[k].make_hexagonal_prism(width=width, length=length, shift=self.au_x_coms[k])
 
-
+    def make_parallelepiped(self, shape=(5, 5, 5), shift=0):
+        r"""
+        See equivalent method in :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`. In this case, the
+        facets are added to *all* of the finite lattices (one for each symmetry partner).
+        """
+        for k in range(len(self.lattices)):
+            self.lattices[k].make_parallelepiped(shape=shape, shift=shift)
 

@@ -7,6 +7,7 @@ from bornagain.target import crystal
 from bornagain.viewers.qtviews import Scatter3D, bright_colors, PADView, MapProjection, MapSlices
 import scipy.constants as const
 import argparse
+import pyqtgraph as pg
 
 eV = const.value('electron volt')
 r_e = const.value("classical electron radius")
@@ -63,16 +64,16 @@ clcore = ClCore()
 mol_amps = []  # Molecular transform amplitudes, 3D arrays one for each symmetry partner
 for k in range(cryst.spacegroup.n_operations):
     x = cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates)
-    amps = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t) * 0
+    lattice_amps = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t) * 0
     clcore.phase_factor_mesh(x, f, N=cdmap.shape, q_min=cdmap.h_limits[:, 0]*2*np.pi,
-                             q_max=cdmap.h_limits[:, 1]*2*np.pi, a=amps, add=True)
-    mol_amps.append(amps)
+                             q_max=cdmap.h_limits[:, 1]*2*np.pi, a=lattice_amps, add=True)
+    mol_amps.append(lattice_amps)
 
 if args.view_density:
     # Show the asymmetric unit:
-    amps = mol_amps[0].get()
-    amps = np.reshape(amps, cdmap.shape)
-    mp = MapProjection(np.abs(fftn(amps)), title='Asymmetric unit')
+    lattice_amps = mol_amps[0].get()
+    lattice_amps = np.reshape(lattice_amps, cdmap.shape)
+    mp = MapProjection(np.abs(fftn(lattice_amps)), title='Asymmetric unit')
 
 if args.view_density:
     # Show the unit cell:
@@ -83,37 +84,41 @@ if args.view_density:
     cell_amps = np.reshape(cell_amps, cdmap.shape)
     mp = MapProjection(np.abs(fftn(cell_amps)))
 
-amps = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t)
-intensities = clcore.to_device(shape=cdmap.shape, dtype=clcore.real_t)*0
-scat = None
+lattice_amps = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t)
+intensity_sum = clcore.to_device(shape=cdmap.shape, dtype=clcore.real_t) * 0
+
+# For viewing the crystal lattice and molecule coordinates
+if args.view_crystal:
+    scat = Scatter3D()
 
 for c in range(args.n_crystals):
     sys.stdout.write('Simulating crystal %d... ' % (c,))
     t = time()
     # Construct a finite lattice in the form of a hexagonal prism
-    width = 1 + np.random.rand(1)*1
-    length = 3 + np.random.rand(1)*1
+    width = 1 #+ np.random.rand(1)*1  # todo: fix this line
+    length = 1 #+ np.random.rand(1)*1  # todo: fix this line
     if args.add_facets:
-        for i in range(len(lats)):
-            lat = lats[i]
-            com = au_x_coms[i]
-            lat.make_hexagonal_prism(width=width, length=length, shift=com)
-    # For viewing the crystal lattice and molecule coordinates
-    if args.view_crystal:
-        if scat is not None:
-            del scat
-        scat = Scatter3D()
-    amps_gpu = 0
+        for k in range(len(lats)):
+            lats[k].make_hexagonal_prism(width=width, length=length, shift=au_x_coms[k])
+            lats[k].make_parallelepiped(shape=(3, 3, 3), shift=au_x_coms[k])  # todo: fix this line
+    crystal_amps = 0
     for k in range(cryst.spacegroup.n_molecules):
         x = lats[k].occupied_x_coordinates
+        # x = np.zeros((2, 3))  # todo: fix this line
+        # x[0, 0] = 2  # todo: fix this line
+        # x[1, 0] = 3  # todo: fix this line
+        # print(x)
+        lattice_amps *= 0
         clcore.phase_factor_mesh(x, N=cdmap.shape, q_min=cdmap.h_limits[:, 0] * 2 * np.pi,
-                                 q_max=cdmap.h_limits[:, 1] * 2 * np.pi, a=amps, add=False)
-        amps_gpu += amps * mol_amps[k]
+                                 q_max=cdmap.h_limits[:, 1] * 2 * np.pi, a=lattice_amps, add=False)
+        crystal_amps += lattice_amps  # * mol_amps[k]  # todo: fix this line
         if args.view_crystal:
+            print(au_x_coms[k])  # todo: fix this line
             r = cryst.unitcell.x2r(x + au_x_coms[k])
             scat.add_points(r, color=bright_colors(k, alpha=0.5), size=5)
             r = cryst.unitcell.x2r(cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates))
             scat.add_points(r, color=bright_colors(k, alpha=0.5), size=1)
+        break # todo: fix this line
     if args.view_crystal:
         scat.add_rgb_axis()
         scat.add_unit_cell(cell=cryst.unitcell)
@@ -124,28 +129,51 @@ for c in range(args.n_crystals):
         filename = 'run%04d_checkpoint%06d.npz' % (args.run_number, c+1)
         sys.stdout.write('(saving %s)' % (filename,))
         np.savez(filename,
-                 map=intensities.get().reshape(cdmap.shape),
+                 map=intensity_sum.get().reshape(cdmap.shape),
                  shape=cdmap.shape, representation='x',
                  map_min=np.squeeze(cdmap.h_limits[:, 0]),
                  map_max=np.squeeze(cdmap.h_limits[:, 1]))
-    clcore.mod_squared_complex_to_real(amps_gpu, intensities)  # Note that this operation **adds** to the intensities
+    clcore.mod_squared_complex_to_real(crystal_amps, intensity_sum)  # Note that this operation **adds** to the intensities
     sys.stdout.write(' in %g seconds.\n' % (time() - t,))
 
-intensities = np.reshape(intensities.get(), cdmap.shape)/args.n_crystals
+intensity = np.reshape(intensity_sum.get(), cdmap.shape) / args.n_crystals
+
+
+h_vecs = cdmap.h_vecs
+ha = np.dot(h_vecs, np.array([1, 0, 0]))
+hb = np.dot(h_vecs, np.array([0, 1, 0]))
+hc = np.dot(h_vecs, np.array([0, 0, 1]))
+
+intensity_model = 3*np.sin(3*2*np.pi*ha)/np.sin(2*np.pi*ha)
+intensity_model *= 3*np.sin(3*2*np.pi*hb)/np.sin(2*np.pi*hb)
+intensity_model *= 3*np.sin(3*2*np.pi*hc)/np.sin(2*np.pi*hc)
+w = np.where(np.sin(2*np.pi*ha)*np.sin(2*np.pi*hb)*np.sin(2*np.pi*hc) == 0)
+intensity_model[w] = 3**3
+intensity_model *= intensity_model
+
+
+print(np.max(intensity.ravel()[w] - intensity_model[w]))
+
 if args.save_results:
     filename = 'run%04d.npz' % (args.run_number,)
     print('saving %s' % (filename,))
     np.savez('run%04d.npz' % (args.run_number,),
-             map=intensities,
+             map=intensity,
              shape=cdmap.shape, representation='x',
              map_min=np.squeeze(cdmap.h_limits[:, 0]),
              map_max=np.squeeze(cdmap.h_limits[:, 1]))
 
 if args.view_intensities:
-    dispim = np.log(intensities.copy()*1e-8)
-    dispim[dispim == np.max(dispim)] = 0
+    dispim = intensity.copy()
+    # dispim -= np.min(dispim)
+    # dispim = dispim/np.max(dispim)
+    # dispim += 1e-3
+    # dispim[dispim == np.max(dispim)] = 0
+    dispim = np.log(dispim)
     # thresh = np.max(dispim)*1e-10
     # dispim[dispim > thresh] = thresh
+    # pg.image(np.transpose(dispim, [1, 0, 2]))
+    # pg.mkQApp().exec_()
     MapSlices(dispim, title='Averaged Intensities')
 
 print('Done!')

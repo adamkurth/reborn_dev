@@ -6,37 +6,157 @@ Working with Numpy
 Indexing and internal memory layout of ndarray objects
 ------------------------------------------------------
 
-According to the
-`docs <https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html#internal-memory-layout-of-an-ndarray>`_,
-Numpy ndarray objects can accommodate any strided indexing scheme.  The bornagain package uses some
-Fortran and OpenCL routines that make assumptions about the internal memory layout of ndarrays, which means that we
-need to be clear about how we store our arrays in memory.  We assume that
-all ndarrays are in the *default* "c-contiguous order", which defines a syntax in which incremements in the right-most
-index of an array correspond to the smallest steps in the internal memory buffer.  The data buffer is contiguous --
-there are no "gaps".  The following example illustrates this:
+*People who are familiar with numpy ndarrays and their memory layout can skip this section -- the synopsis is simple:
+some parts of the bornagain package (particularly those that have underlying Fortran or OpenCL code) assume that
+ndarrays are are in the default c-contiguous ordering.  There are some cases in which errors will result if you pass
+in an array that is not c-contiguous, and in other cases arrays are re-written before passing to Fortran or OpenCL
+functions, which will cause in speed reductions.*
+
+Some users of numpy can carry out all of their Python/numpy calculations without knowledge of the internal memory
+structure of numpy ndarray objects.
+However, most will eventually learn that it is essential to have at least some basic knowledge of how numpy actually
+handles the underlying array data in the computer memory.
+A simple example illustrates the need for this:
 
 .. testcode::
 
     import numpy as np
-    a = np.array([[1,2,3],[4,5,6]])
-    print(a.shape)
-    print(a.flags.c_contiguous)
-    print(a.ravel())
-    print(a[0, 1])
+    a = np.ones(3)
+    b = a
+    print(b)
+    a[0] = 0
+    print(b)
 
 .. testoutput::
 
-    (2, 3)
+    [1. 1. 1.]
+    [0. 1. 1.]
+
+From the output it is evident that the underlying memory buffer of the *a* array is the same as the *b* array; you might
+say that *by changing a we also changed b*.
+Presumably, the reason for this behavior is that ndarrays are designed to avoid unnecessary time-consuming memory
+(re)writes.
+The numpy ndarray class is also meant to provide a clean interface that removes the need to direcly manipulate memory so
+that you can write programs faster, but this apparent simplicity comes at the cost of obscurity.
+Students who begin using numpy without consideration of computer memory are often frustrated by this obscurity.
+
+Now we make a small change to the previous example:
+
+.. testcode::
+
+    import numpy as np
+    a = np.ones(3)
+    b = a*1
+    print(b)
+    a[0] = 0
+    print(b)
+
+.. testoutput::
+
+    [1. 1. 1.]
+    [1. 1. 1.]
+
+In this example the output shows that the *a* and *b* arrays no longer share a common memory buffer.
+The reason is that the multiplication operation caused the ndarray object to create a new memory buffer for *b*.
+There are many other examples that expose some of the behaviors of ndarrays that are related to memory, but we will not
+venture further here since there are many tutorials on this topic on the web and also the
+`numpy ndarray docs <https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html#internal-memory-layout-of-an-ndarray>`_
+have helpful information.
+As a final note on the above examples, you should be aware that the *copy* function can be used in order to be certain
+that two ndarrays have distinct memory, as in this example:
+
+.. testcode::
+
+    import numpy as np
+    a = np.ones(3)
+    b = a.copy()
+    print(b)
+    a[0] = 0
+    print(b)
+
+.. testoutput::
+
+    [1. 1. 1.]
+    [1. 1. 1.]
+
+Additional issues can arise as a result of the fact that numpy ndarray objects can accommodate
+`any strided indexing scheme <https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html#internal-memory-layout-of-an-ndarray>`_
+.
+By default, ndarrays are in the "c-contiguous order", which means that incremements in the right-most index of an
+ndarray correspond to the smallest stride in the internal memory buffer.
+However, there are many operations that result in ndarrays that are not in "c-contiguous" order.
+The following example illustrates this:
+
+.. testcode::
+
+    import numpy as np
+    a = np.arange(9).reshape([3, 3])
+    print(a)
+    print(a.flags.c_contiguous)
+    b = a.T  # Transpose the a array
+    print(b)
+    print(b.flags.c_contiguous)
+    print(b.flags.f_contiguous)
+    a[0, 0] = 1
+    print(b)
+
+.. testoutput::
+
+    [[0 1 2]
+     [3 4 5]
+     [6 7 8]]
     True
-    [1 2 3 4 5 6]
-    2
+    [[0 3 6]
+     [1 4 7]
+     [2 5 8]]
+    False
+    True
+    [[1 3 6]
+     [1 4 7]
+     [2 5 8]]
+
+As we can see, the transpose operation reverses the ordering of the indices but does not modify the memory buffer.
+The result is an ndarray with a memory buffer in "f-contiguous order" (the *first* index has the shortest stride).
+In most cases, the ordering does not matter since virtually all of numpy is designed to be indifferent to
+the layout of internal memory buffers.
+You might notice that the speed of your program depends on the ordering of the internal memory, but you will probably
+get the result you expect regardless of the ordering.
+
+The central point in introducing the above is the following: some portions of the code in bornagain are written in the
+Fortran and OpenCL languages, and as a result *the ordering of the memory buffers matters for some functions in
+bornagain*.
+In order to make this issue as painless as possible, it is assumed that all ndarrays are in the default
+"c-contiguous" order, and the striding corresponds to contiguous data (there are no "gaps" between array elements).
+There are more details on this matter found elsewhere (see e.g. :ref:`Working with Fortran <working_with_fortran>`).
+
 
 Matrices
 --------
 
-Numpy has a matrix class but it is not recommended to use it (according to the numpy docs).  So we use regular numpy
-arrays to store matrices.  In order to take a matrix product, we use the np.dot function as illustrated in the following
+Numpy has a matrix class but it is not recommended to use it (according to the numpy docs).
+We use regular numpy arrays to store matrices.
+Fortunately, numpy displays arrays as you would likely write them down mathematically, as shown in the following
 example:
+
+.. testcode::
+
+    a = np.arange(9).reshape((3,3))
+    print(a)
+    print(a[0,1])
+
+.. testoutput::
+
+    [[0 1 2]
+     [3 4 5]
+     [6 7 8]]
+    1
+
+As you can see, the first index corresponds to "row index" and the second index corresponds to the "column index".
+If you are performing e.g. rotations on vectors and you are uncertain of the ordering of array elements, you can print
+an example array and make sure it looks the way you would write it down on paper.
+
+For ndarrays, the ordinary product operation (a*b) does an element-by-element product.
+In order to take a matrix product of two arrays, we use the np.dot function as in the following example:
 
 .. testcode::
 
@@ -67,8 +187,10 @@ Arrays of vectors
 
 If you have *N* vectors of dimension 3, bornagain assumes they are stored with a shape of (*N*, 3).  This choice was
 made because the right-most index of a numpy array has the smallest stride by default, and because it usually makes
-most sense to have vector components stored close to each other in memory.  This convention is assumed in every function
-in bornagain.  This note is to avoid ambiguity in the case of a (3, 3) array.
+most sense to have vector components stored close to each other in memory.
+This convention is assumed in every function in bornagain that deals with arrays of vectors.
+Normally you would get a runtime error if you pass in an array of the wrong shape, due to mis-match dimensions, but
+there will be no error in the case of a (3, 3) array.
 
 Rotations
 ---------
