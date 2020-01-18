@@ -7,7 +7,6 @@ from bornagain.target import crystal
 from bornagain.viewers.qtviews import Scatter3D, bright_colors, PADView, MapProjection, MapSlices, view_finite_crystal
 import scipy.constants as const
 import argparse
-import pyqtgraph as pg
 
 eV = const.value('electron volt')
 
@@ -24,27 +23,31 @@ parser.add_argument('--crystal_length', type=str, default='6,10', required=False
                     help='Range of crystal lengths')
 parser.add_argument('--crystal_width', type=str, default='2,4', required=False,
                     help='Range of crystal widths')
+parser.add_argument('--gaussian_disorder_sigmas', type=str, default='0.0,0.0,0.0', required=False,
+                    help='Add Gaussian disorder with these sigmas (3 values, specified in crystal basis)')
 parser.add_argument('--photon_energy_ev', type=float, default=8000, required=False,
                     help='Photon energy in electron volts')
+parser.add_argument('--view_crystal', action='store_true', required=False,
+                    help='Display the crystal molecule coordinates')  # 'store_true' means False by default
+parser.add_argument('--view_density', action='store_true', required=False,
+                    help='Display the density map in crystal coordinates')
+parser.add_argument('--view_intensities', action='store_true', required=False,
+                    help='Display the final averaged intensities')
 parser.add_argument('--save_results', action='store_true', required=False,
                     help='Save the density map')
-parser.add_argument('--view_crystal', action='store_false', required=False,
-                    help='Display the crystal molecule coordinates')  # 'store_false' means True by default
-parser.add_argument('--view_density', action='store_false', required=False,
-                    help='Display the density map in crystal coordinates')  # 'store_false' means True by default
-parser.add_argument('--view_intensities', action='store_false', required=False,
-                    help='Display the final averaged intensities')  # 'store_false' means True by default
 parser.add_argument('--run_number', type=int, default=1, required=False,
                     help='Files will be prefixed with "run%%04d_"')
 args = parser.parse_args()
 args.crystal_length = [float(a) for a in args.crystal_length.split(',')]
 args.crystal_width = [float(a) for a in args.crystal_width.split(',')]
+args.gaussian_disorder_sigmas = [float(a) for a in args.gaussian_disorder_sigmas.split(',')]
 
 # This has molecule, unit cell, and spacegroup
 cryst = crystal.CrystalStructure(args.pdb_file, tight_packing=True)  # Tight packing: put molecule COMs inside unit cell
 
 # This uses a crystal structure to make finite lattices with spacegroup considerations
 fc = crystal.FiniteCrystal(cryst, max_size=20)
+fc.set_gaussian_disorder(sigmas=args.gaussian_disorder_sigmas)
 
 # Density map configuration with spacegroup considerations
 cdmap = crystal.CrystalDensityMap(cryst=cryst, resolution=args.resolution, oversampling=args.oversampling)

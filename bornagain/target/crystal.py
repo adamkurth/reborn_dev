@@ -374,8 +374,11 @@ class CrystalStructure(object):
 
 class FiniteLattice(object):
     r"""
-    A utility for creating finite crystal lattices.  Enables the generation of lattice vector positions, lattice
-    occupancies, shaping of crystals. Under development.
+    A utility for creating finite crystal lattices.  Uses an occupancy model in which a maximum-size array of
+    occupancies is created and set to 1 (occupied), and subsequently facets may be added by specifying the plane at
+    at which the cut is made.  A cut sets the occupancies beyond the plane to 0 (unoccupied).  Lattice vector positions
+    can then be generated in the crystal or cartesian basis.  Gaussian disorder may be added.  Special shapes are
+    supported, including hexagonal prisms, parallelepipeds, and spheres.
     """
 
     def __init__(self, max_size=None, unitcell=None):
@@ -407,45 +410,52 @@ class FiniteLattice(object):
         self.all_x_coordinates.flags.writeable = False
         self._all_r_coordinates = None
         self._all_r_mags = None
+        self.sigmas = None
+        self.disordered = False
 
     @property
-    def all_r_coordinates(self):
+    def __all_r_coordinates(self):
 
         if self._all_r_coordinates is None:
             self._all_r_coordinates = np.dot(self.all_x_coordinates, self.unitcell.o_mat.T)
-            # self._all_r_coordinates.flags.writeable = False
         return self._all_r_coordinates
 
     @property
-    def all_r_mags(self):
+    def __all_r_mags(self):
 
         if self._all_r_mags is None:
-            self._all_r_mags = vec_mag(self.all_r_coordinates)
-            # self._all_r_mags.flags.writable = False
+            self._all_r_mags = vec_mag(self.__all_r_coordinates)
         return self._all_r_mags
 
     @property
-    def occupied_indices(self):
+    def __occupied_indices(self):
 
         return np.where(self.occupancies.ravel() != 0)[0]
 
     @property
     def occupied_x_coordinates(self):
-
-        return self.all_x_coordinates[self.occupied_indices, :]
+        r"""
+        The occupied coordinate vectors in the crystal basis.  An (M, 3) numpy array.
+        """
+        x = self.all_x_coordinates[self.__occupied_indices, :]
+        if self.disordered:
+            x += np.random.normal(size=x.shape)*self.sigmas
+        return x
 
     @property
     def occupied_r_coordinates(self):
-
+        r"""
+        The occupied coordinate vectors in the cartesian (laboratory) basis.  An (M, 3) numpy array.
+        """
         return np.dot(self.occupied_x_coordinates, self.unitcell.o_mat.T)
 
     def add_facet(self, plane=None, length=None, shift=0):
-
-        r""" Rejects all lattice sites for which
+        r"""
+        Creates a crystal facet by zeroing the lattice occupancies for which the following condition is met:
 
         .. math::
 
-            `(\mathbf{x}+\mathbf{s})\cdot\mathbf{p} > L`
+            (\mathbf{x}+\mathbf{s})\cdot\mathbf{p} > L
 
         where :math:`\mathbf{x}` are the nominal lattice positions (with one lattice point sitting on the origin),
         :math:`\mathbf{s}` is an optional shift (which might correspond to the center of mass of one molecule
@@ -453,15 +463,15 @@ class FiniteLattice(object):
         the origin to the normal of the facet surface), and :math:`L` is the length from the origin to the facet
         surface.
 
-        This operation will set the occupancies of the rejected lattice sites to zero.
+        This operation will set the occupancies of the rejected lattice sites to zero.  When you subsequently access
+        the :attr:`occupied_x_coordinates <bornagain.target.crystal.FiniteLattice.occupied_x_coordinates>` property,
+        the zero-valued occupancies will not be returned.
 
         Arguments:
 
             plane (numpy array):  The vector :math:`\vec{p}` defined above.
             length (numpy array):  The length :math:`L` defined above.
             shift (numpy array):  The vector :math:`\vec{s}` defined above.
-
-        Returns: None
         """
 
         proj = (self.all_x_coordinates+shift).dot(np.array(plane))
@@ -474,19 +484,38 @@ class FiniteLattice(object):
         self.occupancies = np.ones([self.max_size]*3)
 
     def make_hexagonal_prism(self, width=3, length=10, shift=0):
-        r""" Specialized: assumes "standard" hexagonal cell, i.e. alpha=90, beta=90, gamma=120 """
+        r"""
+        Specialized function to form a hexagonal prism by adding eight facets.  A crude illustration is shown
+        below.  This method assumes a "standard" hexagonal cell in which alpha=90, beta=90, gamma=120.  The length and
+        width parameters span from facet to facet.  The length facets are in the planes [0,0,1] and [0,0,-1].  The three
+        widths specify the facet pairs ([1,0,0], [-1,0,0]), ([0,1,0], [0,-1,0]),  ([1,-1,0], [-1,1,0]).  Note that, by
+        default, there is always at minimum one lattice point that lies on the origin; if that is not desired then you
+        may use the shift parameter as discussed in the
+        :meth:`add_facet <bornagain.target.crystal.FiniteLattice.add_facet>` method.
+
+        Arguments:
+            width (float or array): Three widths to specify the prism shape/size, as explained above.
+            length (float): Length of the prism, as illustrated above.
+        """
+
+        width = np.array(width).squeeze()
+        if width.size == 1:
+            width = np.ones(3)*width
+        elif width.size != 3:
+            raise ValueError('width must be either float, int or 3-element array')
+
         self.reset_occupancies()
-        self.add_facet(plane=[-1, 1, 0], length=width/2, shift=shift)
-        self.add_facet(plane=[1, -1, 0], length=width/2, shift=shift)
-        self.add_facet(plane=[1, 0, 0], length=width/2, shift=shift)
-        self.add_facet(plane=[0, 1, 0], length=width/2, shift=shift)
-        self.add_facet(plane=[-1, 0, 0], length=width/2, shift=shift)
-        self.add_facet(plane=[0, -1, 0], length=width/2, shift=shift)
+        self.add_facet(plane=[1, 0, 0], length=width[0]/2, shift=shift)
+        self.add_facet(plane=[-1, 0, 0], length=width[0]/2, shift=shift)
+        self.add_facet(plane=[0, 1, 0], length=width[1]/2, shift=shift)
+        self.add_facet(plane=[0, -1, 0], length=width[1]/2, shift=shift)
+        self.add_facet(plane=[-1, 1, 0], length=width[2]/2, shift=shift)
+        self.add_facet(plane=[1, -1, 0], length=width[2]/2, shift=shift)
         self.add_facet(plane=[0, 0, 1], length=length/2, shift=shift)
         self.add_facet(plane=[0, 0, -1], length=length/2, shift=shift)
 
     def make_parallelepiped(self, shape=(5, 5, 5), shift=0):
-        r""" Specialized: assumes "standard" hexagonal cell, i.e. alpha=90, beta=90, gamma=120 """
+        r""" Cuts out a Parallelepiped shape"""
         self.reset_occupancies()
         self.add_facet(plane=[1, 0, 0],  length=shape[0]/2, shift=shift)
         self.add_facet(plane=[-1, 0, 0], length=shape[0]/2, shift=shift)
@@ -495,9 +524,29 @@ class FiniteLattice(object):
         self.add_facet(plane=[0, 0, 1],  length=shape[2]/2, shift=shift)
         self.add_facet(plane=[0, 0, -1], length=shape[2]/2, shift=shift)
 
-    def sphericalize(self, radius):
+    def make_sphere(self, radius):
+        r"""
+        Create a spherical crystal, using the radius in cartesian space.
 
-        self.occupancies.flat[self.all_r_mags > radius] = 0
+        Arguments:
+            radius (float):  The cartesian-space radius.
+        """
+        self.occupancies.flat[self.__all_r_mags > radius] = 0
+
+    def set_gaussian_disorder(self, sigmas=(0.0, 0.0, 0.0)):
+        r"""
+        Add Gaussian-distributed random offsets to all lattice points
+
+        Arguments:
+            sigmas (numpy array):  The three standard deviations along crystal basis vectors (so these should probably
+                                   be less than 1)
+        """
+        sigmas = np.array(sigmas).squeeze()
+        if np.sum(np.abs(sigmas)) == 0:
+            self.disordered = False
+        else:
+            self.disordered = True
+        self.sigmas = sigmas
 
 
 class CrystalDensityMap(object):
@@ -530,7 +579,7 @@ class CrystalDensityMap(object):
         and oversampling.
 
         Arguments:
-            cryst (CrystalStructure class instance) : A crystal structure that contains the spacegroup and lattice
+            cryst (:class:`CrystalStructure` instance) : A crystal structure that contains the spacegroup and lattice
                                                       information.
             resolution (float) : The desired resolution of the map (will be modified to suit integer samples and a
                                   square 3D mesh)
@@ -569,11 +618,7 @@ class CrystalDensityMap(object):
         r"""
         Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:
 
-        [[0,  0,  0  ],
-         [0,  0,  1  ],
-         [0,  0,  2  ],
-         ...          ,
-         [N-1,N-1,N-1]]
+        [[0, 0, 0], [0, 0, 1], [0, 0, 2],  ...  , [N-1,N-1,N-1]]
 
         Note that it is the third index, which we might associate with "z", that increments most rapidly.
 
@@ -594,13 +639,7 @@ class CrystalDensityMap(object):
         Get an Nx3 array that contains the fractional coordinates.  For example, if there were four samples per unit
         cell, the array looks like this:
 
-        [[    0,    0,    0],
-         [    0,    0, 0.25],
-         [    0,    0,  0.5],
-         [    0,    0, 0.75],
-         [    0, 0.25,    0],
-         ...                ,
-         [ 0.75, 0.75, 0.75]]
+        [[0, 0, 0], [0, 0, 0.25], [0, 0, 0.5], [0, 0, 0.75], [0, 0.25, 0], ... , [ 0.75, 0.75, 0.75]]
 
         Returns: numpy array
         """
@@ -906,9 +945,9 @@ def pdb_to_dict(pdb_file_path):
 
 class FiniteCrystal(object):
 
-    lattices = None  #: List of :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>` instances.
-    cryst = None  #: :class:`CrystalStructure <bornagain.target.crystal.CrystalStructure>` instances.
-    au_x_coms = None  #: List of numpy arrays that specify center-of-mass coordinates of asymmetric unit and symmetry partners.
+    lattices = None  # : List of :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>` instances.
+    cryst = None  # : :class:`CrystalStructure <bornagain.target.crystal.CrystalStructure>` instances.
+    au_x_coms = None  # : List of numpy arrays that specify center-of-mass coordinates of asymmetric unit and symmetry partners.
 
     def __init__(self, cryst, max_size=20):
         r"""
@@ -917,7 +956,7 @@ class FiniteCrystal(object):
         or other defects that depart from idealized crystals.
 
         Args:
-            cryst :class:`CrystalStructure <bornagain.target.crystal.CrystalStructure>` : A crystal structure object.
+            cryst (:class:`CrystalStructure`) : A crystal structure object.
                            The center-of-mass of asymmetric unit and spacegroup provided by this object will affect the
                            centering of the lattices.
             max_size (3-element array) : Same as in the :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`
@@ -953,7 +992,7 @@ class FiniteCrystal(object):
 
     def make_hexagonal_prism(self, width=3, length=10):
         r"""
-        See equivalent method in :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`. In this case, the
+        See equivalent method in :class:`FiniteLattice`. In this case, the
         facets are added to *all* of the finite lattices (one for each symmetry partner).
         """
         for k in range(len(self.lattices)):
@@ -966,3 +1005,10 @@ class FiniteCrystal(object):
         """
         for k in range(len(self.lattices)):
             self.lattices[k].make_parallelepiped(shape=shape, shift=shift)
+
+    def set_gaussian_disorder(self, sigmas=(0, 0, 0)):
+        r"""
+        See equivalent method in :class:`FiniteLattice` .
+        """
+        for lat in self.lattices:
+            lat.set_gaussian_disorder(sigmas=sigmas)
