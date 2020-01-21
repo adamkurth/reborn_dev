@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd $(dirname $0)
+
 # Note: when documentation is created and pushed to the gitlab repository, this script will run automatically and
 # documentation will be made available here:
 #

@@ -554,7 +554,11 @@ class CrystalDensityMap(object):
     A helper class for working with 3D crystal density maps.  Most importantly, it helps with spacegroup symmetry
     transformations.  Once initialized with a crystal spacegroup and lattice, along with desired resolution
     (:math:`1/d`) and oversampling ratio (equal to 1 for normal crystallographic Bragg sampling), this tool chooses the
-    shape of the map and creates lookup tables for the symmetry transformations.
+    shape of the map and creates lookup tables for the symmetry transformations.  The shape is chosen according to
+    the formula :math:`(N_1, N_2, N_3) = \text{roundup}(a_1/d, a_2/d, a_3/d)` where the function
+    :math:`\texttt{roundup}` takes the next-largest integer multiple of :math:`P`.  The value of :math:`P` comes from
+    the point group and is equal to the largest number of rotations about any axis.  For example, the spacegroup
+    :math:`P6_3` has a point group of 6, and thus :math:`P=6`.
 
     It is generally assumed that you are working in the crystal basis (fractional coordinates).  When working in the
     crystal basis, the symmetry transforms avoid interpolation artifacts.  The shape of the map is chosen specifically
@@ -637,7 +641,7 @@ class CrystalDensityMap(object):
     def x_vecs(self):
         r"""
         Get an Nx3 array that contains the fractional coordinates.  For example, if there were four samples per unit
-        cell, the array looks like this:
+        cell, the array will look like this:
 
         [[0, 0, 0], [0, 0, 0.25], [0, 0, 0.5], [0, 0, 0.75], [0, 0.25, 0], ... , [ 0.75, 0.75, 0.75]]
 
@@ -649,7 +653,8 @@ class CrystalDensityMap(object):
     @property
     def x_limits(self):
         r"""
-        Return a 3x2 array with the limits of the density map.  These limits correspond to the centers of the voxels.
+        Return a 3x2 array with the limits of the density map.  These limits correspond to the concentions described
+        in the :ref:`documentation <working_with_maps>` ; :math:`x_\text{min} = \text{x_limits[:, 0]}` .
 
         Returns:
         """
@@ -661,9 +666,26 @@ class CrystalDensityMap(object):
     @property
     def h_vecs(self):
         r"""
-        This provides an Nx3 array of Fourier-space vectors "h".  These coordinates can be understood as "fractional
-        Miller indices" that coorespond to the density samples upon taking an FFT of the real-space map.  With atomic
-        coordinates x (in the crystal basis) one can take the Fourier transform F(h) = sum_n f_n exp(i h*x)
+        This provides an :math:`M \times 3` array of Fourier-space vectors :math:`\vec{h}` that correspond to the
+        real-space vectors :math:`\vec{x}` of this density map.  These :math:`\vec{h}` vectors can be understood as the
+        "fractional Miller indices", and they are defined in accordance with the
+        `numpy FFT convention <https://docs.scipy.org/doc/numpy/reference/routines.fft.html>`_ .
+        The numpy foward FFT is defined in these terms as
+
+        .. math::
+
+            F_h = \sum_{x=0}^{N-1} f_x \exp(-2 \pi i h x / N) \; , \quad h = 0, 1, 2, \ldots , N-1
+
+        while the inverse FFT is
+
+        .. math::
+
+            f_x = \frac{1}{N}\sum_{h=0}^{N-1} F_h \exp(2 \pi i h x / N) \; , \quad x = 0, 1, 2, \ldots , N-1
+
+        Note that the above expression is defined such that both :math:`h` and :math:`x` have integer step size.  Our
+        :class:`CrystalDensityMap` class handles oversampling, in which case the integer :math:`h` become
+        :math:`h \rightarrow h/s` and the array size grows according to :math:`N \rightarrow s N`, where
+        :math:`s` is the oversampling ratio.
 
         Returns: numpy array
         """
@@ -680,11 +702,36 @@ class CrystalDensityMap(object):
 
     @property
     def h_limits(self):
+        r"""
+        This is depreciated.  Do not use it.
 
+        Returns:
+
+        """
         limits = np.zeros((3, 2))
         limits[:, 0] = -np.floor(self.shape/2)/self.oversampling
         limits[:, 1] = np.floor((self.shape-1) / 2)/self.oversampling
         return limits
+
+    @property
+    def h_min(self):
+        r"""
+        The lower limits of the :math:`\vec{h}` vectors, which correspond to the FFT of this density map.
+
+        Returns:
+            numpy array
+        """
+        return -np.floor(self.shape / 2) / self.oversampling
+
+    @property
+    def h_max(self):
+        r"""
+        The upper limits of the :math:`\vec{h}` vectors, which correspond to the FFT of this density map.
+
+        Returns:
+            numpy array
+        """
+        return np.floor((self.shape - 1) / 2) / self.oversampling
 
     def get_sym_luts(self):
         r"""

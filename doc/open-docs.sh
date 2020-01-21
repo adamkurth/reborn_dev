@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+cd $(dirname $0)
+
 # Opening files from the command line is easy with Mac OS.  How do you do this in Linux?
 if [ "`echo $(uname -a | grep Darwin)`" != '' ]; then
  open ../doc/html/index.html
