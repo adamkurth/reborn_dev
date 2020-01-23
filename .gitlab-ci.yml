@@ -46,5 +46,5 @@ pages:
 piptest:
   stage: test
   script:
-  - cd $basepath/develop
+  - cd $basepath/developer
   - ./pip-install-and-test.sh
