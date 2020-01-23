@@ -15,10 +15,10 @@ before_script:
   - export PATH=$gitbasepath/miniconda/bin:$PATH
   - conda update -n base -c defaults conda
 #  - cd $gitbasepath/developer
-  - conda create --force -y -n bornagain_test
-  - conda activate bornagain_test
+  - conda create --force -y -n bornagain_env
+  - source activate bornagain_env
 #  - cd ..
-  - pip install -e .
+  - pip install .
 #  - cd test
 #  - pytest
 #  - cd ..
