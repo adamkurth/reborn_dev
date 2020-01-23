@@ -64,6 +64,18 @@ class ClCore(object):
 
     """
 
+    # buffer_mesh_lookup_cl = None
+    # divide_nonzero_inplace_real_cl = None
+    # gaussian_lattice_transform_intensities_pad_cl = None
+    # lattice_transform_intensities_pad_cl = None
+    # mesh_interpolation_cl = None
+    # mod_squared_complex_to_real_cl = None
+    # phase_factor_mesh_cl = None
+    # phase_factor_pad_cl = None
+    # phase_factor_qrf_cl = None
+    # rotate_translate_vectors_cl = None
+
+
     def __init__(self, context=None, queue=None, group_size=32, double_precision=False):
 
         r"""
@@ -1387,17 +1399,6 @@ class ClCoreDerek(ClCore):
         return Amps
 
 
-
-def helpme():
-
-    r"""
-
-    Same as helpme() function.
-
-    """
-
-    help()
-
 def help():
 
     r"""
@@ -1481,10 +1482,7 @@ def help():
                             formats))
                 del ctx
 
-    print('')
-    print('')
-    print('')
-    print('')
+    print('=====================================================================')
     print('Summary of platforms and devices (see details above):')
     print(75 * "=")
     i = 0

@@ -5,8 +5,7 @@ if [[ ! $(basename $(pwd))='developer' ]]; then
     exit
 fi
 
-echo 'Cleaning caches'
-. cleanup-caches.sh
-
 echo 'Cleaning compiled objects'
-. cleanup-compiled.sh
+find .. -name '*.so' -type f -exec rm {} \;
+find .. -name '*.dSYM' -type d -exec rm -r {} \;
+find .. -name '*.pyc' -type f -exec rm {} \;

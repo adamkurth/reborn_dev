@@ -5,8 +5,9 @@ if [[ ! $(basename $(pwd))='developer' ]]; then
     exit
 fi
 
-echo 'Cleaning caches'
-. cleanup-caches.sh
-
-echo 'Cleaning compiled objects'
-. cleanup-compiled.sh
+conda create --force -y -n bornagain_test
+conda activate bornagain_test
+cd ..
+pip install -e .
+cd test
+pytest

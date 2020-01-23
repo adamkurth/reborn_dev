@@ -789,7 +789,8 @@ class CrystalDensityMap(object):
             mode             (str)         : Either 'gaussian' or 'trilinear'
             fixed_atom_sigma (float)       : Standard deviation of the Gaussian atoms
 
-        Returns: An NxNxN numpy array containing the sum of densities that were provided as input.
+        Returns:
+            numpy array : The sum of densities that were provided as input.
         """
 
         if mode == 'gaussian':
@@ -814,7 +815,9 @@ class CrystalDensityMap(object):
             atom_x_vecs = np.ascontiguousarray(atom_x_vecs)
 
             # Trilinear insert the 
-            rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=x_min, x_max=x_max, N_bin=bins, mask=np.full(num_atoms, True, dtype=bool))
+            rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=x_min,
+                                                         x_max=x_max, N_bin=bins,
+                                                         mask=np.full(num_atoms, True, dtype=bool))
 
             # Avoid division by zero
             weightout[weightout == 0] = 1

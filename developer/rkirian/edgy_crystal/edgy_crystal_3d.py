@@ -84,13 +84,14 @@ if args.view_density:   # Show the unit cell density map
     # dens[0:10, 0:5, 0:5] = np.max(np.abs(dens))
     MapProjection(np.abs(dens))
 
-# import pyqtgraph as pg
-# dens = ifftn(ifftshift(mol_amps[0].get().reshape(cdmap.shape)))
-# pg.image(np.angle(dens))
-# pg.show()
-# pg.mkQApp().exec_()
-# # print(np.sum(np.abs(np.abs(dens)-np.real(dens)))/np.sum(np.abs(np.abs(dens))))
-# broke
+import pyqtgraph as pg
+dens = ifftn(ifftshift(mol_amps[0].get().reshape(cdmap.shape)))
+pg.image(np.angle(dens))
+pg.mkQApp().exec_()
+pg.plot(np.real(dens).ravel()[0:1000])
+pg.show()
+print(np.sum(np.abs(np.abs(dens)-np.real(dens)))/np.sum(np.abs(np.abs(dens))))
+broke
 
 lattice_amps = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t)
 intensity_sum = clcore.to_device(shape=cdmap.shape, dtype=clcore.real_t) * 0

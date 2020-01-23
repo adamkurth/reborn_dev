@@ -56,12 +56,15 @@ def addblock_svd_update(U, S, V, A, force_orth=False):
 
     *=====================================================================*
 
-    :param U: Left singular vectors of shape p x q
-    :param S: Diagonal matrix (shape q -- only the q diagonal elements specified)
-    :param V: Right singular vectors of shape q x n
-    :param A: The matrix to be appended to X = USV (shape p x n)
-    :param force_orth: Force orthogonality
-    :return:
+    Arguments:
+        U (numpy array) : Left singular vectors of shape p x q
+        S (numpy array) : Diagonal matrix (shape q -- only the q diagonal elements specified)
+        V (numpy array) : Right singular vectors of shape q x n
+        A (numpy array) : The matrix to be appended to X = USV (shape p x n)
+        force_orth : Force orthogonality
+
+    Returns:
+        numpy arrays : Up, Sp, Vp
     """
 
     current_rank = U.shape[1]

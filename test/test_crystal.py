@@ -94,11 +94,3 @@ def test_density_map_1():
 
     # Calculate the relative error and assert that it be less than some small value
     assert np.sqrt( np.sum((I_fft - I_dft)**2) / np.sum((I_fft)**2) ) < 1e-6
-
-
-
-
-
-
-
-

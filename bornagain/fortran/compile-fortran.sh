@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ ! $(basename $(pwd))='fortran' ]]; then
+    echo 'This script should run in the fortran directory.'
+    exit
+fi
+
 f2py="python -m numpy.f2py"
 flags="-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION"
 
