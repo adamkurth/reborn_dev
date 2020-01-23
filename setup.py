@@ -2,6 +2,8 @@ from __future__ import division, absolute_import, print_function
 
 from setuptools import find_packages
 from numpy.distutils.core import setup, Extension
+import datetime
+
 
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
@@ -44,7 +46,7 @@ ext_modules.append(Extension(
       ))
 
 setup(name='bornagain',
-      version='0.1',
+      version=datetime.date.today().strftime('%Y.%m.%d'),
       description='Diffraction analysis and simulation utilities',
       # long_description=readme,
       # long_description_content_type="text/markdown",

@@ -14,7 +14,8 @@
 
 import sys
 import os
-import shlex
+import datetime
+# import shlex
 
 
 #import sphinx_rtd_theme
@@ -71,7 +72,6 @@ author = u'Richard A Kirian'
 # built documents.
 #
 # The short X.Y version.
-import datetime
 version = datetime.date.today().strftime('%Y.%m.%d') # Yields string like '2019.6.30'
 # The full version, including alpha/beta/rc tags.
 release = version
