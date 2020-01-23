@@ -32,7 +32,7 @@ before_script:
 # The above should be possible in the following way:
   - mkdir $gitbasepath/junk
   - cd $gitbasepath/junk
-  - yes | python -m pip install --user -v $gitbasepath
+  - yes | python -m pip install --user -vvv $gitbasepath
   - cd $gitbasepath
   - echo 'before_script done'
 
