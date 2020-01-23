@@ -25,10 +25,14 @@ before_script:
 #  - cd ..
   - conda env create -f gitlab-ci-env.yml
   - source activate bornagain
+# The following should not be necessary:
   - cd $gitbasepath/developer
   - ./compile-fortran.sh
   - cd $gitbasepath
-#  - yes | python -m pip install --user . #$gitbasepath
+# The above should be possible in the following way:
+#  - mkdir junk
+#  - cd junk
+#  - yes | python -m pip install --user $gitbasepath
   - echo 'before_script done'
 
 #tests:
