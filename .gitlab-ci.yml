@@ -26,6 +26,7 @@ before_script:
   - conda env create -f gitlab-ci-env.yml
   - source activate bornagain
   - yes | python -m pip install -e . #$gitbasepath
+  - echo before_script done
 
 #tests:
 #  stage: test
@@ -41,11 +42,13 @@ before_script:
 tests:
   stage: test
   script:
+  - echo begin tests
   - cd $gitbasepath/test
   - pytest --ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py
 
 docs:
   script:
+  - echo docs begin
   - cd $gitbasepath/doc
   - ./update-documentation.sh
   - cd $gitbasepath
