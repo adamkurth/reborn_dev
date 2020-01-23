@@ -18,7 +18,8 @@ before_script:
   - conda create --force -y -n bornagain_env
   - source activate bornagain_env
 #  - cd ..
-  - pip install .
+  - yes | pip install numpy  # Needed for the setup.py script, which itself uses numpy... catch 22!
+  - yes | pip install .
 #  - cd test
 #  - pytest
 #  - cd ..
