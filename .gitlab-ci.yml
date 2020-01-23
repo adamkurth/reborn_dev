@@ -15,51 +15,47 @@ before_script:
   - export PATH=$gitbasepath/miniconda/bin:$PATH
   - conda update -n base -c defaults conda
 #  - cd $gitbasepath/developer
-  - conda create --force -y -n bornagain_env numpy
-  - source activate bornagain_env
+#  - conda create --force -y -n bornagain_env numpy pocl
+#  - source activate bornagain_env
 #  - cd ..
 #  - yes | pip install -v numpy  # Needed for the setup.py script, which itself uses numpy... catch 22!
-  - yes | pip install -e .
+#  - yes | pip install -e .
 #  - cd test
 #  - pytest
 #  - cd ..
-#  - conda env create -f gitlab-ci-env.yml
-#  - source activate bornagain
+  - conda env create -f gitlab-ci-env.yml
+  - source activate bornagain
 
-tests:
-  stage: test
-  script:
-  - cd test
-  - pytest
+#tests:
+#  stage: test
+#  script:
+#  - cd test
+#  - pytest
 #  - cd ..
 
 #  - cd $gitbasepath/developer
 #  - ./compile-fortran.sh
 #  - cd $basepath
 
-#tests:
-#  stage: test
-#  script:
-#  - cd $gitbasepath/test
-#  - pytest --ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py
+tests:
+  stage: test
+  script:
+  - cd $gitbasepath/test
+  - pytest --ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py
 
-#pages:
-#  script:
-#  - cd $gitbasepath/doc
-#  - pwd
-#  - ls
-#  - ./update-documentation.sh
-#  - cd $gitbasepath
-#  - pwd
-#  - ls
-#  - mkdir public
-#  - cp -r $gitbasepath/doc/html/* $basepath/public
-#  artifacts:
-#    paths:
-#    - public
-#  only:
-#  - master
-#
+docs:
+  script:
+  - cd $gitbasepath/doc
+  - ./update-documentation.sh
+  - cd $gitbasepath
+  - mkdir $gitbasepath/public
+  - cp -r $gitbasepath/doc/html/* $basepath/public
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
+
 #piptest:
 #  stage: test
 #  script:

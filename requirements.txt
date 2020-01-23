@@ -1,3 +1,9 @@
+future
 numpy
 scipy
+numba
+matplotlib
 h5py
+pyqtgraph
+pyopengl
+pyopencl
