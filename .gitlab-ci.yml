@@ -63,7 +63,7 @@ docs:
   - ./update-documentation.sh
   - cd $gitbasepath
   - mkdir $gitbasepath/public
-  - cp -r $gitbasepath/doc/html/* $basepath/public
+  - cp -r $gitbasepath/doc/html/* $gitbasepath/public
   artifacts:
     paths:
     - public
