@@ -25,8 +25,11 @@ before_script:
 #  - cd ..
   - conda env create -f gitlab-ci-env.yml
   - source activate bornagain
-  - yes | python -m pip install --user . #$gitbasepath
-  - echo before_script done
+  - cd $gitbasepath/developer
+  - ./compile-fortran.sh
+  - cd $gitbasepath
+#  - yes | python -m pip install --user . #$gitbasepath
+  - echo 'before_script done'
 
 #tests:
 #  stage: test
@@ -42,13 +45,13 @@ before_script:
 tests:
   stage: test
   script:
-  - echo begin tests
+  - echo 'begin tests'
   - cd $gitbasepath/test
   - pytest --ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py
 
 docs:
   script:
-  - echo docs begin
+  - echo 'begin docs'
   - cd $gitbasepath/doc
   - ./update-documentation.sh
   - cd $gitbasepath
