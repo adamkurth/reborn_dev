@@ -6,6 +6,7 @@ before_script:
   - uname -a
   - gitbasepath=$(pwd)
   - echo $gitbasepath
+  - unset cd
   - apt-get -qq -y update
   - apt-get -qq -y install apt-utils
   - apt-get -qq -y install wget
