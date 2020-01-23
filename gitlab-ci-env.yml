@@ -2,7 +2,7 @@ name: bornagain
 channels:
   - conda-forge
 dependencies:
-  - python=3.6   # or 2.7
+  - python=3.8
   - scipy
   - h5py
   - future
@@ -11,7 +11,7 @@ dependencies:
   - sphinx
   - pytest
   - matplotlib
-  - pyqt=5       # or 4
+  - pyqt=5
   - pocl
   - pyqtgraph
 #  - pyopengl

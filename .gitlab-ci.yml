@@ -1,12 +1,8 @@
-#image: continuumio/miniconda3:latest # This image doesn't seem to have make or gfortran
 image: ubuntu:latest # This image doesn't work with GPU stuff
 #image: nvidia:opencl # Can't seem to use this one... needs password?
 
 before_script:
-  - uname -a
   - gitbasepath=$(pwd)
-  - echo $gitbasepath
-  - unset cd
   - apt-get -qq -y update
   - apt-get -qq -y install apt-utils
   - apt-get -qq -y install wget
@@ -15,69 +11,23 @@ before_script:
   - bash $gitbasepath/miniconda.sh -b -p $gitbasepath/miniconda
   - export PATH=$gitbasepath/miniconda/bin:$PATH
   - conda update -n base -c defaults conda
-#  - cd $gitbasepath/developer
-#  - conda create --force -y -n bornagain_env numpy pocl
-#  - source activate bornagain_env
-#  - cd ..
-#  - yes | pip install -v numpy  # Needed for the setup.py script, which itself uses numpy... catch 22!
-#  - yes | pip install -e .
-#  - cd test
-#  - pytest
-#  - cd ..
   - conda env create -f gitlab-ci-env.yml
-  - source activate bornagain
-# The following should not be necessary:
-#  - cd $gitbasepath/developer
-#  - ./compile-fortran.sh
-#  - cd $gitbasepath
-# The above should be possible in the following way:
-#  - mkdir $gitbasepath/junk
-#  - cd $gitbasepath/junk
-#  - yes | python -m pip install --user -vvv $gitbasepath
-#  - cd $gitbasepath
+  - conda activate bornagain
   - python setup.py develop
-  - echo 'before_script done'
-
-#tests:
-#  stage: test
-#  script:
-#  - cd test
-#  - pytest
-#  - cd ..
-
-#  - cd $gitbasepath/developer
-#  - ./compile-fortran.sh
-#  - cd $basepath
 
 tests:
   stage: test
   script:
-  - echo 'begin tests'
   - cd $gitbasepath/test
   - pytest --ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py
 
 docs:
   script:
-  - echo 'begin docs'
   - cd $gitbasepath/doc
   - ./update-documentation.sh
-  - cd $gitbasepath
-  - mkdir $gitbasepath/public
-  - cp -r $gitbasepath/doc/html/* $gitbasepath/public
+  - cp -r $gitbasepath/doc/html $gitbasepath/public
   artifacts:
     paths:
     - public
   only:
   - master
-
-#piptest:
-#  stage: test
-#  script:
-#  - cd $gitbasepath/developer
-#  - ./pip-install-and-test.sh
-
-#condatest:
-#  stage: test
-#  script:
-#  - cd $gitbasepath/developer
-#  - ./conda-install-and-test.sh
