@@ -44,7 +44,7 @@ pages:
   - master
 
 piptest:
-  stage: piptest
+  stage: test
   script:
   - cd $basepath/develop
   - ./pip-install-and-test.sh
