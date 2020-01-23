@@ -6,7 +6,7 @@ from numpy.distutils.core import setup, Extension
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
 
-requirements = ["future", "numpy", "scipy", "numba", "matplotlib", "h5py", "pyqtgraph", "pyopengl", "pyopencl"]
+requirements = [] #["future", "numpy", "scipy", "numba", "matplotlib", "h5py", "pyqtgraph", "pyopengl", "pyopencl"]
 
 ext_modules = list()
 

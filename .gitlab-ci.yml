@@ -25,6 +25,7 @@ before_script:
 #  - cd ..
   - conda env create -f gitlab-ci-env.yml
   - source activate bornagain
+  - yes | pip install $gitbasepath
 
 #tests:
 #  stage: test
