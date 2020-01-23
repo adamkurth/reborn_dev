@@ -11,7 +11,7 @@ before_script:
   - bash $gitbasepath/miniconda.sh -b -p $gitbasepath/miniconda
   - $gitbasepath/miniconda/bin/conda init bash
   - source ~/.bashrc
-#  - export PATH=$gitbasepath/miniconda/bin:$PATH
+  - export PATH=$gitbasepath/miniconda/bin:$PATH
   - conda update -n base -c defaults conda
   - conda env create -f gitlab-ci-env.yml
   - source activate bornagain
