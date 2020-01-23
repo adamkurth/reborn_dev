@@ -31,10 +31,11 @@ before_script:
 #  - ./compile-fortran.sh
 #  - cd $gitbasepath
 # The above should be possible in the following way:
-  - mkdir $gitbasepath/junk
-  - cd $gitbasepath/junk
-  - yes | python -m pip install --user -vvv $gitbasepath
-  - cd $gitbasepath
+#  - mkdir $gitbasepath/junk
+#  - cd $gitbasepath/junk
+#  - yes | python -m pip install --user -vvv $gitbasepath
+#  - cd $gitbasepath
+  - python setup.py develop
   - echo 'before_script done'
 
 #tests:
