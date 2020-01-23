@@ -19,7 +19,7 @@ before_script:
   - source activate bornagain_env
 #  - cd ..
 #  - yes | pip install -v numpy  # Needed for the setup.py script, which itself uses numpy... catch 22!
-  - yes | pip install --no-cache-dir -v .
+  - yes | pip install -e .
 #  - cd test
 #  - pytest
 #  - cd ..
