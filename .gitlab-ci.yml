@@ -22,7 +22,7 @@ tests:
   stage: test
   script:
   - cd $gitbasepath/test
-  - pytest --ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py
+  - pytest #--ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py
 
 docs:
   script:
