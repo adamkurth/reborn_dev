@@ -95,7 +95,7 @@ def test_density_map():
     cdmap = crystal.CrystalDensityMap(cryst, res, osr)
 
     # The ClCore instance manages the GPU simulations.
-    simcore = clcore.ClCore()
+    simcore = ClCore()
 
     # Create two atom position vectors, both at the origin.
     x_vecs = np.zeros([2, 3])
