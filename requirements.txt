@@ -1,9 +1,9 @@
 future
 numpy
 scipy
+h5py
 numba
 matplotlib
-h5py
 pyqtgraph
-pyopengl
 pyopencl
+pocl

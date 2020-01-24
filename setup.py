@@ -8,7 +8,7 @@ import datetime
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
 
-requirements = [] #["future", "numpy", "scipy", "numba", "matplotlib", "h5py", "pyqtgraph", "pyopengl", "pyopencl"]
+requirements = ["future", "numpy", "scipy", "h5py", "numba", "matplotlib", "pyqtgraph", "pyopencl"]
 
 ext_modules = list()
 

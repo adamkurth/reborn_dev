@@ -92,7 +92,15 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # THIS DOES NOTHING SO FAR AS I CAN SEE...
-exclude_patterns = ['*placer*']
+exclude_patterns = ['*placer*', '*_f']
+autodoc_default_options = {
+    # 'members': 'var1, var2',
+    'member-order': 'bysource',
+    'special-members': '__init__',
+    'undoc-members': True,
+    'exclude-members': '*cpython*'
+}
+
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.

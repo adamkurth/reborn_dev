@@ -11,6 +11,7 @@ from scipy import constants as const
 
 hc = const.h*const.c
 
+
 def test_mappings():
 
     # There are many ways to simulate crystal patterns.  Here we chack that we get the same results for the molecular
@@ -128,7 +129,7 @@ def test_density_map():
     # METHOD 2:
     #################################################
     # First make the scattering density map, and then FFT the map to create amplitudes.
-    dmap2 = np.zeros(cdmap.shape)
+    dmap2 = np.zeros(cdmap.shape, dtype=np.complex)
     # Instead of defining a list of atomic coordinates, we directly set the scattering densities to the scattering factors
     # used in METHOD 1.  Note that we've chosen atomic coordinates so that they will lie exactly on grid points in our 3D
     # maps.

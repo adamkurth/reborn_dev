@@ -75,7 +75,7 @@ def get_pdb_file(pdb_id, save_path=".", silent=False):
             pdb_web_path = 'https://files.rcsb.org/download/' + pdb_id
             print('Downloading %s to %s' % (pdb_web_path, pdb_path))
             urllib.request.urlretrieve(pdb_web_path, pdb_path)
-        except urllib.error.HTTPError:
+        except:
             return None
         return pdb_path
 

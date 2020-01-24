@@ -29,3 +29,8 @@ docs:
     - public
   only:
   - master
+#
+#piptest:
+#  stage: test
+#  script:
+#  - cd $gitbasepath/developer
