@@ -58,7 +58,7 @@ clcore = ClCore()
 # Calculate 3D molecular transform amplitudes once.
 mol_amps = []
 f = clcore.to_device(cryst.molecule.get_scattering_factors(photon_energy=args.photon_energy_ev*eV),
-                     dtype=clcore.complex_t)*0 + 1
+                     dtype=clcore.complex_t)
 for k in range(cryst.spacegroup.n_operations):
     x = cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates)
     amp = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t) * 0
@@ -122,11 +122,11 @@ if np.array(w).squeeze().size > 0:
 if args.save_results:
     filename = 'run%04d_intensity.npz' % (args.run_number,)
     print('saving %s' % (filename,))
-    np.savez(filename, map=intensity, type='intensity', shape=cdmap.shape, representation='x',
+    np.savez(filename, map=intensity, type='intensity', shape=cdmap.shape, representation='h',
              map_min=np.squeeze(cdmap.h_limits[:, 0]), map_max=np.squeeze(cdmap.h_limits[:, 1]))
     filename = 'run%04d_au_amplitude.npz' % (args.run_number,)
     np.savez(filename, map=mol_amps[0].get().reshape(cdmap.shape), type='amplitude', shape=cdmap.shape,
-             representation='x', map_min=np.squeeze(cdmap.h_limits[:, 0]), map_max=np.squeeze(cdmap.h_limits[:, 1]))
+             representation='h', map_min=np.squeeze(cdmap.h_limits[:, 0]), map_max=np.squeeze(cdmap.h_limits[:, 1]))
 
 if args.view_intensities:
     dispim = intensity.copy()

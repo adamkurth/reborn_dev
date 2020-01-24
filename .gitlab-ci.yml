@@ -3,26 +3,19 @@ image: ubuntu:latest # This image doesn't work with GPU stuff
 
 before_script:
   - gitbasepath=$(pwd)
-  - apt-get -qq -y update
   - apt-get -qq -y install apt-utils wget gfortran
-#  - apt-get -qq -y install wget
-#  - apt-get -qq -y install gfortran
   - wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $gitbasepath/miniconda.sh
   - bash $gitbasepath/miniconda.sh -b -p $gitbasepath/miniconda
-#  - $gitbasepath/miniconda/bin/conda init bash
-#  - source ~/.bashrc
   - export PATH=$gitbasepath/miniconda/bin:$PATH
-  - conda update -n base -c defaults conda
   - conda env create -f gitlab-ci-env.yml
   - source activate bornagain
-  - cd $gitbasepath
   - python setup.py develop
 
 tests:
   stage: test
   script:
   - cd $gitbasepath/test
-  - pytest #--ignore=test_simulations.py --ignore=test_clcore.py --ignore=test_clcore_interpolations.py --ignore=test_simulate_clcore.py --ignore=test_simulate_cromer_mann.py
+  - pytest
 
 docs:
   script:
