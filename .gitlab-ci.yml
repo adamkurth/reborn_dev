@@ -1,5 +1,4 @@
-image: ubuntu:latest # This image doesn't work with GPU stuff
-#image: nvidia:opencl # Can't seem to use this one... needs password?
+image: ubuntu:latest
 
 before_script:
   - gitbasepath=$(pwd)
@@ -29,8 +28,3 @@ docs:
     - public
   only:
   - master
-#
-#piptest:
-#  stage: test
-#  script:
-#  - cd $gitbasepath/developer

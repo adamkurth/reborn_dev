@@ -57,16 +57,19 @@ clcore = ClCore()
 
 # Calculate 3D molecular transform amplitudes once.
 mol_amps = []
-f = clcore.to_device(cryst.molecule.get_scattering_factors(photon_energy=args.photon_energy_ev*eV),
-                     dtype=clcore.complex_t)
+f = np.abs(cryst.molecule.get_scattering_factors(photon_energy=args.photon_energy_ev*eV))
+f_gpu = clcore.to_device(f, dtype=clcore.complex_t)
+
+au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='trilinear')
+mol_maps = []
+
 for k in range(cryst.spacegroup.n_operations):
     x = cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates)
     amp = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t) * 0
-    clcore.phase_factor_mesh(x, f, N=cdmap.shape, q_min=cdmap.h_limits[:, 0]*2*np.pi,
+    clcore.phase_factor_mesh(x, f_gpu, N=cdmap.shape, q_min=cdmap.h_limits[:, 0]*2*np.pi,
                              q_max=cdmap.h_limits[:, 1]*2*np.pi, a=amp, add=True)
     mol_amps.append(amp)
-
-del f
+    mol_maps.append(cdmap.symmetry_transform(0, k, au_map))
 
 if args.view_crystal:   # 3D view of crystal
     width = args.crystal_width[0] + np.random.rand(3)*args.crystal_width[1]
@@ -75,23 +78,27 @@ if args.view_crystal:   # 3D view of crystal
     view_finite_crystal(fc)
 
 if args.view_density:   # Show the unit cell density map
+
     cell_amps = 0
     for k in range(cryst.spacegroup.n_operations):
         cell_amps += mol_amps[k]
     dens = ifftn(ifftshift(cell_amps.get().reshape(cdmap.shape)))
-    # dens[0:5, 0:5, 0:30] = np.max(np.abs(dens))
-    # dens[0:5, 0:20, 0:5] = np.max(np.abs(dens))
-    # dens[0:10, 0:5, 0:5] = np.max(np.abs(dens))
     MapProjection(np.abs(dens))
 
-import pyqtgraph as pg
-dens = ifftn(ifftshift(mol_amps[0].get().reshape(cdmap.shape)))
-pg.image(np.angle(dens))
-pg.mkQApp().exec_()
-pg.plot(np.real(dens).ravel()[0:1000])
-pg.show()
-print(np.sum(np.abs(np.abs(dens)-np.real(dens)))/np.sum(np.abs(np.abs(dens))))
-broke
+    dens = 0
+    for k in range(cryst.spacegroup.n_operations):
+        dens += mol_maps[k]
+    MapProjection(np.abs(dens))
+
+
+# import pyqtgraph as pg
+# dens = ifftn(ifftshift(mol_amps[0].get().reshape(cdmap.shape)))
+# pg.image(np.angle(dens))
+# pg.mkQApp().exec_()
+# pg.plot(np.real(dens).ravel()[0:1000])
+# pg.show()
+# print(np.sum(np.abs(np.abs(dens)-np.real(dens)))/np.sum(np.abs(np.abs(dens))))
+# broke
 
 lattice_amps = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t)
 intensity_sum = clcore.to_device(shape=cdmap.shape, dtype=clcore.real_t) * 0
@@ -125,6 +132,7 @@ if args.save_results:
     np.savez(filename, map=intensity, type='intensity', shape=cdmap.shape, representation='h',
              map_min=np.squeeze(cdmap.h_limits[:, 0]), map_max=np.squeeze(cdmap.h_limits[:, 1]))
     filename = 'run%04d_au_amplitude.npz' % (args.run_number,)
+    print('saving %s' % (filename,))
     np.savez(filename, map=mol_amps[0].get().reshape(cdmap.shape), type='amplitude', shape=cdmap.shape,
              representation='h', map_min=np.squeeze(cdmap.h_limits[:, 0]), map_max=np.squeeze(cdmap.h_limits[:, 1]))
 
