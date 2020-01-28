@@ -21,7 +21,7 @@ docs:
   script:
   - cd doc
   - ./update-documentation.sh
-  - cp -r html public
+  - cp -r html ../public
   artifacts:
     paths:
     - public
