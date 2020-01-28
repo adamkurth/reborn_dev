@@ -14,10 +14,10 @@ your analysis project is to add it as a `submodule <https://git-scm.com/book/en/
 project's git repository (this can be a bit complicated, but probably worth the effort for large projects).
 
 The main setup task is to simply ensure that Python can load the bornagain package, which means that it must be
-found in a path where python searches for packages.  Here are three different suggestions that you might use to get your
+found in a path where python searches for packages.  Here are three different options that you might use to get your
 path set up:
 
-1) The best way is to set the appropriate environment variable so that Python looks in the right place for bornagain.
+Option (1): The best way is to set the appropriate environment variable so that Python looks in the right place for bornagain.
 If you are using the bash shell, you can do the following:
 
 .. code-block:: bash
@@ -26,7 +26,7 @@ If you are using the bash shell, you can do the following:
 
 You must remember to set your path every time you use bornagain.
 
-2) You can specify the location of bornagain directly in your python scripts.  For example:
+Option (2): You can specify the location of bornagain directly in your python scripts.  For example:
 
 .. code-block:: python
 
@@ -36,7 +36,7 @@ You must remember to set your path every time you use bornagain.
 This option is ok, but then you must remember to always run your script from the appropriate directory if the above
 path is a relative path.
 
-3) You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
+Option (3) You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
 example:
 
 .. code-block:: bash
@@ -54,12 +54,12 @@ If you do any of the above correctly, you might be able to import bornagain in t
     import bornagain
 
 The above might fail if you are missing dependencies, which are described below.  Another possible mode of failure is
-that you have not compiled the fortran code that bornagain uses, which is discussed in the next section.
+that you have not compiled the Fortran code that bornagain uses, which is discussed in the next section.
 
 Compilation of Fortran code
 ---------------------------
 
-There are a couple of bornagain modules that use compiled Fortran code.  We use the f2py program to compile Fortran code
+There are a couple of bornagain modules that use compiled Fortran code.  We use the f2py program that comes with Numpy to compile Fortran code
 and create Python modules.  Although it *shouldn't* be strictly necessary to compile these to use some of the basic
 bornagain classes, you should go ahead and compile them since the f2py program that is included with numpy makes this
 process quite simple.  Try the following:
