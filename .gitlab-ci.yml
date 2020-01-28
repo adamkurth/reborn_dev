@@ -5,11 +5,10 @@ before_script:
   - apt-get -qq -y update
   - apt-get -qq -y install apt-utils wget curl gfortran
   - curl https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh --output $gitbasepath/miniconda.sh
-#  - wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $gitbasepath/miniconda.sh
   - bash $gitbasepath/miniconda.sh -b -p $gitbasepath/miniconda
   - export PATH=$gitbasepath/miniconda/bin:$PATH
   - conda update -n base -c defaults conda
-  - conda env create -f gitlab-ci-env.yml
+  - conda env create -f bornagain-env.yml # gitlab-ci-env.yml
   - source activate bornagain
   - python setup.py develop
 
