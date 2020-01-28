@@ -1,17 +1,39 @@
 Setup
 =====
 
-The following should work on Linux or MacOS.  We have not thoroughly tested bornagain on MS Windows.
+The following suggestions should work on Linux or MacOS.  We have not thoroughly tested bornagain on MS Windows.
 
-Setting up your path
---------------------
+While it is possible to install bornagain using the provided setup.py script, this is not recommended because
+bornagain is under development and its API is not considered to be stable.  It is instead recommended that you keep a
+clone of the bornagain git
+repository where you are doing your analysis or simulations so that you can reproduce your results in the future.
+One way to track the *exact* version of bornagain that is
+used in your analysis project is to add it as a `submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to
+your project's git repository (this can be a bit complicated, but probably worth the effort for large projects).
 
-There are no install scripts (e.g. setup.py) that will automatically add bornagain to your python installation.
-Since bornagain is changing frequently at this time, it is recommended that you keep a local copy of bornagain
-where you are doing your analysis or simulations so that you can reproduce your results in the future.  Archiving
-code alongside results is good practice anyways.  One way to track the *exact* version of bornagain that is used in
-your analysis project is to add it as a `submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your
-project's git repository (this can be a bit complicated, but probably worth the effort for large projects).
+Quick start from a clean Linux install
+--------------------------------------
+
+Below are the standard steps that are tested on a clean Ubuntu Linux install every time the bornagain master branch is
+updated.  The script should be executed from the base directory of the git repository.
+
+.. code-block:: bash
+
+    apt-get -qq -y update
+    apt-get -qq -y install apt-utils wget curl gfortran libgl1-mesa-glx
+    curl https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh --output miniconda.sh
+    bash miniconda.sh -b -p miniconda
+    export PATH=./miniconda/bin:$PATH
+    conda update -n base -c defaults conda
+    conda env create -f bornagain-env.yml
+    source activate bornagain
+    python setup.py develop
+    cd test
+    pytest
+
+
+Notes on setting up your path
+-----------------------------
 
 The main setup task is to simply ensure that Python can load the bornagain package, which means that it must be
 found in a path where python searches for packages.  Here are three different options that you might use to get your
