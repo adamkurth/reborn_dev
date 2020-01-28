@@ -38,9 +38,9 @@ The reciprocal lattice vectors are defined as
 
 .. math::
 
-    \mathbf{a}_1^* &= \mathbf{a}_2\times \mathbf{a}_3 / V_c \\
-    \mathbf{a}_2^* &= \mathbf{a}_3\times \mathbf{a}_1  / V_c \\
-    \mathbf{a}_3^* &= \mathbf{a}_1\times \mathbf{a}_2  / V_c
+    \mathbf{a}_1^* &= (\mathbf{a}_2\times \mathbf{a}_3) / V_c \\
+    \mathbf{a}_2^* &= (\mathbf{a}_3\times \mathbf{a}_1)  / V_c \\
+    \mathbf{a}_3^* &= (\mathbf{a}_1\times \mathbf{a}_2)  / V_c
 
 where :math:`V_c = \mathbf{a}_1\cdot(\mathbf{a}_2\times\mathbf{a}_3)` is the volume of the unit cell.
 
@@ -56,7 +56,7 @@ We define the Fourier transform in orthogonal coordinates as
 
 The inverse Fourier transform is
 
-.. math:: f(\mathbf{r}) = \int F(\mathbf{g}) \exp(i 2 \pi \mathbf{g}^T \mathbf{r}) d^3q
+.. math:: f(\mathbf{r}) = \int F(\mathbf{g}) \exp(i 2 \pi \mathbf{g}^T \mathbf{r}) d^3g
 
 In noting the relation :math:`\mathbf{g}^T \mathbf{r} = \mathbf{h}^T \mathbf{x}` we may also define the Fourier
 transform in the fractional coordinate basis:
@@ -88,7 +88,7 @@ various "records".  Some of the important ones are:
    in a unit cell).
 3) `SCALE <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#SCALEn>`_, which contains
    *"transformation from the orthogonal coordinates as contained in the PDB entry to fractional crystallographic
-   coordinates"*.  Not that this comprises both a rotation and a translation -- what is the purpose of the translation?
+   coordinates"*.  Note that this comprises both a rotation and a translation -- what is the purpose of the translation?
 4) `MTRIX <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#MTRIXn>`_, which contains
    *"transformations expressing non-crystallographic symmetry... [that] operate on the coordinates in the entry to yield
    equivalent representations of the molecule in the same coordinate frame"*.  I remain puzzled by this comment: *"If
@@ -208,7 +208,7 @@ Putting it all together
 
 As an example, the following script will use a PDB file to produce the
 coordinates :math:`\mathbf{x}_\text{au}` and transformations :math:`\mathbf{W}_n`, :math:`\mathbf{Z}_n`, and then use
-them to generate the second crystallographic symmetry partner :math:`\mathbf{x}_2`:
+them to generate the coordinates for the second crystallographic symmetry partner :math:`\mathbf{x}_2`:
 
 .. code-block:: python
 

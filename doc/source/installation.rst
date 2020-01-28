@@ -36,7 +36,7 @@ Option (2): You can specify the location of bornagain directly in your python sc
 This option is ok, but then you must remember to always run your script from the appropriate directory if the above
 path is a relative path.
 
-Option (3) You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
+Option (3): You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
 example:
 
 .. code-block:: bash
