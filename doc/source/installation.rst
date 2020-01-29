@@ -3,19 +3,36 @@ Setup
 
 The following suggestions should work on Linux or MacOS.  We have not thoroughly tested bornagain on MS Windows.
 
-While it is possible to install bornagain using the provided setup.py script, this is not recommended because
-bornagain is under development and its API is not considered to be stable.  It is instead recommended that you keep a
-clone of the bornagain git
-repository where you are doing your analysis or simulations so that you can reproduce your results in the future.
-One way to track the *exact* version of bornagain that is
-used in your analysis project is to add it as a `submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to
-your project's git repository (this can be a bit complicated, but probably worth the effort for large projects).
+In principle, "setting up" bornagain should be as simple as including the base directory of the bornagain git repo in
+your python path.  You'll probably find that you need to install some dependencies, but all of them are known to install
+easily with pip or conda.  There are some pieces of Fortran code in bornagain that need to be compiled, but they
+*should* auto-compile on first import.
 
-Quick start from a clean Linux install
---------------------------------------
+While it is possible to "install" bornagain using the provided setup.py script, this is not recommended because
+bornagain is under development and its API is not considered to be stable.  It is instead recommended that you keep a
+clone of the bornagain git repository where you are doing your analysis or simulations so that you can reproduce your
+results in the future. One way to track the *exact* version of bornagain used in your project is to add it as a
+`git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git repository (however,
+this is probably a nuisance if you are new to programming and git).
+
+Dependencies
+------------
+
+As of 2020, bornagain is only tested with Python 3, because Python 2 is
+`finally dead <https://www.python.org/doc/sunset-python-2/>`_ .  The `bornagain-env.yml` file lists all of the packages
+that are installed upon regular testing of bornagain, which might be understood as the complete list of dependencies.
+Here are the current contents of that file:
+
+.. literalinclude:: ../../bornagain-env.yml
+
+You can import many bornagain modules without installing *all* of these dependencies, but there is little reason to
+install only a subset of them if you use a good package manager.
+
+Complete setup from a clean Linux install
+-----------------------------------------
 
 Below are the standard steps that are tested on a clean Ubuntu Linux install every time the bornagain master branch is
-updated.  The script should be executed from the base directory of the git repository.
+updated.  The script is executed from the base directory of the git repository.
 
 .. code-block:: bash
 
@@ -31,7 +48,6 @@ updated.  The script should be executed from the base directory of the git repos
     cd test
     pytest
 
-
 Notes on setting up your path
 -----------------------------
 
@@ -39,8 +55,8 @@ The main setup task is to simply ensure that Python can load the bornagain packa
 found in a path where python searches for packages.  Here are three different options that you might use to get your
 path set up:
 
-Option (1): The best way is to set the appropriate environment variable so that Python looks in the right place for bornagain.
-If you are using the bash shell, you can do the following:
+**Option (1)**: The best way is to set the appropriate environment variable so that Python looks in the right place for
+bornagain.  If you are using the bash shell, you can do the following:
 
 .. code-block:: bash
 
@@ -48,7 +64,7 @@ If you are using the bash shell, you can do the following:
 
 You must remember to set your path every time you use bornagain.
 
-Option (2): You can specify the location of bornagain directly in your python scripts.  For example:
+**Option (2)**: You can specify the location of bornagain directly in your python scripts.  For example:
 
 .. code-block:: python
 
@@ -58,7 +74,7 @@ Option (2): You can specify the location of bornagain directly in your python sc
 This option is ok, but then you must remember to always run your script from the appropriate directory if the above
 path is a relative path.
 
-Option (3): You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
+**Option (3)**: You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
 example:
 
 .. code-block:: bash
@@ -69,52 +85,23 @@ Note that "bornagain/repository/bornagain" is not a typo in the above -- in the 
 to the actual bornagain package, which lies *within* the git repository that is also named bornagain.  If you use this
 method, you will need to run your scripts from the specific directory where the symbolic link is created.
 
-If you do any of the above correctly, you might be able to import bornagain in the usual way:
-
-.. code-block:: python
-
-    import bornagain
-
-The above might fail if you are missing dependencies, which are described below.  Another possible mode of failure is
-that you have not compiled the Fortran code that bornagain uses, which is discussed in the next section.
-
 Compilation of Fortran code
 ---------------------------
 
-There are a couple of bornagain modules that use compiled Fortran code.  We use the f2py program that comes with Numpy to compile Fortran code
-and create Python modules.  Although it *shouldn't* be strictly necessary to compile these to use some of the basic
-bornagain classes, you should go ahead and compile them since the f2py program that is included with numpy makes this
-process quite simple.  Try the following:
+We use the f2py program that comes with Numpy to compile Fortran code.  Although this code should auto-compile on first
+import, you may wish to compile manually.  This can be done using the `setup.py` script as follows:
+
+.. code-block:: bash
+    python setup.py develop
+
+Alternataively, there is a bash script in the developer directory:
 
 .. code-block:: bash
 
     cd developer
     ./compile-fortran.sh
 
-You will likely see some warnings due to Numpy (these are out of our control), but so long as there are no errors you
-should be all set.
-
-Dependencies
-------------
-
-We *try* to make bornagain compatible with both Python 2 and 3.  For graphical interfaces, we also try to keep
-compatibility with both pyqt4 and pyqt5.  Below are the minimal dependencies that you should need for various features.
-Note that each of them have additional dependencies; you must also satisfy those dependencies.
-
-+--------------------------------------------------------------------+-------------------------------------------------+
-|The **basic classes** in bornagain require:                         |scipy, h5py, future                              |
-+--------------------------------------------------------------------+-------------------------------------------------+
-|Some functions will run **faster** if you install:                  |numba                                            |
-+--------------------------------------------------------------------+-------------------------------------------------+
-|**GPU simulations** require:                                        |pyopencl(, sometimes pocl)                       |
-+--------------------------------------------------------------------+-------------------------------------------------+
-|If you are **developing** bornagain you will need:                  |pytest, sphinx, sphinx_rtd_theme                 |
-+--------------------------------------------------------------------+-------------------------------------------------+
-|Some **visualization tools** depend on:                             |matplotlib, pyqtgraph, pyopengl                  |
-+--------------------------------------------------------------------+-------------------------------------------------+
-|A couple of **specialized modules** depend on:                      |psana, cfelpyutils                               |
-+--------------------------------------------------------------------+-------------------------------------------------+
-
+You will likely see some warnings due to Numpy -- they are probably harmless (and not our fault).
 
 Example setup with Miniconda
 ----------------------------
@@ -183,7 +170,7 @@ You can simply move into the test directory and run pytest:
     cd test
     pytest
 
-With some luck, you will get a nice clean output from pytest:
+With some luck, you will get a nice clean output from pytest that looks like the following:
 
 .. code-block:: bash
 
