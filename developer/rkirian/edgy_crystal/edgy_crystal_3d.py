@@ -8,6 +8,11 @@ from bornagain.viewers.qtviews import Scatter3D, bright_colors, PADView, MapProj
 import scipy.constants as const
 import argparse
 
+import pyqtgraph as pg
+
+pg.setConfigOption('background', 'w')
+pg.setConfigOption('foreground', 'k')
+
 eV = const.value('electron volt')
 
 parser = argparse.ArgumentParser('Simulate finite hexagonal prism crystals and merge intensities into a 3D map.')
@@ -17,6 +22,8 @@ parser.add_argument('--resolution', type=float, default=10e-10, required=False,
                     help='Minimum resolution of the density map in meters')
 parser.add_argument('--oversampling', type=int, default=4, required=False,
                     help='Oversampling factor (1 corresponds to ordinary "Bragg sampling")')
+parser.add_argument('--direct_molecular_transform', action='store_true', required=False,
+                    help='Calculate molecular transforms by direct summation of atomic scattering factors')
 parser.add_argument('--n_crystals', type=int, default=10, required=False,
                     help='How many crystals to simulate (and merge)')
 parser.add_argument('--crystal_length', type=str, default='6,10', required=False,
@@ -42,7 +49,7 @@ args.crystal_length = [float(a) for a in args.crystal_length.split(',')]
 args.crystal_width = [float(a) for a in args.crystal_width.split(',')]
 args.gaussian_disorder_sigmas = [float(a) for a in args.gaussian_disorder_sigmas.split(',')]
 
-# This has molecule, unit cell, and spacegroup
+# This has molecule, unit cell, and spacegroup info
 cryst = crystal.CrystalStructure(args.pdb_file, tight_packing=True)  # Tight packing: put molecule COMs inside unit cell
 
 # This uses a crystal structure to make finite lattices with spacegroup considerations
@@ -55,21 +62,28 @@ cdmap = crystal.CrystalDensityMap(cryst=cryst, resolution=args.resolution, overs
 # GPU simulation engine
 clcore = ClCore()
 
-# Calculate 3D molecular transform amplitudes once.
-mol_amps = []
-f = np.abs(cryst.molecule.get_scattering_factors(photon_energy=args.photon_energy_ev*eV))
-f_gpu = clcore.to_device(f, dtype=clcore.complex_t)
+# Scattering factors (absolute value because interpolations don't work with complex numbers)
+f = np.abs(cryst.molecule.get_scattering_factors(photon_energy=args.photon_energy_ev*eV)).astype(np.double)
 
-au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='trilinear')
-mol_maps = []
-
-for k in range(cryst.spacegroup.n_operations):
-    x = cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates)
-    amp = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t) * 0
-    clcore.phase_factor_mesh(x, f_gpu, N=cdmap.shape, q_min=cdmap.h_limits[:, 0]*2*np.pi,
-                             q_max=cdmap.h_limits[:, 1]*2*np.pi, a=amp, add=True)
-    mol_amps.append(amp)
-    mol_maps.append(cdmap.symmetry_transform(0, k, au_map))
+if args.direct_molecular_transform:
+    # Calculate 3D molecular transform amplitudes on GPU via explicit atomic coordinates: sum over f * exp(i q.r)
+    # The issue with this is that we get ringing artifacts when we take FFTs, but this is more like real data.
+    mol_amps = []
+    f_gpu = clcore.to_device(f, dtype=clcore.complex_t)
+    for k in range(cryst.spacegroup.n_operations):
+        x = cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates)
+        amp = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t) * 0
+        clcore.phase_factor_mesh(x, f_gpu, N=cdmap.shape, q_min=cdmap.h_limits[:, 0]*2*np.pi,
+                                 q_max=cdmap.h_limits[:, 1]*2*np.pi, a=amp, add=True)
+        mol_amps.append(amp)
+else:
+    # Build the electron densities directly and make amplitudes via FFT.  This avoids ringing artifacts that we get
+    # from the direct summation method.
+    mol_amps = []
+    au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates % cdmap.oversampling, f, mode='trilinear')
+    for k in range(cryst.spacegroup.n_operations):
+        rho = cdmap.au_to_k(k, au_map)
+        mol_amps.append(clcore.to_device(fftshift(fftn(rho)), dtype=clcore.complex_t))
 
 if args.view_crystal:   # 3D view of crystal
     width = args.crystal_width[0] + np.random.rand(3)*args.crystal_width[1]
@@ -79,26 +93,14 @@ if args.view_crystal:   # 3D view of crystal
 
 if args.view_density:   # Show the unit cell density map
 
+    dens = ifftn(ifftshift(mol_amps[0].get().reshape(cdmap.shape)))
+    MapProjection(np.abs(dens), title='Asymmetric Unit')
+
     cell_amps = 0
     for k in range(cryst.spacegroup.n_operations):
         cell_amps += mol_amps[k]
     dens = ifftn(ifftshift(cell_amps.get().reshape(cdmap.shape)))
-    MapProjection(np.abs(dens))
-
-    dens = 0
-    for k in range(cryst.spacegroup.n_operations):
-        dens += mol_maps[k]
-    MapProjection(np.abs(dens))
-
-
-# import pyqtgraph as pg
-# dens = ifftn(ifftshift(mol_amps[0].get().reshape(cdmap.shape)))
-# pg.image(np.angle(dens))
-# pg.mkQApp().exec_()
-# pg.plot(np.real(dens).ravel()[0:1000])
-# pg.show()
-# print(np.sum(np.abs(np.abs(dens)-np.real(dens)))/np.sum(np.abs(np.abs(dens))))
-# broke
+    MapProjection(np.abs(dens), title='Unit Cell')
 
 lattice_amps = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t)
 intensity_sum = clcore.to_device(shape=cdmap.shape, dtype=clcore.real_t) * 0
@@ -107,8 +109,8 @@ for c in range(args.n_crystals):
     sys.stdout.write('Simulating crystal %d... ' % (c,))
     t = time()
     # Construct a finite lattice in the form of a hexagonal prism
-    width = args.crystal_width[0] + np.random.rand(3)*args.crystal_width[1]
-    length = args.crystal_length[0] + np.random.rand(1)*args.crystal_length[1]
+    width = args.crystal_width[0] + np.random.rand(3)*(args.crystal_width[1]-args.crystal_width[0])
+    length = args.crystal_length[0] + np.random.rand(1)*(args.crystal_length[1]-args.crystal_length[0])
     fc.make_hexagonal_prism(width=width, length=length)
     crystal_amps = 0
     for k in range(cryst.spacegroup.n_molecules):

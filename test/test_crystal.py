@@ -21,6 +21,7 @@ def test_crystal_structure():
     cryst = crystal.CrystalStructure(lysozyme_pdb_file)
     assert np.max(np.abs(cryst.pdb_dict['scale_matrix']*1e10 - cryst.unitcell.o_mat_inv))/np.max(np.abs(cryst.unitcell.o_mat_inv)) < 0.001
 
+
 def test_spacegroup():
 
     # Round-trip forward/reverse symmetry operations
@@ -49,6 +50,7 @@ def test_finite_lattice():
     assert(lat.all_x_coordinates.shape[0] == siz**3)
     lat.add_facet(plane=[1, 0, 0], length=2)
 
+
 def test_density_map_1():
 
     # Testing h_vecs and that it is consistent with numpy FFT.
@@ -57,51 +59,49 @@ def test_density_map_1():
     cryst = crystal.CrystalStructure(lysozyme_pdb_file)
 
     # Make a densityMap object
-    densityMap = crystal.CrystalDensityMap(cryst, resolution=30e-10, oversampling=2)
+    cdmap = crystal.CrystalDensityMap(cryst, resolution=30e-10, oversampling=2)
 
     # Make a density map and populate two of the voxels, rest is all zeros
     num_atoms = len(cryst.x_vecs)
-    rho = densityMap.place_atoms_in_map(cryst.x_vecs % densityMap.oversampling, np.zeros(num_atoms), mode='trilinear')
-    rho[3,3,3] = 1
-    rho[5,6,7] = 1
+    # rho = cdmap.place_atoms_in_map(cryst.x_vecs % cdmap.oversampling, np.zeros(num_atoms), mode='trilinear')
+    rho = np.zeros(cdmap.shape)
+    rho[3, 3, 3] = 1
+    rho[5, 6, 7] = 1
 
     # Define a DFT function
     def dftn(f):
-        q_vec = 2 * np.pi * densityMap.h_vecs
-        r_vec = densityMap.x_vecs
-
-        Nx, Ny, Nz = f.shape
-        N = Nx * Ny * Nz
-
+        q_vec = 2 * np.pi * cdmap.h_vecs
+        r_vec = cdmap.x_vecs
+        shp = f.shape
         f = np.ravel(f)
-        F = np.zeros(N, dtype=np.complex64)
+        ft = np.zeros(f.size, dtype=np.complex64)
         
-        for k in range(N):
+        for k in range(f.size):
             s = 0
-            for n in range(N):
-                s += f[n] * np.exp(1j * np.dot(q_vec[k,:], r_vec[n,:]))
-            F[k] = s
+            for n in range(f.size):
+                s += f[n] * np.exp(1j * np.dot(q_vec[k, :], r_vec[n, :]))
+            ft[k] = s
 
-        return F.reshape((Nx,Ny,Nz))
-
+        return ft.reshape(shp)
 
     # Calculate the intensity via the numpy fft
-    I_fft = np.abs(np.fft.fftn(rho))**2
+    i_fft = np.abs(np.fft.fftn(rho))**2
 
     # Calculate the intensity via the dft function above
-    I_dft = np.abs(dftn(rho))**2
-    I_dft = np.fft.ifftshift(I_dft)
+    i_dft = np.abs(dftn(rho))**2
+    i_dft = np.fft.ifftshift(i_dft)
 
     # Calculate the relative error and assert that it be less than some small value
-    assert np.sqrt( np.sum((I_fft - I_dft)**2) / np.sum((I_fft)**2) ) < 1e-6
+    assert np.sqrt(np.sum((i_fft - i_dft)**2) / np.sum(i_fft**2)) < 1e-6
 
 
 def test_density_map_2():
 
     # Round-trip test on au_to_k and k_to_au
-    cryst = crystal.CrystalStructure('4ET8')
+    cryst = crystal.CrystalStructure('4ET8', tight_packing=True)
     cdmap = crystal.CrystalDensityMap(cryst, 10e-11, 2)
     dat = np.arange(np.product(cdmap.shape)).reshape(cdmap.shape)
     dat1 = cdmap.au_to_k(0, dat)
-    dat2 = cdmap.k_to_au(0, dat)
-    assert np.sum(np.abs(dat1 - dat2)) == 0
+    dat2 = cdmap.k_to_au(0, dat1)
+    assert np.sum(np.abs(dat - dat1)) != 0
+    assert np.sum(np.abs(dat - dat2)) == 0

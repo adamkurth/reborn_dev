@@ -44,11 +44,11 @@ The reciprocal lattice vectors are defined as
 
 where :math:`V_c = \mathbf{a}_1\cdot(\mathbf{a}_2\times\mathbf{a}_3)` is the volume of the unit cell.
 
-Oftentimes a crystallographic unit cell is specified in terms of three lattice constants (:math:`a`, :math:`b`,
+A crystallographic unit cell is often specified in terms of three lattice constants (:math:`a`, :math:`b`,
 :math:`c`) and three angles (:math:`\alpha`, :math:`\beta`, :math:`\gamma`).  This of course leads to some ambiguity
 since there are only six parameters; the three orientational parameters are missing.  The "standard" way to convert to
 the orthogonalization matrix appears to be in appendix A of
-`this <https://cdn.rcsb.org/wwpdb/docs/documentation/file-format/PDB_format_1992.pdf>`_ document.
+`this document <https://cdn.rcsb.org/wwpdb/docs/documentation/file-format/PDB_format_1992.pdf>`_ .
 
 We define the Fourier transform in orthogonal coordinates as
 
@@ -69,56 +69,60 @@ The factor of :math:`V_c` in the above is due to the Jacobian determinant :math:
 Loading a PDB file
 ------------------
 
+*Note: the folks at PDB recommend that we use CIF format rather than PDB format.*
+
 PDB (Protein Data Bank) files are text files that contain information about molecular structures, in particular the
 positions and types of all the atoms that make up one or more molecular models, along with symmetry operations, and
 more.  PDB files can be downloaded from the `PDB website <http://www.rcsb.org>`_ or using the
-:func:`get_pdb_file()<bornagain.target.crystal.get_pdb_file>` function in bornagain.
+:func:`get_pdb_file <bornagain.target.crystal.get_pdb_file>` function in bornagain.
 
 PDB files have a well-defined `specification <http://www.wwpdb.org/documentation/file-format>`_ and may be divided into
 various "records".  Some of the important ones are:
 
 0) `MODEL <http://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#MODEL>`_,
-   which distinguishes different atomic models.
+   which distinguishes different atomic models.  Beware of files with multiple models!
 1) `ATOM <http://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#ATOM>`_ and
    `HETATM <http://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#HETATM>`_, which contain
-   orthogonal coordinates of atomic models.
+   orthogonal coordinates of atoms in the above-mentioned models.
 2) `CRYST1 <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#CRYST1>`_, which contains
    the unit cell lattice constants and angles (:math:`a`, :math:`b`, :math:`c`, :math:`\alpha`, :math:`\beta`,
-   :math:`\gamma`), the full International Tables for Crystallography’s Hermann-Mauguin symbol, and the Z value (number of polymeric chains
-   in a unit cell).
+   :math:`\gamma`), the full International Tables for Crystallography’s Hermann-Mauguin symbol, and the Z value (number
+   of polymeric chains in a unit cell).
 3) `SCALE <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#SCALEn>`_, which contains
    *"transformation from the orthogonal coordinates as contained in the PDB entry to fractional crystallographic
-   coordinates"*.  Note that this comprises both a rotation and a translation -- what is the purpose of the translation?
+   coordinates"*.  Note that this comprises both a rotation *and a translation*.
 4) `MTRIX <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#MTRIXn>`_, which contains
    *"transformations expressing non-crystallographic symmetry... [that] operate on the coordinates in the entry to yield
-   equivalent representations of the molecule in the same coordinate frame"*.  I remain puzzled by this comment: *"If
+   equivalent representations of the molecule in the same coordinate frame"*.  Take note of this comment: *"If
    coordinates for the representations which are approximately related by the given transformation are present in the
-   file, the last “iGiven” field is set to 1"* -- does this mean that we should ignore entries for which iGiven=1?
+   file, the last “iGiven” field is set to 1"* -- this suggests that we ignore operations for which iGiven=1.
 5) `REMARK 290 <https://www.wwpdb.org/documentation/file-format-content/format32/remarks1.html#REMARK%20290>`_, which
    has the crystallographic symmetry operations.  This entry seems reasonably clear though it is not documented well.
+   The symmetry operations are specified in the orthogonal coordinates, whereas we typically need them in the fractional
+   coordinates.
 6) `ORIGX <http://www.wwpdb.org/documentation/file-format-content/format33/sect8.html#ORIGXn>`_, which contains *"the
-   transformation from the orthogonal coordinates contained in the entry to the submitted coordinates"*.  We are
-   not interested in the original coordinates; we only care about the coordinates in the file.
+   transformation from the orthogonal coordinates contained in the entry to the submitted coordinates"*.  We ignore
+   this entry since the submitted coordinates are almost certainly irrelevant to us.
 
-Based on the above, and on appendix A of
-`this <https://cdn.rcsb.org/wwpdb/docs/documentation/file-format/PDB_format_1992.pdf>`_, we present our understanding of
-how we should interpret the coordinates and transformations found in a PDB file.
+Our present understanding of how we should interpret the coordinates and transformations found in a PDB file on the
+above inspection of PDB entries, and on appendix A of
+`this document <https://cdn.rcsb.org/wwpdb/docs/documentation/file-format/PDB_format_1992.pdf>`_.
 
 We begin with the orthogonal coordinates :math:`\mathbf{r}_0` of a model that are contained in a PDB file.  If there are
 non-crystallographic symmetry (NCS) operations, for example in the case of a virus capsid, we *first* generate the
 the complete set of atomic coordinates that comprise the asymmetric unit (AU).  To do this, we generate the NCS
-symmetry partners using the matrices :math:`\mathbf{M}_i` and translation vectors
-:math:`\mathbf{V}_i` found in the MTRIX record as follows:
+symmetry partners using the matrices :math:`\mathbf{M}_i` and translation vectors :math:`\mathbf{V}_i` found in the
+MTRIX record as follows:
 
 .. math:: \mathbf{r}_\text{ncs, i} = \mathbf{M}_i \mathbf{r}_0 + \mathbf{V}_i
 
 From the documentation, there are some entries in the list of :math:`\mathbf{M}`, :math:`\mathbf{V}` that are only
-"approximate" symmetries, which I gather are provided "just FYI", and which should *not* be applied to
-:math:`\mathbf{r}_0` because the symmetry-related coordinates already appear explicitly in the stored
-:math:`\mathbf{r}_0`.
+"approximate" symmetries as indicated by the "iGiven" flag.  These operations rae *not* be applied to
+:math:`\mathbf{r}_0` because the symmetry-related coordinates that correspond to them already appear explicitly in the
+PDB file (the :math:`\mathbf{r}_0` coordinates).
 
-After we do the above we build the crystal asymmetric unit (AU) by concatenating all of the above coordinates to form
-:math:`\mathbf{r}_\text{au} = \{\mathbf{r}_\text{ncs}\}`.  In order to generate the crystallographic symmetry partners,
+After we do the above we build the crystal asymmetric unit (AU) by concatenating all of the NCS coordinates to form
+:math:`\mathbf{r}_\text{au} = \{\mathbf{r}_\text{ncs}\}`.  In order to generate the spacegroup symmetry partners,
 we could use the rotation matrices :math:`\mathbf{R}_n` and translation vectors :math:`\mathbf{T}_n` found in the
 REMARK 290 record.  We may apply them to the AU orthogonal coordinates as follows:
 
@@ -151,12 +155,12 @@ Dictionary key            Data type                   Mathematical symbol
 ========================= =========================== ================================================================================
 
 Note that the units are not modified from PDB format; angles are degrees and distances are in Angstrom units.  This is
-one of the rare cases in which non-SI units are used in bornagain (but we convert to SI immediately when we create a
-class from this dictionary).
+one of the *very rare* cases in which non-SI units are used in bornagain (but we convert to SI immediately when we
+create a class from this dictionary).
 
 
-Crystallographic symmetry operations
-------------------------------------
+Working in fractional coordinates
+---------------------------------
 
 When concerned with crystals, it usually makes sense to work primarily in the fractional coordinates
 :math:`\mathbf{x}`.  We wish to have simple crystallographic symmetry operations according to
@@ -169,10 +173,12 @@ We also wish to have a simple way to move to the orthogonal coordinate system ac
 
 The benefit of working in the :math:`\mathbf{x}` coordinates in the above way is that the "rotations"
 :math:`\mathbf{W}_n` are strictly permutation operators comprised of elements with values -1, 0, 1, and the translations
-:math:`\mathbf{Z}_n` are strictly integer multiples of 1/6 or 1/4.  As a result, we can define a mesh of density samples
-in which crystallographic operations do not result in interpolations.
+:math:`\mathbf{Z}_n` are strictly integer multiples of 1/6 or 1/4.  As a result, we can define density maps
+in which spacegroup operations do not require interpolations.
 
-We first consider the case in which :math:`\mathbf{U}=0`.  Suppose we have the following from the PDB file:
+Since PDB files provide spacegroup symmetry operations in orthogonal coordinates, we must transform them to the
+fractional coordinate system.  We first consider the case in which :math:`\mathbf{U}=0`.  Suppose we have the following
+from the PDB file:
 
 .. math::
 
@@ -187,7 +193,7 @@ get
     \mathbf{S} \mathbf{r}_n &= \mathbf{S} \mathbf{R}_n \mathbf{r}_\text{au} + \mathbf{S} \mathbf{T}_n \\
     \mathbf{x}_n &= \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1}\mathbf{x}_\text{au} + \mathbf{S} \mathbf{T}_n
 
-which gives us our desired transformations:
+from which we identify our desired transformations:
 
 .. math::
 
@@ -195,7 +201,7 @@ which gives us our desired transformations:
     \mathbf{W}_n &= \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1} \\
     \mathbf{Z}_n &= \mathbf{S}\mathbf{T}_n
 
-Assuming :math:`\mathbf{U}=0`, the :func:`CrystalStructure() <bornagain.target.crystal.CrystalStructure()>` class can be
+Assuming :math:`\mathbf{U}=0`, the :func:`CrystalStructure <bornagain.target.crystal.CrystalStructure>` class can be
 used to easily load in a PDB file and get :math:`\mathbf{x}_\text{au}` and the transformations :math:`\mathbf{W}_n`, :math:`\mathbf{Z}_n`.
 
 In the uncommon situation where :math:`\mathbf{U} \ne 0`, we do not have an understanding of how to determine the

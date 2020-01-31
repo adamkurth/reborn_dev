@@ -8,7 +8,7 @@ your python path.  You'll probably find that you need to install some dependenci
 easily with pip or conda.  There are some pieces of Fortran code in bornagain that need to be compiled, but they
 *should* auto-compile on first import.
 
-While it is possible to "install" bornagain using the provided setup.py script, this is not recommended because
+While it is possible to "install" bornagain using the provided `setup.py` script, this is not recommended because
 bornagain is under development and its API is not considered to be stable.  It is instead recommended that you keep a
 clone of the bornagain git repository where you are doing your analysis or simulations so that you can reproduce your
 results in the future. One way to track the *exact* version of bornagain used in your project is to add it as a
@@ -88,13 +88,13 @@ method, you will need to run your scripts from the specific directory where the 
 Compilation of Fortran code
 ---------------------------
 
-We use the f2py program that comes with Numpy to compile Fortran code.  Although this code should auto-compile on first
-import, you may wish to compile manually.  This can be done using the `setup.py` script as follows:
+We use the f2py program that comes with Numpy to compile Fortran code.  Although Fortran code should auto-compile on
+first import, you may wish to compile manually.  This can be done using the `setup.py` script as follows:
 
 .. code-block:: bash
     python setup.py develop
 
-Alternataively, there is a bash script in the developer directory:
+Alternatively, there is a bash script in the developer directory:
 
 .. code-block:: bash
 

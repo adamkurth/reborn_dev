@@ -5,7 +5,7 @@
 export PYTHONPATH=${PYTHONPATH}:../../..
 
 python edgy_crystal_3d.py --pdb_file 1jb0 \
-                          --resolution 10e-10 \
+                          --resolution 2e-10 \
                           --oversampling 4 \
                           --n_crystals 10 \
                           --crystal_length 1,1 \

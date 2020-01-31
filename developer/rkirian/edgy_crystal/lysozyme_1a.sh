@@ -4,10 +4,10 @@
 
 export PYTHONPATH=${PYTHONPATH}:../../..
 
-python edgy_crystal_3d.py --pdb_file 4ET9 \
-                          --resolution 10e-10 \
+python edgy_crystal_3d.py --pdb_file 4ET8 \
+                          --resolution 2e-10 \
                           --oversampling 4 \
-                          --n_crystals 10 \
+                          --n_crystals 1 \
                           --crystal_length 1,1 \
                           --crystal_width 1,1 \
                           --gaussian_disorder_sigmas 0.0,0.0,0.0 \
@@ -16,4 +16,5 @@ python edgy_crystal_3d.py --pdb_file 4ET9 \
                           --view_density \
                           --view_intensities \
                           --save_results \
-                          --run_number 1
+                          --run_number 1 \
+                          --direct_molecular_transform

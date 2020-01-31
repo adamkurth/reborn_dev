@@ -752,13 +752,27 @@ class CrystalDensityMap(object):
 
     def get_sym_luts(self):
         r"""
-        This provides a list of "symmetry transform lookup tables".  These are the linearized array indices. For a
-        transformation that consists of an identity matrix along with zero translation, the lut is just an array
-        p = [0,1,2,3,...,N^3-1].  Other transforms are like a "scrambling" of that ordering, such that a remapping of
-        density samples is done with an operation like this: newmap.flat[p2] = oldmap.flat[p1].   Note that the luts are
-        kept in memory for future use - beware of the memory requirement.
+        This provides a list of "symmetry transform lookup tables" (symmetry LUTs).  These are the flattened array
+        indices that map voxels from the asymmetric unit (AU) map to the kth symmetry partner.  This kind of
+        transformation, from AU to symmetry partner k, is performed as follows:
 
-        Returns: list of numpy arrays
+        .. code-block:: python
+
+            # data is a 3D array of densities
+            data_trans = np.empty_like(data)
+            lut = crystal_density_map.get_sym_luts()[k]
+            data_trans.flat[lut] = data.flat[:]
+
+        For convenience the above operation may be performed by the method
+        :meth:`au_to_k <bornagain.target.crystal.CrystalDensityMap.au_to_k>`, while the inverse operation may be
+        performed by the method :meth:`k_to_au <bornagain.target.crystal.CrystalDensityMap.k_to_au>`.  The method
+        :meth:`symmetry_transform <bornagain.target.crystal.CrystalDensityMap.symmetry_transform>` can be used to
+        transform from one symmetry partner to another.
+
+        Note that the LUTs are kept in memory for future use - beware of the memory requirement.
+
+        Returns:
+            list of numpy arrays : The symmetry lookup tables (LUTs)
         """
 
         if self.sym_luts is None:
@@ -781,7 +795,8 @@ class CrystalDensityMap(object):
         r"""
         Transform a map of the asymmetric unit (AU) to the kth symmetry partner.  Note that the generation of the
         first symmetry partner (k=0, where k = 0, 1, ..., N-1) might employ a non-identiy rotation matrix and/or a
-        non-zero translation vector -- there are some PDB entries in which this is indeed the case.
+        non-zero translation vector -- typically this is not the case but it can happen for example if the symmetry
+        operations are chosen such that all molecules are packed within the unit cell.
 
         Args:
             k (int) : The index of the symmetry partner (starting with k=0)
@@ -866,13 +881,16 @@ class CrystalDensityMap(object):
         elif mode == 'trilinear':
             bins = self.shape
             x_min = np.zeros(3)
-            x_max = x_min + self.shape * self.dx
+            x_max = x_min + (self.shape - 1) * self.dx
             num_atoms = len(atom_fs)
 
             # Make the atom_x_vecs C-contiguous
             atom_x_vecs = np.ascontiguousarray(atom_x_vecs)
 
-            # Trilinear insert the 
+            # Trilinear insert the
+            # print(x_min)
+            # print(x_max)
+            # print(bins)
             rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=x_min,
                                                          x_max=x_max, N_bin=bins,
                                                          mask=np.full(num_atoms, True, dtype=bool))
