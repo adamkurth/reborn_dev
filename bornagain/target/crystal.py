@@ -131,6 +131,16 @@ class UnitCell(object):
         self.a_mat_inv = o_mat.T.copy()
         self.volume = vol
 
+    def __str__(self):
+        s  = 'UnitCell\n'
+        s += '========\n'
+        s += '(a, b, c) = (%.3g, %.3g, %.3g)\n' % (self.a, self.b, self.c)
+        s += '(alpha, beta, gamma) = (%.3g, %.3g, %.3g)\n' % (self.alpha, self.beta, self.gamma)
+        s += 'Orth. Matrix:\n'
+        s += self.o_mat.__str__()
+        s += '\n--------\n'
+        return s
+
     def r2x(self, r_vecs):
         r""" Transform orthogonal coordinates to fractional coordinates. """
         return np.dot(r_vecs, self.o_mat_inv.T)
@@ -177,9 +187,6 @@ class UnitCell(object):
         r""" Reciprocal basis vector c*. """
         return self.a_mat[:, 2].copy()
 
-    def __str__(self):
-        return 'a=%g b=%g c=%g, alpha=%g beta=%g gamma=%g' % (self.a, self.b, self.c, self.alpha, self.beta, self.gamma)
-
 
 class SpaceGroup(object):
     r"""
@@ -201,6 +208,19 @@ class SpaceGroup(object):
         self.spacegroup_symbol = spacegroup_symbol
         self.sym_rotations = sym_rotations
         self.sym_translations = sym_translations
+
+    def __str__(self):
+
+        s = 'SpaceGroup\n'
+        s += '==========\n'
+        if self.spacegroup_symbol is not None:
+            s += self.spacegroup_symbol + '\n'
+        for k in range(len(self.sym_rotations)):
+            s += 'operation %d\n' % (k,)
+            s += self.sym_translations[k].__str__() + '\n'
+            s += self.sym_rotations[k].__str__() + '\n'
+        s += '==========\n'
+        return s
 
     @property
     def n_molecules(self):
@@ -606,6 +626,14 @@ class CrystalDensityMap(object):
         self.size = np.prod(self.shape)
         self.strides = np.array([self.shape[2]*self.shape[1], self.shape[2], 1])
 
+    def __str__(self):
+        s = 'CrystalDensityMap\n'
+        s += '\tOversampling = %d\n' % self.oversampling
+        s += '\tUnit cell shape = (%d, %d, %d)\n' % tuple(self.cshape)
+        s += '\tPadded shape = (%d, %d, %d)\n' % tuple(self.shape)
+        s += '\tdx = (%.3g, %.3g, %.3g)\n' % tuple(self.dx)
+        return s
+
     @property
     def n_vecs(self):
         r"""
@@ -743,10 +771,49 @@ class CrystalDensityMap(object):
                 lut = np.round(lut / self.dx)        # switch from x to n vectors
                 lut = lut % self.shape               # wrap around
                 lut = np.dot(self.strides, lut.T)    # in p space
+                assert np.sum(lut - np.round(lut)) == 0
                 sym_luts.append(lut.astype(np.int))
             self.sym_luts = sym_luts
 
         return self.sym_luts
+
+    def au_to_k(self, k, data):
+        r"""
+        Transform a map of the asymmetric unit (AU) to the kth symmetry partner.  Note that the generation of the
+        first symmetry partner (k=0, where k = 0, 1, ..., N-1) might employ a non-identiy rotation matrix and/or a
+        non-zero translation vector -- there are some PDB entries in which this is indeed the case.
+
+        Args:
+            k (int) : The index of the symmetry partner (starting with k=0)
+            data (3D numpy array) : The input data array.
+
+        Returns:
+            3D numpy array : Transformed array
+        """
+
+        data_out = np.empty_like(data)
+        lut = self.get_sym_luts()[k]
+        data_out.flat[lut] = data.flat[:]
+
+        return data_out
+
+    def k_to_au(self, k, data):
+        r"""
+        Transform a map of the kth symmetry partner to the asymmetric unit.  This reverses the action of the
+        :meth:`au_to_k <bornagain.target.crystal.CrystalDensityMap.au_to_k>` method.
+
+        Args:
+            k (int) : The index of the symmetry partner (starting with k=0)
+            data (3D numpy array) : The input data array.
+
+        Returns:
+            3D numpy array : Transformed array
+        """
+
+        lut = self.get_sym_luts()[k]
+        data_out = data.flat[lut].reshape(data.shape)
+
+        return data_out
 
     def symmetry_transform(self, i, j, data):
         r"""
@@ -791,6 +858,8 @@ class CrystalDensityMap(object):
             f_map = np.zeros([n_map_voxels], dtype=np.complex)
             f_map_tmp = np.zeros([n_map_voxels], dtype=np.double)
             s = self.oversampling
+            if len(atom_x_vecs.shape) == 1:
+                atom_x_vecs = np.expand_dims(atom_x_vecs, axis=0)
             place_atoms_in_map(atom_x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp)
             return np.reshape(f_map, self.shape)
 

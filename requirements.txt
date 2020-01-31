@@ -1,9 +1,0 @@
-future
-numpy
-scipy
-h5py
-numba
-matplotlib
-pyqtgraph
-pyopencl
-pocl

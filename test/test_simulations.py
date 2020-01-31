@@ -76,15 +76,15 @@ def test_density_map():
     # Testing compatibility of simulation tools with FFT operations
 
     # import numpy as np
-    from bornagain.target import crystal
     # from bornagain.simulate import clcore, atoms
     # import pyqtgraph as pg
     # from scipy import constants
 
     # The CrystalStructure object has a UnitCell, SpaceGroup, and other information.  The input can be any path to a PDB
-    # file or it can be the name of a PDB entry.  The PDB will be fetched from the web if necessary and possible.  The
-    # PDB entry 2LYZ comes with bornagain.
+    # file or it can be the name of a PDB entry.  The PDB will be fetched from the web if necessary and possible.  Some
+    # PDB entries (e.g. 2LYZ, 4ET8) come with bornagain.
     cryst = crystal.CrystalStructure('2LYZ')
+    cryst = crystal.CrystalStructure('4ET8')
 
     # The oversampling ratio:
     osr = 2
@@ -113,8 +113,8 @@ def test_density_map():
     ###############################################
     # Simulate amplitudes using atomistic coordinates, structure factors, and a direct summation over
     #                              F(h) =  sum_n f_n*exp(-i 2*pi*h.x_n)
-    # Recipcorcal-space coordinates are chosen such that they will correspond to a numpy FFT operation.  The limits of that
-    # sample grid are provided by the CrystalDensityMap class:
+    # Recipcorcal-space coordinates are chosen such that they will correspond to a numpy FFT operation.  The limits of
+    # that sample grid are provided by the CrystalDensityMap class:
     g_min = cdmap.h_min * 2 * np.pi
     g_max = cdmap.h_max * 2 * np.pi
     # Simulation tool for regular 3D grid of reciprocal-space samples.
@@ -140,6 +140,6 @@ def test_density_map():
     def compare(a, b):
         return np.max(a - b) / np.mean((a + b) / 2)
 
-    assert compare(np.abs(amps1), np.abs(amps2)) < 1e-5
-    assert compare(np.abs(np.real(amps1)), np.abs(np.real(amps2))) < 1e-5
-    assert compare(np.abs(np.imag(amps1)), np.abs(np.imag(amps2))) < 1e-5
+    assert compare(np.abs(amps1), np.abs(amps2)) < 1e-4
+    assert compare(np.abs(np.real(amps1)), np.abs(np.real(amps2))) < 1e-4
+    assert compare(np.abs(np.imag(amps1)), np.abs(np.imag(amps2))) < 1e-4
