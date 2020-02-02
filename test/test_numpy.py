@@ -64,4 +64,11 @@ def test_fortranarray():
     assert c.data != f.data      # But they no longer share the same memory.  The operation on c created a new array.
     assert c.data == c_original.data
     assert f.data == f_original.data
-test_fortranarray()
+
+
+def test_phase_factor_sum_ordering():
+
+    a = np.arange(10000)
+    b = np.sum(a)*np.exp(1j*3)
+    c = np.sum(a*np.exp(1j*3))
+    assert np.sum(np.abs(c - b)) != 0

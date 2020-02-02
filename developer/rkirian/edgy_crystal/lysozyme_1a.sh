@@ -13,8 +13,5 @@ python edgy_crystal_3d.py --pdb_file 4ET8 \
                           --gaussian_disorder_sigmas 0.0,0.0,0.0 \
                           --photon_energy_ev 8000 \
                           --view_density \
-                          --view_crystal \
                           --view_intensities \
-                          --run_number 1 \
-                          --save_results \
-#                          --direct_molecular_transform
+                          --direct_molecular_transform

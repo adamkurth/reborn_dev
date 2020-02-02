@@ -10,8 +10,8 @@ import argparse
 
 import pyqtgraph as pg
 
-pg.setConfigOption('background', 'w')
-pg.setConfigOption('foreground', 'k')
+pg.setConfigOption('background', np.ones(3)*50)
+pg.setConfigOption('foreground', np.ones(3)*255)
 
 eV = const.value('electron volt')
 
@@ -59,31 +59,73 @@ fc.set_gaussian_disorder(sigmas=args.gaussian_disorder_sigmas)
 # Density map configuration with spacegroup considerations
 cdmap = crystal.CrystalDensityMap(cryst=cryst, resolution=args.resolution, oversampling=args.oversampling)
 
+# FIXME : Set atom coordinates to grid points for testing of the two different methods discussed below.  By setting
+#         atoms to lie on gridpoints, we *should* in principle get the same results from both methods (but we don't).
+print('')
+print('Initial fractional coordinates:')
+print(cryst.fractional_coordinates)
+cryst.fractional_coordinates = np.floor(cryst.fractional_coordinates/cdmap.dx)*cdmap.dx
+print('Fixed fractional coordinates:')
+print(cryst.fractional_coordinates)
+print('3D mesh shape and limits:')
+print('Shape:', cdmap.shape, 'Limits:', cdmap.x_min, cdmap.x_max)
+print('Coordinates of 3D grid points:')
+print(cdmap.x_vecs)
+
 # GPU simulation engine
 clcore = ClCore()
 
 # Scattering factors (absolute value because interpolations don't work with complex numbers)
 f = np.abs(cryst.molecule.get_scattering_factors(photon_energy=args.photon_energy_ev*eV)).astype(np.double)
 
+# FIXME: Which way are we supposed to do this?
+# For now, we are going to compute the molecular transform amplitudes in two different ways.  The "direct" method is to
+# sum over all the atoms with the usual formula: sum_n f_n exp(i q.r_n).
+# The other way, the "fft" method, consists of firstly making the density map and subsequently taking the FFT of the
+# resulting map.
+# We can expect that the direct and fft methods will differ somewhat because one is done on a GPU (possibly with single)
+# precision) whereas the other is done on a CPU with double precision.  There are multiple ways in which floating
+# point arithmetic is handled and this may differ from one device, compiler, etc. to another.  There will also be
+# slightly different results because the order of the summation differs in each case; on a computer, summing the
+# densities first and then multiplying that sum by the exponential phase factor is different than summing over the
+# density/phase factor products.  To be clear, the following test will fail:
+#
+#     a = np.arange(10000)
+#     b = np.sum(a)*np.exp(1j*3)
+#     c = np.sum(a*np.exp(1j*3))
+#     assert np.sum(np.abs(c - b)) == 0
+#
+
+# Calculate 3D molecular transform amplitudes on GPU via explicit atomic coordinates: sum over f * exp(i q.r)
+# The issue with this is that we get ringing artifacts when we take FFTs, but this is more like real data.
+mol_amps_direct = []
+f_gpu = clcore.to_device(f, dtype=clcore.complex_t)
+for k in range(cryst.spacegroup.n_operations):
+    x = cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates)
+    amp = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t) * 0
+    clcore.phase_factor_mesh(x, f_gpu, N=cdmap.shape, q_min=cdmap.h_limits[:, 0]*2*np.pi,
+                             q_max=cdmap.h_limits[:, 1]*2*np.pi, a=amp, add=True)
+    mol_amps_direct.append(amp)
+
+# Build the electron densities directly and make amplitudes via FFT.  This avoids ringing artifacts that we get
+# from the direct summation method.
+mol_amps_fft = []
+au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates % cdmap.oversampling, f, mode='trilinear')
+for k in range(cryst.spacegroup.n_operations):
+    rho = cdmap.au_to_k(k, au_map)
+    mol_amps_fft.append(clcore.to_device(fftshift(fftn(rho)), dtype=clcore.complex_t))
+
+# Here we choose which of the above methods will go into the saved results:
 if args.direct_molecular_transform:
-    # Calculate 3D molecular transform amplitudes on GPU via explicit atomic coordinates: sum over f * exp(i q.r)
-    # The issue with this is that we get ringing artifacts when we take FFTs, but this is more like real data.
-    mol_amps = []
-    f_gpu = clcore.to_device(f, dtype=clcore.complex_t)
-    for k in range(cryst.spacegroup.n_operations):
-        x = cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates)
-        amp = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t) * 0
-        clcore.phase_factor_mesh(x, f_gpu, N=cdmap.shape, q_min=cdmap.h_limits[:, 0]*2*np.pi,
-                                 q_max=cdmap.h_limits[:, 1]*2*np.pi, a=amp, add=True)
-        mol_amps.append(amp)
+    mol_amps = mol_amps_direct
 else:
-    # Build the electron densities directly and make amplitudes via FFT.  This avoids ringing artifacts that we get
-    # from the direct summation method.
-    mol_amps = []
-    au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates % cdmap.oversampling, f, mode='trilinear')
-    for k in range(cryst.spacegroup.n_operations):
-        rho = cdmap.au_to_k(k, au_map)
-        mol_amps.append(clcore.to_device(fftshift(fftn(rho)), dtype=clcore.complex_t))
+    mol_amps = mol_amps_fft
+
+# Check how much the two methods differ:
+for k in range(cryst.spacegroup.n_operations):
+    a = np.abs(mol_amps_direct[k].get()).ravel()
+    b = np.abs(mol_amps_fft[k].get()).ravel()
+    print('Difference in abs(amplitudes):', np.sum(np.abs(a-b))/(np.sum(np.abs(a)+np.abs(b))/2))
 
 if args.view_crystal:   # 3D view of crystal
     width = args.crystal_width[0] + np.random.rand(3)*args.crystal_width[1]

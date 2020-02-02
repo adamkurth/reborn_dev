@@ -881,18 +881,9 @@ class CrystalDensityMap(object):
             return np.reshape(f_map, self.shape)
 
         elif mode == 'trilinear':
-            # bins = self.shape
-            # x_min = np.zeros(3)
-            # x_max = x_min + self.shape * self.dx
+
             num_atoms = len(atom_fs)
-
-            # Make the atom_x_vecs C-contiguous
             atom_x_vecs = np.ascontiguousarray(atom_x_vecs)
-
-            # fixme
-            print('insert xmin', self.x_min)
-            print('insert xmax', self.x_max)
-            print('insert shape', self.shape)
             rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=self.x_min,
                                                          x_max=self.x_max, N_bin=self.shape,
                                                          mask=np.full(num_atoms, True, dtype=bool))
