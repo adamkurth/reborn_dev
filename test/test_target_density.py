@@ -15,12 +15,15 @@ def test_crystal_density():
 
     cryst = crystal.CrystalStructure(psi_pdb_file)
     # Manually reconfigure P1 with rectangular lattice
-    cryst.unitcell = crystal.UnitCell(1e-9, 2e-9, 4e-9, np.pi/2, np.pi/2, np.pi/2)
-    cryst.spacegroup.sym_translations = [np.zeros((3,))]
-    cryst.spacegroup.sym_rotations = [np.eye(3)]
-    dens = crystal.CrystalDensityMap(cryst, 2e-9, 2)
-    assert np.sum(np.abs(dens.n_vecs[8, :] - np.array([1, 0, 0]))) < 1e-8
-    assert np.allclose(dens.x_vecs[9, :], np.array([1., 0., 0.5]))
+    # cryst.unitcell = crystal.UnitCell(1e-9, 2e-9, 4e-9, np.pi/2, np.pi/2, np.pi/2)
+    # cryst.spacegroup.sym_translations = [np.zeros((3,))]
+    # cryst.spacegroup.sym_rotations = [np.eye(3)]
+    dens = crystal.CrystalDensityMap(cryst, 20e-10, 2)
+    # print(dens.x_min, dens.x_max, dens.shape, dens.dx)
+    # print(dens.n_vecs)
+    # print(dens.x_vecs)
+    assert np.sum(np.abs(dens.n_vecs[1, :] - np.array([0, 0, 1]))) < 1e-8
+    assert np.allclose(dens.x_vecs[1, :], np.array([0, 0., 0.1]))
 
     cryst = crystal.CrystalStructure(lysozyme_pdb_file)
     for d in np.array([5, 10])*1e-10:

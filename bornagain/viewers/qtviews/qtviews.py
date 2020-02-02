@@ -325,6 +325,22 @@ def view_finite_crystal(finite_crystal):
     scat.set_orthographic_projection()
     scat.show()
 
+
+def view_density_map(data, title=None):
+
+    app = pg.mkQApp()
+    win = QtGui.QMainWindow()
+    # win.resize(800, 600)
+    if title is not None:
+        win.setWindowTitle(title)
+    imv = pg.ImageView(win, view=pg.PlotItem())
+    imv.setImage(data)
+    win.setCentralWidget(imv)
+    win.show()
+    app.exec_()
+    del app
+
+
 if __name__ == '__main__':
 
     images = [np.random.rand(5, 5), np.random.rand(5, 6), np.random.rand(5, 10)]

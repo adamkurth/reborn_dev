@@ -603,20 +603,14 @@ class CrystalDensityMap(object):
         # Given desired resolution and unit cell, these are the number of voxels along each edge of unit cell.
         cshape = np.ceil((1/resolution) * (1/vec_mag(cryst.unitcell.a_mat.T)))
 
-        # The number of cells along an edge must be a multple of the shortest translation.  E.g., if an operation
-        # consists of a translation of 1/3 distance along the cell, we must have a multiple of 3.
-        multiples = np.ones(3, dtype=np.int)
-        for vec in cryst.spacegroup.sym_translations:
-            for j in range(0, 3):
-                comp = vec[j] % 1
-                comp = min(comp, 1-comp)  # This takes care of the fact that e.g. a 2/3 translation is the same as -1/3
-                if comp == 0:
-                    comp = 1  # Avoid divide-by-zero problem
-                comp = int(np.round(1/comp))
-                if comp > multiples[j]:
-                    multiples[j] = comp
-        multiples = np.max(multiples)*np.ones(3)
-        cshape = np.ceil(cshape / multiples) * multiples
+        # The number of samples along an edge must be a multiple of the shortest translation.  E.g., if an operation
+        # consists of a translation of 1/3 or 2/3 distance along the cell, the shape must be a multiple of 3.
+        v = np.ravel(cryst.spacegroup.sym_translations)
+        v[v == 0] = 1
+        for m in [1, 2, 3, 4, 6]:
+            if np.sum(np.abs(np.round(v*m) - v*m)) == 0:
+                break
+        cshape = np.ceil(cshape / m) * m
 
         self.cryst = cryst
         self.oversampling = np.int(np.ceil(oversampling))
@@ -678,7 +672,15 @@ class CrystalDensityMap(object):
 
         shp = self.shape
         dx = self.dx
-        return np.array([[0, dx[0]*(shp[0]-1)], [0, dx[1]*(shp[1]-1)], [0, dx[2]*(shp[2]-1)]])
+        return np.array([[0, dx[0]*shp[0]], [0, dx[1]*shp[1]], [0, dx[2]*shp[2]]])
+
+    @property
+    def x_min(self):
+        return np.zeros(3)
+
+    @property
+    def x_max(self):
+        return (self.shape - 1) * self.dx
 
     @property
     def h_vecs(self):
@@ -879,20 +881,20 @@ class CrystalDensityMap(object):
             return np.reshape(f_map, self.shape)
 
         elif mode == 'trilinear':
-            bins = self.shape
-            x_min = np.zeros(3)
-            x_max = x_min + (self.shape - 1) * self.dx
+            # bins = self.shape
+            # x_min = np.zeros(3)
+            # x_max = x_min + self.shape * self.dx
             num_atoms = len(atom_fs)
 
             # Make the atom_x_vecs C-contiguous
             atom_x_vecs = np.ascontiguousarray(atom_x_vecs)
 
-            # Trilinear insert the
-            # print(x_min)
-            # print(x_max)
-            # print(bins)
-            rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=x_min,
-                                                         x_max=x_max, N_bin=bins,
+            # fixme
+            print('insert xmin', self.x_min)
+            print('insert xmax', self.x_max)
+            print('insert shape', self.shape)
+            rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=self.x_min,
+                                                         x_max=self.x_max, N_bin=self.shape,
                                                          mask=np.full(num_atoms, True, dtype=bool))
 
             # Avoid division by zero

@@ -644,7 +644,11 @@ class ClCore(object):
         .. math:: \sum_n f_n \exp(-i \vec{q} \cdot \vec{r})
 
         The mesh is defined by the shape of the 3D array along with the minimum and maximum values of :math:`q_i` along
-        each edge :math:`i=1,2,3`.
+        each edge :math:`i=1,2,3`.  The vector components of q are computed according to:
+        .. math:: q_{ni} = n \Delta q_i + q_{\text{min},i}
+        where :math:`n` is the array index (starting with :math:`n=0`) along axis :math:`i` and we define
+        .. math:: \Delta q_i = (q_{\text{max},i} - q_{\text{min},i})/(N_i - 1)
+        for an array with shape :math:`N_i`.
 
         Arguments:
             r (Nx3 numpy array): Atomic coordinates
@@ -682,10 +686,8 @@ class ClCore(object):
             add = 0
         if R is None:
             R = np.eye(3)
-
         if U is None:
             U = np.zeros(3, dtype=self.real_t)
-        # U = np.dot(R.T, U)
 
         R = self.vec16(R, dtype=self.real_t)
         U = self.vec4(U, dtype=self.real_t)

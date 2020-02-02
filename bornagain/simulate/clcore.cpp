@@ -403,7 +403,12 @@ kernel void phase_factor_pad(
 
 
 // Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
-// This variant internally computes scattering vectors corresponding to a regular 3D grid
+// This variant internally computes scattering vectors corresponding to a regular 3D grid.
+// Grid points are computed according to the formula:
+//     q_n = n*dq + q_min
+// where n is the array index (staring with zero) for a given axis (x, y, z).  In the usual bornagain
+// standard, we should compute dq according to the formula
+//     dq = (q_max - q_min)/(N-1)
 
 kernel void phase_factor_mesh(
     global const dsfloat *r,   // Atomic postion vectors
@@ -427,9 +432,6 @@ kernel void phase_factor_mesh(
 
     // Each global index corresponds to a particular q-vector
     dsfloat4 q4r = (dsfloat4)(i*deltaQ.x+q_min.x, j*deltaQ.y+q_min.y, k*deltaQ.z+q_min.z,0.0f);
-
-    // Rotate the scattering vector
-//    q4r = rotate_vec(R, q4r);
 
     // Sum over atomic scattering amplitudes
     dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
@@ -694,7 +696,7 @@ kernel void mesh_insertion_real(
 
 
 // Compute ideal lattice transform for parallelepiped crystal: PROD_i  [ sin(N_i x_i)/sin(x_i) ]^2
-// This variant internallly computes scattering vectors for a pixel-array detector
+// This variant internally computes scattering vectors for a pixel-array detector
 
 kernel void lattice_transform_intensities_pad(
     const dsfloat16 abc,   // Real-space lattice vectors a,b,c, each contiguous in memory
