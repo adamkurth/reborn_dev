@@ -1,8 +1,5 @@
 import numpy as np
-try:
-    from bornagain.simulate.clcore import ClCore
-except ImportError:
-    ClCore = None
+from bornagain.simulate.clcore import ClCore
 from bornagain import detector
 from bornagain import source
 from bornagain.simulate.examples import lysozyme_pdb_file
@@ -73,12 +70,7 @@ def test_mappings():
 
 def test_density_map_fft_vs_direct_sum():
 
-    # Testing compatibility of simulation tools with FFT operations
-
-    # import numpy as np
-    # from bornagain.simulate import clcore, atoms
-    # import pyqtgraph as pg
-    # from scipy import constants
+    # Testing compatibility of simulation tools with FFT operations.
 
     # The CrystalStructure object has a UnitCell, SpaceGroup, and other information.  The input can be any path to a PDB
     # file or it can be the name of a PDB entry.  The PDB will be fetched from the web if necessary and possible.  Some
@@ -149,15 +141,9 @@ def test_density_map_fft_vs_direct_sum_trilinear():
 
     # Testing compatibility of simulation tools with FFT operations
 
-    # import numpy as np
-    # from bornagain.simulate import clcore, atoms
-    # import pyqtgraph as pg
-    # from scipy import constants
-
     # The CrystalStructure object has a UnitCell, SpaceGroup, and other information.  The input can be any path to a PDB
     # file or it can be the name of a PDB entry.  The PDB will be fetched from the web if necessary and possible.  Some
     # PDB entries (e.g. 2LYZ, 4ET8) come with bornagain.
-    cryst = crystal.CrystalStructure('2LYZ')
     cryst = crystal.CrystalStructure('4ET8')
 
     # The oversampling ratio:
@@ -204,20 +190,12 @@ def test_density_map_fft_vs_direct_sum_trilinear():
     #################################################
     # First make the scattering density map, and then FFT the map to create amplitudes.
     dmap2 = np.zeros(cdmap.shape)
-    # Instead of defining a list of atomic coordinates, we directly set the scattering densities to the scattering factors
-    # used in METHOD 1.  Note that we've chosen atomic coordinates so that they will lie exactly on grid points in our 3D
-    # maps.
+    # Instead of defining a list of atomic coordinates, we directly set the scattering densities to the scattering
+    # factors used in METHOD 1.  Note that we've chosen atomic coordinates so that they will lie exactly on grid points
+    # in our 3D maps.
     dmap2[0, 0, 0] = f[0]
     dmap2[0, 0, n] = f[1]
     dmap3 = cdmap.place_atoms_in_map(x_vecs, f, mode='trilinear')
-    # print((cdmap.x_limits[:, 1]-cdmap.x_limits[:, 0])/(cdmap.shape-1))
-    # print(cdmap.dx)
-    # print(cdmap.shape)
-    # print(cdmap.x_limits)
-    # print(x_vecs)
-    # print(f)
-    # print(dmap2[0, 0, 0:3])
-    # print(dmap3[0, 0, 0:3])
     assert np.sum(np.abs(dmap2 - dmap3)) < 1e-10
     amps2 = np.fft.fftn(dmap3)
 

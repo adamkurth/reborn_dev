@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 
+
 def test_rotations_and_broadcasting():
 
     rot = np.array([[0, 1., 0],
