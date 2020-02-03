@@ -243,7 +243,6 @@ static dsfloat2 phase_factor(
     const int li              // Local index of this worker (i.e. group member ID)
 )
 {
-
     int ai;
     dsfloat ph, sinph, cosph;
     dsfloat2 a_temp;
@@ -274,6 +273,7 @@ static dsfloat2 phase_factor(
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
             ph = -dot(q,rg[n]);
+//            ph = -(q.x*rg[n].x + q.y*rg[n].y + q.z*rg[n].z);
             sinph = native_sin(ph);
             cosph = native_cos(ph);
             a_temp.x += fg[n].x*cosph - fg[n].y*sinph;

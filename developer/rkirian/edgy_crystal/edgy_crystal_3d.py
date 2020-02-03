@@ -96,6 +96,9 @@ f = np.abs(cryst.molecule.get_scattering_factors(photon_energy=args.photon_energ
 #     assert np.sum(np.abs(c - b)) == 0
 #
 
+print('shape', cdmap.shape)
+print('h_limits', cdmap.h_limits)
+
 # Calculate 3D molecular transform amplitudes on GPU via explicit atomic coordinates: sum over f * exp(i q.r)
 # The issue with this is that we get ringing artifacts when we take FFTs, but this is more like real data.
 mol_amps_direct = []
@@ -104,8 +107,12 @@ for k in range(cryst.spacegroup.n_operations):
     x = cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates)
     amp = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t) * 0
     clcore.phase_factor_mesh(x, f_gpu, N=cdmap.shape, q_min=cdmap.h_limits[:, 0]*2*np.pi,
-                             q_max=cdmap.h_limits[:, 1]*2*np.pi, a=amp, add=True)
+                             q_max=cdmap.h_limits[:, 1]*2*np.pi, a=amp, add=False)
     mol_amps_direct.append(amp)
+
+print('k zero direct', ifftshift(mol_amps_direct[0].get())[0, 0, 0])
+# print('k zero direct', ifftshift(mol_amps_direct[0].get())[0:2, 0:2, 0:2])
+# print('k zero direct', ifftshift(mol_amps_direct[0].get())[-2:, -2:, -2:])
 
 # Build the electron densities directly and make amplitudes via FFT.  This avoids ringing artifacts that we get
 # from the direct summation method.
@@ -114,6 +121,10 @@ au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates % cdmap.oversampl
 for k in range(cryst.spacegroup.n_operations):
     rho = cdmap.au_to_k(k, au_map)
     mol_amps_fft.append(clcore.to_device(fftshift(fftn(rho)), dtype=clcore.complex_t))
+
+print('k zero fft', ifftshift(mol_amps_fft[0].get())[0, 0, 0])
+print('sum over f', np.sum(f))
+
 
 # Here we choose which of the above methods will go into the saved results:
 if args.direct_molecular_transform:
