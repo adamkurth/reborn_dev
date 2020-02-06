@@ -182,9 +182,6 @@ class ClCore(object):
         self.real_t = np.float32
         self.complex_t = np.complex64
 
-    # def _load_programs(self):
-    #     self._build_opencl_programs()
-
     def _build_opencl_programs(self):
         clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
         kern_str = open(clcore_file).read()
@@ -413,7 +410,7 @@ class ClCore(object):
         self.mod_squared_complex_to_real_cl(self.queue, (global_size,), (self.group_size,), A_dev.data, I_dev.data,
                                             n, add)
 
-    def phase_factor_qrf_chunk_r(self, q, r, f=None, R=None, U=None, a=None, add=False, n_chunks=1):
+    def phase_factor_qrf_chunk_r(self, q, r, f=None, R=None, U=None, a=None, add=False, n_chunks=1, twopi=False):
 
         r"""
 
@@ -442,6 +439,7 @@ class ClCore(object):
             raise ValueError('phase_factor_qrf_chunk_r requires that r and f are numpy arrays.')
 
         add = self.int_t(add)
+        twopi = self.int_t(twopi)
 
         if f is None:
             f = np.ones(r.shape[0])
@@ -458,14 +456,14 @@ class ClCore(object):
             f_chunk = f[r_rng[0]:(r_rng[-1]+1)]
             if i > 0:
                 add = self.int_t(1)
-            self.phase_factor_qrf(q_dev, r_chunk, f_chunk, R, U, a_dev, add)
+            self.phase_factor_qrf(q_dev, r_chunk, f_chunk, R, U, a_dev, add, twopi)
 
         if a is None:
             return a_dev.get()
         else:
             return a_dev
 
-    def phase_factor_qrf(self, q, r, f=None, R=None, U=None, a=None, add=False):
+    def phase_factor_qrf(self, q, r, f=None, R=None, U=None, a=None, add=False, twopi=False):
 
         r"""
         Calculate diffraction amplitudes according to the sum:
@@ -489,41 +487,27 @@ class ClCore(object):
         if not hasattr(self, 'phase_factor_qrf_cl'):
             self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
             self.phase_factor_qrf_cl.set_scalar_arg_dtypes(
-                [None, None, None, None, None, None, self.int_t, self.int_t, self.int_t])
+                [None, None, None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t])
 
-        if R is None:
-            R = np.eye(3)
-        # R = R.T.copy()  # Transpose R because it will actually rotate q instead of r on the GPU (for speed)
-
-        if U is None:
-            U = np.zeros(3, dtype=self.real_t)
-        # U = np.dot(R, U)  # Because we rotate q instead of r on the GPU, we must rotate U by the transpose of R
-
-        if add:
-            add = 1
-        else:
-            add = 0
-
-        if f is None:
-            f = np.ones(r.shape[0])
-
+        if R is None: R = np.eye(3)
+        if U is None: U = np.zeros(3, dtype=self.real_t)
+        add = self.int_t(add)
+        twopi = self.int_t(twopi)
+        if f is None: f = np.ones(r.shape[0])
         n_pixels = self.int_t(q.shape[0])
         n_atoms = self.int_t(r.shape[0])
         q_dev = self.to_device(q, dtype=self.real_t)
         r_dev = self.to_device(r, dtype=self.real_t)
         f_dev = self.to_device(f, dtype=self.complex_t)
-        a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
+        a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels,))
         R = self.vec16(R, dtype=self.real_t)
         U = self.vec4(U, dtype=self.real_t)
-
         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
-
         self.phase_factor_qrf_cl(self.queue, (global_size,),
                                  (self.group_size,), q_dev.data, r_dev.data,
                                  f_dev.data, R, U, a_dev.data, n_atoms,
-                                 n_pixels, add)
+                                 n_pixels, add, twopi)
         self.queue.finish()
-
         if a is None:
             return a_dev.get()
         else:
@@ -574,20 +558,10 @@ class ClCore(object):
                  None, None, None, None, self.int_t])
 
         n_atoms = r.shape[0]
-        if f is None:
-            f = np.ones(n_atoms, dtype=self.complex_t)
-
-        if R is None:
-            R = np.eye(3)
-
-        if U is None:
-            U = np.zeros(3, dtype=self.real_t)
-        # U = np.dot(R.T, U)
-
-        if add:
-            add = 1
-        else:
-            add = 0
+        if f is None: f = np.ones(n_atoms, dtype=self.complex_t)
+        if R is None: R = np.eye(3)
+        if U is None: U = np.zeros(3, dtype=self.real_t)
+        add = self.int_t(add)
 
         if beam is None and pad is None:
             w = self.real_t(w)
@@ -636,7 +610,7 @@ class ClCore(object):
             return a_dev
 
     def phase_factor_mesh(self, r, f=None, N=None, q_min=None, q_max=None, dq=None, a=None, R=None, U=None, add=False,
-                          density_map=None):
+                          density_map=None, twopi=False):
 
         r"""
         Compute the following sum on a regular 3D mesh of q samples:
@@ -674,20 +648,14 @@ class ClCore(object):
         if not hasattr(self, 'phase_factor_mesh_cl'):
             self.phase_factor_mesh_cl = self.programs.phase_factor_mesh
             self.phase_factor_mesh_cl.set_scalar_arg_dtypes(
-                [None, None, None, self.int_t, self.int_t, None, None, None, None, None, self.int_t])
+                [None, None, None, self.int_t, self.int_t, None, None, None, None, None, self.int_t, self.int_t])
 
         n_atoms = r.shape[0]
-        if f is None:
-            f = np.ones(n_atoms, dtype=self.complex_t)
-
-        if add:
-            add = 1
-        else:
-            add = 0
-        if R is None:
-            R = np.eye(3)
-        if U is None:
-            U = np.zeros(3, dtype=self.real_t)
+        if f is None: f = np.ones(n_atoms, dtype=self.complex_t)
+        add = self.int_t(add)
+        twopi = self.int_t(twopi)
+        if R is None: R = np.eye(3)
+        if U is None: U = np.zeros(3, dtype=self.real_t)
 
         R = self.vec16(R, dtype=self.real_t)
         U = self.vec4(U, dtype=self.real_t)
@@ -730,7 +698,7 @@ class ClCore(object):
         self.phase_factor_mesh_cl(self.queue, (global_size,),
                                   (self.group_size,), r_dev.data, f_dev.data,
                                   a_dev.data, n_pixels, n_atoms, N, deltaQ,
-                                  q_min, R, U, add)
+                                  q_min, R, U, add, twopi)
         self.queue.finish()
 
         if a is None:
@@ -745,7 +713,7 @@ class ClCore(object):
         return self.mesh_interpolation(*args, **kwargs)
 
     def mesh_interpolation(self, a_map, q, N=None, q_min=None, q_max=None, dq=None, R=None, U=None, a=None,
-                           density_map=None, add=False):
+                           density_map=None, add=False, twopi=False):
 
         r"""
         This is supposed to lookup intensities from a 3d mesh of amplitudes.
@@ -767,20 +735,15 @@ class ClCore(object):
         """
 
         if not hasattr(self, 'mesh_interpolation_cl'):
-            arg_types = [None, None, None, self.int_t, None, None, None, None, None, self.int_t, self.int_t]
+            arg_types = [None, None, None, self.int_t, None, None, None, None, None, self.int_t, self.int_t, self.int_t]
             self.mesh_interpolation_cl = self.programs.mesh_interpolation
             self.mesh_interpolation_cl.set_scalar_arg_dtypes(arg_types)
             self.mesh_interpolation_real_cl = self.programs.mesh_interpolation_real
             self.mesh_interpolation_real_cl.set_scalar_arg_dtypes(arg_types)
 
-        if add is True:
-            add = self.int_t(1)
-        else:
-            add = self.int_t(0)
-
-        if R is None:
-            R = np.eye(3)
-
+        add = self.int_t(add)
+        twopi = self.int_t(twopi)
+        if R is None: R = np.eye(3)
         if U is None:
             do_translate = self.int_t(0)
             U = np.zeros(3, dtype=self.real_t)
@@ -826,7 +789,7 @@ class ClCore(object):
 
             self.mesh_interpolation_cl(self.queue, (global_size,), (self.group_size,),
                                        a_map_dev.data, q_dev.data, a_out_dev.data,
-                                       n_pixels, N, dq, q_min, R, U, do_translate, add)
+                                       n_pixels, N, dq, q_min, R, U, do_translate, add, twopi)
         elif a_map.dtype == self.real_t:
             a_map_dev = self.to_device(a_map, dtype=self.real_t)
             q_dev = self.to_device(q, dtype=self.real_t)
@@ -838,7 +801,7 @@ class ClCore(object):
             global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
 
             self.mesh_interpolation_real_cl(self.queue, (global_size,), (self.group_size,), a_map_dev.data, q_dev.data,
-                                            a_out_dev.data, n_pixels, N, dq, q_min, R, U, do_translate, add)
+                                            a_out_dev.data, n_pixels, N, dq, q_min, R, U, do_translate, add, twopi)
 
         self.queue.finish()
 
@@ -924,10 +887,6 @@ class ClCore(object):
         nF = self.int_t(nF)
         nS = self.int_t(nS)
         n_pixels = self.int_t(nF * nS)
-        if add is True:
-            add = 1
-        else:
-            add = 0
         add = self.int_t(add)
 
         abc = self.vec16(abc, dtype=self.real_t)
@@ -1044,362 +1003,362 @@ class ClCore(object):
         self.queue.finish()
 
 
-class ClCoreDerek(ClCore):
-
-    def __init__(self, *args, **kwargs):
-
-        ClCore.__init__(self, *args, **kwargs)
-
-        # important for comermann pipeline
-        self.primed_cromermann = False
-
-        self.qrf_cromer_mann_cl = self.programs.qrf_cromer_mann
-        self.qrf_cromer_mann_cl.set_scalar_arg_dtypes([None, None, None, None, None, self.int_t])
-
-    @staticmethod
-    def to_device_static(array, dtype, queue):
-        """
-        Static method
-
-        This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
-        array into a pyopencl.array and send it to the device memory.  So far this only
-        deals with float and comlex arrays, and it should figure out which type it is.
-
-        Arguments:
-            array (numpy/cl array; float/complex type): Input array.
-            dtype (np.dtype): Specify the desired type in opencl.  The two types that
-                               are useful here are np.float32 and np.complex64
-            queue, CL queue
-        Returns:
-            pyopencl array
-        """
-
-        # TODO: why does this method exist?  It is not used anywhere.
-        if isinstance(array, cl_array):
-            return array
-
-        return cl.array.to_device(queue, np.ascontiguousarray(array.astype(dtype)))
-
-    def phase_factor_qrf_inplace(self, q, r, f, R=None, q_is_qdev=False):
-
-        r"""
-        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
-
-        Arguments:
-            q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
-            r (numpy/cl float array [M,3]): Atomic coordinates.
-            f (numpy/cl complex array [M]): Complex scattering factors.
-            R (numpy array [3,3]): Rotation matrix acting on atom vectors
-                (we quietly transpose R and let it operate on q-vectors for speedups)
-            a (cl complex array [N]): Optional container for complex scattering
-              amplitudes.
-
-        Returns:
-            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
-              if there are input cl arrays.
-        """
-
-        if R is None:
-            R = np.eye(3, dtype=self.real_t)
-        R = self.vec16(R.T, dtype=self.real_t)
-
-        n_pixels = self.int_t(q.shape[0])
-        n_atoms = self.int_t(r.shape[0])
-        if not q_is_qdev:
-            q_dev = self.to_device(q, dtype=self.real_t)
-        else:
-            q_dev = q
-        r_dev = self.to_device(r, dtype=self.real_t)
-        f_dev = self.to_device(f, dtype=self.complex_t)
-        #R16_dev = self.to_device(R16, dtype=self.real_t)
-
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
-                             * self.group_size)
-
-        add=self.int_t(1) # inplace always adds...
-        self.phase_factor_qrf_cl(self.queue, (global_size,),
-                                 (self.group_size,), q_dev.data,
-                                 r_dev.data,
-                                 f_dev.data,
-                                 R,
-                                 self.a_dev.data,
-                                 n_atoms,
-                                 n_pixels, add)
-
-    def init_amps(self, Npix):
-
-        r"""
-
-        Initialize amplitudes for cromer-mann simulator as zeros
-
-        Arguments:
-            Npix:
-
-        Returns:
-            None
-        """
-
-        self.a_dev = self.to_device(np.zeros(Npix), dtype=self.complex_t, shape=(Npix))
-
-    def release_amps(self, reset=False):
-
-        r"""
-
-        retrieve scattering amplitudes from cromer-mann simulator
-
-        Arguments:
-            reset:
-                whether to reset the amplitudes to zeros
-
-        Returns:
-
-        """
-
-        amps = self.a_dev.get()
-        if reset:
-            self.init_amps(amps.shape[0])
-        return amps
-
-    def prime_cromermann_simulator(self, q_vecs, atomic_nums=None, incoherent=False):
-        """
-        Prepare special array data for cromermann simulation
-
-        Arguments:
-            q_vecs (np.ndarray) :
-                Npixels x 3 array of cartesian pixels qx, qy, qz
-            atomic_num (np.ndarray) :
-                Natoms x 1 array of atomic numbers corresponding
-                to the atoms in the target
-            incoherent bool:
-                Whether to make form factors random
-        """
-
-        self.q_vecs = q_vecs
-
-        self.Npix = self.int_t(q_vecs.shape[0])
-
-        # allow these to overflow
-        self.Nextra_pix = self.int_t(self.group_size - self.Npix % self.group_size)
-
-        if atomic_nums is None:
-            if not incoherent:
-                self.form_facts_arr = np.ones((self.Npix + self.Nextra_pix, 1), dtype=self.real_t)
-            else:
-                self.form_facts_arr = 2*np.pi * \
-                        np.random.random((self.Npix + self.Nextra_pix, 1)).astype( dtype=self.real_t)
-            self.atomIDs = None
-            self.Nspecies = 1
-            self._load_amp_buffer()
-            self.primed_cromermann = True
-            return
-
-        croman_coef = refdata.get_cromermann_parameters(atomic_nums)
-        form_facts_dict = refdata.get_cmann_form_factors(croman_coef, self.q_vecs)
-
-        lookup = {}  # for matching atomID to atomic number
-
-        self.form_facts_arr = np.zeros(
-            (self.Npix + self.Nextra_pix, len(form_facts_dict)), dtype=self.real_t)
-
-        for i, z in enumerate(form_facts_dict):
-            lookup[z] = i  # set the key
-            self.form_facts_arr[:self.Npix, i] = form_facts_dict[z]
-
-        self.atomIDs = np.array([lookup[z] for z in atomic_nums])
-
-        self.Nspecies = np.unique(atomic_nums).size
-
-        assert (self.Nspecies < 13)  # can easily change this later if necessary...
-        # ^ this assertion is so we can pass inputs to GPU as a float16, 3 q vectors and 13 atom species
-        # where one is reserved to be a dummie
-
-        #       load the amplitudes
-        self._load_amp_buffer()
-
-        self.primed_cromermann = True
-
-    def get_r_cromermann(self, atom_vecs, sub_com=False):
-
-        r"""
-        combine atomic vectors and atomic flux factors into an openCL buffer
-
-        Arguments:
-            atom_vecs (np.ndarray):
-                Atomic positions
-
-            sub_com (bool):
-                Whether to sub the center of mass from the atom vecs
-
-        Returns:
-            pyopenCL buffer data :
-                Natoms x 4 contiguous openCL buffer array
-        """
-
-        assert (self.primed_cromermann), "run ClCore.prime_comermann_simulator first"
-
-        if sub_com:
-            atom_vecs -= atom_vecs.mean(0)
-
-        self._load_r_buffer(atom_vecs)
-
-        return self.r_buff.data
-
-    def _load_r_buffer(self, atom_vecs):
-        """
-        makes the r buffer for use in the cromer-mann simulator, where
-        r-vector is Nx4, the last dimension being atomic number
-        used for lookup of form factor
-        """
-        if self.atomIDs is not None:
-            self.r_vecs = np.concatenate(
-                (atom_vecs, self.atomIDs[:, None]), axis=1)
-        else:
-            self.r_vecs = np.concatenate(
-                (atom_vecs, np.zeros((atom_vecs.shape[0], 1))), axis=1)
-
-        self.Nato = self.r_vecs.shape[0]
-
-        self.r_buff = self.to_device(self.r_vecs, dtype=self.real_t)
-
-    def get_q_cromermann(self):
-        """
-        combine form factors and q-vectors and load onto a CL buffer
-
-        Arguments:
-
-            q_vecs (np.ndarray) :
-                Npixels x 3 array (inverse angstroms)
-
-            atomic_nums (np.ndarray) :
-                Natoms x 1 array of atomic numbers
-
-        Returns:
-            pyopenCL buffer data :
-                Npixelbuff x 16 contiguous openCL buffer array
-                where Npixel buff is the first multiple of
-                group_size that is greater than Npixels
-
-        """
-
-        assert (self.primed_cromermann), "run ClCore.prime_comermann_simulator first"
-
-        #       load onto device
-        self._load_q_buffer()
-
-        return self.q_buff.data
-
-    def _load_q_buffer(self):
-        """
-        makes the q_buffer so that is it integer mutiple of group size
-        this is for the cromer-mann simnulator
-        """
-        q_zeros = np.zeros((self.Npix + self.Nextra_pix, 16))
-        q_zeros[:self.Npix, :3] = self.q_vecs
-        q_zeros[:, 3:3 + self.Nspecies] = self.form_facts_arr
-        self.q_buff = self.to_device(q_zeros, dtype=self.real_t)
-
-    def _load_amp_buffer(self):
-        """
-        makes the amplitude buffer so that it is integer multiple of groupsize
-        """
-        #make output buffer; initialize as 0s
-        self.A_buff = self.to_device(
-            np.zeros(self.Npix + self.Nextra_pix), dtype=self.complex_t)
-
-        self._A_buff_data = self.A_buff.data
-
-    def run_cromermann(self, q_buff_data, r_buff_data,
-                    rand_rot=False, force_rot_mat=None, com=None):
-
-        r"""
-        Run the cromer-mann form-factor simulator.
-
-        Arguments
-            q_buff_data (pyopenCL buffer data) :
-                should have shape NpixelsCLx16 where
-                NpixelsCL is the first multiple of group_size greater than
-                Npixels.
-                Use :func:`get_group_size` to check the currently
-                set group_size. The data stored in
-                q[Npixels,:3] should be the q-vectors.
-                The data stored in q[Npixels,3:Nspecies] should be the
-                q-dependent atomic form factors for up to Nspecies=13
-                atom species See :func:`prime_comermann_simulator`
-                for details regarding the form factor storage and atom
-                species identifier
-
-            r_buff_data (pyopenCL buffer data) :
-                Should have shape Natomsx4. The data stored in
-                r_buff_data[:,:3] are the atomic positions in cartesian
-                (x,y,z).  The data stored in r_buff_data[:,3] are
-                the atom species identifiers (0,1,..Nspecies-1)
-                mapping the atom species here to the form factor value
-                in q_buff_data.
-
-            rand_rot (bool) :
-                Randomly rotate the molecule
-
-            force_rand_rot (np.ndarray) :
-                Supply a specific rotation matrix that operates on molecules
-
-            com (np.ndarray) :
-                Offset the center of mass of the molecule
-
-        .. note::
-            For atom r_i the atom species identifier is sp_i =
-            r_buff_data[r_i,3].
-            Then, for pixel q_i, the simulator can find the corresponding
-            form factor in q_buff_dat[q_i,3+sp_i].
-            I know it is confusing, but it's efficient.
-        """
-
-        #       set the rotation
-        if rand_rot:
-            self.rot_mat = ba.utils.random_rotation().ravel().astype(self.real_t)
-        elif force_rot_mat is not None:
-            self.rot_mat = force_rot_mat.astype(self.real_t)
-        else:
-            self.rot_mat = np.eye(3).ravel().astype(self.real_t)
-
-        self._set_rand_rot()
-
-        #       set the center of mass
-        if com is not None:
-            self.com_vec = com.astype(self.real_t)
-        else:
-            self.com_vec = np.zeros(3).astype(self.real_t)
-        self._set_com_vec()
-
-        #       run the program
-        self.qrf_cromer_mann_cl( self.queue, (int(self.Npix + self.Nextra_pix),),
-            (self.group_size,), q_buff_data, r_buff_data,
-            self.rot_buff.data, self.com_buff.data,
-            self._A_buff_data, self.Nato)
-
-    def _set_rand_rot(self):
-        r"""Sets the random rotation matrix on device"""
-
-        self.rot_buff = self.to_device(self.rot_mat, dtype=self.real_t)
-
-    def _set_com_vec(self):
-        """sets the center-of mass vectors on the device"""
-        self.com_buff = self.to_device(self.com_vec, dtype=self.real_t)
-
-    def release_amplitudes(self, reset=False):
-        r"""
-        Releases the amplitude buffer from the GPU
-
-        Arguments:
-            reset (bool) : Reset the amplitude buffer to 0's on the GPU
-
-        Returns (np.ndarray) : Scattering amplitudes
-        """
-
-        Amps = self.A_buff.get()[:-self.Nextra_pix]
-        if reset:
-            self._load_amp_buffer()
-        return Amps
-
+# class ClCoreDerek(ClCore):
+#
+#     def __init__(self, *args, **kwargs):
+#
+#         ClCore.__init__(self, *args, **kwargs)
+#
+#         # important for comermann pipeline
+#         self.primed_cromermann = False
+#
+#         self.qrf_cromer_mann_cl = self.programs.qrf_cromer_mann
+#         self.qrf_cromer_mann_cl.set_scalar_arg_dtypes([None, None, None, None, None, self.int_t])
+#
+#     @staticmethod
+#     def to_device_static(array, dtype, queue):
+#         """
+#         Static method
+#
+#         This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
+#         array into a pyopencl.array and send it to the device memory.  So far this only
+#         deals with float and comlex arrays, and it should figure out which type it is.
+#
+#         Arguments:
+#             array (numpy/cl array; float/complex type): Input array.
+#             dtype (np.dtype): Specify the desired type in opencl.  The two types that
+#                                are useful here are np.float32 and np.complex64
+#             queue, CL queue
+#         Returns:
+#             pyopencl array
+#         """
+#
+#         # TODO: why does this method exist?  It is not used anywhere.
+#         if isinstance(array, cl_array):
+#             return array
+#
+#         return cl.array.to_device(queue, np.ascontiguousarray(array.astype(dtype)))
+#
+#     def phase_factor_qrf_inplace(self, q, r, f, R=None, q_is_qdev=False):
+#
+#         r"""
+#         Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
+#
+#         Arguments:
+#             q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
+#             r (numpy/cl float array [M,3]): Atomic coordinates.
+#             f (numpy/cl complex array [M]): Complex scattering factors.
+#             R (numpy array [3,3]): Rotation matrix acting on atom vectors
+#                 (we quietly transpose R and let it operate on q-vectors for speedups)
+#             a (cl complex array [N]): Optional container for complex scattering
+#               amplitudes.
+#
+#         Returns:
+#             (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
+#               if there are input cl arrays.
+#         """
+#
+#         if R is None:
+#             R = np.eye(3, dtype=self.real_t)
+#         R = self.vec16(R.T, dtype=self.real_t)
+#
+#         n_pixels = self.int_t(q.shape[0])
+#         n_atoms = self.int_t(r.shape[0])
+#         if not q_is_qdev:
+#             q_dev = self.to_device(q, dtype=self.real_t)
+#         else:
+#             q_dev = q
+#         r_dev = self.to_device(r, dtype=self.real_t)
+#         f_dev = self.to_device(f, dtype=self.complex_t)
+#         #R16_dev = self.to_device(R16, dtype=self.real_t)
+#
+#         global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
+#                              * self.group_size)
+#
+#         add=self.int_t(1) # inplace always adds...
+#         self.phase_factor_qrf_cl(self.queue, (global_size,),
+#                                  (self.group_size,), q_dev.data,
+#                                  r_dev.data,
+#                                  f_dev.data,
+#                                  R,
+#                                  self.a_dev.data,
+#                                  n_atoms,
+#                                  n_pixels, add)
+#
+#     def init_amps(self, Npix):
+#
+#         r"""
+#
+#         Initialize amplitudes for cromer-mann simulator as zeros
+#
+#         Arguments:
+#             Npix:
+#
+#         Returns:
+#             None
+#         """
+#
+#         self.a_dev = self.to_device(np.zeros(Npix), dtype=self.complex_t, shape=(Npix))
+#
+#     def release_amps(self, reset=False):
+#
+#         r"""
+#
+#         retrieve scattering amplitudes from cromer-mann simulator
+#
+#         Arguments:
+#             reset:
+#                 whether to reset the amplitudes to zeros
+#
+#         Returns:
+#
+#         """
+#
+#         amps = self.a_dev.get()
+#         if reset:
+#             self.init_amps(amps.shape[0])
+#         return amps
+#
+#     def prime_cromermann_simulator(self, q_vecs, atomic_nums=None, incoherent=False):
+#         """
+#         Prepare special array data for cromermann simulation
+#
+#         Arguments:
+#             q_vecs (np.ndarray) :
+#                 Npixels x 3 array of cartesian pixels qx, qy, qz
+#             atomic_num (np.ndarray) :
+#                 Natoms x 1 array of atomic numbers corresponding
+#                 to the atoms in the target
+#             incoherent bool:
+#                 Whether to make form factors random
+#         """
+#
+#         self.q_vecs = q_vecs
+#
+#         self.Npix = self.int_t(q_vecs.shape[0])
+#
+#         # allow these to overflow
+#         self.Nextra_pix = self.int_t(self.group_size - self.Npix % self.group_size)
+#
+#         if atomic_nums is None:
+#             if not incoherent:
+#                 self.form_facts_arr = np.ones((self.Npix + self.Nextra_pix, 1), dtype=self.real_t)
+#             else:
+#                 self.form_facts_arr = 2*np.pi * \
+#                         np.random.random((self.Npix + self.Nextra_pix, 1)).astype( dtype=self.real_t)
+#             self.atomIDs = None
+#             self.Nspecies = 1
+#             self._load_amp_buffer()
+#             self.primed_cromermann = True
+#             return
+#
+#         croman_coef = refdata.get_cromermann_parameters(atomic_nums)
+#         form_facts_dict = refdata.get_cmann_form_factors(croman_coef, self.q_vecs)
+#
+#         lookup = {}  # for matching atomID to atomic number
+#
+#         self.form_facts_arr = np.zeros(
+#             (self.Npix + self.Nextra_pix, len(form_facts_dict)), dtype=self.real_t)
+#
+#         for i, z in enumerate(form_facts_dict):
+#             lookup[z] = i  # set the key
+#             self.form_facts_arr[:self.Npix, i] = form_facts_dict[z]
+#
+#         self.atomIDs = np.array([lookup[z] for z in atomic_nums])
+#
+#         self.Nspecies = np.unique(atomic_nums).size
+#
+#         assert (self.Nspecies < 13)  # can easily change this later if necessary...
+#         # ^ this assertion is so we can pass inputs to GPU as a float16, 3 q vectors and 13 atom species
+#         # where one is reserved to be a dummie
+#
+#         #       load the amplitudes
+#         self._load_amp_buffer()
+#
+#         self.primed_cromermann = True
+#
+#     def get_r_cromermann(self, atom_vecs, sub_com=False):
+#
+#         r"""
+#         combine atomic vectors and atomic flux factors into an openCL buffer
+#
+#         Arguments:
+#             atom_vecs (np.ndarray):
+#                 Atomic positions
+#
+#             sub_com (bool):
+#                 Whether to sub the center of mass from the atom vecs
+#
+#         Returns:
+#             pyopenCL buffer data :
+#                 Natoms x 4 contiguous openCL buffer array
+#         """
+#
+#         assert (self.primed_cromermann), "run ClCore.prime_comermann_simulator first"
+#
+#         if sub_com:
+#             atom_vecs -= atom_vecs.mean(0)
+#
+#         self._load_r_buffer(atom_vecs)
+#
+#         return self.r_buff.data
+#
+#     def _load_r_buffer(self, atom_vecs):
+#         """
+#         makes the r buffer for use in the cromer-mann simulator, where
+#         r-vector is Nx4, the last dimension being atomic number
+#         used for lookup of form factor
+#         """
+#         if self.atomIDs is not None:
+#             self.r_vecs = np.concatenate(
+#                 (atom_vecs, self.atomIDs[:, None]), axis=1)
+#         else:
+#             self.r_vecs = np.concatenate(
+#                 (atom_vecs, np.zeros((atom_vecs.shape[0], 1))), axis=1)
+#
+#         self.Nato = self.r_vecs.shape[0]
+#
+#         self.r_buff = self.to_device(self.r_vecs, dtype=self.real_t)
+#
+#     def get_q_cromermann(self):
+#         """
+#         combine form factors and q-vectors and load onto a CL buffer
+#
+#         Arguments:
+#
+#             q_vecs (np.ndarray) :
+#                 Npixels x 3 array (inverse angstroms)
+#
+#             atomic_nums (np.ndarray) :
+#                 Natoms x 1 array of atomic numbers
+#
+#         Returns:
+#             pyopenCL buffer data :
+#                 Npixelbuff x 16 contiguous openCL buffer array
+#                 where Npixel buff is the first multiple of
+#                 group_size that is greater than Npixels
+#
+#         """
+#
+#         assert (self.primed_cromermann), "run ClCore.prime_comermann_simulator first"
+#
+#         #       load onto device
+#         self._load_q_buffer()
+#
+#         return self.q_buff.data
+#
+#     def _load_q_buffer(self):
+#         """
+#         makes the q_buffer so that is it integer mutiple of group size
+#         this is for the cromer-mann simnulator
+#         """
+#         q_zeros = np.zeros((self.Npix + self.Nextra_pix, 16))
+#         q_zeros[:self.Npix, :3] = self.q_vecs
+#         q_zeros[:, 3:3 + self.Nspecies] = self.form_facts_arr
+#         self.q_buff = self.to_device(q_zeros, dtype=self.real_t)
+#
+#     def _load_amp_buffer(self):
+#         """
+#         makes the amplitude buffer so that it is integer multiple of groupsize
+#         """
+#         #make output buffer; initialize as 0s
+#         self.A_buff = self.to_device(
+#             np.zeros(self.Npix + self.Nextra_pix), dtype=self.complex_t)
+#
+#         self._A_buff_data = self.A_buff.data
+#
+#     def run_cromermann(self, q_buff_data, r_buff_data,
+#                     rand_rot=False, force_rot_mat=None, com=None):
+#
+#         r"""
+#         Run the cromer-mann form-factor simulator.
+#
+#         Arguments
+#             q_buff_data (pyopenCL buffer data) :
+#                 should have shape NpixelsCLx16 where
+#                 NpixelsCL is the first multiple of group_size greater than
+#                 Npixels.
+#                 Use :func:`get_group_size` to check the currently
+#                 set group_size. The data stored in
+#                 q[Npixels,:3] should be the q-vectors.
+#                 The data stored in q[Npixels,3:Nspecies] should be the
+#                 q-dependent atomic form factors for up to Nspecies=13
+#                 atom species See :func:`prime_comermann_simulator`
+#                 for details regarding the form factor storage and atom
+#                 species identifier
+#
+#             r_buff_data (pyopenCL buffer data) :
+#                 Should have shape Natomsx4. The data stored in
+#                 r_buff_data[:,:3] are the atomic positions in cartesian
+#                 (x,y,z).  The data stored in r_buff_data[:,3] are
+#                 the atom species identifiers (0,1,..Nspecies-1)
+#                 mapping the atom species here to the form factor value
+#                 in q_buff_data.
+#
+#             rand_rot (bool) :
+#                 Randomly rotate the molecule
+#
+#             force_rand_rot (np.ndarray) :
+#                 Supply a specific rotation matrix that operates on molecules
+#
+#             com (np.ndarray) :
+#                 Offset the center of mass of the molecule
+#
+#         .. note::
+#             For atom r_i the atom species identifier is sp_i =
+#             r_buff_data[r_i,3].
+#             Then, for pixel q_i, the simulator can find the corresponding
+#             form factor in q_buff_dat[q_i,3+sp_i].
+#             I know it is confusing, but it's efficient.
+#         """
+#
+#         #       set the rotation
+#         if rand_rot:
+#             self.rot_mat = ba.utils.random_rotation().ravel().astype(self.real_t)
+#         elif force_rot_mat is not None:
+#             self.rot_mat = force_rot_mat.astype(self.real_t)
+#         else:
+#             self.rot_mat = np.eye(3).ravel().astype(self.real_t)
+#
+#         self._set_rand_rot()
+#
+#         #       set the center of mass
+#         if com is not None:
+#             self.com_vec = com.astype(self.real_t)
+#         else:
+#             self.com_vec = np.zeros(3).astype(self.real_t)
+#         self._set_com_vec()
+#
+#         #       run the program
+#         self.qrf_cromer_mann_cl( self.queue, (int(self.Npix + self.Nextra_pix),),
+#             (self.group_size,), q_buff_data, r_buff_data,
+#             self.rot_buff.data, self.com_buff.data,
+#             self._A_buff_data, self.Nato)
+#
+#     def _set_rand_rot(self):
+#         r"""Sets the random rotation matrix on device"""
+#
+#         self.rot_buff = self.to_device(self.rot_mat, dtype=self.real_t)
+#
+#     def _set_com_vec(self):
+#         """sets the center-of mass vectors on the device"""
+#         self.com_buff = self.to_device(self.com_vec, dtype=self.real_t)
+#
+#     def release_amplitudes(self, reset=False):
+#         r"""
+#         Releases the amplitude buffer from the GPU
+#
+#         Arguments:
+#             reset (bool) : Reset the amplitude buffer to 0's on the GPU
+#
+#         Returns (np.ndarray) : Scattering amplitudes
+#         """
+#
+#         Amps = self.A_buff.get()[:-self.Nextra_pix]
+#         if reset:
+#             self._load_amp_buffer()
+#         return Amps
+#
 
 def help():
 

@@ -106,16 +106,14 @@ kernel void test_atomic_add_real(global dsfloat * a, global dsfloat * b, int len
 //} while( current.u != expected.u );
 //}
 
-static int linear_congruential(int n)
-{
-// Experimental... random number using linear congruential and constants from Numerical Recipes
-    n = (1664525*n + 1013904223) % 4294967296;
-    return n;
-}
-
+//static int linear_congruential(int n)
+//{
+//// Experimental... random number using linear congruential and constants from Numerical Recipes
+//    n = (1664525*n + 1013904223) % 4294967296;
+//    return n;
+//}
 
 // Rotate a vector
-
 static dsfloat4 rotate_vec(
     const dsfloat16 R,
     const dsfloat4 v)
@@ -130,7 +128,6 @@ static dsfloat4 rotate_vec(
 }
 
 // Rotate a vector but use the transpose of the rotation matrix
-
 static dsfloat4 transpose_rotate_vec(
     const dsfloat16 R,
     const dsfloat4 v)
@@ -145,18 +142,15 @@ static dsfloat4 transpose_rotate_vec(
 }
 
 // Rotate then translate a vector
-
 kernel void rotate_translate_vectors(
     const dsfloat16 R,
     const dsfloat4 U,
     global dsfloat *v_in,
     global dsfloat *v_out,
-    int n_vectors)
-{
+    int n_vectors
+){
     const int gi = get_global_id(0); /* Global index */
-
     dsfloat4 tmp;
-
     if (gi < n_vectors){
         dsfloat4 vec = (dsfloat4)(v_in[gi*3],v_in[gi*3+1],v_in[gi*3+2],0.0f);
         tmp = rotate_vec(R, vec) + U;
@@ -167,15 +161,13 @@ kernel void rotate_translate_vectors(
 }
 
 // Test rotate vector
-
 kernel void test_rotate_vec(
     const dsfloat16 R,
     const dsfloat4 U,
     const dsfloat4 v,
-    global dsfloat4 *v_out)
-{
+    global dsfloat4 *v_out
+){
     const int gi = get_global_id(0); /* Global index */
-
     if (gi == 0){
         dsfloat4 v_temp = rotate_vec(R, v) + U;
         v_out[0].x = v_temp.x;
@@ -185,7 +177,6 @@ kernel void test_rotate_vec(
 }
 
 // Test simple summation
-
 kernel void test_simple_sum(
     global dsfloat *in,
     global dsfloat *out,
@@ -193,18 +184,15 @@ kernel void test_simple_sum(
 {
     const int gi = get_global_id(0); /* Global index */
     dsfloat tot = 0;
-
     if (gi == 0){
         for (int g=0; g<n; g++){
             tot = tot + in[g];
         }
         out[0] = tot;
     }
-
 }
 
 // Calculate the scattering vectors for a pixel-array detector
-
 static dsfloat4 q_pad(
     const int i,     // Pixel fast-scan index
     const int j,     // Pixel slow-scan index
@@ -214,15 +202,11 @@ static dsfloat4 q_pad(
     const dsfloat4 S,  // Slow-scan basis vector
     const dsfloat4 B   // Incident beam unit vector
 ){
-
     dsfloat4 V = T + i*F + j*S;
     V /= sqrt(dot(V,V));
     dsfloat4 q = (V-B)*PI2/w;
-
     return q;
-
 }
-
 
 // Given a bunch of vectors q, sum the amplitudes from a collection of atoms for a given scattering vector:
 //
@@ -230,7 +214,6 @@ static dsfloat4 q_pad(
 //
 // ** There is one complication: we attempt to speed up the summation by making workers move atomic coordinates
 // and scattering factors to a local memory buffer in parallel, in hopes of faster computation (is it really faster?)
-
 static dsfloat2 phase_factor(
     const dsfloat4 q,         // Scattering vector
     const dsfloat16 R,        // Rotation applied to positions
@@ -241,20 +224,15 @@ static dsfloat2 phase_factor(
     local dsfloat4 *rg,       // Local storage for chunk of atom positions          (local dsfloat4 rg[GROUP_SIZE];)
     local dsfloat2 *fg,       // Local storage for chunk of atom scattering factors (local dsfloat2 fg[GROUP_SIZE];)
     const int li              // Local index of this worker (i.e. group member ID)
-)
-{
+){
     int ai;
     dsfloat ph, sinph, cosph;
     dsfloat2 a_temp;
     dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
-
     for (int g=0; g<n_atoms; g+=GROUP_SIZE){
-
         // Here we will move a chunk of atoms to local memory.  Each worker in a
         // group moves one atom.
-
         ai = g+li; // Index of the global array of atoms that this worker will move in this particular iteration
-
         if (ai < n_atoms ){
             rg[li] = rotate_vec(R, (dsfloat4)(r[ai*3],r[ai*3+1],r[ai*3+2],0.0f)) + U;
             fg[li] = f[ai];
@@ -262,33 +240,58 @@ static dsfloat2 phase_factor(
             rg[li] = (dsfloat4)(0.0f,0.0f,0.0f,0.0f);
             fg[li] = (dsfloat2)(0.0f,0.0f);
         }
-
         // Don't proceed until **all** members of the group have finished moving
         // atom information into local memory.
         barrier(CLK_LOCAL_MEM_FENCE);
-
         // We use a local real and imaginary part to avoid floating point overflow
         a_temp = (dsfloat2)(0.0f,0.0f);
-
         // Now sum up the amplitudes from this subset of atoms
         for (int n=0; n < GROUP_SIZE; n++){
             ph = -dot(q,rg[n]);
-//            ph = -(q.x*rg[n].x + q.y*rg[n].y + q.z*rg[n].z);
             sinph = native_sin(ph);
             cosph = native_cos(ph);
             a_temp.x += fg[n].x*cosph - fg[n].y*sinph;
             a_temp.y += fg[n].x*sinph + fg[n].y*cosph;
         }
         a_sum += a_temp;
-
         // Don't proceed until this subset of atoms are completed.
         barrier(CLK_LOCAL_MEM_FENCE);
     }
-
     return a_sum;
 }
 
 
+// Given a bunch of vectors q, sum the amplitudes from a collection of atoms for a given scattering vector:
+//
+//    SUM_i f_i * exp(-i*q.(r_i+U))
+//
+// ** There is one complication: we attempt to speed up the summation by making workers move atomic coordinates
+// and scattering factors to a local memory buffer in parallel, in hopes of faster computation (is it really faster?)
+static dsfloat2 phase_factor_slow(
+    const dsfloat4 q,         // Scattering vector
+    const dsfloat16 R,        // Rotation applied to positions
+    const dsfloat4 U,         // Shift added to positions (after rotation)
+    global const dsfloat *r,  // Atomic coordinates
+    global const dsfloat2 *f, // Atomic scattering factors
+    const int n_atoms         // Number of atoms
+){
+    dsfloat ph, sinph, cosph;
+    dsfloat4 rn;
+    dsfloat2 fn;
+    dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
+    for (int n=0; n<n_atoms; n++){
+        rn = rotate_vec(R, (dsfloat4)(r[n*3],r[n*3+1],r[n*3+2],0.0f)) + U;
+        fn = f[n];
+        ph = -dot(q,rn);
+        sinph = native_sin(ph);
+        cosph = native_cos(ph);
+        a_sum.x += fn.x*cosph - fn.y*sinph;
+        a_sum.y += fn.x*sinph + fn.y*cosph;
+    }
+    return a_sum;
+}
+
+// Just return the group size; check that the macro is defined properly
 kernel void get_group_size(
     global int *g){
     const int gi = get_global_id(0);
@@ -296,7 +299,6 @@ kernel void get_group_size(
         g[gi] = GROUP_SIZE;
     }
 }
-
 
 // Take the mod square of an array of complex numbers.  This is supposed to be
 // possible with the pyopencl.array.Array class, but I only get seg. faults...
@@ -315,7 +317,6 @@ kernel void divide_nonzero_inplace_real(global dsfloat *A, global const dsfloat 
 
 // Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
 // This variant allows for an arbitrary collection of scattering vectors
-
 kernel void phase_factor_qrf(
     global const dsfloat *q,  // Scattering vectors
     global const dsfloat *r,  // Atomic postion vectors
@@ -323,84 +324,59 @@ kernel void phase_factor_qrf(
     const dsfloat16 R,        // Rotation matrix
     const dsfloat4 U,         // Translation vector acting on positions
     global dsfloat2 *a,       // The summed scattering amplitudes (output)
-    const int n_atoms,      // Number of atoms
-    const int n_pixels,     // Number of pixels
-    const int add)          // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
-{
+    const int n_atoms,        // Number of atoms
+    const int n_pixels,       // Number of pixels
+    const int add,            // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
+    const int twopi           // Multiply q by 2 pi
+){
     const int gi = get_global_id(0); /* Global index */
     const int li = get_local_id(0);  /* Local group index */
-
-    dsfloat4 q4r;
-
-    // If the pixel index is not out of bounds...
-    if (gi < n_pixels){
-
-        // Move the global scattering vector to private memory
-        q4r = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
-
-        // Rotate the scattering vector
-//        q4r = rotate_vec(R, q4r);
-
-    } else { q4r = (dsfloat4)(0.0f,0.0f,0.0f,0.0f); }
-
-    // Sum over atomic scattering amplitudes
+    dsfloat4 qmod = (dsfloat4)(0.0f,0.0f,0.0f,0.0f);
     dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
     local dsfloat4 rg[GROUP_SIZE];
     local dsfloat2 fg[GROUP_SIZE];
-    a_sum = phase_factor(q4r, R, U, r, f, n_atoms, rg, fg, li);
-
+    // If the pixel index is not out of bounds, move the global scattering vector to private memory
+    if (gi < n_pixels){qmod = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);}
+    if (twopi == 1){qmod *= PI2;}
+    // Sum over atomic scattering amplitudes
+    a_sum = phase_factor(qmod, R, U, r, f, n_atoms, rg, fg, li);
     // Again, check that this pixel index is not out of bounds
-    if (gi < n_pixels){
-        a[gi] = a[gi]*add + a_sum;
-    }
-
+    if (gi < n_pixels){a[gi] = a[gi]*add + a_sum;}
 }
-
 
 // Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
 // This variant internally computes scattering vectors corresponding to a pixel-array detector
-
 kernel void phase_factor_pad(
     global const dsfloat *r,  // Atomic postion vectors
     global const dsfloat2 *f, // Atomic scattering factors
     const dsfloat16 R,        // Rotation matrix
     const dsfloat4 U,         // Translation vector acting on positions
     global dsfloat2 *a,       // The summed scattering amplitudes (output)
-    const int n_pixels,     // Number of pixels
-    const int n_atoms,      // Number of atoms
-    const int nF,           // Number of fast-scan pixels
-    const int nS,           // Number of slow-scan pixels
+    const int n_pixels,       // Number of pixels
+    const int n_atoms,        // Number of atoms
+    const int nF,             // Number of fast-scan pixels
+    const int nS,             // Number of slow-scan pixels
     const dsfloat w,          // Photon wavelength
     const dsfloat4 T,         // Translation of detector
     const dsfloat4 F,         // Fast-scan basis vector
     const dsfloat4 S,         // Slow-scan basis vector
     const dsfloat4 B,         // Incident beam unit vector
-    const int add          // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
+    const int add            // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
 ){
-
     const int gi = get_global_id(0); /* Global index */
     const int i = gi % nF;           /* Pixel coordinate i */
     const int j = gi/nF;             /* Pixel coordinate j */
     const int li = get_local_id(0);  /* Local group index */
-
     // Compute the scattering vector
-    dsfloat4 q4r = q_pad(i,j,w,T,F,S,B);
-
-    // Rotate the scattering vector
-//    q4r = rotate_vec(R, q4r);
-
+    dsfloat4 qmod = q_pad(i,j,w,T,F,S,B);
     // Sum over atomic scattering amplitudes
     dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
     local dsfloat4 rg[GROUP_SIZE];
     local dsfloat2 fg[GROUP_SIZE];
-    a_sum = phase_factor(q4r, R, U, r, f, n_atoms, rg, fg, li);
-
+    a_sum = phase_factor(qmod, R, U, r, f, n_atoms, rg, fg, li);
     // Check that this pixel index is not out of bounds
-    if (gi < n_pixels){
-        a[gi] = a[gi]*add + a_sum;
-    }
+    if (gi < n_pixels){a[gi] = a[gi]*add + a_sum;}
 }
-
 
 // Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
 // This variant internally computes scattering vectors corresponding to a regular 3D grid.
@@ -409,7 +385,6 @@ kernel void phase_factor_pad(
 // where n is the array index (staring with zero) for a given axis (x, y, z).  In the usual bornagain
 // standard, we should compute dq according to the formula
 //     dq = (q_max - q_min)/(N-1)
-
 kernel void phase_factor_mesh(
     global const dsfloat *r,   // Atomic postion vectors
     global const dsfloat2 *f,  // Atomic scattering factors
@@ -421,34 +396,28 @@ kernel void phase_factor_mesh(
     const dsfloat4 q_min,      // Starting positions (i.e. corner) of grid (3 numbers specified)
     const dsfloat16 R,         // Rotation matrix
     const dsfloat4 U,          // Translation vector acting on positions
-    const int add              // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
+    const int add,             // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
+    const int twopi            // Multiply q by 2 pi
 ){
-
     const int gi = get_global_id(0); /* Global index */
     const int i = gi/(N.z*N.y);      /* Voxel coordinate i (x) */
     const int j = (gi/N.z) % N.y;    /* Voxel coordinate j (y) */
     const int k = gi % N.z;          /* Voxel corrdinate k (z) */
     const int li = get_local_id(0);  /* Local group index */
-
     // Each global index corresponds to a particular q-vector
-    dsfloat4 q4r = (dsfloat4)(i*deltaQ.x+q_min.x, j*deltaQ.y+q_min.y, k*deltaQ.z+q_min.z,0.0f);
-
+    dsfloat4 qmod = (dsfloat4)(i*deltaQ.x+q_min.x, j*deltaQ.y+q_min.y, k*deltaQ.z+q_min.z,0.0f);
+    if (twopi == 1){qmod *= PI2;}
     // Sum over atomic scattering amplitudes
     dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
     local dsfloat4 rg[GROUP_SIZE];
     local dsfloat2 fg[GROUP_SIZE];
-    a_sum = phase_factor(q4r, R, U, r, f, n_atoms, rg, fg, li);
-
+    a_sum = phase_factor(qmod, R, U, r, f, n_atoms, rg, fg, li);
     // Check that this pixel index is not out of bounds
-    if (gi < n_pixels){
-        a[gi] = a[gi]*add + a_sum;
-    }
+    if (gi < n_pixels){a[gi] = a[gi]*add + a_sum;}
 }
-
 
 // Interpolate scattering amplitudes from a lookup table.  This is meant to be used in conjunction with the output of
 // phase_factor_mesh.
-
 kernel void mesh_interpolation(
     global dsfloat2 *a_map,  // Lookup table generated by phase_factor_mesh
     global dsfloat *q,       // Scattering vectors
@@ -458,26 +427,23 @@ kernel void mesh_interpolation(
     dsfloat4 deltaQ,         // See phase_factor_mesh
     dsfloat4 q_min,          // See phase_factor_mesh
     const dsfloat16 R,       // Rotation matrix
-    const dsfloat4 U,
-    int do_translate,
-    int add
+    const dsfloat4 U,        // Translation vector acting on positions
+    int do_translate,        // Set to 1 to apply translation
+    int add,                 // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
+    const int twopi          // Multiply q by 2 pi
 ){
-
     const int gi = get_global_id(0);
-
-    dsfloat4 q4r = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
-    q4r = rotate_vec(R,q4r);
-
+    dsfloat4 qmod = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+    qmod = rotate_vec(R,qmod);
+    if (twopi == 1){qmod *= PI2;}
     // Floating point coordinates
-    const dsfloat i_f = (q4r.x - q_min.x)/deltaQ.x;
-    const dsfloat j_f = (q4r.y - q_min.y)/deltaQ.y;
-    const dsfloat k_f = (q4r.z - q_min.z)/deltaQ.z;
-
+    const dsfloat i_f = (qmod.x - q_min.x)/deltaQ.x;
+    const dsfloat j_f = (qmod.y - q_min.y)/deltaQ.y;
+    const dsfloat k_f = (qmod.z - q_min.z)/deltaQ.z;
     // Integer coordinates
     const int i = (int)(floor(i_f));
     const int j = (int)(floor(j_f));
     const int k = (int)(floor(k_f));
-
     // Trilinear interpolation formula specified in paulbourke.net/miscellaneous/interpolation
     const int i0 = (i % N.x)*N.y*N.z;
     const int j0 = (j % N.y)*N.z;
@@ -500,23 +466,18 @@ kernel void mesh_interpolation(
             a_map[i0 + j1 + k1] * x1 * y0 * z0 +
             a_map[i1 + j1 + k0] * x0 * y0 * z1 +
             a_map[i1 + j1 + k1] * x0 * y0 * z0;
-
     dsfloat ph, cosph, sinph;
     dsfloat2 a_temp;
     if (do_translate == 1){
-        ph = -dot(q4r,U);
+        ph = -dot(qmod,U);
         cosph = native_cos(ph);
         sinph = native_sin(ph);
         a_temp.x = a_sum.x*cosph - a_sum.y*sinph;
         a_temp.y = a_sum.x*sinph + a_sum.y*cosph;
         a_sum = a_temp;
     }
-
     // Check that this pixel index is not out of bounds
-    if (gi < n_pixels){
-        a_out[gi] = a_out[gi]*add + a_sum;
-    }
-
+    if (gi < n_pixels){a_out[gi] = a_out[gi]*add + a_sum;}
 }
 
 
@@ -534,24 +495,21 @@ kernel void mesh_interpolation_real(
     const dsfloat16 R,       // Rotation matrix
     const dsfloat4 U,
     int do_translate,
-    int add
+    int add,                 //
+    const int twopi          // Multiply q by 2 pi
 ){
-
     const int gi = get_global_id(0);
-
-    dsfloat4 q4r = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
-    q4r = rotate_vec(R,q4r);
-
+    dsfloat4 qmod = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);
+    qmod = rotate_vec(R,qmod);
+    if (twopi == 1){qmod *= PI2;}
     // Floating point coordinates
-    const dsfloat i_f = (q4r.x - q_min.x)/deltaQ.x;
-    const dsfloat j_f = (q4r.y - q_min.y)/deltaQ.y;
-    const dsfloat k_f = (q4r.z - q_min.z)/deltaQ.z;
-
+    const dsfloat i_f = (qmod.x - q_min.x)/deltaQ.x;
+    const dsfloat j_f = (qmod.y - q_min.y)/deltaQ.y;
+    const dsfloat k_f = (qmod.z - q_min.z)/deltaQ.z;
     // Integer coordinates
     const int i = (int)(floor(i_f));
     const int j = (int)(floor(j_f));
     const int k = (int)(floor(k_f));
-
     // Trilinear interpolation formula specified in paulbourke.net/miscellaneous/interpolation
     const int i0 = (i % N.x)*N.y*N.z;
     const int j0 = (j % N.y)*N.z;
@@ -694,10 +652,8 @@ kernel void mesh_insertion_real(
     }
 }
 
-
 // Compute ideal lattice transform for parallelepiped crystal: PROD_i  [ sin(N_i x_i)/sin(x_i) ]^2
 // This variant internally computes scattering vectors for a pixel-array detector
-
 kernel void lattice_transform_intensities_pad(
     const dsfloat16 abc,   // Real-space lattice vectors a,b,c, each contiguous in memory
     const int4 N,          // Number of unit cells along each axis
@@ -713,17 +669,13 @@ kernel void lattice_transform_intensities_pad(
     const dsfloat4 B,      // Refer to phase_factor_pad
     const int add          // Refer to phase_factor_pad
 ){
-
     const int gi = get_global_id(0); /* Global index */
     const int i = gi % nF;           /* Pixel coordinate i */
     const int j = gi/nF;             /* Pixel coordinate j */
-
     // Get the q vector
-    dsfloat4 q4r = q_pad( i,j,w,T,F,S,B);
-
+    dsfloat4 qmod = q_pad( i,j,w,T,F,S,B);
     // Rotate the q vector
-    q4r = rotate_vec(R, q4r);
-
+    qmod = rotate_vec(R, qmod);
     // Compute lattice transform at this q vector
     dsfloat sn;
     dsfloat s;
@@ -736,7 +688,7 @@ kernel void lattice_transform_intensities_pad(
     // First crystal axis (this could be put in a loop over three axes...)
     n = (dsfloat)N.x;
     a = (dsfloat4)(abc.s0,abc.s1,abc.s2,0.0);
-    x = dot(q4r,a) / 2.0;
+    x = dot(qmod,a) / 2.0;
     if (x != 0){
         // This does [ sin(Nx)/sin(x) ]^2
         sn = sin(n*x);
@@ -751,7 +703,7 @@ kernel void lattice_transform_intensities_pad(
     // Second crystal axis
     n = (dsfloat)N.y;
     a = (dsfloat4)(abc.s3,abc.s4,abc.s5,0.0);
-    x = dot(q4r,a) / 2.0;
+    x = dot(qmod,a) / 2.0;
     if (x != 0){
         // This does [ sin(Nx)/sin(x) ]^2
         sn = sin(n*x);
@@ -766,7 +718,7 @@ kernel void lattice_transform_intensities_pad(
     // Third crystal axis
     n = (dsfloat)N.z;
     a = (dsfloat4)(abc.s6,abc.s7,abc.s8,0.0);
-    x = dot(q4r,a) / 2.0;
+    x = dot(qmod,a) / 2.0;
     if (x != 0){
         // This does [ sin(Nx)/sin(x) ]^2
         sn = sin(n*x);
@@ -793,18 +745,18 @@ kernel void lattice_transform_intensities_pad(
 
 kernel void gaussian_lattice_transform_intensities_pad(
     const dsfloat16 abc,   // Real-space lattice vectors a,b,c, each contiguous in memory
-    const int4 N,        // Number of unit cells along each axis
+    const int4 N,          // Number of unit cells along each axis
     const dsfloat16 R,     // Rotation matrix
     global dsfloat *I,     // Lattice transform intensities (output)
-    const int n_pixels,  // Number of pixels
-    const int nF,        // Refer to phase_factor_pad
-    const int nS,        // Refer to phase_factor_pad
+    const int n_pixels,    // Number of pixels
+    const int nF,          // Refer to phase_factor_pad
+    const int nS,          // Refer to phase_factor_pad
     const dsfloat w,       // Refer to phase_factor_pad
     const dsfloat4 T,      // Refer to phase_factor_pad
     const dsfloat4 F,      // Refer to phase_factor_pad
     const dsfloat4 S,      // Refer to phase_factor_pad
     const dsfloat4 B,      // Refer to phase_factor_pad
-    const int add        // Refer to phase_factor_pad
+    const int add          // Refer to phase_factor_pad
 ){
 
     const int gi = get_global_id(0); /* Global index */
@@ -812,10 +764,10 @@ kernel void gaussian_lattice_transform_intensities_pad(
     const int j = gi/nF;             /* Pixel coordinate j */
 
     // Get the q vector
-    dsfloat4 q4r = q_pad( i,j,w,T,F,S,B);
+    dsfloat4 qmod = q_pad( i,j,w,T,F,S,B);
 
     // Rotate the q vector
-    q4r = rotate_vec(R, q4r);
+    qmod = rotate_vec(R, qmod);
 
     // Compute lattice transform at this q vector
     dsfloat x;
@@ -826,21 +778,21 @@ kernel void gaussian_lattice_transform_intensities_pad(
     // First crystal axis (this could be put in a loop over three axes...)
     n = (dsfloat)N.x;
     a = (dsfloat4)(abc.s0,abc.s1,abc.s2,0.0);
-    x = dot(q4r,a);
+    x = dot(qmod,a);
     x = x - round(x/PI2)*PI2;
     It *= n*n*exp(-n*n*x*x/(4*PI));
 
     // Second crystal axis
     n = (dsfloat)N.y;
     a = (dsfloat4)(abc.s3,abc.s4,abc.s5,0.0);
-    x = dot(q4r,a);
+    x = dot(qmod,a);
     x = x - round(x/PI2)*PI2;
     It *= n*n*exp(-n*n*x*x/(4*PI));
 
     // Third crystal axis
     n = (dsfloat)N.z;
     a = (dsfloat4)(abc.s6,abc.s7,abc.s8,0.0);
-    x = dot(q4r,a);
+    x = dot(qmod,a);
     x = x - round(x/PI2)*PI2;
     It *= n*n*exp(-n*n*x*x/(4*PI));
 
@@ -963,40 +915,32 @@ kernel void gaussian_lattice_transform_intensities_pad(
 
 __kernel void qrf_cromer_mann(
     __global dsfloat16 *q_vecs, // reciprocal space vectors, followed by cromer mann lookups, see clcore.py for details
-    __global dsfloat4 *r_vecs, // atom vectors and atomic number
-    __constant dsfloat *R, // rotation matrix acting on molecules (note it is transposed and used to rotate q for speed)
-    __constant dsfloat *T, // translation vector of molecule moving its center of mass
-    __global dsfloat2 *A, // amplitudes output vector
-    const int n_atoms)
-// 
-{
-
+    __global dsfloat4 *r_vecs,  // atom vectors and atomic number
+    __constant dsfloat *R,      // rotation matrix acting on atom coordinates
+    __constant dsfloat *T,      // translation vector of molecule moving its center of mass
+    __global dsfloat2 *A,       // amplitudes output vector
+    const int n_atoms,
+    const int twopi             // Multiply q by 2 pi
+){
     int q_idx = get_global_id(0);
     int l_idx = get_local_id(0);
-
     //dsfloat Areal=0.0f;
     //dsfloat Aimag=0.0f;
     dsfloat Areal;
     dsfloat Aimag;
-
     dsfloat ff[16];
-    
     // multiply trans vector by inverse rotation matrix  
     dsfloat Tx = R[0]*T[0] + R[3]*T[1] + R[6]*T[2];
     dsfloat Ty = R[1]*T[0] + R[4]*T[1] + R[7]*T[2];
     dsfloat Tz = R[2]*T[0] + R[5]*T[1] + R[8]*T[2];
-
     Areal=A[q_idx].x;
     Aimag=A[q_idx].y;
-
     dsfloat qx = q_vecs[q_idx].s0;
     dsfloat qy = q_vecs[q_idx].s1;
     dsfloat qz = q_vecs[q_idx].s2;
-
     dsfloat qRx = R[0]*qx + R[3]*qy + R[6]*qz;
     dsfloat qRy = R[1]*qx + R[4]*qy + R[7]*qz;
     dsfloat qRz = R[2]*qx + R[5]*qy + R[8]*qz;
-    
     ff[0] = q_vecs[q_idx].s3;
     ff[1] = q_vecs[q_idx].s4;
     ff[2] = q_vecs[q_idx].s5;
@@ -1013,7 +957,6 @@ __kernel void qrf_cromer_mann(
     ff[13] = 0.0f;
     ff[14] = 0.0f;
     ff[15] = 0.0f;
-
     __local dsfloat4 LOC_ATOMS[GROUP_SIZE];
     for (int g=0; g<n_atoms; g+=GROUP_SIZE){
         int ai = g + l_idx;
@@ -1021,21 +964,16 @@ __kernel void qrf_cromer_mann(
             LOC_ATOMS[l_idx] = r_vecs[ai];
         if( !(ai < n_atoms))
             LOC_ATOMS[l_idx] = (dsfloat4)(1.0f, 1.0f, 1.0f, 15.0f); // make atom ID 15, s.t. ff=0
-
         barrier(CLK_LOCAL_MEM_FENCE);
-        
         for (int i=0; i< GROUP_SIZE; i++){
-
             dsfloat phase = qRx*(LOC_ATOMS[i].x+Tx) + qRy*(LOC_ATOMS[i].y+Ty) +
                 qRz*(LOC_ATOMS[i].z+Tz);
             int species_id = (int) (LOC_ATOMS[i].w);
-            
             Areal += native_cos(-phase)*ff[species_id];
             Aimag += native_sin(-phase)*ff[species_id];
         }
         barrier(CLK_LOCAL_MEM_FENCE);
     }
-
     A[q_idx].x = Areal;
     A[q_idx].y = Aimag;
 }

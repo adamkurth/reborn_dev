@@ -1,17 +1,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import numpy as np
-
-# from bornagain.utils import vec_mag
-# from scipy.stats import binned_statistic_dd
-try:
-    from numba import jit
-except ImportError:
-    from bornagain.utils import passthrough_decorator as jit
-
-try:
-    from bornagain.fortran import density_f
-except ImportError:
-    density_f = None
+from numba import jit
+from bornagain.fortran import density_f
 
 
 class DensityMap(object):
@@ -141,13 +131,13 @@ def trilinear_interpolation_numba(densities=None, vectors=None, corners=None, de
         y1 = 1.0 - y0
         z1 = 1.0 - z0
         out[ii] = densities[i0, j0, k0] * x1 * y1 * z1 + \
-                 densities[i1, j0, k0] * x0 * y1 * z1 + \
-                 densities[i0, j1, k0] * x1 * y0 * z1 + \
-                 densities[i0, j0, k1] * x1 * y1 * z0 + \
-                 densities[i1, j0, k1] * x0 * y1 * z0 + \
-                 densities[i0, j1, k1] * x1 * y0 * z0 + \
-                 densities[i1, j1, k0] * x0 * y0 * z1 + \
-                 densities[i1, j1, k1] * x0 * y0 * z0
+                  densities[i1, j0, k0] * x0 * y1 * z1 + \
+                  densities[i0, j1, k0] * x1 * y0 * z1 + \
+                  densities[i0, j0, k1] * x1 * y1 * z0 + \
+                  densities[i1, j0, k1] * x0 * y1 * z0 + \
+                  densities[i0, j1, k1] * x1 * y0 * z0 + \
+                  densities[i1, j1, k0] * x0 * y0 * z1 + \
+                  densities[i1, j1, k1] * x0 * y0 * z0
 
     return out
 

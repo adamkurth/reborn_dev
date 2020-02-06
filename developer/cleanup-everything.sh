@@ -1,10 +1,10 @@
 #!/bin/bash
 
-if [[ ! $(basename $(pwd))='developer' ]]; then
+if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     echo 'This script should run in the developer directory.'
     exit
 fi
 
-. cleanup-caches.sh
-. cleanup-compiled.sh
-. cleanup-docs.sh
+bash cleanup-caches.sh
+bash cleanup-compiled.sh
+bash cleanup-docs.sh

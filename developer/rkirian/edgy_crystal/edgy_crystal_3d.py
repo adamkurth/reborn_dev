@@ -51,6 +51,18 @@ args.gaussian_disorder_sigmas = [float(a) for a in args.gaussian_disorder_sigmas
 
 # This has molecule, unit cell, and spacegroup info
 cryst = crystal.CrystalStructure(args.pdb_file, tight_packing=True)  # Tight packing: put molecule COMs inside unit cell
+uc = cryst.unitcell
+sg = cryst.spacegroup
+
+# P63 Twinning operations
+# for k in range(sg.n_operations):
+#     v = sg.sym_translations[k]
+#     r = sg.sym_rotations[k]
+#     sg.sym_translations[k] = np.array([v[1], v[0], -v[2]])
+#     sg.sym_rotations[k] = np.array([[r[0, 1], r[0, 0], -r[0, 2]],
+#                                     [r[1, 1], r[1, 0], -r[1, 2]],
+#                                     [r[2, 1], r[2, 0], -r[2, 2]]])
+# cryst.set_tight_packing()
 
 # This uses a crystal structure to make finite lattices with spacegroup considerations
 fc = crystal.FiniteCrystal(cryst, max_size=20)
@@ -61,16 +73,18 @@ cdmap = crystal.CrystalDensityMap(cryst=cryst, resolution=args.resolution, overs
 
 # FIXME : Set atom coordinates to grid points for testing of the two different methods discussed below.  By setting
 #         atoms to lie on gridpoints, we *should* in principle get the same results from both methods (but we don't).
-print('')
-print('Initial fractional coordinates:')
-print(cryst.fractional_coordinates)
+# print('')
+# print('Initial fractional coordinates:')
+# print(cryst.fractional_coordinates)
 cryst.fractional_coordinates = np.floor(cryst.fractional_coordinates/cdmap.dx)*cdmap.dx
-print('Fixed fractional coordinates:')
-print(cryst.fractional_coordinates)
-print('3D mesh shape and limits:')
-print('Shape:', cdmap.shape, 'Limits:', cdmap.x_min, cdmap.x_max)
-print('Coordinates of 3D grid points:')
-print(cdmap.x_vecs)
+# print('Fixed fractional coordinates:')
+# print(cryst.fractional_coordinates)
+# print('3D mesh shape and limits:')
+# print('Shape:', cdmap.shape, 'Limits:', cdmap.x_min, cdmap.x_max)
+# print('Coordinates of 3D x grid points:')
+# print(cdmap.x_vecs)
+# print('Coordinates of 3D h grid points:')
+# print(cdmap.h_vecs*2*np.pi)
 
 # GPU simulation engine
 clcore = ClCore()
@@ -94,10 +108,6 @@ f = np.abs(cryst.molecule.get_scattering_factors(photon_energy=args.photon_energ
 #     b = np.sum(a)*np.exp(1j*3)
 #     c = np.sum(a*np.exp(1j*3))
 #     assert np.sum(np.abs(c - b)) == 0
-#
-
-print('shape', cdmap.shape)
-print('h_limits', cdmap.h_limits)
 
 # Calculate 3D molecular transform amplitudes on GPU via explicit atomic coordinates: sum over f * exp(i q.r)
 # The issue with this is that we get ringing artifacts when we take FFTs, but this is more like real data.
@@ -106,26 +116,21 @@ f_gpu = clcore.to_device(f, dtype=clcore.complex_t)
 for k in range(cryst.spacegroup.n_operations):
     x = cryst.spacegroup.apply_symmetry_operation(k, cryst.fractional_coordinates)
     amp = clcore.to_device(shape=cdmap.shape, dtype=clcore.complex_t) * 0
-    clcore.phase_factor_mesh(x, f_gpu, N=cdmap.shape, q_min=cdmap.h_limits[:, 0]*2*np.pi,
-                             q_max=cdmap.h_limits[:, 1]*2*np.pi, a=amp, add=False)
+    clcore.phase_factor_mesh(x, f_gpu, N=cdmap.shape, q_min=cdmap.h_min, q_max=cdmap.h_max, a=amp, add=False, twopi=True)
     mol_amps_direct.append(amp)
-
-print('k zero direct', ifftshift(mol_amps_direct[0].get())[0, 0, 0])
-# print('k zero direct', ifftshift(mol_amps_direct[0].get())[0:2, 0:2, 0:2])
-# print('k zero direct', ifftshift(mol_amps_direct[0].get())[-2:, -2:, -2:])
 
 # Build the electron densities directly and make amplitudes via FFT.  This avoids ringing artifacts that we get
 # from the direct summation method.
 mol_amps_fft = []
-au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates % cdmap.oversampling, f, mode='trilinear')
+au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='trilinear')
 for k in range(cryst.spacegroup.n_operations):
     rho = cdmap.au_to_k(k, au_map)
     mol_amps_fft.append(clcore.to_device(fftshift(fftn(rho)), dtype=clcore.complex_t))
 
-print('k zero fft', ifftshift(mol_amps_fft[0].get())[0, 0, 0])
 print('sum over f', np.sum(f))
-
-
+print('k zero direct', ifftshift(mol_amps_direct[0].get())[0, 0, 0])
+print('k zero fft', ifftshift(mol_amps_fft[0].get())[0, 0, 0])
+sys.exit()
 # Here we choose which of the above methods will go into the saved results:
 if args.direct_molecular_transform:
     mol_amps = mol_amps_direct

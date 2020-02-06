@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ ! $(basename $(pwd))='developer' ]]; then
+if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     echo 'This script should run in the developer directory.'
     exit
 fi
@@ -11,6 +11,6 @@ echo activating...
 source activate bamin36
 
 echo testing...
-echo $(which python)
-cd ../test
+command -v python
+cd ../test || return
 python test_minimal_dependencies.py

@@ -342,14 +342,12 @@ class CrystalStructure(object):
             translations.append(Z)
         self.spacegroup = SpaceGroup(dic['spacegroup_symbol'], rotations, translations)
 
-        # Redefine spacegroup operators so that all molecule COMs are in the unit cell
-        if tight_packing:
-            for i in range(self.spacegroup.n_molecules):
-                com = self.spacegroup.apply_symmetry_operation(i, x_au_com)
-                self.spacegroup.sym_translations[i] -= com - (com % 1)
-
         self.fractional_coordinates = x_au
         self.fractional_coordinates_com = x_au_com
+
+        # Redefine spacegroup operators so that all molecule COMs are in the unit cell
+        if tight_packing:
+            self.set_tight_packing()
 
         r_au_mod = np.dot(x_au, self.unitcell.o_mat.T)
         self.molecule = Molecule(coordinates=r_au_mod, atomic_symbols=dic['atomic_symbols'])
@@ -379,6 +377,12 @@ class CrystalStructure(object):
         for (R, T) in zip(self.spacegroup.sym_rotations, self.spacegroup.sym_translations):
             xs.append(np.dot(x0, R.T) + T)
         return np.dot(np.concatenate(xs), self.unitcell.o_mat.T)
+
+    def set_tight_packing(self):
+
+        for i in range(self.spacegroup.n_molecules):
+            com = self.spacegroup.apply_symmetry_operation(i, self.fractional_coordinates_com)
+            self.spacegroup.sym_translations[i] -= com - (com % 1)
 
 
 class FiniteLattice(object):
