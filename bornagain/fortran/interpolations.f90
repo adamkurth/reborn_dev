@@ -5,12 +5,15 @@ subroutine trilinear_insert(data_coord, data_val, x_min, &
     ! where the addition of 2 is for the boundary samples. The Python code in utils.py then 
     ! crops this N+2 array out to the correct shape of N.
     implicit none
-    real(kind=8), intent(inout) :: dataout(:,:,:), weightout(:,:,:)
-    real(kind=8), intent(in)    :: data_coord(:,:), data_val(:), x_min(3), &
-                                   Delta_x(3), one_over_bin_volume, c1(3)
-    integer(kind=4), intent(in) :: N_data
+    complex(kind=8), intent(inout) :: dataout(:,:,:)
+    real(kind=8),    intent(inout) :: weightout(:,:,:)
+    complex(kind=8), intent(in)    :: data_val(:)
+    real(kind=8),    intent(in)    :: data_coord(:,:), x_min(3), &
+                                      Delta_x(3), one_over_bin_volume, c1(3)
+    integer(kind=4), intent(in)    :: N_data
 
-    real(kind=8)    :: data_coord_curr(3), data_val_curr_scaled, x_ind_fl(3), x_ind_cl(3), Delta_x_1(3), Delta_x_0(3), &
+    complex(kind=8) :: data_val_curr_scaled
+    real(kind=8)    :: data_coord_curr(3), x_ind_fl(3), x_ind_cl(3), Delta_x_1(3), Delta_x_0(3), &
                        N_000, N_100, N_010, N_110, N_001, N_101, N_011, N_111
     integer(kind=4) :: i, ind_fl(3), ind_cl(3)
 

@@ -371,7 +371,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
 
     # Convert to appropriate types
     data_coord = data_coord.astype(np.double)
-    data_val = data_val.astype(np.double)
+    data_val = data_val.astype(np.complex128)
     x_min = x_min.astype(np.double)
     x_max = x_max.astype(np.double)
     N_bin = N_bin.astype(np.int)
@@ -393,7 +393,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     c3 = x_min - 0.5 + epsilon
 
     # Initialise memory for Fortran
-    dataout = np.zeros(N_bin+2, dtype=np.double, order='C')
+    dataout = np.zeros(N_bin+2, dtype=np.complex128, order='C')
     weightout = np.zeros(N_bin+2, dtype=np.double, order='C')
     dataout = np.asfortranarray(dataout)
     weightout = np.asfortranarray(weightout)
