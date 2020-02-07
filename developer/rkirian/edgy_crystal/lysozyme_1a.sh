@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#cd $(dirname $0)
-
 export PYTHONPATH=${PYTHONPATH}:../../..
 
 python edgy_crystal_3d.py --pdb_file 4ET8 \

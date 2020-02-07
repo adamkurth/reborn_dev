@@ -218,30 +218,30 @@ def _clcore(double_precision=False):
 
     amps0 = core.phase_factor_qrf(q, r_vecs, f, rot)
 
-    a = core.phase_factor_qrf_chunk_r(q, r_vecs, f, rot, n_chunks=3)
+    a = core.phase_factor_qrf(q, r_vecs, f, rot, n_chunks=3)
     assert(type(a) is np.ndarray)
 
     a_dev = core.to_device(shape=(q.shape[0],), dtype=core.complex_t)
 
-    core.phase_factor_qrf_chunk_r(q, r_vecs, f, rot, a=a_dev, add=False, n_chunks=2)
+    core.phase_factor_qrf(q, r_vecs, f, rot, a=a_dev, add=False, n_chunks=2)
     amps1 = a_dev.get()
 
     assert(np.allclose(amps0, amps1))
 
     for _ in range(9):
-        core.phase_factor_qrf_chunk_r(q, r_vecs, f, rot, a=a_dev, add=True, n_chunks=2)
+        core.phase_factor_qrf(q, r_vecs, f, rot, a=a_dev, add=True, n_chunks=2)
 
     amps10 = a_dev.get()
 
     assert(np.allclose(10 * amps1, amps10))
 
-    core.phase_factor_qrf_chunk_r(q, r_vecs, f, rot, a=a_dev, add=False, n_chunks=3)
+    core.phase_factor_qrf(q, r_vecs, f, rot, a=a_dev, add=False, n_chunks=3)
     amps1_3 = a_dev.get()
 
     assert(np.allclose(amps1, amps1_3))
 
     for _ in range(9):
-        core.phase_factor_qrf_chunk_r(q, r_vecs, f, rot, a=a_dev, add=True, n_chunks=3)
+        core.phase_factor_qrf(q, r_vecs, f, rot, a=a_dev, add=True, n_chunks=3)
 
     amps10_3 = a_dev.get()
 

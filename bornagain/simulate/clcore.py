@@ -22,64 +22,68 @@ import pkg_resources
 import pyopencl as cl
 import pyopencl.array
 
-import bornagain as ba
 from bornagain.utils import depreciate
-from bornagain.simulate import refdata
 
 cl_array = cl.array.Array
 
 clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
 
 
-def create_some_gpu_context():
-
+def get_all_gpu_devices():
     r"""
+    Search all platforms for GPU devices and return full list.
 
+    Returns:
+        list : List of GPU devices.  If none found, the list is empty.
+    """
+    platforms = cl.get_platforms()
+    all_gpu_devices = []
+    for platform in platforms:
+        gpu_devices = platform.get_devices(device_type=cl.device_type.GPU)
+        print(gpu_devices)
+        if len(gpu_devices) == 0:
+            continue
+        all_gpu_devices.extend(gpu_devices)
+    return all_gpu_devices
+
+
+def create_some_gpu_context():
+    r"""
     Since cl.create_some_context() sometimes forces a CPU on macs, this function will attempt to use a GPU
-    context if possible.
+    context if possible.  A CPU context will be returned if a GPU context is not found.
 
     Returns: opencl context
-
     """
 
-    try:
-        platform = cl.get_platforms()
-        devices = platform[0].get_devices(device_type=cl.device_type.GPU)
-        context = cl.Context(devices=devices)
-    except:
-        context = cl.create_some_context()
+    context = None
+
+    for platform in cl.get_platforms():
+        gpu_devices = platform.get_devices(device_type=cl.device_type.GPU)
+        if len(gpu_devices) == 0:
+            continue
+        context = cl.Context(devices=gpu_devices)
+
+    if context is None:
+        for platform in cl.get_platforms():
+            all_devices = platform.get_devices(device_type=cl.device_type.ALL)
+            if len(all_devices) == 0:
+                continue
+            context = cl.Context(devices=all_devices)
 
     return context
 
 
 class ClCore(object):
-
     r"""
-
     A container for the elementary building blocks that GPU diffraction simulations are composed of.
 
     An instance of this class will initialize an opencl context and help maintain consistency in the
     device queue that compute jobs are sent to, along with consistency in the precision (double/single)
     when memory moves between CPU and GPU memory.
-
     """
 
-    # buffer_mesh_lookup_cl = None
-    # divide_nonzero_inplace_real_cl = None
-    # gaussian_lattice_transform_intensities_pad_cl = None
-    # lattice_transform_intensities_pad_cl = None
-    # mesh_interpolation_cl = None
-    # mod_squared_complex_to_real_cl = None
-    # phase_factor_mesh_cl = None
-    # phase_factor_pad_cl = None
-    # phase_factor_qrf_cl = None
-    # rotate_translate_vectors_cl = None
-
-
     def __init__(self, context=None, queue=None, group_size=32, double_precision=False):
-
         r"""
-
         An instance of this class will attempt to help you manage an opencl context and command queue.
         You may choose the precision that you desire from the beginning, and this will be taken care of
         so that you don't need to think about it when you move arrays between CPU and GPU memory.
@@ -194,7 +198,6 @@ class ClCore(object):
         self.programs = cl.Program(self.context, kern_str).build(options=build_opts)
 
     def vec4(self, x, dtype=None):
-
         r"""
         Evdidently pyopencl does not deal with 3-vectors very well, so we use
         4-vectors and pad with a zero at the end.
@@ -210,7 +213,7 @@ class ClCore(object):
             dtype np.dtype: Examples: np.complex, np.double
 
         Returns:
-            - numpy array of length 4
+            numpy array of length 4
         """
 
         if dtype is None:
@@ -218,7 +221,6 @@ class ClCore(object):
         return np.array([x.flat[0], x.flat[1], x.flat[2], 0.0], dtype=dtype)
 
     def vec16(self, R, dtype=None):
-
         r"""
         The best way to pass in a rotation matrix is as a float16.  This is a helper function for
         preparing a numpy array so that it can be passed in as a float16.
@@ -228,12 +230,12 @@ class ClCore(object):
         See the vec4 function documentation also.
 
         Arguments:
-            R numpy.ndarray: input array
+            R (numpy.ndarray): input array
 
             dtype numpy.dtype: default is np.float32
 
         Returns:
-            - numpy array of length 16
+            numpy array of length 16
         """
 
         if dtype is None:
@@ -243,7 +245,6 @@ class ClCore(object):
         return R16
 
     def to_device(self, array=None, shape=None, dtype=None):
-
         r"""
         This is a thin wrapper for pyopencl.array.to_device().  It will convert a numpy
         array into a pyopencl.array and send it to the device memory.  So far this only
@@ -275,7 +276,6 @@ class ClCore(object):
         return cl.array.to_device(self.queue, np.ascontiguousarray(array.astype(dtype)))
 
     def get_group_size(self):
-
         r"""
         retrieve the currently set group_size
         """
@@ -297,9 +297,7 @@ class ClCore(object):
             return 0
 
     def rotate_translate_vectors(self, rot, trans, vec_in, vec_out=None):
-
         r"""
-
         Apply rotation followed by translation on GPU.
 
         Arguments:
@@ -309,7 +307,6 @@ class ClCore(object):
             v_out (Nx3 array): output vectors
 
         Returns: output vectors
-
         """
 
         if not hasattr(self, 'rotate_translate_vectors_cl'):
@@ -339,7 +336,6 @@ class ClCore(object):
             return None
 
     def test_rotate_vec(self, rot, trans, vec):
-
         r"""
         Rotate a single vector.  CPU arrays in, CPU array out. This is just for testing the consistency of memory
         allocation.
@@ -378,7 +374,6 @@ class ClCore(object):
         return out_dev.get()[0]
 
     def mod_squared_complex_to_real(self, A, I, add=False):
-
         r"""
         Compute the real-valued modulus square of complex numbers.  Good example of a function that
         shouldn't exist, but I needed to add it here because the pyopencl.array.Array class fails to
@@ -390,9 +385,7 @@ class ClCore(object):
             add (bool) : If false, overwrite the I array, else add to I
 
         Returns:
-
             None
-
         """
 
         if not hasattr(self, 'mod_squared_complex_to_real_cl'):
@@ -410,28 +403,9 @@ class ClCore(object):
         self.mod_squared_complex_to_real_cl(self.queue, (global_size,), (self.group_size,), A_dev.data, I_dev.data,
                                             n, add)
 
-    def phase_factor_qrf_chunk_r(self, q, r, f=None, R=None, U=None, a=None, add=False, n_chunks=1, twopi=False):
-
+    def _phase_factor_qrf_chunk_r(self, q, r, f=None, R=None, U=None, a=None, add=False, twopi=False, n_chunks=1):
         r"""
-
-        This needs to be tested, made for really big atom-vectors (e.g. a virus or rhibosome)
-
-        Calculate diffraction amplitudes: sum over f_n*exp(-iq.r_n)
-
-        Arguments:
-            q (numpy/cl float array [N,3]): Scattering vectors (2\pi/\lambda).
-            r (numpy/cl float array [M,3]): Atomic coordinates.
-            f (numpy/cl complex array [M]): Complex scattering factors.
-            a (cl complex array [N]): Optional container for complex scattering amplitudes.
-            R (numpy array [3,3]): Rotation matrix acting on atom vectors.
-                (we quietly transpose R and let it operate on q-vectors for speedups)
-            add (bool): Set to true if you want to add to the input amplitude array "a".  Else it is overwritten.
-            n_chunks (int): Number of chunks to split up atoms.
-
-
-        Returns:
-            (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array
-              if there are input cl arrays.
+        Same as phase_factor_qrf but split
         """
 
         # We must do this because pyopencl Array objects do not allow array slicing.
@@ -463,8 +437,7 @@ class ClCore(object):
         else:
             return a_dev
 
-    def phase_factor_qrf(self, q, r, f=None, R=None, U=None, a=None, add=False, twopi=False):
-
+    def phase_factor_qrf(self, q, r, f=None, R=None, U=None, a=None, add=False, twopi=False, n_chunks=1):
         r"""
         Calculate diffraction amplitudes according to the sum:
 
@@ -478,7 +451,9 @@ class ClCore(object):
             R (numpy array [3,3]): Rotation matrix.
             U (numpy array): Translation vector.
             a (cl complex array [N]): Complex scattering amplitudes (if you wish to manage your own opencl array).
-            add (bool): True means add to the input amplitudes a
+            add (bool): True means add to the input amplitudes a rather than overwrite the amplitudes.
+            twopi (bool): True means to multiply :math:`\vec{q}` by :math:`2\pi` just before calculating :math:`A(q)`.
+            n_r_chunks (int): Run in n batches of position vectors to avoid memory issues.
 
         Returns:
             (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array if there are input cl arrays.
@@ -488,26 +463,28 @@ class ClCore(object):
             self.phase_factor_qrf_cl = self.programs.phase_factor_qrf
             self.phase_factor_qrf_cl.set_scalar_arg_dtypes(
                 [None, None, None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t])
-
-        if R is None: R = np.eye(3)
-        if U is None: U = np.zeros(3, dtype=self.real_t)
-        add = self.int_t(add)
-        twopi = self.int_t(twopi)
-        if f is None: f = np.ones(r.shape[0])
         n_pixels = self.int_t(q.shape[0])
-        n_atoms = self.int_t(r.shape[0])
-        q_dev = self.to_device(q, dtype=self.real_t)
-        r_dev = self.to_device(r, dtype=self.real_t)
-        f_dev = self.to_device(f, dtype=self.complex_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels,))
-        R = self.vec16(R, dtype=self.real_t)
-        U = self.vec4(U, dtype=self.real_t)
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
-        self.phase_factor_qrf_cl(self.queue, (global_size,),
-                                 (self.group_size,), q_dev.data, r_dev.data,
-                                 f_dev.data, R, U, a_dev.data, n_atoms,
-                                 n_pixels, add, twopi)
-        self.queue.finish()
+        if n_chunks > 1:
+            self._phase_factor_qrf_chunk_r(q=q, r=r, f=f, R=R, U=U, a=a, add=add, twopi=twopi, n_chunks=n_chunks)
+        else:
+            if R is None: R = np.eye(3)
+            if U is None: U = np.zeros(3, dtype=self.real_t)
+            add = self.int_t(add)
+            twopi = self.int_t(twopi)
+            if f is None: f = np.ones(r.shape[0])
+            n_atoms = self.int_t(r.shape[0])
+            r_dev = self.to_device(r, dtype=self.real_t)
+            f_dev = self.to_device(f, dtype=self.complex_t)
+            q_dev = self.to_device(q, dtype=self.real_t)
+            R = self.vec16(R, dtype=self.real_t)
+            U = self.vec4(U, dtype=self.real_t)
+            global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
+            self.phase_factor_qrf_cl(self.queue, (global_size,),
+                                     (self.group_size,), q_dev.data, r_dev.data,
+                                     f_dev.data, R, U, a_dev.data, n_atoms,
+                                     n_pixels, add, twopi)
+            self.queue.finish()
         if a is None:
             return a_dev.get()
         else:
@@ -515,7 +492,6 @@ class ClCore(object):
 
     def phase_factor_pad(self, r, f=None, T=None, F=None, S=None, B=None, nF=None, nS=None, w=None, R=None, U=None, a=None,
                          add=False, beam=None, pad=None):
-
         r"""
         Calculate diffraction amplitudes according to the sum:
 
@@ -547,8 +523,7 @@ class ClCore(object):
             a: Optional output complex scattering amplitude cl array
 
         Returns:
-            A: A numpy array of length nF*nS containing complex scattering
-        amplitudes
+            A: A numpy array of length nF*nS containing complex scattering amplitudes
         """
 
         if not hasattr(self, 'phase_factor_pad_cl'):
@@ -611,11 +586,11 @@ class ClCore(object):
 
     def phase_factor_mesh(self, r, f=None, N=None, q_min=None, q_max=None, dq=None, a=None, R=None, U=None, add=False,
                           density_map=None, twopi=False):
-
         r"""
         Compute the following sum on a regular 3D mesh of q samples:
 
-        .. math:: \sum_n f_n \exp(-i \vec{q} \cdot \vec{r})
+        .. math::
+            a_i = \sum_n f_n \exp(-i \vec{q}_i \cdot (\mathbf{R} \vec{r} + \vec{U}))
 
         The mesh is defined by the shape of the 3D array along with the minimum and maximum values of :math:`q_i` along
         each edge :math:`i=1,2,3`.  The vector components of q are computed according to:
@@ -714,9 +689,9 @@ class ClCore(object):
 
     def mesh_interpolation(self, a_map, q, N=None, q_min=None, q_max=None, dq=None, R=None, U=None, a=None,
                            density_map=None, add=False, twopi=False):
-
         r"""
-        This is supposed to lookup intensities from a 3d mesh of amplitudes.
+        This is used in conjunction with :meth:`phase_factor_mesh <bornagain.simulate.clcore.ClCore.phase_factor_mesh>`
+        to interpolate amplitudes from a 3d mesh of simulated amplitudes.
 
         Arguments:
             a_map (numpy array): Complex scattering amplitudes (usually generated from

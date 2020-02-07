@@ -885,17 +885,14 @@ class CrystalDensityMap(object):
             return np.reshape(f_map, self.shape)
 
         elif mode == 'trilinear':
-
-            num_atoms = len(atom_fs)
             atom_x_vecs = np.ascontiguousarray(atom_x_vecs)
             rho_unweighted, weightout = trilinear_insert(data_coord=atom_x_vecs, data_val=atom_fs, x_min=self.x_min,
-                                                         x_max=self.x_max, N_bin=self.shape,
-                                                         mask=np.full(num_atoms, True, dtype=bool))
-
-            # Avoid division by zero
+                                                         x_max=self.x_max, N_bin=self.shape, wrap_around=True,
+                                                         mask=np.full(len(atom_fs), True, dtype=bool))
             weightout[weightout == 0] = 1
+            rho = rho_unweighted / weightout
 
-            return rho_unweighted / weightout
+            return rho
 
         # elif mode == 'nearest':
         #     mm = [0, self.oversampling]
@@ -904,38 +901,38 @@ class CrystalDensityMap(object):
         #     return a
 
 
-@jit(nopython=True)
-def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp):
-    r"""
-    Needs documentation...
-    """
-
-    n_atoms = x_vecs.shape[0]
-    n_map_voxels = map_x_vecs.shape[0]
-    # f_map = np.empty([n_map_voxels], dtype=atom_fs.dtype)
-    # f_map_tmp = np.empty([n_map_voxels], dtype=x_vecs.dtype)
-    for n in range(n_atoms):
-        x = x_vecs[n, 0] % s
-        y = x_vecs[n, 1] % s
-        z = x_vecs[n, 2] % s
-        w_tot = 0
-        for i in range(n_map_voxels):
-            mx = map_x_vecs[i, 0]
-            my = map_x_vecs[i, 1]
-            mz = map_x_vecs[i, 2]
-            dx = np.abs(x - mx)
-            dy = np.abs(y - my)
-            dz = np.abs(z - mz)
-            dx = min(dx, s - dx)
-            dy = min(dy, s - dy)
-            dz = min(dz, s - dz)
-            dr2 = (orth_mat[0, 0] * dx + orth_mat[0, 1] * dy + orth_mat[0, 2] * dz)**2 + \
-                  (orth_mat[1, 0] * dx + orth_mat[1, 1] * dy + orth_mat[1, 2] * dz)**2 + \
-                  (orth_mat[2, 0] * dx + orth_mat[2, 1] * dy + orth_mat[2, 2] * dz)**2
-            w = np.exp(-dr2/(2*sigma**2))
-            f_map_tmp[i] = w
-            w_tot += w
-        f_map += atom_fs[n] * f_map_tmp/w_tot
+# @jit(nopython=True)
+# def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp):
+#     r"""
+#     Needs documentation...
+#     """
+#
+#     n_atoms = x_vecs.shape[0]
+#     n_map_voxels = map_x_vecs.shape[0]
+#     # f_map = np.empty([n_map_voxels], dtype=atom_fs.dtype)
+#     # f_map_tmp = np.empty([n_map_voxels], dtype=x_vecs.dtype)
+#     for n in range(n_atoms):
+#         x = x_vecs[n, 0] % s
+#         y = x_vecs[n, 1] % s
+#         z = x_vecs[n, 2] % s
+#         w_tot = 0
+#         for i in range(n_map_voxels):
+#             mx = map_x_vecs[i, 0]
+#             my = map_x_vecs[i, 1]
+#             mz = map_x_vecs[i, 2]
+#             dx = np.abs(x - mx)
+#             dy = np.abs(y - my)
+#             dz = np.abs(z - mz)
+#             dx = min(dx, s - dx)
+#             dy = min(dy, s - dy)
+#             dz = min(dz, s - dz)
+#             dr2 = (orth_mat[0, 0] * dx + orth_mat[0, 1] * dy + orth_mat[0, 2] * dz)**2 + \
+#                   (orth_mat[1, 0] * dx + orth_mat[1, 1] * dy + orth_mat[1, 2] * dz)**2 + \
+#                   (orth_mat[2, 0] * dx + orth_mat[2, 1] * dy + orth_mat[2, 2] * dz)**2
+#             w = np.exp(-dr2/(2*sigma**2))
+#             f_map_tmp[i] = w
+#             w_tot += w
+#         f_map += atom_fs[n] * f_map_tmp/w_tot
 
 
 def pdb_to_dict(pdb_file_path):

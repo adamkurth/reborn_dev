@@ -77,6 +77,12 @@ cdmap = crystal.CrystalDensityMap(cryst=cryst, resolution=args.resolution, overs
 # print('Initial fractional coordinates:')
 # print(cryst.fractional_coordinates)
 cryst.fractional_coordinates = np.floor(cryst.fractional_coordinates/cdmap.dx)*cdmap.dx
+print('shape', cdmap.shape)
+print('hlims', cdmap.h_min, cdmap.h_max)
+print('xlims', cdmap.x_min, cdmap.x_max)
+print('max fraccoords', np.max(cryst.fractional_coordinates))
+print('fraccoords', np.min(cryst.fractional_coordinates))
+
 # print('Fixed fractional coordinates:')
 # print(cryst.fractional_coordinates)
 # print('3D mesh shape and limits:')
@@ -122,15 +128,17 @@ for k in range(cryst.spacegroup.n_operations):
 # Build the electron densities directly and make amplitudes via FFT.  This avoids ringing artifacts that we get
 # from the direct summation method.
 mol_amps_fft = []
+print('sum over f', np.sum(f))
 au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='trilinear')
+print('sum over au_map', np.sum(au_map))
 for k in range(cryst.spacegroup.n_operations):
     rho = cdmap.au_to_k(k, au_map)
     mol_amps_fft.append(clcore.to_device(fftshift(fftn(rho)), dtype=clcore.complex_t))
 
-print('sum over f', np.sum(f))
+print('sum over 3d f map', np.sum(np.abs(ifftn(mol_amps_fft[0].get()))))
 print('k zero direct', ifftshift(mol_amps_direct[0].get())[0, 0, 0])
 print('k zero fft', ifftshift(mol_amps_fft[0].get())[0, 0, 0])
-sys.exit()
+
 # Here we choose which of the above methods will go into the saved results:
 if args.direct_molecular_transform:
     mol_amps = mol_amps_direct
