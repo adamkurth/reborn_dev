@@ -129,7 +129,9 @@ for k in range(cryst.spacegroup.n_operations):
 # from the direct summation method.
 mol_amps_fft = []
 print('sum over f', np.sum(f))
+print('onefish')
 au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='trilinear')
+print('twofish')
 print('sum over au_map', np.sum(au_map))
 for k in range(cryst.spacegroup.n_operations):
     rho = cdmap.au_to_k(k, au_map)

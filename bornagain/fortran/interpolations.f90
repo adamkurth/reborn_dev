@@ -99,13 +99,12 @@ subroutine trilinear_insert_with_wraparound(data_coord, data_val, x_min, &
     complex(kind=8), intent(in)    :: data_val(:)
     real(kind=8),    intent(in)    :: data_coord(:,:), x_min(3), &
                                       Delta_x(3), one_over_bin_volume, c1(3)
-    integer(kind=4), intent(in)    :: N_data, N_bin
+    integer(kind=4), intent(in)    :: N_data, N_bin(3)
 
     complex(kind=8) :: data_val_curr_scaled
     real(kind=8)    :: data_coord_curr(3), x_ind_fl(3), x_ind_cl(3), Delta_x_1(3), Delta_x_0(3), &
                        N_000, N_100, N_010, N_110, N_001, N_101, N_011, N_111
     integer(kind=4) :: i, ind_fl(3), ind_cl(3)
-
 
     do i=1,N_data
         data_coord_curr = data_coord(i,:)
@@ -123,12 +122,12 @@ subroutine trilinear_insert_with_wraparound(data_coord, data_val, x_min, &
         Delta_x_1 = x_ind_cl - data_coord_curr
 
         ! Take the modulo
-        ind_fl = mod(ind_fl, N_bin)
+        ind_fl = modulo(ind_fl, N_bin)
 
         ! Calculate the ceiling
         ind_cl = ind_fl + 1
 
-        ind_cl = mod(ind_cl, N_bin)
+        ind_cl = modulo(ind_cl, N_bin)
 
         ! Add one to convert Python indexing to Fortran indexing
         ind_fl = ind_fl + 1

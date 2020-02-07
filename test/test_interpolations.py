@@ -835,3 +835,34 @@ def test_25(): # Wrap-around test 4 - wrap-around with interpolation on the boun
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
+def test_26(): # Wrap-around test 4 - wrap-around with interpolation on the boundary
+    data_coord = np.array([[-1.9, 0, 0]])
+    data_val = np.array([1])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([3, 3, 5])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    ans = np.array([[[ 0. ,  0. ,  0.,  0. ,  0. ],
+                     [ 0. ,  0.1 ,  0.,  0. ,  0. ],
+                     [ 0. ,  0. ,  0.,  0. ,  0. ]],
+
+                    [[ 0. ,  0. ,  0.,  0. ,  0. ],
+                     [ 0. ,  0.,  0.,  0. ,  0. ],
+                     [ 0. ,  0. ,  0.,  0. ,  0. ]],
+
+                   [[ 0. ,  0. ,  0.,  0. ,  0. ],
+                     [ 0. ,  0.9,  0.,  0. ,  0. ],
+                     [ 0. ,  0. ,  0.,  0. ,  0. ]]])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_around=True)
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    print(dataout)
+
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
+
+test_26()
