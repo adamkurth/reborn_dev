@@ -318,7 +318,7 @@ else:
         return np.sqrt(d_max)
 
 
-def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
+def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_around=False):
     r"""
     Trilinear insertion on a regular grid with arbitrary sample points.
     The boundary is defined as [x_min-0.5, x_max+0.5). 
@@ -331,13 +331,14 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     Note 2: This code will break if you put a 1 in any of the N_bin entries.
 
     Arguments:
-        data_coord: An Nx3 array of 3-vectors containing coordinates of the data points that you wish to insert into the regular grid.
-        data_val  : An array with the N values containing the values of the data points.
-        x_min     : An array with the three values corresponding to the smallest data grid center points.
-        x_max     : An array with the three values corresponding to the largest data grid center points.
-        N_bin     : An array with the three values corresponding to the number of bins in each direction.
-        mask      : An array with the N values specifying which data points to ignore. Zero means ignore.
-    
+        data_coord : An Nx3 array of 3-vectors containing coordinates of the data points that you wish to insert into the regular grid.
+        data_val   : An array with the N values containing the values of the data points.
+        x_min      : An array with the three values corresponding to the smallest data grid center points.
+        x_max      : An array with the three values corresponding to the largest data grid center points.
+        N_bin      : An array with the three values corresponding to the number of bins in each direction.
+        mask       : An array with the N values specifying which data points to ignore. Zero means ignore.
+        wrap_around: Bool variable to specify periodic boundaries or not.
+
     Returns:
         dataout   : A 3D numpy array with trilinearly summed values - this needs to be divided by weightout to give the trilinearly inserted values.
         weightout : A 3D numpy array that contains the number of times each voxel has a value put into it.
@@ -371,7 +372,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
 
     # Convert to appropriate types
     data_coord = data_coord.astype(np.double)
-    data_val = data_val.astype(np.double)
+    data_val = data_val.astype(np.complex128)
     x_min = x_min.astype(np.double)
     x_max = x_max.astype(np.double)
     N_bin = N_bin.astype(np.int)
@@ -392,40 +393,64 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask):
     c2 = x_max + 0.5 - epsilon
     c3 = x_min - 0.5 + epsilon
 
-    # Initialise memory for Fortran
-    dataout = np.zeros(N_bin+2, dtype=np.double, order='C')
-    weightout = np.zeros(N_bin+2, dtype=np.double, order='C')
-    dataout = np.asfortranarray(dataout)
-    weightout = np.asfortranarray(weightout)
-
     # Mask out data_coord and data_val - user input mask
     data_coord = data_coord[mask != 0, :]
     data_val = data_val[mask != 0]
 
-    # Mask out data_coord and data_val - user input x_min and x_max, i.e. mask out out-of-bounds data points
-    ind_outofbound_max = np.sum((data_coord - c2) > 0, axis=1) == 0 # If any coordinate is greater than the maximum range (c2), throw it away.
-    data_coord = data_coord[ind_outofbound_max] 
-    data_val = data_val[ind_outofbound_max]
+    if (wrap_around == False):
+        # Initialise memory for Fortran
+        # The N_bin+2 is for boundary padding when doing the interpolation
+        dataout = np.zeros(N_bin+2, dtype=np.complex128, order='C')
+        weightout = np.zeros(N_bin+2, dtype=np.double, order='C')
+        dataout = np.asfortranarray(dataout)
+        weightout = np.asfortranarray(weightout)
 
-    ind_outofbound_min = np.sum((data_coord - c3) < 0, axis=1) == 0 # If any coordinate is less than the minimum range (c3), throw it away
-    data_coord = data_coord[ind_outofbound_min] 
-    data_val = data_val[ind_outofbound_min] 
+        # Mask out data_coord and data_val - user input x_min and x_max, i.e. mask out out-of-bounds data points
+        ind_outofbound_max = np.sum((data_coord - c2) > 0, axis=1) == 0 # If any coordinate is greater than the maximum range (c2), throw it away.
+        data_coord = data_coord[ind_outofbound_max] 
+        data_val = data_val[ind_outofbound_max]
 
-    # Number of data points
-    N_data = len(data_val)
-    
-    fortran.interpolations_f.trilinear_insert(data_coord, data_val, x_min, N_data, \
-                                              Delta_x, one_over_bin_volume, c1,  \
-                                              dataout, weightout)
+        ind_outofbound_min = np.sum((data_coord - c3) < 0, axis=1) == 0 # If any coordinate is less than the minimum range (c3), throw it away
+        data_coord = data_coord[ind_outofbound_min] 
+        data_val = data_val[ind_outofbound_min]
 
-    # Keep only the inner array - get rid of the boundary padding.
-    dataout = dataout[1:N_bin[0]+1, 1:N_bin[1]+1, 1:N_bin[2]+1]
-    weightout = weightout[1:N_bin[0]+1, 1:N_bin[1]+1, 1:N_bin[2]+1]
+        # Number of data points - very crucial that this line is placed here because N_data can change depending on if any sample points are out of bounds.
+        N_data = len(data_val)
+        
+        # Do trilinear insertion
+        fortran.interpolations_f.trilinear_insert(data_coord, data_val, x_min, N_data, \
+                                                  Delta_x, one_over_bin_volume, c1,  \
+                                                  dataout, weightout)
 
-    # Calculate the mean value inserted into the array by dividing dataout by weightout.
-    # For locations where weightout is zero, dataout should also be zero (because no values were inserted),
-    # deal with this case by setting weightout to 1.
+        # Keep only the inner array - get rid of the boundary padding.
+        dataout = dataout[1:N_bin[0]+1, 1:N_bin[1]+1, 1:N_bin[2]+1]
+        weightout = weightout[1:N_bin[0]+1, 1:N_bin[1]+1, 1:N_bin[2]+1]
+    else:
+        # Initialise memory for Fortran
+        dataout = np.zeros(N_bin, dtype=np.complex128, order='C')
+        weightout = np.zeros(N_bin, dtype=np.double, order='C')
+        dataout = np.asfortranarray(dataout)
+        weightout = np.asfortranarray(weightout)
+
+        # Number of data points
+        N_data = len(data_val)
+
+        # Do trilinear insertion
+        fortran.interpolations_f.trilinear_insert_with_wraparound(data_coord, data_val, x_min, N_data, \
+                                                                  Delta_x, one_over_bin_volume, c1, N_bin, \
+                                                                  dataout, weightout)
+
+
+    """
+    The code in this section is no longer used because we want to return both dataout and weightout.
+    Returning weightout is useful when we want to interpolate the interpolated slices, 
+    for example in the case of merging slices for a 3D volume.
+
+    # # Calculate the mean value inserted into the array by dividing dataout by weightout.
+    # # For locations where weightout is zero, dataout should also be zero (because no values were inserted),
+    # # deal with this case by setting weightout to 1.
     # assert np.sum(dataout[weightout == 0]) == 0
+    """
 
     return dataout, weightout
 

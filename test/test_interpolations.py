@@ -17,16 +17,16 @@ def test_1():
     x_max = np.array([1, 1, 1])
 
     ans = np.array([[[ 0. ,  0. ,  0. ],
-            [ 0. ,  0. ,  0. ],
-            [ 0. ,  0. ,  0. ]],
+                    [ 0. ,  0. ,  0. ],
+                    [ 0. ,  0. ,  0. ]],
 
-           [[ 0. ,  0. ,  0. ],
-            [ 0. ,  0.9,  0. ],
-            [ 0. ,  0. ,  0. ]],
+                   [[ 0. ,  0. ,  0. ],
+                    [ 0. ,  0.9,  0. ],
+                    [ 0. ,  0. ,  0. ]],
 
-           [[ 0. ,  0. ,  0. ],
-            [ 0. ,  0.1,  0. ],
-            [ 0. ,  0. ,  0. ]]])
+                   [[ 0. ,  0. ,  0. ],
+                    [ 0. ,  0.1,  0. ],
+                    [ 0. ,  0. ,  0. ]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
 
@@ -46,16 +46,16 @@ def test_2():
     x_max = np.array([1, 1, 1])
 
     ans = np.array([[[ 0.   ,  0.   ,  0.   ],
-            [ 0.   ,  0.   ,  0.   ],
-            [ 0.   ,  0.   ,  0.   ]],
+                    [ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.   ,  0.   ]],
 
-           [[ 0.   ,  0.   ,  0.   ],
-            [ 0.   ,  0.125,  0.125],
-            [ 0.   ,  0.125,  0.125]],
+                   [[ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.125,  0.125],
+                    [ 0.   ,  0.125,  0.125]],
 
-           [[ 0.   ,  0.   ,  0.   ],
-            [ 0.   ,  0.125,  0.125],
-            [ 0.   ,  0.125,  0.125]]])
+                   [[ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.125,  0.125],
+                    [ 0.   ,  0.125,  0.125]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
 
@@ -65,7 +65,7 @@ def test_2():
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
-def test_3():
+def test_3(): # Boundary test
     data_coord = np.array([[-1.0, -1.0, -1.0]])
     data_val = np.array([1])
     mask = np.ones(len(data_val))
@@ -75,16 +75,16 @@ def test_3():
     x_max = np.array([1, 1, 1])
 
     ans = np.array([[[ 1.,  0.,  0.],
-            [ 0.,  0.,  0.],
-            [ 0.,  0.,  0.]],
+                    [ 0.,  0.,  0.],
+                    [ 0.,  0.,  0.]],
 
-           [[ 0.,  0.,  0.],
-            [ 0.,  0.,  0.],
-            [ 0.,  0.,  0.]],
+                   [[ 0.,  0.,  0.],
+                    [ 0.,  0.,  0.],
+                    [ 0.,  0.,  0.]],
 
-           [[ 0.,  0.,  0.],
-            [ 0.,  0.,  0.],
-            [ 0.,  0.,  0.]]])
+                   [[ 0.,  0.,  0.],
+                    [ 0.,  0.,  0.],
+                    [ 0.,  0.,  0.]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
 
@@ -94,7 +94,7 @@ def test_3():
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
-def test_4():
+def test_4(): # Boundary test
     data_coord = np.array([[1.0, 1.0, 1.0]])
     data_val = np.array([1])
     mask = np.ones(len(data_val))
@@ -181,7 +181,7 @@ def test_6():
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
-def test_7():
+def test_7(): # Boundary padding test
     data_coord = np.array([[-1.4999, -1.4999, -1.4999]])
     data_val = np.array([1])
     mask = np.ones(len(data_val))
@@ -211,7 +211,7 @@ def test_7():
     assert np.sum(np.abs(dataout - ans)) < 1e-6
 
 
-def test_8():
+def test_8(): # Boundary padding test
     data_coord = np.array([[1.4999, 1.4999, 1.4999]])
     data_val = np.array([1])
     mask = np.ones(len(data_val))
@@ -619,7 +619,7 @@ def test_18(): # Out of bounds test2
             [ 0.,  0.,  0.,  0.],
             [ 0.,  0.,  0.,  0.]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_around=False)
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -631,9 +631,207 @@ def test_18(): # Out of bounds test2
     assert np.sum(ans.shape - np.array(dataout.shape)) == 0
 
 
+def test_19(): # Complex value test 1 - single complex value on the exact grid
+    data_coord = np.array([[-1.0, -1.0, -1.0]])
+    data_val = np.array([10.3+2.9j])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([3, 3, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    ans = np.array([[[ 10.3+2.9j,  0.,  0.],
+                     [ 0.       ,  0.,  0.],
+                     [ 0.       ,  0.,  0.]],
+
+                    [[ 0.       ,  0.,  0.],
+                     [ 0.       ,  0.,  0.],
+                     [ 0.       ,  0.,  0.]],
+
+                    [[ 0.       ,  0.,  0.],
+                     [ 0.       ,  0.,  0.],
+                     [ 0.       ,  0.,  0.]]])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
+
+
+def test_20(): # Complex value test 2 - single complex value with interpolations
+    data_coord = np.array([[0.5, 0.5, 0.5]])
+    data_val = np.array([1j])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([3, 3, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    ans = np.array([[[ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.   ,  0.   ]],
+
+                   [[ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.125j,  0.125j],
+                    [ 0.   ,  0.125j,  0.125j]],
+
+                   [[ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.125j,  0.125j],
+                    [ 0.   ,  0.125j,  0.125j]]])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
 
+def test_21(): # Complex value test 3 - multiple complex values with interpolations
+    data_coord = np.array([[0.1, 0, 0], [0.5, 0.5, 0.5]])
+    data_val = np.array([1, 1j])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([3, 3, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    ans = np.array([[[ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.   ,  0.   ]],
+
+                   [[ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.45+0.0625j,  0.125j],
+                    [ 0.   ,  0.125j,  0.125j]],
+
+                   [[ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.05+0.0625j,  0.125j],
+                    [ 0.   ,  0.125j,  0.125j]]])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask)
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
+
+def test_22(): # Wrap-around test 1 - no wrap-around
+    data_coord = np.array([[0.1, 0, 0]])
+    data_val = np.array([1])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([3, 3, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    ans = np.array([[[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0. ,  0. ],
+                     [ 0. ,  0. ,  0. ]],
+
+                    [[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0.9,  0. ],
+                     [ 0. ,  0. ,  0. ]],
+
+                    [[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0.1,  0. ],
+                     [ 0. ,  0. ,  0. ]]])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_around=True)
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
+
+
+def test_23(): # Wrap-around test 2 - exact wrap-around
+    data_coord = np.array([[2, 0, 0]])
+    data_val = np.array([99])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([3, 3, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    ans = np.array([[[ 0. ,  0. ,  0. ],
+                     [ 0. ,  99.0,  0. ],
+                     [ 0. ,  0. ,  0. ]],
+
+                    [[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0. ,  0. ],
+                     [ 0. ,  0. ,  0. ]],
+
+                    [[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0. ,  0. ],
+                     [ 0. ,  0. ,  0. ]]])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_around=True)
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
+
+
+def test_24(): # Wrap-around test 3 - wrap-around with interpolation
+    data_coord = np.array([[2.1, 0, 0]])
+    data_val = np.array([1])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([3, 3, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    ans = np.array([[[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0.9 ,  0. ],
+                     [ 0. ,  0. ,  0. ]],
+
+                    [[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0.1,  0. ],
+                     [ 0. ,  0. ,  0. ]],
+
+                   [[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0.,  0. ],
+                     [ 0. ,  0. ,  0. ]]])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_around=True)
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
+
+
+def test_25(): # Wrap-around test 4 - wrap-around with interpolation on the boundary
+    data_coord = np.array([[1.1, 0, 0]])
+    data_val = np.array([1])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([3, 3, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    ans = np.array([[[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0.1 ,  0. ],
+                     [ 0. ,  0. ,  0. ]],
+
+                    [[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0.,  0. ],
+                     [ 0. ,  0. ,  0. ]],
+
+                   [[ 0. ,  0. ,  0. ],
+                     [ 0. ,  0.9,  0. ],
+                     [ 0. ,  0. ,  0. ]]])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_around=True)
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
 
