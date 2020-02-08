@@ -895,7 +895,7 @@ def test_27(): # Wrap-around test 6 - wrap-around with interpolation on the boun
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
-def test_28():
+def test_28(): # Wrap-around test 7 - wrap-around with interpolation on the boundary (corner case)
     data_coord = np.array([[1.5, 1.5, 1.5]])
     data_val = np.array([1])
     mask = np.ones(len(data_val))
@@ -925,7 +925,7 @@ def test_28():
 
 
 
-def test_29():
+def test_29(): # Wrap-around test 8 - no wrap-around with interpolation on the boundary (corner case)
     data_coord = np.array([[0.5, 0.5, 0.5]])
     data_val = np.array([1])
     mask = np.ones(len(data_val))
@@ -955,7 +955,7 @@ def test_29():
 
 
 
-def test_30():
+def test_30(): # Wrap-around test 9 - wrap-around with interpolation on the boundary, non cubic volume
     data_coord = np.array([[1.5, 1.5, 1.5]])
     data_val = np.array([1])
     mask = np.ones(len(data_val))
@@ -986,4 +986,31 @@ def test_30():
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
-test_30()
+
+def test_31(): # Wrap-around test 10 - wrap-around with interpolation on the boundary (corner case), multiple sample points to insert
+    data_coord = np.array([[1.5, 1.5, 1.5], [1.5, 1.5, 1.5]])
+    data_val = np.array([1, 1])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([3, 3, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    ans = np.array([[[ 0.125,  0.   ,  0.125],
+                     [ 0.   ,  0.   ,  0.   ],
+                     [ 0.125,  0.   ,  0.125]],
+
+                    [[ 0.   ,  0.   ,  0.   ],
+                     [ 0.   ,  0.   ,  0.   ],
+                     [ 0.   ,  0.   ,  0.   ]],
+
+                    [[ 0.125,  0.   ,  0.125],
+                     [ 0.   ,  0.   ,  0.   ],
+                     [ 0.125,  0.   ,  0.125]]])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_around=True)
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    assert np.sum(np.abs(dataout - ans)) < 1e-9
