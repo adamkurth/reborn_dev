@@ -981,8 +981,6 @@ def test_30(): # Wrap-around test 9 - wrap-around with interpolation on the boun
     weightout[weightout == 0] = 1
     dataout /= weightout
 
-    print(dataout)
-
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
 
