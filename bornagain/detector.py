@@ -27,13 +27,9 @@ class PADGeometry(object):
 
     """
 
+    # pylint: disable=too-many-public-methods
+    # pylint: disable=too-many-instance-attributes
     # These are the configurable parameters.  No defaults.  One must think.
-
-    n_fs = None  #: The number of fast-scan pixels.
-    n_ss = None  #: The number of slow-scan pixels.
-    _fs_vec = None  #: The fast-scan basis vector.
-    _ss_vec = None  #: The slow-scan basis vector.
-    _t_vec = None  #: The overall translation vector.
 
     def __init__(self, n_pixels=None, distance=None, pixel_size=None, shape=None):
         r"""
@@ -45,6 +41,12 @@ class PADGeometry(object):
             distance (float): Sample-to-detector distance, where the beam is taken along the third ("Z") axis
             pixel_size (float): Size of the pixels in SI units.
         """
+
+        self._n_fs = None
+        self._n_ss = None
+        self._fs_vec = None
+        self._ss_vec = None
+        self._t_vec = None
 
         if distance is not None and pixel_size is not None:
 
@@ -61,8 +63,30 @@ class PADGeometry(object):
         return s
 
     @property
-    def n_pixels(self):
+    def n_fs(self):
+        r"""Number of fast-scan pixels."""
+        if self._n_fs is None:
+            raise ValueError('n_fs has not been defined for this PADGeometry!')
+        return self._n_fs
 
+    @n_fs.setter
+    def n_fs(self, val):
+        self._n_fs = val
+
+    @property
+    def n_ss(self):
+        r"""Number of slow-scan pixels."""
+        if self._n_ss is None:
+            raise ValueError('n_ss has not been defined for this PADGeometry!')
+        return self._n_ss
+
+    @n_ss.setter
+    def n_ss(self, val):
+        self._n_ss = val
+
+    @property
+    def n_pixels(self):
+        r"""Total number of pixels (:math:`n_{fs} \cdot n_{ss}`)"""
         return self.n_fs * self.n_ss
 
     @property
@@ -82,9 +106,6 @@ class PADGeometry(object):
         r""" Translation vector pointing from origin to center of corner pixel, which is first in memory. """
 
         return self._t_vec
-
-    # The reason for these setters is that some assumptions are made about the shape of vectors used within bornagain.
-    # TODO: Document assumptions made about vectors
 
     @fs_vec.setter
     def fs_vec(self, fs_vec):
@@ -154,9 +175,9 @@ class PADGeometry(object):
                 self.n_fs = n_pixels
                 self.n_ss = n_pixels
 
-        self.fs_vec = [pixel_size, 0, 0]
-        self.ss_vec = [0, pixel_size, 0]
-        self.t_vec = [-pixel_size * (self.n_fs / 2.0 - 0.5), -pixel_size * (self.n_ss / 2.0 - 0.5), distance]
+        self.fs_vec = np.array([pixel_size, 0, 0])
+        self.ss_vec = np.array([0, pixel_size, 0])
+        self.t_vec = np.array([pixel_size * -(self.n_fs / 2.0 - 0.5), pixel_size * -(self.n_ss / 2.0 - 0.5), distance])
 
     def pixel_size(self):
         r""" Return pixel size, assuming square pixels. """
@@ -305,7 +326,6 @@ class PADGeometry(object):
 
         Returns: numpy array
         """
-        # TODO: this is extremely slow!
         k = self.position_vecs()
         r1 = k - self.fs_vec * .5 - self.ss_vec * .5
         r2 = k + self.fs_vec * .5 - self.ss_vec * .5
@@ -430,7 +450,7 @@ class PADGeometry(object):
         r"""
         For convenience: np.random.random((self.n_ss, self.n_fs))
         """
-        return np.random.random((self.n_ss, self.n_fs))
+        return np.random.random((self.n_ss, self.n_fs))  # pylint: disable=no-member
 
     def max_resolution(self, beam=None):
         r"""
@@ -636,9 +656,8 @@ class IcosphereGeometry(object):
 
     def compute_vertices_and_faces(self):
         r"""
-        Compute vertex and face coordinates.  Needs documentation on output.
+        Compute vertex and face coordinates.  FIXME: Needs documentation.
         """
-        # TODO: documentation.
 
         # Make the base icosahedron
 
@@ -716,7 +735,7 @@ class IcosphereGeometry(object):
 
         faces = np.array(faces)
         verts = np.array(verts)
-        n_faces = faces.shape[0]
+        n_faces = faces.shape[0]  # pylint:disable=unsubscriptable-object
 
         face_centers = np.zeros([n_faces, 3])
         for i in range(0, n_faces):
@@ -732,36 +751,54 @@ class RadialProfiler(object):
     Helper class to create radial profiles.
     """
 
-    n_bins = None
-    bins = None
-    bin_size = None
-    bin_indices = None
-    q_mags = None
-    mask = None
-    counts = None
-    q_range = None
-    counts_non_zero = None
+    # pylint: disable=too-many-instance-attributes
 
-    def __init__(self):
+    def __init__(self, q_mags=None, mask=None, n_bins=None, q_range=None):
 
-        pass
+        self.n_bins = None
+        self.bins = None
+        self.bin_size = None
+        self.bin_indices = None
+        self.q_mags = None
+        self.mask = None
+        self.counts = None
+        self.q_range = None
+        self.counts_non_zero = None
 
-    def make_plan(self, q_mags, mask=None, n_bins=100, q_range=None):
+        if (n_bins or q_range is not None) and q_mags is not None:
+            self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range)
+
+    def make_plan(self, q_mags, mask=None, n_bins=None, q_range=None):
         r"""
         Setup the binning indices for the creation of radial profiles.
 
         Arguments:
-            q_mags (numpy array) :
-                Scattering vector magnitudes.
-            mask (numpy array) :
-                Pixel mask.  Should be ones and zeros, where one means "good" and zero means "bad".
-            n_bins (int) :
-                Number of bins.
-            q_range (list-like) :
-                The minimum and maximum of the scattering vector magnitudes.  The bin size will be equal to
-                (max_q - min_q) / n_bins
+            q_mags (numpy array) : Scattering vector magnitudes.
+            mask (numpy array) : Pixel mask.  Should be ones and zeros, where one means "good" and zero means "bad".
+            n_bins (int) : Number of bins.
+            q_range (list-like) : The minimum and maximum of the scattering vector magnitudes.  The bin size will be
+                                  equal to (max_q - min_q) / n_bins
         """
+        q_mags = q_mags.ravel()
+        if mask is None:
+            mask = np.ones([len(q_mags)])
+        else:
+            mask = mask.copy().ravel()
+        self.setup_bin_indices(q_mags, q_range=q_range, n_bins=n_bins)
+        self.set_mask(mask)
 
+    def setup_bin_indices(self, q_mags, n_bins=None, q_range=None):
+        r"""
+        Assign radial bin values to each of the q magnitudes.  We do this only once and store the values.
+
+        Args:
+            q_mags:
+            n_bins:
+            q_range:
+
+        Returns:
+
+        """
         q_mags = q_mags.ravel()
 
         if q_range is None:
@@ -778,22 +815,25 @@ class RadialProfiler(object):
         bin_indices = np.int64(np.floor((q_mags - min_q) / bin_size))
         bin_indices[bin_indices < 0] = 0
         bin_indices[bin_indices >= n_bins] = n_bins - 1
-        if mask is None:
-            mask = np.ones([len(bin_indices)])
-        else:
-            mask = mask.copy().ravel()
-        # print(bin_indices.shape, mask.shape, n_bins)
-        counts = np.bincount(bin_indices, mask, n_bins)
-        counts_non_zero = counts > 0
 
+        self.q_mags = q_mags
         self.n_bins = n_bins
         self.bins = bins
         self.bin_size = bin_size
         self.bin_indices = bin_indices
-        self.q_mags = q_mags
+        self.q_range = q_range
+
+    def set_mask(self, mask):
+        r"""
+        Configure the mask.  This affects how averaging is done since masked pixels are ignored.
+
+        Args:
+            mask (numpy array) : The mask array.  Zero means ignore.
+        """
+        counts = np.bincount(self.bin_indices, mask, self.n_bins)
+        counts_non_zero = counts > 0
         self.mask = mask
         self.counts = counts
-        self.q_range = q_range
         self.counts_non_zero = counts_non_zero
 
     def get_profile(self, data, average=True):
@@ -801,18 +841,13 @@ class RadialProfiler(object):
         Create a radial profile for a particular dataframe.
 
         Arguments:
-            data (numpy array) :
-                Intensity data.
-            average (bool) :
-                If true, divide the sum in each bin by the counts, else return the sum.  Default: True.
+            data (numpy array) : Intensity data.
+            average (bool) : If true, divide the sum in each bin by the counts, else return the sum.  Default: True.
 
         Returns:
-            profile (numpy array) :
-                The requested radial profile.
+            numpy array : The requested radial profile.
         """
-
         profile = np.bincount(self.bin_indices, data.ravel() * self.mask, self.n_bins)
         if average:
-            profile.flat[self.counts_non_zero] /= self.counts.flat[self.counts_non_zero]
-
+            profile.flat[self.counts_non_zero] /= self.counts.flat[self.counts_non_zero]  # pylint:disable=no-member
         return profile
