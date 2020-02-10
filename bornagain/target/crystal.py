@@ -885,18 +885,10 @@ class CrystalDensityMap(object):
             return np.reshape(f_map, self.shape)
 
         elif mode == 'trilinear':
-            atom_x_vecs = np.ascontiguousarray(atom_x_vecs)
-
             # Note that we do not divide by weightout because we want the sum of the atoms not the mean.
-            rho, _ = trilinear_insert(data_coord=atom_x_vecs, 
-                                      data_val=atom_fs, 
-                                      x_min=self.x_min,
-                                      x_max=self.x_max, 
-                                      N_bin=self.shape, 
-                                      wrap_around=True,
+            rho, _ = trilinear_insert(data_coord=np.ascontiguousarray(atom_x_vecs), data_val=atom_fs,
+                                      x_min=self.x_min, x_max=self.x_max, N_bin=self.shape, wrap_around=True,
                                       mask=np.full(len(atom_fs), True, dtype=bool))
-            
-
             return rho
 
         # elif mode == 'nearest':

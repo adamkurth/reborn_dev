@@ -73,30 +73,13 @@ cdmap = crystal.CrystalDensityMap(cryst=cryst, resolution=args.resolution, overs
 
 # FIXME : Set atom coordinates to grid points for testing of the two different methods discussed below.  By setting
 #         atoms to lie on gridpoints, we *should* in principle get the same results from both methods (but we don't).
-# print('')
-# print('Initial fractional coordinates:')
-# print(cryst.fractional_coordinates)
-cryst.fractional_coordinates = np.floor(cryst.fractional_coordinates/cdmap.dx)*cdmap.dx
-print('shape', cdmap.shape)
-print('hlims', cdmap.h_min, cdmap.h_max)
-print('xlims', cdmap.x_min, cdmap.x_max)
-print('max fraccoords', np.max(cryst.fractional_coordinates))
-print('fraccoords', np.min(cryst.fractional_coordinates))
-
-# print('Fixed fractional coordinates:')
-# print(cryst.fractional_coordinates)
-# print('3D mesh shape and limits:')
-# print('Shape:', cdmap.shape, 'Limits:', cdmap.x_min, cdmap.x_max)
-# print('Coordinates of 3D x grid points:')
-# print(cdmap.x_vecs)
-# print('Coordinates of 3D h grid points:')
-# print(cdmap.h_vecs*2*np.pi)
+# cryst.fractional_coordinates = np.floor(cryst.fractional_coordinates/cdmap.dx)*cdmap.dx
 
 # GPU simulation engine
 clcore = ClCore()
 
 # Scattering factors (absolute value because interpolations don't work with complex numbers)
-f = np.abs(cryst.molecule.get_scattering_factors(photon_energy=args.photon_energy_ev*eV)).astype(np.double)
+f = cryst.molecule.get_scattering_factors(photon_energy=args.photon_energy_ev*eV)
 
 # FIXME: Which way are we supposed to do this?
 # For now, we are going to compute the molecular transform amplitudes in two different ways.  The "direct" method is to
@@ -129,15 +112,11 @@ for k in range(cryst.spacegroup.n_operations):
 # from the direct summation method.
 mol_amps_fft = []
 print('sum over f', np.sum(f))
-print('onefish')
 au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='trilinear')
-print('twofish')
 print('sum over au_map', np.sum(au_map))
 for k in range(cryst.spacegroup.n_operations):
     rho = cdmap.au_to_k(k, au_map)
     mol_amps_fft.append(clcore.to_device(fftshift(fftn(rho)), dtype=clcore.complex_t))
-
-print('sum over 3d f map', np.sum(np.abs(ifftn(mol_amps_fft[0].get()))))
 print('k zero direct', ifftshift(mol_amps_direct[0].get())[0, 0, 0])
 print('k zero fft', ifftshift(mol_amps_fft[0].get())[0, 0, 0])
 
@@ -190,11 +169,6 @@ for c in range(args.n_crystals):
     sys.stdout.write(' in %g seconds.\n' % (time() - t,))
 
 intensity = np.reshape(intensity_sum.get(), cdmap.shape) / args.n_crystals
-w = np.where(~np.isfinite(intensity))
-if np.array(w).squeeze().size > 0:
-    print('Found non-finite values in dispim.  They will be set to -1.')
-    print(intensity[w])
-    intensity[w] = -1
 
 if args.save_results:
     filename = 'run%04d_intensity.npz' % (args.run_number,)
@@ -213,11 +187,6 @@ if args.view_intensities:
     dispim *= 10000
     dispim += 1
     dispim = np.log(dispim)
-    # w = np.where(~np.isfinite(dispim))
-    # if w.size > 0:
-    #     print('Found non-finite values in dispim')
-    # dispim[w] = 0
-    # print(np.isfinite(dispim).all())
     MapSlices(dispim, title='Averaged Intensities')
 
 print('Done!')
