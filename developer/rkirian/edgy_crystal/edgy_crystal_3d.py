@@ -130,7 +130,28 @@ else:
 for k in range(cryst.spacegroup.n_operations):
     a = np.abs(mol_amps_direct[k].get()).ravel()
     b = np.abs(mol_amps_fft[k].get()).ravel()
-    print('Difference in abs(amplitudes):', np.sum(np.abs(a-b))/(np.sum(np.abs(a)+np.abs(b))/2))
+    print('symmetry partner', k)
+    print('k zero direct', ifftshift(mol_amps_direct[k].get())[0, 0, 0])
+    print('k zero fft', ifftshift(mol_amps_fft[k].get())[0, 0, 0])
+    print('k zero direct', ifftshift(mol_amps_direct[k].get())[5, 5, 5])
+    print('k zero fft', ifftshift(mol_amps_fft[k].get())[5, 5, 5])
+    print('Difference in abs(amplitudes):', np.sum(np.abs(a-b))/(np.sum(np.abs(a+b))/2))
+
+levels = [0, 500]
+a = np.abs(mol_amps_direct[0].get())
+imwin_direct = pg.image(a, title='direct')
+imwin_direct.setLevels(levels[0], levels[1])
+imwin_direct.setCurrentIndex(int(np.ceil(a.shape[0]/2)))
+imwin_direct.setPredefinedGradient('flame')
+b = np.abs(mol_amps_fft[0].get())
+imwin_fft = pg.image(b, title='fft')
+imwin_fft.setLevels(levels[0], levels[1])
+imwin_fft.setCurrentIndex(int(np.ceil(b.shape[0]/2)))
+imwin_fft.setPredefinedGradient('flame')
+imwin_diff = pg.image(b-a, title='fft - direct')
+imwin_fft.setCurrentIndex(int(np.ceil(b.shape[0]/2)))
+imwin_fft.setPredefinedGradient('flame')
+
 
 if args.view_crystal:   # 3D view of crystal
     width = args.crystal_width[0] + np.random.rand(3)*args.crystal_width[1]
@@ -188,5 +209,8 @@ if args.view_intensities:
     dispim += 1
     dispim = np.log(dispim)
     MapSlices(dispim, title='Averaged Intensities')
+
+app = pg.mkQApp()
+app.exec_()
 
 print('Done!')
