@@ -881,7 +881,7 @@ class CrystalDensityMap(object):
             s = self.oversampling
             if len(atom_x_vecs.shape) == 1:
                 atom_x_vecs = np.expand_dims(atom_x_vecs, axis=0)
-            place_atoms_in_map(atom_x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp)
+            place_atoms_in_map(atom_x_vecs, atom_fs, sigma, self.x_max, orth_mat, map_x_vecs, f_map, f_map_tmp)
             return np.reshape(f_map, self.shape)
 
         elif mode == 'trilinear':
@@ -898,38 +898,91 @@ class CrystalDensityMap(object):
         #     return a
 
 
-# @jit(nopython=True)
-# def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp):
-#     r"""
-#     Needs documentation...
-#     """
-#
-#     n_atoms = x_vecs.shape[0]
-#     n_map_voxels = map_x_vecs.shape[0]
-#     # f_map = np.empty([n_map_voxels], dtype=atom_fs.dtype)
-#     # f_map_tmp = np.empty([n_map_voxels], dtype=x_vecs.dtype)
-#     for n in range(n_atoms):
-#         x = x_vecs[n, 0] % s
-#         y = x_vecs[n, 1] % s
-#         z = x_vecs[n, 2] % s
-#         w_tot = 0
-#         for i in range(n_map_voxels):
-#             mx = map_x_vecs[i, 0]
-#             my = map_x_vecs[i, 1]
-#             mz = map_x_vecs[i, 2]
-#             dx = np.abs(x - mx)
-#             dy = np.abs(y - my)
-#             dz = np.abs(z - mz)
-#             dx = min(dx, s - dx)
-#             dy = min(dy, s - dy)
-#             dz = min(dz, s - dz)
-#             dr2 = (orth_mat[0, 0] * dx + orth_mat[0, 1] * dy + orth_mat[0, 2] * dz)**2 + \
-#                   (orth_mat[1, 0] * dx + orth_mat[1, 1] * dy + orth_mat[1, 2] * dz)**2 + \
-#                   (orth_mat[2, 0] * dx + orth_mat[2, 1] * dy + orth_mat[2, 2] * dz)**2
-#             w = np.exp(-dr2/(2*sigma**2))
-#             f_map_tmp[i] = w
-#             w_tot += w
-#         f_map += atom_fs[n] * f_map_tmp/w_tot
+@jit(nopython=True)
+def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat, n_sigma):
+
+    # Note that we must deal with wrap-around when calculating distances from atoms to grid points.
+    #
+    #
+    # bins   |_____*_____|_x___*_____|_____*_____|
+    #
+    # index        0           1           2           3           4           5           6           7           8
+    #
+    # wrapped idx  0           1           2           0           1           2           0           1           2
+    #
+    # The above schematic is for a map with 3 bins.  The grid samples that correspond to x_min and x_max are in the
+    # centers of the bins, indicated by the * symbol.  Supposing we want to place a Gaussian centered at the x position,
+    # we need to calculate distances to sample points indexed with 0, 1, 2 but with wrap-around factored in.
+    #
+    #
+
+    n_atoms = f.shape[0]  # Number of atoms
+    dx = (x_max - x_min)/(shape - 1)  # Bin width
+    b_tot = x_max - x_min + dx  # Total width of bins, including half-bins that extend beyond bin center points
+    b_min = x_min - dx/2  # Bin lower bound - extends half a bin beyond bin center point
+    b_max = x_max + dx/2  # Bin upper bound - extends half a bin beyond bin center point
+    sum_map = np.zeros(shape, dtype=f.dtype)
+    sum_map_temp = np.zeros(shape, dtype=f.dtype)
+
+    for n in range(n_atoms):
+        x_atom = x_vecs[n, :]
+        sum_val = 0
+        for i in range(shape[0]):
+            xg = x_min[0] + i * dx[0]
+            for j in range(shape[1]):
+                yg = x_min[1] + j * dx[1]
+                for k in range(shape[2]):
+                    zg = x_min[2] + j * dx[2]
+                    x_grid = np.array([xg, yg, zg])
+                    diff = x_grid - x_atom
+                    diff = ((diff + b_tot/2) % b_tot) - b_tot/2
+                    diff = np.dot(diff, orth_mat.T)
+                    val = np.exp(-np.sum(diff**2)/(2*sigma**2))
+                    sum_val += val
+                    sum_map_temp[i, j, k] = val
+        sum_map_temp /= sum_val
+        sum_map_temp *= f[n]
+        sum_map += sum_map_temp
+
+
+
+
+
+@jit(nopython=True)
+def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp):
+    r"""
+    Needs documentation...
+    """
+    # try:
+    #     a = s.shape
+    # except:
+    #     s = np.array([s, s, s])
+    n_atoms = x_vecs.shape[0]
+    n_map_voxels = map_x_vecs.shape[0]
+    # f_map = np.empty([n_map_voxels], dtype=atom_fs.dtype)
+    # f_map_tmp = np.empty([n_map_voxels], dtype=x_vecs.dtype)
+    for n in range(n_atoms):
+        x = x_vecs[n, 0] % s[0]
+        y = x_vecs[n, 1] % s[1]
+        z = x_vecs[n, 2] % s[2]
+        w_tot = 0
+        for i in range(n_map_voxels):
+            mx = map_x_vecs[i, 0]
+            my = map_x_vecs[i, 1]
+            mz = map_x_vecs[i, 2]
+            dx = np.abs(x - mx)
+            dy = np.abs(y - my)
+            dz = np.abs(z - mz)
+            dx = min(dx, s[0] - dx)
+            dy = min(dy, s[1] - dy)
+            dz = min(dz, s[2] - dz)
+            dr2 = (orth_mat[0, 0] * dx + orth_mat[0, 1] * dy + orth_mat[0, 2] * dz)**2 + \
+                  (orth_mat[1, 0] * dx + orth_mat[1, 1] * dy + orth_mat[1, 2] * dz)**2 + \
+                  (orth_mat[2, 0] * dx + orth_mat[2, 1] * dy + orth_mat[2, 2] * dz)**2
+            w = np.exp(-dr2/(2*sigma**2))
+            f_map_tmp[i] = w
+            w_tot += w
+        f_map += atom_fs[n] * f_map_tmp/w_tot
 
 
 def pdb_to_dict(pdb_file_path):

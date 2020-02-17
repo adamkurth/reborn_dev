@@ -53,6 +53,10 @@ args.gaussian_disorder_sigmas = [float(a) for a in args.gaussian_disorder_sigmas
 cryst = crystal.CrystalStructure(args.pdb_file, tight_packing=True)  # Tight packing: put molecule COMs inside unit cell
 uc = cryst.unitcell
 sg = cryst.spacegroup
+print(uc)
+print(sg)
+
+# sys.exit()
 
 # P63 Twinning operations
 # for k in range(sg.n_operations):
@@ -112,7 +116,7 @@ for k in range(cryst.spacegroup.n_operations):
 # from the direct summation method.
 mol_amps_fft = []
 print('sum over f', np.sum(f))
-au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='trilinear')
+au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='gaussian', fixed_atom_sigma=10e-10)
 print('sum over au_map', np.sum(au_map))
 for k in range(cryst.spacegroup.n_operations):
     rho = cdmap.au_to_k(k, au_map)

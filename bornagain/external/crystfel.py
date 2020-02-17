@@ -75,6 +75,40 @@ def geometry_dict_to_pad_geometry_list(geometry_dict):
     return pads
 
 
+def extract_geom_from_stream(stream_path, geom_path=None):
+
+    r"""
+    Extract a CrystFEL geometry file from a CrystFEL stream file.
+
+    Args:
+        stream_path:
+        geom_path:
+
+    Returns:
+        None
+    """
+
+    # Open the files
+    streamfile = open(stream_path, mode='r')
+    geometryfile_to_write = open(geom_path, mode='w')
+
+    # Start reading the stream file
+    flag_done = 0
+    for line in streamfile:  # Reading lines in streamfile
+        if sta_geom in line:  # In geometery file
+            for line2 in streamfile:  # Reading lines in chunk
+                if end_geom in line2:
+                    flag_done = 1  # Done writing the geometry file
+                    break
+                geometryfile_to_write.write(line2)
+        if flag_done == 1:
+            break
+
+    # close the files
+    streamfile.close()
+    geometryfile_to_write.close()
+
+
 def geometry_file_to_pad_geometry_list(geometry_file):
 
     r"""

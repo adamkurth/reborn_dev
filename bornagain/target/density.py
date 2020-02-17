@@ -60,6 +60,72 @@ class DensityMap(object):
         return n_vecs
 
 
+@jit(nopython=True)
+def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat, n_sigma=4):
+    r"""
+    Construct an atomic scattering density by summing Gaussians.  Sampling is assumed to be a rectangular grid, but axes
+    need no be orthogonal (orrhogonalization matrix may be provided).  Normalization is taken care of by ensuring that
+    the sum over Gaussian samples is equal to the provided scattering factors.
+
+    Args:
+        x_vecs (Mx3 numpy array) : Atom position vectors
+        f (numpy array) : Atom structure factors
+        sigma (float) : Standard deviation of Gaussian (all atoms are the same)
+        x_min (numpy array) : Min position of corner voxel (center of voxel)
+        x_max (numpy array) : Max position of corner voxel (center of voxel)
+        shape (numpy array) : Shape of the 3D array
+        orth_mat (3x3 numpy array) : Matrix that acts on distance vectors before calculating distance scalar
+        n_sigma : Not implemented yet (how many sigmas to extend the atomic densities).
+
+    Returns:
+        numpy array : The density map
+    """
+    # Note that we must deal with wrap-around when calculating distances from atoms to grid points.
+    #
+    #
+    # bins   |_____*_____|_x___*_____|_____*_____|
+    #
+    # index        0           1           2           3           4           5           6           7           8
+    #
+    # wrapped idx  0           1           2           0           1           2           0           1           2
+    #
+    # The above schematic is for a map with 3 bins.  The grid samples that correspond to x_min and x_max are in the
+    # centers of the bins, indicated by the * symbol.  Supposing we want to place a Gaussian centered at the x position,
+    # we need to calculate distances to sample points indexed with 0, 1, 2 but with wrap-around factored in.
+    #
+    #
+
+    n_atoms = f.ravel().shape[0]  # Number of atoms
+    dx = (x_max - x_min)/(shape - 1)  # Bin width
+    b_tot = x_max - x_min + dx  # Total width of bins, including half-bins that extend beyond bin center points
+    sum_map = np.zeros(shape.astype(np.int), dtype=f.dtype)
+    sum_map_temp = np.zeros(shape.astype(np.int), dtype=f.dtype)
+
+    count = 0
+    for n in range(n_atoms):
+        x_atom = x_vecs[n, :]
+        sum_val = 0
+        for i in range(int(shape[0])):
+            xg = x_min[0] + i * dx[0]
+            for j in range(int(shape[1])):
+                yg = x_min[1] + j * dx[1]
+                for k in range(int(shape[2])):
+                    count += 1
+                    zg = x_min[2] + k * dx[2]
+                    x_grid = np.array([xg, yg, zg])
+                    diff1 = x_grid - x_atom
+                    diff = ((diff1 + b_tot/2) % b_tot) - b_tot/2
+                    diff = np.dot(diff, orth_mat.T)
+                    val = np.exp(-np.sum(diff**2)/(2*sigma**2))
+                    sum_val += val
+                    sum_map_temp[i, j, k] = val
+        sum_map_temp /= sum_val
+        sum_map_temp *= f[n]
+        sum_map += sum_map_temp
+
+    return sum_map
+
+
 def trilinear_interpolation_fortran(densities, vectors, corners, deltas, out):
 
     float_t = np.float64

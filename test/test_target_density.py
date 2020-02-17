@@ -5,13 +5,13 @@ import numpy as np
 from bornagain.simulate.examples import lysozyme_pdb_file, psi_pdb_file
 from bornagain.target import crystal, density
 
-try:
-    from bornagain.target import density_f
-except ImportError:
-    density_f = None
+# try:
+#     from bornagain.target import density_f
+# except ImportError:
+#     density_f = None
 
 
-def test_crystal_density():
+def test_01():
 
     cryst = crystal.CrystalStructure(psi_pdb_file)
     # Manually reconfigure P1 with rectangular lattice
@@ -46,7 +46,7 @@ def test_crystal_density():
         assert np.allclose(dat0, dat2)
 
 
-def test_transforms():
+def test_02():
 
     cryst = crystal.CrystalStructure(psi_pdb_file)
 
@@ -68,10 +68,10 @@ def func1(vecs):
     return np.sin(vecs[:, 0]/10.0) + np.cos(3*vecs[:, 1]/10.) + np.cos(2*vecs[:, 2]/10.)
 
 
-def test_interpolations():
+def test_03():
 
-    if density_f is None:
-        return
+    # if density_f is None:
+    #     return
 
     float_t = np.float64
     nx, ny, nz = 6, 7, 8
@@ -117,10 +117,10 @@ def test_interpolations():
     assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2
 
 
-def test_insertions():
+def test_04():
 
-    if density_f is None:
-        return
+    # if density_f is None:
+    #     return
 
     float_t = np.float64
     nx, ny, nz = 6, 7, 8
@@ -174,3 +174,18 @@ def test_insertions():
     val = func1(np.array([[2, 3, 4]], dtype=float_t))
     assert np.max(np.abs(densities)) > 0
     assert (np.abs((val - densities[2, 3, 4]/counts[2, 3, 4]) / val)) < 1e-2
+
+
+def test_05():
+
+    x_min = np.array([-5, -10, -12], dtype=np.double)
+    x_max = np.array([+5, +10, +13], dtype=np.double)
+    shape = np.array([11, 21, 26], dtype=np.double)
+    x_vecs = np.array([[5.5, 10.5, 13.5], [5.5, 10.5, 13.5]], dtype=np.double)
+    sigma = 1.0
+    f = np.array([1], dtype=np.double)
+    orth_mat = np.eye(3, dtype=np.double)
+
+    sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat)
+    assert sum_map[0, 0, 0] == sum_map[-1, -1, -1]
+    assert np.abs(np.sum(sum_map) - f[0]*2) / np.abs(f[0]*2) < 1e8
