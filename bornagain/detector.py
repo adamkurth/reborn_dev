@@ -757,6 +757,7 @@ class RadialProfiler(object):
 
         self.n_bins = None
         self.bins = None
+        self.bin_edges = None
         self.bin_size = None
         self.bin_indices = None
         self.q_mags = None
@@ -789,7 +790,8 @@ class RadialProfiler(object):
 
     def setup_bin_indices(self, q_mags, n_bins=None, q_range=None):
         r"""
-        Assign radial bin values to each of the q magnitudes.  We do this only once and store the values.
+        Assign radial bin values to each of the q magnitudes.  We do this only once and store the values.  The binning
+        convention is as described in the docs.
 
         Args:
             q_mags:
@@ -810,15 +812,24 @@ class RadialProfiler(object):
             min_q = q_range[0]
             max_q = q_range[1]
 
-        bin_size = (max_q - min_q) / float(n_bins)
-        bins = (np.arange(0, n_bins) + 0.5) * bin_size + min_q
-        bin_indices = np.int64(np.floor((q_mags - min_q) / bin_size))
+        bin_size = (max_q - min_q) / float(n_bins - 1)
+        bins = min_q + np.arange(n_bins)*bin_size
+        bin_edges = min_q - bin_size/2 + np.arange(n_bins+1)*bin_size
+        bin_indices = np.int64(np.floor((q_mags - (min_q - bin_size/2)) / bin_size))
+        # bin_index_groups = []  # A list of length n_bins, each of which contains a numpy array with the
+        # for i in range(n_bins):
+
+
+        # Overflow ends up in the min and max bins
         bin_indices[bin_indices < 0] = 0
         bin_indices[bin_indices >= n_bins] = n_bins - 1
+
+
 
         self.q_mags = q_mags
         self.n_bins = n_bins
         self.bins = bins
+        self.bin_edges = bin_edges
         self.bin_size = bin_size
         self.bin_indices = bin_indices
         self.q_range = q_range
@@ -830,9 +841,9 @@ class RadialProfiler(object):
         Args:
             mask (numpy array) : The mask array.  Zero means ignore.
         """
-        counts = np.bincount(self.bin_indices, mask, self.n_bins)
+        counts = np.bincount(self.bin_indices, mask.ravel(), self.n_bins)
         counts_non_zero = counts > 0
-        self.mask = mask
+        self.mask = mask.copy().ravel()
         self.counts = counts
         self.counts_non_zero = counts_non_zero
 
@@ -851,3 +862,14 @@ class RadialProfiler(object):
         if average:
             profile.flat[self.counts_non_zero] /= self.counts.flat[self.counts_non_zero]  # pylint:disable=no-member
         return profile
+
+    # def get_profile_sum(self):
+    #
+    #
+    #
+    # def get_profile_mean(self):
+    #
+    # def get_profile_median(self):
+
+
+

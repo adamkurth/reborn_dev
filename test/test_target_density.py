@@ -189,3 +189,21 @@ def test_05():
     sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat)
     assert sum_map[0, 0, 0] == sum_map[-1, -1, -1]
     assert np.abs(np.sum(sum_map) - f[0]*2) / np.abs(f[0]*2) < 1e8
+
+
+def test_06():
+
+    x_min = np.array([-5, -10, -12], dtype=np.double)
+    x_max = np.array([+5, +11, +13], dtype=np.double)
+    shape = np.array([11, 22, 26], dtype=np.double)
+    x_vecs = np.array([[5.5, 11.5, 13.5]], dtype=np.double)
+    sigma = 1.0
+    f = np.array([1], dtype=np.double)
+    orth_mat = np.eye(3, dtype=np.double)
+
+    sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat,
+                                                          max_radius=4*sigma)
+    assert sum_map[0, 0, 0] == sum_map[-1, -1, -1]
+    assert np.abs(np.sum(sum_map) - f[0]) / np.abs(f[0]) < 1e8
+    w = np.where(sum_map > 0)
+    assert len(w[0]) == 9**3

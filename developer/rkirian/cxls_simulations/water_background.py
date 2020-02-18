@@ -20,7 +20,7 @@ SA = pad.solid_angles()
 F = solutions.get_water_profile(qmag, temperature=(25+273.16))
 F2 = F**2*n_water_molecules
 I = r_e**2 * J * P * SA * F2 / beam.photon_energy
-# I = np.random.poisson(I)
+I = np.random.poisson(I)
 I = pad.reshape(I)
 
 if 'noplots' not in sys.argv:

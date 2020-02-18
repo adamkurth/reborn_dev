@@ -78,7 +78,45 @@ def test_PADAssembler():
     assert(np.max(ass) == 1)
 
 
-def test_radial_profiler():
+def test_radial_profiler_01():
+
+    pad_geom = detector.PADGeometry(shape=[3, 3], distance=1.0, pixel_size=100e-6)
+    q_mags = pad_geom.q_mags(beam_vec=[0, 0, 1], wavelength=1.0e-10)
+    # q_mags = [8885765.80967349 6283185.28361764 8885765.80967349 6283185.28361764 0. 6283185.28361764
+    #           8885765.80967349 6283185.28361764 8885765.80967349]
+    dat = np.ones([3, 3])
+    rad = detector.RadialProfiler(q_mags=q_mags, mask=None, n_bins=3, q_range=[0, 9283185])
+    # rad.bin_edges = [-2320796.25  2320796.25  6962388.75 11603981.25]
+    profile = rad.get_profile(dat, average=False)  # Sums over
+
+    print(q_mags)
+    print(rad.bins)
+    print(rad.bin_edges)
+
+    assert profile[0] == 1
+    assert profile[1] == 4
+    assert profile[2] == 4
+
+    profile = rad.get_profile(dat, average=True)  # Sums over
+
+    assert profile[0] == 1
+    assert profile[1] == 1
+    assert profile[2] == 1
+
+    mask = np.ones([3, 3])
+    mask[0, 0] = 0
+
+    rad.set_mask(mask)
+    profile = rad.get_profile(dat, average=False)  # Sums over
+    print(mask)
+    print(profile)
+
+    assert profile[0] == 1
+    assert profile[1] == 4
+    assert profile[2] == 3
+
+
+def test_radial_profiler_02():
 
     pad_geom = make_pad_list()
 
@@ -95,3 +133,4 @@ def test_radial_profiler():
     prof = rad.get_profile(data, average=True)
     assert(np.max(prof) <= 1)
     assert(np.min(prof) >= 0)
+

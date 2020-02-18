@@ -25,7 +25,7 @@ subroutine boxsnr(dat,mask,mask2,snr,signal,npx,npy,n_inner,n_center,n_outer)
 !                        |Compute NOISE & BACKGROUND in annulus |
 !                        |                                      |
 !                        |      |------------------------|      |
-!                        |      |                        |      |
+!                        |      |  ignore this region    |      |
 !                        |      |    |--------------|    |      |
 !                        |      |    | Compute      |    |      |
 !                        |      |    | integrated   |    |      |

@@ -60,12 +60,14 @@ class DensityMap(object):
         return n_vecs
 
 
-@jit(nopython=True)
-def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat, n_sigma=4):
+def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat, max_radius=1e10):
     r"""
     Construct an atomic scattering density by summing Gaussians.  Sampling is assumed to be a rectangular grid, but axes
-    need no be orthogonal (orrhogonalization matrix may be provided).  Normalization is taken care of by ensuring that
-    the sum over Gaussian samples is equal to the provided scattering factors.
+    need not be orthogonal (the orthogonalization matrix may be provided).  Normalization is preformed such that the
+    sum over the whole map should equal the sum over the input scattering factors f.
+
+    In order to increase speed, you may specify the maximum atom size, in which case only grid points within that
+    distance are sampled.
 
     Args:
         x_vecs (Mx3 numpy array) : Atom position vectors
@@ -75,11 +77,12 @@ def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, o
         x_max (numpy array) : Max position of corner voxel (center of voxel)
         shape (numpy array) : Shape of the 3D array
         orth_mat (3x3 numpy array) : Matrix that acts on distance vectors before calculating distance scalar
-        n_sigma : Not implemented yet (how many sigmas to extend the atomic densities).
+        max_atom_size : Maximum atom size (saves time by not computing tails of Gaussians)
 
     Returns:
         numpy array : The density map
     """
+
     # Note that we must deal with wrap-around when calculating distances from atoms to grid points.
     #
     #
@@ -92,36 +95,59 @@ def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, o
     # The above schematic is for a map with 3 bins.  The grid samples that correspond to x_min and x_max are in the
     # centers of the bins, indicated by the * symbol.  Supposing we want to place a Gaussian centered at the x position,
     # we need to calculate distances to sample points indexed with 0, 1, 2 but with wrap-around factored in.
-    #
-    #
 
-    n_atoms = f.ravel().shape[0]  # Number of atoms
-    dx = (x_max - x_min)/(shape - 1)  # Bin width
-    b_tot = x_max - x_min + dx  # Total width of bins, including half-bins that extend beyond bin center points
+    shape = shape.astype(np.int)
     sum_map = np.zeros(shape.astype(np.int), dtype=f.dtype)
-    sum_map_temp = np.zeros(shape.astype(np.int), dtype=f.dtype)
+    tmp = np.zeros(shape.astype(np.int), dtype=f.dtype)
+    _build_atomic_scattering_density_map_numba(x_vecs=x_vecs, f=f, sigma=sigma, x_min=x_min, x_max=x_max, shape=shape,
+                                               orth_mat=orth_mat, max_radius=max_radius, sum_map=sum_map, tmp=tmp)
 
-    count = 0
-    for n in range(n_atoms):
+    return sum_map
+
+
+@jit #(nopython=True)
+def _build_atomic_scattering_density_map_numba(x_vecs, f, sigma, x_min, x_max, shape, orth_mat, max_radius, sum_map,
+                                               tmp):
+
+    n_atoms = len(f) #.ravel().shape[0]  # Number of atoms
+    dx = (x_max - x_min)/(shape - 1)  # Bin widths in fractional coordinates
+    dr = np.dot(dx, orth_mat.T)  # Bin widths in cartesian coordinates
+    nn = np.ceil(max_radius/dr)  # Radii in voxel units
+    for i in np.arange(3):
+        i = int(i)
+        nn[i] = int(min(nn[i], np.floor((shape[i]-1)/2.0)))  # Cap the radius so it is not larger than the map itself
+    b_tot = x_max - x_min + dx  # Total width of bins, including half-bins that extend beyond bin center points
+
+    for n in np.arange(n_atoms):
+        n = int(n)
         x_atom = x_vecs[n, :]
         sum_val = 0
-        for i in range(int(shape[0])):
-            xg = x_min[0] + i * dx[0]
-            for j in range(int(shape[1])):
-                yg = x_min[1] + j * dx[1]
-                for k in range(int(shape[2])):
-                    count += 1
-                    zg = x_min[2] + k * dx[2]
+        idx = np.floor((x_atom - x_min)/dx + 0.5)  # Nominal grid point
+        idx_min = idx - nn
+        idx_max = idx + nn
+        for i in np.arange(idx_min[0], idx_max[0]+1):
+            imod = int(i) % shape[0]
+            xg = x_min[0] + imod * dx[0]
+            for j in np.arange(idx_min[1], idx_max[1]+1):
+                jmod = int(j) % shape[1]
+                yg = x_min[1] + jmod * dx[1]
+                for k in np.arange(idx_min[2], idx_max[2]+1):
+                    kmod = int(k) % shape[2]
+                    zg = x_min[2] + kmod * dx[2]
                     x_grid = np.array([xg, yg, zg])
                     diff1 = x_grid - x_atom
                     diff = ((diff1 + b_tot/2) % b_tot) - b_tot/2
                     diff = np.dot(diff, orth_mat.T)
                     val = np.exp(-np.sum(diff**2)/(2*sigma**2))
                     sum_val += val
-                    sum_map_temp[i, j, k] = val
-        sum_map_temp /= sum_val
-        sum_map_temp *= f[n]
-        sum_map += sum_map_temp
+                    tmp[imod, jmod, kmod] = val
+        for i in np.arange(idx_min[0], idx_max[0]+1, dtype=np.int):
+            imod = i % shape[0]
+            for j in np.arange(idx_min[1], idx_max[1]+1, dtype=np.int):
+                jmod = j % shape[1]
+                for k in np.arange(idx_min[2], idx_max[2]+1, dtype=np.int):
+                    kmod = k % shape[2]
+                    sum_map[imod, jmod, kmod] += tmp[imod, jmod, kmod] * f[n] / sum_val
 
     return sum_map
 
