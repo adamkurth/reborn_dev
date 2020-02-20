@@ -637,7 +637,7 @@ class CrystalDensityMap(object):
         r"""
         Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:
 
-        [[0, 0, 0], [0, 0, 1], [0, 0, 2],  ...  , [N-1,N-1,N-1]]
+        [[0, 0, 0], [0, 0, 1], [0, 0, 2],  ...  , [Nx-1,Ny-1,Nz-1]]
 
         Note that it is the third index, which we might associate with "z", that increments most rapidly.
 
