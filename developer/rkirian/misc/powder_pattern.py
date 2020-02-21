@@ -10,10 +10,10 @@ import scipy.constants as const
 
 keV = const.value('electron volt')*1000
 
-pads = crystfel.geometry_file_to_pad_geometry_list('./data/cxilu5617-taw10.geom')
+pads = crystfel.geometry_file_to_pad_geometry_list('../data/cxilu5617-taw10.geom')
 for p in pads:
     p.t_vec[2] = 0.1156
-geom = crystfel.load_crystfel_geometry('./data/cxilu5617-taw10.geom')
+geom = crystfel.load_crystfel_geometry('../data/cxilu5617-taw10.geom')
 beam = Beam(photon_energy=9.6/keV)
 
 f = h5py.File('./data/r0230-detector0-class1-sum.h5')

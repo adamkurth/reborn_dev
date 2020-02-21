@@ -40,7 +40,7 @@ solid_angles = [pad.solid_angles() for pad in pads]
 polarization_factors = [pad.polarization_factors(beam=beam) for pad in pads]
 
 
-pdb_dict = pdb_to_dict('data/thiolGold_.pdb')
+pdb_dict = pdb_to_dict('../data/thiolGold_.pdb')
 r_vecs = pdb_dict['atomic_coordinates']*1e-10
 r_vecs -= np.mean(r_vecs, axis=0)
 atomic_numbers = atomic_symbols_to_numbers(pdb_dict['atomic_symbols'])

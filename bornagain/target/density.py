@@ -105,17 +105,17 @@ def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, o
     return sum_map
 
 
-@jit #(nopython=True)
+@jit(nopython=True)
 def _build_atomic_scattering_density_map_numba(x_vecs, f, sigma, x_min, x_max, shape, orth_mat, max_radius, sum_map,
                                                tmp):
 
-    n_atoms = len(f) #.ravel().shape[0]  # Number of atoms
+    n_atoms = len(f)  # Number of atoms
     dx = (x_max - x_min)/(shape - 1)  # Bin widths in fractional coordinates
     dr = np.dot(dx, orth_mat.T)  # Bin widths in cartesian coordinates
     nn = np.ceil(max_radius/dr)  # Radii in voxel units
     for i in np.arange(3):
-        i = int(i)
-        nn[i] = int(min(nn[i], np.floor((shape[i]-1)/2.0)))  # Cap the radius so it is not larger than the map itself
+        #i = int(i)  # Why doesn't declarying int(i) here work?  Below I must do int(i) again, else there is an error.
+        nn[int(i)] = int(min(nn[int(i)], np.floor((shape[int(i)]-1)/2.0)))  # Cap the radius so it is not larger than the map itself
     b_tot = x_max - x_min + dx  # Total width of bins, including half-bins that extend beyond bin center points
 
     for n in np.arange(n_atoms):
@@ -126,13 +126,13 @@ def _build_atomic_scattering_density_map_numba(x_vecs, f, sigma, x_min, x_max, s
         idx_min = idx - nn
         idx_max = idx + nn
         for i in np.arange(idx_min[0], idx_max[0]+1):
-            imod = int(i) % shape[0]
+            imod = int(i % shape[0])
             xg = x_min[0] + imod * dx[0]
             for j in np.arange(idx_min[1], idx_max[1]+1):
-                jmod = int(j) % shape[1]
+                jmod = int(j % shape[1])
                 yg = x_min[1] + jmod * dx[1]
                 for k in np.arange(idx_min[2], idx_max[2]+1):
-                    kmod = int(k) % shape[2]
+                    kmod = int(k % shape[2])
                     zg = x_min[2] + kmod * dx[2]
                     x_grid = np.array([xg, yg, zg])
                     diff1 = x_grid - x_atom
@@ -141,12 +141,12 @@ def _build_atomic_scattering_density_map_numba(x_vecs, f, sigma, x_min, x_max, s
                     val = np.exp(-np.sum(diff**2)/(2*sigma**2))
                     sum_val += val
                     tmp[imod, jmod, kmod] = val
-        for i in np.arange(idx_min[0], idx_max[0]+1, dtype=np.int):
-            imod = i % shape[0]
-            for j in np.arange(idx_min[1], idx_max[1]+1, dtype=np.int):
-                jmod = j % shape[1]
-                for k in np.arange(idx_min[2], idx_max[2]+1, dtype=np.int):
-                    kmod = k % shape[2]
+        for i in np.arange(idx_min[0], idx_max[0]+1):
+            imod = int(i % shape[0])
+            for j in np.arange(idx_min[1], idx_max[1]+1):
+                jmod = int(j % shape[1])
+                for k in np.arange(idx_min[2], idx_max[2]+1):
+                    kmod = int(k % shape[2])
                     sum_map[imod, jmod, kmod] += tmp[imod, jmod, kmod] * f[n] / sum_val
 
     return sum_map

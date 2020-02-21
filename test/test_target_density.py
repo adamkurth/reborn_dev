@@ -14,14 +14,7 @@ from bornagain.target import crystal, density
 def test_01():
 
     cryst = crystal.CrystalStructure(psi_pdb_file)
-    # Manually reconfigure P1 with rectangular lattice
-    # cryst.unitcell = crystal.UnitCell(1e-9, 2e-9, 4e-9, np.pi/2, np.pi/2, np.pi/2)
-    # cryst.spacegroup.sym_translations = [np.zeros((3,))]
-    # cryst.spacegroup.sym_rotations = [np.eye(3)]
     dens = crystal.CrystalDensityMap(cryst, 20e-10, 2)
-    # print(dens.x_min, dens.x_max, dens.shape, dens.dx)
-    # print(dens.n_vecs)
-    # print(dens.x_vecs)
     assert np.sum(np.abs(dens.n_vecs[1, :] - np.array([0, 0, 1]))) < 1e-8
     assert np.allclose(dens.x_vecs[1, :], np.array([0, 0., 0.1]))
 
@@ -70,9 +63,6 @@ def func1(vecs):
 
 def test_03():
 
-    # if density_f is None:
-    #     return
-
     float_t = np.float64
     nx, ny, nz = 6, 7, 8
     dens = np.ones([nx, ny, nz], dtype=float_t)
@@ -118,9 +108,6 @@ def test_03():
 
 
 def test_04():
-
-    # if density_f is None:
-    #     return
 
     float_t = np.float64
     nx, ny, nz = 6, 7, 8
@@ -178,6 +165,8 @@ def test_04():
 
 def test_05():
 
+    # Check that atom scattering factors are additive
+
     x_min = np.array([-5, -10, -12], dtype=np.double)
     x_max = np.array([+5, +10, +13], dtype=np.double)
     shape = np.array([11, 21, 26], dtype=np.double)
@@ -185,13 +174,14 @@ def test_05():
     sigma = 1.0
     f = np.array([1], dtype=np.double)
     orth_mat = np.eye(3, dtype=np.double)
-
     sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat)
     assert sum_map[0, 0, 0] == sum_map[-1, -1, -1]
     assert np.abs(np.sum(sum_map) - f[0]*2) / np.abs(f[0]*2) < 1e8
 
 
 def test_06():
+
+    # Check that wrap-around (periodic condition) is satisfied and max radius truncation
 
     x_min = np.array([-5, -10, -12], dtype=np.double)
     x_max = np.array([+5, +11, +13], dtype=np.double)
@@ -200,10 +190,47 @@ def test_06():
     sigma = 1.0
     f = np.array([1], dtype=np.double)
     orth_mat = np.eye(3, dtype=np.double)
-
-    sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat,
-                                                          max_radius=4*sigma)
+    sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat, max_radius=4)
     assert sum_map[0, 0, 0] == sum_map[-1, -1, -1]
     assert np.abs(np.sum(sum_map) - f[0]) / np.abs(f[0]) < 1e8
     w = np.where(sum_map > 0)
     assert len(w[0]) == 9**3
+
+
+def test_07():
+
+    # Check truncation bounds
+
+    x_min = np.array([-5, -10, -12], dtype=np.double)
+    x_max = np.array([+5, +11, +13], dtype=np.double)
+    shape = np.array([11, 22, 26], dtype=np.double)
+    x_vecs = np.array([[-5, -10, -12]], dtype=np.double)
+    sigma = 1.0
+    f = np.array([1], dtype=np.double)
+    orth_mat = np.eye(3, dtype=np.double)
+    sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat, max_radius=1)
+    assert sum_map[2, 0, 0] == 0
+    assert sum_map[0, 2, 0] == 0
+    assert sum_map[0, 0, 2] == 0
+    norm = 1 + 6*np.exp(-1/(2*sigma**2)) + 12*np.exp(-1/sigma**2) + 8*np.exp(-np.sqrt(3)**2/(2*sigma**2))
+    assert np.abs(sum_map[1, 1, 0] - np.exp(-1/sigma**2)/norm) < 1e6
+    assert np.abs(sum_map[-1, -1, -1] - np.exp(-np.sqrt(3)**2/(2*sigma**2))/norm) < 1e6
+
+
+def test_08():
+
+    # Check orthogonalization matrix
+
+    x_min = np.array([-5, -10, -12], dtype=np.double)
+    x_max = np.array([+5, +11, +13], dtype=np.double)
+    shape = np.array([11, 22, 26], dtype=np.double)
+    x_vecs = np.array([[-5, -10, -12]], dtype=np.double)
+    sigma = 1.0
+    orth_mat = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 0.5]])  # Columns are crystal basis vectors => shrinks "c" axis.
+    f = np.array([1], dtype=np.double)
+    sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat=orth_mat,
+                                                          max_radius=1)
+    assert sum_map[2, 0, 0] == 0
+    assert sum_map[0, 2, 0] == 0
+    assert sum_map[0, 0, 2] != 0
+    assert sum_map[0, 0, -2] != 0

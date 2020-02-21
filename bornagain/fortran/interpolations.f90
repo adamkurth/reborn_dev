@@ -1,3 +1,45 @@
+subroutine trilinear_interpolation(datin, datin_corner, datin_dx, datout_coords, datout)
+    ! Interpolate a 3D grid of data onto arbitrary points
+    ! datin is the input data with corner coordinate datin_corner (3-vector) and grid step size datin_dx (3-vector)
+    ! datout_coords are the coordinates of the interpolation points.  Interpolated values go into datout.
+    ! Works with doubles only
+    implicit none
+    real(kind=8), intent(inout) :: datout(:)
+    real(kind=8), intent(in) :: datin(:,:,:), datout_coords(:,:), datin_corner(3), datin_dx(3)
+    real(kind=8) :: i_f,j_f,k_f,x0,y0,z0,x1,y1,z1
+    integer(kind=4) :: nn,i0,j0,k0,i1,j1,k1,ii,nx,ny,nz
+    nn = size(datout, 1)
+    nx = size(datin, 1)
+    ny = size(datin, 2)
+    nz = size(datin, 3)
+    do ii=1,nn
+        k_f = 1.0 + (datout_coords(1, ii) - datin_corner(1)) / datin_dx(1)
+        j_f = 1.0 + (datout_coords(2, ii) - datin_corner(2)) / datin_dx(2)
+        i_f = 1.0 + (datout_coords(3, ii) - datin_corner(3)) / datin_dx(3)
+        i0 = modulo(floor(i_f) - 1, nx) + 1
+        j0 = modulo(floor(j_f) - 1, ny) + 1
+        k0 = modulo(floor(k_f) - 1, nz) + 1
+        i1 = modulo(i0, nx) + 1
+        j1 = modulo(j0, ny) + 1
+        k1 = modulo(k0, nz) + 1
+        x0 = i_f - floor(i_f)
+        y0 = j_f - floor(j_f)
+        z0 = k_f - floor(k_f)
+        x1 = 1.0 - x0
+        y1 = 1.0 - y0
+        z1 = 1.0 - z0
+        datout(ii) = datin(i0, j0, k0) * x1 * y1 * z1 + &
+                     datin(i1, j0, k0) * x0 * y1 * z1 + &
+                     datin(i0, j1, k0) * x1 * y0 * z1 + &
+                     datin(i0, j0, k1) * x1 * y1 * z0 + &
+                     datin(i1, j0, k1) * x0 * y1 * z0 + &
+                     datin(i0, j1, k1) * x1 * y0 * z0 + &
+                     datin(i1, j1, k0) * x0 * y0 * z1 + &
+                     datin(i1, j1, k1) * x0 * y0 * z0
+    enddo
+end subroutine trilinear_interpolation
+
+
 subroutine trilinear_insert(data_coord, data_val, x_min, &
                             N_data, Delta_x, one_over_bin_volume, c1, &
                             dataout, weightout)
