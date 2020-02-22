@@ -218,6 +218,11 @@ If the above doesn't work, then you can try to get opencl to run on a CPU by ins
 with pyopencl, there are some helpful notes `here <https://documen.tician.de/pyopencl/misc.html>`_.
 
 
+**Intel GPUs**
+
+If you have a laptop with an intel GPU you might find the following to be helpful: 
+`https://github.com/intel/compute-runtime/releases`_ .
+
 **Scientific Linux 6**
 
 To install `pyopencl` on SL6 I found it necessary to download the pyopencl-201X.X.X source, and then from within the
