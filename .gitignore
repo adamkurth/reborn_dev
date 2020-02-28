@@ -30,3 +30,8 @@ doc/source/bornagain.*
 doc/html
 doc/source/api
 developer/rkirian/data
+*.aux
+*.bbl
+*.log
+*.blg
+*.synctex.*
