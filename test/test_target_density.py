@@ -176,7 +176,7 @@ def test_05():
     orth_mat = np.eye(3, dtype=np.double)
     sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat)
     assert sum_map[0, 0, 0] == sum_map[-1, -1, -1]
-    assert np.abs(np.sum(sum_map) - f[0]*2) / np.abs(f[0]*2) < 1e8
+    assert np.abs(np.sum(sum_map) - f[0]*2) / np.abs(f[0]*2) < 1e-8
 
 
 def test_06():
@@ -192,7 +192,7 @@ def test_06():
     orth_mat = np.eye(3, dtype=np.double)
     sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat, max_radius=4)
     assert sum_map[0, 0, 0] == sum_map[-1, -1, -1]
-    assert np.abs(np.sum(sum_map) - f[0]) / np.abs(f[0]) < 1e8
+    assert np.abs(np.sum(sum_map) - f[0]) / np.abs(f[0]) < 1e-8
     w = np.where(sum_map > 0)
     assert len(w[0]) == 9**3
 
@@ -214,7 +214,7 @@ def test_07():
     assert sum_map[0, 0, 2] == 0
     norm = 1 + 6*np.exp(-1/(2*sigma**2)) + 12*np.exp(-1/sigma**2) + 8*np.exp(-np.sqrt(3)**2/(2*sigma**2))
     assert np.abs(sum_map[1, 1, 0] - np.exp(-1/sigma**2)/norm) < 1e6
-    assert np.abs(sum_map[-1, -1, -1] - np.exp(-np.sqrt(3)**2/(2*sigma**2))/norm) < 1e6
+    assert np.abs(sum_map[-1, -1, -1] - np.exp(-np.sqrt(3)**2/(2*sigma**2))/norm) < 1e-6
 
 
 def test_08():
