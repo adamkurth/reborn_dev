@@ -2,6 +2,15 @@ from scipy import misc
 import numpy as np
 import matplotlib.pyplot as plt
 
+def rotate90(f):
+   return np.transpose(np.fliplr(f))
+
+def rotate180(f):
+   return np.fliplr(np.flipud(f))
+
+def rotate270(f):
+   return np.transpose(np.flipud(f))
+
 def shiftx(f,scale,N):
    y0 = 0.5*(N-1)
    kfac = np.zeros((N,N),dtype=np.complex128)
@@ -31,10 +40,19 @@ def shifty(f,scale,N):
    return fs
 
 def shiftrotate(f,ang,N):
-   assert(np.abs(ang) < 0.26*np.pi)
-   t = -np.tan(0.5*ang)
-   s = np.sin(ang)
-   fr = shiftx(f,t,N)
+   n90 = np.rint(ang*2.0/np.pi)
+   dang = ang-n90*np.pi*0.5
+   print("dang deg",dang*180./np.pi)
+   fr = f
+   if (n90 % 4 == 1):
+      fr = rotate90(fr)
+   if (n90 % 4 == 2):
+      fr = rotate180(fr)
+   if (n90 % 4 == 3):
+      fr = rotate270(fr)
+   t = -np.tan(0.5*dang)
+   s = np.sin(dang)
+   fr = shiftx(fr,t,N)
    fr = shifty(fr,s,N)
    fr = shiftx(fr,t,N)
    return fr
@@ -51,7 +69,13 @@ fr[Nadd:Nadd+N0,Nadd:Nadd+N0] = fin
 f0 = fr.copy()
 plt.imshow(fr,cmap=plt.cm.gray)
 plt.show()
-Nang = 20 
+plt.imshow(np.real(rotate90(fr)),cmap=plt.cm.gray)
+plt.show()
+plt.imshow(np.real(rotate180(fr)),cmap=plt.cm.gray)
+plt.show()
+plt.imshow(np.real(rotate270(fr)),cmap=plt.cm.gray)
+plt.show()
+Nang = 20
 dphi = 2.0*np.pi/Nang
 fr = shiftx(fr,-np.tan(0.5*dphi),N)
 plt.imshow(np.real(fr),cmap=plt.cm.gray)
