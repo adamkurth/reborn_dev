@@ -42,7 +42,6 @@ def shifty(f,scale,N):
 def shiftrotate(f,ang,N):
    n90 = np.rint(ang*2.0/np.pi)
    dang = ang-n90*np.pi*0.5
-   print("dang deg",dang*180./np.pi)
    fr = f
    if (n90 % 4 == 1):
       fr = rotate90(fr)
