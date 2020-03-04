@@ -92,6 +92,7 @@ We use the f2py program that comes with Numpy to compile Fortran code.  Although
 first import, you may wish to compile manually.  This can be done using the `setup.py` script as follows:
 
 .. code-block:: bash
+
     python setup.py develop
 
 Alternatively, there is a bash script in the developer directory:
@@ -220,8 +221,9 @@ with pyopencl, there are some helpful notes `here <https://documen.tician.de/pyo
 
 **Intel GPUs**
 
-If you have a laptop with an intel GPU you might find the following to be helpful: 
-`https://github.com/intel/compute-runtime/releases`_ .
+If you have a laptop with an intel GPU you might find
+`this github page <https://github.com/intel/compute-runtime/releases>`_ to be helpful.
+
 
 **Scientific Linux 6**
 
