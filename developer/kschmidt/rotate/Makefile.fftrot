@@ -1,0 +1,19 @@
+FILE=fftrot
+
+SRC=\
+   $(FILE).tex
+
+fftrot.pdf: $(SRC)
+	pdflatex $(FILE)
+	pdflatex $(FILE)
+	
+
+clean:
+	rm -f *.nav *.toc *.out *.snm *.aux *.log
+	rm -f *.pyc
+	rm -rf __pycache__
+
+distclean:
+	rm -f *.nav *.toc *.out *.snm *.aux *.log $(FILE).pdf
+	rm -f *.pyc
+	rm -rf __pycache__
