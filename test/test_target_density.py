@@ -172,7 +172,7 @@ def test_05():
     shape = np.array([11, 21, 26], dtype=np.double)
     x_vecs = np.array([[5.5, 10.5, 13.5], [5.5, 10.5, 13.5]], dtype=np.double)
     sigma = 1.0
-    f = np.array([1], dtype=np.double)
+    f = np.array([1, 1], dtype=np.double)
     orth_mat = np.eye(3, dtype=np.double)
     sum_map = density.build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, orth_mat)
     assert sum_map[0, 0, 0] == sum_map[-1, -1, -1]

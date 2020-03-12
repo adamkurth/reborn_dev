@@ -222,7 +222,12 @@ with pyopencl, there are some helpful notes `here <https://documen.tician.de/pyo
 **Intel GPUs**
 
 If you have a laptop with an intel GPU you might find
-`this github page <https://github.com/intel/compute-runtime/releases>`_ to be helpful.
+`this github page <https://github.com/intel/compute-runtime/releases>`_ to be helpful.  After following the instructions
+there, you might need to do something like this (use the appropriate path to your python installation):
+
+.. code-block:: bash
+
+    ln -s /etc/OpenCL/vendors/intel.icd ~/miniconda3/etc/OpenCL/vendors
 
 
 **Scientific Linux 6**
