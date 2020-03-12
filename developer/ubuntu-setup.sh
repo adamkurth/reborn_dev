@@ -6,6 +6,6 @@ curl https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh --out
 bash miniconda.sh -b -p miniconda
 export PATH=./miniconda/bin:$PATH
 conda update -n base -c defaults conda
-conda env create -f bornagain-env.yml
+conda env create -f environment.yml
 source activate bornagain
 python setup.py develop
