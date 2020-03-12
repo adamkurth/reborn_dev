@@ -19,11 +19,11 @@ Dependencies
 ------------
 
 As of 2020, bornagain is only tested with Python 3, because Python 2 is
-`finally dead <https://www.python.org/doc/sunset-python-2/>`_ .  The `bornagain-env.yml` file lists all of the packages
+`finally dead <https://www.python.org/doc/sunset-python-2/>`_ .  The `environment.yml` file lists all of the packages
 that are installed upon regular testing of bornagain, which might be understood as the complete list of dependencies.
 Here are the current contents of that file:
 
-.. literalinclude:: ../../bornagain-env.yml
+.. literalinclude:: ../../environment.yml
 
 You can import many bornagain modules without installing *all* of these dependencies, but there is little reason to
 install only a subset of them if you use a good package manager.
