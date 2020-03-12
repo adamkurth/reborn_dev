@@ -3,17 +3,17 @@ Setup
 
 The following suggestions should work on Linux or MacOS.  We have not thoroughly tested bornagain on MS Windows.
 
-In principle, "setting up" bornagain should be as simple as including the base directory of the bornagain git repo in
+In principle, setting up bornagain should be as simple as including the base directory of the bornagain git repo in
 your python path.  You'll probably find that you need to install some dependencies, but all of them are known to install
-easily with pip or conda.  There are some pieces of Fortran code in bornagain that need to be compiled, but they
-*should* auto-compile on first import.
+easily with pip or conda (however, there may be some extra steps to enable GPU computatoins -- see the relevant section
+below).  There are some pieces of Fortran code in bornagain that need to be compiled, but they
+should auto-compile on first import.
 
-While it is possible to "install" bornagain using the provided `setup.py` script, this is not recommended because
-bornagain is under development and its API is not considered to be stable.  It is instead recommended that you keep a
+While it is possible to install bornagain using the provided `setup.py` script, this is not recommended because
+bornagain is under development and its API is not stable.  It is instead recommended that you keep a
 clone of the bornagain git repository where you are doing your analysis or simulations so that you can reproduce your
 results in the future. One way to track the *exact* version of bornagain used in your project is to add it as a
-`git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git repository (however,
-this is probably a nuisance if you are new to programming and git).
+`git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git repository.
 
 Dependencies
 ------------
@@ -52,38 +52,24 @@ Notes on setting up your path
 -----------------------------
 
 The main setup task is to simply ensure that Python can load the bornagain package, which means that it must be
-found in a path where python searches for packages.  Here are three different options that you might use to get your
-path set up:
-
-**Option (1)**: The best way is to set the appropriate environment variable so that Python looks in the right place for
+found in a path where python searches for packages.  Here are various options that you might use to get your
+path set up.  The best way is to set the appropriate environment variable so that Python looks in the right place for
 bornagain.  If you are using the bash shell, you can do the following:
 
 .. code-block:: bash
 
     export PYTHONPATH=$PYTHONPATH:example/path/to/bornagain/repository
 
-You must remember to set your path every time you use bornagain.
+If you don't want to do the above every time you open a terminal, you can add this line to your bash startup script.
 
-**Option (2)**: You can specify the location of bornagain directly in your python scripts.  For example:
-
-.. code-block:: python
-
-    import sys
-    sys.path.append("example/path/to/bornagain/repository")
-
-This option is ok, but then you must remember to always run your script from the appropriate directory if the above
-path is a relative path.
-
-**Option (3)**: You can make a symbolic link to the bornagain package in the same directory where you are running your script.  For
-example:
+As an alternative to the above, you can make a symbolic link to the bornagain package in the same directory where you
+are running your script.  For example:
 
 .. code-block:: bash
 
     ln -s example/path/to/bornagain/repository/bornagain path/to/where/your/script/is/located
 
-Note that "bornagain/repository/bornagain" is not a typo in the above -- in the case of a symbolic link you need to link
-to the actual bornagain package, which lies *within* the git repository that is also named bornagain.  If you use this
-method, you will need to run your scripts from the specific directory where the symbolic link is created.
+The above method might be helpful if it is important to specify an exact copy of bornagain that must be used.
 
 Compilation of Fortran code
 ---------------------------
@@ -95,14 +81,22 @@ first import, you may wish to compile manually.  This can be done using the `set
 
     python setup.py develop
 
-Alternatively, there is a bash script in the developer directory:
+You will likely see some warnings due to Numpy or Cython -- they are probably harmless (and not our fault).
+
+Setting up OpenCL for GPU computing
+-----------------------------------
+
+In some cases, pyopencl installs via conda without the need for any further modifications.  However, it may be necessary
+to install drivers and developer toolkits for your GPU.  There are some tips in the
+`pyopencl documentation <https://documen.tician.de/pyopencl/misc.html>`_ that may be helpful.  Importantly, if you have
+issues you should probably start by looking in the directory `/etc/OpenCL/vendors` to see if there are any drivers
+available there.  For example, you might see a driver file `pocl.icd`, which will allow you to use a CPU in absence of a
+GPU, or you might find some vendor specific files such as `nvidia.icd` or `intel.icd`.  You need to make sure that these
+files can be found by the pyopencl module, which probably means that you need to create a symbolic link like this:
 
 .. code-block:: bash
 
-    cd developer
-    ./compile-fortran.sh
-
-You will likely see some warnings due to Numpy -- they are probably harmless (and not our fault).
+    ln -s /etc/OpenCL/vendors/intel.icd ~/miniconda3/etc/OpenCL/vendors
 
 Example setup with Miniconda
 ----------------------------
@@ -208,27 +202,13 @@ If you get a runtime error involving
 
     pyopencl.cffi_cl.LogicError: clGetPlatformIDs failed:
 
-it might be necessary to manually make the path to the opencl drivers visible to pyopencl.  This is probably as simple
-as doing the following:
-
-.. code-block:: bash
-
-    cp /etc/OpenCL/vendors/nvidia.icd ~/miniconda3/etc/OpenCL/vendors
-
-If the above doesn't work, then you can try to get opencl to run on a CPU by installing the pocl package.  For issues
-with pyopencl, there are some helpful notes `here <https://documen.tician.de/pyopencl/misc.html>`_.
-
+then please read the relevant section conerning GPUs above.
 
 **Intel GPUs**
 
 If you have a laptop with an intel GPU you might find
 `this github page <https://github.com/intel/compute-runtime/releases>`_ to be helpful.  After following the instructions
-there, you might need to do something like this (use the appropriate path to your python installation):
-
-.. code-block:: bash
-
-    ln -s /etc/OpenCL/vendors/intel.icd ~/miniconda3/etc/OpenCL/vendors
-
+there, you should then read the relevant section conerning GPUs above.
 
 **Scientific Linux 6**
 
