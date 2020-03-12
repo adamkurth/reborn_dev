@@ -32,21 +32,10 @@ Complete setup from a clean Linux install
 -----------------------------------------
 
 Below are the standard steps that are tested on a clean Ubuntu Linux install every time the bornagain master branch is
-updated.  The script is executed from the base directory of the git repository.
+updated.  The script `developer/ubuntu-install.sh` is executed from the base directory of the git repository.  Here
+are the current contents of that script:
 
-.. code-block:: bash
-
-    apt-get -qq -y update
-    apt-get -qq -y install apt-utils wget curl gfortran libgl1-mesa-glx
-    curl https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh --output miniconda.sh
-    bash miniconda.sh -b -p miniconda
-    export PATH=./miniconda/bin:$PATH
-    conda update -n base -c defaults conda
-    conda env create -f bornagain-env.yml
-    source activate bornagain
-    python setup.py develop
-    cd test
-    pytest
+.. literalinclude:: ../../developer/ubuntu-install.sh
 
 Notes on setting up your path
 -----------------------------
@@ -108,51 +97,25 @@ easy to install the dependencies of bornagain.  You might consider making a tria
 everything works well, since packages like opengl, opencl, pyqt are complex and may have conflicting requirments
 (however, not many problems have been noticed at least since 2019).
 
-Assuming that you have installed conda, here's an example of how to set up a new conda environment:
+The simplest way to setup a proper conda environment is to execute the following (in the base directory of the
+bornagain respository):
 
 .. code-block:: bash
 
-  conda create -n bornagain -c conda-forge python=3.6 pyqt=5 scipy, h5py, future, numba, pyopencl, pocl, pytest, matplotlib, pyqtgraph, pyopengl
+    conda env create -f environment.yml
+    conda activate bornagain
 
-The only downside to the conda environment is that you need to remember to activate the environment every time you use
-bornagain, like this:
+If `conda activate` does not work, you might try the following instead:
 
 .. code-block:: bash
 
     source activate bornagain
 
-or like this
+If you don't want to use a conda environment you can just install the modules manually in the usual way:
 
 .. code-block:: bash
 
-    conda activate bornagain
-
-Note that cfelpyutils currently requires that you use pip to install.  It can be installed (after activating your
-environment) as follows:
-
-.. code-block:: bash
-
-    pip install cfelpyutils
-
-An even easier way to setup your environment is to use the provided environment files:
-
-.. code-block:: bash
-
-    conda env create -f bornagain-env.yml
-    conda activate bornagain
-
-If you don't want to use a conda environment you can just install the modules in the current environment.  For example:
-
-.. code-block:: bash
-
-  conda install -c conda-forge pyqt=5 scipy, h5py, future, numba, pyopencl, pocl, pytest, matplotlib, pyqtgraph, pyopengl
-  pip instlall cfelpyutils
-
-You can uninstall a conda environment as follows:
-
-.. code-block:: bash
-
-    conda env remove -n bornagain
+  conda install -c conda-forge pyqt=5 scipy, h5py, etc, etc
 
 Testing your setup
 ------------------
