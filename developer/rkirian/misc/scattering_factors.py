@@ -16,7 +16,7 @@ max_theta = np.pi/2
 theta = np.arange(0, max_theta, max_theta / 1000)
 
 f_xraylib = np.zeros((len(E), len(theta)), dtype=np.complex)
-f_henke = atoms.get_scattering_factors_fixed_z(Z, E)
+f_henke = atoms.henke_scattering_factors(Z, E)
 for i in range(len(E)):
     this_E = E[i]
     for j in range(len(theta)):
@@ -42,30 +42,21 @@ plt.legend()
 # plt.show()
 # f.savefig("anamalous_%d.pdf" % (Z,), bbox_inches='tight')
 
-# Check that we are doing the lookup of Henke tables correctly
-f_correct = 16.5705 + 1j*2.98532
-f_lookup = atoms.get_scattering_factors([29], 798.570*eV)[0]
-assert np.abs(f_lookup - f_correct) == 0
-f_lookup = atoms.get_scattering_factors_fixed_z(29, np.array([798.570*eV]))[0]
-assert np.abs(f_lookup - f_correct) == 0
-# Check one of the values from the Hubbel et al. 1975 paper:
-assert np.abs(24.461 - xraylib.FF_Rayl(29, 0.175)) == 0
 
-nq = 1000
-qmax = 3
-qrange = np.arange(nq)*qmax/nq
-E = 8
-fray = np.array([xraylib.FF_Rayl(Z, q) for q in qrange])
+q_mags = 1e10*4*np.pi*np.arange(1000)*3/1000
+E = 8000*eV
+f_henke = np.zeros_like(q_mags)+np.abs(atoms.henke_scattering_factors(Z, E))
+f_hubbel = atoms.hubbel_form_factors(q_mags, Z)  # Hubbel atomic form factors from xraylib
+f_xraylib = atoms.xraylib_scattering_factors(q_mags, Z, E)  # Hubbel form factors with xraylib dispersion
+f_hubbel_henke = atoms.hubbel_henke_scattering_factors(q_mags, Z, E)
+
 plt.subplot(122)
-plt.semilogy(qrange, fray, label='Hubbel')
-plt.semilogy(qrange, np.abs(fray + xraylib.Fi(Z, E) - 1j*xraylib.Fii(Z, E)), label='Hubbel w/ xraylib anamalous')
-plt.semilogy(qrange, qrange*0+np.abs(atoms.get_scattering_factors_fixed_z(Z, E*1000*eV)), label='Henke')
-# plt.semilogy(qrange, np.abs(atoms.xraylib_scattering_factors(qrange*4*np.pi, atomic_number=Z, photon_energy=E*1000*eV)),
-#              label='bornagain abs')
-plt.semilogy(qrange, np.abs(atoms.hubbel_henke_atomic_scattering_factors(qrange * 4 * np.pi / 1e10, Z, E * 1000 * eV)),
-             label='Hubbel form factor, Henke dispersion')
+plt.semilogy(q_mags/1e10, np.abs(f_hubbel), label='Hubbel')
+plt.semilogy(q_mags/1e10, np.abs(f_xraylib), label='Hubbel w/ xraylib anamalous')
+plt.semilogy(q_mags/1e10, np.abs(f_henke), label='Henke')
+plt.semilogy(q_mags/1e10, np.abs(f_hubbel_henke), label='Hubbel form factor, Henke dispersion')
 plt.title('Atomic Number %d (%s)' % (Z, atoms.atomic_numbers_to_symbols([Z])))
-plt.xlabel(r'$Q = \sin(\theta/2)/\lambda$ [angstrom]')
+plt.xlabel(r'$Q = 4\pi \sin(\theta/2)/\lambda$ [\AA{} angstrom]')
 plt.ylabel(r'|$f(Q)$|: $Q$-dependent scattering factor at 8 keV')
 plt.legend()
 plt.show()

@@ -93,6 +93,31 @@ def _get_henke_data(atomic_number):
     return data
 
 
+def henke_scattering_factors(atomic_numbers, photon_energies):
+    r"""
+    Get complex atomic scattering factors from Henke tables.
+
+    Note: The inputs are converted to numpy arrays, and the output is a squeezed 2D array of shape
+    (atomic_numbers.size, photon_energies.size).
+
+    Arguments:
+        atomic_numbers (int/list-like): Atomic numbers.
+        photon_energies (float/list-like): Photon energy in SI units.
+
+    Returns:
+        numpy array: Complex scattering factors.
+    """
+    Z = np.array(atomic_numbers).ravel()
+    E = np.array(photon_energies).ravel()
+    f = np.zeros([Z.size, E.size], dtype=np.complex).reshape([Z.size, E.size])
+    # Yes the reshape above shouldn't be necessary, obviously, but this is a quirky feature of numpy...
+    for z in np.unique(Z):
+        dat = _get_henke_data(z)
+        w = np.where(Z == z)
+        f[w, :] = np.interp(E, dat['Photon Energy'], dat['Scatter Factor'], left=-9999, right=-9999)
+    return np.squeeze(f)
+
+
 def get_scattering_factors(atomic_numbers, photon_energy):
     r"""
     Get complex atomic scattering factors (from Henke tables) for a single photon energy and a range of atomic numbers.
@@ -107,7 +132,7 @@ def get_scattering_factors(atomic_numbers, photon_energy):
         numpy array: Complex scattering factors.
     """
 
-    Z = np.array(atomic_numbers)
+    Z = np.array(atomic_numbers).ravel()
     f = np.zeros([len(Z)], dtype=np.complex)
     for z in np.unique(Z):
         dat = _get_henke_data(z)
@@ -128,6 +153,7 @@ def get_scattering_factors_fixed_z(atomic_number, photon_energies):
         scattering_factors (complex/numpy array): Complex scattering factors.
     """
 
+    utils.depreciate('get_scattering_factors_fixed_z is depreciated.  Use henke_scattering_factors instead.')
     dat = _get_henke_data(atomic_number)
     return np.interp(np.array(photon_energies), dat['Photon Energy'], dat['Scatter Factor'], left=-9999, right=-9999)
 
@@ -160,7 +186,7 @@ def xraylib_scattering_factors(qmags, atomic_number, photon_energy):
     return np.array([FF_Rayl(Z, q) for q in qq]) + Fi(Z, E) - 1j*Fii(Z, E)
 
 
-def hubbel_atomic_form_factors(qmags, atomic_number):
+def hubbel_form_factors(qmags, atomic_number):
     r"""
     Get the q-dependent atomic form factors.  This allows for an arbitrary list of q magnitudes and returns an array.
     The scattering factors come from Hubbel et al 1975, and are accessed through the xraylib package.
@@ -173,12 +199,13 @@ def hubbel_atomic_form_factors(qmags, atomic_number):
         Numpy array : Atomic form factor :math:`f(q)`
     """
 
-    qq = qmags*1e10/4.0/np.pi  # xraylib is in inv. angstrom units without the 4 pi
+    qq = np.array(qmags).ravel()  # In case input is just  scalar
+    qq = qq*1e-10/4.0/np.pi  # xraylib is in inv. angstrom units without the 4 pi
     f = np.array([xraylib.FF_Rayl(atomic_number, q) for q in qq])
     return f
 
 
-def hubbel_henke_atomic_scattering_factors(qmags, atomic_number, photon_energy):
+def hubbel_henke_scattering_factors(qmags, atomic_number, photon_energy):
     r"""
     Get the q-dependent atomic form factors for a single atomic number and single photon energy, using the Hubbel atomic
     form factors and the Henke dispersion corrections.  This is what most people should use if they want q-dependent
@@ -193,8 +220,8 @@ def hubbel_henke_atomic_scattering_factors(qmags, atomic_number, photon_energy):
         Numpy array: Atomic form factor :math:`f(q)` with dispersion corrections
     """
 
-    f0 = hubbel_atomic_form_factors(qmags, atomic_number)
-    df = get_scattering_factors_fixed_z(atomic_number, photon_energy) - atomic_number
+    f0 = hubbel_form_factors(qmags, atomic_number)
+    df = henke_scattering_factors(atomic_number, photon_energy) - atomic_number
     return f0 + df
 
 
