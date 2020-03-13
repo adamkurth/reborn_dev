@@ -28,6 +28,34 @@ Here are the current contents of that file:
 You can import many bornagain modules without installing *all* of these dependencies, but there is little reason to
 install only a subset of them if you use a good package manager.
 
+Miniconda
+---------
+
+`Miniconda <https://conda.io/miniconda.html>`_ is a reliable and lightweight distribution of python that is known to
+work well with bornagain.  The `Conda <https://conda.io/docs/>`_ package manager that comes with it makes it fast and
+easy to install the dependencies of bornagain.  You might consider making a trial
+`conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_ to check that
+everything works well, since packages like opengl, opencl, pyqt are complex and may have conflicting requirments
+(however, not many problems have been noticed at least since 2019).  The simplest way to setup a proper conda
+environment is to execute the following (in the base directory of the bornagain respository):
+
+.. code-block:: bash
+
+    conda env create -f environment.yml
+    conda activate bornagain
+
+If `conda activate` does not work, you might try the following instead:
+
+.. code-block:: bash
+
+    source activate bornagain
+
+If you don't want to use a conda environment you can just install the modules manually in the usual way:
+
+.. code-block:: bash
+
+  conda install -c conda-forge pyqt=5 scipy, h5py, etc, etc
+
 Complete setup from a clean Linux install
 -----------------------------------------
 
@@ -75,47 +103,17 @@ You will likely see some warnings due to Numpy or Cython -- they are probably ha
 Setting up OpenCL for GPU computing
 -----------------------------------
 
-In some cases, pyopencl installs via conda without the need for any further modifications.  However, it may be necessary
-to install drivers and developer toolkits for your GPU.  There are some tips in the
+In some cases, pyopencl installs via conda without the need for any further modifications.  However, if you have runtime
+errors, it may be necessary to install drivers and/or developer toolkits for your GPU.  There are some tips in the
 `pyopencl documentation <https://documen.tician.de/pyopencl/misc.html>`_ that may be helpful.  Importantly, if you have
 issues you should probably start by looking in the directory `/etc/OpenCL/vendors` to see if there are any drivers
-available there.  For example, you might see a driver file `pocl.icd`, which will allow you to use a CPU in absence of a
-GPU, or you might find some vendor specific files such as `nvidia.icd` or `intel.icd`.  You need to make sure that these
+available there.  If you see a driver file `pocl.icd`, then you should be able to use a CPU in absence of a
+GPU.  Ideally, you'll find vendor specific files such as `nvidia.icd` or `intel.icd`.  You need to make sure that these
 files can be found by the pyopencl module, which probably means that you need to create a symbolic link like this:
 
 .. code-block:: bash
 
     ln -s /etc/OpenCL/vendors/intel.icd ~/miniconda3/etc/OpenCL/vendors
-
-Example setup with Miniconda
-----------------------------
-
-`Miniconda <https://conda.io/miniconda.html>`_ is a reliable and lightweight distribution of python that is known to
-work well with bornagain.  The `Conda <https://conda.io/docs/>`_ package manager that comes with it makes it fast and
-easy to install the dependencies of bornagain.  You might consider making a trial
-`conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_ to check that
-everything works well, since packages like opengl, opencl, pyqt are complex and may have conflicting requirments
-(however, not many problems have been noticed at least since 2019).
-
-The simplest way to setup a proper conda environment is to execute the following (in the base directory of the
-bornagain respository):
-
-.. code-block:: bash
-
-    conda env create -f environment.yml
-    conda activate bornagain
-
-If `conda activate` does not work, you might try the following instead:
-
-.. code-block:: bash
-
-    source activate bornagain
-
-If you don't want to use a conda environment you can just install the modules manually in the usual way:
-
-.. code-block:: bash
-
-  conda install -c conda-forge pyqt=5 scipy, h5py, etc, etc
 
 Testing your setup
 ------------------
