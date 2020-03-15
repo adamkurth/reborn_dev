@@ -42,19 +42,29 @@ environment is to execute the following (in the base directory of the bornagain 
 .. code-block:: bash
 
     conda env create -f environment.yml
+
+The above line will create a conda environment named `bornagain`, and you will need to activate that environment in the
+following way:
+
+.. code-block:: bash
+
     conda activate bornagain
 
-If `conda activate` does not work, you might try the following instead:
+The `conda activate` often does not work, in which case you might try the following instead:
 
 .. code-block:: bash
 
     source activate bornagain
 
-If you don't want to use a conda environment you can just install the modules manually in the usual way:
+If you don't want to create a new environment named `bornagain`, you can instead add all of the packages in the
+`environment.yml` file to the default `base` environment (or to any other environment you specify with the `name`
+flag):
 
 .. code-block:: bash
 
-  conda install -c conda-forge pyqt=5 scipy, h5py, etc, etc
+    conda env update --name base --file environment.yml
+
+You can of course install all of the necessary packages manually by other means.
 
 Complete setup from a clean Linux install
 -----------------------------------------
@@ -68,16 +78,17 @@ are the current contents of that script:
 Notes on setting up your path
 -----------------------------
 
-The main setup task is to simply ensure that Python can load the bornagain package, which means that it must be
-found in a path where python searches for packages.  Here are various options that you might use to get your
-path set up.  The best way is to set the appropriate environment variable so that Python looks in the right place for
-bornagain.  If you are using the bash shell, you can do the following:
+The main setup task is to simply ensure that Python can import the bornagain package, which means that it must be
+found in a path where python searches for packages.  If you don't already know how to do this, here are some options
+that you might use to get your path set up.  The best way is to set the appropriate environment variable so that Python
+looks in the right place for bornagain.  If you are using the bash shell, you can do the following:
 
 .. code-block:: bash
 
     export PYTHONPATH=$PYTHONPATH:example/path/to/bornagain/repository
 
-If you don't want to do the above every time you open a terminal, you can add this line to your bash startup script.
+If you don't want to do the above every time you open a terminal, you can add this line to your `bash startup script
+<https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html>`_.
 
 As an alternative to the above, you can make a symbolic link to the bornagain package in the same directory where you
 are running your script.  For example:
@@ -86,7 +97,13 @@ are running your script.  For example:
 
     ln -s example/path/to/bornagain/repository/bornagain path/to/where/your/script/is/located
 
-The above method might be helpful if it is important to specify an exact copy of bornagain that must be used.
+If you wish, you can also install bornagain:
+
+.. code-block:: bash
+
+    python setup.py install
+
+but this is not advised as noted above already.
 
 Compilation of Fortran code
 ---------------------------
@@ -104,16 +121,20 @@ Setting up OpenCL for GPU computing
 -----------------------------------
 
 In some cases, pyopencl installs via conda without the need for any further modifications.  However, if you have runtime
-errors, it may be necessary to install drivers and/or developer toolkits for your GPU.  There are some tips in the
-`pyopencl documentation <https://documen.tician.de/pyopencl/misc.html>`_ that may be helpful.  Importantly, if you have
-issues you should probably start by looking in the directory `/etc/OpenCL/vendors` to see if there are any drivers
-available there.  If you see a driver file `pocl.icd`, then you should be able to use a CPU in absence of a
-GPU.  Ideally, you'll find vendor specific files such as `nvidia.icd` or `intel.icd`.  You need to make sure that these
-files can be found by the pyopencl module, which probably means that you need to create a symbolic link like this:
+errors, it may be necessary to install drivers and/or developer toolkits for your GPU.  You should read through the tips
+in the `pyopencl documentation <https://documen.tician.de/pyopencl/misc.html>`_.  As discussed there, you should
+probably start by looking in the directory `/etc/OpenCL/vendors` to see if there are any "Installable Client Drivers"
+(ICDs) available.  If you see the file `pocl.icd`, then you should at least be able to use a CPU in absence of a
+GPU, but you'll notice that simulations are very slow.  Ideally, you'll find vendor-specific ICD files such as
+`nvidia.icd` or `intel.icd`.  You need to make sure that these files can be found by the pyopencl module, which probably
+means that you need to create a symbolic link like this:
 
 .. code-block:: bash
 
     ln -s /etc/OpenCL/vendors/intel.icd ~/miniconda3/etc/OpenCL/vendors
+
+If the above is not sufficient, then unfortunately, it is up to you to figure out how to get pyopencl working on your
+machine.
 
 Testing your setup
 ------------------

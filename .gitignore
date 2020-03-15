@@ -25,6 +25,7 @@ __pycache__
 *.dSYM
 *.so
 .idea
+*~
 .adxv*
 doc/source/bornagain.*
 doc/html
