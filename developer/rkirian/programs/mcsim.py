@@ -9,16 +9,18 @@ import pickle
 from glob import glob
 import inspect
 from scipy.special import erf
+from scipy import constants
+from scipy.spatial.transform import Rotation
 import bornagain as ba
 from bornagain.simulate import solutions
 from bornagain.simulate import simutils
-from bornagain.units import r_e, hc, keV
 import bornagain.simulate.clcore as core
 from bornagain.external import crystfel
 
-# This path setting won't be needed once bornagain is properly installed
-sys.path.append("..")
 
+r_e = constants.value('classical electron radius')
+keV = 1000*constants.value('electron volt')
+hc = constants.h*constants.c
 
 def mcsim(
         detector_distance=50e-3,
@@ -127,7 +129,7 @@ def mcsim(
     num_patterns = int(num_patterns)
 
     # Setup detector geometry
-    pad = ba.detector.PADGeometry(n_pixels=n_pixels, pixel_size=pixel_size, distance=detector_distance)
+    pad = ba.detector.PADGeometry(shape=(n_pixels, n_pixels), pixel_size=pixel_size, distance=detector_distance)
     # q_vecs = pad.q_vecs(beam=beam)
     qmag = pad.q_mags(beam=beam)
     sa = pad.solid_angles()
@@ -228,7 +230,7 @@ def mcsim(
         n_cells_mosaic_domain = np.ceil(min(beam_area, this_mosaic_domain_size**2)*this_mosaic_domain_size / cell_volume)
 
         if random_rotation:
-            R = ba.utils.random_rotation()
+            R = Rotation.random().as_matrix()
         else:
             R = ba.utils.rotation_about_axis(rotation_angle, rotation_axis)
 

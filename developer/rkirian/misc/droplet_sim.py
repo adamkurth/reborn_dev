@@ -10,7 +10,7 @@ from bornagain.viewers.qtviews import PADView, Scatter3D
 from bornagain.simulate.atoms import xraylib_scattering_factors, atomic_symbols_to_numbers
 from bornagain.simulate.clcore import ClCore
 from bornagain.simulate.form_factors import sphere_form_factor
-from bornagain.utils import max_pair_distance, random_rotation
+from bornagain.utils import max_pair_distance
 import scipy.constants as const
 
 eV = const.value('electron volt')

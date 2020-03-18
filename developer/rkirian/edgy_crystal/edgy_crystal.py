@@ -2,20 +2,21 @@ import sys
 from time import time
 import numpy as np
 import pyqtgraph as pg
+from scipy import constants
+from scipy.spatial.transform import Rotation
+import argparse
 from bornagain import detector
 from bornagain import source
-from bornagain.utils import trilinear_insert, random_rotation, vec_mag, vec_norm
+from bornagain.utils import trilinear_insert
 from bornagain.simulate.clcore import ClCore
 from bornagain.simulate.examples import psi_pdb_file, lysozyme_pdb_file
 from bornagain.target import crystal, density
 from bornagain.viewers.qtviews import Scatter3D, bright_colors, colors, PADView
 from bornagain.external.pyqtgraph import keep_open
-import scipy.constants as const
-import argparse
 
-eV = const.value('electron volt')
-r_e = const.value("classical electron radius")
 
+eV = constants.value('electron volt')
+r_e = constants.value("classical electron radius")
 
 
 parser = argparse.ArgumentParser('Simulate finite crystals and merge intensities into a 3D map.')
@@ -107,7 +108,7 @@ scat = None
 
 for c in range(args.n_patterns):
     # Rotate the lattice basis vectors
-    rot = random_rotation()
+    rot = Rotation.random().as_matrix()
     rot = np.array([[-0.154, 0.350, 0.923], [0.700, 0.698, -0.148], [-0.697, 0.623, -0.353]])
     trans = np.zeros(3)
     A = np.dot(rot, cryst.unitcell.a_mat)

@@ -1,11 +1,8 @@
 from xyz import xyz_reader
 import numpy as np
-# from glob import glob
-# import os
-# dirlist = os.listdir(".")
-# print('hello')
 
-file_name = "Ar4631.xyz"
+
+# file_name = "Ar4631.xyz"
 file_name = "Ar_1000.xyz"
 xyz = xyz_reader(file_name)
 
@@ -47,7 +44,6 @@ if deluxe:
     from bornagain.viewers.qtviews import PADView
     from bornagain.simulate.atoms import xraylib_scattering_factors
     from bornagain.simulate.clcore import ClCore
-    from bornagain.utils import random_rotation
     import scipy.constants as const
 
     eV = const.value('electron volt')
@@ -92,7 +88,6 @@ if deluxe:
     q_vecs_gpu = clcore.to_device(q_vecs)
 
     R = np.eye(3)
-    # R = random_rotation()
     print('Simulating pattern...')
     amps = 0
     for j in range(len(uniq_z)):

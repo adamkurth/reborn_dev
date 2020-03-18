@@ -8,8 +8,9 @@ from bornagain.target.crystal import FiniteLattice, UnitCell, CrystalStructure, 
 from bornagain.viewers.qtviews import PADView, Scatter3D
 from bornagain.simulate.atoms import xraylib_scattering_factors, atomic_symbols_to_numbers
 from bornagain.simulate.clcore import ClCore
-from bornagain.utils import max_pair_distance, random_rotation
+from bornagain.utils import max_pair_distance
 import scipy.constants as const
+from scipy.spatial.transform import Rotation
 
 eV = const.value('electron volt')
 r_e = const.value('classical electron radius')
@@ -89,7 +90,7 @@ print('N gold', grp_r_vecs[np.where(uniq_z == 79)[0][0]].shape[0])
 print('Gold size', max_pair_distance(grp_r_vecs[np.where(uniq_z == 79)[0][0]]))
 
 n_patterns = 1
-R = random_rotation()
+R = Rotation.random().as_matrix()
 intensities = []
 for pat in range(n_patterns):
     print('pattern %d' % pat)

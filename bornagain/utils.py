@@ -8,15 +8,9 @@ from functools import wraps
 import sys
 import numpy as np
 from numpy import sin, cos
+from numba import jit
 import bornagain as ba
-try:
-    from numba import jit
-except ImportError:
-    jit = None
-try:
-    from bornagain import fortran
-except ImportError:
-    fortran = None
+from bornagain import fortran
 
 
 def vec_norm(vec):
@@ -30,7 +24,7 @@ def vec_norm(vec):
         (numpy array) New unit vectors, shape (N, 3)
     """
 
-    vecnorm = np.sqrt(np.sum(vec**2, axis=(vec.ndim-1)))
+    vecnorm = np.sqrt(np.sum(vec**2, axis=(vec.ndim - 1)))
     return (vec.T / vecnorm).T
 
 
@@ -44,7 +38,7 @@ def vec_mag(vec):
     Returns: scalar vector magnitudes
     """
 
-    return np.sqrt(np.sum(vec * vec, axis=(vec.ndim-1)))
+    return np.sqrt(np.sum(vec * vec, axis=(vec.ndim - 1)))
 
 
 def depreciate(message):
@@ -100,58 +94,21 @@ def error(message):
     sys.stderr.write("ERROR: %s\n" % message)
 
 
-def warn_pyqtgraph():
-    warn('pyqtgraph is not installed.  Viewers will fail.')
-
-
-def random_rotation(deflection=1.0, randnums=None):
+def random_rotation():
     r"""
-    Creates a random rotation matrix.
+    This function has been removed.  Use scipy instead:
 
-    TODO: documentation
+    .. code-block:: python
 
-    Arguments:
-        deflection (float): the magnitude of the rotation. For 0, no rotation; for 1, competely random
-                            rotation. Small deflection => small perturbation.
-        randnums (numpy array): 3 random numbers in the range [0, 1]. If `None`, they will be auto-generated.
-
-    Returns:
-        (numpy array) Rotation matrix
+        from scipy.spatial.transform import Rotation
+        rotmat = Rotation.random().as_matrix()'
     """
 
-    # from
-    # http://www.realtimerendering.com/resources/GraphicsGems/gemsiii/rand_rotation.c
-    if randnums is None:
-        randnums = np.random.uniform(size=(3,))
+    depreciate('bornagain.utils.random_rotation has been removed.  Use scipy for this:\n'
+               'from scipy.spatial.transform import Rotation\n'
+               'rotmat = Rotation.random().as_matrix()')
 
-    theta, phi, z = randnums
-
-    theta = theta * 2.0 * deflection * np.pi  # Rotation about the pole (Z).
-    phi = phi * 2.0 * np.pi  # For direction of pole deflection.
-    z = z * 2.0 * deflection  # For magnitude of pole deflection.
-
-    # Compute a vector V used for distributing points over the sphere
-    # via the reflection I - V Transpose(V).  This formulation of V
-    # will guarantee that if x[1] and x[2] are uniformly distributed,
-    # the reflected points will be uniform on the sphere.  Note that V
-    # has length sqrt(2) to eliminate the 2 in the Householder matrix.
-
-    r = np.sqrt(z)
-    vec = (
-        np.sin(phi) * r,
-        np.cos(phi) * r,
-        np.sqrt(2.0 - z)
-    )
-
-    st = np.sin(theta)
-    ct = np.cos(theta)
-
-    rot = np.array(((ct, st, 0), (-st, ct, 0), (0, 0, 1)))
-
-    # Construct the rotation matrix  ( V Transpose(V) - I ) R.
-
-    mat = (np.outer(vec, vec) - np.eye(3)).dot(rot)
-    return mat.reshape(3, 3)
+    return None
 
 
 def rotation_about_axis(theta, vec):
@@ -193,11 +150,9 @@ def random_unit_vector():
 
 def random_beam_vector(div_fwhm):
     r"""
-    A random vector for emulating beam divergence.
-    Generates a random normal vector that is nominally along the [0,0,1] direction
-    but with a random rotation along the [1,0,0] axis with given FWHM (Gaussian
-    distributed and centered about zero) followed by a random rotation about the
-    [0,0,1] axis with uniform distribution in the interval [0,2*pi).
+    A random vector for emulating beam divergence. Generates a random normal vector that is nominally along the [0,0,1]
+    direction but with a random rotation along the [1,0,0] axis with given FWHM (Gaussian distributed and centered about
+    zero) followed by a random rotation about the [0,0,1] axis with uniform distribution in the interval [0,2*pi).
 
     Arguments:
         div_fwhm (float):  FWHM of divergence angle.  Assuming Gaussian, where sigma = FWHM / 2.3548
@@ -261,15 +216,15 @@ def triangle_solid_angle(r1, r2, r3):
         (numpy array) of length N with solid angles
     """
 
-    numer = np.abs(np.sum(r1*np.cross(r2, r3), axis=-1))
+    numer = np.abs(np.sum(r1 * np.cross(r2, r3), axis=-1))
 
     r1_n = np.linalg.norm(r1, axis=-1)
     r2_n = np.linalg.norm(r2, axis=-1)
     r3_n = np.linalg.norm(r3, axis=-1)
     denom = r1_n * r2_n * r2_n
-    denom += np.sum(r1*r2, axis=-1) * r3_n
-    denom += np.sum(r2*r3, axis=-1) * r1_n
-    denom += np.sum(r3*r1, axis=-1) * r2_n
+    denom += np.sum(r1 * r2, axis=-1) * r3_n
+    denom += np.sum(r2 * r3, axis=-1) * r1_n
+    denom += np.sum(r3 * r1, axis=-1) * r2_n
     s_ang = np.arctan2(numer, denom) * 2
 
     return s_ang
@@ -299,6 +254,15 @@ def memoize(function):
 
 @jit(nopython=True)
 def max_pair_distance(vecs):
+    r"""
+    Determine the maximum distance between to vectors in a list of vectors.
+
+    Arguments:
+        vecs (Nx3 numpy array) : Input vectors.
+
+    Returns:
+        float : The maximum pair distance.
+    """
     d_max = 0
     for i in range(vecs.shape[0]):
         for j in range(vecs.shape[0]):
@@ -308,11 +272,11 @@ def max_pair_distance(vecs):
     return np.sqrt(d_max)
 
 
-def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_around=False):
+def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_around=False):
     r"""
     Trilinear insertion on a regular grid with arbitrary sample points.
-    The boundary is defined as [x_min-0.5, x_max+0.5). 
-    This function returns two arrays, dataout and weightout, you need to divide dataout 
+    The boundary is defined as [x_min-0.5, x_max+0.5).
+    This function returns two arrays, dataout and weightout, you need to divide dataout
     by weightout (taking care to deal with zeros in weightout) to get the correct trilinear
     insertion result. This is so that the function can be used to sum over many trilinearly
     inserted arrays in for example a 3D diffracted intensity merge.
@@ -321,42 +285,37 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_aroun
     Note 2: This code will break if you put a 1 in any of the N_bin entries.
 
     Arguments:
-        data_coord : An Nx3 array of 3-vectors containing coordinates of the data points that you wish to insert into the regular grid.
+        data_coord : An Nx3 array of 3-vectors containing coordinates of the data points that you wish to insert into
+                     the regular grid.
         data_val   : An array with the N values containing the values of the data points.
         x_min      : An array with the three values corresponding to the smallest data grid center points.
         x_max      : An array with the three values corresponding to the largest data grid center points.
-        N_bin      : An array with the three values corresponding to the number of bins in each direction.
+        n_bin      : An array with the three values corresponding to the number of bins in each direction.
         mask       : An array with the N values specifying which data points to ignore. Zero means ignore.
         wrap_around: Bool variable to specify periodic boundaries or not.
 
     Returns:
-        dataout   : A 3D numpy array with trilinearly summed values - this needs to be divided by weightout to give the trilinearly inserted values.
+        dataout   : A 3D numpy array with trilinearly summed values - this needs to be divided by weightout to give the
+                    trilinearly inserted values.
         weightout : A 3D numpy array that contains the number of times each voxel has a value put into it.
     """
 
-    #------------------------------------------
+    # ------------------------------------------
     # Checks
     if fortran is None:
         raise ImportError('You need to compile fortran code to use utils.trilinear_interpolation()')
-
     if len(data_coord) != len(data_val):
         raise ValueError('The data coordinates and data values must be of the same length.')
-
     if len(data_coord) != len(mask):
         raise ValueError('The data coordinates and data mask must be of the same length.')
-
     if len(x_min) != 3:
         raise ValueError('x_min needs to be an array that contains three elements.')
-
     if len(x_max) != 3:
         raise ValueError('x_max needs to be an array that contains three elements.')
-
-    if len(N_bin) != 3:
+    if len(n_bin) != 3:
         raise ValueError('N_bin needs to be an array that contains three elements.')
-
     if data_coord.shape[1] != 3:
         raise ValueError('data_coord needs to be an Nx3 array.')
-
     # Check if the non-1D arrays are c_contiguous
     assert data_coord.flags.c_contiguous
 
@@ -365,21 +324,20 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_aroun
     data_val = data_val.astype(np.complex128)
     x_min = x_min.astype(np.double)
     x_max = x_max.astype(np.double)
-    N_bin = N_bin.astype(np.int)
-    #------------------------------------------
+    n_bin = n_bin.astype(np.int)
 
     # Bin width
-    Delta_x = (x_max - x_min) / (N_bin - 1)
+    delta_x = (x_max - x_min) / (n_bin - 1)
 
     # Bin volume
-    bin_volume = Delta_x[0] * Delta_x[1] * Delta_x[2]
+    bin_volume = delta_x[0] * delta_x[1] * delta_x[2]
     one_over_bin_volume = 1 / bin_volume
 
     # To safeguard against round-off errors
     epsilon = 1e-9
 
     # Constants (these are arrays with 3 elements in them)
-    c1 = 0.0 - x_min / Delta_x
+    c1 = 0.0 - x_min / delta_x
     c2 = x_max + 0.5 - epsilon
     c3 = x_min - 0.5 + epsilon
 
@@ -387,38 +345,42 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_aroun
     data_coord = data_coord[mask != 0, :]
     data_val = data_val[mask != 0]
 
-    if (wrap_around == False):
+    if not wrap_around:
         # Initialise memory for Fortran
         # The N_bin+2 is for boundary padding when doing the interpolation
-        dataout = np.zeros(N_bin+2, dtype=np.complex128, order='C')
-        weightout = np.zeros(N_bin+2, dtype=np.double, order='C')
+        dataout = np.zeros(n_bin + 2, dtype=np.complex128, order='C')
+        weightout = np.zeros(n_bin + 2, dtype=np.double, order='C')
         dataout = np.asfortranarray(dataout)
         weightout = np.asfortranarray(weightout)
 
         # Mask out data_coord and data_val - user input x_min and x_max, i.e. mask out out-of-bounds data points
-        ind_outofbound_max = np.sum((data_coord - c2) > 0, axis=1) == 0 # If any coordinate is greater than the maximum range (c2), throw it away.
-        data_coord = data_coord[ind_outofbound_max] 
+        # If any coordinate is greater than the maximum range (c2), throw it away.
+        ind_outofbound_max = np.sum((data_coord - c2) > 0, axis=1) == 0
+        data_coord = data_coord[ind_outofbound_max]
         data_val = data_val[ind_outofbound_max]
 
-        ind_outofbound_min = np.sum((data_coord - c3) < 0, axis=1) == 0 # If any coordinate is less than the minimum range (c3), throw it away
-        data_coord = data_coord[ind_outofbound_min] 
+        # If any coordinate is less than the minimum range (c3), throw it away
+        ind_outofbound_min = np.sum((data_coord - c3) < 0, axis=1) == 0
+        data_coord = data_coord[ind_outofbound_min]
         data_val = data_val[ind_outofbound_min]
 
-        # Number of data points - very crucial that this line is placed here because N_data can change depending on if any sample points are out of bounds.
+        # Number of data points - very crucial that this line is placed here
+        # because N_data can change depending on if any sample points are out of
+        # bounds.
         N_data = len(data_val)
-        
+
         # Do trilinear insertion
-        fortran.interpolations_f.trilinear_insert(data_coord, data_val, x_min, N_data, \
-                                                  Delta_x, one_over_bin_volume, c1,  \
+        fortran.interpolations_f.trilinear_insert(data_coord, data_val, x_min, N_data,
+                                                  delta_x, one_over_bin_volume, c1,
                                                   dataout, weightout)
 
         # Keep only the inner array - get rid of the boundary padding.
-        dataout = dataout[1:N_bin[0]+1, 1:N_bin[1]+1, 1:N_bin[2]+1]
-        weightout = weightout[1:N_bin[0]+1, 1:N_bin[1]+1, 1:N_bin[2]+1]
+        dataout = dataout[1:n_bin[0] + 1, 1:n_bin[1] + 1, 1:n_bin[2] + 1]
+        weightout = weightout[1:n_bin[0] + 1, 1:n_bin[1] + 1, 1:n_bin[2] + 1]
     else:
         # Initialise memory for Fortran
-        dataout = np.zeros(N_bin, dtype=np.complex128, order='C')
-        weightout = np.zeros(N_bin, dtype=np.double, order='C')
+        dataout = np.zeros(n_bin, dtype=np.complex128, order='C')
+        weightout = np.zeros(n_bin, dtype=np.double, order='C')
         dataout = np.asfortranarray(dataout)
         weightout = np.asfortranarray(weightout)
 
@@ -426,32 +388,17 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, wrap_aroun
         N_data = len(data_val)
 
         # Do trilinear insertion
-        fortran.interpolations_f.trilinear_insert_with_wraparound(data_coord, data_val, x_min, N_data, \
-                                                                  Delta_x, one_over_bin_volume, c1, N_bin, \
+        fortran.interpolations_f.trilinear_insert_with_wraparound(data_coord, data_val, x_min, N_data,
+                                                                  delta_x, one_over_bin_volume, c1, n_bin,
                                                                   dataout, weightout)
 
-
-    """
-    The code in this section is no longer used because we want to return both dataout and weightout.
-    Returning weightout is useful when we want to interpolate the interpolated slices, 
-    for example in the case of merging slices for a 3D volume.
+    # The code in this section is no longer used because we want to return both dataout and weightout.
+    # Returning weightout is useful when we want to interpolate the interpolated slices,
+    # for example in the case of merging slices for a 3D volume.
 
     # # Calculate the mean value inserted into the array by dividing dataout by weightout.
     # # For locations where weightout is zero, dataout should also be zero (because no values were inserted),
     # # deal with this case by setting weightout to 1.
     # assert np.sum(dataout[weightout == 0]) == 0
-    """
 
     return dataout, weightout
-
-
-def passthrough_decorator(*args1, **kwargs1):
-    r"""
-    A function decorator that does nothing.  It is useful for dealing with the absence of the numba package; then
-    we can define a jit decorator that does nothing.
-    """
-    def real_decorator(function):
-        def wrapper():
-            function(*args, **kwargs)
-        return wrapper
-    return real_decorator

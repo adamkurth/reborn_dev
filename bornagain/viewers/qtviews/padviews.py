@@ -8,17 +8,12 @@ import numpy as np
 import pkg_resources
 import bornagain
 from bornagain.detector import PADGeometry
-from bornagain.utils import warn_pyqtgraph
 from bornagain.fileio.getters import FrameGetter
 from bornagain.analysis.peaks import boxsnr, PeakFinder
 # We are using pyqtgraph's wrapper for pyqt because it helps deal with the different APIs in pyqt5 and pyqt4...
-try:
-    import pyqtgraph as pg
-    from pyqtgraph.Qt import uic, QtGui, QtCore #, QtWidgets
-    from pyqtgraph import ImageItem
-except ImportError:
-    warn_pyqtgraph()
-
+import pyqtgraph as pg
+from pyqtgraph.Qt import uic, QtGui, QtCore #, QtWidgets
+from pyqtgraph import ImageItem
 # from bornagain.external.pyqtgraph import ImageItem
 
 padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')

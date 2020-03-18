@@ -3,6 +3,8 @@ from time import time
 import numpy as np
 from numpy import exp, log
 from scipy.special import factorial, loggamma, gammaln
+from scipy.spatial.transform import Rotation
+from scipy import constants
 import pyqtgraph as pg
 from bornagain.detector import PADGeometry
 from bornagain.source import Beam
@@ -10,9 +12,9 @@ from bornagain.target.molecule import Molecule
 from bornagain.target.density import trilinear_interpolation, trilinear_insertion
 from bornagain.simulate.clcore import ClCore
 from bornagain.simulate.examples import lysozyme_pdb_file, MoleculeSimulatorV1
-from bornagain.utils import rotate, random_rotation, random_unit_vector, max_pair_distance, rotation_about_axis
-from bornagain.units import r_e
-# from image_viewers import ImageViewer2
+
+
+r_e = constants.value('classical electron radius')
 
 visualize = False
 live_update = 1000
@@ -89,7 +91,7 @@ for pat in range(n_patterns):
     msg = '%d' % pat
     sys.stdout.write('\b'*len(pmsg) + msg)
     pmsg = msg
-    true_rot = random_rotation().astype(real_t)
+    true_rot = Rotation.random().as_matrix().astype(real_t)
     rotations.append(true_rot.copy())
     patterns.append(sim.generate_pattern(rotation=true_rot, poisson=True).astype(real_t))
 sys.stdout.write('   (%g seconds)' % (time() - t))
@@ -128,11 +130,11 @@ for update in range(n_model_updates):
     current_model_gpu.set(current_model)
     weights_gpu.fill(0)
     new_model_gpu.fill(0)
-    rot = random_rotation().astype(real_t)
+    rot = Rotation.random().as_matrix().astype(real_t)
     for pat in range(n_patterns):
         t = time()
         sys.stdout.write('model %d, pattern %d: ' % (update+1, pat+1))
-        true_rot = rotations[pat] #random_rotation().astype(real_t)
+        true_rot = rotations[pat]
         intensity_gpu = clcore.to_device(patterns[pat], dtype=real_t)
         n_acceptances = 0
         for orient in range(n_orientations):

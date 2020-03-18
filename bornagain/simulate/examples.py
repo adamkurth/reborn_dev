@@ -8,18 +8,14 @@ Don't build any of this into your code.
 
 import pkg_resources
 import numpy as np
+from scipy.spatial.transform import Rotation
 import bornagain as ba
 from bornagain import detector
-from bornagain.utils import warn, random_rotation, rotation_about_axis, random_unit_vector, random_beam_vector, \
-                            max_pair_distance
+from bornagain.utils import warn, rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance
 import bornagain.external.crystfel
 from bornagain.simulate import atoms
 from bornagain.target.crystal import CrystalStructure
-try:
-    from bornagain.simulate.clcore import ClCore
-except ImportError:
-    warn("simulate.clcore cannot be imported, probably because pyopencl is not installed.")
-    ClCore = None
+from bornagain.simulate.clcore import ClCore
 from scipy import constants as const
 
 hc = const.h*const.c
@@ -88,7 +84,7 @@ def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=Tru
     q = np.ravel(q)
 
     if random_rotation:
-        rot = random_rotation()
+        rot = Rotation.random().as_matrix()
     else:
         rot = None
 
@@ -119,7 +115,7 @@ class PDBMoleculeSimulator(object):
             pdb_file: path to a pdb file
             pad_geometry: array of :class:`PADGeometry <bornagain.detector.PADGeometry>` intances
             wavelength: in SI units of course
-            random_rotation: True or False
+            random_rotation (bool): True or False
         """
 
         if pdb_file is None:
@@ -132,8 +128,6 @@ class PDBMoleculeSimulator(object):
 
         self.clcore = ClCore(group_size=32)
         cryst = CrystalStructure(pdb_file)
-
-        self.random_rotation = random_rotation
 
         r = cryst.molecule.coordinates
         f = cryst.molecule.get_scattering_factors(photon_energy=photon_energy)
@@ -157,7 +151,7 @@ class PDBMoleculeSimulator(object):
         """
 
         if self.random_rotation:
-            rot = random_rotation()
+            rot = Rotation.random().as_matrix()
         else:
             rot = None
 
@@ -199,7 +193,7 @@ class MoleculeSimulatorV1(object):
     def generate_pattern(self, rotation=None, poisson=False):
 
         if rotation is None:
-            rotation = random_rotation()
+            rotation = Rotation.random().as_matrix()
         self.clcore.mesh_interpolation(self.a_map_dev, self.q_dev, N=self.mesh_size, q_min=-self.qmax,
                                        q_max=self.qmax, R=rotation, a=self.a_out_dev)
         if poisson:
@@ -315,7 +309,7 @@ class CrystalSimulatorV1(object):
             np.ceil(min(self.beam_area, this_mosaic_domain_size ** 2) * this_mosaic_domain_size / self.cell_volume)
 
         if rotation_matrix is None:
-            rotation_matrix = random_rotation()
+            rotation_matrix = Rotation.random().as_matrix()
 
         moltrans = []
         for i in range(len(self.pad_geometry)):

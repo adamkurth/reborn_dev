@@ -209,7 +209,6 @@ class ClCore(object):
 
         Arguments:
             x np.ndarray:
-
             dtype np.dtype: Examples: np.complex, np.double
 
         Returns:

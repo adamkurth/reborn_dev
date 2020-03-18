@@ -10,7 +10,7 @@ from scipy import constants as const
 hc = const.h*const.c  # pylint: disable=invalid-name
 
 
-class Beam(object):
+class Beam():
 
     r"""
     A minimal containor to gather x-ray beam properties.

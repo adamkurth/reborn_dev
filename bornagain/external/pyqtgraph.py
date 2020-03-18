@@ -1,13 +1,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import weakref
-import numpy as np
-from bornagain.utils import warn_pyqtgraph
-try:
-    import pyqtgraph as pg
-except ImportError:
-    warn_pyqtgraph()
-    print('Hello! external pyqtgraph.py')
+import pyqtgraph as pg
 
 
 def keep_open():

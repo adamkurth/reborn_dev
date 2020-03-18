@@ -2,7 +2,6 @@ from __future__ import division
 
 import sys
 from time import time
-
 import numpy as np
 np.seterr(divide='ignore', invalid='ignore') # We expect a divide-by-zero, which is corrected... I don't like the annoying message...
 from scipy.stats import binned_statistic_dd
@@ -11,9 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 
-sys.path.append("../..")
 import bornagain as ba
-from bornagain.units import hc, keV
 from bornagain.simulate.clcore import ClCore
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
