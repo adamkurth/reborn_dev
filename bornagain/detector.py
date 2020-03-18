@@ -12,7 +12,7 @@ import h5py
 from .utils import vec_norm, vec_mag, triangle_solid_angle, depreciate, warn
 
 
-class PADGeometry(object):
+class PADGeometry():
     r"""
     A container for pixel-array detector (PAD) geometry specification, with hepful methods for generating:
 
@@ -54,13 +54,13 @@ class PADGeometry(object):
 
     def __str__(self):
 
-        s = ''
-        s += 'n_fs: %s\n' % self.n_fs.__str__()
-        s += 'n_ss: %s\n' % self.n_ss.__str__()
-        s += 'fs_vec: %s\n' % self.fs_vec.__str__()
-        s += 'ss_vec: %s\n' % self.ss_vec.__str__()
-        s += 't_vec: %s' % self.t_vec.__str__()
-        return s
+        out = ''
+        out += 'n_fs: %s\n' % self.n_fs.__str__()
+        out += 'n_ss: %s\n' % self.n_ss.__str__()
+        out += 'fs_vec: %s\n' % self.fs_vec.__str__()
+        out += 'ss_vec: %s\n' % self.ss_vec.__str__()
+        out += 't_vec: %s' % self.t_vec.__str__()
+        return out
 
     @property
     def n_fs(self):
@@ -121,17 +121,17 @@ class PADGeometry(object):
 
     def save(self, save_fname):
         r"""Saves an hdf5 file with class attributes for later use"""
-        with h5py.File(save_fname, "w") as h:
+        with h5py.File(save_fname, "w") as hfil:
             for name, data in vars(self).items():
-                h.create_dataset(name, data=data)
+                hfil.create_dataset(name, data=data)
 
     @classmethod
     def load(cls, fname):
         r""" load a PAD object from fname"""
         pad = cls()
-        with h5py.File(fname, "r") as h:
-            for name in h.keys():
-                data = h[name].value
+        with h5py.File(fname, "r") as hfil:
+            for name in hfil.keys():
+                data = hfil[name].value
                 setattr(pad, name, data)
         return pad
 
@@ -189,26 +189,26 @@ class PADGeometry(object):
 
         return self.n_ss, self.n_fs
 
-    def indices_to_vectors(self, j, i):
+    def indices_to_vectors(self, idx_ss, idx_fs):
         r"""
         Convert pixel indices to translation vectors pointing from origin to position on panel.
         The positions need not lie on the actual panel; this assums an infinite plane.
 
         Arguments:
-            i (float) :
+            idx_fs (float) :
                 Fast-scan index.
-            j (float) :
+            idx_ss (float) :
                 Slow-scan index.
 
         Returns:
             Nx3 numpy array
         """
 
-        i = np.array(i)
-        j = np.array(j)
-        f = np.outer(i.ravel(), self.fs_vec)
-        s = np.outer(j.ravel(), self.ss_vec)
-        return self.t_vec + f + s
+        idx_fs = np.array(idx_fs)
+        idx_ss = np.array(idx_ss)
+        f_vec = np.outer(idx_fs.ravel(), self.fs_vec)
+        s_vec = np.outer(idx_ss.ravel(), self.ss_vec)
+        return self.t_vec + f_vec + s_vec
 
     def position_vecs(self):
         r"""
@@ -305,15 +305,15 @@ class PADGeometry(object):
         Returns: numpy array
         """
 
-        v = self.position_vecs()
-        n = self.norm_vec()
+        v_vec = self.position_vecs()
+        n_vec = self.norm_vec()
 
-        a = vec_mag(np.cross(self.fs_vec, self.ss_vec))  # Area of the pixel
-        r2 = vec_mag(v) ** 2  # Distance to the pixel, squared
-        cs = np.dot(n, vec_norm(v).T)  # Inclination factor: cos(theta)
-        sa = (a / r2) * cs  # Solid angle
+        area = vec_mag(np.cross(self.fs_vec, self.ss_vec))  # Area of the pixel
+        dist2 = vec_mag(v_vec) ** 2  # Distance to the pixel, squared
+        inc = np.dot(n_vec, vec_norm(v_vec).T)  # Inclination factor: cos(theta)
+        solid_ang = (area / dist2) * inc  # Solid angle
 
-        return np.abs(sa.ravel())
+        return np.abs(solid_ang.ravel())
 
     def solid_angles2(self):
         r"""
@@ -326,21 +326,21 @@ class PADGeometry(object):
 
         Returns: numpy array
         """
-        k = self.position_vecs()
-        r1 = k - self.fs_vec * .5 - self.ss_vec * .5
-        r2 = k + self.fs_vec * .5 - self.ss_vec * .5
-        r3 = k - self.fs_vec * .5 + self.ss_vec * .5
-        r4 = k + self.fs_vec * .5 + self.ss_vec * .5
-        sa_1 = triangle_solid_angle(r1, r2, r3)
-        sa_2 = triangle_solid_angle(r4, r2, r3)
-        return sa_1 + sa_2
+        pixel_center = self.position_vecs()
+        corner1 = pixel_center - self.fs_vec * .5 - self.ss_vec * .5
+        corner2 = pixel_center + self.fs_vec * .5 - self.ss_vec * .5
+        corner3 = pixel_center - self.fs_vec * .5 + self.ss_vec * .5
+        corner4 = pixel_center + self.fs_vec * .5 + self.ss_vec * .5
+        solid_angle_1 = triangle_solid_angle(corner1, corner2, corner3)
+        solid_angle_2 = triangle_solid_angle(corner4, corner2, corner3)
+        return solid_angle_1 + solid_angle_2
 
-    def polarization_factors(self, polarization_vec=None, beam_vec=None, weight=None, beam=None):
+    def polarization_factors(self, polarization_vec_1=None, beam_vec=None, weight=None, beam=None):
         r"""
         The scattering polarization factors.
 
         Arguments:
-            polarization_vec (numpy array) :
+            polarization_vec_1 (numpy array) :
                 First beam polarization vector (second is this one crossed with beam vector)
             beam_vec (numpy array) :
                 Incident beam vector
@@ -351,28 +351,26 @@ class PADGeometry(object):
 
         Returns:  numpy array
         """
-
         if beam is not None:
             beam_vec = beam.beam_vec
-            polarization_vec = beam.polarization_vec
+            polarization_vec_1 = beam.polarization_vec
             weight = beam.polarization_weight
-
-        v = vec_norm(self.position_vecs())
-        u = vec_norm(np.array(polarization_vec))
-        b = vec_norm(np.array(beam_vec))
-        up = np.cross(u, b)
-
+        pix_vec = vec_norm(self.position_vecs())
+        polarization_vec_1 = vec_norm(np.array(polarization_vec_1))
+        beam_vec = vec_norm(np.array(beam_vec))
+        polarization_vec_2 = np.cross(polarization_vec_1, beam_vec)
         if weight is None:
-            w1 = 1
-            w2 = 0
+            weight1 = 1
+            weight2 = 0
         else:
-            w1 = weight
-            w2 = 1 - weight
-
-        p1 = w1 * (1 - np.abs(np.dot(v, u)) ** 2)
-        p2 = w2 * (1 - np.abs(np.dot(v, up)) ** 2)
-        p = p1 + p2
-        return p.ravel()
+            weight1 = weight
+            weight2 = 1 - weight
+        polarization_factor = 0
+        if weight1 > 0:
+            polarization_factor += weight1 * (1 - np.abs(np.dot(pix_vec, polarization_vec_1)) ** 2)
+        if weight2 > 0:
+            polarization_factor += weight2 * (1 - np.abs(np.dot(pix_vec, polarization_vec_2)) ** 2)
+        return polarization_factor.ravel()
 
     def scattering_angles(self, beam_vec=None, beam=None):
         r"""
@@ -401,7 +399,6 @@ class PADGeometry(object):
 
         Arguments:
             beam: Instance of the Beam class (for wavelength)
-            wavelength: Specify wavelength (needed for q_mags)
             q_min: Minimum q magnitude
             min_angle: Minimum scattering angle
 
@@ -482,9 +479,9 @@ def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0
 
     pads = []
 
-    tilefs_sep = pad_shape[1] + pad_gap/pixel_size / 2 #+ 0.5
+    tilefs_sep = pad_shape[1] + pad_gap/pixel_size / 2
     tilefs_pos = (np.arange(tiling_shape[1]) - (tiling_shape[1] - 1) / 2) * tilefs_sep
-    tiless_sep = pad_shape[0] + pad_gap/pixel_size / 2 #+ 0.5
+    tiless_sep = pad_shape[0] + pad_gap/pixel_size / 2
     tiless_pos = (np.arange(tiling_shape[0]) - (tiling_shape[0] - 1) / 2) * tiless_sep
 
     for fs_cent in tilefs_pos:  # fast scan
@@ -521,24 +518,24 @@ def split_pad_data(pad_list, data):
     return data_list
 
 
-def edge_mask(data, n):
+def edge_mask(data, n_edge):
     r"""
     Make an "edge mask"; an array of ones with zeros around the edges.
     The mask will be the same type as the data (e.g. double).
 
     Arguments:
         data (2D numpy array): a data array (for shape reference)
-        n (int): number of pixels to mask around edges
+        n_edge (int): number of pixels to mask around edges
 
     Returns: numpy array
     """
-    n = int(n)
+    n_edge = int(n_edge)
     mask = np.ones_like(data)
-    ns, nf = data.shape
-    mask[0:n, :] = 0
-    mask[(ns - n):ns, :] = 0
-    mask[:, 0:n] = 0
-    mask[:, (nf - n):nf] = 0
+    n_ss, n_fs = data.shape
+    mask[0:n_edge, :] = 0
+    mask[(n_ss - n_edge):n_ss, :] = 0
+    mask[:, 0:n_edge] = 0
+    mask[:, (n_fs - n_edge):n_fs] = 0
 
     return mask
 
@@ -555,48 +552,42 @@ class PADAssembler(object):
 
     def __init__(self, pad_list):
         pixel_size = vec_mag(pad_list[0].fs_vec)
-        v = np.concatenate([p.position_vecs() for p in pad_list])
-        v -= np.min(v, axis=0)
-        v /= pixel_size
-        v = np.floor(v).astype(np.int)
-        m = np.max(v, axis=0)
-        a = np.zeros([m[0] + 1, m[1] + 1])
-        self.v = v
-        self.a = a
-        self.shape = (m[0] + 1, m[1] + 1)
+        position_vecs_concat = np.concatenate([p.position_vecs() for p in pad_list])
+        position_vecs_concat -= np.min(position_vecs_concat, axis=0)
+        position_vecs_concat /= pixel_size
+        position_vecs_concat = np.floor(position_vecs_concat).astype(np.int)
+        maxval = np.max(position_vecs_concat, axis=0)
+        assembled = np.zeros([maxval[0] + 1, maxval[1] + 1])
+        self.position_vecs_concat = position_vecs_concat
+        self.assembled = assembled
+        self.shape = (maxval[0] + 1, maxval[1] + 1)
 
     def assemble_data(self, data):
         r"""
         Given a contiguous block of data, create the fake single-panel PAD.
 
         Arguments:
-            data (numpy array):
-                Image data
+            data (numpy array): Image data
 
         Returns:
-            assembled_data (numpy array):
-                Assembled PAD image
+            assembled_data (numpy array): Assembled PAD image
         """
-
         data = np.ravel(data)
+        assembled = self.assembled
+        position_vecs_concat = self.position_vecs_concat
+        assembled[position_vecs_concat[:, 0], position_vecs_concat[:, 1]] = data
 
-        a = self.a
-        v = self.v
-        a[v[:, 0], v[:, 1]] = data
-
-        return a.copy()
+        return assembled.copy()
 
     def assemble_data_list(self, data_list):
         r"""
         Same as assemble_data() method, but accepts a list of individual panels in the form of a list.
 
         Arguments:
-            data_list (list of numpy arrays):
-                Image data
+            data_list (list of numpy arrays): Image data
 
         Returns:
-            assembled_data (numpy array):
-                Assembled PAD image
+            assembled_data (numpy array): Assembled PAD image
         """
 
         return self.assemble_data(np.ravel(data_list))
@@ -604,14 +595,12 @@ class PADAssembler(object):
 
 class IcosphereGeometry(object):
     r"""
-
     Experimental class for a spherical detector that follows the "icosphere" geometry. The Icosphere is generated by
     sub-dividing the vertices of an icosahedron.  The following blog was helpful:
     http://sinestesia.co/blog/tutorials/python-icospheres/
 
     The code is quite slow; needs to be vectorized with numpy.  There are definitely better spherical detectors - the
     solid angles of these pixels are not very uniform.
-
     """
 
     n_subdivisions = 1
@@ -622,12 +611,12 @@ class IcosphereGeometry(object):
         self.n_subdivisions = n_subdivisions
         self.radius = radius
 
-    def _vertex(self, x, y, z):
+    def _vertex(self, x_coords, y_coords, z_coords):
         r""" Return vertex coordinates fixed to the unit sphere """
 
-        length = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+        length = np.sqrt(x_coords ** 2 + y_coords ** 2 + z_coords ** 2)
 
-        return [(i * self.radius) / length for i in (x, y, z)]
+        return [(i * self.radius) / length for i in (x_coords, y_coords, z_coords)]
 
     def _middle_point(self, point_1, point_2, verts, middle_point_cache):
         r""" Find a middle point and project to the unit sphere """
@@ -722,14 +711,14 @@ class IcosphereGeometry(object):
             faces_subdiv = []
 
             for tri in faces:
-                v1 = middle_point(tri[0], tri[1], verts, middle_point_cache)
-                v2 = middle_point(tri[1], tri[2], verts, middle_point_cache)
-                v3 = middle_point(tri[2], tri[0], verts, middle_point_cache)
+                pt1 = middle_point(tri[0], tri[1], verts, middle_point_cache)
+                pt2 = middle_point(tri[1], tri[2], verts, middle_point_cache)
+                pt3 = middle_point(tri[2], tri[0], verts, middle_point_cache)
 
-                faces_subdiv.append([tri[0], v1, v3])
-                faces_subdiv.append([tri[1], v2, v1])
-                faces_subdiv.append([tri[2], v3, v2])
-                faces_subdiv.append([v1, v2, v3])
+                faces_subdiv.append([tri[0], pt1, pt3])
+                faces_subdiv.append([tri[1], pt2, pt1])
+                faces_subdiv.append([tri[2], pt3, pt2])
+                faces_subdiv.append([pt1, pt2, pt3])
 
             faces = faces_subdiv
 
@@ -819,12 +808,9 @@ class RadialProfiler(object):
         # bin_index_groups = []  # A list of length n_bins, each of which contains a numpy array with the
         # for i in range(n_bins):
 
-
         # Overflow ends up in the min and max bins
         bin_indices[bin_indices < 0] = 0
         bin_indices[bin_indices >= n_bins] = n_bins - 1
-
-
 
         self.q_mags = q_mags
         self.n_bins = n_bins
@@ -862,14 +848,3 @@ class RadialProfiler(object):
         if average:
             profile.flat[self.counts_non_zero] /= self.counts.flat[self.counts_non_zero]  # pylint:disable=no-member
         return profile
-
-    # def get_profile_sum(self):
-    #
-    #
-    #
-    # def get_profile_mean(self):
-    #
-    # def get_profile_median(self):
-
-
-

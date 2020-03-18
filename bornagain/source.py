@@ -7,7 +7,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import numpy as np
 from scipy import constants as const
 
-hc = const.h*const.c
+hc = const.h*const.c  # pylint: disable=invalid-name
 
 
 class Beam(object):
@@ -70,8 +70,8 @@ class Beam(object):
 
     @property
     def polarization_vec(self):
-        r""" The principle polarization vector :math:`\hat{u}`.  This should be orthogonal to the incident beam direction.  The
-        complementary polarization vector is :math:`\hat{u}\times\hat{b}`"""
+        r""" The principle polarization vector :math:`\hat{u}`.  This should be orthogonal to the incident beam
+        direction.  The complementary polarization vector is :math:`\hat{u}\times\hat{b}`"""
         return self._polarization_vec
 
     @polarization_vec.setter
@@ -90,10 +90,10 @@ class Beam(object):
 
     @property
     def wavelength(self):
+        r""" Photon wavelength in meters."""
         if self.photon_energy is not None:
             return hc/self.photon_energy
-        else:
-            return None
+        return None
 
     @wavelength.setter
     def wavelength(self, value):
@@ -102,10 +102,10 @@ class Beam(object):
 
     @property
     def pulse_energy(self):
+        r""" Pulse energy in J."""
         if self._pulse_energy is None:
             raise ValueError("beam.pulse_energy has not been defined.  There is no default.")
-        else:
-            return self._pulse_energy
+        return self._pulse_energy
 
     @pulse_energy.setter
     def pulse_energy(self, val):
@@ -113,16 +113,20 @@ class Beam(object):
 
     @property  # this cannot be set - set pulse energy instead
     def n_photons(self):
+        r""" Number of photons per pulse."""
         return self.pulse_energy / self.photon_energy
 
     @property
     def fluence(self):
+        r""" Same as energy_fluence."""
         return self.energy_fluence
 
     @property
     def photon_number_fluence(self):
+        r""" Pulse fluence in photons/m^2."""
         return self.n_photons/(np.pi * self.diameter_fwhm**2 / 4.0)
 
     @property
     def energy_fluence(self):
+        r""" Pulse fluence in J/m^2."""
         return self.pulse_energy/(np.pi * self.diameter_fwhm**2 / 4.0)
