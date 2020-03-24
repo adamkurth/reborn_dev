@@ -9,6 +9,7 @@ from . import simulate
 from . import source
 from . import target
 from . import utils
+from . import fileio
 
 CONFIG_OPTIONS = {'warn_depreciated': True,
                   'force_depreciated': False,
