@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # sys.path.append("../..")
-import bornagain as ba
-import bornagain.simulate.clcore as clcore
+import reborn as ba
+import reborn.simulate.clcore as clcore
 
 show = True
 if 'noplots' in sys.argv:

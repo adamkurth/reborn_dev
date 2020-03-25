@@ -1,12 +1,12 @@
 
 def test_minimal():
 
-    import bornagain
-    from bornagain import detector
-    from bornagain import source
-    from bornagain import utils
+    import reborn
+    from reborn import detector
+    from reborn import source
+    from reborn import utils
 
-    assert bornagain is not None
+    assert reborn is not None
 
 
 if __name__ == '__main__':

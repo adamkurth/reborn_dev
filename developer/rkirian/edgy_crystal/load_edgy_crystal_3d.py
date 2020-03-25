@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.fft import fftn, ifftn, fftshift, ifftshift
-from bornagain.viewers.qtviews import MapProjection
+from reborn.viewers.qtviews import MapProjection
 import matplotlib.pyplot as plt
 import pyqtgraph as pg
 

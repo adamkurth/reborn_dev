@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../..')
-from bornagain.viewers.qtviews import PADView
-from bornagain.external.cheetah import CheetahFrameGetter
+from reborn.viewers.qtviews import PADView
+from reborn.external.cheetah import CheetahFrameGetter
 
 geom_file_name = 'data/cxin5016-oy-v1.geom'
 cxi_file_name = 'data/cxilu5617-r0149-c00.cxi'

@@ -2,13 +2,13 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 
-import bornagain
-from bornagain.simulate.examples import lysozyme_pdb_file
+import reborn
+from reborn.simulate.examples import lysozyme_pdb_file
 
 # try:
 # import pyopencl
 from pyopencl import array as clarray
-from bornagain.simulate.clcore import ClCore
+from reborn.simulate.clcore import ClCore
 cl_array = clarray.Array
 havecl = True
 test_core = ClCore(context=None, queue=None, group_size=1, double_precision=True)
@@ -16,7 +16,7 @@ if test_core.double_precision:
     have_double = True
 else:
     have_double = False
-ctx = bornagain.simulate.clcore.create_some_gpu_context()
+ctx = reborn.simulate.clcore.create_some_gpu_context()
 # except ImportError:
 #     ClCore = None
 #     clarray = None

@@ -6,12 +6,12 @@ from scipy.special import factorial, loggamma, gammaln
 from scipy.spatial.transform import Rotation
 from scipy import constants
 import pyqtgraph as pg
-from bornagain.detector import PADGeometry
-from bornagain.source import Beam
-from bornagain.target.molecule import Molecule
-from bornagain.target.density import trilinear_interpolation, trilinear_insertion
-from bornagain.simulate.clcore import ClCore
-from bornagain.simulate.examples import lysozyme_pdb_file, MoleculeSimulatorV1
+from reborn.detector import PADGeometry
+from reborn.source import Beam
+from reborn.target.molecule import Molecule
+from reborn.target.density import trilinear_interpolation, trilinear_insertion
+from reborn.simulate.clcore import ClCore
+from reborn.simulate.examples import lysozyme_pdb_file, MoleculeSimulatorV1
 
 
 r_e = constants.value('classical electron radius')

@@ -5,7 +5,7 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit 1
 fi
 
-cd ../bornagain/fortran
+cd ../reborn/fortran
 
 f2py="python -m numpy.f2py"
 flags="-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION"

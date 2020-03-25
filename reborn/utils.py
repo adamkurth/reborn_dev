@@ -1,5 +1,5 @@
 r"""
-Some utility functions that might be useful throughout bornagain.  Don't put highly specialized functions here.
+Some utility functions that might be useful throughout reborn.  Don't put highly specialized functions here.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -9,8 +9,8 @@ import sys
 import numpy as np
 from numpy import sin, cos
 from numba import jit
-import bornagain as ba
-from bornagain import fortran
+import reborn as ba
+from reborn import fortran
 
 
 def vec_norm(vec):
@@ -47,8 +47,8 @@ def depreciate(message):
     form "WARNING: DEPRECIATION: blah blah blah" will be printed with sys.stdout.write().  You get to choose the
     "blah blah blah" part of the message, which is the input to this function.
 
-    The output can be silenced with the function bornagain.set_global('warn_depreciated', False), or you can force
-    an error to occur if you do bornagain.set_global('force_depreciated', True).
+    The output can be silenced with the function reborn.set_global('warn_depreciated', False), or you can force
+    an error to occur if you do reborn.set_global('force_depreciated', True).
 
     Arguments:
         message: whatever you want to have printed to the screen
@@ -104,7 +104,7 @@ def random_rotation():
         rotmat = Rotation.random().as_matrix()'
     """
 
-    depreciate('bornagain.utils.random_rotation has been removed.  Use scipy for this:\n'
+    depreciate('reborn.utils.random_rotation has been removed.  Use scipy for this:\n'
                'from scipy.spatial.transform import Rotation\n'
                'rotmat = Rotation.random().as_matrix()')
 

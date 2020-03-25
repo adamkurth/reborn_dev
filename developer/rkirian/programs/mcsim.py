@@ -11,11 +11,11 @@ import inspect
 from scipy.special import erf
 from scipy import constants
 from scipy.spatial.transform import Rotation
-import bornagain as ba
-from bornagain.simulate import solutions
-from bornagain.simulate import simutils
-import bornagain.simulate.clcore as core
-from bornagain.external import crystfel
+import reborn as ba
+from reborn.simulate import solutions
+from reborn.simulate import simutils
+import reborn.simulate.clcore as core
+from reborn.external import crystfel
 
 
 r_e = constants.value('classical electron radius')
@@ -330,9 +330,9 @@ if __name__ == '__main__':
     import numpy as np
     import h5py
     import pyqtgraph
-    from bornagain.simulate.examples import lysozyme_pdb_file, psi_pdb_file
-    from bornagain.viewers.qtviews.padviews import PADView
-    from bornagain.external.crystfel import geometry_file_to_pad_geometry_list
+    from reborn.simulate.examples import lysozyme_pdb_file, psi_pdb_file
+    from reborn.viewers.qtviews.padviews import PADView
+    from reborn.external.crystfel import geometry_file_to_pad_geometry_list
     import shutil
     import os
 

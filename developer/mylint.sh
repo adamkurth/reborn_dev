@@ -9,5 +9,5 @@ pylint --disable too-few-public-methods \
        --disable too-many-instance-attributes \
        --disable too-many-arguments \
        --max-line-length=120 \
-       --extension-pkg-whitelist=numpy,bornagain.fortran \
+       --extension-pkg-whitelist=numpy,reborn.fortran \
        $1

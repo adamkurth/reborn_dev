@@ -6,10 +6,10 @@ import numpy as np
 from numpy.fft import fftn, ifftn, fftshift
 import matplotlib.pyplot as plt
 
-from bornagain.viewers.qtviews import qtviews
-from bornagain.target import crystal
-from bornagain.data import lysozyme_pdb_file
-import bornagain.simulate.clcore as core
+from reborn.viewers.qtviews import qtviews
+from reborn.target import crystal
+from reborn.data import lysozyme_pdb_file
+import reborn.simulate.clcore as core
 from scipy import constants as const
 
 hc = const.h*const.c

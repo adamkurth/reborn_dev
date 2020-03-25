@@ -1,6 +1,6 @@
 r"""
 This module contains some core functions that are useful for simulating diffraction on GPU devices.  Look to the
-bornagain documentation to gain an understaning of how this module is meant to be used.
+reborn documentation to gain an understaning of how this module is meant to be used.
 
 To get some information on compute devices (CPU/GPU) you can run the function clcore.help()
 
@@ -22,11 +22,11 @@ import pkg_resources
 import pyopencl as cl
 import pyopencl.array
 
-from bornagain.utils import depreciate
+from reborn.utils import depreciate
 
 cl_array = cl.array.Array
 
-clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
+clcore_file = pkg_resources.resource_filename('reborn.simulate', 'clcore.cpp')
 
 
 def get_all_gpu_devices():
@@ -187,7 +187,7 @@ class ClCore(object):
         self.complex_t = np.complex64
 
     def _build_opencl_programs(self):
-        clcore_file = pkg_resources.resource_filename('bornagain.simulate', 'clcore.cpp')
+        clcore_file = pkg_resources.resource_filename('reborn.simulate', 'clcore.cpp')
         kern_str = open(clcore_file).read()
         build_opts = []
         if self.double_precision:
@@ -689,7 +689,7 @@ class ClCore(object):
     def mesh_interpolation(self, a_map, q, N=None, q_min=None, q_max=None, dq=None, R=None, U=None, a=None,
                            density_map=None, add=False, twopi=False):
         r"""
-        This is used in conjunction with :meth:`phase_factor_mesh <bornagain.simulate.clcore.ClCore.phase_factor_mesh>`
+        This is used in conjunction with :meth:`phase_factor_mesh <reborn.simulate.clcore.ClCore.phase_factor_mesh>`
         to interpolate amplitudes from a 3d mesh of simulated amplitudes.
 
         Arguments:

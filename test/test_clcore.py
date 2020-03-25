@@ -1,5 +1,5 @@
 """
-Test the clcore simulation engine in bornagain.simulate.  This requires pytest.  You can also run from main
+Test the clcore simulation engine in reborn.simulate.  This requires pytest.  You can also run from main
 like this:
 > python test_simulate_clcore.py
 If you want to view results just add the keyword "view"
@@ -9,7 +9,7 @@ If you want to view results just add the keyword "view"
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-from bornagain.simulate import clcore
+from reborn.simulate import clcore
 import pyopencl
 from pyopencl import array as clarray
 cl_array = clarray.Array

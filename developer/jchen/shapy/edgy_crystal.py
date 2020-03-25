@@ -1,14 +1,14 @@
 from time import time
 import numpy as np
 import pyqtgraph as pg
-from bornagain import detector
-from bornagain import source
-from bornagain.utils import trilinear_insert, random_rotation, vec_mag, vec_norm
-from bornagain.simulate.clcore import ClCore
-from bornagain.simulate.examples import psi_pdb_file, lysozyme_pdb_file
-from bornagain.target import crystal, density
-from bornagain.viewers.qtviews import Scatter3D, bright_colors, colors, PADView
-from bornagain.external.pyqtgraph.extras import keep_open
+from reborn import detector
+from reborn import source
+from reborn.utils import trilinear_insert, random_rotation, vec_mag, vec_norm
+from reborn.simulate.clcore import ClCore
+from reborn.simulate.examples import psi_pdb_file, lysozyme_pdb_file
+from reborn.target import crystal, density
+from reborn.viewers.qtviews import Scatter3D, bright_colors, colors, PADView
+from reborn.external.pyqtgraph.extras import keep_open
 import scipy.constants as const
 eV = const.value('electron volt')
 r_e = const.value("classical electron radius")

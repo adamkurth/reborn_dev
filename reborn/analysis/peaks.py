@@ -3,12 +3,12 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 from scipy.ndimage import measurements
-from bornagain.utils import warn
+from reborn.utils import warn
 
 try:
-    from bornagain.fortran import peaks_f
+    from reborn.fortran import peaks_f
 except ImportError:
-    warn('You need to compile the fortran code.  See the documentation: https://rkirian.gitlab.io/bornagain')
+    warn('You need to compile the fortran code.  See the documentation: https://rkirian.gitlab.io/reborn')
     peaks_f = None
 
 
@@ -21,7 +21,7 @@ class PeakFinder(object):
 
     mask = None  #: Ignore pixels where mask == 0.
     snr_threshold = 10  # : Peaks must have a signal-to-noise ratio above this value.
-    radii = [1, 20, 30]  # : These are the radii associated with the :func:`boxsnr <bornagain.analysis.peaks.boxsnr>` function.
+    radii = [1, 20, 30]  # : These are the radii associated with the :func:`boxsnr <reborn.analysis.peaks.boxsnr>` function.
 
     snr = None  # : The SNR array from the most recent call to the find_peaks method.
     signal = None  # : The signal array from the most recent call to the find_peaks method.
@@ -33,7 +33,7 @@ class PeakFinder(object):
         r"""
         Args:
             snr_threshold: Peaks must have a signal-to-noise ratio above this value
-            radii: These are the radii associated with the :func:`boxsnr <bornagain.analysis.peaks.boxsnr>` function.
+            radii: These are the radii associated with the :func:`boxsnr <reborn.analysis.peaks.boxsnr>` function.
             mask: Ignore pixels where mask == 0.
         """
         self.snr_threshold = snr_threshold

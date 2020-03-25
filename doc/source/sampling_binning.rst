@@ -11,7 +11,7 @@ encounter, and there is a frequent need to extract 2D slices from 3D maps (for e
 to insert 2D slices into 3D maps (for example, by histogramming).
 There is also the need to work with standard coordinates that arise due to algorithms such as the Fast Fourier
 Transform.
-Here we discuss the conventions that will be used consistently within bornagain, and some of the tools that are
+Here we discuss the conventions that will be used consistently within reborn, and some of the tools that are
 available for manipulating density maps.
 
 Sampling and Binning
@@ -54,10 +54,10 @@ Data layout for multi-dimensional maps
 We base our indexing of density maps on numpy conventions.  By default, numpy uses "c-contiguous order", which
 means that incremements in the right-most index of an array correspond to the smallest steps in the internal memory
 buffer.
-In bornagain, it is assumed that all arrays are c-contiguous as with the case of arrays of vectors
+In reborn, it is assumed that all arrays are c-contiguous as with the case of arrays of vectors
 :ref:`decribed elsewhere <arrays_of_vectors>`.
 The "c-contiguous" distinction does not matter in some calculations, but it certainly does if you pass an array to a
-bornagain function that is compiled from underlying OpenCL code or Fortran code.
+reborn function that is compiled from underlying OpenCL code or Fortran code.
 
 A particular sample in a 3D density map has a 3-tuple of indices :math:`(i, j, k)`, and the array size is
 expressed by a 3-tuple :math:`(N_{\mathrm{bin}}^i,N_{\mathrm{bin}}^j,N_{\mathrm{bin}}^k)` that corresponds to the numpy
@@ -99,9 +99,9 @@ It is also noteworthy that the numpy
 `meshgrid function <https://docs.scipy.org/doc/numpy/reference/generated/numpy.meshgrid.html>`_
 allows for both so-called "matrix indexing" and "Cartesian indexing", and the default behavior of meshgrid is to
 scramble the the ordering of indices without a trace of reasoning in the documentation.
-Importantly, there is no notion of ":math:`x`", ":math:`y`" and ":math:`z`" coordinates in bornagain -- the only
+Importantly, there is no notion of ":math:`x`", ":math:`y`" and ":math:`z`" coordinates in reborn -- the only
 important matter here is that we be consistent in the way that we order vector components, and the above example
-defines the ordering that is assumed everywhere in bornagain.  This ordering derives from the numpy indexing
+defines the ordering that is assumed everywhere in reborn.  This ordering derives from the numpy indexing
 conventions (not the bizarre default behavior of meshgrid).
 
 Saving density maps
@@ -111,7 +111,7 @@ Saving density maps
 
 **numpy format**:  If we choose to save in numpy compressed format with ".npz" extension, we agree to the following
 rules.
-There are at least three types of densities that we routinely deal with in bornagain (see e.g.
+There are at least three types of densities that we routinely deal with in reborn (see e.g.
 :ref:`working with crystals <working_with_crystals>` ): electron/scattering density (possibly complex), diffraction
 amplitude (usually complex), and diffraction intensity (always real).
 We specify the type of density by the variable "type", which is a string that is equal to "density", "amplitude", or

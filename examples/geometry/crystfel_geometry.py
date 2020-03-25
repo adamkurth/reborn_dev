@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from bornagain.external import crystfel
-from bornagain.data import cspad_geom_file
+from reborn.external import crystfel
+from reborn.data import cspad_geom_file
 
 # This converts a CrytFEL geom file to a *list* of PADGeometry instances
 pads = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)

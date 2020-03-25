@@ -1,19 +1,19 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import bornagain
-from bornagain.simulate import solutions
+import reborn
+from reborn.simulate import solutions
 from scipy import constants as const
 
 r_e = const.value('classical electron radius')
 eV = const.value('electron volt')
 
-pad = bornagain.detector.PADGeometry(distance=0.2, shape=[4000]*2, pixel_size=100e-6)
-beam = bornagain.source.Beam(photon_energy=8000*eV, diameter_fwhm=5e-6, pulse_energy=1e8*8000*eV)
+pad = reborn.detector.PADGeometry(distance=0.2, shape=[4000]*2, pixel_size=100e-6)
+beam = reborn.source.Beam(photon_energy=8000*eV, diameter_fwhm=5e-6, pulse_energy=1e8*8000*eV)
 jet_diameter = 100e-6
 n_water_molecules = jet_diameter * beam.diameter_fwhm**2 * solutions.water_number_density()
 q = pad.q_vecs(beam=beam)
-qmag = bornagain.utils.vec_mag(q)
+qmag = reborn.utils.vec_mag(q)
 J = beam.fluence
 P = pad.polarization_factors(beam=beam)
 SA = pad.solid_angles()

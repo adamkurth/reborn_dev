@@ -1,62 +1,62 @@
 Setup
 =====
 
-The following suggestions should work on Linux or MacOS.  We have not thoroughly tested bornagain on MS Windows.
+The following suggestions should work on Linux or MacOS.  We have not thoroughly tested reborn on MS Windows.
 
-In principle, setting up bornagain should be as simple as including the base directory of the bornagain git repo in
+In principle, setting up reborn should be as simple as including the base directory of the reborn git repo in
 your python path.  You'll probably find that you need to install some dependencies, but all of them are known to install
 easily with pip or conda (however, there may be some extra steps to enable GPU computatoins -- see the relevant section
-below).  There are some pieces of Fortran code in bornagain that need to be compiled, but they
+below).  There are some pieces of Fortran code in reborn that need to be compiled, but they
 should auto-compile on first import.
 
-While it is possible to install bornagain using the provided `setup.py` script, this is not recommended because
-bornagain is under development and its API is not stable.  It is instead recommended that you keep a
-clone of the bornagain git repository where you are doing your analysis or simulations so that you can reproduce your
-results in the future. One way to track the *exact* version of bornagain used in your project is to add it as a
+While it is possible to install reborn using the provided `setup.py` script, this is not recommended because
+reborn is under development and its API is not stable.  It is instead recommended that you keep a
+clone of the reborn git repository where you are doing your analysis or simulations so that you can reproduce your
+results in the future. One way to track the *exact* version of reborn used in your project is to add it as a
 `git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git repository.
 
 Dependencies
 ------------
 
-As of 2020, bornagain is only tested with Python 3, because Python 2 is
+As of 2020, reborn is only tested with Python 3, because Python 2 is
 `finally dead <https://www.python.org/doc/sunset-python-2/>`_ .  The `environment.yml` file lists all of the packages
-that are installed upon regular testing of bornagain, which might be understood as the complete list of dependencies.
+that are installed upon regular testing of reborn, which might be understood as the complete list of dependencies.
 Here are the current contents of that file:
 
 .. literalinclude:: ../../environment.yml
 
-You can import many bornagain modules without installing *all* of these dependencies, but there is little reason to
+You can import many reborn modules without installing *all* of these dependencies, but there is little reason to
 install only a subset of them if you use a good package manager.
 
 Miniconda
 ---------
 
 `Miniconda <https://conda.io/miniconda.html>`_ is a reliable and lightweight distribution of python that is known to
-work well with bornagain.  The `Conda <https://conda.io/docs/>`_ package manager that comes with it makes it fast and
-easy to install the dependencies of bornagain.  You might consider making a trial
+work well with reborn.  The `Conda <https://conda.io/docs/>`_ package manager that comes with it makes it fast and
+easy to install the dependencies of reborn.  You might consider making a trial
 `conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_ to check that
 everything works well, since packages like opengl, opencl, pyqt are complex and may have conflicting requirments
 (however, not many problems have been noticed at least since 2019).  The simplest way to setup a proper conda
-environment is to execute the following (in the base directory of the bornagain respository):
+environment is to execute the following (in the base directory of the reborn respository):
 
 .. code-block:: bash
 
     conda env create -f environment.yml
 
-The above line will create a conda environment named `bornagain`, and you will need to activate that environment in the
+The above line will create a conda environment named `reborn`, and you will need to activate that environment in the
 following way:
 
 .. code-block:: bash
 
-    conda activate bornagain
+    conda activate reborn
 
 The `conda activate` often does not work, in which case you might try the following instead:
 
 .. code-block:: bash
 
-    source activate bornagain
+    source activate reborn
 
-If you don't want to create a new environment named `bornagain`, you can instead add all of the packages in the
+If you don't want to create a new environment named `reborn`, you can instead add all of the packages in the
 `environment.yml` file to the default `base` environment (or to any other environment you specify with the `name`
 flag):
 
@@ -69,7 +69,7 @@ You can of course install all of the necessary packages manually by other means.
 Complete setup from a clean Linux install
 -----------------------------------------
 
-Below are the standard steps that are tested on a clean Ubuntu Linux install every time the bornagain master branch is
+Below are the standard steps that are tested on a clean Ubuntu Linux install every time the reborn master branch is
 updated.  The script `developer/ubuntu-install.sh` is executed from the base directory of the git repository.  Here
 are the current contents of that script:
 
@@ -78,26 +78,26 @@ are the current contents of that script:
 Notes on setting up your path
 -----------------------------
 
-The main setup task is to simply ensure that Python can import the bornagain package, which means that it must be
+The main setup task is to simply ensure that Python can import the reborn package, which means that it must be
 found in a path where python searches for packages.  If you don't already know how to do this, here are some options
 that you might use to get your path set up.  The best way is to set the appropriate environment variable so that Python
-looks in the right place for bornagain.  If you are using the bash shell, you can do the following:
+looks in the right place for reborn.  If you are using the bash shell, you can do the following:
 
 .. code-block:: bash
 
-    export PYTHONPATH=$PYTHONPATH:example/path/to/bornagain/repository
+    export PYTHONPATH=$PYTHONPATH:example/path/to/reborn/repository
 
 If you don't want to do the above every time you open a terminal, you can add this line to your `bash startup script
 <https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html>`_.
 
-As an alternative to the above, you can make a symbolic link to the bornagain package in the same directory where you
+As an alternative to the above, you can make a symbolic link to the reborn package in the same directory where you
 are running your script.  For example:
 
 .. code-block:: bash
 
-    ln -s example/path/to/bornagain/repository/bornagain path/to/where/your/script/is/located
+    ln -s example/path/to/reborn/repository/reborn path/to/where/your/script/is/located
 
-If you wish, you can also install bornagain:
+If you wish, you can also install reborn:
 
 .. code-block:: bash
 
@@ -143,7 +143,7 @@ You can simply move into the test directory and run pytest:
 
 .. code-block:: bash
 
-    cd path/to/bornagain/repository
+    cd path/to/reborn/repository
     cd test
     pytest
 
@@ -153,7 +153,7 @@ With some luck, you will get a nice clean output from pytest that looks like the
 
     ============================= test session starts ==============================
     platform darwin -- Python 3.6.7, pytest-3.9.3, py-1.7.0, pluggy-0.8.0
-    rootdir: /Users/rkirian/work/projects/bornagain/test, inifile:collected 36 items
+    rootdir: /Users/rkirian/work/projects/reborn/test, inifile:collected 36 items
 
     test_analysis.py ..                                                      [  5%]
     test_clcore.py .....                                                     [ 19%]

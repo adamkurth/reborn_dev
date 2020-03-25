@@ -1,4 +1,4 @@
-name: bornagain
+name: reborn
 channels:
   - conda-forge
 dependencies:

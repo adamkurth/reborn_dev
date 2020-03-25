@@ -2,11 +2,11 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 
-from bornagain.simulate.examples import lysozyme_pdb_file, psi_pdb_file
-from bornagain.target import crystal, density
+from reborn.simulate.examples import lysozyme_pdb_file, psi_pdb_file
+from reborn.target import crystal, density
 
 # try:
-#     from bornagain.target import density_f
+#     from reborn.target import density_f
 # except ImportError:
 #     density_f = None
 

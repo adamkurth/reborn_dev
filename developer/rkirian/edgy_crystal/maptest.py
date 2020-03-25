@@ -1,12 +1,12 @@
 import numpy as np
-from bornagain.target import crystal
-from bornagain.simulate import clcore, atoms
+from reborn.target import crystal
+from reborn.simulate import clcore, atoms
 import pyqtgraph as pg
 from scipy import constants
 
 # The CrystalStructure object has a UnitCell, SpaceGroup, and other information.  The input can be any path to a PDB
 # file or it can be the name of a PDB entry.  The PDB will be fetched from the web if necessary and possible.  The
-# PDB entry 2LYZ comes with bornagain.
+# PDB entry 2LYZ comes with reborn.
 cryst = crystal.CrystalStructure('2LYZ')
 
 # The oversampling ratio:

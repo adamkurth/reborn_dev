@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import xraylib
 import pyqtgraph as pg
-from bornagain.detector import tiled_pad_geometry_list
-from bornagain.source import Beam
-from bornagain.target.crystal import FiniteLattice, UnitCell, CrystalStructure, pdb_to_dict
-from bornagain.viewers.qtviews import PADView, Scatter3D
-from bornagain.simulate.atoms import xraylib_scattering_factors, atomic_symbols_to_numbers
-from bornagain.simulate.clcore import ClCore
-from bornagain.utils import max_pair_distance
+from reborn.detector import tiled_pad_geometry_list
+from reborn.source import Beam
+from reborn.target.crystal import FiniteLattice, UnitCell, CrystalStructure, pdb_to_dict
+from reborn.viewers.qtviews import PADView, Scatter3D
+from reborn.simulate.atoms import xraylib_scattering_factors, atomic_symbols_to_numbers
+from reborn.simulate.clcore import ClCore
+from reborn.utils import max_pair_distance
 import scipy.constants as const
 from scipy.spatial.transform import Rotation
 

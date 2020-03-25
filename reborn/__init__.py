@@ -1,5 +1,5 @@
 r"""
-This is the documentation for the bornagain package.
+This is the documentation for the reborn package.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -33,7 +33,7 @@ def set_global(option, value):
     'force_depreciated' (True/False)    Like 'warn_depreciated' but raise RunTimeError instead of warn.
     'verbose' (True/False)              Attempt to print useful information
     'debug' (integer):                  This is intended for developers.  If the argument is 0,
-                                        bornagain will run as usual.  The other numbers will have some
+                                        reborn will run as usual.  The other numbers will have some
                                         special meaning that is not yet defined.
     ==================================  ================================================================
 
@@ -67,27 +67,27 @@ def docs():
 
     r"""
 
-    Open the bornagain documentation in a web browser (if available).
+    Open the reborn documentation in a web browser (if available).
 
     """
 
     import os
     import pkg_resources
 
-    docs_file_path = pkg_resources.resource_filename('bornagain', '')
+    docs_file_path = pkg_resources.resource_filename('reborn', '')
     docs_file_path = os.path.join(docs_file_path, '..', 'doc', 'html', 'index.html')
 
     if os.path.exists(docs_file_path):
         docs_file_path = 'file://' + docs_file_path
     else:
-        docs_file_path = 'https://rkirian.gitlab.io/bornagain'
+        docs_file_path = 'https://rkirian.gitlab.io/reborn'
 
     try:
         import webbrowser
     except ImportError:
         print("Can't open docs because you need to install the webbrowser Python package.")
         print("If using conda, perhaps you could run 'conda install webbrowser'")
-        print('You can otherwise point your webbrowser to https://rkirian.gitlab.io/bornagain')
+        print('You can otherwise point your webbrowser to https://rkirian.gitlab.io/reborn')
         return
 
     webbrowser.open('file://' + docs_file_path)

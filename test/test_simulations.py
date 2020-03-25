@@ -1,9 +1,9 @@
 import numpy as np
-from bornagain.simulate.clcore import ClCore
-from bornagain import detector
-from bornagain import source
-from bornagain.simulate.examples import lysozyme_pdb_file
-from bornagain.target import crystal
+from reborn.simulate.clcore import ClCore
+from reborn import detector
+from reborn import source
+from reborn.simulate.examples import lysozyme_pdb_file
+from reborn.target import crystal
 from scipy import constants as const
 
 hc = const.h*const.c
@@ -74,7 +74,7 @@ def test_density_map_fft_vs_direct_sum():
 
     # The CrystalStructure object has a UnitCell, SpaceGroup, and other information.  The input can be any path to a PDB
     # file or it can be the name of a PDB entry.  The PDB will be fetched from the web if necessary and possible.  Some
-    # PDB entries (e.g. 2LYZ, 4ET8) come with bornagain.
+    # PDB entries (e.g. 2LYZ, 4ET8) come with reborn.
     cryst = crystal.CrystalStructure('2LYZ')
     cryst = crystal.CrystalStructure('4ET8')
 
@@ -143,7 +143,7 @@ def test_density_map_fft_vs_direct_sum_trilinear():
 
     # The CrystalStructure object has a UnitCell, SpaceGroup, and other information.  The input can be any path to a PDB
     # file or it can be the name of a PDB entry.  The PDB will be fetched from the web if necessary and possible.  Some
-    # PDB entries (e.g. 2LYZ, 4ET8) come with bornagain.
+    # PDB entries (e.g. 2LYZ, 4ET8) come with reborn.
     cryst = crystal.CrystalStructure('4ET8')
 
     # The oversampling ratio:

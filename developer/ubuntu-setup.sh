@@ -7,5 +7,5 @@ bash miniconda.sh -b -p miniconda
 export PATH=./miniconda/bin:$PATH
 conda update -n base -c defaults conda
 conda env create -f environment.yml
-source activate bornagain
+source activate reborn
 python setup.py develop

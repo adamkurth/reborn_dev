@@ -1,5 +1,5 @@
 import numpy as np
-from bornagain.target import crystal
+from reborn.target import crystal
 
 
 def test_nonzero_u_vec():

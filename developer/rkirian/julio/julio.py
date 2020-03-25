@@ -17,15 +17,15 @@ if not deluxe:
     # This chunk simply gets the q-vectors
     ###################################################################
 
-    from bornagain.detector import PADGeometry
+    from reborn.detector import PADGeometry
 
-    # Everything in bornagain is SI units
+    # Everything in reborn is SI units
     detector_distance = 0.07
     pixel_size = 110e-6
     beam_direction = [0, 0, 1]
     n_pixels = 256
 
-    # Create an instance of a bornagain pixel-array detector (PAD) geometry class
+    # Create an instance of a reborn pixel-array detector (PAD) geometry class
     pad = PADGeometry(shape=[n_pixels, n_pixels], pixel_size=pixel_size, distance=detector_distance)
     q_vecs = pad.q_vecs(beam=beam_direction)
     # If the only thing you need are q-vectors (2*pi/lambda) then we are done.  The above is an N^2x3 array, where N is
@@ -38,18 +38,18 @@ if deluxe:
     ########################################################################
 
     import numpy as np
-    from bornagain.detector import PADGeometry
-    from bornagain.source import Beam
-    from bornagain.target.crystal import CrystalStructure
-    from bornagain.viewers.qtviews import PADView
-    from bornagain.simulate.atoms import xraylib_scattering_factors
-    from bornagain.simulate.clcore import ClCore
+    from reborn.detector import PADGeometry
+    from reborn.source import Beam
+    from reborn.target.crystal import CrystalStructure
+    from reborn.viewers.qtviews import PADView
+    from reborn.simulate.atoms import xraylib_scattering_factors
+    from reborn.simulate.clcore import ClCore
     import scipy.constants as const
 
     eV = const.value('electron volt')
     r_e = const.value('classical electron radius')
 
-    # Everything in bornagain is SI units
+    # Everything in reborn is SI units
     photon_energy = 9000 * eV  # Joules
     detector_distance = 0.03  # Meters
     pulse_energy = 200e-3  # Joules

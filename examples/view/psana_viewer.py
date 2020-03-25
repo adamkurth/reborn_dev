@@ -7,10 +7,10 @@ import sys
 import argparse
 import psana
 # import numpy as np
-import bornagain
-from bornagain.viewers.qtviews import PADView
-from bornagain.external import crystfel, lcls, cheetah
-from bornagain.fileio.getters import FrameGetter
+import reborn
+from reborn.viewers.qtviews import PADView
+from reborn.external import crystfel, lcls, cheetah
+from reborn.fileio.getters import FrameGetter
 
 
 def error(message):

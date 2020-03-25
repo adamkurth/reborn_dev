@@ -16,7 +16,7 @@ class MultiHistogramLUTWidget(pg.GraphicsView):
 
     r"""
     This is the equivalent of :class:`pyqtgraph.HistogramLUTWidget`, but wraps
-    :class:`MultiHistogramLUTWidget <bornagain.external.pyqtgraph.MultiHistogramLUTItem>` instead of
+    :class:`MultiHistogramLUTWidget <reborn.external.pyqtgraph.MultiHistogramLUTItem>` instead of
     :class:`pyqtgraph.HistogramLUTItem`.
     """
 
@@ -48,7 +48,7 @@ class MultiHistogramLUTWidget(pg.GraphicsView):
 class MultiHistogramLUTItem(pg.HistogramLUTItem):
 
     r"""
-    This is a bornagain extension to the :class:`pyqtgraph.HistogramLUTItem` that allows control
+    This is a reborn extension to the :class:`pyqtgraph.HistogramLUTItem` that allows control
     over multiple images. The main feature is the
     addition of the :func:`setImageItems` method.
 

@@ -27,7 +27,7 @@ __pycache__
 .idea
 *~
 .adxv*
-doc/source/bornagain.*
+doc/source/reborn.*
 doc/html
 doc/source/api
 developer/rkirian/data

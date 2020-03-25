@@ -1,6 +1,6 @@
 import numpy as np
-from bornagain.target import crystal
-from bornagain.simulate.examples import lysozyme_pdb_file, psi_pdb_file
+from reborn.target import crystal
+from reborn.simulate.examples import lysozyme_pdb_file, psi_pdb_file
 
 
 def test_read_pdb():

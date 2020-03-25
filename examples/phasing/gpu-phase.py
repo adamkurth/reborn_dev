@@ -10,9 +10,9 @@ else:
 
 import matplotlib.pyplot as plt
 
-# from bornagain import units
-from bornagain.viewers import qtviews
-from bornagain.target import crystal
+# from reborn import units
+from reborn.viewers import qtviews
+from reborn.target import crystal
 
 hc = constants.h*constants.c
 

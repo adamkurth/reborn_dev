@@ -1,4 +1,4 @@
-from bornagain import utils
+from reborn import utils
 import numpy as np
 
 # The usage of N_data and N_pattern in some of the tests below can be interpreted as:

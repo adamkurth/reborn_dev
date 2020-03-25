@@ -2,10 +2,10 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import pkg_resources
 import numpy as np
-from bornagain.utils import memoize
+from reborn.utils import memoize
 # import matplotlib.pyplot as plt
 
-file_name = pkg_resources.resource_filename('bornagain', 'data/scatter/water_scattering_data.txt')
+file_name = pkg_resources.resource_filename('reborn', 'data/scatter/water_scattering_data.txt')
 
 
 

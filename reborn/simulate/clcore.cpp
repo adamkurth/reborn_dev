@@ -382,7 +382,7 @@ kernel void phase_factor_pad(
 // This variant internally computes scattering vectors corresponding to a regular 3D grid.
 // Grid points are computed according to the formula:
 //     q_n = n*dq + q_min
-// where n is the array index (staring with zero) for a given axis (x, y, z).  In the usual bornagain
+// where n is the array index (staring with zero) for a given axis (x, y, z).  In the usual reborn
 // standard, we should compute dq according to the formula
 //     dq = (q_max - q_min)/(N-1)
 kernel void phase_factor_mesh(

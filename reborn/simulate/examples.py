@@ -9,60 +9,60 @@ Don't build any of this into your code.
 import pkg_resources
 import numpy as np
 from scipy.spatial.transform import Rotation
-import bornagain as ba
-from bornagain import detector
-from bornagain.utils import warn, rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance
-import bornagain.external.crystfel
-from bornagain.simulate import atoms
-from bornagain.target.crystal import CrystalStructure
-from bornagain.simulate.clcore import ClCore
+import reborn as ba
+from reborn import detector
+from reborn.utils import warn, rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance
+import reborn.external.crystfel
+from reborn.simulate import atoms
+from reborn.target.crystal import CrystalStructure
+from reborn.simulate.clcore import ClCore
 from scipy import constants as const
 
 hc = const.h*const.c
 r_e = const.value('classical electron radius')
 
-lysozyme_pdb_file = pkg_resources.resource_filename('bornagain', 'data/pdb/2LYZ.pdb')
-psi_pdb_file = pkg_resources.resource_filename('bornagain', 'data/pdb/1jb0.pdb')
-pnccd_geom_file = pkg_resources.resource_filename('bornagain', 'data/geom/pnccd_front.geom')
-cspad_geom_file = pkg_resources.resource_filename('bornagain', 'data/geom/cspad.geom')
+lysozyme_pdb_file = pkg_resources.resource_filename('reborn', 'data/pdb/2LYZ.pdb')
+psi_pdb_file = pkg_resources.resource_filename('reborn', 'data/pdb/1jb0.pdb')
+pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front.geom')
+cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad.geom')
 
 
 def pnccd_pads():
 
     r"""
 
-    Generate a list of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances that are inspired by
+    Generate a list of :class:`PADGeometry <reborn.detector.PADGeometry>` instances that are inspired by
     the `pnCCD <https://doi.org/10.1016/j.nima.2009.12.053>`_ detector.
 
-    Returns: List of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances.
+    Returns: List of :class:`PADGeometry <reborn.detector.PADGeometry>` instances.
 
     """
 
-    return bornagain.external.crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
+    return reborn.external.crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
 
 
 def cspad_pads():
 
     r"""
 
-    Generate a list of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances that are inspired by
+    Generate a list of :class:`PADGeometry <reborn.detector.PADGeometry>` instances that are inspired by
     the `CSPAD <http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-15284.pdf>`_ detector.
 
-    Returns: List of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances.
+    Returns: List of :class:`PADGeometry <reborn.detector.PADGeometry>` instances.
 
     """
 
-    return bornagain.external.crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+    return reborn.external.crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
 
 def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=True):
 
     r"""
 
-    Simple simulation of lysozyme molecule using :class:`ClCore <bornagain.simulate.clcore.ClCore>`.
+    Simple simulation of lysozyme molecule using :class:`ClCore <reborn.simulate.clcore.ClCore>`.
 
     Arguments:
-        pad_geometry: List of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances.
+        pad_geometry: List of :class:`PADGeometry <reborn.detector.PADGeometry>` instances.
         wavelength: As always, in SI units.
         random_rotation: If True generate a random rotation.  Default is True.
 
@@ -73,7 +73,7 @@ def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=Tru
     photon_energy = hc / wavelength
 
     if pad_geometry is None:
-        pad_geometry = bornagain.external.crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+        pad_geometry = reborn.external.crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
     sim = ClCore(group_size=32, double_precision=False)
 
@@ -113,7 +113,7 @@ class PDBMoleculeSimulator(object):
 
         Arguments:
             pdb_file: path to a pdb file
-            pad_geometry: array of :class:`PADGeometry <bornagain.detector.PADGeometry>` intances
+            pad_geometry: array of :class:`PADGeometry <reborn.detector.PADGeometry>` intances
             wavelength: in SI units of course
             random_rotation (bool): True or False
         """
@@ -122,7 +122,7 @@ class PDBMoleculeSimulator(object):
             pdb_file = lysozyme_pdb_file
 
         if pad_geometry is None:
-            pad_geometry = bornagain.external.crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+            pad_geometry = reborn.external.crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
         photon_energy = hc / wavelength
 
@@ -226,16 +226,16 @@ class CrystalSimulatorV1(object):
         r"""
 
         Arguments:
-            pad_geometry (list of :class:`PADGeometry <bornagain.detector.PADGeometry>` instances): PAD geometry.
-            beam (:class:`Beam <bornagain.source.Beam>`): A beam instance.
-            crystal_structure (:class:`CrystalStructure <bornagain.target.crystal.CrystalStructure>`): A crystal
+            pad_geometry (list of :class:`PADGeometry <reborn.detector.PADGeometry>` instances): PAD geometry.
+            beam (:class:`Beam <reborn.source.Beam>`): A beam instance.
+            crystal_structure (:class:`CrystalStructure <reborn.target.crystal.CrystalStructure>`): A crystal
                               structure.
             n_iterations (int): Number of iterations to average over
             approximate_shape_transform (bool): Use a Gaussian approximation to shape transforms, else use the analytic
                                          parallelepiped shape transform formula.
             expand_symmetry (bool): Duplicate the asymmetric unit according to spacegroup symmetry in crystal_structure.
             cl_double_precision (bool): Use double precision if available on GPU device.
-            cl_group_size (int): GPU group size (see the :class:`ClCore <bornagain.simulate.clcore.ClCore>` class).
+            cl_group_size (int): GPU group size (see the :class:`ClCore <reborn.simulate.clcore.ClCore>` class).
             poisson_noise (bool): Add Poisson noise to the resulting pattern.
 
         """

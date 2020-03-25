@@ -1,5 +1,5 @@
 import numpy as np
-from bornagain import simulate as sim
+from reborn import simulate as sim
 from scipy import constants as const
 
 eV = const.value('electron volt')

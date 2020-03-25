@@ -1,5 +1,5 @@
 """
-Test the clcore simulation engine in bornagain.simulate. 
+Test the clcore simulation engine in reborn.simulate. 
 > python test_simulate_clcore.py
 If you want to view results just add the keyword "view" 
 > python test_simulate_clcore.py view
@@ -10,11 +10,11 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 sys.path.append('..')
 import numpy as np
-import bornagain as ba
-from bornagain import utils
+import reborn as ba
+from reborn import utils
 
 # try:
-from bornagain.simulate import clcore
+from reborn.simulate import clcore
 # import pyopencl
 from pyopencl import array as clarray
 cl_array = clarray.Array
@@ -32,8 +32,8 @@ ctx = clcore.create_some_gpu_context()
 #     pyopencl = None
 #     havecl = False
 
-import bornagain.simulate.numbacore as numbacore
-from bornagain.utils import rotation_about_axis
+import reborn.simulate.numbacore as numbacore
+from reborn.utils import rotation_about_axis
 
 view = False
 

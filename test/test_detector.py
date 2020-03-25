@@ -3,9 +3,9 @@
 import sys
 
 sys.path.append('..')
-import bornagain as ba
-from bornagain import detector
-from bornagain import source
+import reborn as ba
+from reborn import detector
+from reborn import source
 import numpy as np
 
 

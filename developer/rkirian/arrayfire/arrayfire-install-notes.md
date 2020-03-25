@@ -76,12 +76,12 @@ export CPPFLAGS="-I/usr/local/opt/libomp/include $CPPFLAGS"
 
 
 
-mkdir ~/miniconda3/envs/bornagain3/share/arrayfire
+mkdir ~/miniconda3/envs/reborn3/share/arrayfire
 cmake .. -DCMAKE_BUILD_TYPE=Release -DAF_BUILD_CUDA=OFF -DAF_BUILD_OPENCL=ON -DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/local/opt/libomp/lib/libomp.dylib
 make -j6
-cmake .. -DCMAKE_INSTALL_PREFIX=~/miniconda3/envs/bornagain3/share/arrayfire  
+cmake .. -DCMAKE_INSTALL_PREFIX=~/miniconda3/envs/reborn3/share/arrayfire  
 make install
-export DYLD_LIBRARY_PATH=~/miniconda3/envs/bornagain3/share/arrayfire/lib:$DYLD_LIBRARY_PATH
+export DYLD_LIBRARY_PATH=~/miniconda3/envs/reborn3/share/arrayfire/lib:$DYLD_LIBRARY_PATH
 make test         # see test issues below
 
 
@@ -127,7 +127,7 @@ CUDA_TOOLKIT_ROOT_DIR not found or specified
 -- Found OpenCL: /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/OpenCL.framework (found version "1.2") 
 -- Configuring done
 -- Generating done
--- Build files have been written to: /Users/rkirian/work/projects/bornagain/ignore_rick/arrayfire/install1/arrayfire/build
+-- Build files have been written to: /Users/rkirian/work/projects/reborn/ignore_rick/arrayfire/install1/arrayfire/build
 
 
 

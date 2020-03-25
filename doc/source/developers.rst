@@ -41,7 +41,7 @@ base directory of the git repo, do this
 
 .. code-block:: bash
 
-    pep8 bornagain
+    pep8 reborn
     
 For simple errors like whitespace, you can use autopep8:
 
@@ -55,9 +55,9 @@ For other problems you'll need to fix things by hand.  We aim to have no errors 
 Testing
 -------
 
-We use `pytest <http://doc.pytest.org/>`_ to test the bornagain codebase.  It is very simple to make a new test.
+We use `pytest <http://doc.pytest.org/>`_ to test the reborn codebase.  It is very simple to make a new test.
 
-1) Create a file that has a name that beginning with `test_` in the bornagain/test directory
+1) Create a file that has a name that beginning with `test_` in the reborn/test directory
 2) Within this file, write functions with names that begin with `test_`
 3) Within those functions, include assert statements.
 4) Run pytest in the test directory, and all tests will run.
@@ -72,7 +72,7 @@ the formatting consistent by adhering to the Google-style doc strings.
 
 If you modify code and wish to update this documentation, the easiest way to do so is to run the script
 "update-documentation.sh" from within the doc directory.  First make sure you have all of the appropriate dependencies,
-because sphinx must be able to import all of the bornagain modules in order to auto-generate module/package
+because sphinx must be able to import all of the reborn modules in order to auto-generate module/package
 documentation.
 
 Speeding up code with numba and f2py

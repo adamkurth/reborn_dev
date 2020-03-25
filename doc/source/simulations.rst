@@ -3,14 +3,14 @@ Simulations
 
 TODO: Document the simulation code...
 
-Currently, all GPU simulation utilities in bornagain utilize the pyopencl package.  You can check if opencl is installed correctly 
-and find specific information about available compute devices with the :func:`help() <bornagain.simulate.clcore.help>` function.  
+Currently, all GPU simulation utilities in reborn utilize the pyopencl package.  You can check if opencl is installed correctly 
+and find specific information about available compute devices with the :func:`help() <reborn.simulate.clcore.help>` function.  
 In principle, the pyopencl package also allows the use of CPU computing, but
 none of the code has been written with that in mind thus far.  If it is needed
 we can explore that option. 
 
 The basic simulation functions are accessed by creating an instance of the
-:class:`ClCore <bornagain.simulate.clcore.ClCore>` class.  This class is meant to do some of the following
+:class:`ClCore <reborn.simulate.clcore.ClCore>` class.  This class is meant to do some of the following
 
 - maintain an opencl context and queue
 - manage the compute group size
@@ -21,13 +21,13 @@ The above model seems to work well when using a single GPU device, but note that
 make use of multiple GPU devices (this might be easy to do, but we've not had a need thus far).
 
 Aside from managing how the GPU device is used, the
-:class:`ClCore <bornagain.simulate.clcore.ClCore>` class is meant to provide only the basic building blocks for
-simulations, in the form of simple functions.  :class:`ClCore <bornagain.simulate.clcore.ClCore>` it is not meant to
+:class:`ClCore <reborn.simulate.clcore.ClCore>` class is meant to provide only the basic building blocks for
+simulations, in the form of simple functions.  :class:`ClCore <reborn.simulate.clcore.ClCore>` it is not meant to
 manage data arrays; you should make a specialized subclass for any specialized memory management.  (At the moment, there
-are some methods within :class:`ClCore <bornagain.simulate.clcore.ClCore>` that manage data arrays,
+are some methods within :class:`ClCore <reborn.simulate.clcore.ClCore>` that manage data arrays,
 but they will be depreciated and moved to subclasses.)
 
-Most of the methods in the :class:`ClCore <bornagain.simulate.clcore.ClCore>` class are dedicated to computing the sum
+Most of the methods in the :class:`ClCore <reborn.simulate.clcore.ClCore>` class are dedicated to computing the sum
 
     :math:`F(\vec{q}) = \sum_n f_n(q)e^{i\vec{q}\cdot\vec{r}_n}`
 
@@ -40,7 +40,7 @@ rather than getting them from global memory, and another variant computes the :m
 grid.  In the case that you compute :math:`F(\vec{q})` on a 3D grid, there is a corresponding function that can perform
 interpolations such that you can sample :math:`F(\vec{q})` at any :math:`\vec{q}` that lies within the grid.
 
-The methods in :class:`ClCore <bornagain.simulate.clcore.ClCore>` allow you to pass in CPU arrays and retrieve CPU
+The methods in :class:`ClCore <reborn.simulate.clcore.ClCore>` allow you to pass in CPU arrays and retrieve CPU
 arrays in return.  
 That is the simplest way to to GPU compuations since you can just use the methods without ever
 thinking about memory.  However, the bottleneck in GPU computations is often due to moving memory between devices.

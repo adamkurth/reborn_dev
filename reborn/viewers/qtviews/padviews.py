@@ -6,18 +6,18 @@ from time import time
 import pickle
 import numpy as np
 import pkg_resources
-import bornagain
-from bornagain.detector import PADGeometry
-from bornagain.fileio.getters import FrameGetter
-from bornagain.analysis.peaks import boxsnr, PeakFinder
+import reborn
+from reborn.detector import PADGeometry
+from reborn.fileio.getters import FrameGetter
+from reborn.analysis.peaks import boxsnr, PeakFinder
 # We are using pyqtgraph's wrapper for pyqt because it helps deal with the different APIs in pyqt5 and pyqt4...
 import pyqtgraph as pg
 from pyqtgraph.Qt import uic, QtGui, QtCore #, QtWidgets
 from pyqtgraph import ImageItem
-# from bornagain.external.pyqtgraph import ImageItem
+# from reborn.external.pyqtgraph import ImageItem
 
-padviewui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'padview.ui')
-snrconfigui = pkg_resources.resource_filename('bornagain.viewers.qtviews', 'configs.ui')
+padviewui = pkg_resources.resource_filename('reborn.viewers.qtviews', 'padview.ui')
+snrconfigui = pkg_resources.resource_filename('reborn.viewers.qtviews', 'configs.ui')
 
 
 def write(msg):
@@ -605,7 +605,7 @@ class PADView(object):
                 n_pixels = int(str(text).strip())
 
         for i in range(len(self.mask_data)):
-            self.mask_data[i] *= bornagain.detector.edge_mask(self.mask_data[i], n_pixels)
+            self.mask_data[i] *= reborn.detector.edge_mask(self.mask_data[i], n_pixels)
 
         self.update_masks()
 

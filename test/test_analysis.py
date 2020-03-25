@@ -1,11 +1,11 @@
 import numpy as np
-from bornagain.fortran import peaks_f
+from reborn.fortran import peaks_f
 
 
 def test_fortran():
 
     # try:
-    #     from bornagain.analysis import peaks_f
+    #     from reborn.analysis import peaks_f
     # except ImportError:
     #     return
 

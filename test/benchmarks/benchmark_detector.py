@@ -1,6 +1,6 @@
-import bornagain
+import reborn
 from time import time
-pad = bornagain.detector.PADGeometry(pixel_size=100e-6, distance=0.05, n_pixels=1000)
+pad = reborn.detector.PADGeometry(pixel_size=100e-6, distance=0.05, n_pixels=1000)
 
 n_iter = 10
 

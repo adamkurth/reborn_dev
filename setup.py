@@ -19,13 +19,13 @@ ext_modules = list()
 
 f2py_macros = [('NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION', '')]
 ext_modules.append(Extension(
-      name='bornagain.fortran.interpolations_f',
-      sources=['bornagain/fortran/interpolations.f90'],
+      name='reborn.fortran.interpolations_f',
+      sources=['reborn/fortran/interpolations.f90'],
       define_macros=f2py_macros
       ))
 ext_modules.append(Extension(
-      name='bornagain.fortran.peaks_f',
-      sources=['bornagain/fortran/peaks.f90'],
+      name='reborn.fortran.peaks_f',
+      sources=['reborn/fortran/peaks.f90'],
       define_macros=f2py_macros
       # f2py_options=[],
       # define_macros=[('F2PY_REPORT_ON_ARRAY_COPY', '1')],
@@ -35,25 +35,25 @@ ext_modules.append(Extension(
       # extra_link_args=[],
       ))
 ext_modules.append(Extension(
-      name='bornagain.fortran.wtf_f',
-      sources=['bornagain/fortran/wtf.f90'],
+      name='reborn.fortran.wtf_f',
+      sources=['reborn/fortran/wtf.f90'],
       define_macros=f2py_macros
       ))
 ext_modules.append(Extension(
-      name='bornagain.fortran.density_f',
-      sources=['bornagain/fortran/density.f90'],
+      name='reborn.fortran.density_f',
+      sources=['reborn/fortran/density.f90'],
       define_macros=f2py_macros
       ))
 
-setup(name='bornagain',
+setup(name='reborn',
       version=datetime.date.today().strftime('%Y.%m.%d'),
       description='Diffraction analysis and simulation utilities',
       # long_description=readme,
       # long_description_content_type="text/markdown",
       author='Richard A. Kirian',
       author_email='rkirian@asu.edu',
-      url='https://rkirian.gitlab.io/bornagain',
-      # package_dir={'bornagain': find_packages()},
+      url='https://rkirian.gitlab.io/reborn',
+      # package_dir={'reborn': find_packages()},
       packages=find_packages(),
       ext_modules=ext_modules,
       install_requires=requirements,

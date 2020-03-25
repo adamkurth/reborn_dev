@@ -3,7 +3,7 @@ from time import time
 import numpy as np
 from numpy.fft import fftn, ifftn
 import pyqtgraph as pg
-from bornagain.target import crystal, density
+from reborn.target import crystal, density
 
 beta = 0.90        # Difference Map parameter
 gamma_s = -1/beta  # Difference Map parameter

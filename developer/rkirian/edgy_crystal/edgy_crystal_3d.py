@@ -2,9 +2,9 @@ import sys
 from time import time
 import numpy as np
 from numpy.fft import fftn, ifftn, fftshift, ifftshift
-from bornagain.simulate.clcore import ClCore
-from bornagain.target import crystal
-from bornagain.viewers.qtviews import Scatter3D, bright_colors, PADView, MapProjection, MapSlices, view_finite_crystal
+from reborn.simulate.clcore import ClCore
+from reborn.target import crystal
+from reborn.viewers.qtviews import Scatter3D, bright_colors, PADView, MapProjection, MapSlices, view_finite_crystal
 import scipy.constants as const
 import argparse
 

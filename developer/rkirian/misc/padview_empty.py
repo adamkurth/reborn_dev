@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../..')
 
-from bornagain.viewers.qtviews import PADView
+from reborn.viewers.qtviews import PADView
 
 padview = PADView()
 padview.start()

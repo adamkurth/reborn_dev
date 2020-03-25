@@ -10,7 +10,7 @@ Pixel-Array Detectors
 
     Schematic of a Pixel-Array Detector.
 
-The :class:`PADGeometry <bornagain.detector.PADGeometry>` class contains the data and methods needed to deal
+The :class:`PADGeometry <reborn.detector.PADGeometry>` class contains the data and methods needed to deal
 with "pixel-array detectors" (PADs).  This detector is assumed to consist of an orthogonal 2D grid of
 pixels.  We specify the locations of detector pixels with respect to an arbitrary origin that is also
 understood to the origin of the coordinates of the object that creates the diffraction pattern.  Note that we always
@@ -82,7 +82,7 @@ where the vector normal to the PAD is
 
     \hat{n} = \frac{\vec{f}\times\vec{s}}{|\vec{f}\times\vec{s}|}
 
-The :class:`PADGeometry <bornagain.detector.PADGeometry>` class can currently generate the above quantities for you, along with other helpful functions.
+The :class:`PADGeometry <reborn.detector.PADGeometry>` class can currently generate the above quantities for you, along with other helpful functions.
 
 
 Data and geometry formats
@@ -94,15 +94,15 @@ detector pixel.  Actually, our task is two-fold:
 1) Transform the data found on disk or in memory to numpy arrays.
 2) Determine the 3D positions corresponding to the elements of the numpy arrays.
 
-The :class:`PADGeometry <bornagain.detector.PADGeometry>` class contains methods for dealing with step (2), but
+The :class:`PADGeometry <reborn.detector.PADGeometry>` class contains methods for dealing with step (2), but
 does not have any involvement in step (1).  Step (1) is often a messy process that requires specialized code (see the
 geometry confusion commentary below), and we have made no effort to standardize that process.  In some cases there
 are standard libraries for reading files, but XFEL data often requires customized code.  However, once you have a
-:class:`PADGeometry <bornagain.detector.PADGeometry>` instance along with corresponding numpy arrays, your analsis code
+:class:`PADGeometry <reborn.detector.PADGeometry>` instance along with corresponding numpy arrays, your analsis code
 can be written in a source-agnostic way.
 
 Since XFELs tend to use multiple PADs, you should develop code that can work with lists of
-:class:`PADGeometry <bornagain.detector.PADGeometry>` instances rather than a single one. You can still do vectorized
+:class:`PADGeometry <reborn.detector.PADGeometry>` instances rather than a single one. You can still do vectorized
 operations on all panels at once with the numpy ravel function.  TODO: add examples of ravel.
 
 
@@ -121,14 +121,14 @@ information about...
 - how programs like indexamajig should treat the data (e.g. the `no_index` card)
 
 If you want to read in the complete information from a geom file you can convert it to a python dictionary using the
-:func:`load_crystfel_geometry() <bornagain.external.crystfel.load_crystfel_geometry>` function, which is just a wrapper
+:func:`load_crystfel_geometry() <reborn.external.crystfel.load_crystfel_geometry>` function, which is just a wrapper
 for the corresponding function in the `cfelpyutils <https://pypi.org/project/cfelpyutils/>`_ package.
 
 Importantly, geom files contain the three principal vectors (:math:`\vec{s}`, :math:`\vec{s}`, :math:`\vec{s}`) that
-bornagain uses to specify PAD geometry, although it may not be obvious at first glance when you look into the geom file.
+reborn uses to specify PAD geometry, although it may not be obvious at first glance when you look into the geom file.
 If you just want that information, you can use a geom file to generate a list of
-:class:`PADGeometry <bornagain.detector.PADGeometry>` instances via the
-:func:`geometry_file_to_pad_geometry_list() <bornagain.external.crystfel.geometry_file_to_pad_geometry_list>` function.
+:class:`PADGeometry <reborn.detector.PADGeometry>` instances via the
+:func:`geometry_file_to_pad_geometry_list() <reborn.external.crystfel.geometry_file_to_pad_geometry_list>` function.
 
 A note on detector geometry confusion
 -------------------------------------

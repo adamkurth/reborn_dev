@@ -10,7 +10,7 @@ import os
 import numpy as np
 
 from .. import detector
-from bornagain.fileio.getters import FrameGetter
+from reborn.fileio.getters import FrameGetter
 from cfelpyutils import crystfel_utils
 from scipy import constants as const
 
@@ -47,7 +47,7 @@ def load_crystfel_geometry(geometry_file):
 def geometry_dict_to_pad_geometry_list(geometry_dict):
 
     r"""
-    Given a CrystFEL geometry dictionary, create a list of `:class:<bornagain.geometry.PADGeometry` objects.
+    Given a CrystFEL geometry dictionary, create a list of `:class:<reborn.geometry.PADGeometry` objects.
     This will also append the name of the panel to the PADGeometry instance.
 
     Arguments:
@@ -112,7 +112,7 @@ def extract_geom_from_stream(stream_path, geom_path=None):
 def geometry_file_to_pad_geometry_list(geometry_file):
 
     r"""
-    Given a CrystFEL geometry file, create a list of `:class:<bornagain.geometry.PADGeometry` objects.  This will also
+    Given a CrystFEL geometry file, create a list of `:class:<reborn.geometry.PADGeometry` objects.  This will also
     append extra crystfel-specific items like fsx, max_fs, etc.
 
     Arguments:

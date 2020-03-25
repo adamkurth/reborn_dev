@@ -1,11 +1,11 @@
 import numpy as np
 from numpy.fft import fftn, ifftn, fftshift, ifftshift
 import pyqtgraph as pg
-from bornagain import source
-from bornagain.simulate.clcore import ClCore
-from bornagain.simulate.examples import psi_pdb_file, lysozyme_pdb_file
-from bornagain.target import crystal
-from bornagain.external.pyqtgraph import keep_open
+from reborn import source
+from reborn.simulate.clcore import ClCore
+from reborn.simulate.examples import psi_pdb_file, lysozyme_pdb_file
+from reborn.target import crystal
+from reborn.external.pyqtgraph import keep_open
 import scipy.constants as const
 eV = const.value('electron volt')
 r_e = const.value("classical electron radius")

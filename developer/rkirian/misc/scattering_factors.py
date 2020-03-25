@@ -1,6 +1,6 @@
 import xraylib
 import numpy as np
-from bornagain.simulate import atoms
+from reborn.simulate import atoms
 import matplotlib.pyplot as plt
 import scipy.constants as const
 h = const.h

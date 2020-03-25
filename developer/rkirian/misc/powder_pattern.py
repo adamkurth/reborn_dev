@@ -1,10 +1,10 @@
 import h5py
 import numpy as np
 import pyqtgraph as pg
-from bornagain.detector import RadialProfiler
-from bornagain.source import Beam
-from bornagain.external import crystfel
-from bornagain.viewers.qtviews.padviews import PADView
+from reborn.detector import RadialProfiler
+from reborn.source import Beam
+from reborn.external import crystfel
+from reborn.viewers.qtviews.padviews import PADView
 
 import scipy.constants as const
 

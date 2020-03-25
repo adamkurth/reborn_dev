@@ -1,5 +1,5 @@
 import numpy as np
-from bornagain.simulate import clcore
+from reborn.simulate import clcore
 
 
 # def test_no_atomic_form_factor():

@@ -3,15 +3,15 @@
 Numpy
 =====
 
-Numpy is the most important Python package that bornagain uses when working with arrays.  Below are a few declarations
-that are meant to resolve possible ambiguities when using numpy arrays within the bornagain framework.  Users who are
+Numpy is the most important Python package that reborn uses when working with arrays.  Below are a few declarations
+that are meant to resolve possible ambiguities when using numpy arrays within the reborn framework.  Users who are
 new to numpy should study it -- there are countless tutorials on the web.
 
 Indexing and internal memory layout of ndarray objects
 ------------------------------------------------------
 
 *People who are familiar with numpy ndarrays and their memory layout can skip this section -- the synopsis is simple:
-some parts of the bornagain package (particularly those that have underlying Fortran or OpenCL code) assume that
+some parts of the reborn package (particularly those that have underlying Fortran or OpenCL code) assume that
 ndarrays are are in the default c-contiguous ordering.  There are some cases in which errors will result if you pass
 in an array that is not c-contiguous, and in other cases arrays are re-written before passing to Fortran or OpenCL
 functions, which will cause in speed reductions.*
@@ -126,9 +126,9 @@ the layout of internal memory buffers.
 You might notice that the speed of your program depends on the ordering of the internal memory, but you will probably
 get the result you expect regardless of the ordering.
 
-The central point in introducing the above is the following: some portions of the code in bornagain are written in the
+The central point in introducing the above is the following: some portions of the code in reborn are written in the
 Fortran and OpenCL languages, and as a result *the ordering of the memory buffers matters for some functions in
-bornagain*.
+reborn*.
 In order to make this issue as painless as possible, it is assumed that all ndarrays are in the default
 "c-contiguous" order, and the striding corresponds to contiguous data (there are no "gaps" between array elements).
 There are more details on this matter found elsewhere (see e.g. :ref:`Working with Fortran <working_with_fortran>`).
@@ -189,10 +189,10 @@ Arrays of vectors
 
 .. _arrays_of_vectors:
 
-If you have *N* vectors of dimension 3, bornagain assumes they are stored with a shape of (*N*, 3).  This choice was
+If you have *N* vectors of dimension 3, reborn assumes they are stored with a shape of (*N*, 3).  This choice was
 made because the right-most index of a numpy array has the smallest stride by default, and because it usually makes
 most sense to have vector components stored close to each other in memory.
-This convention is assumed in every function in bornagain that deals with arrays of vectors.
+This convention is assumed in every function in reborn that deals with arrays of vectors.
 Normally you would get a runtime error if you pass in an array of the wrong shape, due to mis-match dimensions, but
 there will be no error in the case of a (3, 3) array.
 
@@ -232,7 +232,7 @@ For clarity, here is what you should expect:
 
 
 Note that the above is consistent with rotation operations performed on GPU devices within the
-:mod:`simulate.clcore <bornagain.simulate.clcore>` module.
+:mod:`simulate.clcore <reborn.simulate.clcore>` module.
 
 Density maps
 ------------

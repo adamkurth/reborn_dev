@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 
-import bornagain as ba
-from bornagain.simulate.clcore import ClCore
+import reborn as ba
+from reborn.simulate.clcore import ClCore
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
 

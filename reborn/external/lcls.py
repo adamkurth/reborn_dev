@@ -8,7 +8,7 @@ Note that there is documentation on `LCLS PAD geometry <https://confluence.slac.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import re
 import numpy as np
-import bornagain
+import reborn
 try:
     import psana
 except ImportError:
@@ -127,7 +127,7 @@ def get_pad_geometry(detector, run):
         run: a psana run object
 
     Returns:
-        A list of bornagain PADGeometry objects
+        A list of reborn PADGeometry objects
     """
     psf = detector.geometry(run).get_psf()
     geom = []
@@ -145,7 +145,7 @@ def get_pad_geometry(detector, run):
         n_fs = 194
         n_ss = 185
     for i in range(len(psf)):
-        g = bornagain.detector.PADGeometry()
+        g = reborn.detector.PADGeometry()
         g.t_vec = np.array(psf[i][0]) * 1e6
         g.ss_vec = np.array(psf[i][1]) * 1e6
         g.fs_vec = np.array(psf[i][2]) * 1e6

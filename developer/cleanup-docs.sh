@@ -6,4 +6,4 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
 fi
 
 echo 'Cleaning sphinx output'
-rm -r ../doc/html ../doc/build
+rm -r ../doc/html ../doc/build ../doc/source/api

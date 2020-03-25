@@ -7,8 +7,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import h5py
 import numpy as np
-from bornagain.external import crystfel
-from bornagain.fileio.getters import FrameGetter
+from reborn.external import crystfel
+from reborn.fileio.getters import FrameGetter
 
 
 # =======================================================================================================================
@@ -45,7 +45,7 @@ def cheetah_cspad_array_to_pad_list(psana_array, geom_dict):
     r"""
     This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with
     data in the native psana format.  First you should create a crystfel geometry dictionary using the function
-    :func:`geometry_file_to_pad_geometry_list() <bornagain.external.crystfel.geometry_file_to_pad_geometry_list>`.
+    :func:`geometry_file_to_pad_geometry_list() <reborn.external.crystfel.geometry_file_to_pad_geometry_list>`.
 
     Arguments:
         psana_array (numpy array) :
@@ -101,7 +101,7 @@ def cheetah_pnccd_array_to_pad_list(psana_array, geom_dict):
     r"""
     This function is helpful if you have a CrystFEL geom file that refers to Cheetah output, but you wish to work with
     data in the native psana format.  First you should create a crystfel geometry dictionary using the function
-    :func:`geometry_file_to_pad_geometry_list() <bornagain.external.crystfel.geometry_file_to_pad_geometry_list>`.
+    :func:`geometry_file_to_pad_geometry_list() <reborn.external.crystfel.geometry_file_to_pad_geometry_list>`.
 
     Arguments:
         psana_array (numpy array) :

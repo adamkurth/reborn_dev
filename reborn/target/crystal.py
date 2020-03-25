@@ -13,21 +13,21 @@ except ImportError:
     import urllib
 import pkg_resources
 import numpy as np
-from bornagain.target.molecule import Molecule
-from bornagain.simulate import atoms
-from bornagain.utils import warn, vec_mag
+from reborn.target.molecule import Molecule
+from reborn.simulate import atoms
+from reborn.utils import warn, vec_mag
 from numba import jit
 
-from bornagain.utils import trilinear_insert
+from reborn.utils import trilinear_insert
 
-pdb_data_path = pkg_resources.resource_filename('bornagain.data', 'pdb')
+pdb_data_path = pkg_resources.resource_filename('reborn.data', 'pdb')
 
 
 def get_pdb_file(pdb_id, save_path=".", silent=False):
     r"""
     Download a PDB file from the PDB web server and return the path to the downloaded file.  There is a data directory
-    included with bornagain that includes a few PDB files for testing purposes - if the requested PDB file exists there,
-    the path to the file included with bornagain will be returned.
+    included with reborn that includes a few PDB files for testing purposes - if the requested PDB file exists there,
+    the path to the file included with reborn will be returned.
 
     *Note: After you download a file for the first time, the downloaded file path will be returned on the next call to
     this function to avoid downloading the same file multiple times.*
@@ -57,7 +57,7 @@ def get_pdb_file(pdb_id, save_path=".", silent=False):
     if os.path.isfile(pdb_path):
         return pdb_path
 
-    # Check if the file is cached in bornagain
+    # Check if the file is cached in reborn
     if os.path.exists(pdb_data_path+'/'+pdb_id):
         return pdb_data_path+'/'+pdb_id
 
@@ -301,7 +301,7 @@ class CrystalStructure(object):
         if np.sum(np.abs(U)) > 0:
             if not no_warnings:
                 warn('\nThe U vector is not equal to zero, which could be a serious problem.  Look here:\n'
-                     'https://rkirian.gitlab.io/bornagain/crystals.html.\n')
+                     'https://rkirian.gitlab.io/reborn/crystals.html.\n')
 
         # These are the initial coordinates with strange origin
         r = dic['atomic_coordinates']
@@ -477,7 +477,7 @@ class FiniteLattice(object):
         surface.
 
         This operation will set the occupancies of the rejected lattice sites to zero.  When you subsequently access
-        the :attr:`occupied_x_coordinates <bornagain.target.crystal.FiniteLattice.occupied_x_coordinates>` property,
+        the :attr:`occupied_x_coordinates <reborn.target.crystal.FiniteLattice.occupied_x_coordinates>` property,
         the zero-valued occupancies will not be returned.
 
         Arguments:
@@ -504,7 +504,7 @@ class FiniteLattice(object):
         widths specify the facet pairs ([1,0,0], [-1,0,0]), ([0,1,0], [0,-1,0]),  ([1,-1,0], [-1,1,0]).  Note that, by
         default, there is always at minimum one lattice point that lies on the origin; if that is not desired then you
         may use the shift parameter as discussed in the
-        :meth:`add_facet <bornagain.target.crystal.FiniteLattice.add_facet>` method.
+        :meth:`add_facet <reborn.target.crystal.FiniteLattice.add_facet>` method.
 
         Arguments:
             width (float or array): Three widths to specify the prism shape/size, as explained above.
@@ -770,9 +770,9 @@ class CrystalDensityMap(object):
             data_trans.flat[lut] = data.flat[:]
 
         For convenience the above operation may be performed by the method
-        :meth:`au_to_k <bornagain.target.crystal.CrystalDensityMap.au_to_k>`, while the inverse operation may be
-        performed by the method :meth:`k_to_au <bornagain.target.crystal.CrystalDensityMap.k_to_au>`.  The method
-        :meth:`symmetry_transform <bornagain.target.crystal.CrystalDensityMap.symmetry_transform>` can be used to
+        :meth:`au_to_k <reborn.target.crystal.CrystalDensityMap.au_to_k>`, while the inverse operation may be
+        performed by the method :meth:`k_to_au <reborn.target.crystal.CrystalDensityMap.k_to_au>`.  The method
+        :meth:`symmetry_transform <reborn.target.crystal.CrystalDensityMap.symmetry_transform>` can be used to
         transform from one symmetry partner to another.
 
         Note that the LUTs are kept in memory for future use - beware of the memory requirement.
@@ -821,7 +821,7 @@ class CrystalDensityMap(object):
     def k_to_au(self, k, data):
         r"""
         Transform a map of the kth symmetry partner to the asymmetric unit.  This reverses the action of the
-        :meth:`au_to_k <bornagain.target.crystal.CrystalDensityMap.au_to_k>` method.
+        :meth:`au_to_k <reborn.target.crystal.CrystalDensityMap.au_to_k>` method.
 
         Args:
             k (int) : The index of the symmetry partner (starting with k=0)
@@ -1115,8 +1115,8 @@ def pdb_to_dict(pdb_file_path):
 
 class FiniteCrystal(object):
 
-    lattices = None  # : List of :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>` instances.
-    cryst = None  # : :class:`CrystalStructure <bornagain.target.crystal.CrystalStructure>` instances.
+    lattices = None  # : List of :class:`FiniteLattice <reborn.target.crystal.FiniteLattice>` instances.
+    cryst = None  # : :class:`CrystalStructure <reborn.target.crystal.CrystalStructure>` instances.
     au_x_coms = None  # : List of numpy arrays that specify center-of-mass coordinates of asymmetric unit and symmetry partners.
 
     def __init__(self, cryst, max_size=20):
@@ -1129,7 +1129,7 @@ class FiniteCrystal(object):
             cryst (:class:`CrystalStructure`) : A crystal structure object.
                            The center-of-mass of asymmetric unit and spacegroup provided by this object will affect the
                            centering of the lattices.
-            max_size (3-element array) : Same as in the :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`
+            max_size (3-element array) : Same as in the :class:`FiniteLattice <reborn.target.crystal.FiniteLattice>`
                                          class.
         """
         self.cryst = cryst
@@ -1144,7 +1144,7 @@ class FiniteCrystal(object):
 
     def add_facet(self, plane=None, length=None):
         r"""
-        See equivalent method in :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`. In this case, the
+        See equivalent method in :class:`FiniteLattice <reborn.target.crystal.FiniteLattice>`. In this case, the
         facet is added to *all* of the finite lattices (one for each symmetry partner).
         """
         for k in range(len(self.lattices)):
@@ -1154,7 +1154,7 @@ class FiniteCrystal(object):
 
     def reset_occupancies(self):
         r"""
-        See equivalent method in :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`. In this case, *all*
+        See equivalent method in :class:`FiniteLattice <reborn.target.crystal.FiniteLattice>`. In this case, *all*
         occupancies are reset (i.e. for all symemtry partner lattices).
         """
         for k in range(len(self.lattices)):
@@ -1170,7 +1170,7 @@ class FiniteCrystal(object):
 
     def make_parallelepiped(self, shape=(5, 5, 5), shift=0):
         r"""
-        See equivalent method in :class:`FiniteLattice <bornagain.target.crystal.FiniteLattice>`. In this case, the
+        See equivalent method in :class:`FiniteLattice <reborn.target.crystal.FiniteLattice>`. In this case, the
         facets are added to *all* of the finite lattices (one for each symmetry partner).
         """
         for k in range(len(self.lattices)):

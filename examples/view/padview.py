@@ -3,12 +3,12 @@
 import sys
 sys.path.append('../..')
 
-import bornagain as ba
+import reborn as ba
 ba.set_global('debug', 0)
-from bornagain.simulate import examples
-from bornagain.viewers.qtviews import PADView
-from bornagain import detector
-from bornagain.fileio.getters import FrameGetter
+from reborn.simulate import examples
+from reborn.viewers.qtviews import PADView
+from reborn import detector
+from reborn.fileio.getters import FrameGetter
 import numpy as np
 
 pad_geometry = examples.cspad_pads()

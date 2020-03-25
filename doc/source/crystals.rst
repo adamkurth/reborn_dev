@@ -3,7 +3,7 @@
 Crystals
 ========
 
-Here we briefly outline some conventions assumed in bornagain, and how to use the classes that expose crystal
+Here we briefly outline some conventions assumed in reborn, and how to use the classes that expose crystal
 symmetry operations.
 
 A little bit of math
@@ -74,7 +74,7 @@ Loading a PDB file
 PDB (Protein Data Bank) files are text files that contain information about molecular structures, in particular the
 positions and types of all the atoms that make up one or more molecular models, along with symmetry operations, and
 more.  PDB files can be downloaded from the `PDB website <http://www.rcsb.org>`_ or using the
-:func:`get_pdb_file <bornagain.target.crystal.get_pdb_file>` function in bornagain.
+:func:`get_pdb_file <reborn.target.crystal.get_pdb_file>` function in reborn.
 
 PDB files have a well-defined `specification <http://www.wwpdb.org/documentation/file-format>`_ and may be divided into
 various "records".  Some of the important ones are:
@@ -135,7 +135,7 @@ Finally, we may transform to fractional coordinates via the matrix :math:`\mathb
 .. math:: \mathbf{x} = \mathbf{S} \mathbf{r} + \mathbf{U}
     :label: stupidU
 
-All of the above quantities can be loaded using the :func:`pdb_to_dict()<bornagain.target.crystal.pdb_to_dict()>`
+All of the above quantities can be loaded using the :func:`pdb_to_dict()<reborn.target.crystal.pdb_to_dict()>`
 function, which returns a Python dictionary with the following mappings to the notation above:
 
 ========================= =========================== ================================================================================
@@ -155,7 +155,7 @@ Dictionary key            Data type                   Mathematical symbol
 ========================= =========================== ================================================================================
 
 Note that the units are not modified from PDB format; angles are degrees and distances are in Angstrom units.  This is
-one of the *very rare* cases in which non-SI units are used in bornagain (but we convert to SI immediately when we
+one of the *very rare* cases in which non-SI units are used in reborn (but we convert to SI immediately when we
 create a class from this dictionary).
 
 
@@ -201,7 +201,7 @@ from which we identify our desired transformations:
     \mathbf{W}_n &= \mathbf{S} \mathbf{R}_n \mathbf{S}^{-1} \\
     \mathbf{Z}_n &= \mathbf{S}\mathbf{T}_n
 
-Assuming :math:`\mathbf{U}=0`, the :func:`CrystalStructure <bornagain.target.crystal.CrystalStructure>` class can be
+Assuming :math:`\mathbf{U}=0`, the :func:`CrystalStructure <reborn.target.crystal.CrystalStructure>` class can be
 used to easily load in a PDB file and get :math:`\mathbf{x}_\text{au}` and the transformations :math:`\mathbf{W}_n`, :math:`\mathbf{Z}_n`.
 
 In the uncommon situation where :math:`\mathbf{U} \ne 0`, we do not have an understanding of how to determine the
@@ -219,8 +219,8 @@ them to generate the coordinates for the second crystallographic symmetry partne
 .. code-block:: python
 
     import numpy as np
-    from bornagain.data import lysozyme_pdb_file
-    from bornagain.target import crystal
+    from reborn.data import lysozyme_pdb_file
+    from reborn.target import crystal
     cryst = crystal.CrystalStructure(lysozyme_pdb_file)
     x_au = cryst.fractional_coordinates
     W2 = cryst.spacegroup.sym_rotations[1]

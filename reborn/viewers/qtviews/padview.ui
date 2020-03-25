@@ -350,7 +350,7 @@
   <customwidget>
    <class>MultiHistogramLUTWidget</class>
    <extends>QGraphicsView</extends>
-   <header>bornagain.external.pyqtgraph</header>
+   <header>reborn.external.pyqtgraph</header>
   </customwidget>
  </customwidgets>
  <resources/>

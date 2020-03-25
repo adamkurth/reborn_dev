@@ -9,4 +9,4 @@ echo 'Cleaning compiled objects'
 find .. -name '*.so' -type f -exec rm {} \;
 find .. -name '*.dSYM' -type d -exec rm -r {} \;
 find .. -name '*.pyc' -type f -exec rm {} \;
-rm -r ../build ../bornagain.egg-info
+rm -r ../build ../reborn.egg-info

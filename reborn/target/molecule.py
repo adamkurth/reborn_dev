@@ -6,8 +6,8 @@ Utilities for manipulating molecules
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-from bornagain.utils import max_pair_distance
-from bornagain.simulate import atoms
+from reborn.utils import max_pair_distance
+from reborn.simulate import atoms
 from scipy import constants as const
 
 hc = const.h*const.c
@@ -45,12 +45,12 @@ class Molecule(object):
         r"""
         Get atomic scattering factors.  You need to specify the photon energy or pass a Beam class instance in.
 
-        This wraps the function :func:`bornagain.simulate.atoms.get_scattering_factors` for more details; see the docs
+        This wraps the function :func:`reborn.simulate.atoms.get_scattering_factors` for more details; see the docs
         for more details.
 
         Args:
             photon_energy: In SI units as always
-            beam: Optionally, provide a :class:`bornagain.beam.Beam` instance instead of photon_energy
+            beam: Optionally, provide a :class:`reborn.beam.Beam` instance instead of photon_energy
 
         Returns:
             Numpy array of complex scattering factors

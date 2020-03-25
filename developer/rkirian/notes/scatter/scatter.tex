@@ -89,7 +89,7 @@ The refractive index is always related to the electron density according to
 \begin{align}
 \rho =  \frac{2\pi}{\lambda^2 r_0 } \left( 1 - n_r \right) = \frac{2\pi}{\lambda^2 r_0 } \left( \delta + i \beta \right) 
 \end{align}
-The tabulated values of $f_1$ and $f_2$ are available in gzip format at the CXRO website \url{http://henke.lbl.gov/optical_constants/asf.html}).  The \texttt{bornagain} package provides programmatic access to them.
+The tabulated values of $f_1$ and $f_2$ are available in gzip format at the CXRO website \url{http://henke.lbl.gov/optical_constants/asf.html}).  The \texttt{reborn} package provides programmatic access to them.
 
 
 \section{xraylib}
@@ -103,9 +103,9 @@ The \texttt{xraylib} library\cite{schoonjansXraylibLibraryXray2011,brunettiLibra
 \end{figure} 
 
 
-\section{bornagain}
+\section{reborn}
 
-These Henke scattering factors (at $q=0$) are returned as a single complex number $f$ from the function \texttt{get\_scattering\_factors(Z,E)}, which is in the \texttt{bornagain.simulate.atoms} sub-module.  \texttt{bornagain} also has wrappers to the xraylib functions for convenience since they use different units and they are not vectorized functions (hence they are very slow).  The combined Hubbel form factors and Henke dispersion corrections may be accessed through the function \texttt{bornagain.simulate.atoms.hubbel\_henke\_atomic\_form\_factors}.
+These Henke scattering factors (at $q=0$) are returned as a single complex number $f$ from the function \texttt{get\_scattering\_factors(Z,E)}, which is in the \texttt{reborn.simulate.atoms} sub-module.  \texttt{reborn} also has wrappers to the xraylib functions for convenience since they use different units and they are not vectorized functions (hence they are very slow).  The combined Hubbel form factors and Henke dispersion corrections may be accessed through the function \texttt{reborn.simulate.atoms.hubbel\_henke\_atomic\_form\_factors}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Getting to the density}
@@ -144,7 +144,7 @@ we arrive at the desired expression
 \begin{align}\label{eqn:rhor}
 \rho(n \Delta r) &\approx \frac{1}{\pi n \Delta r^2 } \text{Im} \left\{ \frac{1}{N}  \sum_{k=0}^{N-1}    F_k  \exp\left( 2\pi i \frac{nk}{ N} \right) \right\} = \frac{1}{\pi n \Delta r^2 } \text{Im}\left\{ \text{FFT}^{-1}\left\{ F_k \right\}_n\right\} \; .
 \end{align}
-Equation \ref{eqn:rhor} has been tested and shown to agree in the case of the hydrogen atom, as shown in figure \ref{fig:hydrogen} (the example script \texttt{scattering\_factors.py} that generated this plot is found in bornagain).  However, there are some issues that remain at this time (1) the density near $r=0$ has a noticable error, and (2) there are oscillatory artifacts that might be due to the truncation of $f(q)$.
+Equation \ref{eqn:rhor} has been tested and shown to agree in the case of the hydrogen atom, as shown in figure \ref{fig:hydrogen} (the example script \texttt{scattering\_factors.py} that generated this plot is found in reborn).  However, there are some issues that remain at this time (1) the density near $r=0$ has a noticable error, and (2) there are oscillatory artifacts that might be due to the truncation of $f(q)$.
 
 \begin{figure}[htbp]
    \centering

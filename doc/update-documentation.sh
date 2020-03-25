@@ -5,10 +5,10 @@
 # Note: when documentation is created and pushed to the gitlab repository, this script will run automatically and
 # documentation will be made available here:
 #
-# https://rkirian.gitlab.io/bornagain
+# https://rkirian.gitlab.io/reborn
 
 rm -r source/api
-sphinx-apidoc --output-dir source/api --module-first ../bornagain ../bornagain/fortran
+sphinx-apidoc --output-dir source/api --module-first ../reborn ../reborn/fortran
 ls source/api
 # Fix the stupid default title of API page
 tail -n+3 source/api/modules.rst > tmp.rst
@@ -23,4 +23,4 @@ make html
 rm -r html
 mv build/html .
 perl -p -i -e 's{<head>\n}{<head>\n  <meta name="robots" content="noindex, nofollow" />\n}' html/*.html
-#perl -p -i -e 's{>bornagain.*</a>}{}'
+#perl -p -i -e 's{>reborn.*</a>}{}'

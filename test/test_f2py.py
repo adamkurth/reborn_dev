@@ -1,5 +1,5 @@
 import numpy as np
-from bornagain.fortran import wtf_f
+from reborn.fortran import wtf_f
 
 
 def test_fortran_wtf():

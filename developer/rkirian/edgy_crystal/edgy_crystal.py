@@ -5,14 +5,14 @@ import pyqtgraph as pg
 from scipy import constants
 from scipy.spatial.transform import Rotation
 import argparse
-from bornagain import detector
-from bornagain import source
-from bornagain.utils import trilinear_insert
-from bornagain.simulate.clcore import ClCore
-from bornagain.simulate.examples import psi_pdb_file, lysozyme_pdb_file
-from bornagain.target import crystal, density
-from bornagain.viewers.qtviews import Scatter3D, bright_colors, colors, PADView
-from bornagain.external.pyqtgraph import keep_open
+from reborn import detector
+from reborn import source
+from reborn.utils import trilinear_insert
+from reborn.simulate.clcore import ClCore
+from reborn.simulate.examples import psi_pdb_file, lysozyme_pdb_file
+from reborn.target import crystal, density
+from reborn.viewers.qtviews import Scatter3D, bright_colors, colors, PADView
+from reborn.external.pyqtgraph import keep_open
 
 
 eV = constants.value('electron volt')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# bornagain documentation build configuration file, created by
+# reborn documentation build configuration file, created by
 # sphinx-quickstart on Sun Mar  5 00:26:44 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -23,7 +23,7 @@ import datetime
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../bornagain'))
+sys.path.insert(0, os.path.abspath('../../reborn'))
 sys.path.insert(0, os.path.abspath('../..'))
 
 # -- General configuration ------------------------------------------------
@@ -63,7 +63,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'bornagain'
+project = u'reborn'
 copyright = u'2017, Richard A Kirian'
 author = u'Richard A Kirian'
 
@@ -233,7 +233,7 @@ html_show_copyright = False
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'bornagaindoc'
+htmlhelp_basename = 'reborndoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -255,7 +255,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'bornagain.tex', u'bornagain Documentation',
+  (master_doc, 'reborn.tex', u'reborn Documentation',
    u'Richard A Kirian', 'manual'),
 ]
 
@@ -285,7 +285,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'bornagain', u'bornagain Documentation',
+    (master_doc, 'reborn', u'reborn Documentation',
      [author], 1)
 ]
 
@@ -299,8 +299,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'bornagain', u'bornagain Documentation',
-   author, 'bornagain', 'One line description of project.',
+  (master_doc, 'reborn', u'reborn Documentation',
+   author, 'reborn', 'One line description of project.',
    'Miscellaneous'),
 ]
 

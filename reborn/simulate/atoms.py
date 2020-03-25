@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import pkg_resources
 import numpy as np
-from bornagain import utils
+from reborn import utils
 from scipy import constants as const
 
 try:
@@ -14,7 +14,7 @@ eV = const.value('electron volt')
 NA = const.value('Avogadro constant')
 
 
-henke_data_path = pkg_resources.resource_filename('bornagain', 'data/scatter/henke')
+henke_data_path = pkg_resources.resource_filename('reborn', 'data/scatter/henke')
 
 
 atomic_symbols = np.array(['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca',
@@ -121,7 +121,7 @@ def henke_scattering_factors(atomic_numbers, photon_energies):
 def get_scattering_factors(atomic_numbers, photon_energy):
     r"""
     Get complex atomic scattering factors (from Henke tables) for a single photon energy and a range of atomic numbers.
-    The scattering factor data come from the function :func:`get_henke_data <bornagain.simulate.atoms.get_henke_data>`.
+    The scattering factor data come from the function :func:`get_henke_data <reborn.simulate.atoms.get_henke_data>`.
     See the function :func:`get_scattering_factors_fixed_z` if you have a range of photon energies and one atomic number.
 
     Arguments:

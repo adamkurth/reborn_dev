@@ -5,7 +5,7 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit
 fi
 
-# Test the base of bornagain, with minimal dependencies.
+# Test the base of reborn, with minimal dependencies.
 conda create --no-default-packages --name bamin36 python=3.8 h5py scipy
 echo activating...
 source activate bamin36

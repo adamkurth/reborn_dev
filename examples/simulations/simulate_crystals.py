@@ -1,11 +1,11 @@
 import numpy as np
 from time import time
 from scipy import constants
-from bornagain import detector, source, target
-from bornagain.simulate.examples import CrystalSimulatorV1, cspad_geom_file, lysozyme_pdb_file
-from bornagain.external.crystfel import geometry_file_to_pad_geometry_list
-from bornagain.viewers.qtviews.padviews import PADView
-from bornagain.fileio.getters import FrameGetter
+from reborn import detector, source, target
+from reborn.simulate.examples import CrystalSimulatorV1, cspad_geom_file, lysozyme_pdb_file
+from reborn.external.crystfel import geometry_file_to_pad_geometry_list
+from reborn.viewers.qtviews.padviews import PADView
+from reborn.fileio.getters import FrameGetter
 
 # Everything in bornagian is SI units.
 eV = constants.value('electron volt')

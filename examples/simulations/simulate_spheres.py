@@ -4,9 +4,9 @@ from time import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-import bornagain
-from bornagain import simulate
-from bornagain.simulate.form_factors import sphere_form_factor
+import reborn
+from reborn import simulate
+from reborn.simulate.form_factors import sphere_form_factor
 
 show = True
 if 'noplots' in sys.argv:
@@ -16,7 +16,7 @@ use_numba = False
 try:
     # This prepares the GPU simulation engine.  It computes this sum: Sum_n f_n exp(i q.r_n)
     # (really fast -- overkill...)
-    from bornagain.simulate.clcore import ClCore
+    from reborn.simulate.clcore import ClCore
     sim = simulate.clcore.ClCore()
     phase_factor_qrf = sim.phase_factor_qrf
 except ImportError:
@@ -25,7 +25,7 @@ except ImportError:
 # use_numba = True
 if use_numba:
     # Default to numba if pyopencl is not available
-    from bornagain.simulate import numbacore
+    from reborn.simulate import numbacore
     phase_factor_qrf = numbacore.phase_factor_qrf
 
 
@@ -47,10 +47,10 @@ if use_numba:
 #     - Usually beam polarization from an undulator is in the horizontal, which would be "x"
 
 # Generic container for an x-ray beam.  Holds beam direction, polarization, wavelength, etc.
-beam = bornagain.source.Beam(wavelength=13.49e-9, beam_vec=[0, 0, 1])
+beam = reborn.source.Beam(wavelength=13.49e-9, beam_vec=[0, 0, 1])
 
 # Generic container for an pixel-array detector
-detector = bornagain.detector.PADGeometry(n_pixels=2048, pixel_size=13.5e-6, distance=0.07)
+detector = reborn.detector.PADGeometry(n_pixels=2048, pixel_size=13.5e-6, distance=0.07)
 
 # Now we construct the arrangement of spheres:
 radius = 0.5e-6
