@@ -18,10 +18,10 @@ def vec_norm(vec):
     Compute normal vectors, which have lengths of one.
 
     Arguments:
-        vec: Input vector of shape (N, 3)
+        vec (numpy array of shape Nx3): Input vector
 
     Returns:
-        (numpy array) New unit vectors, shape (N, 3)
+        numpy array of shape Nx3 : New unit vectors
     """
 
     vecnorm = np.sqrt(np.sum(vec**2, axis=(vec.ndim - 1)))
