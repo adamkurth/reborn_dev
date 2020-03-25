@@ -1,11 +1,11 @@
-(Re)reborn Python Package
-============================
+reborn Python Package
+=====================
 
 Overview
 --------
 
-The (Re)reborn Python package is for the simulation and analysis of x-ray diffraction under the Born approximation.
-The "again" part of the name refers to the overlap with countless other utilities: e.g.
+The reborn Python package contains utilities for the simulation and analysis of x-ray diffraction under the Born 
+approximation.  There are countless other utilities with identical or similar aspirations: 
 `thor <https://github.com/tjlane/thor>`_,
 `OnDa <https://github.com/ondateam>`_,
 `DIALS <https://dials.github.io/>`_,
@@ -14,17 +14,15 @@ The "again" part of the name refers to the overlap with countless other utilitie
 `xrayutilities <https://xrayutilities.sourceforge.io/index.html>`_,
 `xraylib <https://github.com/tschoonj/xraylib/wiki>`_,
 `Dragonfly <https://github.com/duaneloh/Dragonfly/wiki/EMC-implementation>`_,
-and so on.  The "(Re)" part of the name is technically meant to distinguish from the similarly-named
-`BornAgain <www.rebornproject.org>`_ software that also concerns diffraction and the Born approximation, but from
-this point on we'll use our original name "reborn" (no capitalization) to refer to "(Re)reborn".
+`BornAgain <www.rebornproject.org>`_.
 
 For clarity, reborn is not a "program".  In order to use it you must write Python code.  It is also not intended
 to be a *general* or *complete* tool at this time -- its content is dictated by what is needed for work done in the
 Kirian Lab.  It is nonetheless available for anyone to use under the GNU V3 License.
 
-You can find the reborn source code on gitlab here: https://gitlab.com/rkirian/reborn
+You can find the reborn source code on gitlab here: https://gitlab.com/rkirian/bornagain
 
-This documentation is available on the web here: https://rkirian.gitlab.io/reborn
+This documentation is available on the web here: https://rkirian.gitlab.io/bornagain
 
 What's in reborn?
 --------------------
