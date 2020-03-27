@@ -24,8 +24,13 @@ You can find the reborn source code on gitlab here: https://gitlab.com/rkirian/b
 
 This documentation is available on the web here: https://rkirian.gitlab.io/bornagain
 
+If you have never written code to do data analysis or simulations, you should firstly learn the basics of using the
+`bash shell <https://linuxconfig.org/bash-scripting-tutorial-for-beginners>`_,
+`git <https://www.vogella.com/tutorials/Git/article.html>`_,
+and of course `python <https://becksteinlab.physics.asu.edu/learning/48/learning-python>`_.
+
 What's in reborn?
---------------------
+-----------------
 
 In a nutshell, the basic elements reborn are:
 
@@ -38,19 +43,17 @@ In a nutshell, the basic elements reborn are:
 - A few analysis algorithms.
 
 Before you start using reborn...
------------------------------------
+--------------------------------
 
-- Make sure you at least skim the docs.  Complaints are not allowed until you've done that!
-- If documentation is missing or confusing, fix the problem or notify someone who can.
-- The units in reborn are SI.  Angles are radians.  You rarely need to convert units within reborn; the only
-  exceptions so far are a couple of low-level functions that convert PDB and CrystFEL geom files to Python dictionaries.
-  Any reborn class or analysis function must use the standard units.
-- No special coordinate system is assumed.  You specify the direction of the x-ray beam and so on.
-- We make important assumptions about the shapes and memory layout of numpy arrays in reborn.  You'll learn about
-  that when you read the docs.
+- Make sure you know how to use bash, git, and python.
+- Make sure you at least skim through all of the reborn docs.  Complaints are not allowed until you've done that!
+- If documentation is missing or confusing, please fix the problem or notify someone who can.
+- The units in reborn are SI.  Angles are radians.  You rarely need to convert units within reborn.
+- No special coordinate system is assumed.  You specify the direction of the x-ray beam.
+- We make important assumptions about the shapes and memory layout of numpy arrays in reborn.  Read the docs.
 
 If you plan to develop reborn...
------------------------------------
+--------------------------------
 
 See :ref:`developers_anchor`.
 

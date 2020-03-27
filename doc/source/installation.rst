@@ -1,19 +1,29 @@
-Setup
-=====
+Getting Started
+===============
 
-The following suggestions should work on Linux or MacOS.  We have not thoroughly tested reborn on MS Windows.
+The following suggestions should work on Linux or MacOS.  We have not thoroughly tested reborn on MS Windows (but you
+might find `git bash <https://gitforwindows.org/>`_ to be helpful on Windows).
 
-In principle, setting up reborn should be as simple as including the base directory of the reborn git repo in
+In principle, setting up reborn should be as simple as including the base directory of the reborn git repository in
 your python path.  You'll probably find that you need to install some dependencies, but all of them are known to install
-easily with pip or conda (however, there may be some extra steps to enable GPU computatoins -- see the relevant section
-below).  There are some pieces of Fortran code in reborn that need to be compiled, but they
-should auto-compile on first import.
+easily with pip or conda (however, there may be some extra steps to enable GPU computations -- see the relevant section
+below).  There are some pieces of Fortran code in reborn that need to be compiled, but they should auto-compile on first
+import.
 
 While it is possible to install reborn using the provided `setup.py` script, this is not recommended because
 reborn is under development and its API is not stable.  It is instead recommended that you keep a
 clone of the reborn git repository where you are doing your analysis or simulations so that you can reproduce your
 results in the future. One way to track the *exact* version of reborn used in your project is to add it as a
 `git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git repository.
+
+The first thing you will need to do is use git to clone reborn on your computer:
+
+.. code-block:: bash
+
+    git clone git@gitlab.com:rkirian/bornagain.git reborn
+
+Note that reborn was formerly known as bornagain, which is why the above command renames the repository.  Eventually,
+the link will be fixed so that this is not necessary.
 
 Dependencies
 ------------
@@ -103,7 +113,7 @@ If you wish, you can also install reborn:
 
     python setup.py install
 
-but this is not advised as noted above already.
+but this is not tested and is not advised as noted above.
 
 Compilation of Fortran code
 ---------------------------
