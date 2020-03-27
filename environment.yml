@@ -3,21 +3,22 @@ channels:
   - conda-forge
 dependencies:
   - python=3.7
+  - future
   - scipy
   - h5py
-  - future
+  - matplotlib
   - numba
   - pyopencl
+  - pocl
   - sphinx
   - pytest
-  - matplotlib
   - pyqt=5
-  - pocl
   - pyqtgraph
   - pyopengl
-  - pip
-  - make
   - xraylib
+  - fortran-compiler
+  - make
+  - pip
   - pip:
     - cfelpyutils
     - sphinx_rtd_theme
