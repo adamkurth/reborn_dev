@@ -3,13 +3,11 @@ Classes for analyzing/simulating diffraction data contained in pixel array
 detectors (PADs).
 """
 
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
 import h5py
-
-from .utils import vec_norm, vec_mag, triangle_solid_angle, depreciate, warn
+from . import utils
 
 
 class PADGeometry():
@@ -142,7 +140,7 @@ class PADGeometry():
             shape : The shape of the panel, consistent with a numpy array shape.
             pixel_size : Pixel size in SI units.
             distance : Detector distance in SI units.
-            n_pixels : (DEPRECIATED) Either the shape of the panel, or a single number if a square detector is desired.
+            n_pixels : (utils.depreciateD) Either the shape of the panel, or a single number if a square detector is desired.
                        Do not use this input as it will be removed in the future.
 
         Returns:
@@ -150,15 +148,15 @@ class PADGeometry():
         """
 
         if n_pixels is not None:
-            depreciate('The redundant "n_pixels" keyword argument in simple_setup is depreciated.  Use "shape" keyword '
+            utils.depreciate('The redundant "n_pixels" keyword argument in simple_setup is utils.depreciated.  Use "shape" keyword '
                        'instead.')
 
         if pixel_size is None:
-            warn('Setting pixel_size in simple_setup to 100e-6.  You should specify this value explicitly.')
+            utils.warn('Setting pixel_size in simple_setup to 100e-6.  You should specify this value explicitly.')
             pixel_size = 100e-6
 
         if distance is None:
-            warn('Setting distance in simple_setup to 0.1.  You should specify this value explicitly.')
+            utils.warn('Setting distance in simple_setup to 0.1.  You should specify this value explicitly.')
             distance = 0.1
 
         if shape is not None:
@@ -166,7 +164,7 @@ class PADGeometry():
             self.n_ss = shape[0]
         else:
             if n_pixels is None:
-                warn('Setting n_pixels in simple_setup to 1000.  You should specify this value explicitly.')
+                utils.warn('Setting n_pixels in simple_setup to 1000.  You should specify this value explicitly.')
                 n_pixels = 1000
             try:
                 self.n_fs = n_pixels[1]
@@ -182,7 +180,7 @@ class PADGeometry():
     def pixel_size(self):
         r""" Return pixel size, assuming square pixels. """
 
-        return np.mean([vec_mag(self.fs_vec), vec_mag(self.ss_vec)])
+        return np.mean([utils.vec_mag(self.fs_vec), utils.vec_mag(self.ss_vec)])
 
     def shape(self):
         r""" Return tuple corresponding to the numpy shape of this PAD. """
@@ -227,7 +225,7 @@ class PADGeometry():
     def norm_vec(self):
         r""" The vector that is normal to the PAD plane. """
 
-        return vec_norm(np.cross(self.fs_vec, self.ss_vec))
+        return utils.vec_norm(np.cross(self.fs_vec, self.ss_vec))
 
     def ds_vecs(self, beam_vec=None, beam=None):
         r"""
@@ -247,7 +245,7 @@ class PADGeometry():
         if beam is not None:
             beam_vec = beam.beam_vec
 
-        return vec_norm(self.position_vecs()) - beam_vec
+        return utils.vec_norm(self.position_vecs()) - beam_vec
 
     def q_vecs(self, beam_vec=None, wavelength=None, beam=None):
         r"""
@@ -287,7 +285,7 @@ class PADGeometry():
             beam_vec = beam.beam_vec
             wavelength = beam.wavelength
 
-        return vec_mag(self.q_vecs(beam_vec=beam_vec, wavelength=wavelength))
+        return utils.vec_mag(self.q_vecs(beam_vec=beam_vec, wavelength=wavelength))
 
     def solid_angles(self):
         r"""
@@ -308,9 +306,9 @@ class PADGeometry():
         v_vec = self.position_vecs()
         n_vec = self.norm_vec()
 
-        area = vec_mag(np.cross(self.fs_vec, self.ss_vec))  # Area of the pixel
-        dist2 = vec_mag(v_vec) ** 2  # Distance to the pixel, squared
-        inc = np.dot(n_vec, vec_norm(v_vec).T)  # Inclination factor: cos(theta)
+        area = utils.vec_mag(np.cross(self.fs_vec, self.ss_vec))  # Area of the pixel
+        dist2 = utils.vec_mag(v_vec) ** 2  # Distance to the pixel, squared
+        inc = np.dot(n_vec, utils.vec_norm(v_vec).T)  # Inclination factor: cos(theta)
         solid_ang = (area / dist2) * inc  # Solid angle
 
         return np.abs(solid_ang.ravel())
@@ -331,8 +329,8 @@ class PADGeometry():
         corner2 = pixel_center + self.fs_vec * .5 - self.ss_vec * .5
         corner3 = pixel_center - self.fs_vec * .5 + self.ss_vec * .5
         corner4 = pixel_center + self.fs_vec * .5 + self.ss_vec * .5
-        solid_angle_1 = triangle_solid_angle(corner1, corner2, corner3)
-        solid_angle_2 = triangle_solid_angle(corner4, corner2, corner3)
+        solid_angle_1 = utils.triangle_solid_angle(corner1, corner2, corner3)
+        solid_angle_2 = utils.triangle_solid_angle(corner4, corner2, corner3)
         return solid_angle_1 + solid_angle_2
 
     def polarization_factors(self, polarization_vec_1=None, beam_vec=None, weight=None, beam=None):
@@ -355,9 +353,9 @@ class PADGeometry():
             beam_vec = beam.beam_vec
             polarization_vec_1 = beam.polarization_vec
             weight = beam.polarization_weight
-        pix_vec = vec_norm(self.position_vecs())
-        polarization_vec_1 = vec_norm(np.array(polarization_vec_1))
-        beam_vec = vec_norm(np.array(beam_vec))
+        pix_vec = utils.vec_norm(self.position_vecs())
+        polarization_vec_1 = utils.vec_norm(np.array(polarization_vec_1))
+        beam_vec = utils.vec_norm(np.array(beam_vec))
         polarization_vec_2 = np.cross(polarization_vec_1, beam_vec)
         if weight is None:
             weight1 = 1
@@ -392,7 +390,7 @@ class PADGeometry():
         else:
             raise ValueError('Scattering angles cannot be computed without knowing the incident beam direction')
 
-        return np.arccos(vec_norm(self.position_vecs()).dot(beam_vec.ravel()))
+        return np.arccos(utils.vec_norm(self.position_vecs()).dot(beam_vec.ravel()))
 
     def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
         r"""
@@ -551,7 +549,7 @@ class PADAssembler():
     """
 
     def __init__(self, pad_list):
-        pixel_size = vec_mag(pad_list[0].fs_vec)
+        pixel_size = utils.vec_mag(pad_list[0].fs_vec)
         position_vecs_concat = np.concatenate([p.position_vecs() for p in pad_list])
         position_vecs_concat -= np.min(position_vecs_concat, axis=0)
         position_vecs_concat /= pixel_size

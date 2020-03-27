@@ -1,15 +1,8 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-
 import numpy as np
 from scipy.ndimage import measurements
-from reborn.utils import warn
-
-try:
-    from reborn.fortran import peaks_f
-except ImportError:
-    warn('You need to compile the fortran code.  See the documentation: https://rkirian.gitlab.io/reborn')
-    peaks_f = None
+from ..fortran import peaks_f
 
 
 class PeakFinder(object):

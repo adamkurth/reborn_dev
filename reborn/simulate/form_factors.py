@@ -1,10 +1,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-try:
-    from xraylib import FF_Rayl, Fi, Fii
-except ImportError:
-    pass
+from xraylib import FF_Rayl, Fi, Fii
 
 from scipy import constants as const
 

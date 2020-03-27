@@ -2,20 +2,15 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import pkg_resources
 import numpy as np
-from reborn import utils
+from .. import utils
 from scipy import constants as const
+import xraylib
 
-try:
-    import xraylib
-except ImportError:
-    pass
 
 eV = const.value('electron volt')
 NA = const.value('Avogadro constant')
 
-
 henke_data_path = pkg_resources.resource_filename('reborn', 'data/scatter/henke')
-
 
 atomic_symbols = np.array(['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca',
                            'Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y',

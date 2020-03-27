@@ -6,11 +6,34 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from functools import wraps
 import sys
+import os
+import pkg_resources
 import numpy as np
 from numpy import sin, cos
 from numba import jit
-import reborn as ba
-from reborn import fortran
+from . import fortran
+
+
+def docs():
+    r""" Open the reborn documentation in a web browser (if available)."""
+
+    docs_file_path = pkg_resources.resource_filename('reborn', '')
+    docs_file_path = os.path.join(docs_file_path, '..', 'doc', 'html', 'index.html')
+
+    if os.path.exists(docs_file_path):
+        docs_file_path = 'file://' + docs_file_path
+    else:
+        docs_file_path = 'https://rkirian.gitlab.io/reborn'
+
+    try:
+        import webbrowser
+    except ImportError:
+        print("Can't open docs because you need to install the webbrowser Python package.")
+        print("If using conda, perhaps you could run 'conda install webbrowser'")
+        print('You can otherwise point your webbrowser to https://rkirian.gitlab.io/reborn')
+        return
+
+    webbrowser.open('file://' + docs_file_path)
 
 
 def vec_norm(vec):
@@ -43,23 +66,16 @@ def vec_mag(vec):
 
 def depreciate(message):
     r"""
-    Utility for sending warnings when some class, method, function, etc. is depreciated.  By default, a message of the
-    form "WARNING: DEPRECIATION: blah blah blah" will be printed with sys.stdout.write().  You get to choose the
-    "blah blah blah" part of the message, which is the input to this function.
-
-    The output can be silenced with the function reborn.set_global('warn_depreciated', False), or you can force
-    an error to occur if you do reborn.set_global('force_depreciated', True).
+    Utility for sending warnings when some class, method, function, etc. is depreciated.  It simply prints a message of
+    the form "WARNING: DEPRECIATION: blah blah blah" but perhaps it will do someting more sophisticated in the future
+    if the need arises.
 
     Arguments:
         message: whatever you want to have printed to the screen
 
     Returns: None
     """
-
-    if ba.get_global('force_depreciated') is True:
-        error('DEPRECIATION: ' + message)
-    elif ba.get_global('warn_depreciated') is True:
-        warn('DEPRECIATION: ' + message)
+    warn('DEPRECIATION: ' + message)
 
 
 def warn(message):

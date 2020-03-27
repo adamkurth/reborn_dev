@@ -6,19 +6,17 @@ Basic utilities for dealing with crystalline objects.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
-import shutil
 try:
     import urllib.request
 except ImportError:
     import urllib
 import pkg_resources
 import numpy as np
-from reborn.target.molecule import Molecule
-from reborn.simulate import atoms
-from reborn.utils import warn, vec_mag
+from .molecule import Molecule
+from ..simulate import atoms
+from ..utils import warn, vec_mag, trilinear_insert
 from numba import jit
 
-from reborn.utils import trilinear_insert
 
 pdb_data_path = pkg_resources.resource_filename('reborn.data', 'pdb')
 

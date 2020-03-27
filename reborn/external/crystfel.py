@@ -10,7 +10,7 @@ import os
 import numpy as np
 
 from .. import detector
-from reborn.fileio.getters import FrameGetter
+from ..fileio.getters import FrameGetter
 from cfelpyutils import crystfel_utils
 from scipy import constants as const
 

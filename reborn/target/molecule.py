@@ -6,8 +6,8 @@ Utilities for manipulating molecules
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
-from reborn.utils import max_pair_distance
-from reborn.simulate import atoms
+from ..utils import max_pair_distance
+from ..simulate import atoms
 from scipy import constants as const
 
 hc = const.h*const.c

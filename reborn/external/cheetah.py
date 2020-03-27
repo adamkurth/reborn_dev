@@ -7,8 +7,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import h5py
 import numpy as np
-from reborn.external import crystfel
-from reborn.fileio.getters import FrameGetter
+from . import crystfel
+from ..fileio.getters import FrameGetter
 
 
 # =======================================================================================================================

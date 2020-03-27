@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import numpy as np
 from numba import jit
-from reborn.fortran import density_f
+from ..fortran import density_f
 
 
 class DensityMap(object):

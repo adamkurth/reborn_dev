@@ -9,13 +9,12 @@ Don't build any of this into your code.
 import pkg_resources
 import numpy as np
 from scipy.spatial.transform import Rotation
-import reborn as ba
-from reborn import detector
-from reborn.utils import warn, rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance
-import reborn.external.crystfel
-from reborn.simulate import atoms
-from reborn.target.crystal import CrystalStructure
-from reborn.simulate.clcore import ClCore
+from .. import detector
+from ..utils import rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance
+from ..external import crystfel
+from . import atoms
+from ..target.crystal import CrystalStructure
+from .clcore import ClCore
 from scipy import constants as const
 
 hc = const.h*const.c
@@ -38,7 +37,7 @@ def pnccd_pads():
 
     """
 
-    return reborn.external.crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
+    return crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
 
 
 def cspad_pads():
@@ -52,7 +51,7 @@ def cspad_pads():
 
     """
 
-    return reborn.external.crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+    return crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
 
 def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=True):
@@ -73,7 +72,7 @@ def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=Tru
     photon_energy = hc / wavelength
 
     if pad_geometry is None:
-        pad_geometry = reborn.external.crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+        pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
     sim = ClCore(group_size=32, double_precision=False)
 
@@ -122,7 +121,7 @@ class PDBMoleculeSimulator(object):
             pdb_file = lysozyme_pdb_file
 
         if pad_geometry is None:
-            pad_geometry = reborn.external.crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+            pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
         photon_energy = hc / wavelength
 
@@ -157,9 +156,6 @@ class PDBMoleculeSimulator(object):
 
         self.clcore.phase_factor_qrf(self.q_gpu, self.r_gpu, self.f_gpu, rot, self.a_gpu)
         intensity = self.a_gpu.get()
-        if ba.get_global('debug') > 0:
-            print(intensity, intensity.shape, type(intensity), intensity.dtype, np.max(intensity))
-            print(self.q_gpu.shape)
         return np.abs(intensity)**2
 
 
@@ -268,7 +264,7 @@ class CrystalSimulatorV1(object):
         else:
             self.r = self.crystal_structure.molecule.coordinates
             self.Z = self.crystal_structure.molecule.atomic_numbers
-        self.f = ba.simulate.atoms.get_scattering_factors(self.Z, photon_energy=beam.photon_energy)
+        self.f = atoms.get_scattering_factors(self.Z, photon_energy=beam.photon_energy)
 
         self.clcore = ClCore(group_size=cl_group_size, double_precision=cl_double_precision)
         self.r_dev = self.clcore.to_device(self.r, dtype=self.clcore.real_t)

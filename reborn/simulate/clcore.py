@@ -22,7 +22,7 @@ import pkg_resources
 import pyopencl as cl
 import pyopencl.array
 
-from reborn.utils import depreciate
+from ..utils import depreciate
 
 cl_array = cl.array.Array
 
