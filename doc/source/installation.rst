@@ -91,7 +91,40 @@ Mac OS.
 Windows 10 notes
 ----------------
 
-Kosta will add notes here.
+One method that is known to work for Windows 10 is to install Microsoft's Ubuntu subsystem.  There are 
+issues with displaying windows when using the Ubuntu subsystem, and one work-around is to use a 
+Jupyter Lab server so that windows are displayed via your web browser.
+
+1) Download the Ubuntu app from the Windows app store.
+
+2) Open the Windows PowerShell, run as administrator.
+
+3) Run this line and restart your computer: 
+
+.. code-block:: powershell
+	
+    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+
+Note that you will likely need to `cd /mnt/c/../..` to change to the c drive.
+
+4) Install Anaconda on the Ubuntu app using `this guide <https://docs.anaconda.com/anaconda/install/linux/>`_.  
+Note: download the Linux download file and run it on the Ubuntu app interface! 
+
+5) From the Linux command line, start Jupyter Lab:
+
+.. code-block:: bash
+
+    jupyter lab
+ 	
+Copy one the URLs that are listed into a web browser.  Open a new terminal in the jupyter lab interface and 
+run the following command (push shift-enter to run): 
+
+.. code-block:: ipython
+
+    %run yourscript.py
+
+After the above is done, everything is similar to a clean Linux install.  Sublime Text 3 works well to 
+read/write scripts on Windows.
 
 Notes on setting up your path
 -----------------------------
