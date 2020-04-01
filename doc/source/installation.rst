@@ -1,9 +1,6 @@
 Getting Started
 ===============
 
-The following suggestions should work on Linux or MacOS.  We have not thoroughly tested reborn on MS Windows (but you
-might find `git bash <https://gitforwindows.org/>`_ to be helpful on Windows).
-
 In principle, setting up reborn should be as simple as including the base directory of the reborn git repository in
 your python path.  You'll probably find that you need to install some dependencies, but all of them are known to install
 easily with pip or conda (however, there may be some extra steps to enable GPU computations -- see the relevant section
@@ -76,14 +73,25 @@ flag):
 
 You can of course install all of the necessary packages manually by other means.
 
-Complete setup from a clean Linux install
------------------------------------------
+Linux notes
+-----------
 
 Below are the standard steps that are tested on a clean Ubuntu Linux install every time the reborn master branch is
 updated.  The script `developer/ubuntu-install.sh` is executed from the base directory of the git repository.  Here
 are the current contents of that script:
 
 .. literalinclude:: ../../developer/ubuntu-setup.sh
+
+Mac OS notes
+------------
+
+Mostly the same procedure as Linux, except that you should install Miniconda according to the instructions for 
+Mac OS.
+
+Windows 10 notes
+----------------
+
+Kosta will add notes here.
 
 Notes on setting up your path
 -----------------------------
