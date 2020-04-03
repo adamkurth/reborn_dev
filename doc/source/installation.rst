@@ -88,43 +88,37 @@ Mac OS notes
 Mostly the same procedure as Linux, except that you should install Miniconda according to the instructions for 
 Mac OS.
 
-Windows 10 notes
+
+Windows 10 Notes
 ----------------
 
-One method that is known to work for Windows 10 is to install Microsoft's Ubuntu subsystem.  There are 
-issues with displaying windows when using the Ubuntu subsystem, and one work-around is to use a 
-Jupyter Lab server so that windows are displayed via your web browser.
+One method that is known to work for Windows 10 is to install Microsoft's Ubuntu subsystem.
+There are issues with displaying windows when using the Ubuntu subsystem, and one work-around is
+to install VcXsrv.
 
-1) Download the Ubuntu app from the Windows app store.
-
-2) Open the Windows PowerShell, run as administrator.
-
-3) Run this line and restart your computer: 
-
-.. code-block:: powershell
-	
+1) Download the Ubuntu app from the Windows app store
+2) Open the Windows Powershell, run as administrator
+3) Run this line and restart your computer
+.. code-block:: bash
     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 
-Note that you will likely need to `cd /mnt/c/../..` to change to the c drive.
+Note that you will likely need to cd /mnt/c/../.. to change to the c-drive (or whichever drive you wish)
 
-4) Install Anaconda on the Ubuntu app using `this guide <https://docs.anaconda.com/anaconda/install/linux/>`_.  
-Note: download the Linux download file and run it on the Ubuntu app interface! 
+From here, you need to install VcXsrv Windows X Server. Here is a link to the 2020-01-12 version: https://sourceforge.net/projects/vcxsrv/
 
-5) From the Linux command line, start Jupyter Lab:
+4) Download and run VcXsrv and run the installer with all the default settings
+5) In the Ubuntu app, install imagemagick
+.. code-block: bash
+    sudo apt install imagemagick
 
-.. code-block:: bash
+6) In the Ubuntu terminal, run this line
+.. code-block: bash
+    echo "export DISPLAY=localhost:0.0" >> ~/.bashrc && source ~/.bashrc
 
-    jupyter lab
- 	
-Copy one the URLs that are listed into a web browser.  Open a new terminal in the jupyter lab interface and 
-run the following command (push shift-enter to run): 
 
-.. code-block:: ipython
 
-    %run yourscript.py
 
-After the above is done, everything is similar to a clean Linux install.  Sublime Text 3 works well to 
-read/write scripts on Windows.
+
 
 Notes on setting up your path
 -----------------------------
