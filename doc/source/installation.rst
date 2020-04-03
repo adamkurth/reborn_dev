@@ -99,7 +99,9 @@ to install VcXsrv.
 1) Download the Ubuntu app from the Windows app store
 2) Open the Windows Powershell, run as administrator
 3) Run this line and restart your computer
+
 .. code-block:: bash
+
     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 
 Note that you will likely need to cd /mnt/c/../.. to change to the c-drive (or whichever drive you wish)
@@ -108,11 +110,15 @@ From here, you need to install VcXsrv Windows X Server. Here is a link to the 20
 
 4) Download and run VcXsrv and run the installer with all the default settings
 5) In the Ubuntu app, install imagemagick
-.. code-block: bash
+
+.. code-block:: bash
+
     sudo apt install imagemagick
 
 6) In the Ubuntu terminal, run this line
-.. code-block: bash
+
+.. code-block:: bash
+
     echo "export DISPLAY=localhost:0.0" >> ~/.bashrc && source ~/.bashrc
 
 
