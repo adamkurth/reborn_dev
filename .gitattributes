@@ -1,0 +1,21 @@
+# Windows uses different end-of-line characters than Linux and Mac OS.  In an effort
+# to deal with that, I'm trying some suggestions found here:
+# https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings
+# The hope is that line endings will be set to the linefeed only on commits, but
+# on Windows checkouts will convert linefeed to the carriage return and linefeed.
+# Here is a command to list all file extensions in the git repository:
+# find . -type f | perl -ne 'print $1 if m/\.([^.\/]+)$/' | sort -u
+
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+# *.sh text
+
+# Declare files that will always have CRLF line endings on checkout.
+# *.sln text eol=crlf
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
