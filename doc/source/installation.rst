@@ -108,7 +108,7 @@ Note that you will likely need to cd /mnt/c/../.. to change to the c-drive (or w
 
 From here, you need to install VcXsrv Windows X Server. Here is a link to the 2020-01-12 version: https://sourceforge.net/projects/vcxsrv/
 
-4) Download and run VcXsrv and run the installer with all the default settings
+4) Download and run VcXsrv and run the installer with all the default settings. Make sure to choose the 'multiple windows' options.
 5) In the Ubuntu app, install imagemagick
 
 .. code-block:: bash
