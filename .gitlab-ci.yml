@@ -12,7 +12,7 @@ tests:
 pages:
   script:
   - cd doc
-  - ./update-documentation.sh
+  - bash update-documentation.sh
   - cp -r html ../public
   artifacts:
     paths:
