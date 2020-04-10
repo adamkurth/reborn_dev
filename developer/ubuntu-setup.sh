@@ -8,6 +8,7 @@ bash miniconda.sh --help
 bash miniconda.sh -h
 export PATH=./miniconda/bin:$PATH
 pwd
+ls
 ls ./miniconda
 ls ./miniconda/bin
 conda update -n base -c defaults conda
