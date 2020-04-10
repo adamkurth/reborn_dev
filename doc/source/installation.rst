@@ -123,6 +123,21 @@ From here, you need to install VcXsrv Windows X Server. Here is a link to the 20
 
 
 
+To install Python and all the important stuff, go to Anaconda.com and download the LINUX version of the software suite. Then in your Ubuntu terminal,
+navigate to the download and install it using this command
+
+.. code-block:: bash
+
+    bash /your/file/path/Anaconda2-2019.10-Linux-x86_64.sh
+
+Make you sure you change your file path and double check that the download file is the most up to date Linux installation file. Follow through with
+all the default installation settings and restart your terminal once the download is complete.  After all of that is complete, you should have the 
+most up-to-date python and ipython versions. You can download all the packages you need by running conda install [package]. 
+
+
+
+
+
 
 
 
