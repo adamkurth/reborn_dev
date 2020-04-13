@@ -136,6 +136,31 @@ most up-to-date python and ipython versions. You can download all the packages y
 
 
 
+To get submodules to work for Windows, follow this guide:
+
+1) In your ~/.ssh/ folder, add a new text file and name it 'config'.
+
+.. code-block:: bash
+
+    sudo nano config
+
+2)  In that file, add the follwing text: 
+
+.. code-block:: bash
+
+    AddressFamily inet
+
+3) In your repository, do the following. Note: 'B' in the commit messsage should be changed to the 
+repo you're adding bornagain to. 
+
+.. code-block:: bash
+
+    git submodule add git@gitlab.com:rkirian/bornagain.git
+    git submodule update --remote
+
+This should work fine from here, but you may need to add a symbolic link from the location of your script to the bornagain/reborn folder in order to get things working. 
+
+
 
 
 
