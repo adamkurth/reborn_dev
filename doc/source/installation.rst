@@ -150,7 +150,7 @@ To get submodules to work for Windows, follow this guide:
 
     AddressFamily inet
 
-3) In your repository, do the following. Note: 'B' in the commit messsage should be changed to the 
+3)  In your repository, do the following. Note: 'B' in the commit messsage should be changed to the 
 repo you're adding bornagain to. 
 
 .. code-block:: bash
