@@ -107,6 +107,8 @@ to install VcXsrv.
 Note that you will likely need to cd /mnt/c/../.. to change to the c-drive (or whichever drive you wish)
 
 From here, you need to install VcXsrv Windows X Server. Here is a link to the 2020-01-12 version: https://sourceforge.net/projects/vcxsrv/
+It's a little annoying, but you'll have to manually open the software and go through all the default options 
+everytime you reboot your computer. 
 
 4) Download and run VcXsrv and run the installer with all the default settings. Make sure to choose the 'multiple windows' options.
 5) In the Ubuntu app, install imagemagick
@@ -150,8 +152,7 @@ To get submodules to work for Windows, follow this guide:
 
     AddressFamily inet
 
-3)  In your repository, do the following. Note: 'B' in the commit messsage should be changed to the 
-repo you're adding bornagain to. 
+3)  In your repository, do the following. Note: 'B' in the commit messsage should be changed to the repo you're adding bornagain to. 
 
 .. code-block:: bash
 
