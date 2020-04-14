@@ -93,6 +93,38 @@ def boxsnr(dat, mask, mask2, nin, ncent, nout):
     return snr, signal
 
 
+def snr_mask(dat, mask, nin, ncent, nout, threshold, max_iterations=3):
+    r"""
+    Mask out pixels above some chosen SNR threshold.  Algorithm description: search for pixels above some SNR threshold
+    using the boxsnr function, but when calculating the Noise from the annulus, ignore pixels that are already above
+    threshold.  The need for iteration arises because the above-threshold pixels that should not contribute to the Noise
+    calculation cannot be known from the beginning (else this function would not be needed!).
+
+    Arguments:
+        dat (numpy array) : Input data to calculate SNR from.
+        mask (numpy array) : Mask indicating bad pixels (zero means bad, one means ok)
+        nin (int) : See boxsnr function.
+        ncent (int) : See boxsnr function.
+        nout (int) : See boxsnr function.
+        threshold (float) : Reject pixels above this SNR.
+        max_iterations (int) : The maxumum number of iterations (note: the loop exits if the mask stops changing).
+
+    Returns:
+        numpy array : The mask with pixels above the SNR threshold
+    """
+
+    mask_a = mask.copy()
+    for i in range(max_iterations):
+        a, _ = boxsnr(dat, mask, mask_a, nin, ncent, nout)
+        ab = a > threshold
+        if np.sum(ab) > 0:
+            mask_a[ab] = 0
+        else:
+            break
+    return mask_a
+
+
+
 # def boxconv(dat, width):
 #
 #     r"""
