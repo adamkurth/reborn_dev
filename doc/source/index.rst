@@ -20,9 +20,9 @@ For clarity, reborn is not a "program".  In order to use it you must write Pytho
 to be a *general* or *complete* tool at this time -- its content is dictated by what is needed for work done in the
 Kirian Lab.  It is nonetheless available for anyone to use under the GNU V3 License.
 
-You can find the reborn source code on gitlab here: https://gitlab.com/rkirian/bornagain
+You can find the reborn source code on gitlab here: https://gitlab.com/kirianlab/reborn
 
-This documentation is available on the web here: https://rkirian.gitlab.io/bornagain
+This documentation is available on the web here: https://kirianlab.gitlab.io/reborn
 
 If you have never written code to do data analysis or simulations, you should firstly learn the basics of using the
 `bash shell <https://linuxconfig.org/bash-scripting-tutorial-for-beginners>`_,
