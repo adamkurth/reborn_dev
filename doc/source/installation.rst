@@ -17,10 +17,7 @@ The first thing you will need to do is use git to clone reborn on your computer:
 
 .. code-block:: bash
 
-    git clone git@gitlab.com:rkirian/bornagain.git reborn
-
-Note that reborn was formerly known as bornagain, which is why the above command renames the repository.  Eventually,
-the link will be fixed so that this is not necessary.
+    git clone git@gitlab.com:kirianlab/reborn.git
 
 Dependencies
 ------------
