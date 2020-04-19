@@ -69,16 +69,41 @@ class PeakFinder(object):
         return self.centroids
 
 
-def boxsnr(dat, mask, mask2, nin, ncent, nout):
+def boxsnr(dat, mask_in, mask_out, n_in, n_cent, n_out):
 
     r"""
+    Transform an 2D image into a map of local signal-to-noise ratio by the following equivalent steps:
+
+    (1) For every pixel in the input data, do a local signal integration within a square region of size
+        :math:`n_\text{in}*2+1`.  Pixels masked by `mask_in` will be ignored.  Masked pixels are indicated by the value
+        zero, while unmasked pixels are indicated by the value one.
+
+    (2) Estimate background via a local integration within a square annulus of outer size 
+        :math:`2 n_\text{out} + 1` and inner size :math:`2 n_\text{cent} - 1`.  Pixels within `mask_out` will be
+        ignored.
+
+    (3) From every pixel in the local signal integration square, subtract the average background value from step (2).
+
+    (4) Compute the standard deviation :math:`\sigma` in the square annulus.  Pixels within `mask_out` will be ignored.
+
+    (5) Divide the locally-integrated signal-minus-background by the standard error.  The standard error is 
+        equal to :math:`\sigma*\sqrt(M)` where :math:`M` is the number of unmasked pixels in the locally-integratied
+        signal region, and :math:`\sigma` comes from step (4).
+
+    Note: The use of two distinct masks allows for multi-pass SNR computations in which the results of the first pass 
+    may be used to exclude high-SNR regions from contributing to error estimates in the annulus.  See
+    :func:`snr_mask <reborn.analysis.peaks.snr_mask>` if you want to generate a mask this way.
+
+    Note: This routine will attempt to use openmp to parallelize the computations.  It is affected by the environment
+    variable `OMP_NUM_THREADS`.
+
     Arguments:
         dat: The image to analyze
-        mask: The mask for the square central integration region
-        mask2: The mask for the square annulus integration region
-        nin: Size of the central integration region; integrate from (-nin, nin), inclusively.
-        ncent: Define the annulus integration region; we ignore the box from (-ncent, ncent), inclusively
-        nout: Define the annulus integration region; we include the box from (-nout, nout), inclusively
+        mask_in: The mask for the square central integration region
+        mask_out: The mask for the square annulus integration region
+        n_in: Size of the central integration region; integrate from (-nin, nin), inclusively.
+        n_cent: Define the annulus integration region; we ignore the box from (-ncent, ncent), inclusively
+        n_out: Define the annulus integration region; we include the box from (-nout, nout), inclusively
 
     Returns: snr (numpy array), signal (numpy array)
     """
@@ -87,13 +112,13 @@ def boxsnr(dat, mask, mask2, nin, ncent, nout):
     snr = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
     signal = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
     d = np.asfortranarray(dat.astype(float_t))
-    m = np.asfortranarray(mask.astype(float_t))
-    m2 = np.asfortranarray(mask2.astype(float_t))
-    peaks_f.boxsnr(d, m, m2, snr, signal, nin, ncent, nout)
+    m = np.asfortranarray(mask_in.astype(float_t))
+    m2 = np.asfortranarray(mask_out.astype(float_t))
+    peaks_f.boxsnr(d, m, m2, snr, signal, n_in, n_cent, n_out)
     return snr, signal
 
 
-def snr_mask(dat, mask, nin, ncent, nout, threshold, max_iterations=3):
+def snr_mask(dat, mask, nin, ncent, nout, threshold, mask_negative=True, max_iterations=3):
     r"""
     Mask out pixels above some chosen SNR threshold.  Algorithm description: search for pixels above some SNR threshold
     using the boxsnr function, but when calculating the Noise from the annulus, ignore pixels that are already above
@@ -107,6 +132,7 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold, max_iterations=3):
         ncent (int) : See boxsnr function.
         nout (int) : See boxsnr function.
         threshold (float) : Reject pixels above this SNR.
+        mask_negative (bool) : Also reject pixels below the negative of the SNR threshold (default: True).
         max_iterations (int) : The maxumum number of iterations (note: the loop exits if the mask stops changing).
 
     Returns:
@@ -117,6 +143,8 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold, max_iterations=3):
     for i in range(max_iterations):
         a, _ = boxsnr(dat, mask, mask_a, nin, ncent, nout)
         ab = a > threshold
+        if mask_negative:
+            ab *= a < -threshold
         if np.sum(ab) > 0:
             mask_a[ab] = 0
         else:

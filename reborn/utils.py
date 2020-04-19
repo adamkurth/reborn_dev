@@ -297,8 +297,9 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
     insertion result. This is so that the function can be used to sum over many trilinearly
     inserted arrays in for example a 3D diffracted intensity merge.
 
-    Note 1: All input arrays should be C contiguous.
-    Note 2: This code will break if you put a 1 in any of the N_bin entries.
+    Note: All input arrays should be C contiguous.
+
+    Note: This code will break if you put a 1 in any of the N_bin entries.
 
     Arguments:
         data_coord : An Nx3 array of 3-vectors containing coordinates of the data points that you wish to insert into
