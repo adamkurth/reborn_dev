@@ -303,14 +303,22 @@ class CrystalStructure(object):
 
         # These are the initial coordinates with strange origin
         r = dic['atomic_coordinates']
+        
+        Z0 = atoms.atomic_symbols_to_numbers(dic['atomic_symbols'])
+        Z = Z0.copy()
+        atomic_symbols0 = dic['atomic_symbols']
+        atomic_symbols = atomic_symbols0.copy()
 
         # Check for non-crystallographic symmetry.  Construct asymmetric unit from them.
         if expand_ncs_coordinates:
             ncs_partners = [r]
+            print(len(dic['ncs_rotations']))
             n_ncs_partners = len(dic['ncs_rotations'])
             i_given = dic['i_given']
             for i in range(n_ncs_partners):
                 if i_given[i] == 0:
+                    Z = np.concatenate([Z0,Z])
+                    atomic_symbols = np.concatenate([atomic_symbols0, atomic_symbols])
                     R = dic['ncs_rotations'][i]
                     T = dic['ncs_translations'][i]
                     ncs_partners.append(np.dot(r, R.T) + T)
@@ -318,10 +326,11 @@ class CrystalStructure(object):
         else:
             r_au = r
 
+        print("hello1")
         # Transform to fractional coordinates
         x_au = np.dot(S, r_au.T).T # + U
+
         # Get center of mass (estimate based on atomic number only)
-        Z = atoms.atomic_symbols_to_numbers(dic['atomic_symbols'])
         x_au_com = np.sum((Z*x_au.T).T, axis=0)/np.sum(Z)
 
         n_sym = len(dic['spacegroup_rotations'])
@@ -347,8 +356,11 @@ class CrystalStructure(object):
         if tight_packing:
             self.set_tight_packing()
 
+        print("hello2")
         r_au_mod = np.dot(x_au, self.unitcell.o_mat.T)
-        self.molecule = Molecule(coordinates=r_au_mod, atomic_symbols=dic['atomic_symbols'])
+        print(atomic_symbols)
+        self.molecule = Molecule(coordinates=r_au_mod, atomic_symbols=atomic_symbols)
+        print("hello3")
 
     @property
     def x_vecs(self):
@@ -1067,7 +1079,14 @@ def pdb_to_dict(pdb_file_path):
                 mtrix[mtrix_index, 1] = float(line[20:30])
                 mtrix[mtrix_index, 2] = float(line[30:40])
                 mtrix[mtrix_index, 3] = float(line[45:55])
-                i_given[mtrix_index] = int(line[59])
+                if len(line) < 60:
+                    i_given[mtrix_index] = 0
+                else:
+                    try:
+                        i_given[mtrix_index] = int(line[59])
+                    except ValueError:
+                        i_given[mtrix_index] = 0
+
                 mtrix_index += 1
 
             # Atomic (orthogonal) coordinates
