@@ -913,8 +913,6 @@ class RadialProfiler():
             cntdat = self.get_sum_profile(mask)
         else:
             cntdat = self.counts_profile
-        print('cntdat', cntdat.shape)
-        print('FUCK!', sumdat.shape)
         return np.divide(sumdat, cntdat, where=(cntdat > 0), out=np.zeros(sumdat.shape))
 
     def get_profile(self, data, mask=None, average=True):
