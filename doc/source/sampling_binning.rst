@@ -17,6 +17,8 @@ available for manipulating density maps.
 Sampling and Binning
 --------------------
 
+.. _binning:
+
 .. figure:: figures/bins_schematic.png
     :scale: 50 %
     :alt: 6 bin discrete

@@ -36,6 +36,14 @@ def docs():
     webbrowser.open('file://' + docs_file_path)
 
 
+def ensure_list(val):
+    if isinstance(val, list):
+        return val
+    if isinstance(val, tuple):
+        return list(val)
+    return [val]
+
+
 def vec_norm(vec):
     r"""
     Compute normal vectors, which have lengths of one.

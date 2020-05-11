@@ -33,8 +33,8 @@ class Beam():
     diameter_fwhm = None
     pulse_energy_fwhm = 0
 
-    def __init__(self, beam_vec=np.array([0, 0, 1]), photon_energy=None, wavelength=None,
-                 polarization_vec=np.array([1, 0, 0]), pulse_energy=None, diameter_fwhm=None):
+    def __init__(self, beam_vec=np.array([0, 0, 1]), photon_energy=1.602e-15, wavelength=None,
+                 polarization_vec=np.array([1, 0, 0]), pulse_energy=1e-3, diameter_fwhm=1e-6):
 
         self.beam_vec = beam_vec
         self.polarization_vec = polarization_vec
@@ -46,6 +46,18 @@ class Beam():
 
         self.diameter_fwhm = diameter_fwhm
         self.pulse_energy = pulse_energy
+
+    def __str__(self):
+        out = ''
+        out += 'beam_vec: %s\n' % self.beam_vec.__str__()
+        out += 'polarization_vec: %s\n' % self._polarization_vec.__str__()
+        out += 'wavelength: %s\n' % self.wavelength.__str__()
+        out += 'photon_number_fluence: %s\n' % self.photon_number_fluence.__str__()
+        return out
+
+    @property
+    def hash(self):
+        return hash(self.__str__())
 
     @property
     def beam_profile(self):
@@ -91,20 +103,15 @@ class Beam():
     @property
     def wavelength(self):
         r""" Photon wavelength in meters."""
-        if self.photon_energy is not None:
-            return hc/self.photon_energy
-        return None
+        return hc/self.photon_energy
 
     @wavelength.setter
     def wavelength(self, value):
-        if value is not None:
-            self.photon_energy = hc/value
+        self.photon_energy = hc/value
 
     @property
     def pulse_energy(self):
         r""" Pulse energy in J."""
-        if self._pulse_energy is None:
-            raise ValueError("beam.pulse_energy has not been defined.  There is no default.")
         return self._pulse_energy
 
     @pulse_energy.setter
@@ -118,7 +125,7 @@ class Beam():
 
     @property
     def fluence(self):
-        r""" Same as energy_fluence."""
+        r""" Same as energy_fluence.  Don't use this method."""
         return self.energy_fluence
 
     @property

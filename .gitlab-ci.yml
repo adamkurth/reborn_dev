@@ -13,7 +13,7 @@ pages:
   script:
   - cd doc
   - bash update-documentation.sh
-  - cp -r html ../public
+  - cp -r build/html ../public
   artifacts:
     paths:
     - public

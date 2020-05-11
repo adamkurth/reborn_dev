@@ -317,3 +317,8 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 math_number_all = True
+
+rst_epilog = """
+.. |PADGeometry|  replace:: :class:`PADGeometry <reborn.detector.PADGeometry>`
+.. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
+"""

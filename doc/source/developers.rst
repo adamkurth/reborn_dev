@@ -68,7 +68,31 @@ Generation of documentation
 
 Docstrings from within the python code automatically find their way into this documentation via
 `Sphinx <http://www.sphinx-doc.org/en/master/>`_.  Please keep
-the formatting consistent by adhering to the Google-style doc strings.
+the formatting consistent by adhering to the Google-style doc strings.  Here is an example of a decently written
+doc string:
+
+.. code-block:: python
+
+    r"""
+    Calculate diffraction amplitudes according to the sum:
+
+    .. math::
+        a_i = \sum_n f_n \exp(-i \vec{q}_i \cdot (\mathbf{R} \vec{r} + \vec{U}))
+
+    Arguments:
+        q (numpy/cl float array [N,3]): Scattering vectors.
+        r (numpy/cl float array [M,3]): Atomic coordinates.
+        f (numpy/cl complex array [M]): Complex scattering factors.
+        R (numpy array [3,3]): Rotation matrix.
+        U (numpy array): Translation vector.
+        a (cl complex array [N]): Complex scattering amplitudes (if you wish to manage your own opencl array).
+        add (bool): True means add to the input amplitudes a rather than overwrite the amplitudes.
+        twopi (bool): True means to multiply :math:`\vec{q}` by :math:`2\pi` just before calculating :math:`A(q)`.
+        n_r_chunks (int): Run in n batches of position vectors to avoid memory issues.
+
+    Returns:
+        (numpy/cl complex array [N]): Diffraction amplitudes.  Will be a cl array if there are input cl arrays.
+    """
 
 If you modify code and wish to update this documentation, the easiest way to do so is to run the script
 "update-documentation.sh" from within the doc directory.  First make sure you have all of the appropriate dependencies,

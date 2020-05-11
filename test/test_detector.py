@@ -1,25 +1,21 @@
-
-
-import sys
-
-sys.path.append('..')
-import reborn as ba
 from reborn import detector
 from reborn import source
 import numpy as np
+import scipy.constants as const
+eV = const.value('electron volt')
 
 
 def make_pad_list():
 
     pad_geom = []
-    pad = ba.detector.PADGeometry()
+    pad = detector.PADGeometry()
     pad.t_vec = [0, .01, .5]
     pad.fs_vec = [100e-6, 0, 0]
     pad.ss_vec = [0, 100e-6, 0]
     pad.n_fs = 100
     pad.n_ss = 150
     pad_geom.append(pad)
-    pad = ba.detector.PADGeometry()
+    pad = detector.PADGeometry()
     pad.t_vec = [0, -.01, .5]
     pad.fs_vec = [100e-6, 0, 0]
     pad.ss_vec = [0, 100e-6, 0]
@@ -69,7 +65,7 @@ def test_PADAssembler():
 
     pad_geom = make_pad_list()
 
-    assembler = ba.detector.PADAssembler(pad_geom)
+    assembler = detector.PADAssembler(pad_geom)
     dat = [p.ones() for p in pad_geom]
 
     ass = assembler.assemble_data(dat)
@@ -89,10 +85,6 @@ def test_radial_profiler_01():
     # rad.bin_edges = [-2320796.25  2320796.25  6962388.75 11603981.25]
     profile = rad.get_profile(dat, average=False)  # Sums over
 
-    print(q_mags)
-    print(rad.bins)
-    print(rad.bin_edges)
-
     assert profile[0] == 1
     assert profile[1] == 4
     assert profile[2] == 4
@@ -106,14 +98,31 @@ def test_radial_profiler_01():
     mask = np.ones([3, 3])
     mask[0, 0] = 0
 
-    rad.set_mask(mask)
-    profile = rad.get_profile(dat, average=False)  # Sums over
-    print(mask)
-    print(profile)
+    profile = rad.get_profile(dat, mask=mask, average=False)  # Sums over
 
     assert profile[0] == 1
     assert profile[1] == 4
     assert profile[2] == 3
+
+    mask = np.ones([3, 3])
+    mask[0, 0] = 0
+
+    rad.set_mask(mask)
+    profile = rad.get_profile(dat, average=False)  # Sums over
+
+    assert profile[0] == 1
+    assert profile[1] == 4
+    assert profile[2] == 3
+
+    mask = np.ones([3, 3])
+    mask[0, 0] = 0
+
+    rad.set_mask(mask)
+    profile = rad.get_profile(dat, average=True)  # Sums over
+
+    assert profile[0] == 1
+    assert profile[1] == 1
+    assert profile[2] == 1
 
 
 def test_radial_profiler_02():
@@ -125,12 +134,10 @@ def test_radial_profiler_02():
 
     q_mags = np.ravel([p.q_mags(beam_vec=beam, wavelength=wav) for p in pad_geom])
 
-    rad = detector.RadialProfiler()
-    rad.make_plan(q_mags, mask=None, n_bins=100, q_range=None)
+    rad = detector.RadialProfiler(q_mags=q_mags, mask=None, n_bins=100, q_range=None)
 
     data = np.ravel([np.random.rand(p.n_ss, p.n_fs) for p in pad_geom])
 
     prof = rad.get_profile(data, average=True)
     assert(np.max(prof) <= 1)
     assert(np.min(prof) >= 0)
-

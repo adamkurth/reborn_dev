@@ -7,6 +7,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import numpy as np
 import h5py
+from scipy.stats import binned_statistic_dd
 from . import utils
 
 
@@ -34,7 +35,7 @@ class PADGeometry():
         High-level initialization.  Centers the detector in the x-y plane.
 
         Arguments:
-            n_pixels (int or numpy array): Shape of the panels.  The first element is the slow-scan shape.  If there is
+            shape (int or numpy array): Shape of the panels.  The first element is the slow-scan shape.  If there is
                                            only one element, or if it is an int, then it will be a square panel.
             distance (float): Sample-to-detector distance, where the beam is taken along the third ("Z") axis
             pixel_size (float): Size of the pixels in SI units.
@@ -51,7 +52,6 @@ class PADGeometry():
             self.simple_setup(n_pixels=n_pixels, distance=distance, pixel_size=pixel_size, shape=shape)
 
     def __str__(self):
-
         out = ''
         out += 'n_fs: %s\n' % self.n_fs.__str__()
         out += 'n_ss: %s\n' % self.n_ss.__str__()
@@ -59,6 +59,11 @@ class PADGeometry():
         out += 'ss_vec: %s\n' % self.ss_vec.__str__()
         out += 't_vec: %s' % self.t_vec.__str__()
         return out
+
+    @property
+    def hash(self):
+        r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
+        return hash(self.__str__())
 
     @property
     def n_fs(self):
@@ -229,17 +234,16 @@ class PADGeometry():
 
     def ds_vecs(self, beam_vec=None, beam=None):
         r"""
-        Normalized scattering vectors s - s0 where s0 is the incident beam direction
-        (`beam_vec`) and  s is the outgoing vector for a given pixel.  This does **not** have
-        the 2*pi/lambda factor included.
+        Scattering vectors :math:`\hat{s} - \hat{s}_0` where :math:`\hat{s}_0` is the incident beam direction
+        and :math:`\hat{s}` is the outgoing vector pointing from sample to pixel.  This does **not** have
+        the :math:`2\pi/\lambda` factor that is included in :meth:`q_mags <reborn.detector.PADGeometry.q_mags>`.
 
         Arguments:
             beam_vec (tuple or numpy array): specify the unit vector of the incident beam
-            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
+            beam (|Beam| instance): specify incident beam properties.  If provided, you may omit the specification
                                          of beam_vec ect.
 
         Returns: numpy array
-
         """
 
         if beam is not None:
@@ -249,9 +253,11 @@ class PADGeometry():
 
     def q_vecs(self, beam_vec=None, wavelength=None, beam=None):
         r"""
-        Calculate scattering vectors:
+        Calculate scattering vectors :math:`\frac{2\pi}{\lambda}(\hat{s} - \hat{s}_0)`
 
-            :math:`\vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)`
+        .. math::
+
+            \vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)
 
         Arguments:
             beam_vec (tuple or numpy array): specify the unit vector of the incident beam
@@ -267,6 +273,18 @@ class PADGeometry():
             wavelength = beam.wavelength
 
         return (2 * np.pi / wavelength) * self.ds_vecs(beam_vec=beam_vec)
+
+    def ds_mags(self, beam_vec=None, beam=None):
+        r"""
+        These are the magnitudes that correspond to
+
+        Args:
+            beam_vec:
+            beam:
+
+        Returns:
+        """
+        return utils.vec_mag(self.ds_vecs(beam_vec=beam_vec, beam=beam))
 
     def q_mags(self, beam_vec=None, wavelength=None, beam=None):
         r"""
@@ -460,7 +478,7 @@ class PADGeometry():
         return 2 * np.pi / np.max(self.q_mags(beam=beam))
 
 
-def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0.1, tiling_shape=(4, 2), pad_gap=50):
+def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0.1, tiling_shape=(4, 2), pad_gap=0):
     r"""
     Make a list of PADGeometry instances with identical panel sizes, tiled in a regular grid.
 
@@ -492,17 +510,39 @@ def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0
     return pads
 
 
+def concat_pad_data(data):
+    r"""
+    Given a list of numpy arrays, concatenate them into a single 1D array.  This is a very simple command:
+
+    .. code-block:: python
+
+        return np.concatenate([d.ravel() for d in data])
+
+    This should exist in numpy but I couldn't find it.
+
+    Arguments:
+        data (list or numpy array): A list of 2D numpy arrays.  If data is a numpy array, then data.ravel() is returned
+
+    Returns: 1D numpy array
+    """
+
+    if type(data) == np.ndarray:
+        return data.ravel()
+
+    return np.concatenate([d.ravel() for d in data])
+
+
 def split_pad_data(pad_list, data):
     r"""
-
-    Given a contiguous block of data, split it up into individual PAD panels
+    Given a contiguous block of data produced by the function :func:`concat_pad_data <reborn.detector.concat_pad_data>`,
+    split the data into individual 2D PAD panels.
 
     Arguments:
         pad_list: A list of PADGeometry instances
         data: A contiguous array with data values (total pixels to add up to sum of pixels in all PADs)
 
     Returns:
-        A list of 2D PAD data arrays
+        A list of 2D numpy arrays
 
     """
 
@@ -734,115 +774,154 @@ class IcosphereGeometry():
 
 class RadialProfiler():
 
-    r"""
-    Helper class to create radial profiles.
-    """
-
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, q_mags=None, mask=None, n_bins=None, q_range=None):
+    def __init__(self, q_mags=None, mask=None, n_bins=None, q_range=None, pad_geometry=None, beam=None):
+        r"""
+        A class for creating radial profiles from image data.  You must provide the number of bins and the q range that
+        you desire for your radial profiles.  The q magnitudes that correspond to your diffraction patterns may be
+        derived from a list of |PADGeometry|'s along with a |Beam|, or you may supply the q magnitudes directly.
 
-        self.n_bins = None
-        self.bins = None
-        self.bin_edges = None
-        self.bin_size = None
-        self.bin_indices = None
-        self.q_mags = None
-        self.mask = None
-        self.counts = None
-        self.q_range = None
-        self.counts_non_zero = None
+        Arguments:
+            q_mags (numpy array): Optional.  Array of q magnitudes.
+            mask (numpy array): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
+                                will come from this (e.g. use values of 0 and 1 if you want a normal average, otherwise
+                                you get a weighted average).
+            n_bins (int): Number of radial bins you desire.
+            q_range (tuple): The minimum and maximum of the *centers* of the q bins.
+            pad_geometry (list of |PADGeometry| instances):  Optional.  Will be used to generate q magnitudes.  You must
+                                                             provide beam if you provide this.
+            beam (|Beam| instance): Optional, unless pad_geometry is provided.  Wavelength and beam direction are
+                                     needed in order to calculate q magnitudes.
+        """
+        self.n_bins = None  # Number of bins in radial profile
+        self.q_range = None  # The range of q magnitudes in the 1D profile.  These correspond to bin centers
+        self.q_edge_range = None  # Same as above, but corresponds to bin edges not centers
+        self.bin_centers = None  # q magnitudes corresponding to 1D profile bin centers
+        self.bin_edges = None  # q magnitudes corresponding to 1D profile bin edges (length is n_bins+1)
+        self.bin_size = None  # The size of the 1D profile bin in q space
+        self.q_mags = None  # q magnitudes corresponding to diffraction pattern intensities
+        self._mask = None  # The default mask, in case no mask is provided upon requesting profiles
+        self._counts_profile = None  # For speed, we cache the counts corresponding to the default _mask
+        self.pad_geometry = None  # List of PADGeometry instances
+        self.beam = None  # Beam instance for creating q magnitudes
+        self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range, pad_geometry=pad_geometry, beam=beam)
 
-        if (n_bins or q_range is not None) and q_mags is not None:
-            self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range)
+    @property
+    def mask(self):
+        return self._mask
 
-    def make_plan(self, q_mags, mask=None, n_bins=None, q_range=None):
+    @mask.setter
+    def mask(self, val):
+        if val is not None:
+            self._mask = concat_pad_data(val)  # Ensure a properly flattened array
+        else:
+            self._mask = None
+        self._counts_profile = None  # Wipe out this profile
+
+    def set_mask(self, mask):
+        self.mask = mask
+
+    @property
+    def counts_profile(self):
+        if self._counts_profile is None:
+            if self.mask is None:
+                self._counts_profile, _ = np.histogram(self.q_mags, bins=self.n_bins, range=self.q_edge_range)
+            else:
+                self._counts_profile, _ = np.histogram(self.q_mags, weights=self.mask, bins=self.n_bins,
+                                                    range=self.q_edge_range)
+        return self._counts_profile
+
+    def make_plan(self, q_mags=None, mask=None, n_bins=None, q_range=None, pad_geometry=None, beam=None):
         r"""
         Setup the binning indices for the creation of radial profiles.
 
         Arguments:
-            q_mags (numpy array) : Scattering vector magnitudes.
-            mask (numpy array) : Pixel mask.  Should be ones and zeros, where one means "good" and zero means "bad".
-            n_bins (int) : Number of bins.
-            q_range (list-like) : The minimum and maximum of the scattering vector magnitudes.  The bin size will be
-                                  equal to (max_q - min_q) / n_bins
+            q_mags (numpy array): Optional.  Array of q magnitudes.
+            mask (numpy array): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
+                                will come from this (e.g. use values of 0 and 1 if you want a normal average, otherwise
+                                you get a weighted average).
+            n_bins (int): Number of radial bins you desire.
+            q_range (tuple): The minimum and maximum of the *centers* of the q bins.
+            pad_geometry (list of |PADGeometry| instances):  Optional.  Will be used to generate q magnitudes.  You must
+                                                             provide beam if you provide this.
+            beam (|Beam| instance): Optional, unless pad_geometry is provided.  Wavelength and beam direction are
+                                     needed in order to calculate q magnitudes.
         """
-        q_mags = q_mags.ravel()
-        if mask is None:
-            mask = np.ones([len(q_mags)])
-        else:
-            mask = mask.copy().ravel()
-        self.setup_bin_indices(q_mags, q_range=q_range, n_bins=n_bins)
-        self.set_mask(mask)
 
-    def setup_bin_indices(self, q_mags, n_bins=None, q_range=None):
-        r"""
-        Assign radial bin values to each of the q magnitudes.  We do this only once and store the values.  The binning
-        convention is as described in the docs.
-
-        Args:
-            q_mags:
-            n_bins:
-            q_range:
-
-        Returns:
-
-        """
-        q_mags = q_mags.ravel()
-
+        if q_mags is None:
+            if pad_geometry is None:
+                raise ValueError("You must provide a |PADGeometry| if q_mags are not provided in RadialProfiler")
+            if beam is None:
+                raise ValueError("You must provide a |Beam| if q_mags are not profided in RadialProfiler")
+            pad_geometry = utils.ensure_list(pad_geometry)
+            q_mags = [p.q_mags(beam=beam) for p in pad_geometry]
+        q_mags = concat_pad_data(q_mags)
         if q_range is None:
-            min_q = np.min(q_mags)
-            max_q = np.max(q_mags)
-            q_range = np.array([min_q, max_q])
-        else:
-            q_range = q_range.copy()
-            min_q = q_range[0]
-            max_q = q_range[1]
-
-        bin_size = (max_q - min_q) / float(n_bins - 1)
-        bins = min_q + np.arange(n_bins)*bin_size
-        bin_edges = min_q - bin_size/2 + np.arange(n_bins+1)*bin_size
-        bin_indices = np.int64(np.floor((q_mags - (min_q - bin_size/2)) / bin_size))
-        # bin_index_groups = []  # A list of length n_bins, each of which contains a numpy array with the
-        # for i in range(n_bins):
-
-        # Overflow ends up in the min and max bins
-        bin_indices[bin_indices < 0] = 0
-        bin_indices[bin_indices >= n_bins] = n_bins - 1
-
+            q_range = (0, np.max(q_mags))
+        q_range = np.array(q_range)
+        bin_size = (q_range[1] - q_range[0]) / float(n_bins - 1)
+        bin_centers = np.linspace(q_range[0], q_range[1], n_bins)
+        bin_edges = np.linspace(q_range[0]-bin_size/2, q_range[1]+bin_size/2, n_bins+1)
+        q_edge_range = np.array([q_range[0]-bin_size/2,q_range[1]+bin_size/2])
         self.q_mags = q_mags
         self.n_bins = n_bins
-        self.bins = bins
+        self.bin_centers = bin_centers
         self.bin_edges = bin_edges
         self.bin_size = bin_size
-        self.bin_indices = bin_indices
         self.q_range = q_range
+        self.q_edge_range = q_edge_range
+        self.mask = mask
 
-    def set_mask(self, mask):
+    def get_counts_profile(self, mask=None):
+        if mask is not None:
+            mask = concat_pad_data(mask)
+            cntdat, _ = np.histogram(self.q_mags, weights=mask, bins=self.n_bins, range=self.q_edge_range)
+            return cntdat
+        return self.counts_profile
+
+    def get_sum_profile(self, data, mask=None):
         r"""
-        Configure the mask.  This affects how averaging is done since masked pixels are ignored.
+        Calculate the radial profile of summed intensities.
 
         Args:
-            mask (numpy array) : The mask array.  Zero means ignore.
-        """
-        counts = np.bincount(self.bin_indices, mask.ravel(), self.n_bins)
-        counts_non_zero = counts > 0
-        self.mask = mask.copy().ravel()
-        self.counts = counts
-        self.counts_non_zero = counts_non_zero
+            data (numpy array):  The intensity data from which the radial profile is formed.
+            mask (numpy array):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.
 
-    def get_profile(self, data, average=True):
+        Returns:  Numpy array.
+        """
+        data = concat_pad_data(data)
+        if mask is not None:
+            data *= concat_pad_data(mask)
+        cntdat, _ = np.histogram(self.q_mags, weights=data, bins=self.n_bins, range=self.q_edge_range)
+        return cntdat
+
+    def get_mean_profile(self, data, mask=None):
         r"""
-        Create a radial profile for a particular dataframe.
+        Calculate the radial profile of averaged intensities.
 
-        Arguments:
-            data (numpy array) : Intensity data.
-            average (bool) : If true, divide the sum in each bin by the counts, else return the sum.  Default: True.
+        Args:
+            data (numpy array):  The intensity data from which the radial profile is formed.
+            mask (numpy array):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.
 
-        Returns:
-            numpy array : The requested radial profile.
+        Returns:  Numpy array.
         """
-        profile = np.bincount(self.bin_indices, data.ravel() * self.mask, self.n_bins)
-        if average:
-            profile.flat[self.counts_non_zero] /= self.counts.flat[self.counts_non_zero]  # pylint:disable=no-member
-        return profile
+        if mask is None:
+            mask = self.mask
+        sumdat = self.get_sum_profile(data, mask=mask)
+        if mask is not None:
+            cntdat = self.get_sum_profile(mask)
+        else:
+            cntdat = self.counts_profile
+        print('cntdat', cntdat.shape)
+        print('FUCK!', sumdat.shape)
+        return np.divide(sumdat, cntdat, where=(cntdat > 0), out=np.zeros(sumdat.shape))
+
+    def get_profile(self, data, mask=None, average=True):
+        r"""
+        This method is depreciated.  Use get_mean_profile or get_sum_profile instead.
+        """
+        utils.depreciate("RadialProfiler.get_profile() is depreciated.  Read the docs.")
+        if average is True:
+            return self.get_mean_profile(data, mask=mask)
+        return self.get_sum_profile(data, mask=mask)

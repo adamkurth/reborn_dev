@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-htmlindex="../doc/html/index.html"
+htmlindex="../doc/build/html/index.html"
 
 # Opening files from the command line is easy with Mac OS.  How do you do this in Linux?
 if [ "`echo $(uname -a | grep Darwin)`" != '' ]; then
@@ -11,4 +11,4 @@ elif [ $(command -v xdg-open) ]; then
  exit
 fi
 
-echo "You need to manually open the docs in ../doc/html/index.html"
+echo "You need to manually open the docs in ../doc/build/html/index.html"

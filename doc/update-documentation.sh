@@ -20,7 +20,5 @@ rm tmp.rst
 make clean
 make doctest
 make html
-rm -r html
-mv build/html .
-perl -p -i -e 's{<head>\n}{<head>\n  <meta name="robots" content="noindex, nofollow" />\n}' html/*.html
+perl -p -i -e 's{<head>\n}{<head>\n  <meta name="robots" content="noindex, nofollow" />\n}' build/html/*.html
 #perl -p -i -e 's{>reborn.*</a>}{}'
