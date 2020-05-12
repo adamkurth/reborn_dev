@@ -312,7 +312,7 @@ class CrystalStructure(object):
         # Check for non-crystallographic symmetry.  Construct asymmetric unit from them.
         if expand_ncs_coordinates:
             ncs_partners = [r]
-            print(len(dic['ncs_rotations']))
+            # print(len(dic['ncs_rotations']))
             n_ncs_partners = len(dic['ncs_rotations'])
             i_given = dic['i_given']
             for i in range(n_ncs_partners):
