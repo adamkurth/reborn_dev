@@ -320,9 +320,11 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
         wrap_around: Bool variable to specify periodic boundaries or not.
 
     Returns:
-        dataout   : A 3D numpy array with trilinearly summed values - this needs to be divided by weightout to give the
-                    trilinearly inserted values.
-        weightout : A 3D numpy array that contains the number of times each voxel has a value put into it.
+        2-element tuple containing
+
+        - **dataout** (*3D numpy array*) : Trilinearly summed values that needs to be divided by weightout to give the
+                                           trilinearly inserted values.
+        - **weightout** (*3D numpy array*) : Number of times each voxel has a value put into it.
     """
 
     # ------------------------------------------

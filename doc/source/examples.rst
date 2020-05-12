@@ -1,11 +1,9 @@
 Examples
 ========
 
-
-Contents
---------
+.. include:: auto_examples/index.rst
 
 .. toctree::
    :maxdepth: 1
 
-   examples/simulations
+   auto_examples/index

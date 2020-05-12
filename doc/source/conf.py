@@ -39,7 +39,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    'sphinx.ext.doctest']
+    'sphinx.ext.doctest',
+    'sphinx_gallery.gen_gallery']
 
 
 # Don't sort autodocumention alphabetically

@@ -7,15 +7,14 @@
 #
 # https://rkirian.gitlab.io/reborn
 
-rm -r source/api
+[ -d source/api ] && rm -r source/api
+[ -d source/auto_examples ] && rm -r source/auto_examples
 sphinx-apidoc --output-dir source/api --module-first ../reborn ../reborn/fortran
-ls source/api
 # Fix the stupid default title of API page
 tail -n+3 source/api/modules.rst > tmp.rst
 echo 'Complete API' > source/api/modules.rst
 echo '============' >> source/api/modules.rst
 cat tmp.rst >> source/api/modules.rst
-
 rm tmp.rst
 make clean
 make doctest

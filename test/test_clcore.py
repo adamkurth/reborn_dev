@@ -1,9 +1,9 @@
 """
 Test the clcore simulation engine in reborn.simulate.  This requires pytest.  You can also run from main
 like this:
-> python test_simulate_clcore.py
+> python broken_test_simulate_clcore.py
 If you want to view results just add the keyword "view"
-> python test_simulate_clcore.py view
+> python broken_test_simulate_clcore.py view
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)

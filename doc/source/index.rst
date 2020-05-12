@@ -78,8 +78,8 @@ Contents
    crystals
    sampling_binning
    simulations
-   examples
    fortran
+   examples
    developers
    api/modules
 

@@ -317,7 +317,7 @@ class CrystalStructure(object):
             i_given = dic['i_given']
             for i in range(n_ncs_partners):
                 if i_given[i] == 0:
-                    Z = np.concatenate([Z0,Z])
+                    Z = np.concatenate([Z0, Z])
                     atomic_symbols = np.concatenate([atomic_symbols0, atomic_symbols])
                     R = dic['ncs_rotations'][i]
                     T = dic['ncs_translations'][i]
@@ -326,7 +326,6 @@ class CrystalStructure(object):
         else:
             r_au = r
 
-        print("hello1")
         # Transform to fractional coordinates
         x_au = np.dot(S, r_au.T).T # + U
 
@@ -356,11 +355,8 @@ class CrystalStructure(object):
         if tight_packing:
             self.set_tight_packing()
 
-        print("hello2")
         r_au_mod = np.dot(x_au, self.unitcell.o_mat.T)
-        print(atomic_symbols)
         self.molecule = Molecule(coordinates=r_au_mod, atomic_symbols=atomic_symbols)
-        print("hello3")
 
     @property
     def x_vecs(self):
