@@ -322,4 +322,5 @@ math_number_all = True
 rst_epilog = """
 .. |PADGeometry|  replace:: :class:`PADGeometry <reborn.detector.PADGeometry>`
 .. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
+.. |detector|  replace:: :module:`detector <reborn.detector>`
 """

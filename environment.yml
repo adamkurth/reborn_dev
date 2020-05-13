@@ -16,6 +16,7 @@ dependencies:
   - pyqtgraph
   - pyopengl
   - xraylib
+  - pillow
   - fortran-compiler
   - make
   - pip
