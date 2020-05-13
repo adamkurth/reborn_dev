@@ -54,17 +54,10 @@ print('sum over rho', np.sum(rho))
 
 #================================================================================
 # Plotting stuff
-# import matplotlib as mpl
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-# font_size = 12
-# mpl.rcParams['xtick.labelsize'] = font_size
-# mpl.rcParams['ytick.labelsize'] = font_size
 CMAP = "viridis"
-
-plt.close('all')
-
 
 print(au_map.shape)
 Nx,Ny,Nz = au_map.shape
@@ -120,20 +113,20 @@ def show_projection(disp_map, disp_str):
 
 
 disp_map = np.abs(au_map)
-disp_str = 'Asymmetric unit map - central slice'
+disp_str = 'Asymmetric unit - central slice'
 show_slice(disp_map, disp_str)
 
 disp_map = np.abs(au_map)
-disp_str = 'Asymmetric unit map- projection'
+disp_str = 'Asymmetric unit - projection'
 show_projection(disp_map, disp_str)
 
 
 disp_map = np.abs(rho)
-disp_str = 'Unit cell unit map - central slice'
+disp_str = 'Unit cell - central slice'
 show_slice(disp_map, disp_str)
 
 disp_map = np.abs(rho)
-disp_str = 'Unit cell unit map- projection'
+disp_str = 'Unit cell - projection'
 show_projection(disp_map, disp_str)
 
 
