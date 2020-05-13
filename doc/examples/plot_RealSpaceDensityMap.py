@@ -8,59 +8,57 @@ Making real space density maps
 
 
 import numpy as np
-from numpy.fft import fftn, ifftn, fftshift, ifftshift
-from reborn.simulate.clcore import ClCore
 from reborn.target import crystal
 import scipy.constants as const
 
-np.random.seed(42)
 eV = const.value('electron volt')
 
+pdb_file = '1JB0.pdb'
 resolution = 5e-10
 oversampling = 1
 photon_energy_ev = 12000
-pdb_file = '1JB0.pdb'
 
-# Create a crystal object. This has molecule, unit cell, and spacegroup info
-cryst = crystal.CrystalStructure(pdb_file, tight_packing=True)  # Tight packing: put molecule COMs inside unit cell
+
+# Create a crystal object. This object has molecule, unit cell and spacegroup info.
+# Tight packing lets the asymmetric units be positioned in a physical way.
+cryst = crystal.CrystalStructure(pdb_file, tight_packing=True)
 uc = cryst.unitcell
 sg = cryst.spacegroup
 print(uc)
 print(sg)
 
 
-# Density map configuration with spacegroup considerations
+# Create a density map object. This object has spacegroup info.
 cdmap = crystal.CrystalDensityMap(cryst=cryst, resolution=resolution, oversampling=oversampling)
 
 
-# GPU simulation engine
-clcore = ClCore()
-
 # Scattering factors
 f = cryst.molecule.get_scattering_factors(photon_energy=photon_energy_ev*eV)
-print('sum over f', np.sum(f))
+print('sum of f', np.sum(f))
 
-# au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='gaussian', fixed_atom_sigma=1e-10)
-au_map = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='trilinear')
-print('sum over au_map', np.sum(au_map))
 
-# Assemble the unit cell density
-rho = 0
+# Make the density map for the asymmetric unit. 
+# Here we do a trilinear insertion of the scattering factors, giving a 3D array of complex-valued numbers.
+rho_au = cdmap.place_atoms_in_map(cryst.fractional_coordinates, f, mode='trilinear')
+print('sum of rho_au', np.sum(rho_au))
+
+
+# Assemble the unit cell density by generating all symmetry partners of the asymmetric unit and adding them up.
+rho_uc = 0
 for k in range(cryst.spacegroup.n_operations):
-    rho += cdmap.au_to_k(k, au_map)
-
-print('sum over rho', np.sum(rho))
+    rho_uc += cdmap.au_to_k(k, rho_au)
+print('sum of rho_uc', np.sum(rho_uc))
 
 
 #================================================================================
-# Plotting stuff
+# Plotting
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 CMAP = "viridis"
 
-print(au_map.shape)
-Nx,Ny,Nz = au_map.shape
+print(rho_au.shape)
+Nx,Ny,Nz = rho_au.shape
 Nx_cent = int(np.round(Nx/2))
 Ny_cent = int(np.round(Ny/2))
 Nz_cent = int(np.round(Nz/2))
@@ -112,21 +110,20 @@ def show_projection(disp_map, disp_str):
 	plt.show()
 
 
-disp_map = np.abs(au_map)
-disp_str = 'Asymmetric unit - central slice'
+disp_map = np.abs(rho_au)
+disp_str = 'Asymmetric unit: central slice'
 show_slice(disp_map, disp_str)
 
-disp_map = np.abs(au_map)
-disp_str = 'Asymmetric unit - projection'
+disp_map = np.abs(rho_au)
+disp_str = 'Asymmetric unit: projection'
 show_projection(disp_map, disp_str)
 
 
-disp_map = np.abs(rho)
-disp_str = 'Unit cell - central slice'
+disp_map = np.abs(rho_uc)
+disp_str = 'Unit cell: central slice'
 show_slice(disp_map, disp_str)
 
-disp_map = np.abs(rho)
-disp_str = 'Unit cell - projection'
+disp_map = np.abs(rho_uc)
+disp_str = 'Unit cell: projection'
 show_projection(disp_map, disp_str)
-
 
