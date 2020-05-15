@@ -159,11 +159,6 @@ To get submodules to work for Windows, follow this guide:
 This should work fine from here, but you may need to add a symbolic link from the location of your script to the bornagain/reborn folder in order to get things working. 
 
 
-
-
-
-
-
 Notes on setting up your path
 -----------------------------
 
@@ -192,7 +187,13 @@ If you wish, you can also install reborn:
 
     python setup.py install
 
-but this is not tested and is not advised as noted above.
+but this is not tested and is not advised as noted above.  If you *really* want to install, you can try this:
+
+.. code-block:: bash
+
+    pip install --no-deps --editable .
+
+The above method will probably become the recommended way to install, once the reborn API is somewhat stable.
 
 Compilation of Fortran code
 ---------------------------

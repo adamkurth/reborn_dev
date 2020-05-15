@@ -10,9 +10,10 @@ import pkg_resources
 import numpy as np
 from scipy.spatial.transform import Rotation
 from .. import detector
-from ..utils import rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance
+from ..utils import rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance, ensure_list
 from ..external import crystfel
 from . import atoms
+from . import solutions
 from ..target.crystal import CrystalStructure
 from .clcore import ClCore
 from scipy import constants as const
@@ -53,6 +54,30 @@ def cspad_pads():
 
     return crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
+
+def simulate_water(pad_geometry=None, beam=None, water_thickness=1e-6):
+    r"""
+    Simulate water scatter.  Takes a PAD geometry and beam specification and returns list of 2D numpy arrays with the
+    scattering intensity in photon units.
+
+    Args:
+        pad_geometry (list of |PADGeometry|'s): List of PAD geometry specifications.
+        beam (|Beam|): Beam specification
+        water_thickness (float): Thickness of water in SI units.
+
+    Returns:
+        list of 2D numpy arrays
+    """
+    n_water_molecules = water_thickness * np.pi * (beam.diameter_fwhm / 2) ** 2 * solutions.water_number_density()
+    pads = ensure_list(pad_geometry)
+    q_mags = [p.q_mags(beam=beam) for p in pads]
+    J = beam.photon_number_fluence
+    P = detector.concat_pad_data([p.polarization_factors(beam=beam) for p in pads])
+    SA = detector.concat_pad_data([p.solid_angles() for p in pads])
+    F_water = solutions.get_water_profile(q_mags)
+    F2_water = F_water ** 2 * n_water_molecules
+    I = r_e ** 2 * J * P * SA * F2_water
+    return detector.split_pad_data(pads, I)
 
 def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=True):
 

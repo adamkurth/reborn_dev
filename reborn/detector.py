@@ -902,12 +902,13 @@ class RadialProfiler():
 
         Args:
             data (numpy array):  The intensity data from which the radial profile is formed.
-            mask (numpy array):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.
+            mask (numpy array):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
+                                 provided here, the mask configured with :meth:`set_mask` will be used.
 
         Returns:  Numpy array.
         """
         if mask is None:
-            mask = self.mask
+            mask = self.mask  # Use the default mask
         sumdat = self.get_sum_profile(data, mask=mask)
         if mask is not None:
             cntdat = self.get_sum_profile(mask)

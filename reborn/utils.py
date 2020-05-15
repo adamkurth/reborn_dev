@@ -36,12 +36,33 @@ def docs():
     webbrowser.open('file://' + docs_file_path)
 
 
-def ensure_list(val):
-    if isinstance(val, list):
-        return val
-    if isinstance(val, tuple):
-        return list(val)
-    return [val]
+def ensure_list(obj):
+    r"""
+    Make sure that some object is a list.  This is helpful because, for example, we frequently write code around the 
+    assumption that detector geometry comes in the form of a list of |PADGeometry| instances.  However, it is also not
+    so uncommon to have a single |PADGeometry|.  
+    
+    This function is very simple:
+    
+    .. code-block:: python
+    
+        def ensure_list(obj):
+            if isinstance(obj, list):
+                return obj
+            if isinstance(obj, tuple):
+                return list(obj)
+            return [obj]
+    
+    Arguments:
+        obj (object): The object that we want to ensure is a list.
+
+    Returns: list
+    """
+    if isinstance(obj, list):
+        return obj
+    if isinstance(obj, tuple):
+        return list(obj)
+    return [obj]
 
 
 def vec_norm(vec):
@@ -310,20 +331,20 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
     Note: This code will break if you put a 1 in any of the N_bin entries.
 
     Arguments:
-        data_coord : An Nx3 array of 3-vectors containing coordinates of the data points that you wish to insert into
+        data_coord (Nx3 numpy array) : 3-vectors containing coordinates of the data points that you wish to insert into
                      the regular grid.
-        data_val   : An array with the N values containing the values of the data points.
-        x_min      : An array with the three values corresponding to the smallest data grid center points.
-        x_max      : An array with the three values corresponding to the largest data grid center points.
-        n_bin      : An array with the three values corresponding to the number of bins in each direction.
-        mask       : An array with the N values specifying which data points to ignore. Zero means ignore.
-        wrap_around: Bool variable to specify periodic boundaries or not.
+        data_val (numpy array) : The N values of the data points to be inserted into the grid.
+        x_min (numpy array) : The three values corresponding to the smallest data grid center points.
+        x_max (numpy array) : The three values corresponding to the largest data grid center points.
+        n_bin (numpy array) : The three values corresponding to the number of bins in each direction.
+        mask (numpy array) : The N values specifying which data points to ignore. Zero means ignore.
+        wrap_around (bool) : Specify if periodic boundaries should be used.
 
     Returns:
-        2-element tuple containing
+        2-element tuple containing the following
 
         - **dataout** (*3D numpy array*) : Trilinearly summed values that needs to be divided by weightout to give the
-                                           trilinearly inserted values.
+          trilinearly inserted values.
         - **weightout** (*3D numpy array*) : Number of times each voxel has a value put into it.
     """
 

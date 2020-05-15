@@ -4,7 +4,7 @@ import sys
 sys.path.append('../..')
 
 import reborn as ba
-ba.set_global('debug', 0)
+#ba.set_global('debug', 0)
 from reborn.simulate import examples
 from reborn.viewers.qtviews import PADView
 from reborn import detector

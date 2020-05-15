@@ -200,6 +200,68 @@ def hubbel_form_factors(qmags, atomic_number):
     return f
 
 
+# #@utils.memoize
+# def hubbel_density_lut(atomic_number, dr=0.01e-10, rmax=20e-10):
+#     r"""
+#     This is experimental.  Do not use it.
+#
+#     Return the radial profile of the atomic electron density as derived from the inverse transform of the Hubbel
+#     form factors.  This function should not exist because the Hubbel form factors were generated from electron
+#     densities in the first place, so we've gone full circle... but this is what we have for the time being.
+#
+#     Args:
+#         atomic_number (int): Atomic number
+#         dr (float): Step size in the radius grid
+#         rmax (float): Maximum radius
+#
+#     Returns:
+#
+#         2-element tuple with the following entries
+#
+#         - **rho** (*numpy array*) : Numpy array of electron densities (in SI units of course)
+#         - **r** (*numpy array*) : Numpy array of radii corresponding to densities
+#     """
+#     z = int(atomic_number)
+#
+#     r = np.linspace(0, rmax, int(np.ceil(rmax/dr)))
+#
+#     # if z == 1:
+#     #     a0 = 5.2917721e-11
+#     #     rho = np.exp(-2 * r / a0) / np.pi / a0 ** 3  # hydrogen S1
+#     #     return rho, r
+#
+#     n = r.size
+#     dq = 2 * np.pi / dr / n
+#     q = np.arange(n) * dq
+#     f = hubbel_form_factors(q, z)
+#     rho = np.imag(np.fft.ifft(q * f))
+#     rho[1:] /= np.pi * r[1:] * dr
+#     rho[0] = np.sum(q ** 2 * f) * dq / 2 / np.pi ** 2
+#
+#     return rho, r
+#
+#
+# def hubbel_density(atomic_number, radii):
+#     r"""
+#     This is experimental.  Do not use it.
+#
+#     Return the radial profile of the atomic electron density as derived from the inverse transform of the Hubbel
+#     form factors.  This function should not exist because the Hubbel form factors were generated from electron
+#     densities in the first place, so we've gone full circle... but this is what we have for the time being.
+#
+#     Note that this function uses hubbel_density_lut to generate the atomic densities once on a regular grid, and
+#     thereafter this function will interpolate from that standard grid.
+#
+#     Args:
+#         - atomic_number (int) : Atomic number
+#         - radii (numpy array) : Radii at which to calculate electron density
+#     Returns:
+#         - **rho** (*numpy array*) : Electron densities corresponding to input radii
+#     """
+#     rho, r = hubbel_density_lut(atomic_number)
+#     return np.interp(radii, r, rho)
+
+
 def hubbel_henke_scattering_factors(qmags, atomic_number, photon_energy):
     r"""
     Get the q-dependent atomic form factors for a single atomic number and single photon energy, using the Hubbel atomic
@@ -214,28 +276,6 @@ def hubbel_henke_scattering_factors(qmags, atomic_number, photon_energy):
     Returns:
         Numpy array: Atomic form factor :math:`f(q)` with dispersion corrections
     """
-
     f0 = hubbel_form_factors(qmags, atomic_number)
     df = henke_scattering_factors(atomic_number, photon_energy) - atomic_number
     return f0 + df
-
-
-# @utils.memoize
-# def hubbel_atomic_form_factor_table(atomic_number, photon_energy):
-#     r"""
-#     This calls hubbel_atomic_form_factor() and gets a 1D uniformly-spaced sampling for pre-defined q magnitude spacing.
-#
-#     Args:
-#         atomic_number:
-#         photon_energy:
-#
-#     Returns:
-#         Numpy array
-#     """
-#
-#     Z = atomic_number
-#     E = photon_energy/eV/1000
-#     dq = 10e10/1000
-#     qq = np.arange(0, 10e10, dq)/4.0/np.pi/1e10
-#     f = np.array([xraylib.FF_Rayl(Z, q) for q in qq])
-#     return f

@@ -42,6 +42,11 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx_gallery.gen_gallery']
 
+# Configuration for the documentation of examples
+sphinx_gallery_conf = {
+    'filename_pattern': '/plot_',
+    'ignore_pattern': r'__init__\.py',
+}
 
 # Don't sort autodocumention alphabetically
 autodoc_member_order = 'bysource'
@@ -322,5 +327,5 @@ math_number_all = True
 rst_epilog = """
 .. |PADGeometry|  replace:: :class:`PADGeometry <reborn.detector.PADGeometry>`
 .. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
-.. |detector|  replace:: :module:`detector <reborn.detector>`
+.. |detector|  replace:: :mod:`detector <reborn.detector>`
 """
