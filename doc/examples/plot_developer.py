@@ -20,11 +20,13 @@ How to contribute an example
 #
 # Your file *must* have a doc string at the beginning of the file, and there *must* be a very short descriptive title.
 # For example:
-
-# r"""
-# How to contribute an example
-# ============================
-# """
+#
+# .. code-block: python
+#
+#     r"""
+#     How to contribute an example
+#     ============================
+#     """
 
 # %%
 # Code comments vs. documentation blocks
