@@ -279,11 +279,15 @@ class CrystalStructure(object):
     pdb_dict = None
     _au_com = None
 
-    def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False, tight_packing=False):
+    def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False, tight_packing=False, unitcell=None, spacegroup=None):
         r"""
         Arguments:
             pdb_file_path (string): Path to a pdb file
             no_warnings (bool): Suppress warnings concerning ambiguities in symmetry operations
+            expand_ncs_coordinates (bool): Choose whether or not to expand non-crystallographic symmetry (NCS) partners.
+            tight_packing (bool): Choose whether or not to enable a physical arrangement of the asymmetric unit symmetry partners - No difference for inifinite crystals but makes sense for a finite crystal.
+            unitcell (Unit Cell class): Specify a unit cell manually if needed.
+            spacegroup (Space Group class): Specify a space group manually if needed.
         """
 
         if not os.path.exists(pdb_file_path):
@@ -293,20 +297,53 @@ class CrystalStructure(object):
         self.pdb_dict = dic
 
         a, b, c, al, be, ga = dic['unit_cell']
-        self.unitcell = UnitCell(a*1e-10, b*1e-10, c*1e-10, al*np.pi/180, be*np.pi/180, ga*np.pi/180)
-        S = dic['scale_matrix']
-        U = dic['scale_translation']
+
+        if unitcell is not None:
+            # Use the user-specified unit cell
+            self.unitcell = unitcell
+            S = self.unitcell.o_mat_inv * 1e-10 # Convert to meters
+            U = np.zeros(3)
+        else:
+            if (a == 1) and (b == 1) and (c == 1):
+                # This is the case for the PDBs that are deposited from a single particle electron microscopy experiment,
+                # where the unit cell constants are set artificially to a = b = c = 1 Ang 
+                # and the angles al = be = ga = 90 degrees.
+
+                # We will set the unit cell to be the difference between the max and min of the atomic coordinates in the three directions.
+                r_min = np.zeros(3)
+                r_min[0] = np.min(dic['atomic_coordinates'][:,0])
+                r_min[1] = np.min(dic['atomic_coordinates'][:,1])
+                r_min[2] = np.min(dic['atomic_coordinates'][:,2])
+
+                r_max = np.zeros(3)
+                r_max[0] = np.max(dic['atomic_coordinates'][:,0])
+                r_max[1] = np.max(dic['atomic_coordinates'][:,1])
+                r_max[2] = np.max(dic['atomic_coordinates'][:,2])
+
+                self.unitcell = UnitCell((r_max[0] - r_min[0])*1e-10, (r_max[1] - r_min[1])*1e-10, (r_max[2] - r_min[2])*1e-10, 90*np.pi/180, 90*np.pi/180, 90*np.pi/180)
+                S = self.unitcell.o_mat_inv * 1e-10 # Convert to meters
+                U = np.zeros(3)
+            else:
+                # Set the unit cell to be the one from the PDB (vast majority of PDBs will execute this code).
+                self.unitcell = UnitCell(a*1e-10, b*1e-10, c*1e-10, al*np.pi/180, be*np.pi/180, ga*np.pi/180)
+                S = dic['scale_matrix']
+                U = dic['scale_translation']
+
+
         if np.sum(np.abs(U)) > 0:
             if not no_warnings:
                 warn('\nThe U vector is not equal to zero, which could be a serious problem.  Look here:\n'
                      'https://rkirian.gitlab.io/reborn/crystals.html.\n')
 
+
         # These are the initial coordinates with strange origin
         r = dic['atomic_coordinates']
         
         Z0 = atoms.atomic_symbols_to_numbers(dic['atomic_symbols'])
-        Z = Z0.copy()
         atomic_symbols0 = dic['atomic_symbols']
+
+        # Initialisations for generating NCS partners
+        Z = Z0.copy()
         atomic_symbols = atomic_symbols0.copy()
 
         # Check for non-crystallographic symmetry.  Construct asymmetric unit from them.
@@ -346,7 +383,12 @@ class CrystalStructure(object):
             Z = np.round(Z*12)/12
             rotations.append(W)
             translations.append(Z)
-        self.spacegroup = SpaceGroup(dic['spacegroup_symbol'], rotations, translations)
+
+
+        if spacegroup is not None:
+            self.spacegroup = spacegroup
+        else:
+            self.spacegroup = SpaceGroup(dic['spacegroup_symbol'], rotations, translations)
 
         self.fractional_coordinates = x_au
         self.fractional_coordinates_com = x_au_com
@@ -891,6 +933,14 @@ class CrystalDensityMap(object):
             return np.reshape(f_map, self.shape)
 
         elif mode == 'trilinear':
+            # x_min = np.array([-200,-200,-200])
+            # x_max = np.array([200,200,200])
+            # shape = np.array([30,30,30])
+
+            print(self.x_min)
+            print(self.x_max)
+            print(self.shape)
+            print('ok')
             # Note that we do not divide by weightout because we want the sum of the atoms not the mean.
             rho, _ = trilinear_insert(data_coord=np.ascontiguousarray(atom_x_vecs), data_val=atom_fs,
                                       x_min=self.x_min, x_max=self.x_max, n_bin=self.shape, wrap_around=True,
@@ -1085,7 +1135,7 @@ def pdb_to_dict(pdb_file_path):
 
                 mtrix_index += 1
 
-            # Atomic (orthogonal) coordinates
+            # Atomic coordinates (these are the orthogonal, cartesian coordinates denoted as r in the docs).
             if line[:6] == 'ATOM  ' or line[:6] == "HETATM":
                 atomic_coordinates[atom_index, 0] = float(line[30:38])
                 atomic_coordinates[atom_index, 1] = float(line[38:46])
