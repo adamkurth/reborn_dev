@@ -933,14 +933,6 @@ class CrystalDensityMap(object):
             return np.reshape(f_map, self.shape)
 
         elif mode == 'trilinear':
-            # x_min = np.array([-200,-200,-200])
-            # x_max = np.array([200,200,200])
-            # shape = np.array([30,30,30])
-
-            print(self.x_min)
-            print(self.x_max)
-            print(self.shape)
-            print('ok')
             # Note that we do not divide by weightout because we want the sum of the atoms not the mean.
             rho, _ = trilinear_insert(data_coord=np.ascontiguousarray(atom_x_vecs), data_val=atom_fs,
                                       x_min=self.x_min, x_max=self.x_max, n_bin=self.shape, wrap_around=True,
