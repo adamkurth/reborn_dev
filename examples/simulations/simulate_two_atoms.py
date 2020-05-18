@@ -1,10 +1,7 @@
 import sys
 import time
-
 import numpy as np
 import matplotlib.pyplot as plt
-
-# sys.path.append("../..")
 import reborn as ba
 import reborn.simulate.clcore as clcore
 

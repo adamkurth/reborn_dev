@@ -1,11 +1,3 @@
-# try:
-#     from . import interpolations_f
-#     from . import peaks_f
-#     from . import density_f
-#     from . import wtf_f
-# except ImportError:
-#     raise ImportError('You need to build the Fortran code.  Try this:\n python setup.py develop')
-
 import numpy.f2py
 import os
 from glob import glob
@@ -13,8 +5,8 @@ pth = os.path.split(os.path.abspath(__file__))[0]
 
 
 def compile_f90(f90_file, extra_args=''):
-    print('Attempting to compile Fortran code %s.  If this fails, see the docs: https://rkirian.gitlab.io/reborn'
-          % (f90_file,))
+    # print('Attempting to compile Fortran code %s.  If this fails, see the docs: https://rkirian.gitlab.io/reborn'
+    #       % (f90_file,))
     numpy.f2py.compile(open(os.path.join(pth, f90_file), "r").read(), modulename=f90_file.replace('.f90', '_f'),
                        extension='.f90', extra_args=extra_args+' -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION',
                        verbose=False)

@@ -1,7 +1,7 @@
 image: ubuntu:latest
 
 before_script:
-  - source developer/ubuntu-setup.sh
+  - bash ubuntu-setup.sh
 
 tests:
   stage: test

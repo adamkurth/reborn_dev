@@ -1,5 +1,6 @@
 from __future__ import division, absolute_import, print_function
-
+import os
+import shutil
 from setuptools import find_packages
 from numpy.distutils.core import setup, Extension
 import datetime
@@ -18,6 +19,8 @@ ext_modules = list()
 #################################################################################################
 
 f2py_macros = [('NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION', '')]
+# omp_args = {'libraries': ['gomp'], 'extra_compile_args': ['-fopenmp']}
+omp_args = {}
 ext_modules.append(Extension(
       name='reborn.fortran.interpolations_f',
       sources=['reborn/fortran/interpolations.f90'],
@@ -26,13 +29,8 @@ ext_modules.append(Extension(
 ext_modules.append(Extension(
       name='reborn.fortran.peaks_f',
       sources=['reborn/fortran/peaks.f90'],
-      define_macros=f2py_macros
-      # f2py_options=[],
-      # define_macros=[('F2PY_REPORT_ON_ARRAY_COPY', '1')],
-      # # this is the flag gfortran needs to process OpenMP directives
-      # libraries=['gomp'],
-      # extra_compile_args=['-fopenmp'],
-      # extra_link_args=[],
+      define_macros=f2py_macros,
+      **omp_args
       ))
 ext_modules.append(Extension(
       name='reborn.fortran.wtf_f',
@@ -48,12 +46,9 @@ ext_modules.append(Extension(
 setup(name='reborn',
       version=datetime.date.today().strftime('%Y.%m.%d'),
       description='Diffraction analysis and simulation utilities',
-      # long_description=readme,
-      # long_description_content_type="text/markdown",
       author='Richard A. Kirian',
       author_email='rkirian@asu.edu',
       url='https://rkirian.gitlab.io/reborn',
-      # package_dir={'reborn': find_packages()},
       packages=find_packages(),
       ext_modules=ext_modules,
       install_requires=requirements,

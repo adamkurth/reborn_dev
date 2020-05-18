@@ -3,15 +3,18 @@ Getting Started
 
 In principle, setting up reborn should be as simple as including the base directory of the reborn git repository in
 your python path.  You'll probably find that you need to install some dependencies, but all of them are known to install
-easily with pip or conda (however, there may be some extra steps to enable GPU computations -- see the relevant section
-below).  There are some pieces of Fortran code in reborn that need to be compiled, but they should auto-compile on first
-import.
+easily with pip or conda.  There may be some extra steps to enable GPU computations, as discussed below.  There are some
+pieces of Fortran code that might need to be compiled, but usually this is not necessary.
 
-While it is possible to install reborn using the provided `setup.py` script, this is not recommended because
-reborn is under development and its API is not stable.  It is instead recommended that you keep a
+Since reborn's interface is not considered "stable", the recommended installation procedure consists of keeping a
 clone of the reborn git repository where you are doing your analysis or simulations so that you can reproduce your
-results in the future. One way to track the *exact* version of reborn used in your project is to add it as a
-`git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git repository.
+results in the future.  You can then install reborn such that it is "editable"; you can then pull the latest updates
+to the reborn repository without the need to reinstall.  One way to track the *exact* version of reborn used in your
+project is to add it as a `git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git
+repository.
+
+Getting reborn
+--------------
 
 The first thing you will need to do is use git to clone reborn on your computer:
 
@@ -22,53 +25,49 @@ The first thing you will need to do is use git to clone reborn on your computer:
 Dependencies
 ------------
 
-As of 2020, reborn is only tested with Python 3, because Python 2 is
-`finally dead <https://www.python.org/doc/sunset-python-2/>`_ .  The `environment.yml` file lists all of the packages
-that are installed upon regular testing of reborn, which might be understood as the complete list of dependencies.
-Here are the current contents of that file:
+As of 2020, reborn is only tested with Python 3, because
+`Python 2 is finally dead <https://www.python.org/doc/sunset-python-2/>`_.
+The `environment.yml` file lists all of the packages that are installed upon regular testing of reborn, which might be
+understood as the complete list of dependencies.  Here are the current contents of that file:
 
 .. literalinclude:: ../../environment.yml
 
-You can import many reborn modules without installing *all* of these dependencies, but there is little reason to
-install only a subset of them if you use a good package manager.
+You can import many reborn modules without installing *all* of these dependencies, but if you use a good package
+manager there is little reason to avoid installing all of them.
 
 Miniconda
 ---------
 
 `Miniconda <https://conda.io/miniconda.html>`_ is a reliable and lightweight distribution of python that is known to
 work well with reborn.  The `Conda <https://conda.io/docs/>`_ package manager that comes with it makes it fast and
-easy to install the dependencies of reborn.  You might consider making a trial
-`conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_ to check that
-everything works well, since packages like opengl, opencl, pyqt are complex and may have conflicting requirments
-(however, not many problems have been noticed at least since 2019).  The simplest way to setup a proper conda
-environment is to execute the following (in the base directory of the reborn respository):
+easy to install and maintain the dependencies of reborn.  It is recommended that you first make a trial
+`conda environment <https://conda.io/docs/user-guide/tasks/manage-environments.html>`_ to check that there are no
+conflicts between dependencies.  The simplest way to setup a conda environment with all the needed reborn dependencies
+is to execute the following in the base directory of the reborn git repository:
 
 .. code-block:: bash
 
-    conda env create -f environment.yml
+    conda env create --name reborn --file environment.yml
 
-The above line will create a conda environment named `reborn`, and you will need to activate that environment in the
-following way:
+The above line will create the conda environment named `reborn`.  You will need to *activate* that environment whenever
+you want to use it:
 
 .. code-block:: bash
 
     conda activate reborn
 
-The `conda activate` often does not work, in which case you might try the following instead:
+If the above line fails to activate the environment, you might try this instead:
 
 .. code-block:: bash
 
     source activate reborn
 
-If you don't want to create a new environment named `reborn`, you can instead add all of the packages in the
-`environment.yml` file to the default `base` environment (or to any other environment you specify with the `name`
-flag):
+If you are happy with the above `reborn` environment, you may wish to avoid the activation step by installing all the
+dependencies in the default `base` conda environment:
 
 .. code-block:: bash
 
     conda env update --name base --file environment.yml
-
-You can of course install all of the necessary packages manually by other means.
 
 Linux notes
 -----------
@@ -82,8 +81,8 @@ are the current contents of that script:
 Mac OS notes
 ------------
 
-Mostly the same procedure as Linux, except that you should install Miniconda according to the instructions for 
-Mac OS.
+On Mac OS you need to follow the instructions to install Miniconda.  The subsequent steps are identical to those you
+would follow for a Linux setup.
 
 
 Windows 10 Notes
@@ -101,13 +100,15 @@ to install VcXsrv.
 
     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 
-Note that you will likely need to cd /mnt/c/../.. to change to the c-drive (or whichever drive you wish)
+Note that you will likely need to cd /mnt/c/../.. to change to the c-drive (or whichever drive you wish).
 
 From here, you need to install VcXsrv Windows X Server. Here is a link to the 2020-01-12 version: https://sourceforge.net/projects/vcxsrv/
 It's a little annoying, but you'll have to manually open the software and go through all the default options 
-everytime you reboot your computer. 
+every time you reboot your computer.
 
-4) Download and run VcXsrv and run the installer with all the default settings. Make sure to choose the 'multiple windows' options.
+4) Download and run VcXsrv and run the installer with all the default settings. Make sure to choose the 'multiple
+windows' options.
+
 5) In the Ubuntu app, install imagemagick
 
 .. code-block:: bash
@@ -120,20 +121,17 @@ everytime you reboot your computer.
 
     echo "export DISPLAY=localhost:0.0" >> ~/.bashrc && source ~/.bashrc
 
-
-
-To install Python and all the important stuff, go to Anaconda.com and download the LINUX version of the software suite. Then in your Ubuntu terminal,
-navigate to the download and install it using this command
+To install Python and all the important stuff, go to Anaconda.com and download the LINUX version of the software suite.
+Then in your Ubuntu terminal, navigate to the download and install it using this command
 
 .. code-block:: bash
 
     bash /your/file/path/Anaconda2-2019.10-Linux-x86_64.sh
 
-Make you sure you change your file path and double check that the download file is the most up to date Linux installation file. Follow through with
-all the default installation settings and restart your terminal once the download is complete.  After all of that is complete, you should have the 
-most up-to-date python and ipython versions. You can download all the packages you need by running conda install [package]. 
-
-
+Make you sure you change your file path and double check that the download file is the most up to date Linux
+installation file. Follow through with all the default installation settings and restart your terminal once the download
+is complete.  After all of that is complete, you should have the most up-to-date python and ipython versions. You can
+download all the packages you need by running conda install [package].
 
 To get submodules to work for Windows, follow this guide:
 
@@ -158,48 +156,34 @@ To get submodules to work for Windows, follow this guide:
 
 This should work fine from here, but you may need to add a symbolic link from the location of your script to the bornagain/reborn folder in order to get things working. 
 
+Installing reborn
+-----------------
 
-Notes on setting up your path
------------------------------
-
-The main setup task is to simply ensure that Python can import the reborn package, which means that it must be
-found in a path where python searches for packages.  If you don't already know how to do this, here are some options
-that you might use to get your path set up.  The best way is to set the appropriate environment variable so that Python
-looks in the right place for reborn.  If you are using the bash shell, you can do the following:
-
-.. code-block:: bash
-
-    export PYTHONPATH=$PYTHONPATH:example/path/to/reborn/repository
-
-If you don't want to do the above every time you open a terminal, you can add this line to your `bash startup script
-<https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html>`_.
-
-As an alternative to the above, you can make a symbolic link to the reborn package in the same directory where you
-are running your script.  For example:
-
-.. code-block:: bash
-
-    ln -s example/path/to/reborn/repository/reborn path/to/where/your/script/is/located
-
-If you wish, you can also install reborn:
-
-.. code-block:: bash
-
-    python setup.py install
-
-but this is not tested and is not advised as noted above.  If you *really* want to install, you can try this:
+The recommended way to set up reborn is to use pip as follows:
 
 .. code-block:: bash
 
     pip install --no-deps --editable .
 
-The above method will probably become the recommended way to install, once the reborn API is somewhat stable.
+You should execute the above from the base directory of the git repository.  The `--editable` flag in the above is
+important because reborn does not have a stable interface and there are frequent updates.
+
+If you do not want to install with pip, you can simply add the reborn repository to the python search path.  This can be
+done by setting the appropriate environment variable:
+
+.. code-block:: bash
+
+    export PYTHONPATH=$PYTHONPATH:example/path/to/reborn/repository
+
+It might be convenient to add the above line to your `bash startup script
+<https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html>`_.
 
 Compilation of Fortran code
 ---------------------------
 
-We use the f2py program that comes with Numpy to compile Fortran code.  Although Fortran code should auto-compile on
-first import, you may wish to compile manually.  This can be done using the `setup.py` script as follows:
+We use the f2py program that comes with Numpy to compile Fortran code.  Fortran code should auto-compile for most
+users, but in some circumstances you may wish to compile manually.  This can be done using the `setup.py` script as
+follows:
 
 .. code-block:: bash
 
