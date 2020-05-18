@@ -15,7 +15,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 eV = const.value('electron volt')
 
-pdb_file = '1JB0.pdb'
+pdb_file = '1jb0.pdb'
 resolution = 5e-10
 oversampling = 1
 photon_energy_ev = 12000

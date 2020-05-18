@@ -76,7 +76,7 @@ Below are the standard steps that are tested on a clean Ubuntu Linux install eve
 updated.  The script `developer/ubuntu-install.sh` is executed from the base directory of the git repository.  Here
 are the current contents of that script:
 
-.. literalinclude:: ../../developer/ubuntu-setup.sh
+.. literalinclude:: ../../ubuntu-setup.sh
 
 Mac OS notes
 ------------
