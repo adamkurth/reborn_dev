@@ -7,6 +7,7 @@ curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh --out
 bash miniconda.sh -b -p miniconda
 # export PATH=./miniconda/bin:$PATH
 miniconda/bin/conda init bash
+bash ~/.bashrc
 conda update -n base -c defaults conda
 conda env create --name reborn --file environment.yml
 conda activate reborn
