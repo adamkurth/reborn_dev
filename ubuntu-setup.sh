@@ -8,6 +8,7 @@ bash miniconda.sh -b -p miniconda
 # export PATH=./miniconda/bin:$PATH
 miniconda/bin/conda init bash
 source ~/.bashrc
+cat ~/.bashrc
 conda update -n base -c defaults conda
 conda env create --name reborn --file environment.yml
 conda activate reborn
