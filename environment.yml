@@ -17,6 +17,7 @@ dependencies:
   - pyopengl
   - xraylib
   - pillow
+  - memory_profiler
   - fortran-compiler
   - make
   - pip

@@ -46,6 +46,7 @@ extensions = [
 sphinx_gallery_conf = {
     'filename_pattern': '/plot_',
     'ignore_pattern': r'__init__\.py',
+    'show_memory': True
 }
 
 # Don't sort autodocumention alphabetically
