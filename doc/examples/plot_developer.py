@@ -1,6 +1,11 @@
 r"""
 How to contribute an example
 ============================
+
+Brief overview of how to contribute an example script.
+
+Contributed by Richard Kirian.
+
 """
 
 # %%

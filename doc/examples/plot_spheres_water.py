@@ -2,8 +2,11 @@ r"""
 Simulation of spheres in water
 ==============================
 
-Here we do a simple simulation of diffraction from a liquid sheet containing spherical scatterers.  We start by defining
-all of the relevant parameters.  As always, everything in reborn is in SI units.
+Simple simulation of diffraction from a liquid sheet containing spherical scatterers.
+
+Contributed by Richard Kirian.
+
+We start by defining all of the relevant parameters.  As always, everything in reborn is in SI units.
 """
 
 import sys

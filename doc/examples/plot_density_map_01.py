@@ -1,6 +1,13 @@
 r"""
 Making real space density maps
 ==============================
+
+Just one way to make density maps.
+
+Contributed by Joe Chen.
+
+Edited by Richard Kirian.
+
 """
 
 # %%

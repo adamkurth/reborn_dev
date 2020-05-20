@@ -4,6 +4,8 @@ View detector with matplotlib
 
 Simple example of how to view multiple detector panels with matplotlib.
 
+Contributed by Richard Kirian.
+
 First the imports:
 """
 

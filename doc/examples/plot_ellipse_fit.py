@@ -2,7 +2,13 @@ r"""
 Beam center from ellipse fit
 ============================
 
-Here we simulate water scatter and then fit an ellipse to pixels associated to the water ring.  Note that this example
+Simulate water scatter and then fit an ellipse to pixels associated to the water ring.
+
+Contributed by Richard Kirian.
+
+Edited by Kosta Karpos.
+
+Note that this example
 only works on single-panel detectors.  It could be extended to multi-panel detectors if the need arises, but in that
 case it is important that the relative coordinates of all panels is known very well.
 
