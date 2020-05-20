@@ -6,6 +6,9 @@ htmlindex="../doc/build/html/index.html"
 if [ "`echo $(uname -a | grep Darwin)`" != '' ]; then
  open ${htmlindex}
  exit
+elif [ $(command -v sensible-browser) ]; then
+ sensible-browser ${htmlindex}
+ exit
 elif [ $(command -v xdg-open) ]; then
  xdg-open ${htmlindex}
  exit

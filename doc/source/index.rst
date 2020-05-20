@@ -1,8 +1,10 @@
-reborn Python Package
-=====================
+reborn Home
+===========
 
-Overview
---------
+.. image:: https://gitlab.com/kirianlab/reborn/badges/master/pipeline.svg
+
+Overview of reborn package
+--------------------------
 
 The reborn Python package contains utilities for the simulation and analysis of x-ray diffraction under the Born 
 approximation.  There are countless other utilities with identical or similar aspirations: 
@@ -70,6 +72,7 @@ Contents
 .. toctree::
    :maxdepth: 1
 
+   self
    installation
    beams
    geometry
