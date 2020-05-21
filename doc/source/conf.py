@@ -325,4 +325,7 @@ rst_epilog = """
 .. |PADGeometry|  replace:: :class:`PADGeometry <reborn.detector.PADGeometry>`
 .. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
 .. |detector|  replace:: :mod:`detector <reborn.detector>`
+.. |CSPAD|  replace:: `CSPAD <http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-15284.pdf>`__
+.. |Jungfrau|  replace:: `Jungfrau <https://lcls.slac.stanford.edu/detectors/jungfrau>`__
+.. |xraylib|  replace:: `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
 """

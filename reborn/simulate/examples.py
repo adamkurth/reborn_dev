@@ -28,32 +28,55 @@ cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad.geo
 
 
 def pnccd_pads():
-
     r"""
-
     Generate a list of :class:`PADGeometry <reborn.detector.PADGeometry>` instances that are inspired by
     the `pnCCD <https://doi.org/10.1016/j.nima.2009.12.053>`_ detector.
 
-    Returns: List of :class:`PADGeometry <reborn.detector.PADGeometry>` instances.
-
+    Returns: List of |PADGeometry| instances
     """
+    pads = crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
+    for p in pads:
+        p.t_vec[2] = 0.1
+    return pads
 
-    return crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
 
-
-def cspad_pads():
-
+def cspad_pads(detector_distance=0.1):
     r"""
+    Generate a list of |PADGeometry| instances that are inspired by the |CSPAD| detector.
 
-    Generate a list of :class:`PADGeometry <reborn.detector.PADGeometry>` instances that are inspired by
-    the `CSPAD <http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-15284.pdf>`_ detector.
+    Arguments:
+        detector_distance (float): Detector distance in SI units
 
-    Returns: List of :class:`PADGeometry <reborn.detector.PADGeometry>` instances.
-
+    Returns: List of |PADGeometry| instances
     """
+    pads = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+    for p in pads:
+        p.t_vec[2] = detector_distance
+    return pads
 
-    return crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
+def jungfrau4m_pads(detector_distance=0.1, binning=1):
+    r"""
+    Generate a list of |PADGeometry| instances that are inspired by the |Jungfrau| 4M detector.
+
+    Arguments:
+        detector_distance (float): Detector distance in SI units
+        binning (int): Bin the detector into larger NxN virtual pixels.
+
+    Returns: List of |PADGeometry| instances
+    """
+    pads = detector.tiled_pad_geometry_list(pad_shape=(int(512/binning), int(1024/binning)), pixel_size=75e-6*binning,
+                                            distance=detector_distance, tiling_shape=(4, 2), pad_gap=36 * 75e-6)
+    gap = 9e-3
+    pads[0].t_vec += + np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
+    pads[1].t_vec += + np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
+    pads[2].t_vec += - np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
+    pads[3].t_vec += - np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
+    pads[4].t_vec += + np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
+    pads[5].t_vec += + np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
+    pads[6].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
+    pads[7].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
+    return pads
 
 def simulate_water(pad_geometry=None, beam=None, water_thickness=1e-6):
     r"""
