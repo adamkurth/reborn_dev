@@ -1,7 +1,7 @@
 reborn Home
 ===========
 
-.. image:: https://gitlab.com/kirianlab/reborn/badges/master/pipeline.svg
+Welcome to the home page of the reborn python package.
 
 Overview of reborn package
 --------------------------
@@ -22,14 +22,15 @@ For clarity, reborn is not a "program".  In order to use it you must write Pytho
 to be a *general* or *complete* tool at this time -- its content is dictated by what is needed for work done in the
 Kirian Lab.  It is nonetheless available for anyone to use under the GNU V3 License.
 
+The reborn package is under constant development, according to our data analysis needs.  However, we do try to maintain
+a suite of tests to make sure that it is reasonably stable.  The icon below indicates if tests are passing.  Hopefully
+it reads "pipeline: passed":
+
+.. image:: https://gitlab.com/kirianlab/reborn/badges/master/pipeline.svg
+
 You can find the reborn source code on gitlab here: https://gitlab.com/kirianlab/reborn
 
 This documentation is available on the web here: https://kirianlab.gitlab.io/reborn
-
-If you have never written code to do data analysis or simulations, you should firstly learn the basics of using the
-`bash shell <https://linuxconfig.org/bash-scripting-tutorial-for-beginners>`_,
-`git <https://www.vogella.com/tutorials/Git/article.html>`_,
-and of course `python <https://becksteinlab.physics.asu.edu/learning/48/learning-python>`_.
 
 What's in reborn?
 -----------------
@@ -47,12 +48,17 @@ In a nutshell, the basic elements reborn are:
 Before you start using reborn...
 --------------------------------
 
-- Make sure you know how to use bash, git, and python.
+- If you have never written code to do data analysis or simulations, you should first learn the basics of the
+  `shell scripting <https://linuxconfig.org/bash-scripting-tutorial-for-beginners>`_,
+  `git <https://www.vogella.com/tutorials/Git/article.html>`_,
+  `python <https://becksteinlab.physics.asu.edu/learning/48/learning-python>`_.
+- When you learn python, make sure you learn object-oriented programming concepts.
 - Make sure you at least skim through all of the reborn docs.  Complaints are not allowed until you've done that!
 - If documentation is missing or confusing, please fix the problem or notify someone who can.
 - The units in reborn are SI.  Angles are radians.  You rarely need to convert units within reborn.
-- No special coordinate system is assumed.  You specify the direction of the x-ray beam.
-- We make important assumptions about the shapes and memory layout of numpy arrays in reborn.  Read the docs.
+- No special coordinate system is assumed in reborn.  You specify the direction of the x-ray beam.
+- We make important assumptions about the shapes and memory layout of numpy arrays in reborn.  Read the docs!
+- The :ref:`examples` page is a good place to learn about how we use reborn.
 
 If you plan to develop reborn...
 --------------------------------
@@ -63,8 +69,8 @@ Acknowledgements
 ----------------
 
 The reborn package is maintained by Rick Kirian (rkirian at asu dot edu) with conbributions from Derek Mendez,
-Joe Chen, Kevin Schmidt, Rick Hewitt, and Cameron Howard.  Code found in reborn has been inspired by numerous
-open-source software packages listed above.
+Joe Chen, Kevin Schmidt, Kosta Karpos, Rick Hewitt, and Cameron Howard.  Code found in reborn has been inspired by
+numerous open-source software packages listed above.
 
 Contents
 --------
