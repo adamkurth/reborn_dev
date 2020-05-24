@@ -23,15 +23,10 @@ Contributed by Richard Kirian.
 # The first doc string
 # --------------------
 #
-# Your file *must* have a doc string at the beginning of the file, and there *must* be a very short descriptive title.
-# For example:
-#
-# .. code-block: python
-#
-#     r"""
-#     How to contribute an example
-#     ============================
-#     """
+# Your file *must* have a triple-quote doc string at the beginning of the file, and there *must* be a very short
+# descriptive title underlined with = signs.  Please also include a line: "Contributed by your name" or if you modify
+# an example include the line "Modified by your name".
+
 
 # %%
 # Code comments vs. documentation blocks

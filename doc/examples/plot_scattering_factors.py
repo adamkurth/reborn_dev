@@ -26,17 +26,19 @@ save_figures = False
 
 # %%
 # There are several numerical approaches to simulating the scattering amplitudes from objects.  At high resolutions,
-# atomistic features become important.  A common formula is the following:
+# atomistic features become important, which is why this example exists.
 #
-# .. math::
+# Under the first Born approximation, the diffraction intensity from an ensemble of atoms is proportional to the
+# following:
 #
-#     I(\vec{q}) = \left| \sum_{n=1}^N f_n(q) \exp(i \vec{q}\cdot \vec{r}_n) \right|^2
+# .. math:: :label: direct
 #
-# If you take the above approach, you'll need the scattering factors :math:`f_n(q)`.  The above expresses the usual
-# approximation where all atoms are spherically symmetric, we do not consider the details of bonds or other forms
-# of asymmetries since those corrections are hard to detect even if you try.  To first approximation, the scattering
-# factors are identical to the electron densities of the atoms, but when we are near resonant conditions, we need to
-# include dispersion corrections.  We write the energy- and :math:`q`-dependent scattering factors as
+#     I(\vec{q}) \propto \left| \sum_{n=1}^N f_n(q) \exp(i \vec{q}\cdot \vec{r}_n) \right|^2
+#
+# where the scattering factor of the :math:`n`th atom is :math:`f_n(q)`.  The above expresses the usual approximation
+# where all atoms are assumed to be spherically symmetric.  To first approximation, the atomic scattering
+# factors are equal to the Fourier transforms of the electron densities.  When we are near resonant conditions, we need
+# to include dispersion corrections.  We write the energy- and :math:`q`-dependent scattering factors as
 #
 # .. math::
 #
@@ -44,11 +46,13 @@ save_figures = False
 #
 # where :math:`f_0(q)` is the electron density, and the other two terms are the dispersion corrections.
 #
-# At very low resolutions, we only need to know :math:`f(0, E)`, in which case you can use the tables of |Henke1993|.
-# A very simple approximation is :math:`f \approx Z`, where :math:`Z` is the atomic number.
+# At very low resolutions, we only need to know :math:`f(0, E)`, which are found in the tables of |Henke1993| (they are
+# accessible from reborn as shown below).  A very simple approximation is :math:`f \approx Z`, where :math:`Z` is the
+# atomic number.
 
 # %%
-# In many cases, we prefer not to use the direct summation in equation
+# In many cases, we prefer not to use the direct summation in equation :eq:`direct`.  For example, when there are huge
+# numbers of atoms, the direct sum can be quite costly.  We may instead consider taking the Fourier transform
 #
 #
 
@@ -83,10 +87,11 @@ plt.title(r'Hydrogen Hubbel form factor')
 plt.legend()
 
 # %%
-# Now let's have a look in real space electron density of the hydrogen atom.  We take the Fourier transform of the
-# scattering factor.  The problem here is that the electron density has a cusp at :math:`r = 0`, and this cannot be
-# faithfully reproduced by an FT without going to huge values of :math:`q` in the scattering factor :math:`f(q)`.
-# The following plot shows what happened when we tried to go from scattering factors to electron densities:
+# Now let's look at the real-space electron density of the hydrogen atom.  In principle, we can go from the scattering
+# factor to real space by taking a Fourier transform.  However, in doing this, we run into numerical issues.  The
+# problem is that the electron density of the hydrogen atom has a cusp at :math:`r = 0`, and this sharp peak cannot be
+# faithfully reproduced by a numerical FT without going to huge values of :math:`q` in the scattering factor
+# :math:`f(q)`.  The following plot shows what happens when we try to go from scattering factors to electron densities:
 
 rho = np.imag(np.fft.ifft(q*f))  # This is a 3D Fourier transform of f(q), reduced to 1D due to symmetry
 rho[1:] /= np.pi*r[1:]*dr  # Be careful with the divide-by-zero at r=0...
@@ -103,13 +108,6 @@ plt.ylabel(r'$\rho(r)$ [${\rm \AA{}}^{-3}$]')
 plt.title(r'Hydrogen S1 electron density')
 plt.legend()
 plt.subplot(122)
-# plt.plot(r*1e10, rho_h*1e-30, lw=4, label='True')
-# plt.plot(r*1e10, rho*1e-30, label='Calc')
-# plt.xlabel(r'$r$ [${\rm \AA{}}$]')
-# plt.ylabel(r'$\rho(r)$ [${\rm \AA{}}^{-3}$]')
-# plt.title(r'Hydrogen S1 electron density')
-# plt.legend()
-# plt.figure()
 plt.loglog(r*1e10, rho_h*1e-30, lw=4, label='True')
 plt.loglog(r*1e10, rho*1e-30, label='Calc')
 plt.xlabel(r'$r$ [${\rm \AA{}}$]')
@@ -120,20 +118,28 @@ if save_figures:
     f.savefig("../notes/scatter/figures/hydrogen_density_1.pdf", bbox_inches='tight')
 
 # %%
-# As you can see, there are numerical issues at both large and small radii.  In order to access electron densities,
-# we will need to find a better way forward, probably by looking up tabulated real-space densities.
+# As you can see, there are errors at both large and small radii.  If we really want to know electron densities,
+# we will need to find a better way forward, probably by looking up tabulated real-space densities.  This example
+# will be updated to reflect a better way to generate electron density maps from ensembles of atoms.
 
-#
-# Checking that xraylib and the Henke tables give (nearly) the same results
+# %%
+# Now let's return to the issue of dispersion corrections.  |Henke1993| have some of the best tabulated values for
+# dispersion corrections, and these are available from within reborn.  Again, the Henke tables do not provide form
+# factors as a function of q or scattering angles.  They are the zero-angle scattering factors.  Here is how we access
+# them from reborn:
 
-# These are in SI units
-z = 79
 E = np.arange(1000, 15000, 10)*eV
+z = 79
+f_henke = atoms.henke_scattering_factors(z, E)
+
+# |xraylib| also has dispersion corrections, but they are different from |Henke1993| and it is not obvious where the
+# corrections come from.  Below we show how to access the dispersion corrections.  There are a few things to note about
+# |xraylib:: the strange minus sign in front of :math:`f'(E)`, the use of keV units, and the fact that the scattering
+# factors do not  have the factor of :math:`4\pi` included, and the lack of vectorization in the python wrappers.
+
 max_theta = np.pi/2
 theta = np.arange(0, max_theta, max_theta / 1000)
-
 f_xraylib = np.zeros((len(E), len(theta)), dtype=np.complex)
-f_henke = atoms.henke_scattering_factors(z, E)
 for i in range(len(E)):
     this_E = E[i]
     for j in range(len(theta)):
@@ -144,7 +150,11 @@ for i in range(len(E)):
         FF = xraylib.FF_Rayl(z, 1e-10 * this_q / 4 / np.pi)
         Fi = xraylib.Fi(z, this_E / eV / 1000)
         Fii = xraylib.Fii(z, this_E / eV / 1000)
-        f_xraylib[i, j] = FF + Fi - 1j*Fii
+        f_xraylib[i, j] = FF + Fi - 1j*Fii  # Note the MINUS SIGN here
+
+# %%
+# Here are the plots for the real and imaginary parts of the scattering factors :math:`f(0)` as a function of photon
+# energy, for both the Henke tables and xraylib:
 
 f = plt.figure(figsize=plt.figaspect(0.4))
 plt.subplot(121)
@@ -156,6 +166,13 @@ plt.xlabel('Photon Energy [eV]')
 plt.ylabel('Scattering factor at q=0')
 plt.title('Atomic Number %d (%s)' % (z, atoms.atomic_numbers_to_symbols([z])))
 plt.legend()
+
+# %%
+# Here are the total scattering factors :math:`f(q, E)` that come from |Henke1993| and |xraylib|.  Probably, the best
+# way to go is to use the form factors from |Hubbel1975|, while using the dispersion corrections from |Henke1993|.
+# A simple way to do this is to use the reborn function
+# :func:`hubbel_henke_scattering_factors <reborn.simulate.atoms.hubbel_henke_scattering_factors>` as demonstrated
+# below:
 
 q_mags = 1e10*4*np.pi*np.arange(1000)*3/1000
 E = 8000*eV
@@ -176,3 +193,7 @@ plt.legend()
 if save_figures:
     f.savefig("../notes/scatter/figures/formfactor_%d.pdf" % (z,), bbox_inches='tight')
 plt.show()
+
+# %%
+# In the near future, we will update this example to include the |Cromer1968| Gaussian approximations to the scattering
+# factors...

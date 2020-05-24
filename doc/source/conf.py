@@ -326,6 +326,11 @@ rst_epilog = """
 .. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
 .. |detector|  replace:: :mod:`detector <reborn.detector>`
 .. |CSPAD|  replace:: `CSPAD <http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-15284.pdf>`__
+
 .. |Jungfrau|  replace:: `Jungfrau <https://lcls.slac.stanford.edu/detectors/jungfrau>`__
 .. |xraylib|  replace:: `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
+
+.. |Cromer1968|  replace:: `Cromer et al. (1968) <https://doi.org/10.1107/S0567739468000550>`__
+.. |Hubbel1975|  replace:: `Hubbel et al. (1975) <https://doi.org/10.1063/1.555523>`__
+.. |Henke1993|  replace:: `Henke et al. (1993) <https://doi.org/10.1006/adnd.1993.1013>`__
 """
