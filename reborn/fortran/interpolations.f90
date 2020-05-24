@@ -1,3 +1,8 @@
+! Testing if this dummy program is necessary, as suggested here: https://github.com/numpy/numpy/issues/14222
+PROGRAM MAIN
+PRINT *,'Hello world'
+END PROGRAM MAIN
+
 subroutine trilinear_interpolation(datin, datin_corner, datin_dx, datout_coords, datout)
     ! Interpolate a 3D grid of data onto arbitrary points
     ! datin is the input data with corner coordinate datin_corner (3-vector) and grid step size datin_dx (3-vector)
