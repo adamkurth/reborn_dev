@@ -5,9 +5,11 @@
 !  https://github.com/numpy/numpy/issues/14222
 !
 ! I wonder if the main program will now break compilation on other systems.....
-PROGRAM MAIN
-PRINT *,'Hello world'
-END PROGRAM MAIN
+!
+! Update: this may be new to the ubuntu:20.04 docker image used in the gitlab runner...
+!PROGRAM MAIN
+!PRINT *,'Hello world'
+!END PROGRAM MAIN
 
 subroutine trilinear_interpolation(densities, vectors, corners, deltas, out)
     implicit none
