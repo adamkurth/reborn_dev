@@ -10,3 +10,4 @@ conda env create --name reborn --file environment.yml
 source activate reborn
 which pip
 pip install --no-deps --editable .
+which pytest
