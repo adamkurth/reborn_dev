@@ -17,16 +17,6 @@ Before you modify any code:
 * All units are SI (angles in radians) unless there is a *very* good reason to do something different.
 * The scope of this project is diffraction under the Born approximation.  Don't stray far from this.
 
-Python 2/3 compatibility
-------------------------
-
-To ensure compatibility with both Python 2 and 3, you may need to include something like the following at the beginning
-of your module:
-
-.. code-block:: python
-
-    from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 Checking for PEP8 compliance
 ----------------------------
 
@@ -104,7 +94,6 @@ Speeding up code with numba and f2py
 ------------------------------------
 
 Numba is one way to speed up Python code in cases where there is not an existing numpy function.  It is used within
-bornagian in a few places and appears to be reasonably stable, though still lacking some basic functionality.
+reborn in a few places and appears to be reasonably stable, though still lacking some basic functionality.
 
-A better way to speed up code is to use fortran.  There are notes on this elsewere in this documentation.
-
+A better way to speed up code is to use fortran.  Look here: :ref:`working_with_fortran`.
