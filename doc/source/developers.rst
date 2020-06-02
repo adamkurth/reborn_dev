@@ -6,15 +6,20 @@ Developers
 Before you modify any code:
 ---------------------------
 
-* The "`Zen of Python <https://www.python.org/dev/peps/pep-0020/>`_" captures the essence of Python programming.
+* The "`Zen of Python <https://www.python.org/dev/peps/pep-0020/>`_" captures the essence of typical Python programming
+  norms.  We follow these norms in reborn.
 * Follow the `PEP8 guidelines <https://www.python.org/dev/peps/pep-0008/?>`_.
-* Use four spaces, not tabs.
 * One exception to PEP8: we allow lines to be 120 characters in length.
+* Please use four spaces, not tabs.
 * Write `unit tests <http://doc.pytest.org/>`_  for any functionality you add.
-* *Always* write docstrings, and follow the `Google format <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/>`_.
+* Document your code!  It is important to follow the
+  `Google format <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/>`_ so that the html documentation is
+  formatted correctly.
 * Learn how to use `git <https://git-scm.com/book/en/v2>`_.
-* Develop code in the git "develop" branch.  The master branch must always pass tests.
-* All units are SI (angles in radians) unless there is a *very* good reason to do something different.
+* Develop code in the git "develop" branch.  The master branch is protected, and must always pass tests.  We merge the
+  develop branch into master only after tests are known to pass.
+* All units are SI (angles in radians) unless there is a *very* good reason to do something different.  Consistency
+  helps avoid bugs.
 * The scope of this project is diffraction under the Born approximation.  Don't stray far from this.
 
 Checking for PEP8 compliance
@@ -27,8 +32,12 @@ as follows:
 
     pylint --max-line-length=120 filename.py
 
-You can additionally use the pep8 program to check for inconsistencies (install pep8 with pip if need be).  In the
-base directory of the git repo, do this
+We do not strive to remove *all* complaints made by pylint since you will see some unreasonable complaints such as "too
+many function arguments".  You may therefore wish to use the helper script `developer/mylint.sh`, which turns off some
+of the commonly annoying complaints.
+
+You can additionally use the pep8 program to check for inconsistencies (install pep8 with pip or conda if need be).
+In the base directory of the git repo, do this
 
 .. code-block:: bash
 
@@ -94,7 +103,40 @@ Speeding up code with numba and f2py
 ------------------------------------
 
 Numba is one way to speed up Python code in cases where there is not an existing numpy function.  It is used within
-reborn in a few places and appears to be reasonably stable, though still lacking some basic functionality.
+reborn in a few places and appears to be reasonably stable, though still lacking some very basic functionality.
 
-A better way to speed up code is to use fortran.  Look here for some notes on how to work with f2py:
-:ref:`working_with_fortran`.
+.. _working_with_fortran:
+
+Integration of Fortran and Numpy
+--------------------------------
+
+The f2py utility included with numpy makes it quite easy to integrate simple Fortran code with Numpy.  Typically,
+we wish to pass memory buffers from numpy ndarrays into a Fortran subroutine, and we modify those buffers with Fortran.
+There are some very annoying issues that can arise because the ways in which the Numpy package manipulates
+the inernal memory buffers of ndarrays, which might surprise you.  These under-the-hood manipulations might be
+harmless... until the day you really care about operating directly on memory buffers. Examples of such complications can
+be found in the `test_fortran.py` unit test.
+
+Another matter is the way that numpy arrays are passed to fortran routines when you use f2py.  The
+`documentation <https://www.numpy.org/devdocs/f2py/python-usage.html>`_ states the following:
+
+    "*In general, if a NumPy array is proper-contiguous and has a proper type then it is directly passed to wrapped
+    Fortran/C function. Otherwise, an element-wise copy of an input array is made and the copy, being proper-contiguous
+    and with proper type, is used as an array argument.*"
+
+Given the above we've come up with the following recipe to avoid possible issues:
+
+(1) Always work with the default C-contiguous ndarray memory layout in Python code.
+
+(2) Use assert statements in function wrappers: e.g. assert a.flags.c_contiguous == True.
+
+(3) Transpose ndarrays before passing them to Fortran routines.  This will *not* copy memory.
+
+(4) In your Fortran code, simply reverse the ordering of your indices as compared to your Numpy code.
+
+Although it may be inconvenient to reverse your indexing when going between the Fortran and Python code, bear in mind
+that this can only be avoided by (a) making copies of array memory, or (b) enforcing a consistent non-default internal
+memory layout for all Numpy arrays that touch a Fortran routine.  Both options (a) and (b) are highly undesirable.  We
+choose option (c), reverse the index order, because it holds the big advantage that we get to think about memory in the
+most natural way for both Numpy *and* Fortran coding, rather than insisting that Fortran and Numpy syntax *look* the
+same at the expense of speed and potential memory issues.
