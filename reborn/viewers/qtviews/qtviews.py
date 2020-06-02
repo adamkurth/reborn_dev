@@ -38,11 +38,11 @@ def bright_colors(i, alpha=1):
 
 
 class Volumetric3D(object):
-    ''' View a 3D density map '''
+    """ View a 3D density map """
 
     def __init__(self):
 
-        self.app = pg.mkQApp() #QtGui.QApplication([])
+        self.app = pg.mkQApp()  # QtGui.QApplication([])
         self.w = gl.GLViewWidget()
         self.maxDist = 0
         self.defaultWidth = 5
@@ -337,8 +337,8 @@ def view_density_map(data, title=None):
     del app
 
 
-if __name__ == '__main__':
-
-    images = [np.random.rand(5, 5), np.random.rand(5, 6), np.random.rand(5, 10)]
-    images[0][0:2, 0:2] = -1
-    plot_multiple_images(images, title='test', n_rows=2)
+# if __name__ == '__main__':
+#
+#     images = [np.random.rand(5, 5), np.random.rand(5, 6), np.random.rand(5, 10)]
+#     images[0][0:2, 0:2] = -1
+#     plot_multiple_images(images, title='test', n_rows=2)

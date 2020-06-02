@@ -75,17 +75,17 @@ def addblock_svd_update(U, S, V, A, force_orth=False):
     m = np.dot(U.T, A)
     p = A - np.dot(U, m)
     # orth documentation: "Construct an orthonormal basis for the range of p using SVD"
-    P = orth(p)
+    porth = orth(p)
     # p may not have full rank.  If not, P will be too small.  Pad with zeros.
-    if (p.shape[1] - P.shape[1]) > 0:
-        padder =  np.zeros((P.shape[0], p.shape[1]-P.shape[1]))
-        if P.shape[1] == 0:
-            P = padder
+    if (p.shape[1] - porth.shape[1]) > 0:
+        padder = np.zeros((porth.shape[0], p.shape[1]-porth.shape[1]))
+        if porth.shape[1] == 0:
+            porth = padder
         else:
-            P = np.vstack([P, padder])
+            porth = np.vstack([porth, padder])
 
     # Note, vstack(NxM, NxM) -->  2N x M array.
-    Ra = np.dot(P.T, p)
+    Ra = np.dot(porth.T, p)
     # Diagonalize K, maintaining rank
 
     z = np.zeros_like(m)
@@ -94,7 +94,7 @@ def addblock_svd_update(U, S, V, A, force_orth=False):
     # Now update our matrices!
     Sp = tSp.copy()
 
-    Up = np.dot(np.hstack([U, P]), tUp)  # this may not preserve orthogonality over many repetitions.  See below.
+    Up = np.dot(np.hstack([U, porth]), tUp)  # this may not preserve orthogonality over many repetitions.  See below.
 
     # Exploit structure to compute this fast: Vp = [ V Q ] * tVp;
     Vp = np.dot(V.T, tVp.T[0:current_rank, :]).T
@@ -105,12 +105,12 @@ def addblock_svd_update(U, S, V, A, force_orth=False):
     # want to force orthogonality every so often.
     if force_orth:
         raise NotImplementedError('This has not been tested yet.')
-        [UQ, UR] = qr(Up, mode='economic')
-        [VQ, VR] = qr(Vp, mode='economic')
-        print(Up.shape, Vp.shape, UR.shape, Sp.shape, VR.shape)
-        [tUp, tSp, tVp] = svds(np.dot(UR, np.dot(Sp, VR.T)), current_rank)
-        Up = np.dot(UQ, tUp)
-        Vp = np.dot(VQ, tVp)
-        Sp = tSp
+        # [UQ, UR] = qr(Up, mode='economic')
+        # [VQ, VR] = qr(Vp, mode='economic')
+        # print(Up.shape, Vp.shape, UR.shape, Sp.shape, VR.shape)
+        # [tUp, tSp, tVp] = svds(np.dot(UR, np.dot(Sp, VR.T)), current_rank)
+        # Up = np.dot(UQ, tUp)
+        # Vp = np.dot(VQ, tVp)
+        # Sp = tSp
 
     return Up, Sp, Vp
