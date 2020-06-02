@@ -13,6 +13,7 @@ Before you modify any code:
 * Write `unit tests <http://doc.pytest.org/>`_  for any functionality you add.
 * *Always* write docstrings, and follow the `Google format <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/>`_.
 * Learn how to use `git <https://git-scm.com/book/en/v2>`_.
+* Develop code in the git "develop" branch.  The master branch must always pass tests.
 * All units are SI (angles in radians) unless there is a *very* good reason to do something different.
 * The scope of this project is diffraction under the Born approximation.  Don't stray far from this.
 
