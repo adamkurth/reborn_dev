@@ -96,4 +96,5 @@ Speeding up code with numba and f2py
 Numba is one way to speed up Python code in cases where there is not an existing numpy function.  It is used within
 reborn in a few places and appears to be reasonably stable, though still lacking some basic functionality.
 
-A better way to speed up code is to use fortran.  Look here: :ref:`working_with_fortran`.
+A better way to speed up code is to use fortran.  Look here for some notes on how to work with f2py:
+:ref:`working_with_fortran`.
