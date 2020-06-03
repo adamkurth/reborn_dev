@@ -23,7 +23,7 @@ from reborn.simulate.clcore import ClCore
 #
 #    \rho_\text{tot}(\vec{r}) = \sum_n \rho_\text{sph}(|\vec{r} - \vec{s}_n|)
 #
-# where :math:`\vec{s}_n` is the position of the :math:`n`_th sphere.  The Fourier-space density is:
+# where :math:`\vec{s}_n` is the position of the :math:`n` th sphere.  The Fourier-space density is:
 #
 # .. math::
 #
@@ -71,7 +71,9 @@ scat = pad.reshape(scat)
 beam_mask = pad.reshape(beam_mask)
 
 # %%
-# Display the diffraction intensities:
+# Display the diffraction intensities along with the Fourier transform of the intensities.  The FT of the intensities
+# is equal to the autocorrelation of the scattering density, however, there are artifacts caused by Ewald curvature
+# and the beamstop.
 cmap = 'CMRmap'
 fig = plt.figure(2)
 dispim1 = scat
