@@ -330,6 +330,9 @@ rst_epilog = """
 
 .. |Jungfrau|  replace:: `Jungfrau <https://lcls.slac.stanford.edu/detectors/jungfrau>`__
 .. |xraylib|  replace:: `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
+.. |pyopencl|  replace:: `pyopencl <https://documen.tician.de/pyopencl/index.html>`__
+.. |pytest|  replace:: `pytest <http://doc.pytest.org/>`__
+.. |Miniconda|  replace:: `Miniconda <https://conda.io/miniconda.html>`__
 
 .. |Cromer1968|  replace:: `Cromer et al. (1968) <https://doi.org/10.1107/S0567739468000550>`__
 .. |Hubbel1975|  replace:: `Hubbel et al. (1975) <https://doi.org/10.1063/1.555523>`__
