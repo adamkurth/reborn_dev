@@ -41,7 +41,7 @@ class Beam():
 
         self.photon_energy = photon_energy
 
-        if photon_energy is None:
+        if wavelength is not None:
             self.wavelength = wavelength
 
         self.diameter_fwhm = diameter_fwhm
