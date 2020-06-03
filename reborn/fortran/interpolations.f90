@@ -5,9 +5,9 @@
 !  https://github.com/numpy/numpy/issues/14222
 !
 ! I wonder if the main program will now break compilation on other systems.....
-PROGRAM MAIN
-PRINT *,'Hello world'
-END PROGRAM MAIN
+!PROGRAM MAIN
+!PRINT *,'Hello world'
+!END PROGRAM MAIN
 
 subroutine trilinear_interpolation(datin, datin_corner, datin_dx, datout_coords, datout)
     ! Interpolate a 3D grid of data onto arbitrary points
@@ -61,8 +61,7 @@ subroutine trilinear_insert(data_coord, data_val, x_min, &
     complex(kind=8), intent(inout) :: dataout(:,:,:)
     real(kind=8),    intent(inout) :: weightout(:,:,:)
     complex(kind=8), intent(in)    :: data_val(:)
-    real(kind=8),    intent(in)    :: data_coord(:,:), x_min(3), &
-                                      Delta_x(3), one_over_bin_volume, c1(3)
+    real(kind=8),    intent(in)    :: data_coord(:,:), x_min(3), Delta_x(3), one_over_bin_volume, c1(3)
     integer(kind=4), intent(in)    :: N_data
 
     complex(kind=8) :: data_val_curr_scaled

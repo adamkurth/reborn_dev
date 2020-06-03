@@ -12,8 +12,8 @@
 sphinx-apidoc --output-dir source/api --module-first ../reborn ../reborn/fortran
 # Fix the stupid default title of API page
 tail -n+3 source/api/modules.rst > tmp.rst
-echo 'Complete API' > source/api/modules.rst
-echo '============' >> source/api/modules.rst
+echo 'Complete interface' > source/api/modules.rst
+echo '==================' >> source/api/modules.rst
 cat tmp.rst >> source/api/modules.rst
 rm tmp.rst
 make clean

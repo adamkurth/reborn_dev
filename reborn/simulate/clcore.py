@@ -129,6 +129,24 @@ class ClCore(object):
         # setup the programs
         self._build_opencl_programs()
 
+    def get_device_name(self):
+        r"""
+        Get the string (name) that describes the device that this ClCore instance is using.
+        Example: 'Intel(R) Gen9 HD Graphics NEO'
+
+        Note: You can find more properties of the device using e.g. ipython tab completion.  This function simply does
+        the following:
+
+        .. code-block:: python
+
+            return self.context.devices[0].name
+
+        If you want a more complete list of device
+
+        Returns: string
+        """
+        return self.context.devices[0].name
+
     def set_groupsize(self, group_size):
         r"""
         If the environment variable BORNAGAIN_CL_GROUPSIZE is set then use
@@ -1334,103 +1352,139 @@ class ClCore(object):
 #         return Amps
 #
 
-def help():
+def help(extended=False):
 
     r"""
     Print out some useful information about platforms and devices that are
     available for running simulations.
+
+    Arguments:
+        extended (bool):  Print extended details above the summary.
     """
 
-    def print_info(obj, info_cls):
-        for info_name in sorted(dir(info_cls)):
-            if not info_name.startswith("_") and info_name != "to_string":
-                info = getattr(info_cls, info_name)
-                try:
-                    info_value = obj.get_info(info)
-                except:
-                    info_value = "<error>"
+    if extended:
 
-                if (info_cls == cl.device_info and info_name == "PARTITION_TYPES_EXT"
-                    and isinstance(info_value, list)):
-                    print("%s: %s" % (info_name, [
-                        cl.device_partition_property_ext.to_string(v,
-                                                    "<unknown device partition property %d>")
-                        for v in info_value]))
-                else:
+        def print_info(obj, info_cls):
+            for info_name in sorted(dir(info_cls)):
+                if not info_name.startswith("_") and info_name != "to_string":
+                    info = getattr(info_cls, info_name)
                     try:
-                        print("%s: %s" % (info_name, info_value))
+                        info_value = obj.get_info(info)
                     except:
-                        print("%s: <error>" % info_name)
+                        info_value = "<error>"
 
-    short = False
-
-    for platform in cl.get_platforms():
-        print(75 * "=")
-        print(platform)
-        print(75 * "=")
-        if not short:
-            print_info(platform, cl.platform_info)
-
-        for device in platform.get_devices():
-            if not short:
-                print(75 * "-")
-            print(device)
-            if not short:
-                print(75 * "-")
-                print_info(device, cl.device_info)
-                ctx = cl.Context([device])
-                for mf in [
-                    cl.mem_flags.READ_ONLY,
-                    # cl.mem_flags.READ_WRITE,
-                    # cl.mem_flags.WRITE_ONLY
-                ]:
-                    for itype in [
-                        cl.mem_object_type.IMAGE2D,
-                        cl.mem_object_type.IMAGE3D
-                    ]:
+                    if (info_cls == cl.device_info and info_name == "PARTITION_TYPES_EXT"
+                        and isinstance(info_value, list)):
+                        print("%s: %s" % (info_name, [
+                            cl.device_partition_property_ext.to_string(v,
+                                                        "<unknown device partition property %d>")
+                            for v in info_value]))
+                    else:
                         try:
-                            formats = cl.get_supported_image_formats(ctx, mf, itype)
+                            print("%s: %s" % (info_name, info_value))
                         except:
-                            formats = "<error>"
-                        else:
-                            def str_chd_type(chdtype):
-                                result = cl.channel_type.to_string(chdtype,
-                                                                   "<unknown channel data type %d>")
+                            print("%s: <error>" % info_name)
 
-                                result = result.replace("_INT", "")
-                                result = result.replace("UNSIGNED", "U")
-                                result = result.replace("SIGNED", "S")
-                                result = result.replace("NORM", "N")
-                                result = result.replace("FLOAT", "F")
-                                return result
+        short = False
 
-                            formats = ", ".join(
-                                "%s-%s" % (
-                                    cl.channel_order.to_string(iform.channel_order,
-                                                               "<unknown channel order 0x%x>"),
-                                    str_chd_type(iform.channel_data_type))
-                                for iform in formats)
+        for platform in cl.get_platforms():
+            print(75 * "=")
+            print(platform)
+            print(75 * "=")
+            if not short:
+                print_info(platform, cl.platform_info)
 
-                        print("%s %s FORMATS: %s\n" % (
-                            cl.mem_object_type.to_string(itype),
-                            cl.mem_flags.to_string(mf),
-                            formats))
-                del ctx
+            for device in platform.get_devices():
+                if not short:
+                    print(75 * "-")
+                print(device)
+                if not short:
+                    print(75 * "-")
+                    print_info(device, cl.device_info)
+                    ctx = cl.Context([device])
+                    for mf in [
+                        cl.mem_flags.READ_ONLY,
+                        # cl.mem_flags.READ_WRITE,
+                        # cl.mem_flags.WRITE_ONLY
+                    ]:
+                        for itype in [
+                            cl.mem_object_type.IMAGE2D,
+                            cl.mem_object_type.IMAGE3D
+                        ]:
+                            try:
+                                formats = cl.get_supported_image_formats(ctx, mf, itype)
+                            except:
+                                formats = "<error>"
+                            else:
+                                def str_chd_type(chdtype):
+                                    result = cl.channel_type.to_string(chdtype,
+                                                                       "<unknown channel data type %d>")
 
-    print('=====================================================================')
-    print('Summary of platforms and devices (see details above):')
+                                    result = result.replace("_INT", "")
+                                    result = result.replace("UNSIGNED", "U")
+                                    result = result.replace("SIGNED", "S")
+                                    result = result.replace("NORM", "N")
+                                    result = result.replace("FLOAT", "F")
+                                    return result
+
+                                formats = ", ".join(
+                                    "%s-%s" % (
+                                        cl.channel_order.to_string(iform.channel_order,
+                                                                   "<unknown channel order 0x%x>"),
+                                        str_chd_type(iform.channel_data_type))
+                                    for iform in formats)
+
+                            print("%s %s FORMATS: %s\n" % (
+                                cl.mem_object_type.to_string(itype),
+                                cl.mem_flags.to_string(mf),
+                                formats))
+                    del ctx
+
     print(75 * "=")
-    i = 0
-    for platform in cl.get_platforms():
-        print(i, platform)
-        i += 1
-        j = 0
-        for device in platform.get_devices():
-            print(2 * '-', j, device)
-            j += 1
+    print('Summary of platforms and devices:')
     print(75 * "=")
-    print('')
-    print("You can set the environment variable PYOPENCL_CTX to choose the ")
-    print("device and platform automatically.  For example,")
-    print("> export PYOPENCL_CTX='1'")
+    # Create a list of all the platform IDs
+    platforms = cl.get_platforms()
+    print("\nNumber of OpenCL platforms:", len(platforms))
 
+    # Investigate each platform
+    for p in platforms:
+        # Print out some information about the platforms
+        print("\n-------------------------\n")
+        print("Platform:", p.name)
+        print("Vendor:", p.vendor)
+        print("Version:", p.version)
+        # Discover all devices
+        devices = p.get_devices()
+        print("Number of devices:", len(devices))
+        # Investigate each device
+        for d in devices:
+            print("")
+            # Print out some information about the devices
+            print("    Name:", d.name)
+            print("    Version:", d.opencl_c_version)
+            print("    Max. Compute Units:", d.max_compute_units)
+            if 'cl_khr_fp64' not in d.extensions.split():
+                print("    Double Precision Support: No")
+            else:
+                print("    Double Precision Support: Yes")
+            print("    Local Memory Size:", d.local_mem_size / 1024, "KB")
+            print("    Global Memory Size:", d.global_mem_size / (1024 * 1024), "MB")
+            print("    Max Alloc Size:", d.max_mem_alloc_size / (1024 * 1024), "MB")
+            print("    Max Work-group Total Size:", d.max_work_group_size)
+            print("    Cache Size:", d.global_mem_cacheline_size)
+            # Find the maximum dimensions of the work-groups
+            dim = d.max_work_item_sizes
+            print("    Max Work-group Dims:(", dim[0], " ".join(map(str, dim[1:])), ")")
+
+    print("")
+    print(75 * "-")
+    print('\nEnvironment variables that affect the behavior of ClCore:\n')
+    print("PYOPENCL_CTX defines the default device and platform.  Example:")
+    print("")
+    print("> export PYOPENCL_CTX='0:1'")
+    print("")
+    print("BORNAGAIN_CL_GROUPSIZE sets the default work group size:")
+    print("> export BORNAGAIN_CL_GROUPSIZE=32")
+    print("")
+    print(75 * "-")

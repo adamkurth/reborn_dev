@@ -154,7 +154,7 @@ class PADGeometry():
 
         if n_pixels is not None:
             utils.depreciate('The redundant "n_pixels" keyword argument in simple_setup is utils.depreciated.  Use "shape" keyword '
-                       'instead.')
+                             'instead.')
 
         if pixel_size is None:
             utils.warn('Setting pixel_size in simple_setup to 100e-6.  You should specify this value explicitly.')
@@ -495,16 +495,16 @@ def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0
 
     pads = []
 
-    tilefs_sep = pad_shape[1] + pad_gap/pixel_size / 2
+    tilefs_sep = pad_shape[1] + pad_gap / pixel_size / 2
     tilefs_pos = (np.arange(tiling_shape[1]) - (tiling_shape[1] - 1) / 2) * tilefs_sep
-    tiless_sep = pad_shape[0] + pad_gap/pixel_size / 2
+    tiless_sep = pad_shape[0] + pad_gap / pixel_size / 2
     tiless_pos = (np.arange(tiling_shape[0]) - (tiling_shape[0] - 1) / 2) * tiless_sep
 
     for fs_cent in tilefs_pos:  # fast scan
         for ss_cent in tiless_pos:  # slow scan
             pad = PADGeometry(shape=pad_shape, pixel_size=pixel_size, distance=distance)
-            pad.t_vec += pad.fs_vec * fs_cent - 0.5*pixel_size
-            pad.t_vec += pad.ss_vec * ss_cent - 0.5*pixel_size
+            pad.t_vec += pad.fs_vec * fs_cent - 0.5 * pixel_size
+            pad.t_vec += pad.ss_vec * ss_cent - 0.5 * pixel_size
             pads.append(pad)
 
     return pads
@@ -526,7 +526,7 @@ def concat_pad_data(data):
     Returns: 1D numpy array
     """
 
-    if type(data) == np.ndarray:
+    if isinstance(data, np.ndarray):
         return data.ravel()
 
     return np.concatenate([d.ravel() for d in data])
@@ -829,7 +829,7 @@ class RadialProfiler():
                 self._counts_profile, _ = np.histogram(self.q_mags, bins=self.n_bins, range=self.q_edge_range)
             else:
                 self._counts_profile, _ = np.histogram(self.q_mags, weights=self.mask, bins=self.n_bins,
-                                                    range=self.q_edge_range)
+                                                       range=self.q_edge_range)
         return self._counts_profile
 
     def make_plan(self, q_mags=None, mask=None, n_bins=None, q_range=None, pad_geometry=None, beam=None):
@@ -862,8 +862,8 @@ class RadialProfiler():
         q_range = np.array(q_range)
         bin_size = (q_range[1] - q_range[0]) / float(n_bins - 1)
         bin_centers = np.linspace(q_range[0], q_range[1], n_bins)
-        bin_edges = np.linspace(q_range[0]-bin_size/2, q_range[1]+bin_size/2, n_bins+1)
-        q_edge_range = np.array([q_range[0]-bin_size/2,q_range[1]+bin_size/2])
+        bin_edges = np.linspace(q_range[0] - bin_size / 2, q_range[1] + bin_size / 2, n_bins + 1)
+        q_edge_range = np.array([q_range[0] - bin_size / 2, q_range[1] + bin_size / 2])
         self.q_mags = q_mags
         self.n_bins = n_bins
         self.bin_centers = bin_centers
