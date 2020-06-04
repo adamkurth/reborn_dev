@@ -147,6 +147,12 @@ class ClCore(object):
         """
         return self.context.devices[0].name
 
+    def print_device_info(self):
+        r"""
+        Print some helpful information about the device.
+        """
+        print_device_info(self.context.devices[0])
+
     def set_groupsize(self, group_size):
         r"""
         If the environment variable BORNAGAIN_CL_GROUPSIZE is set then use
@@ -1352,6 +1358,26 @@ class ClCore(object):
 #         return Amps
 #
 
+def print_device_info(device):
+    d = device
+    print("")
+    # Print out some information about the devices
+    print("    Name:", d.name)
+    print("    Version:", d.opencl_c_version)
+    print("    Max. Compute Units:", d.max_compute_units)
+    if 'cl_khr_fp64' not in d.extensions.split():
+        print("    Double Precision Support: No")
+    else:
+        print("    Double Precision Support: Yes")
+    print("    Local Memory Size:", d.local_mem_size / 1024, "KB")
+    print("    Global Memory Size:", d.global_mem_size / (1024 * 1024), "MB")
+    print("    Max Alloc Size:", d.max_mem_alloc_size / (1024 * 1024), "MB")
+    print("    Max Work-group Total Size:", d.max_work_group_size)
+    print("    Cache Size:", d.global_mem_cacheline_size)
+    # Find the maximum dimensions of the work-groups
+    dim = d.max_work_item_sizes
+    print("    Max Work-group Dims:(", dim[0], " ".join(map(str, dim[1:])), ")")
+
 def help(extended=False):
 
     r"""
@@ -1459,23 +1485,24 @@ def help(extended=False):
         print("Number of devices:", len(devices))
         # Investigate each device
         for d in devices:
-            print("")
-            # Print out some information about the devices
-            print("    Name:", d.name)
-            print("    Version:", d.opencl_c_version)
-            print("    Max. Compute Units:", d.max_compute_units)
-            if 'cl_khr_fp64' not in d.extensions.split():
-                print("    Double Precision Support: No")
-            else:
-                print("    Double Precision Support: Yes")
-            print("    Local Memory Size:", d.local_mem_size / 1024, "KB")
-            print("    Global Memory Size:", d.global_mem_size / (1024 * 1024), "MB")
-            print("    Max Alloc Size:", d.max_mem_alloc_size / (1024 * 1024), "MB")
-            print("    Max Work-group Total Size:", d.max_work_group_size)
-            print("    Cache Size:", d.global_mem_cacheline_size)
-            # Find the maximum dimensions of the work-groups
-            dim = d.max_work_item_sizes
-            print("    Max Work-group Dims:(", dim[0], " ".join(map(str, dim[1:])), ")")
+            print_device_info(d)
+            # print("")
+            # # Print out some information about the devices
+            # print("    Name:", d.name)
+            # print("    Version:", d.opencl_c_version)
+            # print("    Max. Compute Units:", d.max_compute_units)
+            # if 'cl_khr_fp64' not in d.extensions.split():
+            #     print("    Double Precision Support: No")
+            # else:
+            #     print("    Double Precision Support: Yes")
+            # print("    Local Memory Size:", d.local_mem_size / 1024, "KB")
+            # print("    Global Memory Size:", d.global_mem_size / (1024 * 1024), "MB")
+            # print("    Max Alloc Size:", d.max_mem_alloc_size / (1024 * 1024), "MB")
+            # print("    Max Work-group Total Size:", d.max_work_group_size)
+            # print("    Cache Size:", d.global_mem_cacheline_size)
+            # # Find the maximum dimensions of the work-groups
+            # dim = d.max_work_item_sizes
+            # print("    Max Work-group Dims:(", dim[0], " ".join(map(str, dim[1:])), ")")
 
     print("")
     print(75 * "-")
