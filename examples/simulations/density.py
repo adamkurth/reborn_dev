@@ -1,36 +1,26 @@
-from __future__ import division
+r"""
+Density maps (incomplete)
+=========================
 
-import sys
+Contributed by Richard A. Kirian
+
+"""
 
 import numpy as np
 from numpy.fft import fftn, ifftn, fftshift
+from scipy import constants as const
 import matplotlib.pyplot as plt
-
-from reborn.viewers.qtviews import qtviews
 from reborn.target import crystal
 from reborn.data import lysozyme_pdb_file
 import reborn.simulate.clcore as core
-from scipy import constants as const
 
 hc = const.h*const.c
-
-plot = True
-if 'noplots' in sys.argv:
-    plot = False
 
 fftmethod = True
 
 pdb_file = lysozyme_pdb_file
 print('Loading pdb file (%s)' % pdb_file)
-cryst = crystal.CrystalStructure(pdb_file)
-
-if plot and 0:
-    # Show atoms in scatter plot
-    r = cryst.molecule.coordinates
-    sv = qtviews.Scatter3D()
-    sv.add_points(r)
-    sv.show()
-
+cryst = crystal.CrystalStructure('2LYZ')
 
 # Look up atomic scattering factors (they are complex numbers)
 print('Getting scattering factors')
@@ -88,42 +78,25 @@ else:  # This is the direct way of making a density map from atoms and their str
 
 rho_cell = fftshift(rho_cell)
 
-if plot and 1:
-
-    print('Showing 3D volumetric rendering of unit cell')
-    vol = qtviews.Volumetric3D()
-    for i in range(0, len(mt.get_sym_luts())):
-        # print(rho)
-        vol.add_density(fftshift(mt.symmetry_transform(0, i, rho)), qtviews.bright_colors(i))
-    vol.show()
-
-if plot and 1:
-
-    print('Showing orthogonal slices of diffraction intensities and density projections')
-    fig = plt.figure()
-
-    fig.add_subplot(2, 3, 1)
-    dispim = np.log10(I[np.floor(mt.shape[0]/2).astype(np.int), :, :] + 10)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-
-    fig.add_subplot(2, 3, 4)
-    dispim = np.sum(rho_cell, axis=0)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-
-    fig.add_subplot(2, 3, 2)
-    dispim = np.log10(I[:, np.floor(mt.shape[1]/2).astype(np.int), :] + 10)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-
-    fig.add_subplot(2, 3, 5)
-    dispim = np.sum(rho_cell, axis=1)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-
-    fig.add_subplot(2, 3, 3)
-    dispim = np.log10(I[:, :, np.floor(mt.shape[2]/2).astype(np.int)] + 10)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-
-    fig.add_subplot(2, 3, 6)
-    dispim = np.sum(rho_cell, axis=2)
-    plt.imshow(dispim, interpolation='nearest', cmap='gray')
-
-    plt.show()
+# %%
+# Show orthogonal slices of diffraction intensities and density projections
+fig = plt.figure()
+fig.add_subplot(2, 3, 1)
+dispim = np.log10(I[np.floor(mt.shape[0]/2).astype(np.int), :, :] + 10)
+plt.imshow(dispim, interpolation='nearest', cmap='gray')
+fig.add_subplot(2, 3, 4)
+dispim = np.sum(rho_cell, axis=0)
+plt.imshow(dispim, interpolation='nearest', cmap='gray')
+fig.add_subplot(2, 3, 2)
+dispim = np.log10(I[:, np.floor(mt.shape[1]/2).astype(np.int), :] + 10)
+plt.imshow(dispim, interpolation='nearest', cmap='gray')
+fig.add_subplot(2, 3, 5)
+dispim = np.sum(rho_cell, axis=1)
+plt.imshow(dispim, interpolation='nearest', cmap='gray')
+fig.add_subplot(2, 3, 3)
+dispim = np.log10(I[:, :, np.floor(mt.shape[2]/2).astype(np.int)] + 10)
+plt.imshow(dispim, interpolation='nearest', cmap='gray')
+fig.add_subplot(2, 3, 6)
+dispim = np.sum(rho_cell, axis=2)
+plt.imshow(dispim, interpolation='nearest', cmap='gray')
+plt.show()
