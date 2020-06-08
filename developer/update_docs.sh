@@ -6,4 +6,4 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
 fi
 
 cd ../doc || return
-./update-documentation.sh "$@"
+./update_docs.sh "$@"

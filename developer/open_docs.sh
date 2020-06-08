@@ -6,4 +6,4 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
 fi
 
 cd ../doc || return
-./open-docs.sh
+./open_docs.sh
