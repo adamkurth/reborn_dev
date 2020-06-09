@@ -154,22 +154,45 @@ def _build_atomic_scattering_density_map_numba(x_vecs, f, sigma, x_min, x_max, s
 
 def trilinear_interpolation_fortran(densities, vectors, corners, deltas, out):
 
-    float_t = np.float64
-    assert densities.dtype == float_t
-    assert vectors.dtype == float_t
-    assert corners.dtype == float_t
-    assert deltas.dtype == float_t
-    assert out.dtype == float_t
+    assert vectors.dtype == np.float64
+    assert corners.dtype == np.float64
+    assert deltas.dtype == np.float64
     assert densities.flags.c_contiguous
     assert vectors.flags.c_contiguous
     assert corners.flags.c_contiguous
     assert deltas.flags.c_contiguous
     assert out.flags.c_contiguous
     assert np.min(deltas) > 0
-    density_f.trilinear_interpolation(densities.T, vectors.T, corners.T, deltas.T, out.T)
+    if np.iscomplexobj(densities):
+        assert densities.dtype == np.complex128
+        assert out.dtype == np.complex128
+        density_f.trilinear_interpolation_complex(densities.T, vectors.T, corners.T, deltas.T, out.T)
+    else:
+        assert densities.dtype == np.float64
+        assert out.dtype == np.float64
+        density_f.trilinear_interpolation(densities.T, vectors.T, corners.T, deltas.T, out.T)
 
 
 def trilinear_interpolation(densities, vectors, corners, deltas, out=None):
+    r"""
+    Perform a `trilinear interpolation <https://en.wikipedia.org/wiki/Trilinear_interpolation>`__.
+
+    Notes:
+        * This function assumes a periodic density; points that lie out of bounds will wrap around.
+        * Only double precision arrays.
+
+    Arguments:
+        densities (numpy array): A 3D density array.
+        vectors (numpy array): An Nx3 array of vectors that specify the points to be interpolated.
+        corners (numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
+        deltas (numpy array): A 3-element vector specifying the spacing between density samples in the 3D array.
+        out (numpy array): If you don't want the output array to be created (e.g for speed), provide it here.
+
+    Returns:
+        numpy array
+    """
+    corners = np.array(corners).copy()
+    deltas = np.array(deltas).copy()
 
     if out is None:
         out = np.zeros(vectors.shape[0], dtype=densities.dtype)
@@ -180,58 +203,58 @@ def trilinear_interpolation(densities, vectors, corners, deltas, out=None):
     return out
 
 
-@jit(nopython=True)
-def trilinear_interpolation_numba(densities=None, vectors=None, corners=None, deltas=None, out=None):
-    r"""
-    Trilinear interpolation of a 3D map.
-
-    Arguments:
-        densities: A 3D array of shape AxBxC
-        vectors: An Nx3 array of 3-vectors
-        limits: A 3x2 array specifying the limits of the density map samples.  These values specify the voxel centers.
-
-    Returns: Array of intensities with length N.
-    """
-
-    nx = int(densities.shape[0])
-    ny = int(densities.shape[1])
-    nz = int(densities.shape[2])
-
-    for ii in range(vectors.shape[0]):
-
-        # Floating point coordinates
-        i_f = float(vectors[ii, 0] - corners[0, 0]) / deltas[0]
-        j_f = float(vectors[ii, 1] - corners[1, 0]) / deltas[1]
-        k_f = float(vectors[ii, 2] - corners[2, 0]) / deltas[2]
-
-        # Integer coordinates
-        i = int(np.floor(i_f)) % nx
-        j = int(np.floor(j_f)) % ny
-        k = int(np.floor(k_f)) % nz
-
-        # Trilinear interpolation formula specified in e.g. paulbourke.net/miscellaneous/interpolation
-        k0 = k
-        j0 = j
-        i0 = i
-        k1 = k+1
-        j1 = j+1
-        i1 = i+1
-        x0 = i_f - np.floor(i_f)
-        y0 = j_f - np.floor(j_f)
-        z0 = k_f - np.floor(k_f)
-        x1 = 1.0 - x0
-        y1 = 1.0 - y0
-        z1 = 1.0 - z0
-        out[ii] = densities[i0, j0, k0] * x1 * y1 * z1 + \
-                  densities[i1, j0, k0] * x0 * y1 * z1 + \
-                  densities[i0, j1, k0] * x1 * y0 * z1 + \
-                  densities[i0, j0, k1] * x1 * y1 * z0 + \
-                  densities[i1, j0, k1] * x0 * y1 * z0 + \
-                  densities[i0, j1, k1] * x1 * y0 * z0 + \
-                  densities[i1, j1, k0] * x0 * y0 * z1 + \
-                  densities[i1, j1, k1] * x0 * y0 * z0
-
-    return out
+# @jit(nopython=True)
+# def trilinear_interpolation_numba(densities=None, vectors=None, corners=None, deltas=None, out=None):
+#     r"""
+#     Trilinear interpolation of a 3D map.
+#
+#     Arguments:
+#         densities: A 3D array of shape AxBxC
+#         vectors: An Nx3 array of 3-vectors
+#         limits: A 3x2 array specifying the limits of the density map samples.  These values specify the voxel centers.
+#
+#     Returns: Array of intensities with length N.
+#     """
+#
+#     nx = int(densities.shape[0])
+#     ny = int(densities.shape[1])
+#     nz = int(densities.shape[2])
+#
+#     for ii in range(vectors.shape[0]):
+#
+#         # Floating point coordinates
+#         i_f = float(vectors[ii, 0] - corners[0, 0]) / deltas[0]
+#         j_f = float(vectors[ii, 1] - corners[1, 0]) / deltas[1]
+#         k_f = float(vectors[ii, 2] - corners[2, 0]) / deltas[2]
+#
+#         # Integer coordinates
+#         i = int(np.floor(i_f)) % nx
+#         j = int(np.floor(j_f)) % ny
+#         k = int(np.floor(k_f)) % nz
+#
+#         # Trilinear interpolation formula specified in e.g. paulbourke.net/miscellaneous/interpolation
+#         k0 = k
+#         j0 = j
+#         i0 = i
+#         k1 = k+1
+#         j1 = j+1
+#         i1 = i+1
+#         x0 = i_f - np.floor(i_f)
+#         y0 = j_f - np.floor(j_f)
+#         z0 = k_f - np.floor(k_f)
+#         x1 = 1.0 - x0
+#         y1 = 1.0 - y0
+#         z1 = 1.0 - z0
+#         out[ii] = densities[i0, j0, k0] * x1 * y1 * z1 + \
+#                   densities[i1, j0, k0] * x0 * y1 * z1 + \
+#                   densities[i0, j1, k0] * x1 * y0 * z1 + \
+#                   densities[i0, j0, k1] * x1 * y1 * z0 + \
+#                   densities[i1, j0, k1] * x0 * y1 * z0 + \
+#                   densities[i0, j1, k1] * x1 * y0 * z0 + \
+#                   densities[i1, j1, k0] * x0 * y0 * z1 + \
+#                   densities[i1, j1, k1] * x0 * y0 * z0
+#
+#     return out
 
 
 def trilinear_insertion(densities, weights, vectors, vals, corners, deltas, weight=1):

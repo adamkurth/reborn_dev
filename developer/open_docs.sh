@@ -5,7 +5,5 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit
 fi
 
-./cleanup-everything.sh
-./compile-fortran.sh
-cd ../test
-pytest
+cd ../doc || return
+./open_docs.sh

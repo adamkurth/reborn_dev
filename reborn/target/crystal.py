@@ -848,7 +848,7 @@ class CrystalDensityMap(object):
     def au_to_k(self, k, data):
         r"""
         Transform a map of the asymmetric unit (AU) to the kth symmetry partner.  Note that the generation of the
-        first symmetry partner (k=0, where k = 0, 1, ..., N-1) might employ a non-identiy rotation matrix and/or a
+        first symmetry partner (k=0, where k = 0, 1, ..., N-1) might employ a non-identity rotation matrix and/or a
         non-zero translation vector -- typically this is not the case but it can happen for example if the symmetry
         operations are chosen such that all molecules are packed within the unit cell.
 
@@ -903,15 +903,17 @@ class CrystalDensityMap(object):
 
         return data_trans
 
-    def place_atoms_in_map(self, atom_x_vecs, atom_fs, mode='gaussian', fixed_atom_sigma=0.5e-10):
+    def place_atoms_in_map(self, atom_x_vecs, atom_fs, mode='trilinear', fixed_atom_sigma=0.5e-10):
         r"""
         This will take a list of atom position vectors and densities and place them in a 3D map.  The position vectors
         should be in the crystal basis, and the densities must be real.
 
+        FIXME: This function will soon be replaced with one that utilizes atomic form factors.
+
         Arguments:
             atom_x_vecs      (numpy array) : An nx3 array of position vectors
             atom_fs          (numpy array) : An n-length array of densities (must be real)
-            mode             (str)         : Either 'gaussian' or 'trilinear'
+            mode             (str)         : Either 'gaussian' or 'trilinear' (default: 'trilinear')
             fixed_atom_sigma (float)       : Standard deviation of the Gaussian atoms
 
         Returns:
@@ -919,6 +921,7 @@ class CrystalDensityMap(object):
         """
 
         if mode == 'gaussian':
+            raise ValueError('The "gaussian" mode does not implement periodic boundaries properly...')  # FIXME
             sigma = fixed_atom_sigma  # Gaussian sigma (i.e. atom "size"); this is a fudge factor and needs to be
             # updated n_atoms = atom_x_vecs.shape[0]
             orth_mat = self.cryst.unitcell.o_mat.copy()
@@ -926,7 +929,6 @@ class CrystalDensityMap(object):
             n_map_voxels = map_x_vecs.shape[0]
             f_map = np.zeros([n_map_voxels], dtype=np.complex)
             f_map_tmp = np.zeros([n_map_voxels], dtype=np.double)
-            s = self.oversampling
             if len(atom_x_vecs.shape) == 1:
                 atom_x_vecs = np.expand_dims(atom_x_vecs, axis=0)
             place_atoms_in_map(atom_x_vecs, atom_fs, sigma, self.x_max, orth_mat, map_x_vecs, f_map, f_map_tmp)

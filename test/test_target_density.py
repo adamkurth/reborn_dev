@@ -106,6 +106,29 @@ def test_03():
     assert np.max(np.abs(dens2)) > 0
     assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2
 
+    # Check that the above works with complex density map
+    # float_t = np.float64
+    # nx, ny, nz = 6, 7, 8
+    # corners = np.array([0, 0, 0], dtype=float_t)
+    # deltas = np.array([1, 1, 1], dtype=float_t)
+    # x, y, z = np.meshgrid(np.arange(0, nx), np.arange(0, ny), np.arange(0, nz), indexing='ij')
+    # vectors0 = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t)
+    # dens = func1(vectors0).reshape([nx, ny, nz])
+    # x, y, z = np.meshgrid(np.arange(1, nx-2), np.arange(1, ny-2), np.arange(1, nz-2), indexing='ij')
+    # vectors = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t) + 0.1
+    # dens1 = func1(vectors).astype(np.complex128)
+    # dens = dens.astype(np.complex128)
+    # dens += 1j
+    # dens1 += dens1*1j
+    # dens2 = np.zeros_like(dens1)
+    # density.trilinear_interpolation(dens, vectors, corners, deltas, dens2)
+    # assert np.max(np.abs(np.real(dens1))) > 0
+    # assert np.max(np.abs(np.real(dens2))) > 0
+    # assert np.max(np.abs((np.real(dens1) - np.real(dens2))/np.real(dens1))) < 1e-2
+    # assert np.max(np.abs(np.imag(dens1))) > 0
+    # assert np.max(np.abs(np.imag(dens2))) > 0
+    # assert np.max(np.abs((np.imag(dens1) - np.imag(dens2))/np.imag(dens1))) < 1e-2
+
 
 def test_04():
 

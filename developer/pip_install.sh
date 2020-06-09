@@ -5,5 +5,5 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit
 fi
 
-cd ../doc || return
-./open-docs.sh
+cd ..
+pip install --no-deps --editable .
