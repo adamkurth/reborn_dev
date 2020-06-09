@@ -1,4 +1,4 @@
-image: ubuntu:18.04
+image: ubuntu:20.04
 
 before_script:
   - source ubuntu-setup.sh
@@ -12,7 +12,7 @@ tests:
 pages:
   script:
   - cd doc
-  - bash update-documentation.sh
+  - bash update_docs.sh
   - cp -r build/html ../public
   artifacts:
     paths:

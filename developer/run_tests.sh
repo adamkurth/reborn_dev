@@ -8,4 +8,4 @@ fi
 ./cleanup-everything.sh
 ./compile-fortran.sh
 cd ../test
-pytest
+pytest $@

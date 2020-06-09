@@ -17,7 +17,7 @@ np.random.seed(0)
 r_e = const.value('classical electron radius')
 eV = const.value('electron volt')
 
-pad = reborn.detector.PADGeometry(distance=0.2, shape=[4000]*2, pixel_size=100e-6)
+pad = reborn.detector.PADGeometry(distance=0.2, shape=[500]*2, pixel_size=800e-6)
 beam = reborn.source.Beam(photon_energy=8000*eV, diameter_fwhm=5e-6, pulse_energy=1e8*8000*eV)
 jet_diameter = 100e-6
 n_water_molecules = jet_diameter * beam.diameter_fwhm**2 * solutions.water_number_density()
