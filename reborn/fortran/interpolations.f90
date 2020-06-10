@@ -1,14 +1,3 @@
-! Suddenly, it became necessary to have this main program in order for these to compile with f2py.  Nothing in the
-! python or fortran code changed in reborn.  Not sure if this is due to numpy or conda, but the failure began on
-! May 23, 2020 when compiling via the gitlab runner.  This is possibly helpful:
-!
-!  https://github.com/numpy/numpy/issues/14222
-!
-! I wonder if the main program will now break compilation on other systems.....
-!PROGRAM MAIN
-!PRINT *,'Hello world'
-!END PROGRAM MAIN
-
 subroutine trilinear_interpolation(datin, datin_corner, datin_dx, datout_coords, datout)
     ! Interpolate a 3D grid of data onto arbitrary points
     ! datin is the input data with corner coordinate datin_corner (3-vector) and grid step size datin_dx (3-vector)
