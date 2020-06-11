@@ -5,6 +5,7 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit
 fi
 
-bash cleanup-caches.sh
-bash cleanup-compiled.sh
-bash cleanup-docs.sh
+bash cleanup_pip.sh
+bash cleanup_caches.sh
+bash cleanup_compiled.sh
+bash cleanup_docs.sh

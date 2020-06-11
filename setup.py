@@ -35,8 +35,8 @@ ext_modules.append(Extension(
       **omp_args
       ))
 ext_modules.append(Extension(
-      name='reborn.fortran.wtf_f',
-      sources=['reborn/fortran/wtf.f90'],
+      name='reborn.fortran.fortran_indexing_f',
+      sources=['reborn/fortran/fortran_indexing.f90'],
       define_macros=f2py_macros,
       **extra_args
       ))

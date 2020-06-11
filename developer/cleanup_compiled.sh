@@ -5,8 +5,8 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit
 fi
 
-echo 'Cleaning compiled objects'
+echo 'Cleaning pip install files'
 find .. -name '*.so' -type f -exec rm {} \;
 find .. -name '*.dSYM' -type d -exec rm -r {} \;
 find .. -name '*.pyc' -type f -exec rm {} \;
-rm -r ../build ../reborn.egg-info
+find .. -name 'reborn.egg-info' -type d -exec rm -r {} \;

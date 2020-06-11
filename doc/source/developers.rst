@@ -111,8 +111,8 @@ The f2py utility included with numpy makes it quite easy to integrate simple For
 we wish to pass memory buffers from numpy ndarrays into a Fortran subroutine, and we modify those buffers with Fortran.
 There are some very annoying issues that can arise because the ways in which the Numpy package manipulates
 the inernal memory buffers of ndarrays, which might surprise you.  These under-the-hood manipulations might be
-harmless... until the day you really care about operating directly on memory buffers. Examples of such complications can
-be found in the `test_fortran.py` unit test.
+harmless until the day you really care about operating directly on memory buffers. Examples of such complications can
+be found in the example :ref:`plot_f2py`.
 
 Another matter is the way that numpy arrays are passed to fortran routines when you use f2py.  The
 `documentation <https://www.numpy.org/devdocs/f2py/python-usage.html>`_ states the following:

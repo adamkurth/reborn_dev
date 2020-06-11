@@ -22,10 +22,10 @@ except ImportError:
     from . import interpolations_f
 
 try:
-    from . import wtf_f
+    from . import fortran_indexing_f
 except ImportError:
-    compile_f90('wtf.f90')
-    from . import wtf_f
+    compile_f90('fortran_indexing.f90')
+    from . import fortran_indexing_f
 
 try:
     from . import peaks_f
