@@ -7,6 +7,9 @@ fi
 
 cd ../reborn/fortran
 
+export NPY_DISTUTILS_APPEND_FLAGS=1
+export NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
+
 f2py="python -m numpy.f2py"
 flags="-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION"
 

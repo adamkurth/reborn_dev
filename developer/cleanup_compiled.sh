@@ -10,3 +10,4 @@ find .. -name '*.so' -type f -exec rm {} \;
 find .. -name '*.dSYM' -type d -exec rm -r {} \;
 find .. -name '*.pyc' -type f -exec rm {} \;
 find .. -name 'reborn.egg-info' -type d -exec rm -r {} \;
+find .. -name build -type d -exec rm -r {} \;
