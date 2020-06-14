@@ -19,7 +19,7 @@ ext_modules = list()
 os.environ['NPY_DISTUTILS_APPEND_FLAGS'] = '1'
 os.environ['NPY_NO_DEPRECATED_API'] = 'NPY_1_7_API_VERSION'
 f2py_macros = []  # [('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'), ('NPY_DISTUTILS_APPEND_FLAGS', '1')]
-extra_args = {'extra_compile_args': ['-static']}
+extra_args = {} #{'extra_compile_args': ['-static']}
 omp_args = {}  # {'libraries': ['gomp'], 'extra_compile_args': ['-fopenmp']}
 ext_modules.append(Extension(
       name='reborn.fortran.interpolations_f',
@@ -48,7 +48,7 @@ ext_modules.append(Extension(
       ))
 
 setup(name='reborn',
-      version=datetime.date.today().strftime('%Y.%m.%d'),
+      version=datetime.date.today().strftime('%Y.%m.%d').replace('.0', '.'),
       description='Diffraction analysis and simulation utilities',
       author='Richard A. Kirian',
       author_email='rkirian@asu.edu',
