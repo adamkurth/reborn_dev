@@ -7,7 +7,7 @@ pth = os.path.split(os.path.abspath(__file__))[0]
 def compile_f90(f90_file, extra_args=''):
     # print('Attempting to compile Fortran code %s.  If this fails, see the docs: https://rkirian.gitlab.io/reborn'
     #       % (f90_file,))
-    numpy.f2py.compile(open(os.path.join(pth, f90_file), "r").read(), modulename=f90_file.replace('.f90', '_f'),
+    numpy.f2py.compile(open(os.path.join(pth, f90_file), "rb").read(), modulename=f90_file.replace('.f90', '_f'),
                        extension='.f90', extra_args=extra_args+' -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION',
                        verbose=False)
     fils = glob('*%s*' % (f90_file.replace('.f90', '_f'),))
