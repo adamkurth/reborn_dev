@@ -6,4 +6,4 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
 fi
 
 cd ..
-pip -v install --no-deps --editable .
+pip -v install --no-index --user --no-deps --editable .
