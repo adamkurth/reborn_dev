@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import sys
 import time
 import reborn as ba
+from reborn.target.density import trilinear_interpolation, trilinear_insertion
 import reborn.target.crystal as crystal
 import reborn.simulate.clcore as core
 from reborn.simulate.examples import lysozyme_pdb_file
@@ -114,6 +115,7 @@ if 1:
     tt = time.time() - t
     print("Moving amplitudes back to CPU memory in %7.03f ms" % (tt*1e3))
 
+    show = False
     if show:
         imdisp = a.reshape(pad.n_ss, pad.n_fs)
         imdisp = np.abs(imdisp) ** 2
@@ -224,28 +226,31 @@ def rand_rot(points):
 
 #returns a list of values to go with our vectors from arr
 #finds the value of the voxel it falls within
+# def trilinear_standin(arr,r_min,r_max,n_bin,vecs):
+#     out=np.array([])
+#     for n in range(len(vecs)):
+#         (x,y,z)=(vecs[n][0],vecs[n][1],vecs[n][2])
+#         (xmin,ymin,zmin)=(r_min[0],r_min[1],r_min[2])
+#         (xmax,ymax,zmax)=(r_max[0],r_max[1],r_max[2])
+#         i=int(np.floor((x-xmin)/dx+1/2))
+#         j=int(np.floor((y-ymin)/dy+1/2))
+#         k=int(np.floor((z-zmin)/dz+1/2))
+#         if x>xmax or y>ymax or z>zmax:
+#             print('error (',x,y,z,') > (',xmax,ymax,zmax,')')
+#         if x<xmin or y<ymin or z<zmin:
+#             print('error (',x,y,z,') > (',xmin,ymin,zmin,')')
+#         out=np.append(out,arr[i,j,k])
+#     return out
+
 def trilinear_standin(arr,r_min,r_max,n_bin,vecs):
-    out=np.array([])
-    for n in range(len(vecs)):
-        (x,y,z)=(vecs[n][0],vecs[n][1],vecs[n][2])
-        (xmin,ymin,zmin)=(r_min[0],r_min[1],r_min[2])
-        (xmax,ymax,zmax)=(r_max[0],r_max[1],r_max[2])
-        i=int(np.floor((x-xmin)/dx+1/2))
-        j=int(np.floor((y-ymin)/dy+1/2))
-        k=int(np.floor((z-zmin)/dz+1/2))
-        if x>xmax or y>ymax or z>zmax:
-            print('error (',x,y,z,') > (',xmax,ymax,zmax,')')
-        if x<xmin or y<ymin or z<zmin:
-            print('error (',x,y,z,') > (',xmin,ymin,zmin,')')
-        out=np.append(out,arr[i,j,k])
-    return out
+    return trilinear_interpolation(arr, vecs, x_min=r_min, x_max=r_max)
 
 #doing a single trilinear insert, with real part output
-def insert(data_coord, data_val, r_min, r_max, n_bin):
-        mask=np.ones_like(data_val)
-        data_out,weight_out=trilinear_insert(data_coord, data_val, r_min, r_max, n_bin, mask)
-        weight_out[weight_out==0]=1
-        return np.real(data_out/weight_out)
+# def insert(data_coord, data_val, r_min, r_max, n_bin):
+#         mask=np.ones_like(data_val)
+#         data_out,weight_out=trilinear_insert(data_coord, data_val, r_min, r_max, n_bin, mask)
+#         weight_out[weight_out==0]=1
+#         return np.real(data_out/weight_out)
     
 #plots an array summed over the x axis
 def plt_collapse(ar):
@@ -304,14 +309,17 @@ def sample_gauss_periodic(sigma):
 #'model_input' can be any fourier density but eventually should be noise
 def emmc(data,dect_arr,model_input,r_min,r_max,n_bin,N_remodels,N_metropolis,sigma):
     print('beginning EMMC')
+    dect_arr = dect_arr.astype(np.float64)
     t=time.time()
     model=model_input
     models=[model]
     def lnp(model,points,datum):
         return lnprob_poisson(model,r_min,r_max,n_bin,points,datum)
     for v in range(N_remodels):
-        model_val=np.zeros_like(model_input)
-        model_weights=np.zeros_like(model_input)
+        # model_val=np.zeros_like(model_input)
+        # model_weights=np.zeros_like(model_input)
+        model_val = np.zeros(model_input.shape, dtype=np.float64)
+        model_weights = np.zeros(model_input.shape, dtype=np.float64)
         for d in range(np.shape(data)[0]):
             datum=data[d]
             da=np.array(rand_rot(dect_arr))
@@ -327,9 +335,11 @@ def emmc(data,dect_arr,model_input,r_min,r_max,n_bin,N_remodels,N_metropolis,sig
                     da=da_prop
                     accpt+=1
                 mask=np.ones_like(datum)
-                (mv,mw)=trilinear_insert(da, datum, r_min, r_max, n_bin, mask)
-                model_val+=np.real(mv)
-                model_weights+=np.real(mw)
+                # (mv,mw)=trilinear_insert(da, datum, r_min, r_max, n_bin, mask)
+                # model_val+=np.real(mv)
+                # model_weights+=np.real(mw)
+                trilinear_insertion(densities=model_val, weights=model_weights,
+                                    vectors=da, insert_vals=datum.astype(np.float64), x_min=r_min, x_max=r_max)
                 #print('model',v+1,'datum',d,'metro',l+1)
             print('    datum ',d,"complete",'accpt',100*accpt/N_metropolis)
         model_weights[model_weights==0]=1
@@ -418,7 +428,7 @@ data_coord=rot(rot(bowl,[0,1,0],pi/2),[1,0,0],pi/4)
 #data_val=trilinear_standin(fourier_test,r_min,r_max,n_bin,data_coord)
 #data_val=fake_data[0]
 data_val=trilinear_standin(flat_test,r_min,r_max,n_bin,data_coord)
-ar=insert(data_coord, data_val, r_min, r_max, n_bin)
+# ar=insert(data_coord, data_val, r_min, r_max, n_bin)
 
 
 #inserting 2 ewald bowls
@@ -452,6 +462,7 @@ plt.hist(smpls,bins=2*pi*np.array(range(0,100))/100-pi)
 '''
 #seems correct
 
+print(fourier_test2)
 models=emmc(fake_data,bowl,fourier_test2,r_min,r_max,n_bin,1,10,pi/2)
 plt.imshow(models[-1][int(np.floor(Nx*1/2))])
 

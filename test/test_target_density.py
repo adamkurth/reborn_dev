@@ -177,6 +177,23 @@ def test_04():
     assert np.max(np.abs(densities)) > 0
     assert (np.abs((val - densities[2, 3, 4]/counts[2, 3, 4]) / val)) < 1e-2
 
+    np.random.seed(0)
+    float_t = np.float64
+    nx, ny, nz = 6, 7, 8
+    densities = np.zeros([nx, ny, nz], dtype=np.complex128)
+    counts = np.zeros([nx, ny, nz], dtype=float_t)
+    corners = np.array([0, 0, 0], dtype=float_t)
+    deltas = np.array([1, 1, 1], dtype=float_t)
+    vectors = (np.random.rand(10000, 3) * np.array([nx-1, ny-1, nz-1])).astype(float_t)
+    vals = func1(vectors)
+    vals = vals + 2j*vals
+    density.trilinear_insertion(densities, counts, vectors, vals, corners, deltas)
+    val = func1(np.array([[2, 3, 4]], dtype=float_t))
+    val = val + 2j*val
+    assert np.max(np.abs(np.real(densities))) > 0
+    assert (np.abs((np.real(val) - np.real(densities[2, 3, 4])/counts[2, 3, 4]) / np.real(val))) < 1e-2
+    assert np.max(np.abs(np.imag(densities))) > 0
+    assert (np.abs((np.imag(val) - np.imag(densities[2, 3, 4])/counts[2, 3, 4]) / np.imag(val))) < 1e-2
 
 def test_05():
 
