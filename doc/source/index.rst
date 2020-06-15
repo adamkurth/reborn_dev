@@ -88,6 +88,7 @@ Contents
    sampling_binning
    simulations
    examples
+   tips
    developers
    api/modules
 

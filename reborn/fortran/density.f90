@@ -24,7 +24,8 @@ subroutine trilinear_interpolation(densities, vectors, corners, deltas, out)
         x1 = 1.0 - x0
         y1 = 1.0 - y0
         z1 = 1.0 - z0
-        out(ii) = densities(i0, j0, k0) * x1 * y1 * z1 + &
+        out(ii) = out(ii) + &
+                  densities(i0, j0, k0) * x1 * y1 * z1 + &
                   densities(i1, j0, k0) * x0 * y1 * z1 + &
                   densities(i0, j1, k0) * x1 * y0 * z1 + &
                   densities(i0, j0, k1) * x1 * y1 * z0 + &
@@ -62,7 +63,8 @@ subroutine trilinear_interpolation_complex(densities, vectors, corners, deltas, 
         x1 = 1.0 - x0
         y1 = 1.0 - y0
         z1 = 1.0 - z0
-        out(ii) = densities(i0, j0, k0) * x1 * y1 * z1 + &
+        out(ii) = out(ii) + &
+                  densities(i0, j0, k0) * x1 * y1 * z1 + &
                   densities(i1, j0, k0) * x0 * y1 * z1 + &
                   densities(i0, j1, k0) * x1 * y0 * z1 + &
                   densities(i0, j0, k1) * x1 * y1 * z0 + &

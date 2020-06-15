@@ -152,8 +152,18 @@ def _build_atomic_scattering_density_map_numba(x_vecs, f, sigma, x_min, x_max, s
     return sum_map
 
 
-def trilinear_interpolation_fortran(densities, vectors, corners, deltas, out):
+def _trilinear_interpolation_fortran(densities, vectors, corners, deltas, out):
+    r"""
+    This is the wrapper to the corresponding fortran function.  It is not meant to be used directly.  See the
+    ``trilinear_interpolation`` function.
 
+    Arguments:
+        densities:
+        vectors:
+        corners:
+        deltas:
+        out:
+    """
     assert vectors.dtype == np.float64
     assert corners.dtype == np.float64
     assert deltas.dtype == np.float64
@@ -173,91 +183,88 @@ def trilinear_interpolation_fortran(densities, vectors, corners, deltas, out):
         density_f.trilinear_interpolation(densities.T, vectors.T, corners.T, deltas.T, out.T)
 
 
-def trilinear_interpolation(densities, vectors, corners, deltas, out=None):
+def trilinear_interpolation(densities, vectors, corners=None, deltas=None, x_min=None, x_max=None, out=None,
+                            strict_types=True):
     r"""
-    Perform a `trilinear interpolation <https://en.wikipedia.org/wiki/Trilinear_interpolation>`__.
+    Perform a `trilinear interpolation <https://en.wikipedia.org/wiki/Trilinear_interpolation>`__ on a 3D array.  An
+    arbitrary set of sample points in the form of an :math:`N\times 3` array may be specified.
 
     Notes:
-        * This function assumes a periodic density; points that lie out of bounds will wrap around.
-        * Only double precision arrays.
+        * This function behaves as if the density is periodic; points that lie out of bounds will wrap around.  This
+          might change in the future, in which case a keyword argument will be added so that you may explicitly decide
+          what to do in the case of points that lie outside of the grid.  Note that periodic boundaries avoid the
+          need for conditional statements within a for loop, which probably makes the function faster.  For now, if you
+          think you have points that lie outside of the grid, consider handling them separately.
+        * You may specify the output array, which is useful if you wish to simply add to an existing array that you
+          have already allocated.  This can make your code faster and reduce memory.  Beware: the out array is not
+          over-written -- the underlying fortran function will *add* to the existing *out* array.
+        * Only double precision arrays (both real and complex are allowed) at the fortran level.  You may pass in
+          other types, but they will be converted to double (or double complex) before passing to the fortran function.
+        * Make sure that all your arrays are c-contiguous.
+        * An older version of this code allowed the arguments *corners* and *deltas*.  They are discouraged because
+          we aim to standardize on the *x_min* and *x_max* arguments documented below.  They may be removed in the
+          future.
+        * The shape of the array is inferred from the *densities* argument.
 
     Arguments:
         densities (numpy array): A 3D density array.
         vectors (numpy array): An Nx3 array of vectors that specify the points to be interpolated.
-        corners (numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
-        deltas (numpy array): A 3-element vector specifying the spacing between density samples in the 3D array.
+        x_min (numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
+        x_max (numpy array): Same as x_min, but specifies the opposite corner, with larger values than x_min.
         out (numpy array): If you don't want the output array to be created (e.g for speed), provide it here.
+        strict_types (bool): Set this to False if you don't mind your code being slow due to the need to convert
+                             datatypes (i.e. copy arrays) on every function call.  Default: True.
 
     Returns:
         numpy array
     """
-    corners = np.array(corners).copy()
-    deltas = np.array(deltas).copy()
-
+    if (corners is not None) and (deltas is not None):
+        corners = np.array(corners).copy()
+        deltas = np.array(deltas).copy()
+    else:
+        if (x_min is None) or (x_max is None):
+            raise ValueError('trilinear_interpolation requires the x_min and x_max arguments')
+        shape = np.array(densities.shape)
+        if len(shape) != 3:
+            raise ValueError('trilinear_interpolation requires a 3D densities argument')
+        x_min = np.array(x_min)
+        x_max = np.array(x_max)
+        deltas = (x_max - x_min)/(shape - 1)
+        corners = x_min
+    corners = corners.astype(np.float64)
+    deltas = deltas.astype(np.float64)
+    if not strict_types:
+        if np.iscomplexobj(densities):
+            densities = densities.astype(np.complex128)
+        else:
+            densities = densities.astype(np.float64)
+        if out is not None:
+            if np.iscomplexobj(out):
+                out = out.astype(np.complex128)
+            else:
+                out = out.astype(np.float64)
     if out is None:
         out = np.zeros(vectors.shape[0], dtype=densities.dtype)
-    if density_f is not None:
-        trilinear_interpolation_fortran(densities, vectors, corners, deltas, out)
-#    else:
-#        trilinear_interpolation_numba(densities=None, vectors=None, limits=None, out=None)
+    _trilinear_interpolation_fortran(densities, vectors, corners, deltas, out)
     return out
 
 
-# @jit(nopython=True)
-# def trilinear_interpolation_numba(densities=None, vectors=None, corners=None, deltas=None, out=None):
-#     r"""
-#     Trilinear interpolation of a 3D map.
-#
-#     Arguments:
-#         densities: A 3D array of shape AxBxC
-#         vectors: An Nx3 array of 3-vectors
-#         limits: A 3x2 array specifying the limits of the density map samples.  These values specify the voxel centers.
-#
-#     Returns: Array of intensities with length N.
-#     """
-#
-#     nx = int(densities.shape[0])
-#     ny = int(densities.shape[1])
-#     nz = int(densities.shape[2])
-#
-#     for ii in range(vectors.shape[0]):
-#
-#         # Floating point coordinates
-#         i_f = float(vectors[ii, 0] - corners[0, 0]) / deltas[0]
-#         j_f = float(vectors[ii, 1] - corners[1, 0]) / deltas[1]
-#         k_f = float(vectors[ii, 2] - corners[2, 0]) / deltas[2]
-#
-#         # Integer coordinates
-#         i = int(np.floor(i_f)) % nx
-#         j = int(np.floor(j_f)) % ny
-#         k = int(np.floor(k_f)) % nz
-#
-#         # Trilinear interpolation formula specified in e.g. paulbourke.net/miscellaneous/interpolation
-#         k0 = k
-#         j0 = j
-#         i0 = i
-#         k1 = k+1
-#         j1 = j+1
-#         i1 = i+1
-#         x0 = i_f - np.floor(i_f)
-#         y0 = j_f - np.floor(j_f)
-#         z0 = k_f - np.floor(k_f)
-#         x1 = 1.0 - x0
-#         y1 = 1.0 - y0
-#         z1 = 1.0 - z0
-#         out[ii] = densities[i0, j0, k0] * x1 * y1 * z1 + \
-#                   densities[i1, j0, k0] * x0 * y1 * z1 + \
-#                   densities[i0, j1, k0] * x1 * y0 * z1 + \
-#                   densities[i0, j0, k1] * x1 * y1 * z0 + \
-#                   densities[i1, j0, k1] * x0 * y1 * z0 + \
-#                   densities[i0, j1, k1] * x1 * y0 * z0 + \
-#                   densities[i1, j1, k0] * x0 * y0 * z1 + \
-#                   densities[i1, j1, k1] * x0 * y0 * z0
-#
-#     return out
-
-
 def trilinear_insertion(densities, weights, vectors, vals, corners, deltas, weight=1):
+    r"""
+    Sorry... this needs documentation... blame Rick.
+
+    Args:
+        densities:
+        weights:
+        vectors:
+        vals:
+        corners:
+        deltas:
+        weight:
+
+    Returns:
+
+    """
 
     float_t = np.float64
     assert densities.dtype == float_t
@@ -274,110 +281,3 @@ def trilinear_insertion(densities, weights, vectors, vals, corners, deltas, weig
     assert deltas.flags.c_contiguous
     weight = float_t(weight)
     density_f.trilinear_insertion(densities.T, weights.T, vectors.T, vals.T, corners.T, deltas.T, weight)
-
-
-# @jit(nopython=True)
-# def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp):
-#
-#         r"""
-#
-#         Needs documentation...
-#
-#         """
-#
-#         n_atoms = x_vecs.shape[0]
-#         n_map_voxels = map_x_vecs.shape[0]
-#         # f_map = np.empty([n_map_voxels], dtype=atom_fs.dtype)
-#         # f_map_tmp = np.empty([n_map_voxels], dtype=x_vecs.dtype)
-#         for n in range(n_atoms):
-#             x = x_vecs[n, 0] % s
-#             y = x_vecs[n, 1] % s
-#             z = x_vecs[n, 2] % s
-#             w_tot = 0
-#             for i in range(n_map_voxels):
-#                 mx = map_x_vecs[i, 0]
-#                 my = map_x_vecs[i, 1]
-#                 mz = map_x_vecs[i, 2]
-#                 dx = np.abs(x - mx)
-#                 dy = np.abs(y - my)
-#                 dz = np.abs(z - mz)
-#                 dx = min(dx, s - dx)
-#                 dy = min(dy, s - dy)
-#                 dz = min(dz, s - dz)
-#                 dr2 = (orth_mat[0, 0] * dx + orth_mat[0, 1] * dy + orth_mat[0, 2] * dz)**2 + \
-#                       (orth_mat[1, 0] * dx + orth_mat[1, 1] * dy + orth_mat[1, 2] * dz)**2 + \
-#                       (orth_mat[2, 0] * dx + orth_mat[2, 1] * dy + orth_mat[2, 2] * dz)**2
-#                 w = np.exp(-dr2/(2*sigma**2))
-#                 f_map_tmp[i] = w
-#                 w_tot += w
-#             f_map += atom_fs[n] * f_map_tmp/w_tot
-
-
-# @jit(['void(float64[:], float64[:], float64[:], float64[:], float64[:])'], nopython=True)
-# def trilinear_insertion(densities=None, weights=None, vectors=None, input_densities=None, limits=None):
-#     r"""
-#     Trilinear "insertion" -- basically the opposite of trilinear interpolation.  This places densities into a grid
-#     using the same weights as in trilinear interpolation.
-#
-#     Arguments:
-#         densities (NxMxP array):
-#         weights (NxMxP array):
-#         vectors (Qx3 array):
-#         input_densities (length-Q array):
-#         limits (3x2 array): A 3x2 array specifying the limits of the density map samples.  These values specify the
-#                             voxel centers.
-#
-#     Returns: None -- the inputs densities and weights are modified by this function
-#     """
-#
-#     nx = int(densities.shape[0])
-#     ny = int(densities.shape[1])
-#     nz = int(densities.shape[2])
-#
-#     dx = (limits[0, 1] - limits[0, 0]) / nx
-#     dy = (limits[1, 1] - limits[1, 0]) / ny
-#     dz = (limits[2, 1] - limits[2, 0]) / nz
-#
-#     for ii in range(vectors.shape[0]):
-#
-#         # Floating point coordinates
-#         i_f = float(vectors[ii, 0] - limits[0, 0]) / dx
-#         j_f = float(vectors[ii, 1] - limits[1, 0]) / dy
-#         k_f = float(vectors[ii, 2] - limits[2, 0]) / dz
-#
-#         # Integer coordinates
-#         i = int(np.floor(i_f))
-#         j = int(np.floor(j_f))
-#         k = int(np.floor(k_f))
-#
-#         # Trilinear interpolation formula specified in e.g. paulbourke.net/miscellaneous/interpolation
-#         k0 = k
-#         j0 = j
-#         i0 = i
-#         k1 = k+1
-#         j1 = j+1
-#         i1 = i+1
-#         x0 = i_f - np.floor(i_f)
-#         y0 = j_f - np.floor(j_f)
-#         z0 = k_f - np.floor(k_f)
-#         x1 = 1.0 - x0
-#         y1 = 1.0 - y0
-#         z1 = 1.0 - z0
-#         if i >= 0 and i < nx and j >= 0 and j < ny and k >= 0 and k < nz:
-#             val = input_densities[ii]
-#             densities[i0, j0, k0] += val
-#             densities[i1, j0, k0] += val
-#             densities[i0, j1, k0] += val
-#             densities[i0, j0, k1] += val
-#             densities[i1, j0, k1] += val
-#             densities[i0, j1, k1] += val
-#             densities[i1, j1, k0] += val
-#             densities[i1, j1, k1] += val
-#             weights[i0, j0, k0] += x1 * y1 * z1
-#             weights[i1, j0, k0] += x0 * y1 * z1
-#             weights[i0, j1, k0] += x1 * y0 * z1
-#             weights[i0, j0, k1] += x1 * y1 * z0
-#             weights[i1, j0, k1] += x0 * y1 * z0
-#             weights[i0, j1, k1] += x1 * y0 * z0
-#             weights[i1, j1, k0] += x0 * y0 * z1
-#             weights[i1, j1, k1] += x0 * y0 * z0

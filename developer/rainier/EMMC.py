@@ -224,21 +224,26 @@ def rand_rot(points):
 
 #returns a list of values to go with our vectors from arr
 #finds the value of the voxel it falls within
+# def trilinear_standin(arr,r_min,r_max,n_bin,vecs):
+#     out=np.array([])
+#     for n in range(len(vecs)):
+#         (x,y,z)=(vecs[n][0],vecs[n][1],vecs[n][2])
+#         (xmin,ymin,zmin)=(r_min[0],r_min[1],r_min[2])
+#         (xmax,ymax,zmax)=(r_max[0],r_max[1],r_max[2])
+#         i=int(np.floor((x-xmin)/dx+1/2))
+#         j=int(np.floor((y-ymin)/dy+1/2))
+#         k=int(np.floor((z-zmin)/dz+1/2))
+#         if x>xmax or y>ymax or z>zmax:
+#             print('error (',x,y,z,') > (',xmax,ymax,zmax,')')
+#         if x<xmin or y<ymin or z<zmin:
+#             print('error (',x,y,z,') > (',xmin,ymin,zmin,')')
+#         out=np.append(out,arr[i,j,k])
+#     return out
+
+from reborn.target.density import trilinear_interpolation
+
 def trilinear_standin(arr,r_min,r_max,n_bin,vecs):
-    out=np.array([])
-    for n in range(len(vecs)):
-        (x,y,z)=(vecs[n][0],vecs[n][1],vecs[n][2])
-        (xmin,ymin,zmin)=(r_min[0],r_min[1],r_min[2])
-        (xmax,ymax,zmax)=(r_max[0],r_max[1],r_max[2])
-        i=int(np.floor((x-xmin)/dx+1/2))
-        j=int(np.floor((y-ymin)/dy+1/2))
-        k=int(np.floor((z-zmin)/dz+1/2))
-        if x>xmax or y>ymax or z>zmax:
-            print('error (',x,y,z,') > (',xmax,ymax,zmax,')')
-        if x<xmin or y<ymin or z<zmin:
-            print('error (',x,y,z,') > (',xmin,ymin,zmin,')')
-        out=np.append(out,arr[i,j,k])
-    return out
+    return trilinear_interpolation(arr, vecs, x_min=r_min, x_max=r_max)
 
 #doing a single trilinear insert, with real part output
 def insert(data_coord, data_val, r_min, r_max, n_bin):
