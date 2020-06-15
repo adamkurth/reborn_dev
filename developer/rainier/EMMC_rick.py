@@ -462,7 +462,6 @@ plt.hist(smpls,bins=2*pi*np.array(range(0,100))/100-pi)
 '''
 #seems correct
 
-print(fourier_test2)
 models=emmc(fake_data,bowl,fourier_test2,r_min,r_max,n_bin,1,10,pi/2)
 plt.imshow(models[-1][int(np.floor(Nx*1/2))])
 
