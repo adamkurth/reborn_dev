@@ -1,14 +1,6 @@
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import numpy as np
-
 from reborn.simulate.examples import lysozyme_pdb_file, psi_pdb_file
 from reborn.target import crystal, density
-
-# try:
-#     from reborn.target import density_f
-# except ImportError:
-#     density_f = None
 
 
 def test_01():
@@ -85,7 +77,7 @@ def test_03():
     vectors = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t) + 0.1
     dens1 = func(vectors)
     dens2 = np.zeros_like(dens1)
-    density.trilinear_interpolation(dens, vectors, corners, deltas, dens2)
+    density.trilinear_interpolation(dens, vectors, corners, deltas, out=dens2)
     assert np.max(np.abs(dens1)) > 0
     assert np.max(np.abs(dens2)) > 0
     assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-8
@@ -101,7 +93,7 @@ def test_03():
     vectors = (np.vstack([x.ravel(), y.ravel(), z.ravel()])).T.copy().astype(float_t) + 0.1
     dens1 = func1(vectors)
     dens2 = np.zeros_like(dens1)
-    density.trilinear_interpolation(dens, vectors, corners, deltas, dens2)
+    density.trilinear_interpolation(dens, vectors, corners, deltas, out=dens2)
     assert np.max(np.abs(dens1)) > 0
     assert np.max(np.abs(dens2)) > 0
     assert np.max(np.abs((dens1 - dens2)/dens1)) < 1e-2
@@ -121,7 +113,7 @@ def test_03():
     dens += dens*2j
     dens1 += dens1*2j
     dens2 = np.zeros_like(dens1)
-    density.trilinear_interpolation(dens, vectors, corners, deltas, dens2)
+    density.trilinear_interpolation(dens, vectors, corners, deltas, out=dens2)
     assert np.max(np.abs(np.real(dens1))) > 0
     assert np.max(np.abs(np.real(dens2))) > 0
     assert np.max(np.abs((np.real(dens1) - np.real(dens2))/np.real(dens1))) < 1e-2
