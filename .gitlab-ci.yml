@@ -21,8 +21,8 @@ doc:
     - cd doc
     - bash update_docs.sh
   cache:
-    paths:
-    - build
+    - paths:
+      - build
 
 pages:
   stage: deploy
