@@ -3,7 +3,7 @@ image: "ubuntu:20.04"
 before_script:
   - export DEBIAN_FRONTEND=noninteractive
   - cd developer
-  - bash cleanup_everything.sh
+  - ./cleanup_everything.sh
   - cd ..
   - source ubuntu_setup.sh
 
