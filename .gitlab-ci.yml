@@ -13,12 +13,6 @@ build:
   stage: build
   script:
   - source ubuntu_setup.sh
-  artifacts:
-    paths:
-    - miniconda
-    - reborn.egg-info
-    - build
-    - reborn/fortran
 
 test:
   stage: test
