@@ -13,10 +13,9 @@ build:
   stage: build
   script:
   - source ubuntu_setup.sh
-  cache:
+  artifacts:
     paths:
     - reborn.egg-info
-    - reborn/fortran
 
 test:
   stage: test
