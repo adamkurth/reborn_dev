@@ -2,40 +2,35 @@ image: "ubuntu:20.04"
 
 before_script:
   - export DEBIAN_FRONTEND=noninteractive
+  - cd developer
+  - bash cleanup_everything.sh
+  - cd ..
+  - source ubuntu_setup.sh
 
 stages:
-  - build
   - test
   - doc
   - deploy
 
-build:
-  stage: build
-  script:
-  - source ubuntu_setup.sh
-
 test:
   stage: test
-  dependencies:
-  - build
   script:
   - cd test
   - pytest
 
 doc:
   stage: doc
-  dependencies:
-  - build
   script:
-  - cd doc
-  - bash update_docs.sh
+    - cd doc
+    - bash update_docs.sh
+  cache:
+    paths:
+    - build
 
 pages:
   stage: deploy
-  dependencies:
-  - doc
   only:
-  - master
+    - master
   script:
   - cd doc
   - cp -r build/html ../public
