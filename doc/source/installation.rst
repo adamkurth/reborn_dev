@@ -99,6 +99,8 @@ follows:
 
     python setup.py develop
 
+You will likely see some warnings due to Numpy or Cython -- they are probably harmless (and not our fault).
+
 If the above fails, you can have a look at the ``developer/compile-fortran.sh`` script.  There are occasionally issues
 caused by the mixing of dynamic libraries between different Python versions (not our fault...).
 
@@ -161,10 +163,10 @@ Linux notes
 -----------
 
 Below are the standard steps that are tested on a clean Ubuntu Linux install every time the reborn master branch is
-updated.  The script ``ubuntu_setup.sh`` is executed from the base directory of the git repository.  Here
+updated.  The script ``developer/ubuntu-install.sh`` is executed from the base directory of the git repository.  Here
 are the current contents of that script:
 
-.. literalinclude:: ../../ubuntu_setup.sh
+.. literalinclude:: ../../ubuntu-setup.sh
 
 Mac OS notes
 ------------

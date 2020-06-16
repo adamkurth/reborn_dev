@@ -1,31 +1,18 @@
-image: "ubuntu:20.04"
+image: ubuntu:20.04
 
-stages:
-  - build
-  - test
-  - doc
-  - deploy
+before_script:
+  - source ubuntu-setup.sh
 
-build:
-  stage: build
-  script:
-  - source ubuntu_setup.sh
-
-test:
+tests:
   stage: test
   script:
   - cd test
   - pytest
 
-doc:
-  stage: doc
-  script:
-    - cd doc
-    - bash update_docs.sh
-
 pages:
-  stage: deploy
   script:
+  - cd doc
+  - bash update_docs.sh
   - cp -r build/html ../public
   artifacts:
     paths:
