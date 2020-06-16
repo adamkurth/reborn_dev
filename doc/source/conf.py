@@ -103,25 +103,22 @@ exclude_patterns = ['*placer*', '*_f']
 autodoc_default_options = {
     # 'members': 'var1, var2',
     'member-order': 'bysource',
-    'special-members': '__init__',
+    # 'special-members': '__init__',
     'undoc-members': True,
     'exclude-members': '*cpython*'
 }
 
 
-# The reST default role (used for this markup: `text`) to use for all
-# documents.
+# The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = False
 
-# If true, the current module name will be prepended to all description
-# unit titles (such as .. function::).
+# If true, the current module name will be prepended to all description unit titles (such as .. function::).
 #add_module_names = True
 
-# If true, sectionauthor and moduleauthor directives will be shown in the
-# output. They are ignored by default.
+# If true, sectionauthor and moduleauthor directives will be shown in the output. They are ignored by default.
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
