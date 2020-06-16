@@ -17,6 +17,7 @@ build:
     paths:
     - reborn.egg-info
     - reborn/fortran
+    - miniconda
 
 test:
   stage: test
