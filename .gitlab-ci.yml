@@ -9,6 +9,13 @@ tests:
   - cd test
   - pytest
 
+doc:
+  script:
+  - cd doc
+  - bash update_docs.sh
+  except:
+  - master
+
 pages:
   script:
   - cd doc
