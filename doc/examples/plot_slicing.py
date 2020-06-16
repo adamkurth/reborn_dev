@@ -15,7 +15,6 @@ import reborn
 from reborn.simulate import clcore
 
 eV = const.value('electron volt')
-hc = const.h*const.c
 
 # %%
 # Load PDB file with atomic coordinates:

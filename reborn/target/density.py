@@ -209,8 +209,9 @@ def trilinear_interpolation(densities, vectors, corners=None, deltas=None, x_min
     Arguments:
         densities (numpy array): A 3D density array.
         vectors (numpy array): An Nx3 array of vectors that specify the points to be interpolated.
-        x_min (numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
-        x_max (numpy array): Same as x_min, but specifies the opposite corner, with larger values than x_min.
+        x_min (float or numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
+                                      If a float is passed instead, it will be replicated to make a 3D array.
+        x_max (float or numpy array): Same as x_min, but specifies the opposite corner, with larger values than x_min.
         out (numpy array): If you don't want the output array to be created (e.g for speed), provide it here.
         strict_types (bool): Set this to False if you don't mind your code being slow due to the need to convert
                              datatypes (i.e. copy arrays) on every function call.  Default: True.
@@ -227,8 +228,12 @@ def trilinear_interpolation(densities, vectors, corners=None, deltas=None, x_min
         shape = np.array(densities.shape)
         if len(shape) != 3:
             raise ValueError('trilinear_interpolation requires a 3D densities argument')
-        x_min = np.array(x_min)
-        x_max = np.array(x_max)
+        x_min = np.atleast_1d(np.array(x_min))
+        x_max = np.atleast_1d(np.array(x_max))
+        if len(x_min) == 1:
+            x_min = np.squeeze(np.array([x_min, x_min, x_min]))
+        if len(x_max) == 1:
+            x_max = np.squeeze(np.array([x_max, x_max, x_max]))
         deltas = (x_max - x_min)/(shape - 1)
         corners = x_min
     corners = corners.astype(np.float64)
@@ -316,8 +321,9 @@ def trilinear_insertion(densities, weights, vectors, insert_vals, corners=None, 
         vectors (numpy array): The 3D vector positions corresponding to the values to be inserted.
         insert_vals (numpy array): The values to be inserted into the 3D map.  They are multiplied by weights before
                                    being inserted into the densities map.
-        x_min (numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
-        x_max (numpy array): Same as x_min, but specifies the opposite corner, with larger values than x_min.
+        x_min (float or numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
+                                      If a float is passed instead, it will be replicated to make a 3D array.
+        x_max (float or numpy array): Same as x_min, but specifies the opposite corner, with larger values than x_min.
 
     Returns:
         None.  This function modifies the densities and weights arrays; it returns nothing.
@@ -331,8 +337,12 @@ def trilinear_insertion(densities, weights, vectors, insert_vals, corners=None, 
         shape = np.array(densities.shape)
         if len(shape) != 3:
             raise ValueError('trilinear_interpolation requires a 3D densities argument')
-        x_min = np.array(x_min)
-        x_max = np.array(x_max)
+        x_min = np.atleast_1d(np.array(x_min))
+        x_max = np.atleast_1d(np.array(x_max))
+        if len(x_min) == 1:
+            x_min = np.squeeze(np.array([x_min, x_min, x_min]))
+        if len(x_max) == 1:
+            x_max = np.squeeze(np.array([x_max, x_max, x_max]))
         deltas = (x_max - x_min)/(shape - 1)
         corners = x_min
     corners = corners.astype(np.float64)
