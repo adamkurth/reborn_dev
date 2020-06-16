@@ -1,3 +1,4 @@
+export DEBIAN_FRONTEND=noninteractive
 export NPY_DISTUTILS_APPEND_FLAGS=1
 export NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 apt-get -qq -y update

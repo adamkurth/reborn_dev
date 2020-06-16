@@ -1,8 +1,5 @@
 image: "ubuntu:20.04"
 
-before_script:
-  - export DEBIAN_FRONTEND=noninteractive
-
 stages:
   - build
   - test
@@ -13,9 +10,6 @@ build:
   stage: build
   script:
   - source ubuntu_setup.sh
-  artifacts:
-    paths:
-    - reborn.egg-info
 
 test:
   stage: test
