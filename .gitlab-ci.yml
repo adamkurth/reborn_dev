@@ -2,12 +2,22 @@ image: "ubuntu:20.04"
 
 before_script:
   - export DEBIAN_FRONTEND=noninteractive
-  - source ubuntu_setup.sh
 
 stages:
+  - build
   - test
   - doc
   - deploy
+
+build:
+  stage: build
+  script:
+  - source ubuntu_setup.sh
+  cache:
+    paths:
+    - reborn.egg-info
+    - reborn/fortran
+    - miniconda
 
 test:
   stage: test
@@ -20,17 +30,13 @@ doc:
   script:
     - cd doc
     - bash update_docs.sh
-  cache:
-    - paths:
-      - build
 
 pages:
   stage: deploy
-  only:
-    - master
   script:
-  - cd doc
   - cp -r build/html ../public
   artifacts:
     paths:
     - public
+  only:
+  - master
