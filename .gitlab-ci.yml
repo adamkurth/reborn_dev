@@ -2,9 +2,6 @@ image: "ubuntu:20.04"
 
 before_script:
   - export DEBIAN_FRONTEND=noninteractive
-  - cd developer
-  - ./cleanup_everyting.sh
-  - cd ..
   - source ubuntu_setup.sh
 
 stages:
