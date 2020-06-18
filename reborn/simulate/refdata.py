@@ -12,6 +12,7 @@ import numpy as np
 # Helper functions for accessing REFERENCE TABLES
 # ------------------------------------------------------------------------------
 
+
 def get_cmann_form_factors(cman, q):
     """
     cman is a dict of {atomic_number : array of cman parameters}

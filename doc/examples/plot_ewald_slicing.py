@@ -1,10 +1,17 @@
 r"""
-Slicing Ewald spheres through 3D maps
-=====================================
+.. _ewald_slice:
 
-How to make 3D lookup table and slice 2D Ewald sphere sections.
+Ewald slices through 3D maps
+============================
+
+How to make 3D intensity/amplitude map and slice 2D sections on the Ewald sphere.
 
 Contributed by Richard A. Kirian.
+
+Here we build a 3D map of diffraction amplitudes on a GPU.  Then we generate a list of :math:`\vec{q}`
+samples corresponding to a pixel-array detector (PAD).  Those vectors naturally lie on the Ewald
+sphere.  We "slice" through the 3D map in order to generate simulated diffraction intensities on the
+PAD.  By "slice", we mean "trilinear interpolate" in this case.
 
 Imports, constants:
 """
@@ -53,9 +60,9 @@ print(time.time()-t, 'seconds')
 # Have a look:
 plt.figure()
 plt.subplot(1, 2, 1)
-plt.imshow(np.log10(intensity_slice), interpolation='none', cmap='gray')
+plt.imshow(np.log10(intensity_slice + 10), interpolation='none', cmap='gnuplot2')
 plt.title('Sliced GPU Mesh')
 plt.subplot(1, 2, 2)
-plt.imshow(np.log10(intensity_slice), interpolation='none', cmap='gray')
+plt.imshow(np.log10(intensity_slice + 10), interpolation='none', cmap='gnuplot2')
 plt.title('Sliced CPU Mesh')
 plt.show()
