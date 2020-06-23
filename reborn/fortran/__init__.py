@@ -14,6 +14,11 @@ def compile_f90(f90_file, extra_args=''):
     for fil in fils:
         os.rename(fil, os.path.join(pth, os.path.basename(fil)))
 
+try:
+    from . import utils_f
+except ImportError:
+    compile_f90('utils.f90')
+    from . import utils_f
 
 try:
     from . import interpolations_f

@@ -75,7 +75,7 @@ grouped_fs = []
 for z in uniq_z:
     subr = np.squeeze(r_vecs[np.where(atomic_numbers == z), :])
     grouped_r_vecs.append(subr)
-    grouped_fs.append(atoms.hubbel_henke_scattering_factors(qmags=q_mags, photon_energy=beam.photon_energy,
+    grouped_fs.append(atoms.hubbel_henke_scattering_factors(q_mags=q_mags, photon_energy=beam.photon_energy,
                                                             atomic_number=z))
 
 # %%

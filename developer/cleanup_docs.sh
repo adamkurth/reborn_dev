@@ -5,4 +5,4 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit
 fi
 
-rm -r ../doc/build ../doc/source/api &> /dev/null
+rm -r ../doc/build ../doc/source/api ../doc/source/auto_examples &> /dev/null

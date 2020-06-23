@@ -1,8 +1,10 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import numpy as np
-from numba import jit
 from ..fortran import density_f
-
+try:
+    from numba import jit
+except ImportError:
+    from ..utils import __fake_numba_jit as jit
 
 class DensityMap(object):
 

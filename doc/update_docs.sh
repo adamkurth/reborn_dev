@@ -20,4 +20,7 @@ make clean
 make doctest
 make html
 perl -p -i -e 's{<head>\n}{<head>\n  <meta name="robots" content="noindex, nofollow" />\n}' build/html/*.html
+#perl -p -i -e 's{toctree-l2}{toctree-l1}' build/html/api/modules.html
+#perl -p -i -e 's{toctree-l3}{toctree-l1}' build/html/api/modules.html
+#perl -p -i -e 's{toctree-l4}{toctree-l1}' build/html/api/modules.html
 #perl -p -i -e 's{>reborn.*</a>}{}'
