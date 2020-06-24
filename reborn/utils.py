@@ -10,7 +10,7 @@ import os
 import pkg_resources
 import numpy as np
 from numpy import sin, cos
-from numba import jit
+# from numba import jit
 from . import fortran
 
 
@@ -275,6 +275,19 @@ def triangle_solid_angle(r1, r2, r3):
     return s_ang
 
 
+def __fake_numba_jit(*args, **kwargs):
+    r"""
+    This is a fake decorator.  It is presently used to avoid errors when numba is missing, but will usually result in
+    very slow code.
+
+    Note: do not use this function.  It will go away some day.
+    """
+    def decorator(func):
+        print('You need to install numba, else your code will run very slowly.')
+        return func
+    return decorator
+
+
 def memoize(function):
     r"""
     This is a function decorator for caching results from a function, to avoid
@@ -297,7 +310,7 @@ def memoize(function):
     return wrapper
 
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def max_pair_distance(vecs):
     r"""
     Determine the maximum distance between to vectors in a list of vectors.
@@ -308,13 +321,19 @@ def max_pair_distance(vecs):
     Returns:
         float : The maximum pair distance.
     """
-    d_max = 0
-    for i in range(vecs.shape[0]):
-        for j in range(vecs.shape[0]):
-            d = np.sum((vecs[i, :] - vecs[j, :])**2)
-            if d > d_max:
-                d_max = d
-    return np.sqrt(d_max)
+    vecs = np.double(vecs)
+    if not vecs.flags.c_contiguous:
+        vecs = vecs.copy()
+    d_max = np.array([0], dtype=np.float64)
+    fortran.utils_f.max_pair_distance(vecs.T, d_max)
+    return d_max[0]
+    # d_max = 0
+    # for i in range(vecs.shape[0]):
+    #     for j in range(vecs.shape[0]):
+    #         d = np.sum((vecs[i, :] - vecs[j, :])**2)
+    #         if d > d_max:
+    #             d_max = d
+    # return np.sqrt(d_max)
 
 
 def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_around=False):

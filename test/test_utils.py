@@ -1,8 +1,13 @@
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import numpy as np
-
 from reborn import utils
+
+
+def test_max_pair_distance():
+
+    vecs = np.arange(3*4, dtype=np.float64).reshape([4, 3])
+    assert utils.max_pair_distance(vecs) == np.sqrt(np.sum((vecs[0, :] - vecs[3, :])**2))
+    vecs = np.arange(3*4, dtype=np.int).reshape([4, 3])
+    assert utils.max_pair_distance(vecs) == np.sqrt(np.sum((vecs[0, :] - vecs[3, :])**2))
 
 
 def test_rotation():

@@ -15,7 +15,10 @@ import numpy as np
 from .molecule import Molecule
 from ..simulate import atoms
 from ..utils import warn, vec_mag, trilinear_insert
-from numba import jit
+try:
+    from numba import jit
+except ImportError:
+    from ..utils import __fake_numba_jit as jit
 
 
 pdb_data_path = pkg_resources.resource_filename('reborn.data', 'pdb')

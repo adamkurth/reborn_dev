@@ -17,6 +17,29 @@ import os
 import datetime
 # import shlex
 
+# These are shortcuts that can be used in the reborn docs.
+rst_epilog = """
+.. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
+.. |ClCore|  replace:: :mod:`ClCore <reborn.simulate.clcore.ClCore>`
+.. |CSPAD|  replace:: `CSPAD <http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-15284.pdf>`__
+.. |detector|  replace:: :mod:`detector <reborn.detector>`
+.. |examples|  replace:: :ref:`examples`
+.. |PAD|  replace:: :mod:`detector <reborn.detector>`
+.. |PADGeometry|  replace:: :class:`PADGeometry <reborn.detector.PADGeometry>`
+
+.. |Jungfrau|  replace:: `Jungfrau <https://lcls.slac.stanford.edu/detectors/jungfrau>`__
+.. |xraylib|  replace:: `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
+.. |pyopencl|  replace:: `pyopencl <https://documen.tician.de/pyopencl/index.html>`__
+.. |pytest|  replace:: `pytest <http://doc.pytest.org/>`__
+.. |Miniconda|  replace:: `Miniconda <https://conda.io/miniconda.html>`__
+.. |ndarray|  replace:: `ndarray <https://numpy.org/doc/1.18/reference/generated/numpy.ndarray.html>`__
+
+.. |Cromer1968|  replace:: `Cromer et al. (1968) <https://doi.org/10.1107/S0567739468000550>`__
+.. |Hubbel1975|  replace:: `Hubbel et al. (1975) <https://doi.org/10.1063/1.555523>`__
+.. |Henke1993|  replace:: `Henke et al. (1993) <https://doi.org/10.1006/adnd.1993.1013>`__
+"""
+
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -289,24 +312,3 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 math_number_all = True
-
-# These are shortcuts that can be used in the reborn docs.
-rst_epilog = """
-.. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
-.. |ClCore|  replace:: :mod:`ClCore <reborn.simulate.clcore.ClCore>`
-.. |CSPAD|  replace:: `CSPAD <http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-15284.pdf>`__
-.. |detector|  replace:: :mod:`detector <reborn.detector>`
-.. |examples|  replace:: :ref:`examples`
-.. |PAD|  replace:: :mod:`detector <reborn.detector>`
-.. |PADGeometry|  replace:: :class:`PADGeometry <reborn.detector.PADGeometry>`
-
-.. |Jungfrau|  replace:: `Jungfrau <https://lcls.slac.stanford.edu/detectors/jungfrau>`__
-.. |xraylib|  replace:: `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
-.. |pyopencl|  replace:: `pyopencl <https://documen.tician.de/pyopencl/index.html>`__
-.. |pytest|  replace:: `pytest <http://doc.pytest.org/>`__
-.. |Miniconda|  replace:: `Miniconda <https://conda.io/miniconda.html>`__
-
-.. |Cromer1968|  replace:: `Cromer et al. (1968) <https://doi.org/10.1107/S0567739468000550>`__
-.. |Hubbel1975|  replace:: `Hubbel et al. (1975) <https://doi.org/10.1063/1.555523>`__
-.. |Henke1993|  replace:: `Henke et al. (1993) <https://doi.org/10.1006/adnd.1993.1013>`__
-"""
