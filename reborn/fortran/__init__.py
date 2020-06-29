@@ -3,6 +3,8 @@ import os
 from glob import glob
 pth = os.path.split(os.path.abspath(__file__))[0]
 
+os.environ['NPY_DISTUTILS_APPEND_FLAGS'] = '1'
+os.environ['NPY_NO_DEPRECATED_API'] = 'NPY_1_7_API_VERSION'
 
 def compile_f90(f90_file, extra_args=''):
     # print('Attempting to compile Fortran code %s.  If this fails, see the docs: https://rkirian.gitlab.io/reborn'
