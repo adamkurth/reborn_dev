@@ -345,18 +345,17 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
     insertion result. This is so that the function can be used to sum over many trilinearly
     inserted arrays in for example a 3D diffracted intensity merge.
 
-    Note: All input arrays should be C contiguous.
-
-    Note: This code will break if you put a 1 in any of the N_bin entries.
+    Note 1: All input arrays should be C contiguous.
+    Note 2: This code will break if you put a 1 in any of the N_bin entries.
 
     Arguments:
-        data_coord (Nx3 numpy array) : 3-vectors containing coordinates of the data points that you wish to insert into
+        data_coord (Nx3 numpy array) : Coordinates (x,y,z) of the data points that you wish to insert into
                      the regular grid.
-        data_val (numpy array) : The N values of the data points to be inserted into the grid.
-        x_min (numpy array) : The three values corresponding to the smallest data grid center points.
-        x_max (numpy array) : The three values corresponding to the largest data grid center points.
-        n_bin (numpy array) : The three values corresponding to the number of bins in each direction.
-        mask (numpy array) : The N values specifying which data points to ignore. Zero means ignore.
+        data_val (Nx1 numpy array) : The values of the data points to be inserted into the grid.
+        x_min (1x3 numpy array) : (x_min, y_min, z_min)
+        x_max (1x3 numpy array) : (x_max, y_max, z_max)
+        n_bin (1x3 numpy array) : Number of bins in each direction (N_x, N_y, N_z)
+        mask (Nx1 numpy array) : Specify which data points to ignore. Zero means ignore.
         wrap_around (bool) : Specify if periodic boundaries should be used.
 
     Returns:
@@ -367,7 +366,6 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
         - **weightout** (*3D numpy array*) : Number of times each voxel has a value put into it.
     """
 
-    # ------------------------------------------
     # Checks
     if fortran is None:
         raise ImportError('You need to compile fortran code to use utils.trilinear_interpolation()')
@@ -383,6 +381,15 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
         raise ValueError('N_bin needs to be an array that contains three elements.')
     if data_coord.shape[1] != 3:
         raise ValueError('data_coord needs to be an Nx3 array.')
+    if np.sum(x_min < np.min(data_coord, axis=0)) != 3 and wrap_around == False:
+        raise ValueError('data_coord has values less than one or more of the values in x_min. ' +
+                         'I.e., one or more points will fall outside the volume defined by x_min and x_max. ' +
+                         'Execute the following code: np.min(data_coord, axis=0) and compare the result to x_min to see.')
+    if np.sum(x_max > np.max(data_coord, axis=0)) != 3 and wrap_around == False:
+        raise ValueError('data_coord has values greater than one or more of the values in x_max. ' + 
+                         'I.e., one or more points will fall outside the volume defined by x_min and x_max. ' + 
+                         'Execute the following code: np.max(data_coord, axis=0) and compare the result to x_max to see.')
+
     # Check if the non-1D arrays are c_contiguous
     assert data_coord.flags.c_contiguous
 
@@ -469,3 +476,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
     # assert np.sum(dataout[weightout == 0]) == 0
 
     return dataout, weightout
+
+
+
+
