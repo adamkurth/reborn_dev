@@ -10,6 +10,7 @@ import os
 import pkg_resources
 import numpy as np
 from numpy import sin, cos
+from numpy.fft import fftshift, fft, ifft
 # from numba import jit
 from . import fortran
 
@@ -478,5 +479,143 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
     return dataout, weightout
 
 
+
+def rotate3D(f, Euler_angles):
+    r"""
+    Rotate a 3D array of numbers in 3-dimensions.
+    The function works by rotating each 2D sections of the 3D array via three shears,
+    as described by Unser et al. (1995) "Convolution-based interpolation for fast, 
+    high-quality rotation of images." IEEE Transactions on Image Processing, 4:1371.
+
+    Note 1: If the input array, f, is non-cubic, it will be zero-padded to a cubic array 
+            with length the size of the largest side of the original array.
+    Note 2: If you don't want wrap arounds, make sure the input array, f, is zero-padded to
+            at least sqrt(2) times the largest dimension of the desired object.
+    Note 3: Proper Euler angle convention is used, i.e, zyz.
+
+    Arguments:
+        f (*3D numpy array*) : The 3D input array.
+        Euler_angles (1x3 numpy array) : The three Euler angles, in zyz format.
+
+    Returns:
+        - **f_rot** (*3D numpy array*) : The rotated 3D array.
+    """
+
+    #---------------------------
+    # Define private functions
+
+    def rotate90(f):
+       return np.transpose(np.fliplr(f))
+
+
+    def rotate180(f):
+       return np.fliplr(np.flipud(f))
+
+
+    def rotate270(f):
+       return np.transpose(np.flipud(f))
+
+
+    def shiftx(f, kxfac, xfac):
+        return ifft(fftshift(fft(f, axis=0), axes=0) * kxfac, axis=0) * xfac
+
+
+    def shifty(f, kyfac, yfac):
+        return ifft(fftshift(fft(f, axis=1), axes=1) * kyfac, axis=1) * yfac
+
+
+    def rotate2D(fr, kxfac, xfac, kyfac, yfac, n90_mod_Four):
+        """ Rotate a 2D section. """
+        
+        if (n90_mod_Four == 1):
+            fr = rotate90(fr)
+        elif (n90_mod_Four == 2):
+            fr = rotate180(fr)
+        elif (n90_mod_Four == 3):
+            fr = rotate270(fr)
+
+        fr = shiftx(fr, kxfac, xfac)
+        fr = shifty(fr, kyfac, yfac)
+        fr = shiftx(fr, kxfac, xfac)
+
+        return fr
+
+    def rotate_setup(f, ang):
+        """ Set up required to rotate. """
+        n90 = np.rint(ang*TwoOverPi)
+        dang = ang - n90 * PiOvTwo
+
+        t = -np.tan(0.5*dang)
+        s = np.sin(dang)
+
+        kxfac = np.exp(constx1 * t)
+        xfac = np.exp(constx2_2 - constx2_3 * t)
+
+        kyfac = np.exp(consty1 * s)
+        yfac = np.exp(consty2_2 - consty2_3 * s)
+
+        n90_mod_Four = n90 % 4
+
+        return kxfac, xfac, kyfac, yfac, n90_mod_Four
+
+
+    def __rotate_Euler_z(f, ang):
+
+        kxfac, xfac, kyfac, yfac, n90_mod_Four = rotate_setup(f, ang)
+        
+        f_rot = np.zeros((N, N, N), dtype=np.complex128)
+        for ii in range(0, N):
+            f_rot[ii,:,:] = rotate2D(f[ii,:,:], kxfac, xfac, kyfac, yfac, n90_mod_Four)
+
+        return f_rot
+
+
+    def __rotate_Euler_y(f, ang):
+
+        kxfac, xfac, kyfac, yfac, n90_mod_Four = rotate_setup(f, ang)
+
+        f_rot = np.zeros((N, N, N), dtype=np.complex128)
+        for ii in range(0, N):
+            f_rot[:,ii,:] = rotate2D(f[:,ii,:], kxfac, xfac, kyfac, yfac, n90_mod_Four)
+
+        return f_rot
+    #---------------------------
+    # Get the max shape of the array
+    Nx, Ny, Nz = f.shape
+    N = np.max([Nx, Ny, Nz])
+
+    # Make array cubic if the array is not cubic.
+    if Nx != Ny or Nx != Nz or Ny != Nz:
+        f_rot = np.zeros((N,N,N), dtype=np.complex128)
+        f_rot[0:Nx, 0:Ny, 0:Nz] = f
+    else:
+        f_rot = f
+
+    #---------------------------
+    # Precalculations for speed
+    Y, X = np.meshgrid(np.arange(N), np.arange(N))
+
+    y0 = 0.5 * (N-1)
+    constx1   = -1j*2.0*np.pi/N * X * (Y-y0)
+    constx2_1 = -1j*np.pi * (1-(N%2)/N)
+    constx2_2 = constx2_1*X
+    constx2_3 = constx2_1*(Y-y0)
+
+    x0 = 0.5 * (N-1)
+    consty1   = -1j*2.0*np.pi/N * Y * (X-x0)
+    consty2_1 = -1j*np.pi * (1-(N%2)/N)
+    consty2_2 = consty2_1*Y
+    consty2_3 = consty2_1*(X-x0)
+
+    TwoOverPi = 2.0/np.pi
+    PiOvTwo = 0.5 * np.pi
+
+    #---------------------------
+    # Do the rotations
+    f_rot = __rotate_Euler_z(f_rot, ang=Euler_angles[0])
+    f_rot = __rotate_Euler_y(f_rot, ang=Euler_angles[1])
+    f_rot = __rotate_Euler_z(f_rot, ang=Euler_angles[2])
+
+    return f_rot
 
 
