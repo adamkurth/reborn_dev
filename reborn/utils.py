@@ -337,7 +337,7 @@ def max_pair_distance(vecs):
     # return np.sqrt(d_max)
 
 
-def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_around=False):
+def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_mode="truncate"):
     r"""
     Trilinear insertion on a regular grid with arbitrary sample points.
     The boundary is defined as [x_min-0.5, x_max+0.5).
@@ -356,8 +356,10 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
         x_min (1x3 numpy array) : (x_min, y_min, z_min)
         x_max (1x3 numpy array) : (x_max, y_max, z_max)
         n_bin (1x3 numpy array) : Number of bins in each direction (N_x, N_y, N_z)
-        mask (Nx1 numpy array) : Specify which data points to ignore. Zero means ignore.
-        wrap_around (bool) : Specify if periodic boundaries should be used.
+        mask (Nx1 numpy array) : Specify which data points to ignore. Non-zero means use, zero means ignore.
+        boundary_mode (str) : Specify how the boundary should be treated. Options are:
+                              (1) "truncate" - Ignores all points outside the insertion volume.
+                              (2) "periodic" - Equivalent to wrapping around.
 
     Returns:
         2-element tuple containing the following
@@ -382,14 +384,17 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
         raise ValueError('N_bin needs to be an array that contains three elements.')
     if data_coord.shape[1] != 3:
         raise ValueError('data_coord needs to be an Nx3 array.')
-    if np.sum(x_min < np.min(data_coord, axis=0)) != 3 and wrap_around == False:
-        raise ValueError('data_coord has values less than one or more of the values in x_min. ' +
-                         'I.e., one or more points will fall outside the volume defined by x_min and x_max. ' +
-                         'Execute the following code: np.min(data_coord, axis=0) and compare the result to x_min to see.')
-    if np.sum(x_max > np.max(data_coord, axis=0)) != 3 and wrap_around == False:
-        raise ValueError('data_coord has values greater than one or more of the values in x_max. ' + 
-                         'I.e., one or more points will fall outside the volume defined by x_min and x_max. ' + 
-                         'Execute the following code: np.max(data_coord, axis=0) and compare the result to x_max to see.')
+
+    if np.sum(x_min <= np.min(data_coord, axis=0)) != 3:
+        print('Warning: Values in data_coord is less than one or more of the limits specified in x_min. \n' +
+              'I.e., one or more points are outside the insertion volume. \n' +
+              'If this is intended, please disregard this message. \n' +
+              'Else you could execute the following code: np.min(data_coord, axis=0) and compare against x_min to see. \n')
+    if np.sum(x_max >= np.max(data_coord, axis=0)) != 3:
+        print('Warning: Values in data_coord is greater than one or more of the limits specified in x_max. \n' + 
+              'I.e., one or more points are outside the insertion volume. \n' + 
+              'If this is intended, please disregard this message. \n' +
+              'Else you cold execute the following code: np.max(data_coord, axis=0) and compare against x_max to see. \n')
 
     # Check if the non-1D arrays are c_contiguous
     assert data_coord.flags.c_contiguous
@@ -416,11 +421,23 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
     c2 = x_max + 0.5 - epsilon
     c3 = x_min - 0.5 + epsilon
 
-    # Mask out data_coord and data_val - user input mask
-    data_coord = data_coord[mask != 0, :]
-    data_val = data_val[mask != 0]
+    
 
-    if not wrap_around:
+    if boundary_mode == 'truncate':
+        # Modify the mask to mask out points outside the insertion volume.
+
+        # All three coordinates of a point needs to evaluate to true for the point to be 
+        # included in the insertion volume.
+        mask_out_of_bound_coords_min = np.sum((x_min - delta_x) <= data_coord, axis=1) == 3
+        mask_out_of_bound_coords_max = np.sum((x_max + delta_x) >= data_coord, axis=1) == 3
+
+        # Update mask
+        mask *= mask_out_of_bound_coords_min * mask_out_of_bound_coords_max
+
+        # Mask out data_coord and data_val - user input mask
+        data_coord = data_coord[mask != 0, :]
+        data_val = data_val[mask != 0]
+
         # Initialise memory for Fortran
         # The N_bin+2 is for boundary padding when doing the interpolation
         dataout = np.zeros(n_bin + 2, dtype=np.complex128, order='C')
@@ -452,7 +469,14 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, wrap_aroun
         # Keep only the inner array - get rid of the boundary padding.
         dataout = dataout[1:n_bin[0] + 1, 1:n_bin[1] + 1, 1:n_bin[2] + 1]
         weightout = weightout[1:n_bin[0] + 1, 1:n_bin[1] + 1, 1:n_bin[2] + 1]
-    else:
+
+    elif boundary_mode == 'periodic':
+        # Periodic boundary conditions on the insertion volume.
+
+        # Mask out data_coord and data_val - user input mask
+        data_coord = data_coord[mask != 0, :]
+        data_val = data_val[mask != 0]
+
         # Initialise memory for Fortran
         dataout = np.zeros(n_bin, dtype=np.complex128, order='C')
         weightout = np.zeros(n_bin, dtype=np.double, order='C')
