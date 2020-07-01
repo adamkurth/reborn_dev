@@ -13,7 +13,7 @@ from . import utils
 
 class PADGeometry():
     r"""
-    A container for pixel-array detector (PAD) geometry specification, with hepful methods for generating:
+    A container for pixel-array detector (PAD) geometry specification, with helpful methods for generating:
 
     - Vectors from sample to pixel
     - Scattering vectors (i.e. "q" vectors... provided beam information)

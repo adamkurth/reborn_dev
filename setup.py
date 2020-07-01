@@ -17,7 +17,7 @@ ext_modules = list()
 #################################################################################################
 os.environ['NPY_DISTUTILS_APPEND_FLAGS'] = '1'
 os.environ['NPY_NO_DEPRECATED_API'] = 'NPY_1_7_API_VERSION'
-f2py_macros = [('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')] #, ('NPY_DISTUTILS_APPEND_FLAGS', '1')]
+f2py_macros = [('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'), ('NPY_DISTUTILS_APPEND_FLAGS', '1')]
 #extra_args = {'extra_compile_args': ['-Wno-unused-function', '-fopenmp']}
 #omp_args = {'extra_compile_args': ['-fopenmp']}  # {'libraries': ['gomp'], 'extra_compile_args': ['-fopenmp']}
 ext_modules.append(Extension(
@@ -36,7 +36,7 @@ ext_modules.append(Extension(
       name='reborn.fortran.peaks_f',
       sources=['reborn/fortran/peaks.f90'],
       define_macros=f2py_macros,
-      extra_compile_args=['-Wno-unused-function', '-fopenmp']
+      extra_compile_args=['-Wno-unused-function', '-fopenmp', '-lgomp']
       ))
 ext_modules.append(Extension(
       name='reborn.fortran.fortran_indexing_f',
