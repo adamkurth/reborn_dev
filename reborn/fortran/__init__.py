@@ -3,12 +3,16 @@ import os
 from glob import glob
 pth = os.path.split(os.path.abspath(__file__))[0]
 
+os.environ['NPY_DISTUTILS_APPEND_FLAGS'] = '1'
+os.environ['NPY_NO_DEPRECATED_API'] = 'NPY_1_7_API_VERSION'
 
 def compile_f90(f90_file, extra_args=''):
     # print('Attempting to compile Fortran code %s.  If this fails, see the docs: https://rkirian.gitlab.io/reborn'
     #       % (f90_file,))
-    numpy.f2py.compile(open(os.path.join(pth, f90_file), "rb").read(), modulename=f90_file.replace('.f90', '_f'),
-                       extension='.f90', extra_args=extra_args+' -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION',
+    numpy.f2py.compile(open(os.path.join(pth, f90_file), "rb").read(),
+                       modulename=f90_file.replace('.f90', '_f'),
+                       extension='.f90',
+                       extra_args=extra_args,
                        verbose=False)
     fils = glob('*%s*' % (f90_file.replace('.f90', '_f'),))
     for fil in fils:
@@ -35,8 +39,13 @@ except ImportError:
 try:
     from . import peaks_f
 except ImportError:
-    compile_f90('peaks.f90', extra_args="--f90flags='-fopenmp -O2' -lgomp")
-    from . import peaks_f
+    try:
+        # Attempt to use openmp if it is available
+        compile_f90('peaks.f90', extra_args="--f90flags='-fopenmp -O2' -lgomp")
+        from . import peaks_f
+    except ImportError:
+        compile_f90('peaks.f90')
+        from . import peaks_f
 
 try:
     from . import density_f
