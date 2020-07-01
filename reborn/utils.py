@@ -495,7 +495,6 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
     return dataout, weightout
 
 
-
 def rotate3D(f, Euler_angles):
     r"""
     Rotate a 3D array of numbers in 3-dimensions.
@@ -503,10 +502,12 @@ def rotate3D(f, Euler_angles):
     as described by Unser et al. (1995) "Convolution-based interpolation for fast, 
     high-quality rotation of images." IEEE Transactions on Image Processing, 4:1371.
 
-    Note 1: If the input array, f, is non-cubic, it will be zero-padded to a cubic array 
+    Note 1: If the input array, f, is non-cubic, it will be zero-padded to a cubic array
             with length the size of the largest side of the original array.
+
     Note 2: If you don't want wrap arounds, make sure the input array, f, is zero-padded to
             at least sqrt(2) times the largest dimension of the desired object.
+
     Note 3: Proper Euler angle convention is used, i.e, zyz.
 
     Arguments:
