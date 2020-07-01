@@ -311,7 +311,6 @@ def memoize(function):
     return wrapper
 
 
-# @jit(nopython=True)
 def max_pair_distance(vecs):
     r"""
     Determine the maximum distance between to vectors in a list of vectors.
@@ -328,13 +327,6 @@ def max_pair_distance(vecs):
     d_max = np.array([0], dtype=np.float64)
     fortran.utils_f.max_pair_distance(vecs.T, d_max)
     return d_max[0]
-    # d_max = 0
-    # for i in range(vecs.shape[0]):
-    #     for j in range(vecs.shape[0]):
-    #         d = np.sum((vecs[i, :] - vecs[j, :])**2)
-    #         if d > d_max:
-    #             d_max = d
-    # return np.sqrt(d_max)
 
 
 def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_mode="truncate"):
