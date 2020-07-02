@@ -1,0 +1,1 @@
+500 data 500 steps  0.5pi sigma 2 remodels model_input=model_correct/6, with scaling fix

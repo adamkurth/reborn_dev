@@ -1,0 +1,1 @@
+1 data 10000 steps  0.5pi sigma 1 remodels  correctly seeded input

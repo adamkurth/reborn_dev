@@ -1,0 +1,3 @@
+500 data 500 steps  0.5pi sigma 3 remodels model_input= poissonified model_correct/6, with scaling fix, dark bands grow, likely insufficient sampling
+
+ahhhh actually it was always comparing to model_correct/6, not the new models

@@ -1,0 +1,5 @@
+500 data 200 steps  0.5pi sigma 10 remodels test with error align random input
+
+the principal axis rotation seems to have failed
+
+14 min 41 sec

@@ -1,0 +1,1 @@
+1000 data 2000 steps  0.5pi sigma 2 remodels

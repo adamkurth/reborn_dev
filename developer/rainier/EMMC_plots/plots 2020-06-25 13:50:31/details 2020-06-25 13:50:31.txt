@@ -1,0 +1,1 @@
+500 data 500 steps  0.5pi sigma 4 remodels model_input= poissonified model_correct/100, with scaling fix fixed. Woohoo! Stable!

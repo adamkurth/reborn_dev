@@ -420,7 +420,7 @@ for i in range(len(fourier_test)):
             fourier_test2[i][j][k]=2*funct(x*2,y*2-1.75,z*2-1.5)+2*funct(x*2,y*2+1.75,z*2-1.5)+3*funct(x*2-1.5,y*2,z*2+1.5)+2*funct(x,y,z-1.5)
 #gives a density with more features
 
-fake_data=create_fake_data(200*fourier_test2,r_min,r_max,n_bin, bowl, 10)
+fake_data=create_fake_data(200*fourier_test2,r_min,r_max,n_bin, bowl, 300)
 
 #using trlinear insert
 #data_coord=rot(bowl,[0,1,0],pi/2)
@@ -462,7 +462,7 @@ plt.hist(smpls,bins=2*pi*np.array(range(0,100))/100-pi)
 '''
 #seems correct
 
-models=emmc(fake_data,bowl,fourier_test2,r_min,r_max,n_bin,1,10,pi/2)
+models=emmc(fake_data,bowl,fourier_test2,r_min,r_max,n_bin,1,300,pi/2)
 plt.imshow(models[-1][int(np.floor(Nx*1/2))])
 
 
