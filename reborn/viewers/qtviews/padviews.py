@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 from time import time
 import pickle
 import numpy as np
@@ -653,33 +650,42 @@ class PADView(object):
                 im.setVisible(not im.isVisible())
 
     def save_masks(self):
-
+        r""" Save list of masks in pickle or reborn mask format. """
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Masks", "mask",
-                                                          "Python Pickle (*.pkl)", options=options)
+                                                          "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
+                                                                 options=options)
         if file_name == "":
             return
 
         if file_type == 'Python Pickle (*.pkl)':
             write('Saving masks: ' + file_name)
-            pickle.dump(self.mask_data, open(file_name, "wb"))
+            with open(file_name, "wb") as f:
+                pickle.dump(self.mask_data, f)
+        if file_type == 'reborn Mask File (*.mask)':
+            reborn.detector.save_pad_masks(file_name, self.mask_data)
 
     def load_masks(self):
-
+        r""" Load list of masks that have been saved in pickle or reborn mask format. """
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load Masks", "mask",
-                                                          "Python Pickle (*.pkl)", options=options)
+                                                          "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
+                                                                 options=options)
 
         if file_name == "":
             return
 
         if file_type == 'Python Pickle (*.pkl)':
-            write('Saving masks: ' + file_name)
-            self.mask_data = pickle.load(open(file_name, "rb"))
-            self.update_masks(self.mask_data)
+            with open(file_name, "rb") as f:
+                self.mask_data = pickle.load(f)
+        if file_type == 'reborn Mask File (*.mask)':
+            self.mask_data = reborn.detector.load_pad_masks(file_name)
+
+        self.update_masks(self.mask_data)
+        write('Loaded mask: ' + file_name)
 
     def mask_hovering_roi(self):
-
+        r""" Mask the ROI region that the mouse cursor is hovering over. """
         if self._mask_rois is None:
             return
 

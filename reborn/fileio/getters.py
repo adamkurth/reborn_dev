@@ -40,13 +40,21 @@ class FrameGetter(object):
 
     def __init__(self):
 
-        self.n_frames = 1
+        self._n_frames = 1
         self.current_frame = 0
         self.geom_dict = None
         self.skip = 1
         self.history_length = 10000
         self.history = np.zeros(self.history_length, dtype=np.int)
         self.history_index = 0
+
+    @property
+    def n_frames(self):
+        return self._n_frames
+
+    @n_frames.setter
+    def n_frames(self, n_frames):
+        self._n_frames = n_frames
 
     def get_data(self, frame_number=None):
 

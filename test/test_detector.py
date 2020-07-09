@@ -1,12 +1,14 @@
+import os
 from reborn import detector
 from reborn import source
 import numpy as np
 import scipy.constants as const
 eV = const.value('electron volt')
+np.random.seed(0)
 
 
 def make_pad_list():
-
+    r""" Simply check the creation of a pad list. """
     pad_geom = []
     pad = detector.PADGeometry()
     pad.t_vec = [0, .01, .5]
@@ -26,27 +28,41 @@ def make_pad_list():
     return pad_geom
 
 
-def test_PADGeometry():
-
+def test_solid_angles():
     # Check that the two solid angle calculations are in agreement
-
     pad = detector.PADGeometry()
     assert pad.t_vec is None
     pad = detector.PADGeometry(pixel_size=100e-6, distance=1, shape=(100, 100))
     assert np.max(pad.solid_angles1() - pad.solid_angles2())/np.max(pad.solid_angles2()) < 1e-6
 
 
-def test_beam():
+def test_save_pad():
+    file_name = 'test.json'
+    pad1 = detector.PADGeometry(pixel_size=100e-6, distance=1, shape=(100, 100))
+    pad1.save_json(file_name)
+    pad2 = detector.PADGeometry()
+    pad2.load_json(file_name)
+    os.remove(file_name)
+    assert pad1 == pad2
 
+
+def test_save_pad_list():
+    file_name = 'test.json'
+    pads1 = make_pad_list()
+    detector.save_pad_geometry_list(file_name, pads1)
+    pads2 = detector.load_pad_geometry_list(file_name)
+    print(pads2)
+    for i in range(len(pads1)):
+        assert pads1[i] == pads2[i]
+    os.remove(file_name)
+
+
+def test_beam():
     beam = source.Beam()
     beam.wavelength = 1.5e-10
     beam.beam_vec = np.array([0, 0, 1])
-
     pad_geom = detector.PADGeometry(pixel_size=100e-6, distance=1, shape=(100, 100))
-    # pad_geom.simple_setup()
-
     # TODO: put some thought into these tests...
-
     out = pad_geom.scattering_angles(beam=beam)
     assert np.min(out >= 0)
     out = pad_geom.polarization_factors(beam=beam)
@@ -60,22 +76,16 @@ def test_beam():
 
 
 def test_PADAssembler():
-
     # TODO: check that layout is actually correct.
-
     pad_geom = make_pad_list()
-
     assembler = detector.PADAssembler(pad_geom)
     dat = [p.ones() for p in pad_geom]
-
     ass = assembler.assemble_data(dat)
-
     assert(np.min(ass) == 0)
     assert(np.max(ass) == 1)
 
 
 def test_radial_profiler_01():
-
     pad_geom = detector.PADGeometry(shape=[3, 3], distance=1.0, pixel_size=100e-6)
     q_mags = pad_geom.q_mags(beam_vec=[0, 0, 1], wavelength=1.0e-10)
     # q_mags = [8885765.80967349 6283185.28361764 8885765.80967349 6283185.28361764 0. 6283185.28361764
@@ -141,3 +151,23 @@ def test_radial_profiler_02():
     prof = rad.get_profile(data, average=True)
     assert(np.max(prof) <= 1)
     assert(np.min(prof) >= 0)
+
+
+def test_saving():
+
+    shapes = [np.array((100, 101)) for _ in range(8)]
+    masks = [np.round(np.random.random(shapes[i]) * 0.6).astype(int) for i in range(8)]
+    assert np.sum(masks[0]) > 0
+
+    detector.save_pad_masks('unpacked.mask', masks, packbits=False)
+    detector.save_pad_masks('packed', masks)
+
+    unpacked = detector.load_pad_masks('unpacked.mask')
+    print('loaded unpacked')
+    packed = detector.load_pad_masks('packed.mask')
+    for i in range(len(masks)):
+        assert np.max(packed[i] - unpacked[i]) == 0
+        assert np.max(masks[i] - unpacked[i]) == 0
+
+    os.remove('unpacked.mask')
+    os.remove('packed.mask')
