@@ -239,7 +239,7 @@ class PADView(object):
         shortcut("r", self.show_random_frame)
         shortcut("n", self.show_history_next)
         shortcut("p", self.show_history_previous)
-        shortcut("c", self.run_plugin)
+        shortcut("c", self.choose_plugins)
         shortcut("Ctrl+g", self.toggle_all_geom_info)
         shortcut("Ctrl+r", self.edit_ring_radii)
         shortcut("Ctrl+a", self.toggle_coordinate_axes)
@@ -1265,9 +1265,14 @@ class PADView(object):
         for i in range(self.n_pads):
             self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(3, 6, 9)))
 
+    def choose_plugins(self):
+        plst = "subtract_median_ss"
+        text, ok = QtGui.QInputDialog.getText(self.main_window, "Choose plugins", "",
+                                              QtGui.QLineEdit.Normal, plst)
+        self.run_plugin(text)
+
     def run_plugin(self, module_name='subtract_median_ss'):
         self.debug('run_plugin()')
-        print(__package__)
         module = importlib.import_module(__package__+'.plugins.'+module_name)
         module.plugin(self)
 
