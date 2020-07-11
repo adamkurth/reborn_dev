@@ -7,7 +7,7 @@ from reborn.external.crystfel import geometry_file_to_pad_geometry_list
 from reborn.viewers.qtviews.padviews import PADView
 from reborn.fileio.getters import FrameGetter
 
-# Everything in bornagian is SI units.
+# Everything in bornagain is SI units.
 eV = constants.value('electron volt')
 
 # Load a CrystFEL geom file

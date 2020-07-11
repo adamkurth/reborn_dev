@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from time import time
+import importlib
 import pickle
 import numpy as np
 import pkg_resources
@@ -238,6 +239,7 @@ class PADView(object):
         shortcut("r", self.show_random_frame)
         shortcut("n", self.show_history_next)
         shortcut("p", self.show_history_previous)
+        shortcut("c", self.run_plugin)
         shortcut("Ctrl+g", self.toggle_all_geom_info)
         shortcut("Ctrl+r", self.edit_ring_radii)
         shortcut("Ctrl+a", self.toggle_coordinate_axes)
@@ -632,19 +634,19 @@ class PADView(object):
         self.update_masks()
 
     def hide_masks(self):
-
+        self.debug('hide_masks()')
         if self.mask_images is not None:
             for im in self.mask_images:
                 im.setVisible(False)
 
     def show_masks(self):
-
+        self.debug('show_masks()')
         if self.mask_images is not None:
             for im in self.mask_images:
                 im.setVisible(True)
 
     def toggle_masks(self):
-
+        self.debug('toggle_masks()')
         if self.mask_images is not None:
             for im in self.mask_images:
                 im.setVisible(not im.isVisible())
@@ -1262,6 +1264,12 @@ class PADView(object):
         self.peak_finders = []
         for i in range(self.n_pads):
             self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(3, 6, 9)))
+
+    def run_plugin(self, module_name='subtract_median_ss'):
+        self.debug('run_plugin()')
+        print(__package__)
+        module = importlib.import_module(__package__+'.plugins.'+module_name)
+        module.plugin(self)
 
     def find_peaks(self):
 

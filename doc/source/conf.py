@@ -119,7 +119,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and directories to ignore when looking for source
 # files. RICK: THIS DOES NOTHING SO FAR AS I CAN SEE...
-exclude_patterns = ['*placer*', '*_f']
+exclude_patterns = ['plugins', '*placer*', '*_f']
 autodoc_default_options = {
     # 'members': 'var1, var2',
     'member-order': 'bysource',
