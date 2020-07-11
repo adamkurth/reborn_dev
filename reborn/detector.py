@@ -6,6 +6,7 @@ detectors (PADs).
 import os
 import json
 import numpy as np
+from scipy.stats import binned_statistic
 from . import utils
 
 
@@ -852,8 +853,8 @@ class RadialProfiler():
         derived from a list of |PADGeometry|'s along with a |Beam|, or you may supply the q magnitudes directly.
 
         Arguments:
-            q_mags (numpy array): Optional.  Array of q magnitudes.
-            mask (numpy array): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
+            q_mags (|ndarray|): Optional.  Array of q magnitudes.
+            mask (|ndarray|): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
                                 will come from this (e.g. use values of 0 and 1 if you want a normal average, otherwise
                                 you get a weighted average).
             n_bins (int): Number of radial bins you desire.
@@ -906,8 +907,8 @@ class RadialProfiler():
         Setup the binning indices for the creation of radial profiles.
 
         Arguments:
-            q_mags (numpy array): Optional.  Array of q magnitudes.
-            mask (numpy array): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
+            q_mags (|ndarray|): Optional.  Array of q magnitudes.
+            mask (|ndarray|): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
                                 will come from this (e.g. use values of 0 and 1 if you want a normal average, otherwise
                                 you get a weighted average).
             n_bins (int): Number of radial bins you desire.
@@ -954,10 +955,10 @@ class RadialProfiler():
         Calculate the radial profile of summed intensities.
 
         Args:
-            data (numpy array):  The intensity data from which the radial profile is formed.
-            mask (numpy array):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.
+            data |ndarray|:  The intensity data from which the radial profile is formed.
+            mask |ndarray|:  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.
 
-        Returns:  Numpy array.
+        Returns:  |ndarray|
         """
         data = concat_pad_data(data)
         if mask is not None:
@@ -970,11 +971,11 @@ class RadialProfiler():
         Calculate the radial profile of averaged intensities.
 
         Args:
-            data (numpy array):  The intensity data from which the radial profile is formed.
-            mask (numpy array):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
+            data |ndarray|:  The intensity data from which the radial profile is formed.
+            mask |ndarray|:  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
                                  provided here, the mask configured with :meth:`set_mask` will be used.
 
-        Returns:  Numpy array.
+        Returns: |ndarray|
         """
         if mask is None:
             mask = self.mask  # Use the default mask
@@ -985,11 +986,32 @@ class RadialProfiler():
             cntdat = self.counts_profile
         return np.divide(sumdat, cntdat, where=(cntdat > 0), out=np.zeros(sumdat.shape))
 
+    def get_median_profile(self, data, mask=None):
+        r"""
+        Calculate the radial profile of averaged intensities.
+
+        Args:
+            data (|ndarray|):  The intensity data from which the radial profile is formed.
+            mask (|ndarray|):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
+                                 provided here, the mask configured with :meth:`set_mask` will be used.
+
+        Returns:  |ndarray|
+        """
+        data = concat_pad_data(data)
+        q_mags = self.q_mags.copy()
+        if mask is not None:
+            mask = concat_pad_data(mask)
+            w = np.where(mask)
+            data = data[w]
+            q_mags = q_mags[w]
+        median, bin_edges, binnumber = binned_statistic(q_mags, data, statistic='median', bins=self.bin_edges)
+        return median
+
     def get_profile(self, data, mask=None, average=True):
         r"""
         This method is depreciated.  Use get_mean_profile or get_sum_profile instead.
         """
-        utils.depreciate("RadialProfiler.get_profile() is depreciated.  Read the docs.")
+        utils.depreciate("RadialProfiler.get_profile() is depreciated.  Use RadialProfiler.get_mean_profile().")
         if average is True:
             return self.get_mean_profile(data, mask=mask)
         return self.get_sum_profile(data, mask=mask)

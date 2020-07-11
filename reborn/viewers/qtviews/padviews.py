@@ -49,6 +49,7 @@ class PADView(object):
     raw_data = None   # Dictionary with 'pad_data' and 'peaks' keys
     processed_data = None  # Dictionary with 'pad_data' and 'peaks' keys
     pad_geometry = []
+    beam = None
     crystfel_geom_file_name = None
     pad_labels = None
     mask_data = None
@@ -175,6 +176,10 @@ class PADView(object):
 
         write("something happened")
 
+    def set_title(self, title):
+        self.main_window.setWindowTitle(title)
+        self.process_events()  # Why?
+
     def close_main_window(self):
 
         self.debug('close_main_window()')
@@ -268,11 +273,26 @@ class PADView(object):
         if self.get_pad_display_data() is not None:
             return len(self.get_pad_display_data())
 
+    def process_events(self):
+        pg.QtGui.QApplication.processEvents()
+
     def setup_histogram_tool(self):
 
         self.debug('setup_histogram_tool()')
-        self.main_window.histogram.gradient.loadPreset('flame')
+        self.set_preset_colormap('flame')
         self.main_window.histogram.setImageItems(self.images)
+
+    def set_preset_colormap(self, preset='flame'):
+        r""" Changes the colormap """
+        self.main_window.histogram.gradient.loadPreset(preset)
+        self.main_window.histogram.setImageItems(self.images)
+        pg.QtGui.QApplication.processEvents()
+
+    def set_levels_by_percentiles(self, percents=(1, 99)):
+        d = reborn.detector.concat_pad_data(self.get_pad_display_data())
+        lower = np.percentile(d, percents[0])
+        upper = np.percentile(d, percents[1])
+        self.set_levels(lower, upper)
 
     def set_levels(self, min_value, max_value):
 
@@ -1266,15 +1286,47 @@ class PADView(object):
             self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(3, 6, 9)))
 
     def choose_plugins(self):
-        plst = "subtract_median_ss"
-        text, ok = QtGui.QInputDialog.getText(self.main_window, "Choose plugins", "",
-                                              QtGui.QLineEdit.Normal, plst)
-        self.run_plugin(text)
+        self.debug('choose_plugins')
+        init = ''
+        init += "subtract_median_fs\n"
+        init += "#subtract_median_ss\n"
+        init += "#subtract_median_radial\n"
+        text = self.get_text(text=init)
+        a = text.strip().split("\n")
+        plugins = []
+        for b in a:
+            if len(b) == 0:
+                continue
+            if b[0] != '#':  # Ignore commented lines
+                c = b.split('#')[0]
+                if c != '':
+                    plugins.append(c)
+        if len(plugins) > 0:
+            self.run_plugins(plugins)
 
-    def run_plugin(self, module_name='subtract_median_ss'):
+    def run_plugins(self, module_names=['subtract_median_ss']):
         self.debug('run_plugin()')
-        module = importlib.import_module(__package__+'.plugins.'+module_name)
-        module.plugin(self)
+        if len(module_names) <= 0:
+            return
+        mod = module_names[0]
+        try:
+            self.debug('plugin: %s' % mod)
+            module = importlib.import_module(__package__+'.plugins.'+mod)
+            module.plugin(self)  # This is the syntax for running a plugin
+        except ImportError:
+            print('Failed to find plugin %s' % module)
+
+    def get_text(self, title="Title", label="Label", text="Text"):
+        text, ok = QtGui.QInputDialog.getText(self.main_window, title, label, QtGui.QLineEdit.Normal, text)
+        return text
+
+    # def get_multiline_text(self, title="Title", label="Label", text="Text"):
+    #     # FIXME: this is only Qt 5.2+
+    #     text, ok = QtGui.QInputDialog.getMultilineText(self.main_window, title=title, label=label, text=text)
+    #     return text
+
+    def get_float(self, title="Title", label="Label", text="Text"):
+        return float(self.get_text(title=title, label=label, text=text))
 
     def find_peaks(self):
 
