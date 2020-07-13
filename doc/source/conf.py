@@ -17,6 +17,11 @@ import os
 import datetime
 # import shlex
 
+intersphinx_mapping = {'python': ('http://docs.python.org/2', None),
+                       'numpy': ('http://docs.scipy.org/doc/numpy/', None),
+                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
+                       'matplotlib': ('http://matplotlib.sourceforge.net/', None)}
+
 # These are shortcuts that can be used in the reborn docs.
 rst_epilog = """
 .. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
@@ -59,6 +64,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
     'sphinx_gallery.gen_gallery']
 
 # Configuration for the documentation of examples
@@ -113,7 +119,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and directories to ignore when looking for source
 # files. RICK: THIS DOES NOTHING SO FAR AS I CAN SEE...
-exclude_patterns = ['*placer*', '*_f']
+exclude_patterns = ['plugins', '*placer*', '*_f']
 autodoc_default_options = {
     # 'members': 'var1, var2',
     'member-order': 'bysource',

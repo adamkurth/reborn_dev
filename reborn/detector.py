@@ -3,11 +3,10 @@ Classes for analyzing/simulating diffraction data contained in pixel array
 detectors (PADs).
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
+import os
+import json
 import numpy as np
-import h5py
-from scipy.stats import binned_statistic_dd
+from scipy.stats import binned_statistic
 from . import utils
 
 
@@ -64,6 +63,24 @@ class PADGeometry():
     def hash(self):
         r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
         return hash(self.__str__())
+
+    def __eq__(self, other):
+        if not isinstance(other, PADGeometry):
+            return False
+        if not self.n_fs == other.n_fs:
+            return False
+        if not self.n_ss == other.n_ss:
+            return False
+        if np.max(np.abs(self.ss_vec - other.ss_vec)) > 0:
+            return False
+        if np.max(np.abs(self.fs_vec - other.fs_vec)) > 0:
+            return False
+        if np.max(np.abs(self.t_vec - other.t_vec)) > 0:
+            return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     @property
     def n_fs(self):
@@ -122,21 +139,54 @@ class PADGeometry():
     def t_vec(self, t_vec):
         self._t_vec = np.array(t_vec)
 
-    def save(self, save_fname):
-        r"""Saves an hdf5 file with class attributes for later use"""
-        with h5py.File(save_fname, "w") as hfil:
-            for name, data in vars(self).items():
-                hfil.create_dataset(name, data=data)
+    def to_dict(self):
+        r""" Convert geometry to a dictionary.  It contains n_fs, n_ss, fs_vec, ss_vec and t_vec keys."""
+        return {'n_fs': self.n_fs, 'n_ss': self.n_ss, 'fs_vec': tuple(self.fs_vec), 'ss_vec': tuple(self.ss_vec), 't_vec': tuple(self.t_vec)}
 
-    @classmethod
-    def load(cls, fname):
-        r""" load a PAD object from fname"""
-        pad = cls()
-        with h5py.File(fname, "r") as hfil:
-            for name in hfil.keys():
-                data = hfil[name].value
-                setattr(pad, name, data)
-        return pad
+    def from_dict(self, dictionary):
+        r""" Loads geometry from dictionary.  This goes along with the to_dict method."""
+        self.n_fs = dictionary['n_fs']
+        self.n_ss = dictionary['n_ss']
+        self.fs_vec = dictionary['fs_vec']
+        self.ss_vec = dictionary['ss_vec']
+        self.t_vec = dictionary['t_vec']
+
+    def copy(self):
+        r""" Make a copy of this class instance. """
+        p = PADGeometry()
+        p.from_dict(self.to_dict())
+        return p
+
+    def save_json(self, file_name):
+        r""" Save the geometry as a json file. """
+        with open(file_name, 'w') as f:
+            json.dump(self.to_dict(), f)
+
+    def load_json(self, file_name):
+        r""" Save the geometry as a json file. """
+        with open(file_name, 'r') as f:
+            d = json.load(f)
+        self.from_dict(d)
+
+    # def save(self, save_fname):
+    #     r"""Saves an hdf5 file with class attributes for later use"""
+    #     utils.depreciate('Do not save as hdf5.  Use the save_json method instead, so you have a human readable file.')
+    #     import h5py
+    #     with h5py.File(save_fname, "w") as hfil:
+    #         for name, data in vars(self).items():
+    #             hfil.create_dataset(name, data=data)
+    #
+    # @classmethod
+    # def load(cls, fname):
+    #     r""" load a PAD object from fname"""
+    #     utils.depreciate('Do not use hdf5 files.  Use the save_json method instead, so you have human readable files.')
+    #     import h5py
+    #     pad = cls()
+    #     with h5py.File(fname, "r") as hfil:
+    #         for name in hfil.keys():
+    #             data = hfil[name].value
+    #             setattr(pad, name, data)
+    #     return pad
 
     def simple_setup(self, n_pixels=None, pixel_size=None, distance=None, shape=None):
         r""" Make this a square PAD with beam at center.
@@ -478,6 +528,26 @@ class PADGeometry():
         return 2 * np.pi / np.max(self.q_mags(beam=beam))
 
 
+def save_pad_geometry_list(file_name, geom_list):
+    r""" Save a list of PADGeometry instances as a json file. """
+    if not isinstance(geom_list, list):
+        geom_list = [geom_list]
+    with open(file_name, 'w') as f:
+        json.dump([g.to_dict() for g in geom_list], f, sort_keys=True, indent=0)
+
+
+def load_pad_geometry_list(file_name):
+    r""" Load a list of PADGeometry instances stored in json format. """
+    with open(file_name, 'r') as f:
+        dicts = json.load(f)
+    out = []
+    for d in dicts:
+        pad = PADGeometry()
+        pad.from_dict(d)
+        out.append(pad)
+    return out
+
+
 def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0.1, tiling_shape=(4, 2), pad_gap=0):
     r"""
     Make a list of PADGeometry instances with identical panel sizes, tiled in a regular grid.
@@ -783,8 +853,8 @@ class RadialProfiler():
         derived from a list of |PADGeometry|'s along with a |Beam|, or you may supply the q magnitudes directly.
 
         Arguments:
-            q_mags (numpy array): Optional.  Array of q magnitudes.
-            mask (numpy array): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
+            q_mags (|ndarray|): Optional.  Array of q magnitudes.
+            mask (|ndarray|): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
                                 will come from this (e.g. use values of 0 and 1 if you want a normal average, otherwise
                                 you get a weighted average).
             n_bins (int): Number of radial bins you desire.
@@ -837,8 +907,8 @@ class RadialProfiler():
         Setup the binning indices for the creation of radial profiles.
 
         Arguments:
-            q_mags (numpy array): Optional.  Array of q magnitudes.
-            mask (numpy array): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
+            q_mags (|ndarray|): Optional.  Array of q magnitudes.
+            mask (|ndarray|): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
                                 will come from this (e.g. use values of 0 and 1 if you want a normal average, otherwise
                                 you get a weighted average).
             n_bins (int): Number of radial bins you desire.
@@ -885,10 +955,10 @@ class RadialProfiler():
         Calculate the radial profile of summed intensities.
 
         Args:
-            data (numpy array):  The intensity data from which the radial profile is formed.
-            mask (numpy array):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.
+            data |ndarray|:  The intensity data from which the radial profile is formed.
+            mask |ndarray|:  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.
 
-        Returns:  Numpy array.
+        Returns:  |ndarray|
         """
         data = concat_pad_data(data)
         if mask is not None:
@@ -901,11 +971,11 @@ class RadialProfiler():
         Calculate the radial profile of averaged intensities.
 
         Args:
-            data (numpy array):  The intensity data from which the radial profile is formed.
-            mask (numpy array):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
+            data |ndarray|:  The intensity data from which the radial profile is formed.
+            mask |ndarray|:  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
                                  provided here, the mask configured with :meth:`set_mask` will be used.
 
-        Returns:  Numpy array.
+        Returns: |ndarray|
         """
         if mask is None:
             mask = self.mask  # Use the default mask
@@ -916,11 +986,84 @@ class RadialProfiler():
             cntdat = self.counts_profile
         return np.divide(sumdat, cntdat, where=(cntdat > 0), out=np.zeros(sumdat.shape))
 
+    def get_median_profile(self, data, mask=None):
+        r"""
+        Calculate the radial profile of averaged intensities.
+
+        Args:
+            data (|ndarray|):  The intensity data from which the radial profile is formed.
+            mask (|ndarray|):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
+                                 provided here, the mask configured with :meth:`set_mask` will be used.
+
+        Returns:  |ndarray|
+        """
+        data = concat_pad_data(data)
+        q_mags = self.q_mags.copy()
+        if mask is not None:
+            mask = concat_pad_data(mask)
+            w = np.where(mask)
+            data = data[w]
+            q_mags = q_mags[w]
+        median, bin_edges, binnumber = binned_statistic(q_mags, data, statistic='median', bins=self.bin_edges)
+        return median
+
     def get_profile(self, data, mask=None, average=True):
         r"""
         This method is depreciated.  Use get_mean_profile or get_sum_profile instead.
         """
-        utils.depreciate("RadialProfiler.get_profile() is depreciated.  Read the docs.")
+        utils.depreciate("RadialProfiler.get_profile() is depreciated.  Use RadialProfiler.get_mean_profile().")
         if average is True:
             return self.get_mean_profile(data, mask=mask)
         return self.get_sum_profile(data, mask=mask)
+
+
+def save_pad_masks(file_name, mask_list, packbits=True):
+    r"""
+    Save list of 2D mask arrays in a compressed format.  It is assumed that masks consist of values of zero or one.
+    We presently use the :func:`numpy.packbits` function along with numpy.savez_compressed function.
+
+    Note: The file name extension will be .mask.  If you provide a name without an extension, or with a different
+    extension, the extension will be changed.  It is recommended that you explicitly provide the extension.
+
+    Arguments:
+        file_name (str): Path to file that will be saved.
+        mask_list (list): A list of |ndarray| masks.  Will be converted to bool type before saving.
+        packbits (bool): Specify if numpy.packbits should be used to reduce file size.  (Default: True).
+
+    Returns: File name string (will have *.mask extension)
+    """
+    if not file_name.endswith('.mask'):
+        file_name += '.mask'
+    if not isinstance(mask_list, list):
+        mask_list = [mask_list]
+    if packbits:
+        shapes = [np.array(m.shape).astype(int) for m in mask_list]
+        masks = [np.packbits(m.ravel().astype(bool).astype(np.uint8)) for m in mask_list]
+        np.savez_compressed(file_name, *shapes, *masks, format=1)
+    else:
+        np.savez_compressed(file_name, *mask_list, format=0)
+    os.rename(file_name+'.npz', file_name)
+    return file_name
+
+
+def load_pad_masks(file_name):
+    r"""
+    Load a mask created using the save_pad_masks function.
+
+    Arguments:
+        file_name (str): The path to the file you want to open.
+
+    Returns: List of |ndarray| objects with int type.
+    """
+    out = np.load(file_name)
+    keys = list(out.keys())
+    n = int(len(out) - 1)
+    file_format = out['format']
+    def _range(x): return np.arange(x, dtype=int)
+    if file_format == 1:
+        shapes = [out[keys[i]] for i in _range(n/2) + 1]
+        masks = [out[keys[i]] for i in _range(n/2) + int(n/2) + 1]
+        masks = [np.unpackbits(masks[i])[0:np.prod(shapes[i])].astype(int).reshape(shapes[i]) for i in _range(n/2)]
+    else:
+        masks = [out[keys[i]] for i in _range(n) + 1]
+    return masks

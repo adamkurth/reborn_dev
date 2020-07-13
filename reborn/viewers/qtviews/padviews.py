@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 from time import time
+import importlib
 import pickle
 import numpy as np
 import pkg_resources
@@ -51,6 +49,7 @@ class PADView(object):
     raw_data = None   # Dictionary with 'pad_data' and 'peaks' keys
     processed_data = None  # Dictionary with 'pad_data' and 'peaks' keys
     pad_geometry = []
+    beam = None
     crystfel_geom_file_name = None
     pad_labels = None
     mask_data = None
@@ -177,6 +176,10 @@ class PADView(object):
 
         write("something happened")
 
+    def set_title(self, title):
+        self.main_window.setWindowTitle(title)
+        self.process_events()  # Why?
+
     def close_main_window(self):
 
         self.debug('close_main_window()')
@@ -241,6 +244,7 @@ class PADView(object):
         shortcut("r", self.show_random_frame)
         shortcut("n", self.show_history_next)
         shortcut("p", self.show_history_previous)
+        shortcut("c", self.choose_plugins)
         shortcut("Ctrl+g", self.toggle_all_geom_info)
         shortcut("Ctrl+r", self.edit_ring_radii)
         shortcut("Ctrl+a", self.toggle_coordinate_axes)
@@ -269,11 +273,26 @@ class PADView(object):
         if self.get_pad_display_data() is not None:
             return len(self.get_pad_display_data())
 
+    def process_events(self):
+        pg.QtGui.QApplication.processEvents()
+
     def setup_histogram_tool(self):
 
         self.debug('setup_histogram_tool()')
-        self.main_window.histogram.gradient.loadPreset('flame')
+        self.set_preset_colormap('flame')
         self.main_window.histogram.setImageItems(self.images)
+
+    def set_preset_colormap(self, preset='flame'):
+        r""" Changes the colormap """
+        self.main_window.histogram.gradient.loadPreset(preset)
+        self.main_window.histogram.setImageItems(self.images)
+        pg.QtGui.QApplication.processEvents()
+
+    def set_levels_by_percentiles(self, percents=(1, 99)):
+        d = reborn.detector.concat_pad_data(self.get_pad_display_data())
+        lower = np.percentile(d, percents[0])
+        upper = np.percentile(d, percents[1])
+        self.set_levels(lower, upper)
 
     def set_levels(self, min_value, max_value):
 
@@ -635,51 +654,60 @@ class PADView(object):
         self.update_masks()
 
     def hide_masks(self):
-
+        self.debug('hide_masks()')
         if self.mask_images is not None:
             for im in self.mask_images:
                 im.setVisible(False)
 
     def show_masks(self):
-
+        self.debug('show_masks()')
         if self.mask_images is not None:
             for im in self.mask_images:
                 im.setVisible(True)
 
     def toggle_masks(self):
-
+        self.debug('toggle_masks()')
         if self.mask_images is not None:
             for im in self.mask_images:
                 im.setVisible(not im.isVisible())
 
     def save_masks(self):
-
+        r""" Save list of masks in pickle or reborn mask format. """
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Masks", "mask",
-                                                          "Python Pickle (*.pkl)", options=options)
+                                                          "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
+                                                                 options=options)
         if file_name == "":
             return
 
         if file_type == 'Python Pickle (*.pkl)':
             write('Saving masks: ' + file_name)
-            pickle.dump(self.mask_data, open(file_name, "wb"))
+            with open(file_name, "wb") as f:
+                pickle.dump(self.mask_data, f)
+        if file_type == 'reborn Mask File (*.mask)':
+            reborn.detector.save_pad_masks(file_name, self.mask_data)
 
     def load_masks(self):
-
+        r""" Load list of masks that have been saved in pickle or reborn mask format. """
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load Masks", "mask",
-                                                          "Python Pickle (*.pkl)", options=options)
+                                                          "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
+                                                                 options=options)
 
         if file_name == "":
             return
 
         if file_type == 'Python Pickle (*.pkl)':
-            write('Saving masks: ' + file_name)
-            self.mask_data = pickle.load(open(file_name, "rb"))
-            self.update_masks(self.mask_data)
+            with open(file_name, "rb") as f:
+                self.mask_data = pickle.load(f)
+        if file_type == 'reborn Mask File (*.mask)':
+            self.mask_data = reborn.detector.load_pad_masks(file_name)
+
+        self.update_masks(self.mask_data)
+        write('Loaded mask: ' + file_name)
 
     def mask_hovering_roi(self):
-
+        r""" Mask the ROI region that the mouse cursor is hovering over. """
         if self._mask_rois is None:
             return
 
@@ -1256,6 +1284,49 @@ class PADView(object):
         self.peak_finders = []
         for i in range(self.n_pads):
             self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(3, 6, 9)))
+
+    def choose_plugins(self):
+        self.debug('choose_plugins')
+        init = ''
+        init += "subtract_median_fs\n"
+        init += "#subtract_median_ss\n"
+        init += "#subtract_median_radial\n"
+        text = self.get_text(text=init)
+        a = text.strip().split("\n")
+        plugins = []
+        for b in a:
+            if len(b) == 0:
+                continue
+            if b[0] != '#':  # Ignore commented lines
+                c = b.split('#')[0]
+                if c != '':
+                    plugins.append(c)
+        if len(plugins) > 0:
+            self.run_plugins(plugins)
+
+    def run_plugins(self, module_names=['subtract_median_ss']):
+        self.debug('run_plugin()')
+        if len(module_names) <= 0:
+            return
+        mod = module_names[0]
+        try:
+            self.debug('plugin: %s' % mod)
+            module = importlib.import_module(__package__+'.plugins.'+mod)
+            module.plugin(self)  # This is the syntax for running a plugin
+        except ImportError:
+            print('Failed to find plugin %s' % module)
+
+    def get_text(self, title="Title", label="Label", text="Text"):
+        text, ok = QtGui.QInputDialog.getText(self.main_window, title, label, QtGui.QLineEdit.Normal, text)
+        return text
+
+    # def get_multiline_text(self, title="Title", label="Label", text="Text"):
+    #     # FIXME: this is only Qt 5.2+
+    #     text, ok = QtGui.QInputDialog.getMultilineText(self.main_window, title=title, label=label, text=text)
+    #     return text
+
+    def get_float(self, title="Title", label="Label", text="Text"):
+        return float(self.get_text(title=title, label=label, text=text))
 
     def find_peaks(self):
 
