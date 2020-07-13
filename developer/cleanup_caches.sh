@@ -5,6 +5,6 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit
 fi
 
-find .. -name '__pycache__' -type d -exec rm -r {} \; &> /dev/null
-find .. -name '.cache' -type d -exec rm -r {} \; &> /dev/null
-find .. -name '.pytest_cache' -type d -exec rm -r {} \; &> /dev/null
+find .. \( -path ../miniconda \) -prune -o -name '__pycache__' -type d -exec rm -r {} \; &> /dev/null
+find .. \( -path ../miniconda \) -prune -o -name '.cache' -type d -exec rm -r {} \; &> /dev/null
+find .. \( -path ../miniconda \) -prune -o -name '.pytest_cache' -type d -exec rm -r {} \; &> /dev/null

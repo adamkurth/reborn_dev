@@ -1,0 +1,1 @@
+1000 data 500 steps  0.5pi sigma 11 remodels full scale reconstruction with brute force error measure

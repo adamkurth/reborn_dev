@@ -1,0 +1,5 @@
+800 data 500 steps  0.5pi sigma 12 remodels first test of emmc_sa
+
+the principal axes line up enough that the error actually goes down
+
+but reconstructed rotated to correct model doesn't look right...

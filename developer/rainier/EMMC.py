@@ -10,6 +10,7 @@ import os
 import numpy as np
 import scipy as sci
 from reborn.utils import trilinear_insert
+from reborn.utils import rotate3D
 from reborn.target.density import trilinear_interpolation, trilinear_insertion
 from scipy import constants as const
 import matplotlib.pyplot as plt
@@ -18,11 +19,13 @@ import reborn
 import reborn.target.crystal as crystal
 import reborn.simulate.clcore as core
 
+
 ##############################################
 #Simulating Lysase
 #see https://kirianlab.gitlab.io/reborn/auto_examples/plot_simulate_pdb.html#sphx-glr-auto-examples-plot-simulate-pdb-py
 
 eV = const.value('electron volt')
+r_e = const.value('classical electron radius')
 
 #setting up the gpu
 simcore = core.ClCore(group_size=32, double_precision=False)
@@ -30,16 +33,51 @@ simcore = core.ClCore(group_size=32, double_precision=False)
 # Let's check which device we are using:
 print(simcore.get_device_name())
 
-# First we set up a pixel array detector (|PAD|) and an x-ray |Beam|:
-beam = reborn.source.Beam(photon_energy=10000*eV)
-pad = reborn.detector.PADGeometry(shape=(1001, 1001), pixel_size=100e-6, distance=0.5)
+# First we set up a pixel array detector, PAD and an x-ray, Beam:
+#beam = reborn.source.Beam(photon_energy=10000*eV, diameter_fwhm=0.2e-6, pulse_energy=2)
+beam = reborn.source.Beam(photon_energy=5000*eV, diameter_fwhm=0.2e-6, pulse_energy=0.02)
+fluence = beam.photon_number_fluence
+pad = reborn.detector.PADGeometry(shape=(51, 51), pixel_size=4000e-6, distance=0.5)
+#pad = reborn.detector.PADGeometry(shape=(1001, 1001), pixel_size=100e-6, distance=0.5)
 q_vecs = pad.q_vecs(beam=beam)
 n_pixels = q_vecs.shape[0]
+solid_angles = pad.solid_angles()
+polarization_factors = pad.polarization_factors(beam=beam)
+q_mags = pad.q_mags(beam=beam)
 
 # Next we load a crystal structure from pdb file, from which we can get coordinates and scattering factors.
 cryst = crystal.CrystalStructure('2LYZ')
 r_vecs = cryst.molecule.coordinates  # These are atomic coordinates (Nx3 array)
+atomic_numbers = cryst.molecule.atomic_numbers
 n_atoms = r_vecs.shape[0]
+
+'''
+#doing the full sum in a slow way, idk
+uniq_z = np.unique(atomic_numbers)
+grouped_r_vecs = []
+grouped_fs = []
+for z in uniq_z:
+    subr = np.squeeze(r_vecs[np.where(atomic_numbers == z), :])
+    grouped_r_vecs.append(subr)
+    grouped_fs.append(reborn.simulate.atoms.hubbel_henke_scattering_factors(q_mags=q_mags, photon_energy=beam.photon_energy,
+                                                            atomic_number=z))
+#calulating the intesities for a set of q vectors
+intensities = []
+sa = solid_angles
+p = polarization_factors
+q = q_vecs
+amps = 0
+for j in range(len(grouped_fs)):
+    f = grouped_fs[j]
+    r = grouped_r_vecs[j]
+    a = simcore.phase_factor_qrf(q, r)
+    amps += a*f
+ints = r_e**2*fluence*sa*p*np.abs(amps)**2
+intensities.append(pad.reshape(ints))
+
+# Let's see how many photons hit the detector:
+print('# photons total: %d' % np.round(np.sum(reborn.detector.concat_pad_data(intensities))))
+'''
 
 # Look up atomic scattering factors (they are complex numbers).  Note that these are not :math:`q`-dependent; they are
 # the forward scattering factors :math:`f(0)`.
@@ -61,6 +99,7 @@ simcore.phase_factor_mesh(r_vecs, f, N=N, q_min=-q_max, q_max=q_max, a=a_map_dev
 
 #voila the lysozyme 3d scattering intensity
 lys_intensity=np.ndarray.astype(np.abs(np.reshape(a_map_dev.get(),[N,N,N])),'float64')
+F_lys2=np.ndarray.astype(np.abs(np.reshape(a_map_dev.get(),[N,N,N]))**2,'float64')
 
 
 
@@ -207,21 +246,113 @@ def insert(data_coord, data_val, q_min, q_max, N_bin):
 #plots an array summed over the x axis
 def imshow_collapse(ar):
     plt.imshow(np.sum(ar,axis=0))
+
+#plot cross section natural log through equator
+#replaces values that are small compared to the avg with the average
+#this eliminates the zero padding to help with contrast
+def imshow_ln(ar,avg=True):
+    x=ar[int(np.floor(len(ar)*0.5))]
+    #x[x==x[0,0]]=np.average(x)
+    if avg==True:
+        x[x<np.average(x)/10**7]=np.average(x)
+    plt.imshow(np.log(x),cmap='gray')
     
 #plot cross section through equator
 def imshow_x(ar):
-    plt.imshow(ar[int(np.floor(len(ar)*0.5))])
+    plt.imshow(ar[int(np.floor(len(ar)*0.5))],cmap='gray')
 
 
 #returns N lists of poisson values,
 #one value in each list for each detector point given in 'bowl'
-def create_fake_data(arr,q_min,q_max,N_bin,bowl,N):
+#track=True will return the fake data and the rotations used
+def create_fake_data(arr,q_min,q_max,bowl,N,track=False):
+    t=time.time()
     print('creating fake data')
     fake_data=[]
-    for n in range(N):
-        fake_data.append(np.random.poisson(trilinear_standin(arr,q_min,q_max,rand_rot(bowl))))
-    print('fake data complete')
-    return np.array(fake_data)
+    Rs=[]
+    if track==False:
+        for n in range(N):
+            fake_data.append(np.random.poisson(trilinear_standin(arr,q_min,q_max,rand_rot(bowl))))
+        print('fake data complete',time.time()-t, 'sec')
+        return np.array(fake_data)
+    else: 
+        print('track')
+        for n in range(N):
+            R=randR()
+            Rs.append(R)
+            bowl_rot=np.dot(bowl,R.T)
+            fake_data.append(np.random.poisson(trilinear_standin(arr,q_min,q_max,bowl_rot)))
+        print('fake data complete',time.time()-t, 'sec')
+        return np.array(fake_data),np.array(Rs)
+    
+#returns N lists of poisson values,
+#one value in each list for each detector point given in 'bowl'
+#track=True will return the fake data and the rotations used
+def create_fake_data_sa(arr,q_min,q_max,q_vecs,solid_angles,N,track=False):
+    t=time.time()
+    print('creating fake data')
+    fake_data=[]
+    if track==False:
+        for n in range(N):
+            q_vecs_rot=rand_rot(q_vecs)
+            val=trilinear_standin(arr,q_min,q_max,q_vecs_rot)
+            val*=solid_angles
+            fake_data.append(np.random.poisson(val))
+        print('fake data complete',time.time()-t, 'sec')
+        return np.array(fake_data)
+    else: 
+        Rs=[]
+        print('track')
+        for n in range(N):
+            R=randR()
+            Rs.append(R)
+            q_vecs_rot=np.dot(q_vecs,R.T)
+            val=trilinear_standin(arr,q_min,q_max,q_vecs_rot)
+            val*=solid_angles
+            fake_data.append(np.random.poisson(val))
+        print('fake data complete',time.time()-t, 'sec')
+        return np.array(fake_data),np.array(Rs)
+
+#plotting probability over phi
+#simulates an exposure from 'model_correct', and calculates the probability
+#from 'model' around a vector 'n_vec' plotted with phi
+def plot_prob_phi(model,model_correct,dect_arr,N_angle_samples,n_vec,log=True,zoom=False,save=False):
+    datum=np.random.poisson(trilinear_standin(model_correct,q_min,q_max,dect_arr))
+    n_vec=np.array(n_vec).astype('float64')
+    n_vec=n_vec/np.sqrt(np.sum(n_vec**2))
+    lnp_vs_phi=[]
+    for j in range(N_angle_samples):
+        bowl_rot=rot(dect_arr, n_vec, 2*pi*j/N_angle_samples-pi)
+        lnp_vs_phi.append(lnprob_poisson(model,q_min,q_max,N_bin,bowl_rot,datum))
+    lnp_vs_phi=np.array(lnp_vs_phi)
+    x_values=np.array(range(N_angle_samples))*2/N_angle_samples-1
+    if log==True:
+        plt.plot(x_values,lnp_vs_phi)
+    else:
+        lnp_vs_phi_expnorm=np.exp(lnp_vs_phi-np.max(lnp_vs_phi))
+        if zoom==False:
+            plt.plot(x_values,lnp_vs_phi_expnorm)
+        else:
+            plt.plot(x_values[lnp_vs_phi_expnorm>0.00001],lnp_vs_phi_expnorm[lnp_vs_phi_expnorm>0.00001])
+    if save==True:
+        title='around '+str(n_vec)
+        if zoom==True:
+            title+=' zoom'
+        if log==True:
+            title+=' log'
+        plt.title(title)
+        now=str(round_sec(dt.datetime.today()))
+        plt.savefig('EMMC_plots/rotation_prob '+title+now+'.pdf')
+
+def max_magnitude(vecs):
+    mag=0
+    for vec in vecs:
+        v=0
+        for x in vec:
+            v+=x**2
+        if v>mag:
+            mag=v
+    return np.sqrt(mag)
 
 def inertia_tensor(rho,qmin,qmax):
     N_bin=np.shape(rho)
@@ -229,10 +360,6 @@ def inertia_tensor(rho,qmin,qmax):
     y_ = np.linspace(qmin[1],qmax[1],N_bin[1])
     z_ = np.linspace(qmin[2],qmax[2],N_bin[2])
     x,y,z = np.meshgrid(x_,y_,z_,indexing='ij')
-   # print(np.shape(x),np.min(x),np.max(x),np.average(x))
-    #print(np.shape(x_),np.min(x_),np.max(x_),np.average(x_))
-    #print(x[0,0,0],x[0,0,10],x[0,10,0],x[10,0,0])
-    #print(z[0,0,0],z[0,0,10],z[0,10,0],z[10,0,0])
     Ixx = np.sum((y**2 + z**2)*rho)
     Iyy = np.sum((x**2 + z**2)*rho)
     Izz = np.sum((x**2 + y**2)*rho)
@@ -246,8 +373,8 @@ def inertia_tensor(rho,qmin,qmax):
 
 
 #aligns rho to rho_correct
-#if return_trunc_correct=True it gives (rho_rotated, rho_correct truncated)
-#if enantomers=True it rho_rot is a 4 item list
+#if return_error=True if returns the error 
+#of rho compared to rho_correct once it tries to align them
 def principal_axes_align(rho,rho_correct,q_min,q_max,return_error=False):
     t=time.time()
     
@@ -302,7 +429,9 @@ def principal_axes_align(rho,rho_correct,q_min,q_max,return_error=False):
                 rho_rots.append(RHO)
                 errors.append(np.sum((rho_correct-RHO)**2))
     errors=np.array(errors)
-    print('errors',errors,'we choose',np.argmin(errors))
+    print('out of errors')
+    print(errors)
+    print('we choose',np.min(errors))
     error=np.min(errors)
     rho_rot=rho_rots[np.argmin(errors)]
     print(time.time()-t,'secs')
@@ -311,9 +440,9 @@ def principal_axes_align(rho,rho_correct,q_min,q_max,return_error=False):
     else:
         return rho_rot
     
+    
 #aligns rho to rho_correct
-#if return_trunc_correct=True it gives (rho_rotated, rho_correct truncated)
-#if enantomers=True it rho_rot is a 4 item list
+#returns all 8 flips and twists
 def align_xyz(rho,q_min,q_max):
     
     #we need to turn [i,j,k] into q-coord vectors to rotate them
@@ -342,6 +471,8 @@ def align_xyz(rho,q_min,q_max):
     #Calculate the principal axes and order them by ascending eignevalue
     I=inertia_tensor(rho, q_min, q_max)
     eigvals,R = np.linalg.eigh(I)
+    print(eigvals)
+    print(R)
     
     #rotating rho by all enantomers
     signs=[-1,1]
@@ -353,36 +484,145 @@ def align_xyz(rho,q_min,q_max):
                 b=sign2*np.array([0,1,0])
                 c=sign3*np.array([0,0,1])
                 flip=np.array([a,b,c])
-                rotation=np.dot(R,flip)
+                rotation=np.dot(R.T,flip)
                 coord_list_rot=np.dot(coord_list,rotation)
                 RHO=insert(coord_list_rot, rho_trunc, q_min, q_max, N_bin)
                 rho_rots.append(RHO)
     return rho_rots
 
-
-
-
-
-#tabulation of ln(N!)
-lnfact=[]
-for n in range(100000):
-    lnfact.append(sci.special.gammaln(n+1))
-lnfact=np.array(lnfact)
-#having it work on arrays
-def lnfactorial(arr):
-    return lnfact[arr.astype(np.int)]
-
-#calculating the log probability of a particular exposure, 'datum',
-#on a rotated detector array, 'bowl_rot',
-#to be sampled from a model, 'denisty' M
-def lnprob_poisson(M,q_min,q_max,N_bin,bowl_rot,datum):
-    lamb=trilinear_standin(M,q_min,q_max,bowl_rot)
-    k=datum
-    lnp=k*np.log(lamb)-lamb-lnfactorial(k)
-    #avoiding nan inf etc.
-    lnp[lamb==0]=-1000
-    return np.sum(lnp)
+#truncates to the ball < qmax
+def rotate_density_map(rho,R,q_min,q_max):
+    #we need to turn [i,j,k] into q-coord vectors to rotate them
+    #truncated to the ball r >=qmax to avoid going out of bounds
+    N_bin=np.array(np.shape(rho))
+    dx=(q_max[0]-q_min[0])/(N_bin[0]-1)
+    dy=(q_max[1]-q_min[1])/(N_bin[1]-1)
+    dz=(q_max[2]-q_min[2])/(N_bin[2]-1)
+    coord_list=[]
+    mask=[]
+    iterator=np.nditer(rho,flags=['multi_index'],order='C')
+    for l in iterator:
+        x=q_min[0]+dx*iterator.multi_index[0]
+        y=q_min[1]+dy*iterator.multi_index[1]
+        z=q_min[2]+dz*iterator.multi_index[2]
+        mag=np.sqrt(x**2+y**2+z**2)
+        if  mag<=np.min(np.abs(q_max)) and mag <=np.min(np.abs(q_min)):
+            coord_list.append((x,y,z))
+            mask.append(1)
+        else:
+            mask.append(0)
+    mask=np.array(mask)
+    rho_trunc=np.ndarray.flatten(rho)[mask==1]
+    avg1=np.average(rho_trunc)
+    coord_list_rot=np.dot(coord_list,R.T)
+    rho_rot=insert(coord_list_rot, rho_trunc, q_min, q_max, N_bin)
+    avg2=np.average(np.ndarray.flatten(rho_rot)[mask==1])
     
+    return rho_rot*avg1/avg2
+
+#throws N rotations, takes the best.
+def error_search_random(construct,truth,q_min,q_max,N):
+    print('error search')
+    truth=rotate_density_map(truth, randR(), q_min, q_max)
+    best=truth
+    error=np.sum((construct-truth)**2)
+    for l in range(N):
+        n=np.array([np.random.normal(),np.random.normal(),np.random.normal()])
+        n=n/np.sqrt(np.sum(n**2))
+        phi=np.random.uniform(low=-pi,high=pi)
+        A=R(n,phi)
+        truth_rot=rotate_density_map(truth, A, q_min, q_max)
+        error_p=np.sum((construct-truth_rot)**2)
+        print(error_p)
+        if error_p<error:
+            best=truth_rot
+            error=error_p
+            print('accpt')
+    return error,best
+
+#creating an icosohedron of points 20
+gold=(1+np.sqrt(5))/2
+icoso=[]
+plusminus=[-1,1]
+for a in plusminus:
+    for b in plusminus:
+        for c in plusminus:
+            icoso.append([a*gold,b*gold,c*gold])
+for i in plusminus:
+    for j in plusminus:
+        icoso.append([0,i*gold**2,j])
+for i in plusminus:
+    for j in plusminus:
+        icoso.append([i*gold**2,j,0])
+for i in plusminus:
+    for j in plusminus:
+        icoso.append([i,0,j*gold**2])
+       
+#the icosohedron identified with antipodal points 10
+ics_1=[]
+for i in plusminus:
+    for j in plusminus:
+            ics_1.append([i*gold,j*gold,gold])
+for i in plusminus:
+    ics_1.append([0,i*gold**2,1])
+for i in plusminus:
+    ics_1.append([i*gold**2,1,0])
+for i in plusminus:
+        ics_1.append([i,0,gold**2])
+        
+#creating a buckyball identifying antipodal 30
+buck=[]
+for i in plusminus:
+    buck.append([0,i*1,3*gold])
+for i in plusminus:
+    buck.append([i*1,3*gold,0])
+for i in plusminus:
+    buck.append([i*3*gold,0,1])
+for i in plusminus:
+    for j in plusminus:
+        buck.append([i*1,j*(2+gold),2*gold])
+for i in plusminus:
+    for j in plusminus:
+        buck.append([i*(2+gold),j*2*gold,1])
+for i in plusminus:
+    for j in plusminus:
+        buck.append([i*2*gold,j*1,(2+gold)])
+for i in plusminus:
+    for j in plusminus:
+        buck.append([i*gold,j*2,gold**3])
+for i in plusminus:
+    for j in plusminus:
+        buck.append([i*2,j*gold**3,gold])
+for i in plusminus:
+    for j in plusminus:
+        buck.append([i*gold**3,j*gold,2])
+
+
+#checks N rotations around the vertices of a buckyball
+def error_search_buck(construct,truth,q_min,q_max,N,return_rotation=False,return_both=False):
+    print('buckyball error search')
+    construct=(construct+np.flip(construct))/2
+    #get rid of any bias and truncate to the sphere
+    Aint=randR()
+    truth=rotate_density_map(truth, Aint, q_min, q_max)
+    error=np.sum((construct-truth)**2)
+    for n in buck:
+        for l in range(N):
+            phi=l*pi/N
+            A=R(n,phi)
+            truth_rot=rotate_density_map(truth, A, q_min, q_max)
+            error_p=np.sum((construct-truth_rot)**2)
+            if error_p<error:
+                error=error_p
+                print(error_p)
+                Abest=np.dot(A,Aint)
+    if return_rotation==True:
+        return Abest
+    if return_both==True:
+        return np.sqrt(error/np.sum(truth**2)),Abest
+    return np.sqrt(error/np.sum(truth**2))
+
+
 #prop dist as a gaussian cut off at 0 and 2 pi
 #irrelavant currently
 def prob_guass_periodic(phi,sigma):
@@ -399,52 +639,40 @@ def sample_gauss_periodic(sigma):
         phi_p=sigma*np.random.randn()
     return phi_p
 
-def max_magnitude(vecs):
-    mag=0
-    for vec in vecs:
-        v=0
-        for x in vec:
-            v+=x**2
-        if v>mag:
-            mag=v
-    return np.sqrt(mag)
+#tabulation of ln(N!)
+lnfact=[]
+for n in range(1000000):
+    lnfact.append(sci.special.gammaln(n+1))
+lnfact=np.array(lnfact)
+#having it work on arrays
+def lnfactorial(arr):
+    return lnfact[arr.astype(np.int)]
 
-   
-    
+#calculating the log probability of a particular exposure, 'datum',
+#on a rotated detector array, 'bowl_rot',
+#to be sampled from a model, 'denisty' M
+def lnprob_poisson(M,q_min,q_max,N_bin,bowl_rot,datum):
+    lamb=trilinear_standin(M,q_min,q_max,bowl_rot)
+    k=datum
+    lnp=k*np.log(lamb)-lamb-lnfactorial(k)
+    #avoiding nan inf etc.
+    lnp[lamb==0]=-1000
+    return np.sum(lnp)
 
-#plotting probability over phi
-#simulates an exposure from 'model_correct', and calculates the probability
-#from 'model' around a vector 'n_vec' plotted with phi
-def plot_prob_phi(model,model_correct,dect_arr,N_angle_samples,n_vec,log=True,zoom=False,save=False):
-    datum=np.random.poisson(trilinear_standin(model_correct,q_min,q_max,dect_arr))
-    n_vec=np.array(n_vec).astype('float64')
-    n_vec=n_vec/np.sqrt(np.sum(n_vec**2))
-    lnp_vs_phi=[]
-    for j in range(N_angle_samples):
-        bowl_rot=rot(dect_arr, n_vec, 2*pi*j/N_angle_samples-pi)
-        lnp_vs_phi.append(lnprob_poisson(model,q_min,q_max,N_bin,bowl_rot,datum))
-    lnp_vs_phi=np.array(lnp_vs_phi)
-    x_values=np.array(range(N_angle_samples))*2/N_angle_samples-1
-    if log==True:
-        plt.plot(x_values,lnp_vs_phi)
-    else:
-        lnp_vs_phi_expnorm=np.exp(lnp_vs_phi-np.max(lnp_vs_phi))
-        if zoom==False:
-            plt.plot(x_values,lnp_vs_phi_expnorm)
-        else:
-            plt.plot(x_values[lnp_vs_phi_expnorm>0.00001],lnp_vs_phi_expnorm[lnp_vs_phi_expnorm>0.00001])
-    if save==True:
-        title='around '+str(n_vec)
-        if zoom==True:
-            title+=' zoom'
-        if log==True:
-            title+=' log'
-        plt.title(title)
-        now=str(round_sec(dt.datetime.today()))
-        plt.savefig('EMMC_plots/rotation_prob '+title+now+'.pdf')
-        
+#calculating the log probability of a particular exposure, 'datum',
+#on a rotated detector array, 'bowl_rot',
+#to be sampled from a model, 'denisty' M
+#with solid angles accounted for
+def lnprob_poisson_sa(M,q_min,q_max,N_bin,bowl_rot,datum,solid_angles='none'):
+    lamb=trilinear_standin(M,q_min,q_max,bowl_rot)
+    lamb*=solid_angles
+    k=datum
+    lnp=k*np.log(lamb)-lamb-lnfactorial(k)
+    #avoiding nan inf etc.
+    lnp[lamb==0]=-1000
+    return np.sum(lnp)
     
-        
+########################################################################
 ########################################################################
 #'data' is a list of the exposures
 #'dect_arr' are the detector pixel q-vector coordinates
@@ -461,9 +689,9 @@ def emmc(data,dect_arr,model_input,q_min,q_max,N_bin,N_remodels,N_metropolis,sig
     def intensity_normalize(model): 
          t=time.time()
          print('calculating intensity scale factor')
-         dpc=np.sum(fake_data) #data photon count (take outside)
+         dpc=np.sum(data) #data photon count (take outside)
          mpc=0
-         for ooo in range(len(fake_data)):
+         for ooo in range(len(data)):
              mpc+=np.sum(trilinear_standin(model,q_min,q_max,rand_rot(dect_arr)))
          a_intensity_scale=dpc/mpc
          print(' dpc',dpc,'mpc',mpc)
@@ -533,9 +761,100 @@ def emmc(data,dect_arr,model_input,q_min,q_max,N_bin,N_remodels,N_metropolis,sig
     else:
         print("emmc completed in",tf//3600,'hr',(tf%3600)//60, "min",(tf%3600)%60,'sec')
     return models
-#######################################################              
+########################################################################
+########################################################################
+#'data' is a list of the exposures
+#'dect_arr' are the detector pixel q-vector coordinates
+#'model_input' can be any fourier density but eventually should be noise
+def emmc_sa(data,dect_arr,solid_angles,model_input,q_min,q_max,N_bin,N_remodels,N_metropolis,sigma):
+    print('beginning EMMC with pixel solid angles')
+    t=time.time()
+    
+    def lnp_sa(model,points,datum):
+        return lnprob_poisson_sa(model,q_min,q_max,N_bin,points,datum,solid_angles)
+    
+    #normalizing overall intensity
+    #by simulating the expected photon count of the data
+    def intensity_normalize(model): 
+         t=time.time()
+         print('calculating intensity scale factor')
+         dpc=np.sum(data) #data photon count (take outside)
+         mpc=0 #model photon count
+         for ooo in range(len(data)):
+             mpc+=np.sum(solid_angles*trilinear_standin(model,q_min,q_max,rand_rot(dect_arr)))
+         a_intensity_scale=dpc/mpc
+         print(' dpc',dpc,'mpc',mpc)
+         print('intensity scale factor',a_intensity_scale)
+         model*=a_intensity_scale
+         print(' ',time.time()-t,'sec')
+         return model
+    
+    model=model_input
+    intensity_normalize(model)
+    models=[model]
+   
+    for v in range(N_remodels):
+        model_val=np.zeros_like(model)
+        model_weights=np.zeros_like(model)
+        for d in range(np.shape(data)[0]):
+            datum=data[d]
+            da=np.array(rand_rot(dect_arr))
+            accpt=0
+            counter=0
+            for l in range(N_metropolis):
+                n_vec=np.array([np.random.normal(),np.random.normal(),np.random.normal()])
+                n_vec/=np.sqrt(np.sum(n_vec**2))
+                phi=sample_gauss_periodic(sigma)
+                da_prop=rot(da,n_vec,phi)
+                lnA=np.min([0,lnp_sa(model,da_prop,datum)-lnp_sa(model,da,datum)])
+                u=np.random.uniform()
+                
+                '''
+                if np.log(u)<=lnA:
+                    da=da_prop
+                    accpt+=1
+                mask=np.ones_like(datum)
+                (mv,mw)=trilinear_insert(da, datum, q_min, q_max, N_bin, mask)
+                model_val+=np.real(mv)
+                model_weights+=np.real(mw)
+                model_val+=np.real(mv)
+                model_weights+=np.real(mw)
+                '''
+                
+                mask=np.ones_like(datum)
+                if np.log(u)<=lnA:
+                    (mv,mw)=trilinear_insert(da, datum/solid_angles, q_min, q_max, N_bin, mask)
+                    model_val+=counter*np.real(mv)
+                    model_weights+=counter*np.real(mw)
+                    da=da_prop
+                    accpt+=1
+                    counter=0
+                counter+=1
+                if l==N_metropolis-1:
+                    (mv,mw)=trilinear_insert(da, datum/solid_angles, q_min, q_max, N_bin, mask)
+                    model_val+=counter*np.real(mv)
+                    model_weights+=counter*np.real(mw)
+                   
+            if (d+1)%10==0:
+                print('model',v+1,'datum ',d+1,"complete",'accpt %',100*accpt/N_metropolis)
+        model_weights[model_weights==0]=1
+        model=model_val/model_weights
+        model[model==0]=10**-9 #this shouldn't apply if sufficient data
+        intensity_normalize(model)
+        models.append(model)
+    tf=time.time()-t
+    if tf<120:
+        print("emmc completed in",tf, "sec")
+    elif tf<3600:
+        print("emmc completed in",tf//60,'min',tf%60, "sec")
+    else:
+        print("emmc completed in",tf//3600,'hr',(tf%3600)//60, "min",(tf%3600)%60,'sec')
+    return models
+########################################################################
+########################################################################        
                 
             
+
 
 #lets generate some points on a z-oriented ewald bowl to rotate around
 #our bowl's radius, K
@@ -609,91 +928,177 @@ model_input_random=np.reshape(model_input_random,[N,N,N])
 
 
 
-#model_input=lys_intensity
-model_correct=lys_intensity/np.max(lys_intensity)
-#model_correct=10*lys_intensity/np.average(lys_intensity)
+#model_correct=lys_intensity
+model_correct=F_lys2
+model_correct*=fluence*r_e**2
+#model_correct/=np.max(model_correct)
+#model_correct/=np.average(model_correct)
 #model_correct=200*fourier_test2
-#model_input=model_correct/100
-#model_input=np.random.poisson(model_correct/4).astype(np.float64)+0.0001
+#model_input=model_correct/10
+#model_input=np.random.poisson(model_correct/3).astype(np.float64)+0.0001
 model_input=model_input_random
 
-dect_arr=bowl
+#dect_arr=bowl
+dect_arr=q_vecs
+N_bin=40
+N_bin=np.array([N_bin,N_bin,N_bin])
 
-N_data=500
-N_remodels=10
-N_steps=400
+N_data=1000
+N_remodels=2
+N_steps=50
 sigma=pi/2
+N_buckerror=2
 
 max_mag=max_magnitude(dect_arr)
 q_max=np.array([max_mag,max_mag,max_mag])
 q_min=-q_max
 
-fake_data=create_fake_data(model_correct,q_min,q_max,N_bin, dect_arr, N_data)
-
-models=emmc(fake_data,dect_arr,model_input,q_min,q_max,np.array([N,N,N]),N_remodels,N_steps,sigma)
-#imshow_x(models[-1])
-#plt.imshow(principal_axes_align(model_correct,models[-1],q_min,q_max)[int(np.floor(len(models[-1])*0.5))])
+#fake_data=create_fake_data(model_correct,q_min,q_max,N_bin, dect_arr, N_data)
+fake_data,Rs=create_fake_data_sa(model_correct, q_min, q_max, dect_arr, solid_angles,N_data,track=True)
+#fake_data=create_fake_data_sa(model_correct, q_min, q_max, dect_arr,solid_angles,N_data)
 
 
-#lkj=principal_axes_align(model_correct,model_input_random,q_min,q_max)
-#fds=principal_axes_align(model_correct,lkj,q_min,q_max)
+#finding the best reconstruction
+data_out=np.zeros_like(model_correct)
+weight_out=np.zeros_like(model_correct)
+for l in range(len(fake_data)):
+    datum=fake_data[l]
+    mask=np.ones_like(datum)
+    data_out_l,weight_out_l=trilinear_insert(np.dot(dect_arr,Rs[l].T), datum, q_min, q_max, N_bin, mask)
+    data_out+=np.real(data_out_l)
+    weight_out+=weight_out_l
+weight_out[weight_out==0]=1
+best_reconstruction=data_out/weight_out
+
+imshow_ln(best_reconstruction)
 
 
 
+'''
+#how do we use axis label?
+x = np.arange(0, 10, 0.005)
+y = np.exp(-x/2.) * np.sin(2*np.pi*x)
 
+fig, ax = plt.subplots()
+ax.plot(x, y)
+ax.set_xlim(0, 10)
+ax.set_ylim(-1, 1)
+
+plt.show()
+
+bestplt=plt.subplots()
+title='best reconstruction'
+plt.title(title)
+imshow_ln(best_reconstruction)
+plt.clf()
+'''
+
+#models=emmc(fake_data,dect_arr,model_input,q_min,q_max,np.array([N,N,N]),N_remodels,N_steps,sigma)
+#models=emmc_sa(fake_data,dect_arr,solid_angles,model_input,q_min,q_max,np.array([N,N,N]),N_remodels,N_steps,sigma)
+
+#imshow_ln((models[-1]))
+
+m=np.load("reconstruction2020-07-09.npy")
+#mc_rot=error_search_ic(m,model_correct,q_min,q_max,12)[1]
 
 
 
 #saving and documenting, edit the note!
-note=''
+'''
+note=' full scale reconstruction with brute force error measure'
 
 plt.clf()
 now=now()
 dirr="EMMC_plots/plots "+now+'/'
 os.mkdir(dirr)
 
-text_file = open(dirr+'details '+now+'.txt', "w+")
-text_file.write(str(N_data)+' data '+str(N_steps)+' steps  '+str(sigma/pi)+'pi sigma '+str(N_remodels)+ ' remodels'+' '+note)
-text_file.close()
+ti=time.time()
+models=emmc_sa(fake_data,dect_arr,solid_angles,model_input,q_min,q_max,np.array([N,N,N]),N_remodels,N_steps,sigma)
+tf=time.time()-ti
 
+tie=time.time()
 errors=[]
-for v in range(len(models)):
-    model=models[v]
-    title='model '+str(v)
+for l in range(len(models)):
+    model=models[l]
+    title='model '+str(l)
     plt.title(title)
-    imshow_x(model)
-    plt.savefig(dirr+str(v)+' model '+now+'.pdf')
-    error=principal_axes_align(model_correct, model, q_min, q_max,return_error=True)
-    errors.append(error)
+    imshow_ln(model)
+    plt.savefig(dirr+str(l)+' model '+now+'.pdf')
+    #error=principal_axes_align(model_correct, model, q_min, q_max,return_error=True)
+    if l!=0:
+        if l==len(models)-1:
+            error,Rot=error_search_buck(model, model_correct, q_min, q_max, N_buckerror,return_both=True)
+        else:
+            error=error_search_buck(model, model_correct, q_min, q_max, N_buckerror)
+        errors.append(error)
     plt.clf()
+tfe=time.time()-tie
 
-title='errors '+str(N_data)+' data '+str(N_steps)+' steps  '+str(sigma/pi)+'pi sigma '
+title='error'
 plt.title(title)
-plt.plot(errors[1:])
+plt.plot(errors)
+plt.axes.Axes.set_xticks(range(1,N_remodels+1))
 plt.savefig(dirr+'error '+now+'.pdf')
 plt.clf()
 
 title='correct model rotated to reconstructed model'
 plt.title(title)
-imshow_x(principal_axes_align(model_correct, models[-1], q_min, q_max))
+#plt.xlabel('iterations')
+#imshow_ln(principal_axes_align(model_correct, models[-1], q_min, q_max))
+imshow_ln(rotate_density_map(model_correct, Rot, q_min, q_max))
 plt.savefig(dirr+str(N_remodels+1)+' correct model rotated '+now+'.pdf')
 plt.clf()
 
 title='reconstructed model rotated to correct model'
 plt.title(title)
-imshow_x(principal_axes_align( models[-1], model_correct, q_min, q_max))
-plt.savefig(dirr+str(N_remodels+2)+' model rotated to model correct '+now+'.pdf')
+#imshow_ln(principal_axes_align( models[-1], model_correct, q_min, q_max))
+imshow_ln(rotate_density_map(models[-1], Rot.T, q_min, q_max))
+plt.savefig(dirr+str(N_remodels+2)+'construct rotated to model correct '+now+'.pdf')
 plt.clf()
-     
+
+
+title='best reconstruction'
+plt.title(title)
+imshow_ln(best_reconstruction)
+plt.savefig(dirr+str(N_remodels+3)+'correct model'+now+'.pdf')
+plt.clf()
+
+text_file = open(dirr+'details '+now+'.txt', "w+")
+text_file.write(str(N_data)+' data '+str(N_steps)+' steps  '+str(sigma/pi)+'pi sigma '+str(N_remodels)+ ' remodels'+' reconstucted in '+str(tf)+' secs  errors caluclated in'+str(tfe) +note)
+text_file.close()
+
+np.save(dirr+'reconstruction',models[-1])
+
+'''
+
+
+
+
+#using trlinear insert to look at a datum
+data_coord=dect_arr
+data_coord=rot(data_coord,[0,1,0],pi/2)
+#data_coord=rot(data_coord,[1,0,0],pi/4)
+#data_coord=rot(data_coord,[0,1,0],pi/2)
+data_val=fake_data[0]
+#data_val=trilinear_standin(fourier_test,q_min,q_max,data_coord)
+#data_val=trilinear_standin(flat_test,q_min,q_max,data_coord)
+one_datum=insert(data_coord, data_val, q_min, q_max, N_bin)
+#imshow_x(one_datum)
+imshow_collapse(one_datum)
+
+
+rrr=randR()
+t=time.time()
+np.real(rotate3D(model_correct,[pi/4,pi/4,pi/4]))
+print(t-time.time())
+t=time.time()
+rotate_density_map(model_correct, randR(), q_min, q_max)
+print(t-time.time())
 
 
 
 
 
-
-
-#np.save(dirr+'models',models)
-#np.save(dirr+'errors',errors)
 
 
 
@@ -701,27 +1106,6 @@ plt.clf()
 #plot_prob_phi(model_correct,model_correct,dect_arr,5000,[1,1,1],log=False,zoom=True)
 #plot_prob_phi(model_correct/100,model_correct,dect_arr,5000,[1,1,1])
    
-
-#using trlinear insert to look at a datum
-#data_coord=bowl
-#data_coord=rot(bowl,[0,1,0],pi/2)
-#data_coord=rot(data_coord,[1,0,0],pi/4)
-#data_coord=rot(data_coord,[0,1,0],pi/2)
-#data_val=trilinear_standin(fourier_test,q_min,q_max,data_coord)
-#data_val=fake_data[0]
-#data_val=trilinear_standin(flat_test,q_min,q_max,data_coord)
-#ar=insert(data_coord, data_val, q_min, q_max, N_bin)
-#plt.imshow(np.real(ar[int(np.floor(Nx*1/2))]))
-#plt_collapse(ar)
-
-
-
-
-
-
-
-
-
 
 #Checking to see if our proposal dist works
 '''

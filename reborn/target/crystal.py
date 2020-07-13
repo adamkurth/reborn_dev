@@ -15,7 +15,10 @@ import numpy as np
 from .molecule import Molecule
 from ..simulate import atoms
 from ..utils import warn, vec_mag, trilinear_insert
-from numba import jit
+try:
+    from numba import jit
+except ImportError:
+    from ..utils import __fake_numba_jit as jit
 
 
 pdb_data_path = pkg_resources.resource_filename('reborn.data', 'pdb')
@@ -937,7 +940,7 @@ class CrystalDensityMap(object):
         elif mode == 'trilinear':
             # Note that we do not divide by weightout because we want the sum of the atoms not the mean.
             rho, _ = trilinear_insert(data_coord=np.ascontiguousarray(atom_x_vecs), data_val=atom_fs,
-                                      x_min=self.x_min, x_max=self.x_max, n_bin=self.shape, wrap_around=True,
+                                      x_min=self.x_min, x_max=self.x_max, n_bin=self.shape, boundary_mode="truncate",
                                       mask=np.full(len(atom_fs), True, dtype=bool))
             return rho
 

@@ -1,4 +1,3 @@
-# from __future__ import division, absolute_import, print_function
 import os
 from setuptools import find_packages
 from numpy.distutils.core import setup, Extension
@@ -8,7 +7,7 @@ import datetime
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
 
-requirements = ["future", "numpy", "scipy", "h5py", "numba", "matplotlib", "pyqtgraph", "pyopencl"]
+requirements = ["scipy", "h5py"]
 
 ext_modules = list()
 
@@ -18,33 +17,38 @@ ext_modules = list()
 #################################################################################################
 os.environ['NPY_DISTUTILS_APPEND_FLAGS'] = '1'
 os.environ['NPY_NO_DEPRECATED_API'] = 'NPY_1_7_API_VERSION'
-f2py_macros = [('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')] #, ('NPY_DISTUTILS_APPEND_FLAGS', '1')]
-extra_args = {'extra_compile_args': ['-Wno-unused-function']}
-omp_args = {}  # {'libraries': ['gomp'], 'extra_compile_args': ['-fopenmp']}
+f2py_macros = [('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'), ('NPY_DISTUTILS_APPEND_FLAGS', '1')]
+#extra_args = {'extra_compile_args': ['-Wno-unused-function', '-fopenmp']}
+#omp_args = {'extra_compile_args': ['-fopenmp']}  # {'libraries': ['gomp'], 'extra_compile_args': ['-fopenmp']}
+ext_modules.append(Extension(
+      name='reborn.fortran.utils_f',
+      sources=['reborn/fortran/utils.f90'],
+      define_macros=f2py_macros,
+      extra_compile_args=['-Wno-unused-function']
+      ))
 ext_modules.append(Extension(
       name='reborn.fortran.interpolations_f',
       sources=['reborn/fortran/interpolations.f90'],
       define_macros=f2py_macros,
-      **extra_args
+      extra_compile_args=['-Wno-unused-function']
       ))
 ext_modules.append(Extension(
       name='reborn.fortran.peaks_f',
       sources=['reborn/fortran/peaks.f90'],
       define_macros=f2py_macros,
-      **extra_args,
-      **omp_args
+      extra_compile_args=['-Wno-unused-function', '-fopenmp', '-lgomp']
       ))
 ext_modules.append(Extension(
       name='reborn.fortran.fortran_indexing_f',
       sources=['reborn/fortran/fortran_indexing.f90'],
       define_macros=f2py_macros,
-      **extra_args
+      extra_compile_args=['-Wno-unused-function']
       ))
 ext_modules.append(Extension(
       name='reborn.fortran.density_f',
       sources=['reborn/fortran/density.f90'],
       define_macros=f2py_macros,
-      **extra_args
+      extra_compile_args=['-Wno-unused-function']
       ))
 
 setup(name='reborn',

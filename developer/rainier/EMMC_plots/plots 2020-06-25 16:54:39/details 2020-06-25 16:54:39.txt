@@ -1,1 +1,0 @@
-600 data 700 steps  0.5pi sigma 6 remodels model_input=noise
