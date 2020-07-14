@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from time import time
+import inspect
 import importlib
 import pickle
 import numpy as np
@@ -64,7 +65,7 @@ class PADView(object):
     scan_arrows = None
     frame_getter = FrameGetter()
     _px_mode = False
-    _shortcuts = None
+    _shortcuts = []
     _status_string_mouse = ""
     _status_string_getter = " Frame 1 of 1 | "
     evt = None
@@ -82,19 +83,15 @@ class PADView(object):
 
     def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None,
                  debug_level=0):
-
         """
-
         Arguments:
             pad_geometry: a list of PADGeometry instances
             mask_data: a list of numpy arrays
             logscale: apply log to data before viewing
             frame_getter: a subclass of the FrameGetter class
         """
-
         self.debug_level = debug_level
-        self.debug('__init__()')
-
+        self.debug(get_caller(), 1)
         self.logscale = logscale
         self.mask_data = mask_data
         self.pad_geometry = pad_geometry
@@ -168,44 +165,36 @@ class PADView(object):
         if self.debug_level >= val:
             print(msg)
 
-    def _do_nothing(self):
-
-        return None
-
-    def _print_something(self):
-
-        write("something happened")
-
     def set_title(self, title):
+        r""" Set the title of the main window. """
+        self.debug(get_caller(), 1)
         self.main_window.setWindowTitle(title)
-        self.process_events()  # Why?
+        # self.process_events()  # Why?
 
     def close_main_window(self):
-
-        self.debug('close_main_window()')
-
+        r""" Not sure if this works... it is supposed to close out all children windows. """
+        # FIXME: Check if this works.  I think it doesn't
+        self.debug(get_caller(), 1)
         for key in self.widgets.keys():
             self.widgets[key].close()
         self.main_window.destroy()
 
     def setup_widgets(self):
-
-        self.debug('setup_widgets()')
-
+        r""" Setup widgets that are supposed to talk to the main window. """
+        self.debug(get_caller(), 1)
         snr_config = SNRConfigWidget()
         snr_config.values_changed.connect(self.update_snr_filter_params)
         self.widgets['SNR Config'] = snr_config
 
     def setup_mouse_interactions(self):
-
-        self.debug('setup_mouse_interactions()')
-
+        r""" I don't know what this does... obviously something about mouse interactions... """
+        # FIXME: What does this do?
+        self.debug(get_caller(), 1)
         self.proxy = pg.SignalProxy(self.viewbox.scene().sigMouseMoved, rateLimit=60, slot=self._mouse_moved)
 
     def setup_menu(self):
-
-        self.debug('setup_menu()')
-
+        r""" Connect menu items (e.g. "File") so that they actually do something when clicked. """
+        self.debug(get_caller(), 1)
         mw = self.main_window
         mw.actionGrid.triggered.connect(self.toggle_grid)
         mw.actionRings.triggered.connect(self.edit_ring_radii)
@@ -227,45 +216,43 @@ class PADView(object):
         mw.actionMask_lower_limit.triggered.connect(self.mask_lower_level)
         mw.actionMask_limits.triggered.connect(self.mask_levels)
 
+    def set_shortcut(self, shortcut, func):
+        r""" Setup one keyboard shortcut so it connects to some function, assuming no arguments are needed. """
+        self._shortcuts.append(QtGui.QShortcut(QtGui.QKeySequence(shortcut), self.main_window).activated.connect(func))
+
     def setup_shortcuts(self):
-
-        self.debug('setup_shortcuts()')
-
-        if self._shortcuts is None:
-            self._shortcuts = []
-
-        shortcut = lambda key, func: self._shortcuts.append(QtGui.QShortcut(QtGui.QKeySequence(key),
-                                                                            self.main_window).activated.connect(func))
-
-        shortcut(QtCore.Qt.Key_Right, self.show_next_frame)
-        shortcut(QtCore.Qt.Key_Left, self.show_previous_frame)
-        shortcut("f", self.show_next_frame)
-        shortcut("b", self.show_previous_frame)
-        shortcut("r", self.show_random_frame)
-        shortcut("n", self.show_history_next)
-        shortcut("p", self.show_history_previous)
-        shortcut("c", self.choose_plugins)
-        shortcut("Ctrl+g", self.toggle_all_geom_info)
-        shortcut("Ctrl+r", self.edit_ring_radii)
-        shortcut("Ctrl+a", self.toggle_coordinate_axes)
-        shortcut("Ctrl+l", self.toggle_pad_labels)
-        shortcut("Ctrl+s", self.increase_skip)
-        shortcut("Shift+s", self.decrease_skip)
-        shortcut("m", self.toggle_masks)
-        shortcut("t", self.mask_hovering_roi)
+        r""" Connect all standard keyboard shortcuts to functions. """
+        self.debug(get_caller(), 1)
+        self.set_shortcut(QtCore.Qt.Key_Right, self.show_next_frame)
+        self.set_shortcut(QtCore.Qt.Key_Left, self.show_previous_frame)
+        self.set_shortcut("a", self.call_method_by_name)
+        self.set_shortcut("f", self.show_next_frame)
+        self.set_shortcut("b", self.show_previous_frame)
+        self.set_shortcut("r", self.show_random_frame)
+        self.set_shortcut("n", self.show_history_next)
+        self.set_shortcut("p", self.show_history_previous)
+        self.set_shortcut("c", self.choose_plugins)
+        self.set_shortcut("Ctrl+g", self.toggle_all_geom_info)
+        self.set_shortcut("Ctrl+r", self.edit_ring_radii)
+        self.set_shortcut("Ctrl+a", self.toggle_coordinate_axes)
+        self.set_shortcut("Ctrl+l", self.toggle_pad_labels)
+        self.set_shortcut("Ctrl+s", self.increase_skip)
+        self.set_shortcut("Shift+s", self.decrease_skip)
+        self.set_shortcut("m", self.toggle_masks)
+        self.set_shortcut("t", self.mask_hovering_roi)
 
     def update_status_string(self, frame_number=None, n_frames=None):
-
+        r""" Update status string at the bottom of the main window. """
+        self.debug(get_caller(), 2)
         if frame_number is not None and n_frames is not None:
             n = np.int(np.ceil(np.log10(n_frames)))
             strn = ' Frame %%%dd of %%%dd | ' % (n, n)
             self._status_string_getter = strn % (frame_number, n_frames)
-
         self.main_window.statusbar.showMessage(self._status_string_getter + self._status_string_mouse)
 
     @property
     def n_pads(self):
-
+        r""" Number of PADs in the display. """
         if self.pad_geometry is not None:
             if not isinstance(self.pad_geometry, list):
                 self.pad_geometry = [self.pad_geometry]
@@ -274,32 +261,42 @@ class PADView(object):
             return len(self.get_pad_display_data())
 
     def process_events(self):
+        r""" Sometimes we need to force events to be processed... I don't understand... """
+        # FIXME: Try to make sure that this function is never needed.
+        self.debug(get_caller(), 1)
         pg.QtGui.QApplication.processEvents()
 
     def setup_histogram_tool(self):
-
-        self.debug('setup_histogram_tool()')
+        r""" Set up the histogram/colorbar/colormap tool that is located to the right of the PAD display. """
+        self.debug(get_caller(), 1)
         self.set_preset_colormap('flame')
         self.main_window.histogram.setImageItems(self.images)
 
     def set_preset_colormap(self, preset='flame'):
-        r""" Changes the colormap """
+        r""" Change the colormap to one of the presets configured in pyqtgraph.  Right-click on the colorbar to find
+        out what values are allowed.
+        """
+        self.debug(get_caller(), 1)
         self.main_window.histogram.gradient.loadPreset(preset)
         self.main_window.histogram.setImageItems(self.images)
         pg.QtGui.QApplication.processEvents()
 
     def set_levels_by_percentiles(self, percents=(1, 99)):
+        r""" Set upper and lower levels according to percentiles.  This is based on :func:`numpy.percentile`. """
+        self.debug(get_caller(), 1)
         d = reborn.detector.concat_pad_data(self.get_pad_display_data())
         lower = np.percentile(d, percents[0])
         upper = np.percentile(d, percents[1])
         self.set_levels(lower, upper)
 
     def set_levels(self, min_value, max_value):
-
+        r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
+        self.debug(get_caller(), 1)
         self.main_window.histogram.item.setLevels(min_value, max_value)
 
     def add_rectangle_roi(self, pos=(0, 0), size=(100, 100)):
-
+        r""" Adds a |pyqtgraph| RectROI """
+        self.debug(get_caller(), 1)
         roi = pg.RectROI(pos=pos, size=size, centered=True, sideScalers=True)
         roi.name = 'rectangle'
         roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
@@ -309,7 +306,7 @@ class PADView(object):
         self.viewbox.addItem(roi)
 
     def add_ellipse_roi(self, pos=(0, 0), size=(100, 100)):
-
+        self.debug(get_caller(), 1)
         roi = pg.EllipseROI(pos=pos, size=size, centered=True, sideScalers=True)
         roi.name = 'ellipse'
         roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
@@ -319,7 +316,7 @@ class PADView(object):
         self.viewbox.addItem(roi)
 
     def add_circle_roi(self, pos=(0, 0), size=100):
-
+        self.debug(get_caller(), 1)
         roi = pg.CircleROI(pos=pos, size=size)
         roi.name = 'circle'
         if self._mask_rois is None:
@@ -328,29 +325,29 @@ class PADView(object):
         self.viewbox.addItem(roi)
 
     def hide_rois(self):
-
+        self.debug(get_caller(), 1)
         if self._mask_rois is not None:
             for roi in self._mask_rois:
                 self.viewbox.removeItem(roi)
             self._mask_rois = None
 
     def toggle_rois(self):
-
+        self.debug(get_caller(), 1)
         if self._mask_rois is None:
             self.add_rectangle_roi()
         else:
             self.hide_rois()
 
     def increase_skip(self):
-
+        self.debug(get_caller(), 1)
         self.frame_getter.skip = 10**np.floor(np.log10(self.frame_getter.skip)+1)
 
     def decrease_skip(self):
-
+        self.debug(get_caller(), 1)
         self.frame_getter.skip = np.max([10**(np.floor(np.log10(self.frame_getter.skip))-1), 1])
 
     def show_coordinate_axes(self):
-
+        self.debug(get_caller(), 1)
         if self.coord_axes is None:
             x = pg.ArrowItem(pos=(30, 0), brush=pg.mkBrush('r'), pxMode=self._px_mode, angle=180, pen=None)
             y = pg.ArrowItem(pos=(0, 30), brush=pg.mkBrush('g'), pxMode=self._px_mode, angle=-90, pen=None)
@@ -361,54 +358,47 @@ class PADView(object):
             self.viewbox.addItem(y)
 
     def hide_coordinate_axes(self):
-
+        self.debug(get_caller(), 1)
         if self.coord_axes is not None:
             for c in self.coord_axes:
                 self.viewbox.removeItem(c)
             self.coord_axes = None
 
     def toggle_coordinate_axes(self):
-
+        self.debug(get_caller(), 1)
         if self.coord_axes is None:
             self.show_coordinate_axes()
         else:
             self.hide_coordinate_axes()
 
     def show_fast_scan_directions(self):
-
+        self.debug(get_caller(), 1)
         if self.scan_arrows is None:
-
             self.scan_arrows = []
-
             for p in self.pad_geometry:
-
                 f = p.fs_vec.ravel()/p.pixel_size()
                 t = p.t_vec.ravel()/p.pixel_size()
                 ang = np.arctan2(f[1], f[0])*180/np.pi + 180
                 a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None, pxMode=False)
-
                 self.scan_arrows.append(a)
                 self.viewbox.addItem(a)
 
     def hide_fast_scan_directions(self):
-
+        self.debug(get_caller(), 1)
         if self.scan_arrows is not None:
-
             for a in self.scan_arrows:
-
                 self.viewbox.removeItem(a)
-
             self.scan_arrows = None
 
     def toggle_fast_scan_directions(self):
-
+        self.debug(get_caller(), 1)
         if self.scan_arrows is None:
             self.show_fast_scan_directions()
         else:
             self.hide_fast_scan_directions()
 
     def show_all_geom_info(self):
-
+        self.debug(get_caller(), 1)
         self.show_pad_borders()
         self.show_grid()
         self.show_pad_labels()
@@ -416,7 +406,7 @@ class PADView(object):
         self.show_coordinate_axes()
 
     def hide_all_geom_info(self):
-
+        self.debug(get_caller(), 1)
         self.hide_pad_borders()
         self.hide_grid()
         self.hide_pad_labels()
@@ -424,20 +414,17 @@ class PADView(object):
         self.hide_coordinate_axes()
 
     def toggle_all_geom_info(self):
-
+        self.debug(get_caller(), 1)
         if self.scan_arrows is None:
             self.show_all_geom_info()
         else:
             self.hide_all_geom_info()
 
     def show_pad_labels(self):
-
+        self.debug(get_caller(), 1)
         if self.pad_labels is None:
-
             self.pad_labels = []
-
             for i in range(0, self.n_pads):
-
                 lab = pg.TextItem(text="%d" % i, fill=pg.mkBrush('b'), color='y', anchor=(0.5, 0.5))
                 g = self.pad_geometry[i]
                 fs = g.fs_vec.ravel()*g.n_fs/2
@@ -450,36 +437,33 @@ class PADView(object):
                 self.viewbox.addItem(lab)
 
     def hide_pad_labels(self):
-
+        self.debug(get_caller(), 1)
         if self.pad_labels is not None:
             for lab in self.pad_labels:
                 self.viewbox.removeItem(lab)
             self.pad_labels = None
 
     def toggle_pad_labels(self):
-
+        self.debug(get_caller(), 1)
         if self.pad_labels is None:
             self.show_pad_labels()
         else:
             self.hide_pad_labels()
 
     def scale_factor(self):
-
         return 1/self.pad_geometry[0].pixel_size()
 
     def _apply_pad_transform(self, im, p):
-
-        # This is really aweful.  I don't know if this is the best way to do the transforms, but it's the best
+        self.debug(get_caller(), 2)
+        # This is really awful.  I don't know if this is the best way to do the transforms, but it's the best
         # I could do given the fact that I'm not able to track down all the needed info on how all of these
         # transforms are applied.  I can only say that a physicist did not invent this system.
 
         # 3D basis vectors of panel (length encodes pixel size):
         f = p.fs_vec.ravel().copy()
         s = p.ss_vec.ravel().copy()
-
         # 3D translation to *center* of corner pixel (first pixel in memory):
         t = p.t_vec.ravel().copy()
-
         # Normalize all vectors to pixel size.  This is a hack that needs to be fixed later.  Obviously, we cannot
         # show multiple detectors at different distances using this stupid pixel-based convention.
         # ps = p.pixel_size()
@@ -487,40 +471,32 @@ class PADView(object):
         f *= scl
         s *= scl
         t *= scl
-
         # Strip off the z component.  Another dumb move.
         f = f[0:2]
         s = s[0:2]
         t = t[0:2]
-
         # Offset translation since pixel should be centered.
         # t += np.array([0.5, -0.5])
-
         # These two operations set the "home" position of the panel such that the fast-scan direction
         # is along the viewbox "x" axis.  I don't know if this is the corret thing to do -- needs further
         # attention.  I would imagine that pyqtgraph has a better way to do this, but I haven't found the right
         # feature yet.
         im.scale(1, -1)
         im.rotate(-90)
-
         # Scale the axes.  This is a phony way to deal with detector tilts.  Better than nothing I guess.
         scf = np.sqrt(np.sum(f * f))
         scs = np.sqrt(np.sum(s * s))
-
         # Note that the *sign* of this scale factor takes care of the fact that 2D rotations alone
         # cannot deal with a transpose operation.  What follows is a confusing hack... must be a better way.
         sign = np.sign(np.cross(np.array([f[0], f[1], 0]), np.array([s[0], s[1], 0]))[2])
-
         # Here goes the re-scaling
         im.scale(sign * scs, scf)
-
         # Rotate the axes
         fnorm = f / np.sqrt(np.sum(f * f))
         ang = np.arctan2(fnorm[1], fnorm[0])
         # No, wait, don't rotate the axes... experimentation says to translate first despite the fact that it
         # doesn't make much sense to do things that way.  Maybe I just gave up too soon, but I found that I needed
         # to translate first...
-
         # Translate the scaled/rotated image.  Turns out we need to flip the sign of the translation vector
         # coordinate corresponding to the axis we flipped.  I don't know why, but I've completely given up on the
         # idea of understanding the many layers of coordinate systems and transformations...
@@ -528,7 +504,6 @@ class PADView(object):
         im.translate(sign * t[1], t[0])
         im.rotate(-sign * ang * 180 / np.pi)
         im.translate(-sign*0.5*scf, -0.5*scs)
-
         # Now, one would *think* that we could define a simple matrix transform, and then translate the resulting
         # image (which has been rotated and possibly skewed to imitate a 3D rotation).  I tried and failed.  But
         # It's worthwile to try again, since it would be brilliant if we could just learn how to define these
@@ -539,7 +514,6 @@ class PADView(object):
         # im.setTransform(trans)
 
     def _make_mask_rgba(self, mask):
-
         d = mask
         mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
         r = np.zeros_like(d)
@@ -554,67 +528,43 @@ class PADView(object):
         mask_rgba[:, :, 1] = g
         mask_rgba[:, :, 2] = b
         mask_rgba[:, :, 3] = t
-
         return mask_rgba
 
     def setup_masks(self, mask_data=None):
-
-        self.debug('setup_masks()')
-
+        self.debug(get_caller(), 1)
         if self.pad_geometry is None:
             return
-
         if mask_data is not None:
             self.mask_data = mask_data
-
         pad_data = self.get_pad_display_data()
         if self.mask_data is None:
             self.mask_data = [np.ones_like(d) for d in pad_data]
-
         if self.mask_color is None:
             self.mask_color = np.array([128, 0, 0])
-
         for i in range(0, self.n_pads):
-
             d = self.mask_data[i]
-
-#            if True: # Mask fast-scan pixels
-#                d[0, 0: int(np.floor(self.pad_geometry[i].n_fs / 2))] = 1
-
             mask_rgba = self._make_mask_rgba(d)
-
             im = ImageItem(mask_rgba, autoDownsample='max')
-
             self._apply_pad_transform(im, self.pad_geometry[i])
-
             if self.mask_images is None:
                 self.mask_images = []
-
             self.mask_images.append(im)
             self.viewbox.addItem(im)
-
             self.main_window.histogram.regionChanged()
 
     def update_masks(self, mask_data=None):
-
-        self.debug('update_masks()')
-
+        self.debug(get_caller(), 1)
         if mask_data is not None:
             self.mask_data = mask_data
-
         if self.mask_images is None:
             self.setup_masks()
-
         for i in range(0, self.n_pads):
-
             d = self.mask_data[i]
-
             mask_rgba = self._make_mask_rgba(d)
-
             self.mask_images[i].setImage(mask_rgba)
 
     def mask_panel_edges(self, n_pixels=None):
-
+        self.debug(get_caller(), 1)
         if n_pixels is None or n_pixels is False:
             text, ok = QtGui.QInputDialog.getText(self.main_window, "Edge mask", "Specify number of edge pixels to mask",
                                                   QtGui.QLineEdit.Normal, "1")
@@ -622,14 +572,13 @@ class PADView(object):
                 if text == '':
                     return
                 n_pixels = int(str(text).strip())
-
         for i in range(len(self.mask_data)):
             self.mask_data[i] *= reborn.detector.edge_mask(self.mask_data[i], n_pixels)
-
         self.update_masks()
 
     def mask_upper_level(self):
-
+        r""" Mask pixels above upper threshold in the current colormap. """
+        self.debug(get_caller(), 1)
         val = self.main_window.histogram.item.getLevels()[1]
         dat = self.get_pad_display_data()
         for i in range(len(dat)):
@@ -637,7 +586,8 @@ class PADView(object):
         self.update_masks()
 
     def mask_lower_level(self):
-
+        r""" Mask pixels above upper threshold in the current colormap. """
+        self.debug(get_caller(), 1)
         val = self.main_window.histogram.item.getLevels()[0]
         dat = self.get_pad_display_data()
         for i in range(len(dat)):
@@ -645,7 +595,7 @@ class PADView(object):
         self.update_masks()
 
     def mask_levels(self):
-
+        self.debug(get_caller(), 1)
         val = self.main_window.histogram.item.getLevels()
         dat = self.get_pad_display_data()
         for i in range(len(dat)):
@@ -654,32 +604,32 @@ class PADView(object):
         self.update_masks()
 
     def hide_masks(self):
-        self.debug('hide_masks()')
+        self.debug(get_caller(), 1)
         if self.mask_images is not None:
             for im in self.mask_images:
                 im.setVisible(False)
 
     def show_masks(self):
-        self.debug('show_masks()')
+        self.debug(get_caller(), 1)
         if self.mask_images is not None:
             for im in self.mask_images:
                 im.setVisible(True)
 
     def toggle_masks(self):
-        self.debug('toggle_masks()')
+        self.debug(get_caller(), 1)
         if self.mask_images is not None:
             for im in self.mask_images:
                 im.setVisible(not im.isVisible())
 
     def save_masks(self):
         r""" Save list of masks in pickle or reborn mask format. """
+        self.debug(get_caller(), 1)
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Masks", "mask",
                                                           "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
                                                                  options=options)
         if file_name == "":
             return
-
         if file_type == 'Python Pickle (*.pkl)':
             write('Saving masks: ' + file_name)
             with open(file_name, "wb") as f:
@@ -689,6 +639,7 @@ class PADView(object):
 
     def load_masks(self):
         r""" Load list of masks that have been saved in pickle or reborn mask format. """
+        self.debug(get_caller(), 1)
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load Masks", "mask",
                                                           "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
@@ -696,13 +647,11 @@ class PADView(object):
 
         if file_name == "":
             return
-
         if file_type == 'Python Pickle (*.pkl)':
             with open(file_name, "rb") as f:
                 self.mask_data = pickle.load(f)
         if file_type == 'reborn Mask File (*.mask)':
             self.mask_data = reborn.detector.load_pad_masks(file_name)
-
         self.update_masks(self.mask_data)
         write('Loaded mask: ' + file_name)
 
@@ -710,18 +659,12 @@ class PADView(object):
         r""" Mask the ROI region that the mouse cursor is hovering over. """
         if self._mask_rois is None:
             return
-
         noslice = slice(0, 1, None)
-
         for roi in self._mask_rois:
-
             if not roi.mouseHovering:
                 continue
-
             pad_data = self.get_pad_display_data()
-
             for (ind, im, dat, geom) in zip(range(self.n_pads), self.images, pad_data, self.pad_geometry):
-
                 # Using builtin function of pyqtgraph ROI to identify panels associated with the ROI...
                 pslice, _ = roi.getArraySlice(dat, im, axes=(0, 1), returnSlice=True)
                 if pslice[0] == noslice and pslice[1] == noslice:
@@ -755,132 +698,96 @@ class PADView(object):
                     self.mask_images[ind].setImage(self._make_mask_rgba(self.mask_data[ind]))
 
     def stupid_pyqtgraph_fix(self, dat):
-
         # Deal with this stupid problem: https://github.com/pyqtgraph/pyqtgraph/issues/769
         return [np.double(d) for d in dat]
 
-    def get_pad_display_data(self, debug=False):
-
+    def get_pad_display_data(self):
         # The logic of what actually gets displayed should go here.  For now, we display processed data if it is
         # available, else we display raw data, else we display zeros based on the pad geometry.  If none of these
         # are available, this function returns none.
-
-        # self.debug('get_pad_display_data()')
-
+        self.debug(get_caller(), 3)
         if self.processed_data is not None:
             if 'pad_data' in self.processed_data.keys():
                 dat = self.processed_data['pad_data']
                 if dat:
                     # self.debug("Got self.processed_data['pad_data']")
                     return self.stupid_pyqtgraph_fix(dat)
-
         if self.raw_data is not None:
             if 'pad_data' in self.raw_data.keys():
                 dat = self.raw_data['pad_data']
                 if dat:
                     # self.debug("Got self.raw_data['pad_data']")
                     return self.stupid_pyqtgraph_fix(dat)
-
         if self.pad_geometry is not None:
             self.debug('No raw data found - setting display data arrays to zeros')
             return [pad.zeros() for pad in self.pad_geometry]
-
         return None
 
     def get_peak_data(self):
-
+        self.debug(get_caller(), 1)
         if self.processed_data is not None:
             self.debug('Getting processed peak data')
             if 'peaks' in self.processed_data.keys():
                 return self.processed_data['peaks']
-
         if self.raw_data is not None:
             self.debug('Getting raw peak data')
             if 'peaks' in self.raw_data.keys():
                 return self.raw_data['peaks']
-
         return None
 
     def setup_pads(self):
-
-        self.debug('setup_pads()')
-
+        self.debug(get_caller(), 1)
         pad_data = self.get_pad_display_data()
-
         mx = np.ravel(pad_data).max()
-
         self.images = []
-
         if self.n_pads == 0:
             self.debug("Cannot setup pad display data - there are no pads to display.")
-
         for i in range(0, self.n_pads):
-
             d = pad_data[i]
-
             if self.logscale:
                 d[d < 0] = 0
                 d = np.log10(d)
-
             if self.show_true_fast_scans:  # For testing - show fast scan axis
                 d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
-
             im = ImageItem(d) #, autoDownsample='mean')
-
             self._apply_pad_transform(im, self.pad_geometry[i])
-
             self.images.append(im)
             self.viewbox.addItem(im)
-
             self.main_window.histogram.regionChanged()
-
         self.setup_histogram_tool()
         self.setup_masks()
         self.set_levels(np.percentile(np.ravel(pad_data), 10), np.percentile(np.ravel(pad_data), 90))
 
     def update_pads(self):
-
-        self.debug('update_pads()')
-
+        self.debug(get_caller(), 1)
         if self.images is None:
             self.setup_pads()
-
         processed_data = self.get_pad_display_data()
         mx = np.ravel(processed_data).max()
         for i in range(0, self.n_pads):
-
             d = processed_data[i]
-
             if self.show_true_fast_scans:  # For testing - show fast scan axis
                 d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
-
             if self.logscale:
                 d[d < 0] = 0
                 d = np.log10(d)
-
             self.images[i].setImage(d)
-
         self.main_window.histogram.regionChanged()
 
     def _mouse_moved(self, evt):
-
+        self.debug(get_caller(), 3)
         if evt is None:
             return
-
         if self.pad_geometry is None:
             return
-
         pad_data = self.get_pad_display_data()
-
         self.evt = evt
         pos = evt[0]
         pid = -1
         ppos = (-1, -1)
         intensity = -1
-
         if self.images is None:
             return
-
         if self.viewbox.sceneBoundingRect().contains(pos):
             for i in range(0, len(self.images)):
                 if self.images[i].sceneBoundingRect().contains(pos):
@@ -888,7 +795,6 @@ class PADView(object):
                     ppos = self.images[i].mapFromScene(pos)
                     ppos = (np.floor(ppos.x()), np.floor(ppos.y()))
                     continue
-
             # pnt = self.viewbox.mapSceneToView(pos)
             fs = np.int(ppos[1])
             ss = np.int(ppos[0])
@@ -897,16 +803,14 @@ class PADView(object):
                 sh = d.shape
                 if ss < sh[0] and fs < sh[1]:
                     intensity = pad_data[pid][ss, fs]
-
             if pid >= 0:
                 self._status_string_mouse = ' Panel %2d  |  Pixel %4d,%4d  |  Value=%8g  | ' % (pid, ss, fs, intensity)
             else:
                 self._status_string_mouse = ''
-
             self.update_status_string()
 
     def edit_ring_radii(self):
-
+        self.debug(get_caller(), 1)
         text, ok = QtGui.QInputDialog.getText(self.main_window, "Enter ring radii (comma separated)", "Ring radii",
                                               QtGui.QLineEdit.Normal, "100,200")
         if ok:
@@ -924,153 +828,127 @@ class PADView(object):
             self.add_rings(rad)
 
     def add_rings(self, radii=[], pens=None, radius_handle=False):
-
+        self.debug(get_caller(), 1)
         if not isinstance(radii, (list,)):
             radii = [radii]
-
         n = len(radii)
-
         if pens is None:
             pens = [pg.mkPen([255, 255, 255], width=2)]*n
-
         for i in range(0, n):
             circ = pg.CircleROI(pos=[-radii[i]*0.5]*2, size=radii[i], pen=pens[i])
             circ.translatable = False
             circ.removable = True
             self.rings.append(circ)
             self.viewbox.addItem(circ)
-
         if not radius_handle:
-
             self.hide_ring_radius_handles()
 
     def hide_ring_radius_handles(self):
-
+        self.debug(get_caller(), 1)
         for circ in self.rings:
             for handle in circ.handles:
                 circ.removeHandle(handle['item'])
 
     def remove_rings(self):
-
+        self.debug(get_caller(), 1)
         if self.rings is None:
             return
-
         for i in range(0, len(self.rings)):
             self.viewbox.removeItem(self.rings[i])
 
     def show_grid(self):
-
+        self.debug(get_caller(), 1)
         if self.grid is None:
             self.grid = pg.GridItem()
         self.viewbox.addItem(self.grid)
 
     def hide_grid(self):
-
+        self.debug(get_caller(), 1)
         if self.grid is not None:
             self.viewbox.removeItem(self.grid)
             self.grid = None
 
     def toggle_grid(self):
-
+        self.debug(get_caller(), 1)
         if self.grid is None:
             self.show_grid()
         else:
             self.hide_grid()
 
     def show_pad_border(self, n, pen=None):
-
+        self.debug(get_caller(), 1)
         if self.images is None:
             return
-
         if pen is None:
             pen = pg.mkPen([0, 255, 0], width=2)
         self.images[n].setBorder(pen)
 
     def hide_pad_border(self, n):
-
+        self.debug(get_caller(), 1)
         if self.images is None:
             return
-
         self.images[n].setBorder(None)
 
     def show_pad_borders(self, pen=None):
-
+        self.debug(get_caller(), 1)
         if self.images is None:
             return
-
         if pen is None:
             pen = pg.mkPen([0, 255, 0], width=1)
         for image in self.images:
             image.setBorder(pen)
 
     def hide_pad_borders(self):
-
+        self.debug(get_caller(), 1)
         if self.images is None:
             return
-
         for image in self.images:
             image.setBorder(None)
 
     def show_history_next(self):
-
+        self.debug(get_caller(), 1)
         if self.frame_getter is None:
             self.debug('no getter')
             return
-
         dat = self.frame_getter.get_history_next()
         self.raw_data = dat
-
         self.update_display_data()
 
     def show_history_previous(self):
-
+        self.debug(get_caller(), 1)
         if self.frame_getter is None:
-            self.debug('no getter')
+            self.debug('no getter', 0)
             return
-
         dat = self.frame_getter.get_history_previous()
         self.raw_data = dat
-
         self.update_display_data()
 
     def show_next_frame(self):
-
-        self.debug('show_next_frame()')
-
+        self.debug(get_caller(), 1)
         if self.frame_getter is None:
-            self.debug('no getter')
+            self.debug('no getter', 0)
             return
-
         dat = self.frame_getter.get_next_frame()
         self.raw_data = dat
         self.update_display_data()
 
     def show_previous_frame(self):
-
-        self.debug('show_previous_frame()')
-
+        self.debug(get_caller(), 1)
         if self.frame_getter is None:
-            self.debug('no getter')
+            self.debug('no getter', 0)
             return
-
         dat = self.frame_getter.get_previous_frame()
         self.raw_data = dat
-
         self.update_display_data()
 
     def show_random_frame(self):
-
-        self.debug('show_random_frame()')
-
+        self.debug(get_caller(), 1)
         dat = self.frame_getter.get_random_frame()
         self.raw_data = dat
-
         self.update_display_data()
 
     def show_frame(self, frame_number=0):
-
-        self.debug('show_frame()')
-
+        self.debug(get_caller(), 1)
         if self.frame_getter is None:
             self.debug("Note: there is no frame getter configured.")
         else:
@@ -1082,29 +960,22 @@ class PADView(object):
         self.update_display_data()
 
     def process_data(self):
-
-        self.debug('process_data()')
-
+        self.debug(get_caller(), 1)
         if self.data_processor is not None:
             self.data_processor()
         else:
             self.processed_data = None
 
     def update_display_data(self, ):
-
         r"""
-
         Update display with new data, e.g. when moving to next frame.
 
         Arguments:
             dat: input dictionary with keys 'pad_data', 'peaks'
 
         Returns:
-
         """
-
-        self.debug('update_display_data()')
-
+        self.debug(get_caller(), 1)
         if self.data_processor is not None:
             self.process_data()
         self.update_pads()
@@ -1116,31 +987,25 @@ class PADView(object):
         self._mouse_moved(self.evt)
 
     def add_scatter_plot(self, *args, **kargs):
-
+        self.debug(get_caller(), 1)
         if self.scatter_plots is None:
             self.scatter_plots = []
-
         scat = pg.ScatterPlotItem(*args, **kargs)
         self.scatter_plots.append(scat)
         self.viewbox.addItem(scat)
 
     def remove_scatter_plots(self):
-
+        self.debug(get_caller(), 1)
         if self.scatter_plots is not None:
             for scat in self.scatter_plots:
                 self.viewbox.removeItem(scat)
-
         self.scatter_plots = None
 
     def display_peaks(self):
-
-        self.debug('display_peaks()')
-
+        self.debug(get_caller(), 1)
         peaks = self.get_peak_data()
-
         if peaks is None:
             return
-
         n_peaks = peaks['n_peaks']
         centroids = peaks['centroids']
         gl_fs_pos = np.empty(n_peaks)
@@ -1160,43 +1025,38 @@ class PADView(object):
         self.add_scatter_plot(gl_fs_pos, gl_ss_pos, **self.peak_style)
 
     def toggle_peaks(self):
-
+        self.debug(get_caller(), 1)
         if self.scatter_plots is None:
             self.display_peaks()
             self.show_peaks = True
         else:
             self.remove_scatter_plots()
             self.show_peaks = False
-
         self.update_pads()
 
     def toggle_filter(self):
-
+        self.debug(get_caller(), 1)
         if self.apply_filters is True:
             self.apply_filters = False
         else:
             self.apply_filters = True
 
     def show_snr_filter_widget(self):
-
+        self.debug(get_caller(), 1)
         self.widgets['SNR Config'].show()
 
     def apply_snr_filter(self):
-
+        self.debug(get_caller(), 1)
         self.debug('apply_snr_filter()')
         t = time()
         if self.snr_filter_params is None:
             return
-
         if self.snr_filter_params['activate'] is not True:
             return
-
         if self.raw_data is None:
             return
-
         if self.mask_data is None:
             return
-
         a = self.snr_filter_params['inner']
         b = self.snr_filter_params['center']
         c = self.snr_filter_params['outer']
@@ -1215,9 +1075,7 @@ class PADView(object):
         self.debug('%g seconds' % (time()-t,))
 
     def update_snr_filter_params(self):
-
-        # Get info from the widget
-
+        self.debug(get_caller(), 1)
         self.debug("Updating SNR Filter parameters")
         vals = self.widgets['SNR Config'].get_values()
         if vals['activate']:
@@ -1230,13 +1088,12 @@ class PADView(object):
             self.update_display_data()
 
     def load_geometry_file(self):
-
+        self.debug(get_caller(), 1)
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load geometry file", "",
                                                           "CrystFEL geom (*.geom)", options=options)
         if file_name == "":
             return
-
         if file_type == "CrystFEL geom (*.geom)":
             print('CrystFEL geom not implemented.')
             pass
@@ -1244,14 +1101,12 @@ class PADView(object):
             # self.crystfel_geom_file_name = file_name
 
     def open_data_file(self):
-
+        self.debug(get_caller(), 1)
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load data file", "",
                                                           "Cheetah CXI (*.cxi)", options=options)
-
         if file_name == "":
             return
-
         if file_type == 'Cheetah CXI (*.cxi)':
             print('Cheetah CXI not implemented.')
             pass
@@ -1265,28 +1120,24 @@ class PADView(object):
             #     self.main_window.setWindowTitle(file_name)
             #
             # self.frame_getter = CheetahFrameGetter(file_name, self.crystfel_geom_file_name)
-
         self.show_frame(frame_number=0)
 
     def toggle_peak_finding(self):
-
+        self.debug(get_caller(), 1)
         if self.do_peak_finding is False:
             self.do_peak_finding = True
         else:
             self.do_peak_finding = False
-
         self.update_display_data()
 
-    def setup_peak_finders(self, params=None):
-
-        self.debug('setup_peak_finders()')
-
+    def setup_peak_finders(self):
+        self.debug(get_caller(), 1)
         self.peak_finders = []
         for i in range(self.n_pads):
             self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(3, 6, 9)))
 
     def choose_plugins(self):
-        self.debug('choose_plugins')
+        self.debug(get_caller(), 1)
         init = ''
         init += "subtract_median_fs\n"
         init += "#subtract_median_ss\n"
@@ -1305,7 +1156,7 @@ class PADView(object):
             self.run_plugins(plugins)
 
     def run_plugins(self, module_names=['subtract_median_ss']):
-        self.debug('run_plugin()')
+        self.debug(get_caller(), 1)
         if len(module_names) <= 0:
             return
         mod = module_names[0]
@@ -1329,12 +1180,9 @@ class PADView(object):
         return float(self.get_text(title=title, label=label, text=text))
 
     def find_peaks(self):
-
-        self.debug('find_peaks()')
-
+        self.debug(get_caller(), 1)
         if self.peak_finders is None:
             self.setup_peak_finders()
-
         centroids = [None]*self.n_pads
         n_peaks = 0
         for i in range(self.n_pads):
@@ -1342,28 +1190,44 @@ class PADView(object):
             pfind.find_peaks(data=self.raw_data['pad_data'][i], mask=self.mask_data[i])
             n_peaks += pfind.n_labels
             centroids[i] = pfind.centroids
-
         self.debug('Found %d peaks' % (n_peaks))
-
         self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
 
     def start(self):
-
-        self.debug('start()')
+        self.debug(get_caller(), 1)
         self.app.aboutToQuit.connect(self.stop)
         self.app.exec_()
 
     def stop(self):
-
-        self.debug('stop()')
+        self.debug(get_caller(), 1)
         self.app.quit()
         del self.app
 
     def show(self):
-
-        self.debug('show()')
+        self.debug(get_caller(), 1)
         self.main_window.show()
         # self.main_window.callback_pb_load()
+
+    def call_method_by_name(self, method_name=None, *args, **kwargs):
+        r""" Call a method via it's name in string format. Try not to do this... """
+        self.debug(get_caller(), 1)
+        if method_name is None:
+            method_name = self.get_text('Call method', 'Method name', '')
+        self.debug('method_name: ' + method_name)
+        method = getattr(self, method_name, None)
+        if method is not None:
+            method(*args, **kwargs)
+
+
+def get_caller():
+    r""" Get the name of the function that calls this one. """
+    try:
+        stack = inspect.stack()
+        if len(stack) > 1:
+            return inspect.stack()[1][3]
+    except:
+        pass
+    return 'get_caller'
 
 
 class SNRConfigWidget(QtGui.QWidget):

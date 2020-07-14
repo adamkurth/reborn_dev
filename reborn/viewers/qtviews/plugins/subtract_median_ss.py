@@ -1,4 +1,5 @@
 import numpy as np
+import reborn
 
 
 def plugin(self):
@@ -11,3 +12,11 @@ def plugin(self):
         self.processed_data = {}
     self.processed_data['pad_data'] = pad_data
     self.update_pads()
+    d = reborn.detector.concat_pad_data(pad_data)
+    upper = np.percentile(d, 98)
+    lower = np.percentile(d, 2)
+    lim = max(np.abs(upper), np.abs(lower))
+    self.set_preset_colormap('bipolar')
+    self.update_pads()
+    self.set_levels(-lim, lim)
+    self.process_events()

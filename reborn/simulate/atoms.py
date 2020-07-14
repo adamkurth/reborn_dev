@@ -329,7 +329,8 @@ def get_cmann_form_factors(cman, q):
     return form_facts
 
 
-def get_cromermann_parameters(atomic_numbers):
+@utils.memoize
+def get_cromermann_parameters(atomic_numbers=None):
     r"""
     Get Cromer-Mann parameters for each atom type
 
@@ -342,6 +343,8 @@ def get_cromermann_parameters(atomic_numbers):
         dict : The Cromer-Mann parameters for the system. The dictionary key corresponds to the atomic number, and the
                parameters are listed in order as a_1, a_2, a_3, a_4, b_1, b_2, b_3, b_4, c
     """
+    if atomic_numbers is None:
+        raise ValueError('Atomic numbers were not provided')
     atom_types = np.unique(atomic_numbers)
     cromermann = {}
     for i, a in enumerate(atom_types):
@@ -353,58 +356,58 @@ def get_cromermann_parameters(atomic_numbers):
     return cromermann
 
 
-def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
-    r"""
-    Get cromer-mann parameters for each atom type and renumber the atom
-    types to 0, 1, 2, ... to point to their CM params.
-
-    Arguments:
-
-        atomic_numbers (|ndarray|, int) :
-            A numpy array of the atomic numbers of each atom in the system.
-
-        max_num_atom_types (int) :
-            The maximium number of atom types allowable
-
-    Returns:
-
-        cromermann (c-array, float) :
-            The Cromer-Mann parameters for the system. Positions [(0-8) * aid] are
-            reserved for each atom type in the system (see `aid` below).
-
-        aid (c-array, int) :
-            The indicies of the atomic ids of each atom in the system. This is an
-            arbitrary compressed index for use within the scattering code. Really
-            this is just a renumbering so that each atom type recieves an index
-            0, 1, 2, ... corresponding to the position of that atom's type in
-            the `cromermann` array.
-    """
-
-    atom_types = np.unique(atomic_numbers)
-    num_atom_types = len(atom_types)
-
-    if max_num_atom_types:
-        if num_atom_types > max_num_atom_types:
-            raise Exception('Fatal Error. Your molecule has too many unique atom  '
-                            'types -- the scattering code cannot handle more due'
-                            ' to code requirements. You can recompile the kernel'
-                            ' to fix this -- see file odin/src/scatter. Email '
-                            'tjlane@stanford.edu complaining about shitty code'
-                            'if you get confused.')
-
-    cromermann = np.zeros(9*num_atom_types, dtype=np.float32)
-    aid = np.zeros(len(atomic_numbers), dtype=np.int32)
-
-    for i, a in enumerate(atom_types):
-        ind = i * 9
-        try:
-            cromermann[ind:ind+9] = np.array(cromer_mann_params[(a, 0)], dtype=np.float32)
-        except KeyError:
-            print('Element number %d not in Cromer-Mann form factor parameter database' % a)
-            raise RuntimeError('Could not get critical parameters for computation')
-        aid[atomic_numbers == a] = np.int32(i)
-
-    return cromermann, aid
+# def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
+#     r"""
+#     Get cromer-mann parameters for each atom type and renumber the atom
+#     types to 0, 1, 2, ... to point to their CM params.
+#
+#     Arguments:
+#
+#         atomic_numbers (|ndarray|, int) :
+#             A numpy array of the atomic numbers of each atom in the system.
+#
+#         max_num_atom_types (int) :
+#             The maximium number of atom types allowable
+#
+#     Returns:
+#
+#         cromermann (c-array, float) :
+#             The Cromer-Mann parameters for the system. Positions [(0-8) * aid] are
+#             reserved for each atom type in the system (see `aid` below).
+#
+#         aid (c-array, int) :
+#             The indicies of the atomic ids of each atom in the system. This is an
+#             arbitrary compressed index for use within the scattering code. Really
+#             this is just a renumbering so that each atom type recieves an index
+#             0, 1, 2, ... corresponding to the position of that atom's type in
+#             the `cromermann` array.
+#     """
+#
+#     atom_types = np.unique(atomic_numbers)
+#     num_atom_types = len(atom_types)
+#
+#     if max_num_atom_types:
+#         if num_atom_types > max_num_atom_types:
+#             raise Exception('Fatal Error. Your molecule has too many unique atom  '
+#                             'types -- the scattering code cannot handle more due'
+#                             ' to code requirements. You can recompile the kernel'
+#                             ' to fix this -- see file odin/src/scatter. Email '
+#                             'tjlane@stanford.edu complaining about shitty code'
+#                             'if you get confused.')
+#
+#     cromermann = np.zeros(9*num_atom_types, dtype=np.float32)
+#     aid = np.zeros(len(atomic_numbers), dtype=np.int32)
+#
+#     for i, a in enumerate(atom_types):
+#         ind = i * 9
+#         try:
+#             cromermann[ind:ind+9] = np.array(cromer_mann_params[(a, 0)], dtype=np.float32)
+#         except KeyError:
+#             print('Element number %d not in Cromer-Mann form factor parameter database' % a)
+#             raise RuntimeError('Could not get critical parameters for computation')
+#         aid[atomic_numbers == a] = np.int32(i)
+#
+#     return cromermann, aid
 
 
 # ------------------------------------------------------------------------------
@@ -439,21 +442,9 @@ def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):
 #       -- negative int for an anion
 #       -- '.' for a radical
 
-def cromer_mann_coefficients_neutral():
-    r"""
-    Return an |ndarray| with all the Cromer-Mann coefficients (|Cromer1968|) for neutral atoms with atomic numbers in
-    the range :math:`1 \le Z \le 95`.  These coefficients correspond to the model
 
-    .. math::
-
-        f(\sin\theta/\lambda) = \sum_{i=1}^4 a_i \exp[-b_i \sin^2\theta/\lambda^2] + c
-
-    Returns:
-
-    """
-    return _cmann_coeffs_neutral
-
-# These are simplified Cromer-Mann coefficients -- only the neutral atoms, and stored as a 95x9 array
+# These are simplified Cromer-Mann coefficients -- only the neutral atoms, and stored as a 95x9 array.
+# This is almost always what we want.  The order is [a_1, a_2, a_3, a_4, b_1, b_2, b_3, b_4, c].
 _cmann_coeffs_neutral = np.array([
     [0.493002, 0.322912, 0.140191, 0.04081, 10.5109, 26.1257, 3.14236, 57.7997, 0.0030380001],
     [0.8734, 0.6309, 0.3112, 0.178, 9.1037, 3.3568, 22.9276, 0.9821, 0.0063999998],
