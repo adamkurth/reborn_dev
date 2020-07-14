@@ -9,6 +9,7 @@ import datetime as dt
 import os
 import numpy as np
 import scipy as sci
+from  scipy.spatial.transform import Rotation
 from reborn.utils import trilinear_insert
 from reborn.utils import rotate3D
 from reborn.target.density import trilinear_interpolation, trilinear_insertion
@@ -51,16 +52,33 @@ r_vecs = cryst.molecule.coordinates  # These are atomic coordinates (Nx3 array)
 atomic_numbers = cryst.molecule.atomic_numbers
 n_atoms = r_vecs.shape[0]
 
-'''
-#doing the full sum in a slow way, idk
+# Pre-allocation of GPU arrays
+q_dev = simcore.to_device(q_vecs, dtype=simcore.real_t)
+r_dev = simcore.to_device(r_vecs, dtype=simcore.real_t)
+a_dev = simcore.to_device(shape=(q_dev.shape[0]), dtype=simcore.complex_t)
+
+
+# 3D mesh of diffraction amplitudes:
+q_max = np.max(pad.q_mags(beam=beam))
+N =40  # Number of samples(bins)
+a_map_dev = 0*simcore.to_device(shape=(N ** 3,), dtype=simcore.complex_t)
+
+#making 3D arrays from q cooridinates
+qx=np.linspace(-q_max,q_max,N)
+qx,qy,qz=np.meshgrid(qx,qx,qx,indexing='ij')
+q_grid_mags=np.sqrt(qx**2+qy**2+qz**2)
+mask_grid=np.zeros([N,N,N])
+mask_grid[q_grid_mags<q_max]=1
+
+#grouping by atom type
 uniq_z = np.unique(atomic_numbers)
 grouped_r_vecs = []
 grouped_fs = []
 for z in uniq_z:
     subr = np.squeeze(r_vecs[np.where(atomic_numbers == z), :])
     grouped_r_vecs.append(subr)
-    grouped_fs.append(reborn.simulate.atoms.hubbel_henke_scattering_factors(q_mags=q_mags, photon_energy=beam.photon_energy,
-                                                            atomic_number=z))
+    grouped_fs.append(reborn.simulate.atoms.hubbel_henke_scattering_factors(q_mags=q_grid_mags, photon_energy=beam.photon_energy,atomic_number=z))
+
 #calulating the intesities for a set of q vectors
 intensities = []
 sa = solid_angles
@@ -70,37 +88,9 @@ amps = 0
 for j in range(len(grouped_fs)):
     f = grouped_fs[j]
     r = grouped_r_vecs[j]
-    a = simcore.phase_factor_qrf(q, r)
-    amps += a*f
-ints = r_e**2*fluence*sa*p*np.abs(amps)**2
-intensities.append(pad.reshape(ints))
-
-# Let's see how many photons hit the detector:
-print('# photons total: %d' % np.round(np.sum(reborn.detector.concat_pad_data(intensities))))
-'''
-
-# Look up atomic scattering factors (they are complex numbers).  Note that these are not :math:`q`-dependent; they are
-# the forward scattering factors :math:`f(0)`.
-f = cryst.molecule.get_scattering_factors(beam=beam)
-
-# Pre-allocation of GPU arrays
-q_dev = simcore.to_device(q_vecs, dtype=simcore.real_t)
-r_dev = simcore.to_device(r_vecs, dtype=simcore.real_t)
-f_dev = simcore.to_device(f, dtype=simcore.complex_t)
-a_dev = simcore.to_device(shape=(q_dev.shape[0]), dtype=simcore.complex_t)
-
-
-# Speeding up with lookup tables
-# First we compute the 3D mesh of diffraction amplitudes:
-q_max = np.max(pad.q_mags(beam=beam))
-N =40  # Number of samples(bins)
-a_map_dev = simcore.to_device(shape=(N ** 3,), dtype=simcore.complex_t)
-simcore.phase_factor_mesh(r_vecs, f, N=N, q_min=-q_max, q_max=q_max, a=a_map_dev)
-
-#voila the lysozyme 3d scattering intensity
-lys_intensity=np.ndarray.astype(np.abs(np.reshape(a_map_dev.get(),[N,N,N])),'float64')
-F_lys2=np.ndarray.astype(np.abs(np.reshape(a_map_dev.get(),[N,N,N]))**2,'float64')
-
+    simcore.phase_factor_mesh(r, N=N, q_min=-q_max, q_max=q_max, a=a_map_dev)
+    amps += a_map_dev.get()*f
+F_lys2=(np.abs(amps)**2).reshape([N,N,N])
 
 
 
@@ -302,7 +292,7 @@ def create_fake_data_sa(arr,q_min,q_max,q_vecs,solid_angles,N,track=False):
         return np.array(fake_data)
     else: 
         Rs=[]
-        print('track')
+        print('  tracking')
         for n in range(N):
             R=randR()
             Rs.append(R)
@@ -540,6 +530,7 @@ def error_search_random(construct,truth,q_min,q_max,N):
             print('accpt')
     return error,best
 
+
 #creating an icosohedron of points 20
 gold=(1+np.sqrt(5))/2
 icoso=[]
@@ -603,19 +594,22 @@ def error_search_buck(construct,truth,q_min,q_max,N,return_rotation=False,return
     print('buckyball error search')
     construct=(construct+np.flip(construct))/2
     #get rid of any bias and truncate to the sphere
-    Aint=randR()
-    truth=rotate_density_map(truth, Aint, q_min, q_max)
+    truth[mask_grid==0]=0
+    #Aint=randR()
+    #truth=rotate_density_map(truth, Aint, q_min, q_max)
     error=np.sum((construct-truth)**2)
     for n in buck:
         for l in range(N):
             phi=l*pi/N
             A=R(n,phi)
-            truth_rot=rotate_density_map(truth, A, q_min, q_max)
+            angles=Rotation.from_matrix(A).as_euler('zyz')
+            truth_rot=rotate3D(truth, angles)
+            #truth_rot=rotate_density_map(truth, A, q_min, q_max)
             error_p=np.sum((construct-truth_rot)**2)
             if error_p<error:
                 error=error_p
                 print(error_p)
-                Abest=np.dot(A,Aint)
+                Abest=A
     if return_rotation==True:
         return Abest
     if return_both==True:
@@ -763,11 +757,12 @@ def emmc(data,dect_arr,model_input,q_min,q_max,N_bin,N_remodels,N_metropolis,sig
     return models
 ########################################################################
 ########################################################################
-#'data' is a list of the exposures
+#'data' is a list of the exposure pixel values
 #'dect_arr' are the detector pixel q-vector coordinates
-#'model_input' can be any fourier density but eventually should be noise
-def emmc_sa(data,dect_arr,solid_angles,model_input,q_min,q_max,N_bin,N_remodels,N_metropolis,sigma):
-    print('beginning EMMC with pixel solid angles')
+#'model_input' is the seed density of noise
+#'solid angles' is the list of solid angles coresponding to the dect_arr pixels
+def mcemc_sa(data,dect_arr,solid_angles,model_input,q_min,q_max,N_bin,N_remodels,N_metropolis,sigma):
+    print('beginning MCEMC with pixel solid angles')
     t=time.time()
     
     def lnp_sa(model,points,datum):
@@ -851,7 +846,85 @@ def emmc_sa(data,dect_arr,solid_angles,model_input,q_min,q_max,N_bin,N_remodels,
         print("emmc completed in",tf//3600,'hr',(tf%3600)//60, "min",(tf%3600)%60,'sec')
     return models
 ########################################################################
-########################################################################        
+########################################################################
+#'data' is a list of the exposure pixel values
+#'dect_arr' are the detector pixel q-vector coordinates
+#'model_input' is the seed density of noise
+#'solid angles' is the list of solid angles coresponding to the dect_arr pixels
+def emc_sa(data,dect_arr,solid_angles,model_input,q_min,q_max,N_bin,N_remodels,N_rot):
+    print('beginning EMC')
+    t=time.time()
+    
+    def lnp_sa(model,points,datum):
+        return lnprob_poisson_sa(model,q_min,q_max,N_bin,points,datum,solid_angles)
+    
+    #normalizing overall intensity
+    #by simulating the expected photon count of the data
+    def intensity_normalize(model): 
+         t=time.time()
+         print('calculating intensity scale factor')
+         dpc=np.sum(data) #data photon count (take outside)
+         mpc=0 #model photon count
+         for ooo in range(len(data)):
+             mpc+=np.sum(solid_angles*trilinear_standin(model,q_min,q_max,rand_rot(dect_arr)))
+         a_intensity_scale=dpc/mpc
+         print(' dpc',dpc,'mpc',mpc)
+         print('intensity scale factor',a_intensity_scale)
+         model*=a_intensity_scale
+         print(' ',time.time()-t,'sec')
+         return model
+    
+    model=model_input
+    intensity_normalize(model)
+    models=[model]
+    
+    
+    #creating all the rotations of the dector q vectors
+    da_rots=[]
+    for n in buck:
+        for b in range(N_rot):
+            phi=b*2*pi/N_rot
+            da_rots.append(rot(dect_arr,n,phi))
+                
+    for v in range(N_remodels):
+        model_val=np.zeros_like(model)
+        model_weights=np.zeros_like(model)
+        for d in range(np.shape(data)[0]):
+            datum=data[d]
+            mask=np.ones_like(datum)
+            #finding the orientational probability dist
+            #normalizing while and avoiding underflow
+            lnps=[]
+            for da in da_rots:
+                lnp=lnp_sa(model,da,datum)
+                lnps.append(lnp)
+            lnps=np.array(lnps)
+            lnps-=np.average(lnps)
+            w=np.exp(lnps)
+            w/=np.average(w)
+            for l in range(len(da_rots)):
+                da=da_rots[l]
+                mv,mw=np.real(trilinear_insert(da, datum/solid_angles, q_min, q_max, N_bin, mask))
+                model_val+=w[l]*mv
+                model_weights+=mw
+            if (d+1)%10==0:
+                print('  datum',d+1)
+                
+        model_weights[model_weights==0]=1
+        model=model_val/model_weights
+        model[model==0]=10**-9 #this shouldn't apply if sufficient data
+        intensity_normalize(model)
+        models.append(model)
+    tf=time.time()-t
+    if tf<120:
+        print("emc completed in",tf, "sec")
+    elif tf<3600:
+        print("emc completed in",tf//60,'min',tf%60, "sec")
+    else:
+        print("emc completed in",tf//3600,'hr',(tf%3600)//60, "min",(tf%3600)%60,'sec')
+    return models
+########################################################################
+########################################################################     
                 
             
 
@@ -934,19 +1007,20 @@ model_correct*=fluence*r_e**2
 #model_correct/=np.max(model_correct)
 #model_correct/=np.average(model_correct)
 #model_correct=200*fourier_test2
-#model_input=model_correct/10
+model_input=model_correct/10
 #model_input=np.random.poisson(model_correct/3).astype(np.float64)+0.0001
-model_input=model_input_random
+#model_input=model_input_random
 
 #dect_arr=bowl
 dect_arr=q_vecs
 N_bin=40
 N_bin=np.array([N_bin,N_bin,N_bin])
 
-N_data=1000
-N_remodels=2
+N_data=500
+N_remodels=1
 N_steps=50
 sigma=pi/2
+N_rot=4
 N_buckerror=2
 
 max_mag=max_magnitude(dect_arr)
@@ -956,7 +1030,6 @@ q_min=-q_max
 #fake_data=create_fake_data(model_correct,q_min,q_max,N_bin, dect_arr, N_data)
 fake_data,Rs=create_fake_data_sa(model_correct, q_min, q_max, dect_arr, solid_angles,N_data,track=True)
 #fake_data=create_fake_data_sa(model_correct, q_min, q_max, dect_arr,solid_angles,N_data)
-
 
 #finding the best reconstruction
 data_out=np.zeros_like(model_correct)
@@ -970,35 +1043,15 @@ for l in range(len(fake_data)):
 weight_out[weight_out==0]=1
 best_reconstruction=data_out/weight_out
 
-imshow_ln(best_reconstruction)
-
-
-
-'''
-#how do we use axis label?
-x = np.arange(0, 10, 0.005)
-y = np.exp(-x/2.) * np.sin(2*np.pi*x)
-
-fig, ax = plt.subplots()
-ax.plot(x, y)
-ax.set_xlim(0, 10)
-ax.set_ylim(-1, 1)
-
-plt.show()
-
-bestplt=plt.subplots()
-title='best reconstruction'
-plt.title(title)
-imshow_ln(best_reconstruction)
-plt.clf()
-'''
+#imshow_ln(best_reconstruction)
 
 #models=emmc(fake_data,dect_arr,model_input,q_min,q_max,np.array([N,N,N]),N_remodels,N_steps,sigma)
-#models=emmc_sa(fake_data,dect_arr,solid_angles,model_input,q_min,q_max,np.array([N,N,N]),N_remodels,N_steps,sigma)
+#models=mcemc_sa(fake_data,dect_arr,solid_angles,model_input,q_min,q_max,N_bin,N_remodels,N_steps,sigma)
+models=emc_sa(fake_data,dect_arr,solid_angles,model_input,q_min,q_max,N_bin,N_remodels,N_rot)
 
 #imshow_ln((models[-1]))
 
-m=np.load("reconstruction2020-07-09.npy")
+#m=np.load("reconstruction2020-07-09.npy")
 #mc_rot=error_search_ic(m,model_correct,q_min,q_max,12)[1]
 
 
@@ -1013,7 +1066,7 @@ dirr="EMMC_plots/plots "+now+'/'
 os.mkdir(dirr)
 
 ti=time.time()
-models=emmc_sa(fake_data,dect_arr,solid_angles,model_input,q_min,q_max,np.array([N,N,N]),N_remodels,N_steps,sigma)
+models=mcemc_sa(fake_data,dect_arr,solid_angles,model_input,q_min,q_max,np.array([N,N,N]),N_remodels,N_steps,sigma)
 tf=time.time()-ti
 
 tie=time.time()
@@ -1075,31 +1128,52 @@ np.save(dirr+'reconstruction',models[-1])
 
 
 #using trlinear insert to look at a datum
-data_coord=dect_arr
-data_coord=rot(data_coord,[0,1,0],pi/2)
+#data_coord=dect_arr
+#data_coord=rot(data_coord,[0,1,0],pi/2)
 #data_coord=rot(data_coord,[1,0,0],pi/4)
 #data_coord=rot(data_coord,[0,1,0],pi/2)
-data_val=fake_data[0]
+#data_val=fake_data[0]
 #data_val=trilinear_standin(fourier_test,q_min,q_max,data_coord)
 #data_val=trilinear_standin(flat_test,q_min,q_max,data_coord)
-one_datum=insert(data_coord, data_val, q_min, q_max, N_bin)
+#one_datum=insert(data_coord, data_val, q_min, q_max, N_bin)
 #imshow_x(one_datum)
-imshow_collapse(one_datum)
+#imshow_collapse(one_datum)
 
-
+'''
 rrr=randR()
 t=time.time()
 np.real(rotate3D(model_correct,[pi/4,pi/4,pi/4]))
-print(t-time.time())
+print(time.time()-t)
 t=time.time()
 rotate_density_map(model_correct, randR(), q_min, q_max)
-print(t-time.time())
+print(time.time()-t)
+'''
 
 
 
+'''
+#how do we use axis label?
+x = np.arange(0, 10, 0.005)
+y = np.exp(-x/2.) * np.sin(2*np.pi*x)
+
+fig, ax = plt.subplots()
+ax.plot(x, y)
+ax.set_xlim(0, 10)
+ax.set_ylim(-1, 1)
+
+plt.show()
+
+bestplt=plt.subplots()
+title='best reconstruction'
+plt.title(title)
+imshow_ln(best_reconstruction)
+plt.clf()
+'''
 
 
-
+testR=randR()
+test_rot1=np.real(rotate3D(model_correct, Rotation.from_matrix(testR).as_euler('zyz')))
+test_rot2=rotate_density_map(model_correct, testR, q_min, q_max)
 
 
 #plot_prob_phi(model_correct,model_correct,dect_arr,5000,[1,0,0],log=False,zoom=True,save=True)

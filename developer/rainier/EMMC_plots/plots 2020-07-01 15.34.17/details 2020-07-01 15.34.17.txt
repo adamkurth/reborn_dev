@@ -1,4 +1,0 @@
-1000 data 400 steps  0.5pi sigma 10 remodels test with error align
-1 hr
-
-error align hasn't worked, or reconstruction incorrect
