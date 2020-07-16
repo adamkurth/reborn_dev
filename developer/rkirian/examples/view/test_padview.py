@@ -10,4 +10,5 @@ for d in dats:
     x, y = np.indices(d.shape)
     d -= x/100
 padview = PADView(raw_data=dats, pad_geometry=pads, debug_level=1)
-padview.start()
+padview.set_title('Title')
+padview.show()

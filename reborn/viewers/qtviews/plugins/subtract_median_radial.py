@@ -17,7 +17,7 @@ def plugin(self):
     n_bins = int(len(np.sqrt(q_mags))/2.0)
     profiler = detector.RadialProfiler(pad_geometry=pad_geometry, beam=self.beam, q_range=(0, q_max), n_bins=n_bins)
     print('Getting median profile...')
-    median = profiler.get_median_profile(pad_data, mask=mask)
+    median = profiler.get_mean_profile(pad_data, mask=mask)
     print('Done!')
     median_q_mags = profiler.bin_centers
     for i in range(len(pad_data)):
