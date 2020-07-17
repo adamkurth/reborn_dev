@@ -12,11 +12,11 @@ from reborn.simulate.clcore import ClCore
 cl_array = clarray.Array
 havecl = True
 test_core = ClCore(context=None, queue=None, group_size=1, double_precision=True)
-if test_core.double_precision:
-    have_double = True
-else:
-    have_double = False
-ctx = reborn.simulate.clcore.create_some_gpu_context()
+# if test_core.double_precision:
+#     have_double = True
+# else:
+#     have_double = False
+# ctx = reborn.simulate.clcore.create_some_gpu_context()
 # except ImportError:
 #     ClCore = None
 #     clarray = None

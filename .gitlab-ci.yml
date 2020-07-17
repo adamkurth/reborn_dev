@@ -11,6 +11,7 @@ tests:
   - pytest -v test_math.py
   - python -c 'from pyopencl import array as clarray'
   - python -c 'from reborn.simulate.clcore import ClCore'
+  - python -c 'from pyopencl import array as clarray; cl_array = clarray.Array'
   - pytest -v test_clcore_interpolations.py
   - pytest -v
 
