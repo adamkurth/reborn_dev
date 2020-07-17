@@ -8,6 +8,7 @@ tests:
   stage: test
   script:
   - cd test
+  - pytest -v test_math.py
   - pytest -v
 
 doc:
