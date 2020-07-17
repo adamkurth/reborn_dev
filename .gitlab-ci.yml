@@ -8,7 +8,7 @@ tests:
   stage: test
   script:
   - cd test
-  - pytest
+  - pytest -v
 
 doc:
   script:
