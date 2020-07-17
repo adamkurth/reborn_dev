@@ -9,6 +9,8 @@ tests:
   script:
   - cd test
   - pytest -v test_math.py
+  - python -c 'from pyopencl import array as clarray'
+  - python -c 'from reborn.simulate.clcore import ClCore'
   - pytest -v test_clcore_interpolations.py
   - pytest -v
 

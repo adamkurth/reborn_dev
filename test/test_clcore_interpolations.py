@@ -24,8 +24,8 @@ ctx = reborn.simulate.clcore.create_some_gpu_context()
 #     havecl = False
 
 
-def func(vecs):
-    return vecs[:, 0].ravel().copy()
+# def func(vecs):
+#     return vecs[:, 0].ravel().copy()
 
 
 # def func1(vecs):
