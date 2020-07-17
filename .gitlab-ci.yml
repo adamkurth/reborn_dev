@@ -9,6 +9,7 @@ tests:
   script:
   - cd test
   - pytest -v test_math.py
+  - pytest -v test_clcore_interpolations.py
   - pytest -v
 
 doc:
