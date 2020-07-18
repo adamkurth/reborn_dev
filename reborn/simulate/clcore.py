@@ -82,7 +82,7 @@ class ClCore(object):
     when memory moves between CPU and GPU memory.
     """
 
-    def __init__(self, context=None, queue=None, group_size=32, double_precision=False):
+    def __init__(self, context=None, queue=None, group_size=32, double_precision=False, debug=0):
         r"""
         An instance of this class will attempt to help you manage an opencl context and command queue.
         You may choose the precision that you desire from the beginning, and this will be taken care of
@@ -104,29 +104,42 @@ class ClCore(object):
             double_precision (bool): True if double-precision is desired
         """
 
+        if debug > 0:
+            print('Creating ClCore')
+
         self.group_size = None
         self.programs = None
         self.double_precision = double_precision
 
         # Setup the context
         if context is None:
+            if debug > 0:
+                print('Creating GPU context')
             self.context = create_some_gpu_context()
         else:
             self.context = context
 
         # Setup the queue
         if queue is None:
+            if debug > 0:
+                print('Creating queue')
             self.queue = cl.CommandQueue(self.context)
         else:
             self.queue = queue
 
         # Abstract real and complex types to allow for double/single
+        if debug > 0:
+            print('Setup precision.  Double = %d' % double_precision)
         self._setup_precision(double_precision)
 
         # Setup the group size.
+        if debug > 0:
+            print('Setup group size: %d' % group_size)
         self.set_groupsize(group_size)
 
         # setup the programs
+        if debug > 0:
+            print('Building opencl programs')
         self._build_opencl_programs()
 
     def get_device_name(self):
