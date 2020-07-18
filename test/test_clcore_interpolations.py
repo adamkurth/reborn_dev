@@ -1,12 +1,3 @@
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
-import numpy as np
-
-import reborn
-from reborn.simulate.examples import lysozyme_pdb_file
-
-# try:
-# import pyopencl
 from pyopencl import array as clarray
 from reborn.simulate.clcore import ClCore
 cl_array = clarray.Array
