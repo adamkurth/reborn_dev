@@ -12,8 +12,6 @@ Some environment variables that affect the behaviour of this module:
 Using the above variables allows you to run the same code on different devices.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import os
 import sys
 
@@ -23,7 +21,7 @@ import pyopencl as cl
 import pyopencl.array
 
 from ..utils import depreciate
-
+print('Can you hear me?')
 cl_array = cl.array.Array
 
 clcore_file = pkg_resources.resource_filename('reborn.simulate', 'clcore.cpp')
