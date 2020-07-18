@@ -9,5 +9,5 @@ conda env create --name reborn --file environment.yml
 source activate reborn
 export NPY_DISTUTILS_APPEND_FLAGS=1
 export NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
-export PYTHONPATH=$(pwd)
+export PYTHONPATH=$(pwd):$PYTHONPATH
 #pip -v install --no-deps --editable .
