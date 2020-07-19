@@ -1,9 +1,13 @@
 #image: ubuntu:20.04
+
 image: rkirian/reborn:v01
 
 before_script:
-  - export DEBIAN_FRONTEND=noninteractive
+#  - export DEBIAN_FRONTEND=noninteractive
 #  - source ubuntu-setup.sh
+  - cd developer
+  - bash compile_fortran.sh
+  - cd ..
   - export PATH=/usr/local/miniconda/bin:$PATH
   - export PYTHONPATH=$(pwd)
 
