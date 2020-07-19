@@ -3,4 +3,6 @@
 cp ../../environment.yml .
 docker build -f Dockerfile .
 rm environment.yml
-# Don't forget to docker tag and docker push!
+# docker login registry.gitlab.com
+# docker tag <hash>
+# docker push
