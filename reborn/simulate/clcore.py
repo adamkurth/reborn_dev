@@ -1369,7 +1369,9 @@ class ClCore(object):
 #         return Amps
 #
 
+
 def print_device_info(device):
+    r""" Print some useful information about available devices. """
     d = device
     print("")
     # Print out some information about the devices
@@ -1389,8 +1391,8 @@ def print_device_info(device):
     dim = d.max_work_item_sizes
     print("    Max Work-group Dims:(", dim[0], " ".join(map(str, dim[1:])), ")")
 
-def help(extended=False):
 
+def help(extended=False):
     r"""
     Print out some useful information about platforms and devices that are
     available for running simulations.
