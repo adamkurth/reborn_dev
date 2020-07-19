@@ -24,8 +24,9 @@ from ..utils import depreciate
 print('Can you hear me?')
 cl_array = cl.array.Array
 
+print('Still?')
 clcore_file = pkg_resources.resource_filename('reborn.simulate', 'clcore.cpp')
-
+print('Still?')
 
 def get_all_gpu_devices():
     r"""

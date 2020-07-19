@@ -2,6 +2,7 @@ from pyopencl import array as clarray
 from reborn.simulate.clcore import ClCore
 cl_array = clarray.Array
 havecl = True
+print('In test.  Just one line after this one!')
 test_core = ClCore(context=None, queue=None, group_size=1, double_precision=True, debug=1)
 # if test_core.double_precision:
 #     have_double = True
