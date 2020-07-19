@@ -1,6 +1,6 @@
 #image: ubuntu:20.04
 #image: rkirian/reborn:v01
-image: kirianlab/reborn/ubuntu
+image: registry.gitlab.com/kirianlab/reborn/ubuntu:latest
 
 before_script:
 #  - export DEBIAN_FRONTEND=noninteractive
