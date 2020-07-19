@@ -1,27 +1,41 @@
-#image: ubuntu:20.04
-#image: rkirian/reborn:v01
-image: registry.gitlab.com/kirianlab/reborn/ubuntu:latest
+# This image has the dependencies of reborn pre-installed.  It was created with developer/docker/build_docker.sh
+image: registry.gitlab.com/kirianlab/reborn/ubuntu-20.04:latest
 
 before_script:
-#  - export DEBIAN_FRONTEND=noninteractive
-#  - source ubuntu-setup.sh
-  - ls /usr/local/miniconda/etc/OpenCL/vendors
+#  - which python3
+#  - ls -la /etc/OpenCL/*
+#  - mv /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl.icd /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl-conda.icd
+#  - ln -s /etc/OpenCL/vendors/pocl.icd /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl.icd
+#  - cat /etc/OpenCL/vendors/pocl.icd
+#  - ln -s /usr/bin/python3 /usr/bin/python
+#  - cd developer
+#  - bash check_pyopencl.sh
+#  - cd ..
   - export PATH=/usr/local/miniconda/bin:$PATH
-  - export PYTHONPATH=$(pwd)
+  - source activate reborn # This environment is already set up in the docker image
+  - conda list
+  - python --version
   - cd developer
-  - bash compile_fortran.sh
+  - bash check_pyopencl.sh # Check that opencl works
+  - bash build_inplace.sh # Compile fortran code
   - cd ..
+  - export PYTHONPATH=$(pwd) # Put reborn in the python path
+  - python -c 'from reborn import fortran' # Check fortran compilation
+#  - /usr/local/miniconda/envs/reborn/bin/python -c 'import pyopencl; print(pyopencl.get_platforms())' # Check opencl
+#  - python -c 'import pyopencl; print(pyopencl.get_platforms())' # Check opencl
+#  - python -c 'from reborn.simulate import clcore' # Sanity check
+
 
 tests:
   stage: test
   script:
+#  - cat /etc/OpenCL/vendors/pocl.icd
+#  - cd developer
+#  - bash check_pyopencl.sh
+#  - cd ..
   - cd test
-  - pytest -v test_math.py
-  - python -c 'from pyopencl import array as clarray'
-  - python -c 'from reborn.simulate.clcore import ClCore'
-  - python -c 'from pyopencl import array as clarray; cl_array = clarray.Array'
-  - python -c 'from reborn.simulate.clcore import help; help()'
-  - pytest -v test_clcore_interpolations.py
+#  - python -c 'import test_clcore_interpolations'
+#  - pytest -v -s test_clcore_interpolations.py
   - pytest -v
 
 doc:

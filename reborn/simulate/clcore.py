@@ -11,22 +11,16 @@ Some environment variables that affect the behaviour of this module:
 
 Using the above variables allows you to run the same code on different devices.
 """
-
 import os
 import sys
-
 import numpy as np
 import pkg_resources
 import pyopencl as cl
 import pyopencl.array
-
 from ..utils import depreciate
-print('Can you hear me?')
 cl_array = cl.array.Array
-
-print('Still?')
 clcore_file = pkg_resources.resource_filename('reborn.simulate', 'clcore.cpp')
-print('Still?')
+
 
 def get_all_gpu_devices():
     r"""
@@ -141,6 +135,7 @@ class ClCore(object):
             print('Building opencl programs')
         self._build_opencl_programs()
 
+
     def get_device_name(self):
         r"""
         Get the string (name) that describes the device that this ClCore instance is using.
@@ -224,12 +219,13 @@ class ClCore(object):
     def _build_opencl_programs(self):
         clcore_file = pkg_resources.resource_filename('reborn.simulate', 'clcore.cpp')
         kern_str = open(clcore_file).read()
+        # print(kern_str)
         build_opts = []
         if self.double_precision:
             build_opts.append('-D')
             build_opts.append('CONFIG_USE_DOUBLE=1')
         build_opts.append('-D')
-        build_opts.append('GROUP_SIZE=%d' % (self.group_size))
+        build_opts.append('GROUP_SIZE=%d' % (self.group_size,))
         self.programs = cl.Program(self.context, kern_str).build(options=build_opts)
 
     def vec4(self, x, dtype=None):
