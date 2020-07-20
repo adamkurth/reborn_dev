@@ -1,5 +1,5 @@
 import numpy as np
-import pyopencl
+# import pyopencl
 from pyopencl import array as clarray
 from reborn.simulate.clcore import ClCore #, help, print_device_info
 cl_array = clarray.Array

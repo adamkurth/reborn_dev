@@ -1,6 +1,5 @@
 FROM ubuntu:20.04
 RUN apt-get -qq -y update
-# RUN apt-get -qq -y install apt-utils
 RUN apt-get -qq -y install curl libgl1-mesa-glx ocl-icd-opencl-dev python3-pyopencl
 RUN python3 -c 'import pyopencl; print(pyopencl.get_platforms())'
 RUN mkdir /tmp/reborn

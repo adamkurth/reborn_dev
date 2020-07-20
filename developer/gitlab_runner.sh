@@ -7,6 +7,8 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     echo 'This script should run in the developer directory.'
     exit 1
 fi
-dock
+
+# Notet that we use the local docker -- if the docker image changed, you'll need to push it to gitlab
+# in order for it to be used.  See developer/docker/build_docker.sh .
 cd ..
 gitlab-runner exec docker --docker-pull-policy="if-not-present" tests

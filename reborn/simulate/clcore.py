@@ -33,7 +33,6 @@ def get_all_gpu_devices():
     all_gpu_devices = []
     for platform in platforms:
         gpu_devices = platform.get_devices(device_type=cl.device_type.GPU)
-        print(gpu_devices)
         if len(gpu_devices) == 0:
             continue
         all_gpu_devices.extend(gpu_devices)

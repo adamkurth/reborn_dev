@@ -2,40 +2,22 @@
 image: registry.gitlab.com/kirianlab/reborn/ubuntu-20.04:latest
 
 before_script:
-#  - which python3
-#  - ls -la /etc/OpenCL/*
-#  - mv /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl.icd /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl-conda.icd
-#  - ln -s /etc/OpenCL/vendors/pocl.icd /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl.icd
-#  - cat /etc/OpenCL/vendors/pocl.icd
-#  - ln -s /usr/bin/python3 /usr/bin/python
-#  - cd developer
-#  - bash check_pyopencl.sh
-#  - cd ..
-  - export PATH=/usr/local/miniconda/bin:$PATH
-  - source activate reborn # This environment is already set up in the docker image
-  - conda list
+  - export PATH=/usr/local/miniconda/bin:$PATH # Set up in developer/docker/build_docker.sh
+  - source activate reborn # Set up in developer/docker/build_docker.sh
+  - conda list # Helpful for debugging in the future...
   - python --version
+  - cat /etc/OpenCL/vendors/pocl.icd
   - cd developer
   - bash check_pyopencl.sh # Check that opencl works
   - bash build_inplace.sh # Compile fortran code
   - cd ..
   - export PYTHONPATH=$(pwd) # Put reborn in the python path
   - python -c 'from reborn import fortran' # Check fortran compilation
-#  - /usr/local/miniconda/envs/reborn/bin/python -c 'import pyopencl; print(pyopencl.get_platforms())' # Check opencl
-#  - python -c 'import pyopencl; print(pyopencl.get_platforms())' # Check opencl
-#  - python -c 'from reborn.simulate import clcore' # Sanity check
-
 
 tests:
   stage: test
   script:
-#  - cat /etc/OpenCL/vendors/pocl.icd
-#  - cd developer
-#  - bash check_pyopencl.sh
-#  - cd ..
   - cd test
-#  - python -c 'import test_clcore_interpolations'
-#  - pytest -v -s test_clcore_interpolations.py
   - pytest -v
 
 doc:
