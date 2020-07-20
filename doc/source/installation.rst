@@ -1,16 +1,17 @@
 Installation
 ============
 
-In principle, setting up reborn should be as simple as including the base directory of the reborn git repository in
-your python path.  You'll probably find that you need to install some dependencies, but most of them are known to
-install with pip or conda.  There may be some extra steps to enable GPU computations, as discussed below.  There are
-some pieces of Fortran code that occasionally need to be compiled manually, also discussed below.
+Setting up reborn consists of compiling the fortran code and including the base directory of the reborn git repository
+in your python path.  Nearly all of the packages that reborn uses are known to install with pip or conda.  The only
+package that is sometimes a nuisance to install is pyopencl, which you will only need if you plan to do GPU
+computations.
 
-Since reborn's interface is not considered "stable", the recommended installation procedure consists of keeping a
+Since reborn's interface is not considered "stable", it is recommended that you keep a
 clone of the reborn git repository where you are doing your analysis or simulations so that you can reproduce your
-results in the future.  You should be mindful of the exact git commit that you use in your analysis, since things may
-change in a month from now.  One way to track the *exact* version of reborn used in your project is to add it as a
-`git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git repository.
+results in the future.  You should consider keeping track of the exact version of reborn,
+down to the exact git commit SHA, since things may change in a month from now.  One way to track the *exact* version of
+reborn is to add it as a `git submodule <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`_ to your project's git
+repository.
 
 Getting reborn
 --------------
@@ -26,13 +27,15 @@ Dependencies
 
 As of 2020, reborn is only tested with Python 3, because
 `Python 2 is finally dead <https://www.python.org/doc/sunset-python-2/>`_.
-The `environment.yml` file lists all of the packages that are installed upon regular testing of reborn, which might be
-understood as the complete list of dependencies.  Here are the current contents of that file:
+The `environment.yml` file lists all of the packages that are installed upon regular testing of reborn.  Here are the
+current contents of that file:
 
 .. literalinclude:: ../../environment.yml
 
-You can import many reborn modules without installing *all* of these dependencies, but if you use a good package
-manager there is little reason to avoid installing all of them.
+Some of the core modules of reborn (e.g. :mod:`detector <reborn.detector>`, :mod:`source <reborn.source>`,
+:mod:`utils <reborn.utils>`) only require |scipy|, but GPU simulations require |pyopencl|, working with CrystFEL
+geometry files requires `cfelpyutils <https://pypi.org/project/cfelpyutils/>`__, and so on.  If you use a good package
+manager you might as well install all of the above dependencies.
 
 Setting up Python with Miniconda
 --------------------------------
@@ -48,37 +51,24 @@ is to execute the following command in the *base directory* of the reborn git re
 
     conda env create --name reborn --file environment.yml
 
-The above line will create the conda environment named ``reborn`` (you may choose a different name if you wish).  You will
-need to *activate* that environment whenever you want to use it:
+The above line will create the conda environment named ``reborn`` (you may choose a different name if you wish).  You
+will need to *activate* that environment whenever you want to use it:
 
 .. code-block:: bash
 
     source activate reborn
 
-If you wish, you can also install reborn into the default ``base`` conda environment (or another environment that
-already exists):
+If you wish, you can also install the dependencies into the default ``base`` conda environment (or another environment
+that already exists):
 
 .. code-block:: bash
 
     conda env update --name base --file environment.yml
 
-Installing reborn with pip
---------------------------
+Installing reborn
+-----------------
 
-The recommended way to install reborn is to use pip as follows:
-
-.. code-block:: bash
-
-    pip install --no-deps --editable .
-
-You should execute the above *from the base directory* of the git repository.  The ``--editable`` flag in the above
-means that you usually do not need to reinstall when you pull the latest updates the reborn git repository.  However,
-it may be necessary to reinstall if Fortran code has changed.
-
-Installing reborn without pip
------------------------------
-
-If you do not want to install with pip, you can simply add the reborn repository to the python search path.  This can be
+If you do not need to "install" reborn; you can simply add the reborn repository to the python search path.  This can be
 done by setting the appropriate environment variable:
 
 .. code-block:: bash
@@ -91,25 +81,45 @@ It might be convenient to add the above line to your `bash startup script
 Compilation of Fortran code
 ---------------------------
 
-We use the f2py program that comes with Numpy to compile Fortran code.  Fortran code should auto-compile for most
-users, but in some circumstances you may wish to compile manually.  This can be done using the ``setup.py`` script as
-follows:
+We use the f2py program that comes with Numpy to compile Fortran code.  Fortran code will often auto-compile on the
+first import, but in some circumstances you may need to compile manually.  This can be done using the ``setup.py``
+script as follows:
 
 .. code-block:: bash
 
-    python setup.py develop
+    export NPY_DISTUTILS_APPEND_FLAGS=1
+    export NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
+    python setup.py build_ext --inplace
 
-You will likely see some warnings due to Numpy or Cython -- they are probably harmless (and not our fault).
+Do note the environment variables above -- in some versions of |numpy|, they are essential.
+
+If you update reborn, you should re-compile the fortran code (unless you are certain that no fortran code was updated).
 
 If the above fails, you can have a look at the ``developer/compile-fortran.sh`` script.  There are occasionally issues
-caused by the mixing of dynamic libraries between different Python versions (not our fault...).
+caused by the mixing of dynamic libraries between different Python versions (not our fault... you need to make sure
+that you maintain a clean python path).
+
+Installing reborn with pip
+--------------------------
+
+It is not recommended to install reborn with pip because you might end up with caches in
+places that you are unaware of, which can cause confusion when you update reborn.  That said, if you really want to use
+pip you should at least consider doing so in a way that accommodates future changes to reborn:
+
+.. code-block:: bash
+
+    pip install --no-deps --editable .
+
+You should execute the above *from the base directory* of the git repository.  The ``--editable`` flag in the above
+means that you usually do not need to reinstall python code when you pull the latest updates the reborn git repository.
+However, it will be necessary to reinstall if Fortran code has changed.
 
 Setting up OpenCL for GPU computing
 -----------------------------------
 
 In some cases, |pyopencl| installs via conda without the need for any further modifications.  However, if you have
 runtime errors, it may be necessary to install drivers and/or developer toolkits that are specific to your GPU and OS.
-You should read through the tips in the official `documentation <https://documen.tician.de/pyopencl/misc.html>`_.  Most
+You should read through the tips in the `pyopencl documentation <https://documen.tician.de/pyopencl/misc.html>`_.  Most
 often, you need to look in the directory ``/etc/OpenCL/vendors`` to see if there are any
 "Installable Client Drivers" (ICDs) available.  If you see the file ``pocl.icd``, then you should at least be able to
 use a CPU as a substitute for a GPU, but you will surely notice that simulations are very slow.  Ideally, you will find
@@ -133,48 +143,32 @@ You can simply move into the test directory and run |pytest|:
     cd test
     pytest
 
-With some luck, you will get a nice clean output that looks like the following:
-
-.. code-block:: bash
-
-    ============================= test session starts ==============================
-    platform darwin -- Python 3.6.7, pytest-3.9.3, py-1.7.0, pluggy-0.8.0
-    rootdir: /Users/rkirian/work/projects/reborn/test, inifile:collected 36 items
-
-    test_analysis.py ..                                                      [  5%]
-    test_clcore.py .....                                                     [ 19%]
-    test_clcore_interpolations.py .                                          [ 22%]
-    test_crystal.py .....                                                    [ 36%]
-    test_crystfel.py .                                                       [ 38%]
-    test_detector.py ....                                                    [ 50%]
-    test_interpolations.py .                                                 [ 52%]
-    test_minimal_dependencies.py .                                           [ 55%]
-    test_numpy.py ...                                                        [ 63%]
-    test_simulate_atoms.py ...                                               [ 72%]
-    test_simulate_clcore.py ..                                               [ 77%]
-    test_simulate_cromer_mann.py .                                           [ 80%]
-    test_simulations.py .                                                    [ 83%]
-    test_target_density.py ....                                              [ 94%]
-    test_utils.py ..                                                         [100%]
-
-    ========================== 36 passed in 19.55 seconds ==========================
-
 Linux notes
 -----------
 
-Below are the standard steps that are tested on a clean Ubuntu Linux install every time the reborn master branch is
-updated.  The script ``developer/ubuntu-install.sh`` is executed from the base directory of the git repository.  Here
-are the current contents of that script:
+You might need to install a Fortran compiler.  On Ubuntu linux this is done easily:
 
-.. literalinclude:: ../../ubuntu-setup.sh
+.. code-block:: bash
+
+    apt-get install gfortran
+
+For pyopencl, it might be helpful to install pocl:
+
+.. code-block:: bash
+
+    apt-get install pocl-opencl-icd
+
+For pyopengl, the following might help:
+
+.. code-block:: bash
+
+    apt-get install libgl1-mesa-glx
+
 
 Mac OS notes
 ------------
 
-On Mac OS you need to follow the relevant instructions to install |Miniconda|.  The subsequent steps are *usually*
-identical to those you would follow for a Linux setup.  If you do not want to use |Miniconda|, then you will need to
-figure out how to get all the dependencies installed.  It might help to install xcode, Homebrew, or similar, to get
-gfortran, for example.
+It might help to install xcode, Homebrew, or similar, to get gfortran, for example.
 
 Windows 10 Notes
 ----------------
@@ -260,13 +254,16 @@ If you get a runtime error involving
 
     pyopencl.cffi_cl.LogicError: clGetPlatformIDs failed:
 
-then please read the relevant section conerning GPUs above.
+then please read the relevant section concerning "Installable Client Drivers" (ICDs) above.
+
+If you get a segmentation fault immediately when you try to use pyopencl, you might need to try a different ICD.  For
+example, if the ICD set up by conda fails, try installing one using apt.
 
 **Intel GPUs on Ubuntu**
 
 If you have an Ubuntu-like OS and a laptop with an intel GPU you might find
 `this github page <https://github.com/intel/compute-runtime/releases>`_ helpful.  After following the instructions
-there, you should then read the relevant section conerning GPUs above.
+there, you should then read the relevant section concerning GPUs above.
 
 **Scientific Linux 6**
 

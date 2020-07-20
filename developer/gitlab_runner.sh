@@ -12,3 +12,7 @@ fi
 # in order for it to be used.  See developer/docker/build_docker.sh .
 cd ..
 gitlab-runner exec docker --docker-pull-policy="if-not-present" tests
+
+if [[ "$1" == "doc" ]]; then
+  gitlab-runner exec docker --docker-pull-policy="if-not-present" doc
+fi

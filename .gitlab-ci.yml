@@ -2,34 +2,37 @@
 image: registry.gitlab.com/kirianlab/reborn/ubuntu-20.04:latest
 
 before_script:
+  - export reborn=$(pwd)
   - export PATH=/usr/local/miniconda/bin:$PATH # Set up in developer/docker/build_docker.sh
+  - export PYTHONPATH=$reborn # Put reborn git repo in the python path
+  - cd $reborn/developer
+  - bash test_minimal_dependencies.sh
+  - bash cleanup_everything.sh
   - source activate reborn # Set up in developer/docker/build_docker.sh
   - conda list # Helpful for debugging in the future...
   - python --version
-  - cat /etc/OpenCL/vendors/pocl.icd
-  - cd developer
+  - cat /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl.icd
   - bash check_pyopencl.sh # Check that opencl works
-  - bash build_inplace.sh # Compile fortran code
-  - cd ..
-  - export PYTHONPATH=$(pwd) # Put reborn in the python path
+#  - bash build_inplace.sh # Compile fortran code
+  - cd $reborn
   - python -c 'from reborn import fortran' # Check fortran compilation
 
 tests:
   stage: test
   script:
-  - cd test
+  - cd $reborn/test
   - pytest -v
 
 doc:
   script:
-  - cd doc
+  - cd $reborn/doc
   - bash update_docs.sh
   except:
   - master
 
 pages:
   script:
-  - cd doc
+  - cd $reborn/doc
   - bash update_docs.sh
   - cp -r build/html ../public
   artifacts:
