@@ -6,12 +6,15 @@
       <w>cryst</w>
       <w>cspad</w>
       <w>dmap</w>
+      <w>elif</w>
       <w>fluence</w>
+      <w>frac</w>
       <w>henke</w>
       <w>hubbel</w>
       <w>luts</w>
       <w>lysozyme</w>
       <w>miniconda</w>
+      <w>ndarray</w>
       <w>opencl</w>
       <w>opengl</w>
       <w>pnccd</w>

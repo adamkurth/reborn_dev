@@ -1,14 +1,24 @@
-image: ubuntu:20.04
+# This image has the dependencies of reborn pre-installed.  It was created with developer/docker/build_docker.sh
+image: registry.gitlab.com/kirianlab/reborn/ubuntu-20.04:latest
 
 before_script:
-  - export DEBIAN_FRONTEND=noninteractive
-  - source ubuntu-setup.sh
+  - export PATH=/usr/local/miniconda/bin:$PATH # Set up in developer/docker/build_docker.sh
+  - source activate reborn # Set up in developer/docker/build_docker.sh
+  - conda list # Helpful for debugging in the future...
+  - python --version
+  - cat /etc/OpenCL/vendors/pocl.icd
+  - cd developer
+  - bash check_pyopencl.sh # Check that opencl works
+  - bash build_inplace.sh # Compile fortran code
+  - cd ..
+  - export PYTHONPATH=$(pwd) # Put reborn in the python path
+  - python -c 'from reborn import fortran' # Check fortran compilation
 
 tests:
   stage: test
   script:
   - cd test
-  - pytest
+  - pytest -v
 
 doc:
   script:

@@ -1,0 +1,10 @@
+FROM ubuntu:20.04
+RUN apt-get -qq -y update
+RUN apt-get -qq -y install apt-utils
+RUN apt-get -qq -y install curl libgl1-mesa-glx ocl-icd-opencl-dev python3-pyopencl
+RUN python3 -c 'import pyopencl; print(pyopencl.get_platforms())'
+RUN curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh --output /tmp/miniconda.sh
+RUN bash /tmp/miniconda.sh -b -p /usr/local/miniconda
+RUN /usr/local/miniconda/bin/conda update -n base -c defaults conda
+RUN /usr/local/miniconda/bin/conda install -c conda-forge python=3.7 scipy h5py pyopencl pocl
+RUN /usr/local/miniconda/bin/python -c 'import pyopencl; print(pyopencl.get_platforms())'

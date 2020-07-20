@@ -4,6 +4,7 @@ auto_examples
 ignore
 hidden
 build
+builds
 old
 temp
 .cache

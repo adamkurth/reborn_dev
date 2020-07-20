@@ -11,21 +11,14 @@ Some environment variables that affect the behaviour of this module:
 
 Using the above variables allows you to run the same code on different devices.
 """
-
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import os
 import sys
-
 import numpy as np
 import pkg_resources
 import pyopencl as cl
 import pyopencl.array
-
 from ..utils import depreciate
-
 cl_array = cl.array.Array
-
 clcore_file = pkg_resources.resource_filename('reborn.simulate', 'clcore.cpp')
 
 
@@ -40,7 +33,6 @@ def get_all_gpu_devices():
     all_gpu_devices = []
     for platform in platforms:
         gpu_devices = platform.get_devices(device_type=cl.device_type.GPU)
-        print(gpu_devices)
         if len(gpu_devices) == 0:
             continue
         all_gpu_devices.extend(gpu_devices)
@@ -82,7 +74,7 @@ class ClCore(object):
     when memory moves between CPU and GPU memory.
     """
 
-    def __init__(self, context=None, queue=None, group_size=32, double_precision=False):
+    def __init__(self, context=None, queue=None, group_size=32, double_precision=False, debug=0):
         r"""
         An instance of this class will attempt to help you manage an opencl context and command queue.
         You may choose the precision that you desire from the beginning, and this will be taken care of
@@ -104,30 +96,44 @@ class ClCore(object):
             double_precision (bool): True if double-precision is desired
         """
 
+        if debug > 0:
+            print('Creating ClCore')
+
         self.group_size = None
         self.programs = None
         self.double_precision = double_precision
 
         # Setup the context
         if context is None:
+            if debug > 0:
+                print('Creating GPU context')
             self.context = create_some_gpu_context()
         else:
             self.context = context
 
         # Setup the queue
         if queue is None:
+            if debug > 0:
+                print('Creating queue')
             self.queue = cl.CommandQueue(self.context)
         else:
             self.queue = queue
 
         # Abstract real and complex types to allow for double/single
+        if debug > 0:
+            print('Setup precision.  Double = %d' % double_precision)
         self._setup_precision(double_precision)
 
         # Setup the group size.
+        if debug > 0:
+            print('Setup group size: %d' % group_size)
         self.set_groupsize(group_size)
 
         # setup the programs
+        if debug > 0:
+            print('Building opencl programs')
         self._build_opencl_programs()
+
 
     def get_device_name(self):
         r"""
@@ -212,12 +218,13 @@ class ClCore(object):
     def _build_opencl_programs(self):
         clcore_file = pkg_resources.resource_filename('reborn.simulate', 'clcore.cpp')
         kern_str = open(clcore_file).read()
+        # print(kern_str)
         build_opts = []
         if self.double_precision:
             build_opts.append('-D')
             build_opts.append('CONFIG_USE_DOUBLE=1')
         build_opts.append('-D')
-        build_opts.append('GROUP_SIZE=%d' % (self.group_size))
+        build_opts.append('GROUP_SIZE=%d' % (self.group_size,))
         self.programs = cl.Program(self.context, kern_str).build(options=build_opts)
 
     def vec4(self, x, dtype=None):
@@ -1357,7 +1364,9 @@ class ClCore(object):
 #         return Amps
 #
 
+
 def print_device_info(device):
+    r""" Print some useful information about available devices. """
     d = device
     print("")
     # Print out some information about the devices
@@ -1377,8 +1386,8 @@ def print_device_info(device):
     dim = d.max_work_item_sizes
     print("    Max Work-group Dims:(", dim[0], " ".join(map(str, dim[1:])), ")")
 
-def help(extended=False):
 
+def help(extended=False):
     r"""
     Print out some useful information about platforms and devices that are
     available for running simulations.

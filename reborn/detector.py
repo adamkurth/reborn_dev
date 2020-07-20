@@ -1020,17 +1020,18 @@ class RadialProfiler():
 def save_pad_masks(file_name, mask_list, packbits=True):
     r"""
     Save list of 2D mask arrays in a compressed format.  It is assumed that masks consist of values of zero or one.
-    We presently use the :func:`numpy.packbits` function along with numpy.savez_compressed function.
+    We presently use the :func:`numpy.packbits` function along with :func:`numpy.savez_compressed` function.
 
-    Note: The file name extension will be .mask.  If you provide a name without an extension, or with a different
-    extension, the extension will be changed.  It is recommended that you explicitly provide the extension.
+    .. note::
+        The file name extension will be '.mask'.  If you provide a name without an extension, or with a different
+        extension, *the extension will be changed*.  It is recommended that you explicitly provide the extension.
 
     Arguments:
         file_name (str): Path to file that will be saved.
         mask_list (list): A list of |ndarray| masks.  Will be converted to bool type before saving.
-        packbits (bool): Specify if numpy.packbits should be used to reduce file size.  (Default: True).
+        packbits (bool): Specify if :func:`numpy.packbits` should be used to reduce file size.  (Default: True).
 
-    Returns: File name string (will have *.mask extension)
+    Returns: str: File name
     """
     if not file_name.endswith('.mask'):
         file_name += '.mask'
