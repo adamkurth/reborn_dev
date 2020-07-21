@@ -5,4 +5,6 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit
 fi
 
+echo cleaning docs
 rm -r ../doc/build ../doc/source/api ../doc/source/auto_examples &> /dev/null
+echo done

@@ -1,9 +1,20 @@
 #!/bin/bash
 
-if [[ "$(conda env list | grep reborn_minimal)" == "" ]]; then
-  conda create --name reborn_minimal python=3 pytest scipy h5py
+if [[ "$(conda env list | grep reborn-minimal)" == "" ]]; then
+  conda create --name reborn-minimal python=3.7 scipy
 fi
 
-source activate reborn_minimal
-cd ..
-pytest test/test_minimal_dependencies.py
+source activate reborn-minimal
+./build_inplace.sh
+python << EOF
+import reborn
+assert reborn is not None
+from reborn import detector
+p = detector.PADGeometry()
+assert p is not None
+from reborn import source
+b = source.Beam()
+assert b is not None
+from reborn import utils
+assert utils is not None
+EOF

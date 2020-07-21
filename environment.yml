@@ -2,14 +2,14 @@ name: reborn
 channels:
   - conda-forge
 dependencies:
-  - python=3.7
+  - python
 #  - future
   - scipy
   - h5py
   - matplotlib
   - numba
   - pyopencl
-  - pocl
+#  - pocl
 #  - ocl-icd-system
   - sphinx
   - pytest
@@ -19,9 +19,9 @@ dependencies:
   - xraylib
   - pillow
   - memory_profiler
-  - fortran-compiler
-  - ipython
-  - make
+#  - fortran-compiler
+#  - ipython
+#  - make
   - pip
   - pip:
     - cfelpyutils
