@@ -9,9 +9,10 @@ class ylmIntegration(object):
 
         f(\theta, \phi) = \sum_{lm} a_{lm} Y_{lm}(\theta, \phi) ;.
 
-    The spherical harmonics :math:`Y_{lm}(\theta, \phi)` are assumed to be the same as the |scipy| function
-    :func:`scipy.special.sph_harm`; if you define :math:`f(\theta, \phi) = Y_{l'm'}(\theta, \phi)` you will get the
-    expected
+    The spherical harmonics :math:`Y_{lm}(\theta, \phi)` are the same as the |scipy| function
+    :func:`scipy.special.sph_harm`, HOWEVER, the :math:`\theta` and :math:`\phi` variables in the |scipy| documentation
+    are switched when compared to the common physics convention used here.  The normalization is defined so that
+    setting :math:`f(\theta, \phi) = Y_{l'm'}(\theta, \phi)` you will result in
 
     .. math::
 
