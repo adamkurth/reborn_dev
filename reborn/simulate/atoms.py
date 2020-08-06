@@ -284,17 +284,43 @@ def hubbel_henke_scattering_factors(q_mags, atomic_number, photon_energy):
     return f0 + df
 
 
-def cromer_mann_scattering_factors(q_mags, atomic_number):
+def cromer_mann_scattering_factors(q_mags, atomic_numbers):
+    r"""
+    Get Cromer-Mann scattering factors (|Cromer1968|) for a range of atomic numbers and q magnitudes.  The Cromer-Mann
+    formula is
 
-    return
+    .. math::
 
+        f(q) = c + \sum_{i=1}^4 a_i \exp[-b_i q^2 / 16\pi^2] \\
 
+    Note: The Cromer-Mann tables contain the :math:`a_i` and :math:`b_i` coefficients for ions, but this function only
+    works with neutral atoms for simplicity.  You may use :func:`get_cmann_form_factors` if you want to work with
+    ions.
+
+    Args:
+        atomic_numbers (|ndarray|): Array of atomic numbers.  Will be converted to 1D |ndarray| of int type.
+        q_mags (|ndarray|): Array of q magnitudes.  Will be converted to 1D |ndarray| or floats.
+
+    Returns:
+        |ndarray|: Atomic scattering factor array with shape (len(atomic_numbers), len(q_mags))
+    """
+    atomic_numbers = np.atleast_1d(atomic_numbers).ravel().astype(int)
+    q2 = np.atleast_1d(q_mags).ravel()**2/16/np.pi**2/1e20
+    out = np.zeros((atomic_numbers.size, q_mags.size))
+    for i in range(len(atomic_numbers)):
+        z = atomic_numbers[i]
+        if (z > 92) or (z < 1):
+            raise ValueError('Atomic number is out of range.')
+        a_1, a_2, a_3, a_4, b_1, b_2, b_3, b_4, c = _cmann_coeffs_neutral[z-1, :]
+        out[i, :] = c + a_1*np.exp(-b_1*q2) + a_2*np.exp(-b_2*q2) + a_3*np.exp(-b_3*q2) + a_4*np.exp(-b_4*q2)
+    out = np.squeeze(out)
+    return out
 
 
 def get_cmann_form_factors(cman, q):
     r"""
-    Generates the form factors :math:`f_0(q)` from the model of |Cromer1968|.  This will be depreciated to favor an
-    interface that takes the atomic numbers rather than the cmann coefficients.
+    Generates the form factors :math:`f_0(q)` from the model of |Cromer1968|.  Needs documentation - ask Derek Mendez.
+    If you want to work with neutral atoms, use :func:`cromer_mann_scattering_factors` instead.
 
     Arguments:
         cman (dict): Dictionary containing {atomic_number : array of cman parameters}
@@ -332,9 +358,9 @@ def get_cmann_form_factors(cman, q):
 @utils.memoize
 def get_cromermann_parameters(atomic_numbers=None):
     r"""
-    Get Cromer-Mann parameters for each atom type
+    Get Cromer-Mann parameters for each atom type.
 
-    Modified from tjlane/thor.git.
+    Modified from tjlane/thor.git by Derek Mendez.
 
     Arguments:
         atomic_numbers (|ndarray|, int) : A numpy array of the atomic numbers of each atom in the system.
