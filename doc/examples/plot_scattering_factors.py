@@ -25,9 +25,6 @@ eV = const.value('electron volt')
 save_figures = False
 
 # %%
-# There are several numerical approaches to simulating the scattering amplitudes from objects.  At high resolutions,
-# atomistic features become important, which is why this example exists.
-#
 # Under the first Born approximation, the diffraction intensity from an ensemble of atoms is proportional to the
 # following:
 #
@@ -37,14 +34,14 @@ save_figures = False
 #
 # where the scattering factor of the :math:`n`th atom is :math:`f_n(q)`.  The above expresses the usual approximation
 # where all atoms are assumed to be spherically symmetric.  To first approximation, the atomic scattering
-# factors are equal to the Fourier transforms of the electron densities.  When we are near resonant conditions, we need
-# to include dispersion corrections.  We write the energy- and :math:`q`-dependent scattering factors as
+# factors are equal to the Fourier transforms of the electron densities and are independent of wavelength.  When the
+# photon energy is near resonance, we need to include a dispersion correction that adds a complex-valued
+# energy-dependent scalar.
+# We therefor write the general energy- and :math:`q`-dependent scattering factors as
 #
 # .. math::
 #
-#    f(q, E) = f_0(q) + f'(E) + i f''(E)
-#
-# where :math:`f_0(q)` is the electron density, and the other two terms are the dispersion corrections.
+#    f(q, E) = f_0(q) + f'(E) + i f''(E) \;.
 #
 # At very low resolutions, we only need to know :math:`f(0, E)`, which are found in the tables of |Henke1993| (they are
 # accessible from reborn as shown below).  A very simple approximation is :math:`f \approx Z`, where :math:`Z` is the
@@ -52,9 +49,8 @@ save_figures = False
 
 # %%
 # In many cases, we prefer not to use the direct summation in equation :eq:`direct`.  For example, when there are huge
-# numbers of atoms, the direct sum can be quite costly.  We may instead consider taking the Fourier transform
-#
-#
+# numbers of atoms, the direct sum can be quite costly.  It might be faster to first build a regular grid of scattering
+# density and then take the Fast Fourier Transform (FFT).
 
 # %%
 # Let's start by getting the atomic form factor of hydrogen.  We will then Fourier transform the form factor to get the
@@ -178,11 +174,13 @@ q_mags = 1e10*4*np.pi*np.arange(1000)*3/1000
 E = 8000*eV
 f_henke = np.zeros_like(q_mags)+np.abs(atoms.henke_scattering_factors(z, E))
 f_hubbel = atoms.hubbel_form_factors(q_mags, z)  # Hubbel atomic form factors from xraylib
+f_cmann = atoms.cromer_mann_scattering_factors(q_mags, z) + f_henke - z
 f_xraylib = atoms.xraylib_scattering_factors(q_mags, z, E)  # Hubbel form factors with xraylib dispersion
 f_hubbel_henke = atoms.hubbel_henke_scattering_factors(q_mags, z, E)
 
 plt.subplot(122)
 plt.semilogy(q_mags/1e10, np.abs(f_hubbel), label='Hubbel')
+plt.semilogy(q_mags/1e10, np.abs(f_cmann), label='Cromer-Mann/Henke')
 plt.semilogy(q_mags/1e10, np.abs(f_xraylib), label='xraylib')
 plt.semilogy(q_mags/1e10, np.abs(f_henke), label='Henke')
 plt.semilogy(q_mags/1e10, np.abs(f_hubbel_henke), label='Hubbel/Henke')
@@ -197,3 +195,4 @@ plt.show()
 # %%
 # In the near future, we will update this example to include the |Cromer1968| Gaussian approximations to the scattering
 # factors...
+

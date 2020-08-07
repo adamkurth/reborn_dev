@@ -68,9 +68,13 @@ See :ref:`developers_anchor`.
 Acknowledgements
 ----------------
 
-The reborn package is maintained by Rick Kirian (rkirian at asu dot edu) with conbributions from Derek Mendez,
-Joe Chen, Kevin Schmidt, Kosta Karpos, Rick Hewitt, and Cameron Howard.  Code found in reborn has been inspired by
-numerous open-source software packages listed above.
+The reborn package is maintained by `Rick Kirian <https://www.physics.asu.edu/content/richard-kirian>`_
+with contributions from Derek Mendez, Joe Chen, Kevin Schmidt, Kosta Karpos, Rick Hewitt, and Cameron Howard.  Code
+found in reborn has been inspired by numerous open-source software packages listed above.  Development is supported by
+National Science Foundation awards
+`1231306 <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1231306>`__,
+`1943448 <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1943448>`__,
+and `1565180 <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1565180>`__.
 
 Contents
 --------
