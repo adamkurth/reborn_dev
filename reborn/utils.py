@@ -331,15 +331,19 @@ def max_pair_distance(vecs):
 
 def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_mode="truncate"):
     r"""
-    Trilinear insertion on a regular grid with arbitrary sample points.
-    The boundary is defined as [x_min-0.5, x_max+0.5).
-    This function returns two arrays, dataout and weightout, you need to divide dataout
-    by weightout (taking care to deal with zeros in weightout) to get the correct trilinear
-    insertion result. This is so that the function can be used to sum over many trilinearly
-    inserted arrays in for example a 3D diffracted intensity merge.
+    Trilinear insertion on a regular grid with arbitrarily positioned sample points.
+
+    This function returns two arrays, dataout and weightout.
+    weightout is a 3D array containing the accumulated trilinear weights.
+    dataout is the accumulated trilinearly inserted values.
+    One needs to divide dataout by weightout (taking care to deal with zeros in weightout) to get the 
+    correct trilinear insertion result. 
+    This is so that the function can be used to sum over many trilinearly inserted arrays in 
+    for example a 3D diffracted intensity merge.
 
     Note 1: All input arrays should be C contiguous.
     Note 2: This code will break if you put a 1 in any of the N_bin entries.
+    Note 3: The boundary is defined as [x_min-0.5, x_max+0.5).
 
     Arguments:
         data_coord (Nx3 numpy array) : Coordinates (x,y,z) of the data points that you wish to insert into
@@ -358,7 +362,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
 
         - **dataout** (*3D numpy array*) : Trilinearly summed values that needs to be divided by weightout to give the
           trilinearly inserted values.
-        - **weightout** (*3D numpy array*) : Number of times each voxel has a value put into it.
+        - **weightout** (*3D numpy array*) : Cumulative trilinear weights.
     """
 
     # Checks
@@ -391,7 +395,10 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
     # Check if the non-1D arrays are c_contiguous
     assert data_coord.flags.c_contiguous
 
-    # Convert to appropriate types
+    # Store the datatype of the incoming data
+    data_val_type = data_val.dtype
+
+    # Convert to appropriate types for the insertion
     data_coord = data_coord.astype(np.double)
     data_val = data_val.astype(np.complex128)
     x_min = x_min.astype(np.double)
@@ -491,6 +498,11 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
     # # For locations where weightout is zero, dataout should also be zero (because no values were inserted),
     # # deal with this case by setting weightout to 1.
     # assert np.sum(dataout[weightout == 0]) == 0
+
+
+    # If the original datatype is not complex, then return only the real part.
+    if data_val_type != np.complex128: 
+        dataout = np.real(dataout)
 
     return dataout, weightout
 

@@ -7,6 +7,7 @@ import numpy as np
 # And the action of the trilinear_insert() is to insert the values measured by the detector
 # into a 3D regularly grided array.
 
+"""
 def test_1():
     data_coord = np.array([[0.1, 0, 0]])
     data_val = np.array([1])
@@ -1012,3 +1013,85 @@ def test_31(): # Wrap-around test 10 - wrap-around with interpolation on the bou
     dataout /= weightout
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
+"""
+
+
+def test_32():
+    small = 1e-10
+    data_coord = np.array([[small, small, small], [1-small, 1-small, 1-small]])
+    data_val = np.array([1, 1])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([4, 4, 4])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([2, 2, 2])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    ans_dataout = np.array([[[0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.]]])
+    ans_dataout_sum = 8.0
+
+    assert np.sum(np.abs(dataout - ans_dataout)) < 1e-9
+    assert np.sum(np.abs(np.sum(dataout) - ans_dataout_sum)) < 1e-9
+
+
+
+def test_33():
+    small = 1e-10
+    data_coord = np.array([[small, small, small], [1-small, 1-small, 1-small]])
+    data_val = np.array([1, 1])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([4, 4, 4])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([2, 2, 2])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    ans_dataout = np.array([[[0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.]]])
+    ans_dataout_sum = 8.0
+
+    assert np.sum(np.abs(dataout - ans_dataout)) < 1e-9
+    assert np.sum(np.abs(np.sum(dataout) - ans_dataout_sum)) < 1e-9
