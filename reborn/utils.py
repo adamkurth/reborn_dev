@@ -334,7 +334,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
     Trilinear insertion on a regular grid with arbitrarily positioned sample points.
 
     This function returns two arrays, dataout and weightout.
-    weightout is a 3D array containing the number of times a value has fallen into a voxel.
+    weightout is a 3D array containing the accumulated trilinear weights.
     dataout is the accumulated trilinearly inserted values.
     One needs to divide dataout by weightout (taking care to deal with zeros in weightout) to get the 
     correct trilinear insertion result. 
@@ -362,7 +362,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
 
         - **dataout** (*3D numpy array*) : Trilinearly summed values that needs to be divided by weightout to give the
           trilinearly inserted values.
-        - **weightout** (*3D numpy array*) : Number of times each voxel has a value put into it.
+        - **weightout** (*3D numpy array*) : Cumulative trilinear weights.
     """
 
     # Checks
