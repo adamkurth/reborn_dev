@@ -390,7 +390,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
         print('Warning: Values in data_coord is greater than one or more of the limits specified in x_max. \n' + 
               'I.e., one or more points are outside the insertion volume. \n' + 
               'If this is intended, please disregard this message. \n' +
-              'Else you cold execute the following code: np.max(data_coord, axis=0) and compare against x_max to see. \n')
+              'Else you could execute the following code: np.max(data_coord, axis=0) and compare against x_max to see. \n')
 
     # Check if the non-1D arrays are c_contiguous
     assert data_coord.flags.c_contiguous

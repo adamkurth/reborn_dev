@@ -5,5 +5,6 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit
 fi
 
+export PYTHONPATH=$(cd ..; pwd):$PYTHONPATH
 cd ../test
 pytest $@
