@@ -7,6 +7,7 @@ import numpy as np
 # And the action of the trilinear_insert() is to insert the values measured by the detector
 # into a 3D regularly grided array.
 
+
 def test_1():
     data_coord = np.array([[0.1, 0, 0]])
     data_val = np.array([1])
@@ -21,14 +22,15 @@ def test_1():
                     [ 0. ,  0. ,  0. ]],
 
                    [[ 0. ,  0. ,  0. ],
-                    [ 0. ,  0.9,  0. ],
+                    [ 0. ,  1.0,  0. ],
                     [ 0. ,  0. ,  0. ]],
 
                    [[ 0. ,  0. ,  0. ],
-                    [ 0. ,  0.1,  0. ],
+                    [ 0. ,  1.0,  0. ],
                     [ 0. ,  0. ,  0. ]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -50,14 +52,15 @@ def test_2():
                     [ 0.   ,  0.   ,  0.   ]],
 
                    [[ 0.   ,  0.   ,  0.   ],
-                    [ 0.   ,  0.125,  0.125],
-                    [ 0.   ,  0.125,  0.125]],
+                    [ 0.   ,  1.0,  1.0],
+                    [ 0.   ,  1.0,  1.0]],
 
                    [[ 0.   ,  0.   ,  0.   ],
-                    [ 0.   ,  0.125,  0.125],
-                    [ 0.   ,  0.125,  0.125]]])
+                    [ 0.   ,  1.0,  1.0],
+                    [ 0.   ,  1.0,  1.0]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -132,17 +135,17 @@ def test_5():
     x_min = np.array([-1, -1, -1])
     x_max = np.array([1, 1, 1])
 
-    ans = np.array([[[ 0.125,  0.125,  0.   ],
-            [ 0.125,  0.125,  0.   ],
-            [ 0.   ,  0.   ,  0.   ]],
+    ans = np.array([[[ 1.0,  1.0,  0.   ],
+                    [ 1.0,  1.0,  0.   ],
+                    [ 0.   ,  0.   ,  0.   ]],
 
-           [[ 0.125,  0.125,  0.   ],
-            [ 0.125,  0.125,  0.   ],
-            [ 0.   ,  0.   ,  0.   ]],
+                   [[ 1.0,  1.0,  0.   ],
+                    [ 1.0,  1.0,  0.   ],
+                    [ 0.   ,  0.   ,  0.   ]],
 
-           [[ 0.   ,  0.   ,  0.   ],
-            [ 0.   ,  0.   ,  0.   ],
-            [ 0.   ,  0.   ,  0.   ]]])
+                   [[ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.   ,  0.   ],
+                    [ 0.   ,  0.   ,  0.   ]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
@@ -190,7 +193,7 @@ def test_7(): # Boundary padding test
     x_min = np.array([-1, -1, -1])
     x_max = np.array([1, 1, 1])
 
-    ans = np.array([[[ 0.12507502,  0.        ,  0.        ],
+    ans = np.array([[[ 1.0,  0.        ,  0.        ],
             [ 0.        ,  0.        ,  0.        ],
             [ 0.        ,  0.        ,  0.        ]],
 
@@ -230,7 +233,7 @@ def test_8(): # Boundary padding test
 
            [[ 0.        ,  0.        ,  0.        ],
             [ 0.        ,  0.        ,  0.        ],
-            [ 0.        ,  0.        ,  0.12507502]]])
+            [ 0.        ,  0.        ,  1]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
@@ -279,8 +282,8 @@ def test_10():
     x_max = np.array([1, 1, 1])
 
     ans = np.array([[[  0.     ,   0.     ,   0.     ],
-            [  0.     ,   0.     ,  62.22944],
-            [  0.     ,   0.     ,  15.55736]],
+            [  0.     ,   0.     ,  213.7],
+            [  0.     ,   0.     ,  213.7]],
 
            [[  0.     ,   0.     ,   0.     ],
             [  0.     ,   0.     ,   0.     ],
@@ -322,12 +325,12 @@ def test_11():
             [ 0.        ,  0.        ,  0.        ]],
 
            [[ 0.        ,  0.        ,  0.        ],
-            [ 0.        ,  0.076496791,  0.112277353],
-            [ 0.        ,  0.105961945,  0.058409726]],
+            [ 0.        ,  1.0,  1.0],
+            [ 0.        ,  1.0,  1.0]],
 
            [[ 0.        ,  0.        ,  0.        ],
-            [ 0.        ,  0.174489971,  0.112437026],
-            [ 0.        ,  0.256917323,  0.103009865]]])
+            [ 0.        ,  1.0,  1.0],
+            [ 0.        ,  1.0,  1.0]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
@@ -352,11 +355,11 @@ def test_12():
             [ 0.  ,  0.  ,  0.  ,  0.  ]],
 
            [[ 0.  ,  0.  ,  0.  ,  0.  ],
-            [ 0.  ,  0.25,  0.25,  0.  ],
+            [ 0.  ,  1.0,   1.0,  0.  ],
             [ 0.  ,  0.  ,  0.  ,  0.  ]],
 
            [[ 0.  ,  0.  ,  0.  ,  0.  ],
-            [ 0.  ,  0.25,  0.25,  0.  ],
+            [ 0.  ,  1.0 ,  1.0,  0.  ],
             [ 0.  ,  0.  ,  0.  ,  0.  ]],
 
            [[ 0.  ,  0.  ,  0.  ,  0.  ],
@@ -388,14 +391,14 @@ def test_13():
             [ 0.   ,  0.   ,  0.   ,  0.   ]],
 
            [[ 0.   ,  0.   ,  0.   ,  0.   ],
-            [ 0.   ,  0.   ,  6.   ,  2.   ],
-            [ 0.   ,  0.   ,  0.15 ,  0.25 ],
+            [ 0.   ,  0.   ,  10   ,  10   ],
+            [ 0.   ,  0.   ,  1 ,  1 ],
             [ 0.   ,  0.   ,  0.   ,  0.   ],
             [ 0.   ,  0.   ,  0.   ,  0.   ]],
 
            [[ 0.   ,  0.   ,  0.   ,  0.   ],
-            [ 0.   ,  0.   ,  1.5  ,  0.5  ],
-            [ 0.   ,  0.   ,  0.225,  0.375],
+            [ 0.   ,  0.   ,  10  ,  10  ],
+            [ 0.   ,  0.   ,  1,  1],
             [ 0.   ,  0.   ,  0.   ,  0.   ],
             [ 0.   ,  0.   ,  0.   ,  0.   ]]])
 
@@ -463,14 +466,14 @@ def test_15(): # More-than-one-patterns test
             [ 0.   ,  0.   ,  0.   ,  0.   ]],
 
            [[ 0.   ,  0.   ,  0.   ,  0.   ],
-            [ 0.   ,  0.   ,  6.   ,  2.   ],
-            [ 0.   ,  0.   ,  0.15 ,  0.25 ],
+            [ 0.   ,  0.   ,  10   ,  10   ],
+            [ 0.   ,  0.   ,  1 ,  1 ],
             [ 0.   ,  0.   ,  0.   ,  0.   ],
             [ 0.   ,  0.   ,  0.   ,  0.   ]],
 
            [[ 0.   ,  0.   ,  0.   ,  0.   ],
-            [ 0.   ,  0.   ,  1.5  ,  0.5  ],
-            [ 0.   ,  0.   ,  0.225,  0.375],
+            [ 0.   ,  0.   ,  10   ,  10  ],
+            [ 0.   ,  0.   ,  1, 1],
             [ 0.   ,  0.   ,  0.   ,  0.   ],
             [ 0.   ,  0.   ,  0.   ,  0.   ]]])
 
@@ -500,29 +503,29 @@ def test_16():
     x_min = np.array([-100, -99, -71])
     x_max = np.array([200, 300, -2])
 
-    ans = np.array([[[ 0.44481935,  0.07150083,  0.        ,  0.        ,  0.        ,
+    ans = np.array([[[ 1.3068219,  1.3068219,  0.        ,  0.        ,  0.        ,
           0.        ],
-        [ 0.03423333,  0.00550271,  0.        ,  0.        ,  0.        ,
+        [ 1.3068219,  1.3068219,  0.        ,  0.        ,  0.        ,
           0.        ],
         [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
           0.        ],
         [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
           0.        ]],
 
-       [[ 0.60057795,  0.09653766,  0.        ,  0.        ,  0.        ,
+       [[ 1.3068219,  1.3068219,  0.        ,  0.        ,  0.        ,
           0.        ],
-        [ 0.04622053,  0.00742955,  0.        ,  0.07410725,  2.30167695,
+        [ 1.3068219,  1.3068219,  0.        ,  6.04473423,  6.04473423,
           0.        ],
-        [ 0.        ,  0.        ,  0.        ,  0.03272169,  1.01629419,
+        [ 0.        ,  0.        ,  0.        ,  6.04473423,  6.04473423,
           0.        ],
         [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
           0.        ]],
 
        [[ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
           0.        ],
-        [ 0.        ,  0.        ,  0.        ,  0.05669123,  1.76075739,
+        [ 0.        ,  0.        ,  0.        ,  6.04473423,  6.04473423,
           0.        ],
-        [ 0.        ,  0.        ,  0.        ,  0.02503173,  0.7774538 ,
+        [ 0.        ,  0.        ,  0.        ,  6.04473423,  6.04473423 ,
           0.        ],
         [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
           0.        ]],
@@ -568,11 +571,11 @@ def test_17(): # Mask test
             [ 0.  ,  0.  ,  0.  ,  0.  ]],
 
            [[ 0.  ,  0.  ,  0.  ,  0.  ],
-            [ 0.  ,  0.25,  0.25,  0.  ],
+            [ 0.  ,  1.0,  1.0,  0.  ],
             [ 0.  ,  0.  ,  0.  ,  0.  ]],
 
            [[ 0.  ,  0.  ,  0.  ,  0.  ],
-            [ 0.  ,  0.25,  0.25,  0.  ],
+            [ 0.  ,  1.0,  1.0,  0.  ],
             [ 0.  ,  0.  ,  0.  ,  0.  ]],
 
            [[ 0.  ,  0.  ,  0.  ,  0.  ],
@@ -624,6 +627,8 @@ def test_18(): # Out of bounds test2
     weightout[weightout == 0] = 1
     dataout /= weightout
 
+    
+
     assert np.sum(np.abs(dataout - ans)) < 1e-9
 
     # Check that the shape of the output is equal to N_bin and the shape of the answer
@@ -674,12 +679,12 @@ def test_20(): # Complex value test 2 - single complex value with interpolations
                     [ 0.   ,  0.   ,  0.   ]],
 
                    [[ 0.   ,  0.   ,  0.   ],
-                    [ 0.   ,  0.125j,  0.125j],
-                    [ 0.   ,  0.125j,  0.125j]],
+                    [ 0.   ,  1j,  1j],
+                    [ 0.   ,  1j,  1j]],
 
                    [[ 0.   ,  0.   ,  0.   ],
-                    [ 0.   ,  0.125j,  0.125j],
-                    [ 0.   ,  0.125j,  0.125j]]])
+                    [ 0.   ,  1j,  1j],
+                    [ 0.   ,  1j,  1j]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
@@ -687,7 +692,6 @@ def test_20(): # Complex value test 2 - single complex value with interpolations
     dataout /= weightout
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
-
 
 
 def test_21(): # Complex value test 3 - multiple complex values with interpolations
@@ -704,20 +708,19 @@ def test_21(): # Complex value test 3 - multiple complex values with interpolati
                     [ 0.   ,  0.   ,  0.   ]],
 
                    [[ 0.   ,  0.   ,  0.   ],
-                    [ 0.   ,  0.45+0.0625j,  0.125j],
-                    [ 0.   ,  0.125j,  0.125j]],
+                    [ 0.   ,  0.87804878+0.12195122j,  1j],
+                    [ 0.   ,  1j,  1j]],
 
                    [[ 0.   ,  0.   ,  0.   ],
-                    [ 0.   ,  0.05+0.0625j,  0.125j],
-                    [ 0.   ,  0.125j,  0.125j]]])
+                    [ 0.   ,  0.44444444+0.55555556j,  1j],
+                    [ 0.   ,  1j,  1j]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
 
-    assert np.sum(np.abs(dataout - ans)) < 1e-9
-
+    assert np.sum(np.abs(dataout - ans)) < 1e-7
 
 
 def test_22(): # Wrap-around test 1 - no wrap-around
@@ -734,11 +737,11 @@ def test_22(): # Wrap-around test 1 - no wrap-around
                      [ 0. ,  0. ,  0. ]],
 
                     [[ 0. ,  0. ,  0. ],
-                     [ 0. ,  0.9,  0. ],
+                     [ 0. ,  1.0,  0. ],
                      [ 0. ,  0. ,  0. ]],
 
                     [[ 0. ,  0. ,  0. ],
-                     [ 0. ,  0.1,  0. ],
+                     [ 0. ,  1.0,  0. ],
                      [ 0. ,  0. ,  0. ]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
@@ -788,11 +791,11 @@ def test_24(): # Wrap-around test 3 - wrap-around with interpolation
     x_max = np.array([1, 1, 1])
 
     ans = np.array([[[ 0. ,  0. ,  0. ],
-                     [ 0. ,  0.9 ,  0. ],
+                     [ 0. ,  1.0 ,  0. ],
                      [ 0. ,  0. ,  0. ]],
 
                     [[ 0. ,  0. ,  0. ],
-                     [ 0. ,  0.1,  0. ],
+                     [ 0. ,  1.0,  0. ],
                      [ 0. ,  0. ,  0. ]],
 
                    [[ 0. ,  0. ,  0. ],
@@ -817,7 +820,7 @@ def test_25(): # Wrap-around test 4 - wrap-around with interpolation on the boun
     x_max = np.array([1, 1, 1])
 
     ans = np.array([[[ 0. ,  0. ,  0. ],
-                     [ 0. ,  0.1 ,  0. ],
+                     [ 0. ,  1 ,  0. ],
                      [ 0. ,  0. ,  0. ]],
 
                     [[ 0. ,  0. ,  0. ],
@@ -825,7 +828,7 @@ def test_25(): # Wrap-around test 4 - wrap-around with interpolation on the boun
                      [ 0. ,  0. ,  0. ]],
 
                    [[ 0. ,  0. ,  0. ],
-                     [ 0. ,  0.9,  0. ],
+                     [ 0. ,  1,  0. ],
                      [ 0. ,  0. ,  0. ]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
@@ -846,7 +849,7 @@ def test_26(): # Wrap-around test 5 - wrap-around with interpolation on the boun
     x_max = np.array([1, 1, 1])
 
     ans = np.array([[[ 0. ,  0. ,  0. ],
-                     [ 0. ,  0.1 ,  0. ],
+                     [ 0. ,  1 ,  0. ],
                      [ 0. ,  0. ,  0. ]],
 
                     [[ 0. ,  0. ,  0. ],
@@ -854,7 +857,7 @@ def test_26(): # Wrap-around test 5 - wrap-around with interpolation on the boun
                      [ 0. ,  0. ,  0. ]],
 
                    [[ 0. ,  0. ,  0. ],
-                     [ 0. ,  0.9,  0. ],
+                     [ 0. ,  1,  0. ],
                      [ 0. ,  0. ,  0. ]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
@@ -863,7 +866,6 @@ def test_26(): # Wrap-around test 5 - wrap-around with interpolation on the boun
     dataout /= weightout
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
-
 
 
 def test_27(): # Wrap-around test 6 - wrap-around with interpolation on the boundary
@@ -876,7 +878,7 @@ def test_27(): # Wrap-around test 6 - wrap-around with interpolation on the boun
     x_max = np.array([1, 1, 1])
 
     ans = np.array([[[ 0. ,  0. ,  0.,  0. ,  0. ],
-                     [ 0. ,  0. ,  0.1,  0. ,  0. ],
+                     [ 0. ,  0. ,  1,  0. ,  0. ],
                      [ 0. ,  0. ,  0.,  0. ,  0. ]],
 
                     [[ 0. ,  0. ,  0.,  0. ,  0. ],
@@ -884,7 +886,7 @@ def test_27(): # Wrap-around test 6 - wrap-around with interpolation on the boun
                      [ 0. ,  0. ,  0.,  0. ,  0. ]],
 
                     [[ 0. ,  0. ,  0.,  0. ,  0. ],
-                     [ 0. ,  0.,  0.9,  0. ,  0. ],
+                     [ 0. ,  0.,  1,  0. ,  0. ],
                      [ 0. ,  0. ,  0.,  0. ,  0. ]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
@@ -904,17 +906,17 @@ def test_28(): # Wrap-around test 7 - wrap-around with interpolation on the boun
     x_min = np.array([-1, -1, -1])
     x_max = np.array([1, 1, 1])
 
-    ans = np.array([[[ 0.125,  0.   ,  0.125],
+    ans = np.array([[[ 1,  0.   ,  1],
                      [ 0.   ,  0.   ,  0.   ],
-                     [ 0.125,  0.   ,  0.125]],
+                     [ 1,  0.   ,  1]],
 
                     [[ 0.   ,  0.   ,  0.   ],
                      [ 0.   ,  0.   ,  0.   ],
                      [ 0.   ,  0.   ,  0.   ]],
 
-                    [[ 0.125,  0.   ,  0.125],
+                    [[ 1,  0.   ,  1],
                      [ 0.   ,  0.   ,  0.   ],
-                     [ 0.125,  0.   ,  0.125]]])
+                     [ 1,  0.   ,  1]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
@@ -922,7 +924,6 @@ def test_28(): # Wrap-around test 7 - wrap-around with interpolation on the boun
     dataout /= weightout
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
-
 
 
 def test_29(): # Wrap-around test 8 - no wrap-around with interpolation on the boundary (corner case)
@@ -939,12 +940,12 @@ def test_29(): # Wrap-around test 8 - no wrap-around with interpolation on the b
                     [ 0.   ,  0.   ,  0.   ]],
 
                    [[ 0.   ,  0.   ,  0.   ],
-                    [ 0.   ,  0.125,  0.125],
-                    [ 0.   ,  0.125,  0.125]],
+                    [ 0.   ,  1.0,  1.0],
+                    [ 0.   ,  1.0,  1.0]],
 
                    [[ 0.   ,  0.   ,  0.   ],
-                    [ 0.   ,  0.125,  0.125],
-                    [ 0.   ,  0.125,  0.125]]])
+                    [ 0.   ,  1.0,  1.0],
+                    [ 0.   ,  1.0,  1.0]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
@@ -952,7 +953,6 @@ def test_29(): # Wrap-around test 8 - no wrap-around with interpolation on the b
     dataout /= weightout
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
-
 
 
 def test_30(): # Wrap-around test 9 - wrap-around with interpolation on the boundary, non cubic volume
@@ -964,17 +964,17 @@ def test_30(): # Wrap-around test 9 - wrap-around with interpolation on the boun
     x_min = np.array([-1, -1, -1])
     x_max = np.array([1, 1, 1])
 
-    ans = np.array([[[ 0.25,  0.   ,  0.,  0., 0. ],
+    ans = np.array([[[ 1.0,  0.   ,  0.,  0., 0. ],
                      [ 0.   ,  0.   ,  0.,  0., 0.],
-                     [ 0.25,  0.   ,  0.,  0., 0. ]],
+                     [ 1.0,  0.   ,  0.,  0., 0. ]],
 
                     [[ 0.   ,  0.   ,  0.,  0., 0.    ],
                      [ 0.   ,  0.   ,  0.,  0., 0.    ],
                      [ 0.   ,  0.   ,  0.,  0., 0.    ]],
 
-                    [[ 0.25,  0.   ,  0.,  0., 0. ],
+                    [[ 1.0,  0.   ,  0.,  0., 0. ],
                      [ 0.   ,  0.   ,  0.,  0., 0.    ],
-                     [ 0.25,  0.   ,  0.,  0., 0. ]]])
+                     [ 1.0,  0.   ,  0.,  0., 0. ]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
@@ -982,7 +982,6 @@ def test_30(): # Wrap-around test 9 - wrap-around with interpolation on the boun
     dataout /= weightout
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
-
 
 
 def test_31(): # Wrap-around test 10 - wrap-around with interpolation on the boundary (corner case), multiple sample points to insert
@@ -994,17 +993,17 @@ def test_31(): # Wrap-around test 10 - wrap-around with interpolation on the bou
     x_min = np.array([-1, -1, -1])
     x_max = np.array([1, 1, 1])
 
-    ans = np.array([[[ 0.125,  0.   ,  0.125],
+    ans = np.array([[[ 1.0,  0.   ,  1.0],
                      [ 0.   ,  0.   ,  0.   ],
-                     [ 0.125,  0.   ,  0.125]],
+                     [ 1.0,  0.   ,  1.0]],
 
                     [[ 0.   ,  0.   ,  0.   ],
                      [ 0.   ,  0.   ,  0.   ],
                      [ 0.   ,  0.   ,  0.   ]],
 
-                    [[ 0.125,  0.   ,  0.125],
+                    [[ 1.0,  0.   ,  1.0],
                      [ 0.   ,  0.   ,  0.   ],
-                     [ 0.125,  0.   ,  0.125]]])
+                     [ 1.0,  0.   ,  1.0]]])
 
     dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
@@ -1012,3 +1011,84 @@ def test_31(): # Wrap-around test 10 - wrap-around with interpolation on the bou
     dataout /= weightout
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
+
+
+def test_32():
+    small = 1e-10
+    data_coord = np.array([[small, small, small], [1-small, 1-small, 1-small]])
+    data_val = np.array([1, 1])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([4, 4, 4])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([2, 2, 2])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    ans_dataout = np.array([[[0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.]]])
+    ans_dataout_sum = 8.0
+
+    assert np.sum(np.abs(dataout - ans_dataout)) < 1e-9
+    assert np.sum(np.abs(np.sum(dataout) - ans_dataout_sum)) < 1e-9
+
+
+
+def test_33():
+    small = 1e-10
+    data_coord = np.array([[small, small, small], [1-small, 1-small, 1-small]])
+    data_val = np.array([1, 1])
+    mask = np.ones(len(data_val))
+
+    N_bin = np.array([4, 4, 4])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([2, 2, 2])
+
+    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+
+    weightout[weightout == 0] = 1
+    dataout /= weightout
+
+    ans_dataout = np.array([[[0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 1., 1., 0.],
+                              [0., 0., 0., 0.],],
+
+                             [[0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.],
+                              [0., 0., 0., 0.]]])
+    ans_dataout_sum = 8.0
+
+    assert np.sum(np.abs(dataout - ans_dataout)) < 1e-9
+    assert np.sum(np.abs(np.sum(dataout) - ans_dataout_sum)) < 1e-9
