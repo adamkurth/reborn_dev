@@ -349,9 +349,9 @@ class PADView(object):
     def show_coordinate_axes(self):
         self.debug(get_caller(), 1)
         if self.coord_axes is None:
-            x = pg.ArrowItem(pos=(30, 0), brush=pg.mkBrush('r'), pxMode=self._px_mode, angle=180, pen=None)
-            y = pg.ArrowItem(pos=(0, 30), brush=pg.mkBrush('g'), pxMode=self._px_mode, angle=-90, pen=None)
-            z = pg.ScatterPlotItem([0], [0], pen=None, brush=pg.mkBrush('b'), pxMode=self._px_mode, size=15)
+            x = pg.ArrowItem(pos=(15, 0), brush=pg.mkBrush('r'), angle=0, pen=None) #, pxMode=self._px_mode)
+            y = pg.ArrowItem(pos=(0, 15), brush=pg.mkBrush('g'), angle=90, pen=None) #, pxMode=self._px_mode)
+            z = pg.ScatterPlotItem([0], [0], pen=None, brush=pg.mkBrush('b'), size=15) #, pxMode=self._px_mode)
             self.coord_axes = [x, y, z]
             self.viewbox.addItem(z)
             self.viewbox.addItem(x)
@@ -376,10 +376,10 @@ class PADView(object):
         if self.scan_arrows is None:
             self.scan_arrows = []
             for p in self.pad_geometry:
-                f = p.fs_vec.ravel()/p.pixel_size()
-                t = p.t_vec.ravel()/p.pixel_size()
-                ang = np.arctan2(f[1], f[0])*180/np.pi + 180
-                a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None, pxMode=False)
+                f = p.fs_vec/p.pixel_size()
+                t = (p.t_vec + p.fs_vec + p.ss_vec)/p.pixel_size()
+                ang = np.arctan2(f[1], f[0])*180/np.pi
+                a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None) #, pxMode=False)
                 self.scan_arrows.append(a)
                 self.viewbox.addItem(a)
 
@@ -425,11 +425,12 @@ class PADView(object):
         if self.pad_labels is None:
             self.pad_labels = []
             for i in range(0, self.n_pads):
-                lab = pg.TextItem(text="%d" % i, fill=pg.mkBrush('b'), color='y', anchor=(0.5, 0.5))
+                lab = pg.TextItem(text="%d" % i, fill=pg.mkBrush(20, 20, 20, 128), color='w', anchor=(0.5, 0.5),
+                                  border=pg.mkPen('w'))
                 g = self.pad_geometry[i]
-                fs = g.fs_vec.ravel()*g.n_fs/2
-                ss = g.ss_vec.ravel()*g.n_ss/2
-                t = g.t_vec.ravel()
+                fs = g.fs_vec*g.n_fs/2
+                ss = g.ss_vec*g.n_ss/2
+                t = g.t_vec + (g.fs_vec + g.ss_vec)/2
                 x = (fs[0] + ss[0] + t[0])/g.pixel_size()
                 y = (fs[1] + ss[1] + t[1])/g.pixel_size()
                 lab.setPos(x, y)
@@ -455,63 +456,15 @@ class PADView(object):
 
     def _apply_pad_transform(self, im, p):
         self.debug(get_caller(), 2)
-        # This is really awful.  I don't know if this is the best way to do the transforms, but it's the best
-        # I could do given the fact that I'm not able to track down all the needed info on how all of these
-        # transforms are applied.  I can only say that a physicist did not invent this system.
-
-        # 3D basis vectors of panel (length encodes pixel size):
-        f = p.fs_vec.ravel().copy()
-        s = p.ss_vec.ravel().copy()
-        # 3D translation to *center* of corner pixel (first pixel in memory):
-        t = p.t_vec.ravel().copy()
-        # Normalize all vectors to pixel size.  This is a hack that needs to be fixed later.  Obviously, we cannot
-        # show multiple detectors at different distances using this stupid pixel-based convention.
-        # ps = p.pixel_size()
-        scl = self.scale_factor()
-        f *= scl
-        s *= scl
-        t *= scl
-        # Strip off the z component.  Another dumb move.
-        f = f[0:2]
-        s = s[0:2]
-        t = t[0:2]
-        # Offset translation since pixel should be centered.
-        # t += np.array([0.5, -0.5])
-        # These two operations set the "home" position of the panel such that the fast-scan direction
-        # is along the viewbox "x" axis.  I don't know if this is the corret thing to do -- needs further
-        # attention.  I would imagine that pyqtgraph has a better way to do this, but I haven't found the right
-        # feature yet.
-        im.scale(1, -1)
-        im.rotate(-90)
-        # Scale the axes.  This is a phony way to deal with detector tilts.  Better than nothing I guess.
-        scf = np.sqrt(np.sum(f * f))
-        scs = np.sqrt(np.sum(s * s))
-        # Note that the *sign* of this scale factor takes care of the fact that 2D rotations alone
-        # cannot deal with a transpose operation.  What follows is a confusing hack... must be a better way.
-        sign = np.sign(np.cross(np.array([f[0], f[1], 0]), np.array([s[0], s[1], 0]))[2])
-        # Here goes the re-scaling
-        im.scale(sign * scs, scf)
-        # Rotate the axes
-        fnorm = f / np.sqrt(np.sum(f * f))
-        ang = np.arctan2(fnorm[1], fnorm[0])
-        # No, wait, don't rotate the axes... experimentation says to translate first despite the fact that it
-        # doesn't make much sense to do things that way.  Maybe I just gave up too soon, but I found that I needed
-        # to translate first...
-        # Translate the scaled/rotated image.  Turns out we need to flip the sign of the translation vector
-        # coordinate corresponding to the axis we flipped.  I don't know why, but I've completely given up on the
-        # idea of understanding the many layers of coordinate systems and transformations...
-        # im.translate(sign * (t[1] + sign*0.5*scf), t[0]-0.5*scs)
-        im.translate(sign * t[1], t[0])
-        im.rotate(-sign * ang * 180 / np.pi)
-        im.translate(-sign*0.5*scf, -0.5*scs)
-        # Now, one would *think* that we could define a simple matrix transform, and then translate the resulting
-        # image (which has been rotated and possibly skewed to imitate a 3D rotation).  I tried and failed.  But
-        # It's worthwile to try again, since it would be brilliant if we could just learn how to define these
-        # transforms and apply them to all relevant graphics items.
-        # trans = QtGui.QTransform()
-        # trans.scale(M[0, 0], M[1, 1])
-        # trans.translate(t[0], t[1])
-        # im.setTransform(trans)
+        f = p.fs_vec.copy()
+        s = p.ss_vec.copy()
+        t = p.t_vec.copy()
+        f = f * self.scale_factor()
+        s = s * self.scale_factor()
+        t = t * self.scale_factor() + (f + s)/2.0
+        trans = QtGui.QTransform()
+        trans.setMatrix(s[0], s[1], 0, f[0], f[1], 0, t[0], t[1], 1)
+        im.setTransform(trans)
 
     def _make_mask_rgba(self, mask):
         d = mask
@@ -675,7 +628,8 @@ class PADView(object):
                     sides = [roi.size()[1], roi.size()[0]]
                     corner = np.array([roi.pos()[0], roi.pos()[1]])
                     angle = roi.angle() * np.pi / 180
-                    pix_pos = (geom.position_vecs() * self.scale_factor()).reshape(geom.n_ss, geom.n_fs, 3)
+                    p = geom.position_vecs() + geom.fs_vec + geom.ss_vec  # Why?
+                    pix_pos = (p * self.scale_factor()).reshape(geom.n_ss, geom.n_fs, 3)
                     pix_pos = pix_pos[:, :, 0:2] - corner
                     v1 = np.array([-np.sin(angle), np.cos(angle)])
                     v2 = np.array([np.cos(angle), np.sin(angle)])
@@ -691,7 +645,8 @@ class PADView(object):
                     # the ROI.  I couldn't figure out how to do this directly with the ROI class methods.
                     radius = roi.size()[0]/2.
                     center = np.array([roi.pos()[0], roi.pos()[1]]) + radius
-                    pix_pos = (geom.position_vecs() * self.scale_factor()).reshape(geom.n_ss, geom.n_fs, 3)
+                    p = geom.position_vecs() + geom.fs_vec + geom.ss_vec  # Why?
+                    pix_pos = (p * self.scale_factor()).reshape(geom.n_ss, geom.n_fs, 3)
                     pix_pos = pix_pos[:, :, 0:2] - center
                     r = np.sqrt(pix_pos[:, :, 0]**2 + pix_pos[:, :, 1]**2)
                     self.mask_data[ind][r < radius] = 0
@@ -1016,7 +971,7 @@ class PADView(object):
             if c is None:
                 continue
             nc = c.shape[0]
-            vec = self.pad_geometry[i].indices_to_vectors(c[:, 1], c[:, 0])#.ravel()
+            vec = self.pad_geometry[i].indices_to_vectors(c[:, 1], c[:, 0])
             gl_fs_pos[n:(n + nc)] = vec[:, 0].ravel()
             gl_ss_pos[n:(n + nc)] = vec[:, 1].ravel()
             n += nc
