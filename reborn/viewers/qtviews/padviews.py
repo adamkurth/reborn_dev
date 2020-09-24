@@ -6,7 +6,7 @@ import pickle
 import numpy as np
 import pkg_resources
 import reborn
-from reborn.detector import PADGeometry
+from reborn import detector, source
 from reborn.fileio.getters import FrameGetter
 from reborn.analysis.peaks import boxsnr, PeakFinder
 from reborn.external.pyqtgraph import MultiHistogramLUTWidget
@@ -14,10 +14,11 @@ from reborn.external.pyqtgraph import MultiHistogramLUTWidget
 import pyqtgraph as pg
 from pyqtgraph.Qt import uic, QtGui, QtCore #, QtWidgets
 from pyqtgraph import ImageItem
+from reborn.viewers.qtviews import misc
 # from reborn.external.pyqtgraph import ImageItem
 
-padviewui = pkg_resources.resource_filename('reborn.viewers.qtviews', 'padview.ui')
-snrconfigui = pkg_resources.resource_filename('reborn.viewers.qtviews', 'configs.ui')
+padviewui = pkg_resources.resource_filename('reborn.viewers.qtviews', 'ui/padview.ui')
+snrconfigui = pkg_resources.resource_filename('reborn.viewers.qtviews', 'ui/configs.ui')
 
 
 def write(msg):
@@ -125,7 +126,7 @@ class PADView(object):
             pad_geometry = []
             shft = 0
             for dat in self.raw_data['pad_data']:
-                pad = PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
+                pad = detector.PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
                 pad.t_vec[0] += shft
                 shft += pad.shape()[0]
                 pad_geometry.append(pad)
@@ -1266,7 +1267,7 @@ class PADView2(object):
             pad_geometry = []
             shft = 0
             for dat in self.raw_data['pad_data']:
-                pad = PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
+                pad = detector.PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
                 pad.t_vec[0] += shft
                 shft += pad.shape()[0]
                 pad_geometry.append(pad)
@@ -1282,7 +1283,7 @@ class PADView2(object):
         self.setup_mouse_interactions()
         self.setup_shortcuts()
         self.setup_menu()
-        self.setup_widgets()
+        # self.setup_widgets()
         self.statusbar.setStyleSheet("background-color:rgb(30, 30, 30);color:rgb(255,0,255);"
                                                  "font-weight:bold;font-family:monospace;")
         if self.raw_data is not None:
@@ -1315,8 +1316,37 @@ class PADView2(object):
         self.statusbar = self.main_window.statusBar()
         self.hbox = QtGui.QHBoxLayout()
         self.splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
-        # self.ptree = pg.parametertree.ParameterTree()
-        # self.splitter.addWidget(self.ptree)
+        self.setup_widgets()
+        self.side_panel = QtGui.QWidget()
+        self.side_panel_layout = QtGui.QVBoxLayout()
+        self.side_panel_layout.setAlignment(QtCore.Qt.AlignTop)
+        box = misc.CollapsibleBox('Display')
+        lay = QtGui.QGridLayout()
+        lay.addWidget(QtGui.QLabel('CMap min:'), 1, 1)
+        maxspin = QtGui.QSpinBox()
+        lay.addWidget(maxspin, 1, 2)
+        box.setContentLayout(lay)
+        self.side_panel_layout.addWidget(box)
+        box = misc.CollapsibleBox('Peaks')
+        lay = QtGui.QGridLayout()
+        lay.addWidget(self.widgets['Peakfinder Config'], 1, 1)
+        box.setContentLayout(lay)
+        self.side_panel_layout.addWidget(box)
+
+        self.side_panel.setLayout(self.side_panel_layout)
+        self.splitter.addWidget(self.side_panel)
+
+
+        # self.side_panel_layout.addWidget(box)
+        # self.side_panel_layout.addWidget(QtGui.QLabel('Display Range'), 1, 1)
+
+        # self.cmap_min = QtGui.QSpinBox()
+        # self.outer_spinbox.setMinimum(1)
+        # self.outer_spinbox.setValue(10)
+        # self.layout.addWidget(self.outer_spinbox, 4, 2)
+        # self.side_panel.setLayout(self.side_panel_layout)
+
+
         self.graphics_view = pg.GraphicsView()
         self.viewbox = pg.ViewBox()
         self.viewbox.invertX()
@@ -1350,6 +1380,9 @@ class PADView2(object):
         snr_config = SNRConfigWidget()
         snr_config.values_changed.connect(self.update_snr_filter_params)
         self.widgets['SNR Config'] = snr_config
+        peak_config = PeakfinderConfigWidget()
+        # peak_config.values_changed.connect(self.update_snr_filter_params)
+        self.widgets['Peakfinder Config'] = peak_config
 
     def setup_mouse_interactions(self):
         r""" I don't know what this does... obviously something about mouse interactions... """
@@ -1551,8 +1584,9 @@ class PADView2(object):
         if self.scan_arrows is None:
             self.scan_arrows = []
             for p in self.pad_geometry:
-                f = p.fs_vec/p.pixel_size()
-                t = (p.t_vec + p.fs_vec + p.ss_vec)/p.pixel_size()
+                scl = self.scale_factor(p)
+                f = p.fs_vec * scl
+                t = (p.t_vec + p.fs_vec + p.ss_vec) * scl
                 ang = np.arctan2(f[1], f[0])*180/np.pi
                 a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None) #, pxMode=False)
                 self.scan_arrows.append(a)
@@ -1606,8 +1640,9 @@ class PADView2(object):
                 fs = g.fs_vec*g.n_fs/2
                 ss = g.ss_vec*g.n_ss/2
                 t = g.t_vec + (g.fs_vec + g.ss_vec)/2
-                x = (fs[0] + ss[0] + t[0])/g.pixel_size()
-                y = (fs[1] + ss[1] + t[1])/g.pixel_size()
+                scl = self.scale_factor(g)
+                x = (fs[0] + ss[0] + t[0]) * scl
+                y = (fs[1] + ss[1] + t[1]) * scl
                 lab.setPos(x, y)
                 self.pad_labels.append(lab)
                 self.viewbox.addItem(lab)
@@ -1626,17 +1661,18 @@ class PADView2(object):
         else:
             self.hide_pad_labels()
 
-    def scale_factor(self):
-        return 1/self.pad_geometry[0].pixel_size()
+    def scale_factor(self, pad_geometry):
+        return 1/pad_geometry.t_vec[2]
 
     def _apply_pad_transform(self, im, p):
         self.debug(get_caller(), 2)
+        scl = self.scale_factor(p)
         f = p.fs_vec.copy()
         s = p.ss_vec.copy()
         t = p.t_vec.copy()
-        f = f * self.scale_factor()
-        s = s * self.scale_factor()
-        t = t * self.scale_factor() + (f + s)/2.0
+        f = f * scl
+        s = s * scl
+        t = t * scl + (f + s)/2.0
         trans = QtGui.QTransform()
         trans.setMatrix(s[0], s[1], 0, f[0], f[1], 0, t[0], t[1], 1)
         im.setTransform(trans)
@@ -1804,7 +1840,7 @@ class PADView2(object):
                     corner = np.array([roi.pos()[0], roi.pos()[1]])
                     angle = roi.angle() * np.pi / 180
                     p = geom.position_vecs() + geom.fs_vec + geom.ss_vec  # Why?
-                    pix_pos = (p * self.scale_factor()).reshape(geom.n_ss, geom.n_fs, 3)
+                    pix_pos = (p * self.scale_factor(geom)).reshape(geom.n_ss, geom.n_fs, 3)
                     pix_pos = pix_pos[:, :, 0:2] - corner
                     v1 = np.array([-np.sin(angle), np.cos(angle)])
                     v2 = np.array([np.cos(angle), np.sin(angle)])
@@ -1821,7 +1857,7 @@ class PADView2(object):
                     radius = roi.size()[0]/2.
                     center = np.array([roi.pos()[0], roi.pos()[1]]) + radius
                     p = geom.position_vecs() + geom.fs_vec + geom.ss_vec  # Why?
-                    pix_pos = (p * self.scale_factor()).reshape(geom.n_ss, geom.n_fs, 3)
+                    pix_pos = (p * self.scale_factor(geom)).reshape(geom.n_ss, geom.n_fs, 3)
                     pix_pos = pix_pos[:, :, 0:2] - center
                     r = np.sqrt(pix_pos[:, :, 0]**2 + pix_pos[:, :, 1]**2)
                     self.mask_data[ind][r < radius] = 0
@@ -1965,7 +2001,7 @@ class PADView2(object):
         if pens is None:
             pens = [pg.mkPen([255, 255, 255], width=2)]*n
         for i in range(0, n):
-            circ = pg.CircleROI(pos=[-radii[i]*0.5]*2, size=radii[i], pen=pens[i])
+            circ = pg.CircleROI(pos=[-radii[i]*0.5+0.5]*2, size=radii[i], pen=pens[i])
             circ.translatable = False
             circ.removable = True
             self.rings.append(circ)
@@ -2147,11 +2183,9 @@ class PADView2(object):
                 continue
             nc = c.shape[0]
             vec = self.pad_geometry[i].indices_to_vectors(c[:, 1], c[:, 0])
-            gl_fs_pos[n:(n + nc)] = vec[:, 0].ravel()
-            gl_ss_pos[n:(n + nc)] = vec[:, 1].ravel()
+            gl_fs_pos[n:(n + nc)] = vec[:, 0].ravel() * self.scale_factor(self.pad_geometry[i])
+            gl_ss_pos[n:(n + nc)] = vec[:, 1].ravel() * self.scale_factor(self.pad_geometry[i])
             n += nc
-        gl_fs_pos *= self.scale_factor()
-        gl_ss_pos *= self.scale_factor()
         self.add_scatter_plot(gl_fs_pos, gl_ss_pos, **self.peak_style)
 
     def toggle_peaks(self):
@@ -2360,34 +2394,194 @@ def get_caller():
     return 'get_caller'
 
 
-class SNRConfigWidget(QtGui.QWidget):
+# class SNRConfigWidget(QtGui.QWidget):
+#     values_changed = QtCore.pyqtSignal()
+#     def __init__(self, parent=None):
+#
+#         QtGui.QWidget.__init__(self, parent=parent)
+#         uic.loadUi(snrconfigui, self)
+#
+#         self.updateButton.clicked.connect(self.send_values)
+#         self.activateBox.stateChanged.connect(self.send_values)
+#
+#     def send_values(self):
+#
+#         self.debug('send_values()')
+#         self.values_changed.emit()
+#
+#     def get_values(self):
+#         self.debug('get_values()')
+#         dat = {}
+#         dat['activate'] = self.activateBox.isChecked()
+#         dat['inner'] = self.spinBoxInnerRadius.value()
+#         dat['center'] = self.spinBoxCenterRadius.value()
+#         dat['outer'] = self.spinBoxOuterRadius.value()
+#         return dat
+#
+#     def debug(self, msg):
+#
+#         print(msg)
+
+
+class PeakfinderConfigWidget(QtGui.QWidget):
 
     values_changed = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
+        super().__init__()
+        self.setWindowTitle('Peakfinder Settings')
+        self.layout = QtGui.QGridLayout()
+        row = 0
+        row += 1
+        self.layout.addWidget(QtGui.QLabel('Activate Peakfinder'), row, 1)
+        self.activate_button = QtGui.QRadioButton()
+        self.activate_button.toggled.connect(self.send_values)
+        self.layout.addWidget(self.activate_button, row, 2, alignment=QtCore.Qt.AlignCenter)
+        row += 1
+        self.layout.addWidget(QtGui.QLabel('SNR Threshold'), row, 1)
+        self.snr_spinbox = QtGui.QSpinBox()
+        self.snr_spinbox.setMinimum(1)
+        self.snr_spinbox.setValue(1)
+        self.layout.addWidget(self.snr_spinbox, row, 2)
+        row += 1
+        self.layout.addWidget(QtGui.QLabel('Inner Size'), row, 1)
+        self.inner_spinbox = QtGui.QSpinBox()
+        self.inner_spinbox.setMinimum(1)
+        self.inner_spinbox.setValue(1)
+        self.layout.addWidget(self.inner_spinbox, row, 2)
+        row += 1
+        self.layout.addWidget(QtGui.QLabel('Center Size'), row, 1)
+        self.center_spinbox = QtGui.QSpinBox()
+        self.center_spinbox.setMinimum(1)
+        self.center_spinbox.setValue(5)
+        self.layout.addWidget(self.center_spinbox, row, 2)
+        row += 1
+        self.layout.addWidget(QtGui.QLabel('Outer Size'), row, 1)
+        self.outer_spinbox = QtGui.QSpinBox()
+        self.outer_spinbox.setMinimum(1)
+        self.outer_spinbox.setValue(10)
+        self.layout.addWidget(self.outer_spinbox, row, 2)
+        row += 1
+        self.layout.addWidget(QtGui.QLabel('Max Filter Iterations'), row, 1)
+        self.iter_spinbox = QtGui.QSpinBox()
+        self.iter_spinbox.setMinimum(1)
+        self.iter_spinbox.setValue(10)
+        self.layout.addWidget(self.iter_spinbox, row, 2)
+        row += 1
+        self.update_button = QtGui.QPushButton("Update Peakfinder")
+        self.update_button.clicked.connect(self.send_values)
+        self.layout.addWidget(self.update_button, row, 1, 1, 2)
 
-        QtGui.QWidget.__init__(self, parent=parent)
-        uic.loadUi(snrconfigui, self)
-
-        self.updateButton.clicked.connect(self.send_values)
-        self.activateBox.stateChanged.connect(self.send_values)
+        self.setLayout(self.layout)
 
     def send_values(self):
-
-        self.debug('send_values()')
+        self.debug('SNRConfigWidget.send_values()')
         self.values_changed.emit()
 
     def get_values(self):
-        self.debug('get_values()')
+        self.debug('SNRConfigWidget.get_values()')
         dat = {}
-        dat['activate'] = self.activateBox.isChecked()
-        dat['inner'] = self.spinBoxInnerRadius.value()
-        dat['center'] = self.spinBoxCenterRadius.value()
-        dat['outer'] = self.spinBoxOuterRadius.value()
+        dat['activate'] = self.activate_button.isChecked()
+        dat['inner'] = self.inner_spinbox.value()
+        dat['center'] = self.center_spinbox.value()
+        dat['outer'] = self.outer_spinbox.value()
         return dat
 
     def debug(self, msg):
 
         print(msg)
 
+
+class SNRConfigWidget(QtGui.QWidget):
+
+    values_changed = QtCore.pyqtSignal()
+
+    def __init__(self, parent=None):
+        super().__init__()
+        self.setWindowTitle('SNR Filter Settings')
+        self.layout = QtGui.QGridLayout()
+
+        self.layout.addWidget(QtGui.QLabel('Activate Filter'), 1, 1)
+        self.activate_button = QtGui.QRadioButton()
+        self.activate_button.toggled.connect(self.send_values)
+        self.layout.addWidget(self.activate_button, 1, 2, alignment=QtCore.Qt.AlignCenter)
+
+        self.layout.addWidget(QtGui.QLabel('Inner Size'), 2, 1)
+        self.inner_spinbox = QtGui.QSpinBox()
+        self.inner_spinbox.setMinimum(1)
+        self.inner_spinbox.setValue(1)
+        self.layout.addWidget(self.inner_spinbox, 2, 2)
+
+        self.layout.addWidget(QtGui.QLabel('Center Size'), 3, 1)
+        self.center_spinbox = QtGui.QSpinBox()
+        self.center_spinbox.setMinimum(1)
+        self.center_spinbox.setValue(5)
+        self.layout.addWidget(self.center_spinbox, 3, 2)
+
+        self.layout.addWidget(QtGui.QLabel('Outer Size'), 4, 1)
+        self.outer_spinbox = QtGui.QSpinBox()
+        self.outer_spinbox.setMinimum(1)
+        self.outer_spinbox.setValue(10)
+        self.layout.addWidget(self.outer_spinbox, 4, 2)
+
+        self.update_button = QtGui.QPushButton("Update Filter")
+        self.update_button.clicked.connect(self.send_values)
+        self.layout.addWidget(self.update_button, 5, 1, 1, 2)
+
+        self.setLayout(self.layout)
+
+    def send_values(self):
+        self.debug('SNRConfigWidget.send_values()')
+        self.values_changed.emit()
+
+    def get_values(self):
+        self.debug('SNRConfigWidget.get_values()')
+        dat = {}
+        dat['activate'] = self.activate_button.isChecked()
+        dat['inner'] = self.inner_spinbox.value()
+        dat['center'] = self.center_spinbox.value()
+        dat['outer'] = self.outer_spinbox.value()
+        return dat
+
+    def debug(self, msg):
+
+        print(msg)
+
+class LevelsWidget(QtGui.QWidget):
+    min_value = None
+    max_value = None
+    def __init__(self, padview=None):
+        super().__init__()
+        self.setWindowTitle("Levels")
+        layout = QtGui.QVBoxLayout()
+        min_value = layout.addWidget(QtGui.QDoubleSpinBox())
+        max_value = layout.addWidget(QtGui.QDoubleSpinBox())
+        self.setLayout(layout)
+    def get_min_value(self):
+        return self.min_value.value()
+    def get_max_value(self):
+        return self.max_value.value()
+
+if __name__ == '__main__':
+    from reborn.simulate import solutions
+    np.random.seed(10)
+    pads = detector.tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0.1, tiling_shape=(4, 2), pad_gap=5*100e-6)
+    beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3)
+    def make_images():
+        dat = solutions.get_pad_solution_intensity(pads, beam, thickness=10e-6, liquid='water')
+        for d in dat:
+            nx, ny = d.shape
+            x, y = np.indices(d.shape)
+            xo = np.random.rand() * nx
+            yo = np.random.rand() * ny
+            d += 100 * np.exp((-(x - xo) ** 2 - (y - yo) ** 2)/3)
+        return dat
+
+    # app = pg.mkQApp()
+    dat = make_images()
+    pv = PADView2(raw_data=dat, pad_geometry=pads)
+    pv.start()
+    # lw = LevelsWidget(pv)
+    # lw.show()
+    # app.exec_()
 

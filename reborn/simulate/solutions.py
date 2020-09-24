@@ -2,17 +2,17 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import pkg_resources
 import numpy as np
-from reborn.utils import memoize
-# import matplotlib.pyplot as plt
+import reborn
 
 file_name = pkg_resources.resource_filename('reborn', 'data/scatter/water_scattering_data.txt')
 
 
-
 def water_number_density():
+    """ Number density of water in SI units. """
     return 33.3679e27
 
-@memoize
+
+@reborn.utils.memoize
 def load_data():
 
     with open(file_name, 'r') as f:
@@ -86,8 +86,6 @@ def water_scattering_factor_squared(q, temperature=298, volume=None):
         volume: if this is not None, the scattering factor will be multiplied by the number of molecules in volume
 
     Returns:
-
-
     """
 
     qmag, intensity, temp = load_data()
@@ -117,3 +115,34 @@ def water_scattering_factor_squared(q, temperature=298, volume=None):
         F2 *= volume * water_number_density
 
     return F2
+
+
+def get_pad_solution_intensity(pad_geometry, beam, thickness=10e-6, liquid='water', temperature=298, poisson=True):
+    r"""
+    Given a list of |PADGeometry| instances along with a |Beam| instance, calculate the scattering intensity of a
+    liquid with given thickness.
+
+    Args:
+        pad_geometry (list of |PADGeometry| instances): PAD geometry info.
+        beam (|Beam|): X-ray beam parameters.
+        thickness (float): Thickness of the liquid (assumed to be a sheet geometry)
+        liquid (str): We can only do "water" at this time...
+        temperature (float): Temperature of the liquid.
+
+    Returns:
+        List of |ndarray| instances containing intensities.
+    """
+    if liquid != 'water':
+        raise ValueError('Sorry, we can only simulate water at this time...')
+    pad_geometry = reborn.utils.ensure_list(pad_geometry)
+    n_water_molecules = thickness * beam.diameter_fwhm ** 2 * water_number_density()
+    qmags = reborn.detector.concat_pad_data([p.q_mags(beam=beam) for p in pad_geometry])
+    J = beam.fluence
+    P = reborn.detector.concat_pad_data([p.polarization_factors(beam=beam) for p in pad_geometry])
+    SA = reborn.detector.concat_pad_data([p.solid_angles() for p in pad_geometry])
+    F = get_water_profile(qmags, temperature=temperature)
+    F2 = F ** 2 * n_water_molecules
+    I = 2.8179403262e-15 ** 2 * J * P * SA * F2 / beam.photon_energy
+    if poisson: I = np.double(np.random.poisson(I))
+    I = reborn.detector.split_pad_data(pad_geometry, I)
+    return I

@@ -6,6 +6,9 @@ from reborn.viewers.qtviews.padviews import PADView, PADView2
 np.random.seed(0)
 
 pads = reborn.detector.tiled_pad_geometry_list(pad_shape=(20, 15), pixel_size=1000e-6, distance=0.1, tiling_shape=(2, 2), pad_gap=0)
+pads[3].t_vec *= 2
+pads[3].fs_vec *= 2
+pads[3].ss_vec *= 2
 # pads = jungfrau4m_pads()
 # pads = examples.cspad_pads(); pads = pads[0:12]
 dats = [np.random.random(p.shape()) for p in pads]
@@ -20,3 +23,4 @@ padview.show_pad_labels()
 padview.show_coordinate_axes()
 padview.set_title('Title')
 padview.start()
+
