@@ -13,7 +13,7 @@ class PeakFinder(object):
     """
 
     mask = None  #: Ignore pixels where mask == 0.
-    snr_threshold = 10  # : Peaks must have a signal-to-noise ratio above this value.
+    snr_threshold = 5  # : Peaks must have a signal-to-noise ratio above this value.
     radii = [1, 20, 30]  # : These are the radii associated with the :func:`boxsnr <reborn.analysis.peaks.boxsnr>` function.
 
     snr = None  # : The SNR array from the most recent call to the find_peaks method.
@@ -120,10 +120,9 @@ def boxsnr(dat, mask_in, mask_out, n_in, n_cent, n_out):
 
 def snr_mask(dat, mask, nin, ncent, nout, threshold, mask_negative=True, max_iterations=3):
     r"""
-    Mask out pixels above some chosen SNR threshold.  Algorithm description: search for pixels above some SNR threshold
-    using the boxsnr function, but when calculating the Noise from the annulus, ignore pixels that are already above
-    threshold.  The need for iteration arises because the above-threshold pixels that should not contribute to the Noise
-    calculation cannot be known from the beginning (else this function would not be needed!).
+    Mask out pixels above some chosen SNR threshold.  The image is converted to a map of SNR using boxsnr.  Additional
+    iterations follow, in which pixels above threshold in the previous run are also masked in the annulus.
+    This iterative procedure helps avoid contributions of peak signals to the Noise calculation.
 
     Arguments:
         dat (numpy array) : Input data to calculate SNR from.

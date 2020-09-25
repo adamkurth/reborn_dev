@@ -10,7 +10,7 @@ import os
 import pkg_resources
 import numpy as np
 from numpy import sin, cos
-from numpy.fft import fftshift, fft, ifft
+from numpy.fft import fftshift, fft, ifft, fftn
 # from numba import jit
 from . import fortran
 
@@ -646,5 +646,117 @@ def rotate3D(f, Euler_angles):
     f_rot = __rotate_Euler_z(f_rot, ang=Euler_angles[2])
 
     return f_rot
+
+
+
+
+
+def make_label_radialShell(r_bin_vec, N_vec):
+    r"""
+    For fast radial statistics calcuations - done through a precomputed label array.
+
+    Produce a 3D volume with concentric shells of thickness specified by r_bin_vec.
+    Each shell is labelled incrementally by integers starting with 1 at the centre. 
+    (the label zero is reserved for masked values in the volume).
+
+    Voxels outside the maximum radius is given a label of zero.
+
+    Input:
+        r_bin_vec - Radii of the shells - in voxel units
+        N_vec     - Shape of the desired volume
+
+    Output:
+        labels_radial
+    """
+    Nx, Ny, Nz = N_vec
+
+    Nx_cent = int(Nx / 2) # equivalent to int(np.floor(Nx/2))
+    Ny_cent = int(Ny / 2)
+    Nz_cent = int(Nz / 2)
+
+    # Initialise memory
+    labels_radial = np.zeros((Nx, Ny, Nz), dtype=np.int)
+
+    r_bin_vec_sq = r_bin_vec**2
+
+    for i in range(Nx):
+        i_sq = (i - Nx_cent)**2
+
+        for j in range(Ny):
+            j_sq = (j - Ny_cent)**2
+
+            for k in range(Nz):
+                r_sq = i_sq + j_sq + (k - Nz_cent)**2
+
+                # Get the index of which r bin the current (i,j,k) voxel belongs
+                r_ind = np.sum(r_sq >= r_bin_vec_sq)
+                
+                labels_radial[i,j,k] = r_ind
+
+    # This is to make the centre voxel exactly have its unique label of 1.
+    labels_radial += 1 # Shift all labels up by 1.
+    labels_radial[Nx_cent, Ny_cent, Nz_cent] = 1 # Now make the centre 1.
+
+    # Set all voxels lying outside a radius larger than the final value in r_bin_vec to a label of zero.
+    labels_radial[labels_radial == len(r_bin_vec)+1] = 0
+
+    return labels_radial
+
+
+def radial_stats(f, labels_radial, N_radials, mode):
+    r"""
+    Calculate the statistics of the voxels in each shell.
+
+    Input:
+        f              - The input 3D array of numbers
+        labels_radial  - The labels
+        N_radials      - Maximum label value 
+        mode           - The desired statistics that we wish to calculate
+
+    Output:
+        radial_stats_vec
+    """
+
+    # Initialise memory
+    f_dtype = f.dtype
+    if f_dtype == np.float64:
+        radial_stats_vec = np.zeros(N_radials, dtype=np.float64)
+    elif f_dtype == np.complex128:
+        radial_stats_vec = np.zeros(N_radials, dtype=np.complex128)
+    else:
+        raise ValueError("Data type not implemented.")
+
+    # Calculate the radial stats
+    # Range runs from 1 to N_radials+1 to ignore the zero label
+    if mode == "mean":
+        for i in range(N_radials):
+            radial_stats_vec[i] = np.mean(f[labels_radial == i+1]) 
+    elif mode == "sum":
+        for i in range(N_radials):
+            radial_stats_vec[i] = np.sum(f[labels_radial == i+1])
+    elif mode == "count": # Number of voxels in each shell
+        for i in range(N_radials):
+            radial_stats_vec[i] = np.sum(labels_radial == i+1)
+    elif mode == "median":
+        for i in range(N_radials):
+            radial_stats_vec[i] = np.median(f[labels_radial == i+1])
+    else:
+        raise ValueError("Mode not recognised.")
+
+    return radial_stats_vec
+
+
+def get_FSC(f1, f2, labels_radial, N_radials):
+    r"""
+    Calculate the FSC.
+    """
+    F1 = fftshift( fftn(f1) )
+    F2 = fftshift( fftn(f2) )
+
+    radial_F1F2 = radial_stats(f=F1*np.conj(F2), labels_radial=labels_radial, N_radials=N_radials, mode="sum")
+    radial_F1   = radial_stats(f=np.abs(F1)**2 , labels_radial=labels_radial, N_radials=N_radials, mode="sum")
+    radial_F2   = radial_stats(f=np.abs(F2)**2 , labels_radial=labels_radial, N_radials=N_radials, mode="sum")
+
+    return np.abs( (radial_F1F2) / (np.sqrt(radial_F1) * np.sqrt(radial_F2)) )
 
 
