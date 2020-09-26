@@ -25,6 +25,7 @@ from reborn.analysis import optimize
 from reborn.simulate import examples
 # Need to be on reborn develop branch 
 from reborn.simulate import solutions
+from reborn.viewers.qtviews.padviews import PADView
 
 
 
@@ -46,16 +47,6 @@ beam_diameter = 5e-6
 water_thickness = 1e-6
 water_ring_thresh = 2000000
 
-def make_images(pad, beam):
-    dat = solutions.get_pad_solution_intensity(pad, beam, thickness=10e-6, liquid='water')
-    # for d in dat:
-    #     nx, ny = d.shape
-    #     x, y = np.indices(d.shape)
-    #     xo = np.random.rand() * nx
-    #     yo = np.random.rand() * ny
-    #     d += 100 * np.exp((-(x - xo) ** 2 - (y - yo) ** 2)/3)
-    return dat
-
 # %%
 # Set up the PAD geometry:
 # pad = detector.PADGeometry(distance=detector_distance, shape=detector_shape, pixel_size=pixel_size)
@@ -69,9 +60,21 @@ py = np.concatenate([p.position_vecs()[:,1].ravel() for p in pad])
 beam = source.Beam(photon_energy=photon_energy, diameter_fwhm=beam_diameter, pulse_energy=n_photons*photon_energy)
 
 #%%
-dat = make_images(pad, beam)
+dat = solutions.get_pad_solution_intensity(pad, beam, thickness=10e-6, liquid='water')
 data = detector.concat_pad_data(dat)
+# viewer = PADView(pad_geometry=pad, raw_data=dat)
+# viewer.start()
+
+mask = data*0
+print(mask.size)
 w = np.where(data > 5000)
+mask[w[0]] = 1
+print(np.max(mask), np.sum(mask))
+mask = detector.split_pad_data(pad, mask.ravel())
+viewer = PADView(pad_geometry=pad, raw_data=mask)
+viewer.start()
+
+
 fit_ellipse = optimize.fit_ellipse(px[w], py[w])
 
 
