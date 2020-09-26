@@ -1004,7 +1004,17 @@ class RadialProfiler():
             w = np.where(mask)
             data = data[w]
             q_mags = q_mags[w]
-        median, bin_edges, binnumber = binned_statistic(q_mags, data, statistic='median', bins=self.bin_edges)
+
+        # Calculate the number of bins
+        N_bins = len(self.bin_edges)-1
+
+        # Grab the data values that is within bin edges and calculate the median of those values.
+        median = np.zeros(N_bins)
+        for i in range(N_bins):
+            ind = (self.bin_edges[i] <= q_mags) * (q_mags < self.bin_edges[i+1])
+            
+            median[i] = np.median(data[ind])
+
         return median
 
     def get_profile(self, data, mask=None, average=True):
