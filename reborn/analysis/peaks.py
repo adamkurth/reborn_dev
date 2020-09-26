@@ -13,16 +13,16 @@ class PeakFinder(object):
     """
 
     mask = None  #: Ignore pixels where mask == 0.
-    snr_threshold = 5  # : Peaks must have a signal-to-noise ratio above this value.
-    radii = [1, 20, 30]  # : These are the radii associated with the :func:`boxsnr <reborn.analysis.peaks.boxsnr>` function.
-
+    snr_threshold = None  # : Peaks must have a signal-to-noise ratio above this value.
+    radii = None  # : These are the radii associated with the :func:`boxsnr <reborn.analysis.peaks.boxsnr>` function.
     snr = None  # : The SNR array from the most recent call to the find_peaks method.
     signal = None  # : The signal array from the most recent call to the find_peaks method.
     labels = None  # : Labeled regions of peak candidates
     n_labels = 0  # : Number of peak candidates
     centroids = None  # : Centroids of each peak candidate
+    beam = None  # :
 
-    def __init__(self, snr_threshold=10, radii=(3, 8, 10), mask=None):
+    def __init__(self, snr_threshold=6, radii=(3, 5, 10), mask=None, max_iterations=3, beam=None):
         r"""
         Args:
             snr_threshold: Peaks must have a signal-to-noise ratio above this value
@@ -32,6 +32,7 @@ class PeakFinder(object):
         self.snr_threshold = snr_threshold
         self.radii = radii
         self.mask = mask
+        self.max_iterations = max_iterations
 
     def find_peaks(self, data, mask=None):
         r"""
@@ -49,7 +50,14 @@ class PeakFinder(object):
             if self.mask is None:
                 self.mask = np.ones_like(data)
             mask = self.mask
-
+        mask_a = mask.copy()
+        for i in range(self.max_iterations):
+            snr, signal = boxsnr(data, mask, mask_a, self.radii[0], self.radii[1], self.radii[2])
+            ab = snr > self.snr_threshold
+            if np.sum(ab) > 0:
+                mask_a[ab] = 0
+            else:
+                break
         self.snr, self.signal = boxsnr(data, mask, mask, self.radii[0], self.radii[1], self.radii[2])
         self.labels, self.n_labels = measurements.label(self.snr > self.snr_threshold)
         print('self.n_labels', self.n_labels)
