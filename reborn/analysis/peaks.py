@@ -143,7 +143,7 @@ class PeakFinder(object):
                 break
         self.snr, self.signal = boxsnr(data, mask, mask, self.radii[0], self.radii[1], self.radii[2])
         self.labels, self.n_labels = measurements.label(self.snr > self.snr_threshold)
-        print('self.n_labels', self.n_labels)
+        #print('self.n_labels', self.n_labels)
         if self.n_labels > 0:
             sig = self.signal.copy()
             sig[sig < 0] = 0
@@ -152,7 +152,7 @@ class PeakFinder(object):
             if len(cent.shape) == 1:
                 cent = np.expand_dims(cent, axis=0)
             cent = cent[:, ::-1].copy()
-            print('cent', cent)
+            #print('cent', cent)
             self.centroids = cent
         else:
             self.centroids = None
