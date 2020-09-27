@@ -78,7 +78,6 @@ class PADView(object):
     do_peak_finding = False
     data_filters = None
     show_peaks = True
-    peaks = None
     apply_filters = True
     data_processor = None
     widgets = {}
@@ -1219,13 +1218,12 @@ class PADView2(object):
     peak_finders = None
     do_peak_finding = False
     data_filters = None
-    show_peaks = True
-    peaks = None
+    peaks_visible = True
     apply_filters = True
     data_processor = None
     widgets = {}
 
-    peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': False}
+    peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
     def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None,
                  debug_level=0):
@@ -1409,7 +1407,7 @@ class PADView2(object):
         add_menu(mask_menu, 'Load mask...', connect=self.load_masks)
         analysis_menu = self.menubar.addMenu('Analysis')
         add_menu(analysis_menu, 'Toggle peak finding', connect=self.toggle_peak_finding)
-        add_menu(analysis_menu, 'Toggle peaks visible', connect=self.toggle_peaks)
+        add_menu(analysis_menu, 'Toggle peaks visible', connect=self.toggle_peaks_visible)
         # add_menu(analysis_menu, 'SNR transform', connect=self.show_snr_filter_widget)
 
     def set_shortcut(self, shortcut, func):
@@ -1650,6 +1648,8 @@ class PADView2(object):
             self.hide_pad_labels()
 
     def _scale_factor(self, pad_geometry):
+        if type(pad_geometry) == int:
+            pad_geometry = self.pad_geometry[pad_geometry]
         return 1/pad_geometry.t_vec[2]
 
     def _apply_pad_transform(self, im, p):
@@ -1875,18 +1875,6 @@ class PADView2(object):
         if self.pad_geometry is not None:
             self.debug('No raw data found - setting display data arrays to zeros')
             return [pad.zeros() for pad in self.pad_geometry]
-        return None
-
-    def get_peak_data(self):
-        self.debug(get_caller(), 1)
-        if self.processed_data is not None:
-            self.debug('Getting processed peak data')
-            if 'peaks' in self.processed_data.keys():
-                return self.processed_data['peaks']
-        if self.raw_data is not None:
-            self.debug('Getting raw peak data')
-            if 'peaks' in self.raw_data.keys():
-                return self.raw_data['peaks']
         return None
 
     def setup_pads(self):
@@ -2155,37 +2143,6 @@ class PADView2(object):
                 self.viewbox.removeItem(scat)
         self.scatter_plots = None
 
-    def display_peaks(self):
-        self.debug(get_caller(), 1)
-        peaks = self.get_peak_data()
-        if peaks is None:
-            return
-        n_peaks = peaks['n_peaks']
-        centroids = peaks['centroids']
-        gl_fs_pos = np.empty(n_peaks)
-        gl_ss_pos = np.empty(n_peaks)
-        n = 0
-        for i in range(self.n_pads):
-            c = centroids[i]
-            if c is None:
-                continue
-            nc = c.shape[0]
-            vec = self.pad_geometry[i].indices_to_vectors(c[:, 1], c[:, 0])
-            gl_fs_pos[n:(n + nc)] = vec[:, 0].ravel() * self._scale_factor(self.pad_geometry[i])
-            gl_ss_pos[n:(n + nc)] = vec[:, 1].ravel() * self._scale_factor(self.pad_geometry[i])
-            n += nc
-        self.add_scatter_plot(gl_fs_pos, gl_ss_pos, **self.peak_style)
-
-    def toggle_peaks(self):
-        self.debug(get_caller(), 1)
-        if self.scatter_plots is None:
-            self.display_peaks()
-            self.show_peaks = True
-        else:
-            self.remove_scatter_plots()
-            self.show_peaks = False
-        self.update_pads()
-
     def toggle_filter(self):
         self.debug(get_caller(), 1)
         if self.apply_filters is True:
@@ -2268,6 +2225,78 @@ class PADView2(object):
             # self.frame_getter = CheetahFrameGetter(file_name, self.crystfel_geom_file_name)
         self.show_frame(frame_number=0)
 
+    def panel_scatter_plot(self, panel_number, ss_coords, fs_coords):
+        vec = self.pad_geometry[panel_number].indices_to_vectors(ss_coords+1, fs_coords+1)
+        fs = vec[:, 0].ravel() * self._scale_factor(panel_number)
+        ss = vec[:, 1].ravel() * self._scale_factor(panel_number)
+        self.add_scatter_plot(fs, ss, **self.peak_style)
+
+    def display_peaks(self):
+        self.debug(get_caller(), 1)
+        peaks = self.get_peak_data()
+        if peaks is None:
+            return
+        centroids = peaks['centroids']
+        for i in range(self.n_pads):
+            c = centroids[i]
+            self.panel_scatter_plot(i, c[:, 1], c[:, 0])
+
+    def show_peaks(self):
+        self.debug(get_caller(), 1)
+        self.display_peaks()
+        self.peaks_visible = True
+        self.update_pads()
+
+    def hide_peaks(self):
+        self.debug(get_caller(), 1)
+        self.remove_scatter_plots()
+        self.peaks_visible = False
+        self.update_pads()
+
+    def toggle_peaks_visible(self):
+        self.debug(get_caller(), 1)
+        if self.peaks_visible == False:
+            self.display_peaks()
+            self.peaks_visible = True
+        else:
+            self.hide_peaks()
+            self.peaks_visible = False
+
+    def get_peak_data(self):
+        self.debug(get_caller(), 1)
+        if self.processed_data is not None:
+            self.debug('Getting processed peak data')
+            if 'peaks' in self.processed_data.keys():
+                return self.processed_data['peaks']
+        if self.raw_data is not None:
+            self.debug('Getting raw peak data')
+            if 'peaks' in self.raw_data.keys():
+                return self.raw_data['peaks']
+        return None
+
+    def update_peakfinder_params(self):
+        self.peakfinder_params = self.widget_peakfinder_config.get_values()
+        self.setup_peak_finders()
+        self.find_peaks()
+        if self.peakfinder_params['activate']:
+            self.show_peaks()
+        else:
+            self.hide_peaks()
+
+    def find_peaks(self):
+        self.debug(get_caller(), 1)
+        if self.peak_finders is None:
+            self.setup_peak_finders()
+        centroids = [None]*self.n_pads
+        n_peaks = 0
+        for i in range(self.n_pads):
+            pfind = self.peak_finders[i]
+            pfind.find_peaks(data=self.raw_data['pad_data'][i], mask=self.mask_data[i])
+            n_peaks += pfind.n_labels
+            centroids[i] = pfind.centroids
+        self.debug('Found %d peaks' % (n_peaks))
+        self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
+
     def toggle_peak_finding(self):
         self.debug(get_caller(), 1)
         if self.do_peak_finding is False:
@@ -2279,9 +2308,12 @@ class PADView2(object):
     def setup_peak_finders(self):
         self.debug(get_caller(), 1)
         self.peak_finders = []
-        params = self.widget_peakfinder_config
+        a = self.peakfinder_params['inner']
+        b = self.peakfinder_params['center']
+        c = self.peakfinder_params['outer']
+        t = self.peakfinder_params['snr_threshold']
         for i in range(self.n_pads):
-            self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(3, 6, 9)))
+            self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(a, b, c), snr_threshold=t))
 
     def choose_plugins(self):
         self.debug(get_caller(), 1)
@@ -2327,20 +2359,6 @@ class PADView2(object):
     def get_float(self, title="Title", label="Label", text="Text"):
         r""" Simple popup widget that allows the capture of a float number."""
         return float(self.get_text(title=title, label=label, text=text))
-
-    def find_peaks(self):
-        self.debug(get_caller(), 1)
-        if self.peak_finders is None:
-            self.setup_peak_finders()
-        centroids = [None]*self.n_pads
-        n_peaks = 0
-        for i in range(self.n_pads):
-            pfind = self.peak_finders[i]
-            pfind.find_peaks(data=self.raw_data['pad_data'][i], mask=self.mask_data[i])
-            n_peaks += pfind.n_labels
-            centroids[i] = pfind.centroids
-        self.debug('Found %d peaks' % (n_peaks))
-        self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
 
     def start(self):
         self.debug(get_caller(), 1)
@@ -2425,7 +2443,7 @@ class PeakfinderConfigWidget(QtGui.QWidget):
         self.layout.addWidget(QtGui.QLabel('SNR Threshold'), row, 1)
         self.snr_spinbox = QtGui.QDoubleSpinBox()
         self.snr_spinbox.setMinimum(0)
-        self.snr_spinbox.setValue(1)
+        self.snr_spinbox.setValue(6)
         self.layout.addWidget(self.snr_spinbox, row, 2)
         row += 1
         self.layout.addWidget(QtGui.QLabel('Inner Size'), row, 1)
@@ -2449,7 +2467,7 @@ class PeakfinderConfigWidget(QtGui.QWidget):
         self.layout.addWidget(QtGui.QLabel('Max Filter Iterations'), row, 1)
         self.iter_spinbox = QtGui.QSpinBox()
         self.iter_spinbox.setMinimum(3)
-        self.iter_spinbox.setValue(10)
+        self.iter_spinbox.setValue(3)
         self.layout.addWidget(self.iter_spinbox, row, 2)
         row += 1
         self.update_button = QtGui.QPushButton("Update Peakfinder")
@@ -2568,7 +2586,7 @@ if __name__ == '__main__':
 
     # app = pg.mkQApp()
     dat = make_images()
-    pv = PADView(raw_data=dat, pad_geometry=pads)
+    pv = PADView2(raw_data=dat, pad_geometry=pads, debug_level=1)
     pv.start()
     # lw = LevelsWidget(pv)
     # lw.show()
