@@ -1369,6 +1369,7 @@ class PADView2(object):
         snr_config.values_changed.connect(self.update_snr_filter_params)
         self.widget_snr_config = snr_config
         self.widget_peakfinder_config = PeakfinderConfigWidget()
+        self.widget_peakfinder_config.values_changed.connect(self.update_peakfinder_params)
         self.widget_plugin = PluginWidget(self)
 
     def setup_mouse_interactions(self):
