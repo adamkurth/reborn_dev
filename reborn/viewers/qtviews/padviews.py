@@ -1225,7 +1225,7 @@ class PADView2(object):
     data_processor = None
     widgets = {}
 
-    peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': False}
+    peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
     def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None,
                  debug_level=0):
@@ -1435,6 +1435,8 @@ class PADView2(object):
         self.set_shortcut("Shift+s", self.decrease_skip)
         self.set_shortcut("m", self.toggle_masks)
         self.set_shortcut("t", self.mask_hovering_roi)
+        self.set_shortcut("h", self.mask_hovering_roi_inverse)
+        self.set_shortcut("d", self.mask_hovering_roi_toggle)
 
     def update_status_string(self, frame_number=None, n_frames=None):
         r""" Update status string at the bottom of the main window. """
@@ -1510,8 +1512,12 @@ class PADView2(object):
         self._mask_rois.append(roi)
         self.viewbox.addItem(roi)
 
-    def add_circle_roi(self, pos=(0, 0), size=100):
+    def add_circle_roi(self, pos=(0, 0), size=None):
+        if size is None:
+            size = 0.1/self.scale_factor(0)
+        pos = np.array(pos) - size/2
         self.debug(get_caller(), 1)
+        #roi = pg.CircleROI(pos=np.array(pos)-size/2, size=size)
         roi = pg.CircleROI(pos=pos, size=size)
         roi.name = 'circle'
         if self._mask_rois is None:
@@ -1649,6 +1655,8 @@ class PADView2(object):
             self.hide_pad_labels()
 
     def _scale_factor(self, pad_geometry):
+        if type(pad_geometry) == int:
+            pad_geometry = self.pad_geometry[pad_geometry]
         return 1/pad_geometry.t_vec[2]
 
     def _apply_pad_transform(self, im, p):
@@ -1806,10 +1814,12 @@ class PADView2(object):
         self.update_masks(self.mask_data)
         write('Loaded mask: ' + file_name)
 
-    def mask_hovering_roi(self):
+    def mask_hovering_roi(self, inverse=False, toggle=False):
         r""" Mask the ROI region that the mouse cursor is hovering over. """
         if self._mask_rois is None:
             return
+        setval = 0
+        if inverse: setval = 1
         noslice = slice(0, 1, None)
         for roi in self._mask_rois:
             if not roi.mouseHovering:
@@ -1836,7 +1846,14 @@ class PADView2(object):
                     ind1 = (ind1 >= 0) * (ind1 <= sides[0])
                     ind2 = (ind2 >= 0) * (ind2 <= sides[1])
                     inds = ind1*ind2
-                    self.mask_data[ind][inds] = 0
+                    if toggle:
+                        vals = self.mask_data[ind][inds]
+                        newvals = vals.copy()
+                        newvals[vals == 0] = 1
+                        newvals[vals == 1] = 0
+                        self.mask_data[ind][inds] = newvals
+                    else:
+                        self.mask_data[ind][inds] = setval
                     self.mask_images[ind].setImage(self._make_mask_rgba(self.mask_data[ind]))
                 if roi.name == 'circle':
                     # To find pixels in the rectangular ROI, project pixel coordinates onto the two basis vectors of
@@ -1847,8 +1864,22 @@ class PADView2(object):
                     pix_pos = (p * self._scale_factor(geom)).reshape(geom.n_ss, geom.n_fs, 3)
                     pix_pos = pix_pos[:, :, 0:2] - center
                     r = np.sqrt(pix_pos[:, :, 0]**2 + pix_pos[:, :, 1]**2)
-                    self.mask_data[ind][r < radius] = 0
+                    inds = r < radius
+                    if toggle:
+                        vals = self.mask_data[ind][inds]
+                        newvals = vals.copy()
+                        newvals[vals == 0] = 1
+                        newvals[vals == 1] = 0
+                        self.mask_data[ind][inds] = newvals
+                    else:
+                        self.mask_data[ind][inds] = setval
                     self.mask_images[ind].setImage(self._make_mask_rgba(self.mask_data[ind]))
+
+    def mask_hovering_roi_inverse(self):
+        self.mask_hovering_roi(inverse=True)
+
+    def mask_hovering_roi_toggle(self):
+        self.mask_hovering_roi(toggle=True)
 
     def _pyqtgraph_fix(self, dat):
         # Deal with this stupid problem: https://github.com/pyqtgraph/pyqtgraph/issues/769
@@ -2277,10 +2308,14 @@ class PADView2(object):
 
     def setup_peak_finders(self):
         self.debug(get_caller(), 1)
+
         self.peak_finders = []
         params = self.widget_peakfinder_config
         for i in range(self.n_pads):
             self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(3, 6, 9)))
+
+
+
 
     def choose_plugins(self):
         self.debug(get_caller(), 1)
@@ -2338,6 +2373,8 @@ class PADView2(object):
             pfind.find_peaks(data=self.raw_data['pad_data'][i], mask=self.mask_data[i])
             n_peaks += pfind.n_labels
             centroids[i] = pfind.centroids
+        #print(centroids)
+        #yay
         self.debug('Found %d peaks' % (n_peaks))
         self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
 

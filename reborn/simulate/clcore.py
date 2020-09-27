@@ -1395,7 +1395,7 @@ def help(extended=False):
     Arguments:
         extended (bool):  Print extended details above the summary.
     """
-
+    print(pyopencl.__file__)
     if extended:
 
         def print_info(obj, info_cls):
