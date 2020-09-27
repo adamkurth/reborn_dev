@@ -3,6 +3,89 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import numpy as np
 from scipy.ndimage import measurements
 from ..fortran import peaks_f
+from ..utils import ensure_list
+from ..detector import RadialProfiler, concat_pad_data, split_pad_data
+
+
+class MultiPADPeakFinder(object):
+    r"""
+    A peak finder class that deals with multiple PADs.
+    """
+
+    def __init__(self, snr_threshold=6, radii=(1, 5, 10), mask=None, subtract_radial_median=False, correct_polarization=False, pad_geometry=None, beam=None):
+        r"""
+        Args:
+            snr_threshold: Peaks must have a signal-to-noise ratio above this value
+            radii: These are the radii associated with the :func:`boxsnr <reborn.analysis.peaks.boxsnr>` function.
+            mask: Ignore pixels where mask == 0.
+            subtract_radial_median: Boolean variable to switch on radial median subtraction
+            correct_polarization: Boolean variable to switch on polarization correction
+            pad_geometry: pad geometry object
+            beam: beam object
+        """
+        pad_geometry = ensure_list(pad_geometry)
+
+        self.pads = pad_geometry
+        n_pads = len(self.pads)
+        
+        self.snr_threshold = snr_threshold
+        self.radii = radii
+        
+        if mask is None:
+            self.mask = [None] * n_pads
+        self.mask = ensure_list(self.mask)
+
+        self.peak_finders = [PeakFinder(snr_threshold=snr_threshold, radii=radii, mask=self.mask[i]) for i in range(len(self.pads))]
+
+        self.subtract_radial_median = subtract_radial_median
+        self.correct_polarization = correct_polarization
+
+        if subtract_radial_median:
+            qmag = np.concatenate([p.q_mags(beam=beam) for p in self.pads])
+            self.radial_profiler = RadialProfiler(n_bins=100,
+                                                  q_range=(np.min(qmag), np.max(qmag)),
+                                                  pad_geometry=self.pads,
+                                                  beam=beam)
+            self.qmag = qmag
+        if correct_polarization:
+            self.polarization_factor = concat_pad_data([p.polarization_factors(beam=beam) for p in self.pads])
+
+
+    def find_peaks(self, data, mask=None):
+        r"""
+        Do peak-finding on a data array with multiple PADs.
+
+        Args:
+            data: The data to perform peak-finding on.
+            mask: A mask, if desired.  By default, the mask used on creation of a PeakFinder instance will be used.
+                  This defaults to ones everywhere.
+
+        Returns:
+            A list of centroids of the peaks.
+        """
+
+        # Put the data PADs into a 1D array
+        data = concat_pad_data(data)
+
+        # Divide out polarization
+        if self.correct_polarization:
+            data /= self.polarization_factor
+
+        # Calculate and subtract the radial median
+        if self.subtract_radial_median:
+            radial_med = self.radial_profiler.get_median_profile(data)
+
+            data -= np.interp(self.qmag, self.radial_profiler.bin_centers, radial_med)
+
+        # Put the data back into PADs 
+        data = split_pad_data(self.pads, data)
+
+        # Find the peaks for each PAD
+        peaks_centroids = []
+        for i in range(len(self.pads)):
+            peaks_centroids.append(self.peak_finders[i].find_peaks(data=data[i]))
+
+        return peaks_centroids
 
 
 class PeakFinder(object):
@@ -13,16 +96,16 @@ class PeakFinder(object):
     """
 
     mask = None  #: Ignore pixels where mask == 0.
-    snr_threshold = 5  # : Peaks must have a signal-to-noise ratio above this value.
-    radii = [1, 20, 30]  # : These are the radii associated with the :func:`boxsnr <reborn.analysis.peaks.boxsnr>` function.
-
+    snr_threshold = None  # : Peaks must have a signal-to-noise ratio above this value.
+    radii = None  # : These are the radii associated with the :func:`boxsnr <reborn.analysis.peaks.boxsnr>` function.
     snr = None  # : The SNR array from the most recent call to the find_peaks method.
     signal = None  # : The signal array from the most recent call to the find_peaks method.
     labels = None  # : Labeled regions of peak candidates
     n_labels = 0  # : Number of peak candidates
     centroids = None  # : Centroids of each peak candidate
+    beam = None  # :
 
-    def __init__(self, snr_threshold=10, radii=(3, 8, 10), mask=None):
+    def __init__(self, snr_threshold=6, radii=(3, 5, 10), mask=None, max_iterations=3, beam=None):
         r"""
         Args:
             snr_threshold: Peaks must have a signal-to-noise ratio above this value
@@ -32,6 +115,7 @@ class PeakFinder(object):
         self.snr_threshold = snr_threshold
         self.radii = radii
         self.mask = mask
+        self.max_iterations = max_iterations
 
     def find_peaks(self, data, mask=None):
         r"""
@@ -49,7 +133,14 @@ class PeakFinder(object):
             if self.mask is None:
                 self.mask = np.ones_like(data)
             mask = self.mask
-
+        mask_a = mask.copy()
+        for i in range(self.max_iterations):
+            snr, signal = boxsnr(data, mask, mask_a, self.radii[0], self.radii[1], self.radii[2])
+            ab = snr > self.snr_threshold
+            if np.sum(ab) > 0:
+                mask_a[ab] = 0
+            else:
+                break
         self.snr, self.signal = boxsnr(data, mask, mask, self.radii[0], self.radii[1], self.radii[2])
         self.labels, self.n_labels = measurements.label(self.snr > self.snr_threshold)
         print('self.n_labels', self.n_labels)
