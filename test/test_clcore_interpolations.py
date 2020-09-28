@@ -8,6 +8,7 @@ havecl = True
 # context = pyopencl.create_some_context()
 # queue = pyopencl.CommandQueue(context)
 test_core = ClCore(context=None, queue=None, group_size=1, double_precision=True, debug=1)
+print('created ClCore')
 
 def test_nothing():
     assert test_core is not None

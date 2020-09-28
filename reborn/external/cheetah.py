@@ -143,6 +143,16 @@ class CheetahFrameGetter(FrameGetter):
         self.current_frame = 0
 
         self.peaks = None
+        
+        try: 
+            self.photon_energies = self.h5file['/LCLS/photon_energy_eV'][:] * 1.602e-19
+        except:
+            self.photon_energies = None
+
+        try:
+            self.encoder_values = self.h5file['/LCLS/detector_1/EncoderValue'][:]
+        except:
+            self.encoder_values = None 
 
     def load_cxidb_file(self, cxi_file_name):
 
@@ -221,5 +231,11 @@ class CheetahFrameGetter(FrameGetter):
         if not self.skip_peaks:
             peaks = self.get_peaks(self.h5file, frame_number)
             dat['peaks'] = peaks
+
+        if self.photon_energies is not None:
+            dat['photon_energy'] = self.photon_energies[frame_number]
+
+        if self.encoder_values is not None:
+            dat['encoder_value'] = self.encoder_values[frame_number]
 
         return dat

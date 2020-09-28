@@ -1434,6 +1434,8 @@ class PADView2(object):
         self.set_shortcut("Shift+s", self.decrease_skip)
         self.set_shortcut("m", self.toggle_masks)
         self.set_shortcut("t", self.mask_hovering_roi)
+        self.set_shortcut("h", self.mask_hovering_roi_inverse)
+        self.set_shortcut("d", self.mask_hovering_roi_toggle)
 
     def update_status_string(self, frame_number=None, n_frames=None):
         r""" Update status string at the bottom of the main window. """
@@ -1483,6 +1485,10 @@ class PADView2(object):
         upper = np.percentile(d, percents[1])
         self.set_levels(lower, upper)
 
+    def get_levels(self):
+        r""" Get the minimum and maximum levels of the current image display. """
+        return self.histogram.item.getLevels()
+
     def set_levels(self, min_value, max_value):
         r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
         self.debug(get_caller(), 1)
@@ -1509,8 +1515,12 @@ class PADView2(object):
         self._mask_rois.append(roi)
         self.viewbox.addItem(roi)
 
-    def add_circle_roi(self, pos=(0, 0), size=100):
+    def add_circle_roi(self, pos=(0, 0), size=None):
+        if size is None:
+            size = 0.1/self.scale_factor(0)
+        pos = np.array(pos) - size/2
         self.debug(get_caller(), 1)
+        #roi = pg.CircleROI(pos=np.array(pos)-size/2, size=size)
         roi = pg.CircleROI(pos=pos, size=size)
         roi.name = 'circle'
         if self._mask_rois is None:
@@ -1807,10 +1817,12 @@ class PADView2(object):
         self.update_masks(self.mask_data)
         write('Loaded mask: ' + file_name)
 
-    def mask_hovering_roi(self):
+    def mask_hovering_roi(self, inverse=False, toggle=False):
         r""" Mask the ROI region that the mouse cursor is hovering over. """
         if self._mask_rois is None:
             return
+        setval = 0
+        if inverse: setval = 1
         noslice = slice(0, 1, None)
         for roi in self._mask_rois:
             if not roi.mouseHovering:
@@ -1837,7 +1849,14 @@ class PADView2(object):
                     ind1 = (ind1 >= 0) * (ind1 <= sides[0])
                     ind2 = (ind2 >= 0) * (ind2 <= sides[1])
                     inds = ind1*ind2
-                    self.mask_data[ind][inds] = 0
+                    if toggle:
+                        vals = self.mask_data[ind][inds]
+                        newvals = vals.copy()
+                        newvals[vals == 0] = 1
+                        newvals[vals == 1] = 0
+                        self.mask_data[ind][inds] = newvals
+                    else:
+                        self.mask_data[ind][inds] = setval
                     self.mask_images[ind].setImage(self._make_mask_rgba(self.mask_data[ind]))
                 if roi.name == 'circle':
                     # To find pixels in the rectangular ROI, project pixel coordinates onto the two basis vectors of
@@ -1848,8 +1867,22 @@ class PADView2(object):
                     pix_pos = (p * self._scale_factor(geom)).reshape(geom.n_ss, geom.n_fs, 3)
                     pix_pos = pix_pos[:, :, 0:2] - center
                     r = np.sqrt(pix_pos[:, :, 0]**2 + pix_pos[:, :, 1]**2)
-                    self.mask_data[ind][r < radius] = 0
+                    inds = r < radius
+                    if toggle:
+                        vals = self.mask_data[ind][inds]
+                        newvals = vals.copy()
+                        newvals[vals == 0] = 1
+                        newvals[vals == 1] = 0
+                        self.mask_data[ind][inds] = newvals
+                    else:
+                        self.mask_data[ind][inds] = setval
                     self.mask_images[ind].setImage(self._make_mask_rgba(self.mask_data[ind]))
+
+    def mask_hovering_roi_inverse(self):
+        self.mask_hovering_roi(inverse=True)
+
+    def mask_hovering_roi_toggle(self):
+        self.mask_hovering_roi(toggle=True)
 
     def _pyqtgraph_fix(self, dat):
         # Deal with this stupid problem: https://github.com/pyqtgraph/pyqtgraph/issues/769
@@ -2225,13 +2258,22 @@ class PADView2(object):
             # self.frame_getter = CheetahFrameGetter(file_name, self.crystfel_geom_file_name)
         self.show_frame(frame_number=0)
 
-    def panel_scatter_plot(self, panel_number, ss_coords, fs_coords):
-        vec = self.pad_geometry[panel_number].indices_to_vectors(ss_coords+1, fs_coords+1)
-        fs = vec[:, 0].ravel() * self._scale_factor(panel_number)
-        ss = vec[:, 1].ravel() * self._scale_factor(panel_number)
-        self.add_scatter_plot(fs, ss, **self.peak_style)
+    def vector_coords_to_2d_display_coords(self, vecs):
+        r""" Convert 3D vector coords to the equivalent coords in the 2D display plane.  This corresponds to ignoring
+        the "z" coordinate, and scaling the "x,y" coordinates to that of an equivalent detector located at a distance
+        of 1 meter from the origin.  Simply put: remove the z component, divide the x,y components by the z component"""
+        return vecs[:, 0:2]/vecs[:, 2]
+
+    def panel_scatter_plot(self, panel_number, ss_coords, fs_coords, style=None):
+        r""" Scatter plot points given coordinates (i.e. indices) corresponding to a particular panel.  This will
+        take care of the re-mapping to the display coordinates."""
+        if style is None: style = self.peak_style
+        vecs = self.pad_geometry[panel_number].indices_to_vectors(ss_coords+1, fs_coords+1)  # FIXME: Why the +1 ???
+        vecs = self.vector_coords_to_2d_display_coords(vecs)
+        self.add_scatter_plot(vecs[:, 0], vecs[:, 1], **style)
 
     def display_peaks(self):
+        r""" Scatter plot the peaks that are cached in the class instance. """
         self.debug(get_caller(), 1)
         peaks = self.get_peak_data()
         if peaks is None:
@@ -2239,21 +2281,25 @@ class PADView2(object):
         centroids = peaks['centroids']
         for i in range(self.n_pads):
             c = centroids[i]
-            self.panel_scatter_plot(i, c[:, 1], c[:, 0])
+            if c is not None:
+                self.panel_scatter_plot(i, c[:, 1], c[:, 0])
 
     def show_peaks(self):
+        r""" Make peak scatter plots visible. """
         self.debug(get_caller(), 1)
         self.display_peaks()
         self.peaks_visible = True
         self.update_pads()
 
     def hide_peaks(self):
+        r""" Make peak scatter plots invisible. """
         self.debug(get_caller(), 1)
         self.remove_scatter_plots()
         self.peaks_visible = False
         self.update_pads()
 
     def toggle_peaks_visible(self):
+        r""" Toggle peak scatter plots visible/invisible. """
         self.debug(get_caller(), 1)
         if self.peaks_visible == False:
             self.display_peaks()
@@ -2263,6 +2309,8 @@ class PADView2(object):
             self.peaks_visible = False
 
     def get_peak_data(self):
+        r""" Fetch peak data, which might be stored in various places.
+        FIXME: Need to simplify the data structure so that it is not a hassle to find peaks."""
         self.debug(get_caller(), 1)
         if self.processed_data is not None:
             self.debug('Getting processed peak data')
@@ -2275,15 +2323,19 @@ class PADView2(object):
         return None
 
     def update_peakfinder_params(self):
+        r""" Reset the peak finders with new parameters.  This also launges a peakfinding job.
+        FIXME: Need to make this more intelligent so that unnecessary jobs are not launched."""
         self.peakfinder_params = self.widget_peakfinder_config.get_values()
         self.setup_peak_finders()
         self.find_peaks()
+        self.hide_peaks()
         if self.peakfinder_params['activate']:
             self.show_peaks()
         else:
             self.hide_peaks()
 
     def find_peaks(self):
+        r""" Launch a peak-finding job, and cache the results.  This will not display anything. """
         self.debug(get_caller(), 1)
         if self.peak_finders is None:
             self.setup_peak_finders()
@@ -2298,6 +2350,8 @@ class PADView2(object):
         self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
 
     def toggle_peak_finding(self):
+        r""" Toggle peakfinding on/off.  Set this to true if you want to automatically do peakfinding when a new
+        image data is displayed. """
         self.debug(get_caller(), 1)
         if self.do_peak_finding is False:
             self.do_peak_finding = True
@@ -2306,6 +2360,8 @@ class PADView2(object):
         self.update_display_data()
 
     def setup_peak_finders(self):
+        r""" Create peakfinder class instances.  We use peakfinder classes rather than functions in order to tidy up
+        the data structure. """
         self.debug(get_caller(), 1)
         self.peak_finders = []
         a = self.peakfinder_params['inner']
@@ -2350,11 +2406,6 @@ class PADView2(object):
         r""" Simple popup widget that allows the capture of a text string."""
         text, ok = QtGui.QInputDialog.getText(self.main_window, title, label, QtGui.QLineEdit.Normal, text)
         return text
-
-    # def get_multiline_text(self, title="Title", label="Label", text="Text"):
-    #     # FIXME: this is only Qt 5.2+
-    #     text, ok = QtGui.QInputDialog.getMultilineText(self.main_window, title=title, label=label, text=text)
-    #     return text
 
     def get_float(self, title="Title", label="Label", text="Text"):
         r""" Simple popup widget that allows the capture of a float number."""
