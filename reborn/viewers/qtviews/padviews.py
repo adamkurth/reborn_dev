@@ -1334,9 +1334,16 @@ class PADView2(object):
         lay.addWidget(self.widget_peakfinder_config, 1, 1)
         box.setContentLayout(lay)
         self.side_panel_layout.addWidget(box)
-        box = misc.CollapsibleBox('Plugins') ###########################
+        box = misc.CollapsibleBox('Analysis') ###########################
         lay = QtGui.QGridLayout()
-        lay.addWidget(self.widget_plugin, 1, 1)
+        row = 0
+        row += 1
+        lay.addWidget(QtGui.QLabel('Polarization Correction'), row, 1)
+        polarization_button = QtGui.QCheckBox()
+        # polarization_button.toggled.connect()
+        lay.addWidget(polarization_button, row, 2, alignment=QtCore.Qt.AlignCenter)
+        row += 1
+        lay.addWidget(self.widget_plugin, row, 1)
         box.setContentLayout(lay)
         self.side_panel_layout.addWidget(box)
         self.side_panel.setLayout(self.side_panel_layout)
