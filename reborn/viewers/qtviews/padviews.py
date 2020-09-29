@@ -1524,7 +1524,7 @@ class PADView2(object):
 
     def add_circle_roi(self, pos=(0, 0), size=None):
         if size is None:
-            size = 0.1/self.scale_factor(0)
+            size = 0.1/self._scale_factor(0)
         pos = np.array(pos) - size/2
         self.debug(get_caller(), 1)
         #roi = pg.CircleROI(pos=np.array(pos)-size/2, size=size)
@@ -2010,6 +2010,8 @@ class PADView2(object):
             self.add_rings(rad)
 
     def add_rings(self, radii=[], pens=None, radius_handle=False):
+        r""" Plot rings.  Note that these are in a plane located 1 meter from the sample position; calculate the radius
+        Needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is tan(theta)"""
         self.debug(get_caller(), 1)
         if not isinstance(radii, (list,)):
             radii = [radii]
@@ -2017,7 +2019,9 @@ class PADView2(object):
         if pens is None:
             pens = [pg.mkPen([255, 255, 255], width=2)]*n
         for i in range(0, n):
-            circ = pg.CircleROI(pos=[-radii[i]*0.5+0.5]*2, size=radii[i], pen=pens[i])
+            r = 2*radii[i]
+            s = -r/2 
+            circ = pg.CircleROI(pos=[s, s], size=r, pen=pens[i])
             circ.translatable = False
             circ.removable = True
             self.rings.append(circ)
