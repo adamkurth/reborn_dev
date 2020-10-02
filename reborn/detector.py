@@ -168,26 +168,6 @@ class PADGeometry():
             d = json.load(f)
         self.from_dict(d)
 
-    # def save(self, save_fname):
-    #     r"""Saves an hdf5 file with class attributes for later use"""
-    #     utils.depreciate('Do not save as hdf5.  Use the save_json method instead, so you have a human readable file.')
-    #     import h5py
-    #     with h5py.File(save_fname, "w") as hfil:
-    #         for name, data in vars(self).items():
-    #             hfil.create_dataset(name, data=data)
-    #
-    # @classmethod
-    # def load(cls, fname):
-    #     r""" load a PAD object from fname"""
-    #     utils.depreciate('Do not use hdf5 files.  Use the save_json method instead, so you have human readable files.')
-    #     import h5py
-    #     pad = cls()
-    #     with h5py.File(fname, "r") as hfil:
-    #         for name in hfil.keys():
-    #             data = hfil[name].value
-    #             setattr(pad, name, data)
-    #     return pad
-
     def simple_setup(self, n_pixels=None, pixel_size=None, distance=None, shape=None):
         r""" Make this a square PAD with beam at center.
 
@@ -263,6 +243,39 @@ class PADGeometry():
         s_vec = np.outer(idx_ss.ravel(), self.ss_vec)
         return self.t_vec + f_vec + s_vec
 
+    def vectors_to_indices(self, vecs, insist_in_pad=True, round=False):
+        r""" Suppose you have a vector pointing away from the origin and you want to know which pixel the vector
+        will intercept (if scaled by an appropriate constant).  This function will do that calculation for you.  It will
+        return the indices corresponding to the point where the vector intercepts the PAD.  Note that the indices are
+        floating points, so you might need to convert to integers if you use them for indexing.
+
+        Arguments:
+            vecs (|ndarray|): An array of vectors, with shape (N, 3) or shape (3)
+            insist_in_pad (bool): If you want to allow out-of-range indices, set this to True.  Otherwise, out-of-range
+                                  values will be set to nan.
+
+        Returns:
+            slow-scan indices, fast-scan indices.  The values will be nan if out of range.
+        """
+        vecs = np.atleast_2d(vecs)
+        fxs = np.dot(vecs, np.cross(self.ss_vec, self.fs_vec))
+        i = np.dot(np.cross(self.ss_vec, vecs), self.t_vec)/fxs
+        j = -np.dot(np.cross(self.fs_vec, vecs), self.t_vec)/fxs
+        if round:
+            i = np.round(i)
+            j = np.round(j)
+        if insist_in_pad:
+            ii = i + 0.5
+            jj = j + 0.5
+            m = np.zeros(ii.shape, dtype=np.int)
+            m[ii < 0] = 1
+            m[jj < 0] = 1
+            m[ii > self.n_fs] = 1
+            m[jj > self.n_ss] = 1
+            i[m == 1] = np.nan
+            j[m == 1] = np.nan
+        return j, i
+
     def position_vecs(self):
         r"""
         Compute vectors pointing from origin to pixel centers.
@@ -276,6 +289,9 @@ class PADGeometry():
         i.ravel()
         j.ravel()
         return self.indices_to_vectors(j, i)
+
+    def center_pos_vec(self):
+        return self.t_vec + (self.n_fs - 1) * self.fs_vec / 2.0 + (self.n_ss - 1) * self.ss_vec / 2.0
 
     def norm_vec(self):
         r""" The vector that is normal to the PAD plane. """

@@ -1275,9 +1275,7 @@ class PADView2(object):
             self.pad_geometry = pad_geometry
 
         self.app = pg.mkQApp()
-        test = PluginWidget()
         self.setup_ui()
-        # self.main_window = uic.loadUi(padviewui)
         self.viewbox = pg.ViewBox()
         self.viewbox.invertX()
         self.viewbox.setAspectLocked()
@@ -1292,8 +1290,7 @@ class PADView2(object):
             self.setup_pads()
             self.show_frame()
         self.main_window.show()
-
-        self.debug('__init__ complete')
+        self.debug('__init__ complete', 1)
 
     def debug(self, msg, val=1):
         r"""
@@ -1501,9 +1498,18 @@ class PADView2(object):
         self.debug(get_caller(), 1)
         self.histogram.item.setLevels(min_value, max_value)
 
-    def add_rectangle_roi(self, pos=(0, 0), size=(100, 100)):
+    def get_view_bounding_rect(self):
+        vb = self.viewbox
+        return vb.mapSceneToView(vb.mapToScene(vb.rect()).boundingRect()).boundingRect().getRect()
+
+    def add_rectangle_roi(self, pos=(0, 0), size=None):
         r""" Adds a |pyqtgraph| RectROI """
         self.debug(get_caller(), 1)
+        if size is None:
+            br = self.get_view_bounding_rect()
+            s = min(br[2], br[3])
+            size = (s/4, s/4)
+        pos = (pos[0] - size[0]/2, pos[1] - size[0]/2)
         roi = pg.RectROI(pos=pos, size=size, centered=True, sideScalers=True)
         roi.name = 'rectangle'
         roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
@@ -1512,23 +1518,23 @@ class PADView2(object):
         self._mask_rois.append(roi)
         self.viewbox.addItem(roi)
 
-    def add_ellipse_roi(self, pos=(0, 0), size=(100, 100)):
-        self.debug(get_caller(), 1)
-        roi = pg.EllipseROI(pos=pos, size=size, centered=True, sideScalers=True)
-        roi.name = 'ellipse'
-        roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
-        if self._mask_rois is None:
-            self._mask_rois = []
-        self._mask_rois.append(roi)
-        self.viewbox.addItem(roi)
+    # def add_ellipse_roi(self, pos=(0, 0), size=(100, 100)):
+    #     self.debug(get_caller(), 1)
+    #     roi = pg.EllipseROI(pos=pos, size=size, centered=True, sideScalers=True)
+    #     roi.name = 'ellipse'
+    #     roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
+    #     if self._mask_rois is None:
+    #         self._mask_rois = []
+    #     self._mask_rois.append(roi)
+    #     self.viewbox.addItem(roi)
 
-    def add_circle_roi(self, pos=(0, 0), size=None):
-        if size is None:
-            size = 0.1/self._scale_factor(0)
-        pos = np.array(pos) - size/2
+    def add_circle_roi(self, pos=(0, 0), radius=None):
         self.debug(get_caller(), 1)
-        #roi = pg.CircleROI(pos=np.array(pos)-size/2, size=size)
-        roi = pg.CircleROI(pos=pos, size=size)
+        if radius is None:
+            br = self.get_view_bounding_rect()
+            radius = min(br[2], br[3]) / 2
+        pos = np.array(pos) - radius / 2
+        roi = pg.CircleROI(pos=pos, size=radius)
         roi.name = 'circle'
         if self._mask_rois is None:
             self._mask_rois = []
@@ -1587,9 +1593,8 @@ class PADView2(object):
         if self.scan_arrows is None:
             self.scan_arrows = []
             for p in self.pad_geometry:
-                scl = self._scale_factor(p)
-                f = p.fs_vec * scl
-                t = (p.t_vec + p.fs_vec + p.ss_vec) * scl
+                f = p.fs_vec
+                t = (p.t_vec + p.fs_vec + p.ss_vec)
                 ang = np.arctan2(f[1], f[0])*180/np.pi
                 a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None) #, pxMode=False)
                 self.scan_arrows.append(a)
@@ -1643,10 +1648,11 @@ class PADView2(object):
                 fs = g.fs_vec*g.n_fs/2
                 ss = g.ss_vec*g.n_ss/2
                 t = g.t_vec + (g.fs_vec + g.ss_vec)/2
-                scl = self._scale_factor(g)
-                x = (fs[0] + ss[0] + t[0]) * scl
-                y = (fs[1] + ss[1] + t[1]) * scl
-                lab.setPos(x, y)
+                x = (fs[0] + ss[0] + t[0])
+                y = (fs[1] + ss[1] + t[1])
+                vec = self.pad_geometry[i].center_pos_vec()
+                vec = self.vector_to_view_coords(vec)
+                lab.setPos(vec[0], vec[1])
                 self.pad_labels.append(lab)
                 self.viewbox.addItem(lab)
 
@@ -1664,22 +1670,13 @@ class PADView2(object):
         else:
             self.hide_pad_labels()
 
-    def _scale_factor(self, pad_geometry):
-        if type(pad_geometry) == int:
-            pad_geometry = self.pad_geometry[pad_geometry]
-        return 1/pad_geometry.t_vec[2]
-
     def _apply_pad_transform(self, im, p):
         self.debug(get_caller(), 2)
-        scl = self._scale_factor(p)
         f = p.fs_vec.copy()
         s = p.ss_vec.copy()
-        t = p.t_vec.copy()
-        f = f * scl
-        s = s * scl
-        t = t * scl + (f + s)/2.0
+        t = p.t_vec.copy() - (f + s)/2.0
         trans = QtGui.QTransform()
-        trans.setMatrix(s[0], s[1], 0, f[0], f[1], 0, t[0], t[1], 1)
+        trans.setMatrix(s[0], s[1], s[2], f[0], f[1], f[2], t[0], t[1], t[2])
         im.setTransform(trans)
 
     def _make_mask_rgba(self, mask):
@@ -1846,8 +1843,9 @@ class PADView2(object):
                     sides = [roi.size()[1], roi.size()[0]]
                     corner = np.array([roi.pos()[0], roi.pos()[1]])
                     angle = roi.angle() * np.pi / 180
-                    p = geom.position_vecs() + geom.fs_vec + geom.ss_vec  # Why?
-                    pix_pos = (p * self._scale_factor(geom)).reshape(geom.n_ss, geom.n_fs, 3)
+                    p = geom.position_vecs() #+ geom.fs_vec + geom.ss_vec  # Why?
+
+                    pix_pos = p.reshape(geom.n_ss, geom.n_fs, 3)
                     pix_pos = pix_pos[:, :, 0:2] - corner
                     v1 = np.array([-np.sin(angle), np.cos(angle)])
                     v2 = np.array([np.cos(angle), np.sin(angle)])
@@ -1871,7 +1869,7 @@ class PADView2(object):
                     radius = roi.size()[0]/2.
                     center = np.array([roi.pos()[0], roi.pos()[1]]) + radius
                     p = geom.position_vecs() + geom.fs_vec + geom.ss_vec  # Why?
-                    pix_pos = (p * self._scale_factor(geom)).reshape(geom.n_ss, geom.n_fs, 3)
+                    pix_pos = p.reshape(geom.n_ss, geom.n_fs, 3)
                     pix_pos = pix_pos[:, :, 0:2] - center
                     r = np.sqrt(pix_pos[:, :, 0]**2 + pix_pos[:, :, 1]**2)
                     inds = r < radius
@@ -1956,40 +1954,57 @@ class PADView2(object):
             self.images[i].setImage(d)
         self.histogram.regionChanged()
 
+    def vector_to_view_coords(self, vec):
+        r""" If you have a vector (or vectors) pointing in some direction in space, this function will tell you the 2D
+        point at which it intercepts with the view plane (the plane 1 meter away from the origin)."""
+        vec = np.atleast_2d(vec)
+        vec /= vec[:, 2]
+        return np.squeeze(vec[:, 0:2])
+
+    def get_pad_coords_from_view_coords(self, view_coords):
+        self.debug(get_caller(), 3)
+        x = view_coords[0]
+        y = view_coords[1]
+        pad_idx = None
+        for n in range(self.n_pads):
+            vec = np.array([x, y, 1])  # This vector points from origin to the plane of the scene
+            ss_idx, fs_idx = self.pad_geometry[n].vectors_to_indices(vec, insist_in_pad=True)
+            if np.isfinite(ss_idx[0]) and np.isfinite(fs_idx[0]):
+                pad_idx = n
+                break
+        return ss_idx, fs_idx, pad_idx
+
+    def get_pad_coords_from_mouse_pos(self):
+        self.debug(get_caller(), 3)
+        view_coords = self.get_view_coords_from_mouse_pos()
+        ss_idx, fs_idx, pad_idx = self.get_pad_coords_from_view_coords(view_coords)
+        self.debug('\tpad coords: '+(ss_idx, fs_idx, pad_idx).__str__(), 3)
+        return ss_idx[0], fs_idx[0], pad_idx
+
+    def get_view_coords_from_mouse_pos(self):
+        r""" These are the real-space coordinates in the plane situated 1 meter from the interaction point. """
+        self.debug(get_caller(), 3)
+        if self.evt is None:  # Note: self.evt is updated by _mouse_moved
+            return 0, 0
+        sc = self.viewbox.mapSceneToView(self.evt[0])
+        self.debug('\tview coords: '+sc.__str__(), 3)
+        return sc.x(), sc.y()
+
     def _mouse_moved(self, evt):
         self.debug(get_caller(), 3)
+        self.debug('\tmouse position: ' + evt.__str__(), 3)
         if evt is None:
             return
-        if self.pad_geometry is None:
-            return
-        pad_data = self.get_pad_display_data()
         self.evt = evt
-        pos = evt[0]
-        pid = -1
-        ppos = (-1, -1)
-        intensity = -1
-        if self.images is None:
-            return
-        if self.viewbox.sceneBoundingRect().contains(pos):
-            for i in range(0, len(self.images)):
-                if self.images[i].sceneBoundingRect().contains(pos):
-                    pid = i
-                    ppos = self.images[i].mapFromScene(pos)
-                    ppos = (np.floor(ppos.x()), np.floor(ppos.y()))
-                    continue
-            # pnt = self.viewbox.mapSceneToView(pos)
-            fs = np.int(ppos[1])
-            ss = np.int(ppos[0])
-            if pid >= 0:
-                d = pad_data[pid]
-                sh = d.shape
-                if ss < sh[0] and fs < sh[1]:
-                    intensity = pad_data[pid][ss, fs]
-            if pid >= 0:
-                self._status_string_mouse = ' Panel %2d  |  Pixel %4d,%4d  |  Value=%8g  | ' % (pid, ss, fs, intensity)
-            else:
-                self._status_string_mouse = ''
-            self.update_status_string()
+        ss, fs, pid = self.get_pad_coords_from_mouse_pos()
+        if pid is None:
+            self._status_string_mouse = ''
+        else:
+            fs = int(np.round(fs))
+            ss = int(np.round(ss))
+            intensity = self.get_pad_display_data()[pid][ss, fs]
+            self._status_string_mouse = ' Panel %2d  |  Pixel %4d,%4d  |  Value=%8g  | ' % (pid, ss, fs, intensity)
+        self.update_status_string()
 
     def edit_ring_radii(self):
         self.debug(get_caller(), 1)
@@ -2403,11 +2418,13 @@ class PADView2(object):
 
     def run_plugins(self, module_names=['subtract_median_ss']):
         self.debug(get_caller(), 1)
+        self.debug(module_names, 1)
         if len(module_names) <= 0:
             return
         mod = module_names[0]
         try:
             self.debug('plugin: %s' % mod)
+            self.debug(__package__)
             module = importlib.import_module(__package__+'.plugins.'+mod)
             module.plugin(self)  # This is the syntax for running a plugin
         except ImportError:
@@ -2633,8 +2650,33 @@ class LevelsWidget(QtGui.QWidget):
 
 if __name__ == '__main__':
     from reborn.simulate import solutions
+    from reborn import detector, source
+    from reborn.viewers.qtviews.padviews import PADView2
     np.random.seed(10)
-    pads = detector.tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0.1, tiling_shape=(4, 2), pad_gap=5*100e-6)
+    theta1 = 0.1
+    theta2 = 0.2
+    Tscl = 0.2
+    dist = 0.1
+    pix = 1e-3
+    shape = (200, 200)
+    tiles = (2, 2)
+    gap = pix*10
+    #pads = [reborn.detector.PADGeometry(pixel_size=1e-3, distance=1, shape=(100, 100))]
+    #pads[0].t_vec[0:2] = 0
+    pads = detector.tiled_pad_geometry_list(pad_shape=shape, pixel_size=pix, distance=dist, tiling_shape=tiles, pad_gap=gap)
+    ct = np.cos(theta1)
+    st = np.sin(theta1)
+    R2 = np.array([[1, 0, 0], [0, ct, st], [0, -st, ct]])
+    ct = np.cos(theta2)
+    st = np.sin(theta2)
+    R1 = np.array([[ct, st, 0], [-st, ct, 0], [0, 0, 1]])
+    R = np.dot(R2, R1.T)
+    T = np.array([0.05, -0.07, 0])*Tscl
+    for p in pads:
+        p.ss_vec = np.dot(p.ss_vec, R.T)
+        p.fs_vec = np.dot(p.fs_vec, R.T)
+        p.t_vec = np.dot(p.t_vec, R.T)
+        p.t_vec += T
     beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3)
     def make_images():
         dat = solutions.get_pad_solution_intensity(pads, beam, thickness=10e-6, liquid='water')
@@ -2644,11 +2686,13 @@ if __name__ == '__main__':
             xo = np.random.rand() * nx
             yo = np.random.rand() * ny
             d += 100 * np.exp((-(x - xo) ** 2 - (y - yo) ** 2)/3)
+            d.flat[0:10] = 0
         return dat
-
-    # app = pg.mkQApp()
     dat = make_images()
-    pv = PADView2(raw_data=dat, pad_geometry=pads, debug_level=1)
+    [print(p) for p in pads]
+    pv = PADView2(raw_data=dat, pad_geometry=pads, debug_level=3)
+    # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
+    pv.toggle_grid()
     pv.start()
     # lw = LevelsWidget(pv)
     # lw.show()
