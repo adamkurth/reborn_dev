@@ -516,9 +516,7 @@ class PADView(object):
         if self.mask_images is None:
             self.setup_masks()
         for i in range(0, self.n_pads):
-            d = self.mask_data[i]
-            mask_rgba = self._make_mask_rgba(d)
-            self.mask_images[i].setImage(mask_rgba)
+            self.mask_images[i].setImage(self._make_mask_rgba(self.mask_data[i]))
 
     def mask_panel_edges(self, n_pixels=None):
         self.debug(get_caller(), 1)
@@ -656,10 +654,6 @@ class PADView(object):
                     self.mask_data[ind][r < radius] = 0
                     self.mask_images[ind].setImage(self._make_mask_rgba(self.mask_data[ind]))
 
-    def stupid_pyqtgraph_fix(self, dat):
-        # Deal with this stupid problem: https://github.com/pyqtgraph/pyqtgraph/issues/769
-        return [np.double(d) for d in dat]
-
     def get_pad_display_data(self):
         # The logic of what actually gets displayed should go here.  For now, we display processed data if it is
         # available, else we display raw data, else we display zeros based on the pad geometry.  If none of these
@@ -669,14 +663,12 @@ class PADView(object):
             if 'pad_data' in self.processed_data.keys():
                 dat = self.processed_data['pad_data']
                 if dat:
-                    # self.debug("Got self.processed_data['pad_data']")
-                    return self.stupid_pyqtgraph_fix(dat)
+                    return [np.double(d) for d in dat]
         if self.raw_data is not None:
             if 'pad_data' in self.raw_data.keys():
                 dat = self.raw_data['pad_data']
                 if dat:
-                    # self.debug("Got self.raw_data['pad_data']")
-                    return self.stupid_pyqtgraph_fix(dat)
+                    return [np.double(d) for d in dat]
         if self.pad_geometry is not None:
             self.debug('No raw data found - setting display data arrays to zeros')
             return [pad.zeros() for pad in self.pad_geometry]
@@ -1190,7 +1182,8 @@ class PADView2(object):
 
     # Note that most of the interface was created using the QT Designer tool.  There are many attributes that are
     # not visible here.
-    debug_level = 0  # Levels are 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
+    dataframe = None
+    debug_level = None  # Levels are 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
     logscale = False
     raw_data = None   # Dictionary with 'pad_data' and 'peaks' keys
     processed_data = None  # Dictionary with 'pad_data' and 'peaks' keys
@@ -1239,6 +1232,7 @@ class PADView2(object):
         self.logscale = logscale
         self.mask_data = mask_data
         self.pad_geometry = pad_geometry
+        self.dataframe = {}
 
         if raw_data is not None:
             if isinstance(raw_data, dict):
@@ -1273,7 +1267,6 @@ class PADView2(object):
                 shft += pad.shape()[0]
                 pad_geometry.append(pad)
             self.pad_geometry = pad_geometry
-
         self.app = pg.mkQApp()
         self.setup_ui()
         self.viewbox = pg.ViewBox()
@@ -1460,11 +1453,11 @@ class PADView2(object):
         if self.get_pad_display_data() is not None:
             return len(self.get_pad_display_data())
 
-    def process_events(self):
-        r""" Sometimes we need to force events to be processed... I don't understand... """
-        # FIXME: Try to make sure that this function is never needed.
-        self.debug(get_caller(), 1)
-        pg.QtGui.QApplication.processEvents()
+    # def process_events(self):
+    #     r""" Sometimes we need to force events to be processed... I don't understand... """
+    #     # FIXME: Try to make sure that this function is never needed.
+    #     self.debug(get_caller(), 1)
+    #     pg.QtGui.QApplication.processEvents()
 
     def setup_histogram_tool(self):
         r""" Set up the histogram/colorbar/colormap tool that is located to the right of the PAD display. """
@@ -1499,6 +1492,7 @@ class PADView2(object):
         self.histogram.item.setLevels(min_value, max_value)
 
     def get_view_bounding_rect(self):
+        r""" Bounding rectangle of everything presently visible, in view (i.e real-space, 1-meter plane) coordinates."""
         vb = self.viewbox
         return vb.mapSceneToView(vb.mapToScene(vb.rect()).boundingRect()).boundingRect().getRect()
 
@@ -1566,13 +1560,30 @@ class PADView2(object):
     def show_coordinate_axes(self):
         self.debug(get_caller(), 1)
         if self.coord_axes is None:
-            x = pg.ArrowItem(pos=(15, 0), brush=pg.mkBrush('r'), angle=0, pen=None) #, pxMode=self._px_mode)
-            y = pg.ArrowItem(pos=(0, 15), brush=pg.mkBrush('g'), angle=90, pen=None) #, pxMode=self._px_mode)
-            z = pg.ScatterPlotItem([0], [0], pen=None, brush=pg.mkBrush('b'), size=15) #, pxMode=self._px_mode)
-            self.coord_axes = [x, y, z]
-            self.viewbox.addItem(z)
+            corners = self.vector_to_view_coords(np.vstack([p.corner_position_vectors() for p in self.pad_geometry]))
+            length = np.max(np.abs(corners[:, 0:2]))/10
+            xl = pg.PlotDataItem([0, length], [0, 0], pen='r')
+            self.viewbox.addItem(xl)
+            yl = pg.PlotDataItem([0, 0], [0, length], pen='g')
+            self.viewbox.addItem(yl)
+            x = pg.ArrowItem(pos=(length, 0), brush=pg.mkBrush('r'), angle=0, pen=None) #, pxMode=self._px_mode)
             self.viewbox.addItem(x)
+            y = pg.ArrowItem(pos=(0, length), brush=pg.mkBrush('g'), angle=90, pen=None) #, pxMode=self._px_mode)
             self.viewbox.addItem(y)
+            z1 = pg.ScatterPlotItem([0], [0], pen=None, brush=pg.mkBrush('b'), size=15, symbol='x') #, pxMode=self._px_mode)
+            self.viewbox.addItem(z1)
+            z2 = pg.ScatterPlotItem([0], [0], pen='b', brush=None, size=15, symbol='o')  # , pxMode=self._px_mode)
+            self.viewbox.addItem(z2)
+            xt = pg.TextItem(text="x", color='r', anchor=(0.5, 0.5))
+            xt.setPos(length*0.6, -length/3)
+            self.viewbox.addItem(xt)
+            yt = pg.TextItem(text="y", color='g', anchor=(0.5, 0.5))
+            yt.setPos(-length/3, length*0.6)
+            self.viewbox.addItem(yt)
+            zt = pg.TextItem(text="z", color='b', anchor=(0.5, 0.5))
+            zt.setPos(-length/3, -length/3)
+            self.viewbox.addItem(zt)
+            self.coord_axes = [xl, yl, x, y, z1, z2, xt, yt, zt]
 
     def hide_coordinate_axes(self):
         self.debug(get_caller(), 1)
@@ -1593,10 +1604,15 @@ class PADView2(object):
         if self.scan_arrows is None:
             self.scan_arrows = []
             for p in self.pad_geometry:
+                t = p.t_vec
                 f = p.fs_vec
-                t = (p.t_vec + p.fs_vec + p.ss_vec)
+                n = p.n_fs
+                x = self.vector_to_view_coords(np.array([t, t + f*n/3]))
+                plot = pg.PlotDataItem(x[:, 0], x[:, 1], pen='r')
+                self.scan_arrows.append(plot)
+                self.viewbox.addItem(plot)
                 ang = np.arctan2(f[1], f[0])*180/np.pi
-                a = pg.ArrowItem(pos=(t[0], t[1]), angle=ang, brush=pg.mkBrush('r'), pen=None) #, pxMode=False)
+                a = pg.ArrowItem(pos=(x[1, 0], x[1, 1]), angle=ang, brush=pg.mkBrush('r'), pen=None)#, pxMode=False)
                 self.scan_arrows.append(a)
                 self.viewbox.addItem(a)
 
@@ -1725,9 +1741,7 @@ class PADView2(object):
         if self.mask_images is None:
             self.setup_masks()
         for i in range(0, self.n_pads):
-            d = self.mask_data[i]
-            mask_rgba = self._make_mask_rgba(d)
-            self.mask_images[i].setImage(mask_rgba)
+            self.mask_images[i].setImage(self._make_mask_rgba(self.mask_data[i]))
 
     def mask_panel_edges(self, n_pixels=None):
         self.debug(get_caller(), 1)
@@ -1810,7 +1824,6 @@ class PADView2(object):
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load Masks", "mask",
                                                           "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
                                                                  options=options)
-
         if file_name == "":
             return
         if file_type == 'Python Pickle (*.pkl)':
@@ -1821,77 +1834,47 @@ class PADView2(object):
         self.update_masks(self.mask_data)
         write('Loaded mask: ' + file_name)
 
-    def mask_hovering_roi(self, inverse=False, toggle=False):
+    def mask_hovering_roi(self, setval=0, toggle=False, mask_outside=False):
         r""" Mask the ROI region that the mouse cursor is hovering over. """
-        if self._mask_rois is None:
+        self.debug(get_caller(), 1)
+        if self._mask_rois is None: return
+        roi = [r for r in self._mask_rois if r.mouseHovering]
+        if len(roi) == 0: return
+        roi = roi[0]
+        p_vecs = np.vstack([p.position_vecs() for p in self.pad_geometry])
+        v_vecs = self.vector_to_view_coords(p_vecs)[:, 0:2]
+        mask = detector.concat_pad_data(self.mask_data)
+        if roi.name == 'rectangle':  # Find all pixels within the rectangle
+            self.debug('\tmask rectangle roi', 1)
+            sides = [roi.size()[1], roi.size()[0]]
+            corner = np.array([roi.pos()[0], roi.pos()[1]])
+            angle = roi.angle() * np.pi / 180
+            v1 = np.array([-np.sin(angle), np.cos(angle)])
+            v2 = np.array([np.cos(angle), np.sin(angle)])
+            d = v_vecs - corner
+            ind1 = np.dot(d, v1)
+            ind2 = np.dot(d, v2)
+            inds = (ind1 >= 0) * (ind1 <= sides[0]) * (ind2 >= 0) * (ind2 <= sides[1])
+        elif roi.name == 'circle':
+            self.debug('\tmask circle roi', 1)
+            radius = roi.size()[0]/2.
+            center = np.array([roi.pos()[0], roi.pos()[1]]) + radius
+            inds = np.sqrt(np.sum((v_vecs - center)**2, axis=1)) < radius
+        else:
             return
-        setval = 0
-        if inverse: setval = 1
-        noslice = slice(0, 1, None)
-        for roi in self._mask_rois:
-            if not roi.mouseHovering:
-                continue
-            pad_data = self.get_pad_display_data()
-            for (ind, im, dat, geom) in zip(range(self.n_pads), self.images, pad_data, self.pad_geometry):
-                # Using builtin function of pyqtgraph ROI to identify panels associated with the ROI...
-                pslice, _ = roi.getArraySlice(dat, im, axes=(0, 1), returnSlice=True)
-                if pslice[0] == noslice and pslice[1] == noslice:
-                    continue
-                if roi.name == 'rectangle':
-                    # To find pixels in the rectangular ROI, project pixel coordinates onto the two basis vectors of
-                    # the ROI.  I couldn't figure out how to do this directly with the ROI class methods.
-                    sides = [roi.size()[1], roi.size()[0]]
-                    corner = np.array([roi.pos()[0], roi.pos()[1]])
-                    angle = roi.angle() * np.pi / 180
-                    p = geom.position_vecs() #+ geom.fs_vec + geom.ss_vec  # Why?
-
-                    pix_pos = p.reshape(geom.n_ss, geom.n_fs, 3)
-                    pix_pos = pix_pos[:, :, 0:2] - corner
-                    v1 = np.array([-np.sin(angle), np.cos(angle)])
-                    v2 = np.array([np.cos(angle), np.sin(angle)])
-                    ind1 = np.dot(pix_pos, v1)
-                    ind2 = np.dot(pix_pos, v2)
-                    ind1 = (ind1 >= 0) * (ind1 <= sides[0])
-                    ind2 = (ind2 >= 0) * (ind2 <= sides[1])
-                    inds = ind1*ind2
-                    if toggle:
-                        vals = self.mask_data[ind][inds]
-                        newvals = vals.copy()
-                        newvals[vals == 0] = 1
-                        newvals[vals == 1] = 0
-                        self.mask_data[ind][inds] = newvals
-                    else:
-                        self.mask_data[ind][inds] = setval
-                    self.mask_images[ind].setImage(self._make_mask_rgba(self.mask_data[ind]))
-                if roi.name == 'circle':
-                    # To find pixels in the rectangular ROI, project pixel coordinates onto the two basis vectors of
-                    # the ROI.  I couldn't figure out how to do this directly with the ROI class methods.
-                    radius = roi.size()[0]/2.
-                    center = np.array([roi.pos()[0], roi.pos()[1]]) + radius
-                    p = geom.position_vecs() + geom.fs_vec + geom.ss_vec  # Why?
-                    pix_pos = p.reshape(geom.n_ss, geom.n_fs, 3)
-                    pix_pos = pix_pos[:, :, 0:2] - center
-                    r = np.sqrt(pix_pos[:, :, 0]**2 + pix_pos[:, :, 1]**2)
-                    inds = r < radius
-                    if toggle:
-                        vals = self.mask_data[ind][inds]
-                        newvals = vals.copy()
-                        newvals[vals == 0] = 1
-                        newvals[vals == 1] = 0
-                        self.mask_data[ind][inds] = newvals
-                    else:
-                        self.mask_data[ind][inds] = setval
-                    self.mask_images[ind].setImage(self._make_mask_rgba(self.mask_data[ind]))
+        if mask_outside:
+            inds = -(inds - 1)
+        if toggle:
+            mask[inds] = -(mask[inds] - 1)
+        else:
+            mask[inds] = setval
+        self.update_masks(detector.split_pad_data(self.pad_geometry, mask))
 
     def mask_hovering_roi_inverse(self):
-        self.mask_hovering_roi(inverse=True)
+        self.mask_hovering_roi(setval=1)
 
     def mask_hovering_roi_toggle(self):
         self.mask_hovering_roi(toggle=True)
-
-    def _pyqtgraph_fix(self, dat):
-        # Deal with this stupid problem: https://github.com/pyqtgraph/pyqtgraph/issues/769
-        return [np.double(d) for d in dat]
 
     def get_pad_display_data(self):
         # The logic of what actually gets displayed should go here.  For now, we display processed data if it is
@@ -1902,14 +1885,12 @@ class PADView2(object):
             if 'pad_data' in self.processed_data.keys():
                 dat = self.processed_data['pad_data']
                 if dat:
-                    # self.debug("Got self.processed_data['pad_data']")
-                    return self._pyqtgraph_fix(dat)
+                    return [np.double(d) for d in dat]
         if self.raw_data is not None:
             if 'pad_data' in self.raw_data.keys():
                 dat = self.raw_data['pad_data']
                 if dat:
-                    # self.debug("Got self.raw_data['pad_data']")
-                    return self._pyqtgraph_fix(dat)
+                    return [np.double(d) for d in dat]
         if self.pad_geometry is not None:
             self.debug('No raw data found - setting display data arrays to zeros')
             return [pad.zeros() for pad in self.pad_geometry]
@@ -1958,8 +1939,9 @@ class PADView2(object):
         r""" If you have a vector (or vectors) pointing in some direction in space, this function will tell you the 2D
         point at which it intercepts with the view plane (the plane 1 meter away from the origin)."""
         vec = np.atleast_2d(vec)
-        vec /= vec[:, 2]
-        return np.squeeze(vec[:, 0:2])
+        vec = (vec.T / np.squeeze(vec[:, 2])).T.copy()
+        vec[:, 2] = 1
+        return np.squeeze(vec)
 
     def get_pad_coords_from_view_coords(self, view_coords):
         self.debug(get_caller(), 3)
@@ -2692,7 +2674,10 @@ if __name__ == '__main__':
     [print(p) for p in pads]
     pv = PADView2(raw_data=dat, pad_geometry=pads, debug_level=3)
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
-    pv.toggle_grid()
+    # pv.show_fast_scan_directions()
+    # pv.show_coordinate_axes()
+    pv.set_title('testing')
+    # pv.toggle_grid()
     pv.start()
     # lw = LevelsWidget(pv)
     # lw.show()

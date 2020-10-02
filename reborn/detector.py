@@ -543,6 +543,9 @@ class PADGeometry():
         """
         return 2 * np.pi / np.max(self.q_mags(beam=beam))
 
+    def corner_position_vectors(self):
+        t, f, s, nf, ns = self.t_vec, self.fs_vec, self.ss_vec, self.n_fs, self.n_ss
+        return np.array([t, t+nf*f, t+nf*f+ns*s, t+ns*s])
 
 def save_pad_geometry_list(file_name, geom_list):
     r""" Save a list of PADGeometry instances as a json file. """
