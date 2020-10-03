@@ -2270,13 +2270,13 @@ class PADView2(object):
         r""" Convert 3D vector coords to the equivalent coords in the 2D display plane.  This corresponds to ignoring
         the "z" coordinate, and scaling the "x,y" coordinates to that of an equivalent detector located at a distance
         of 1 meter from the origin.  Simply put: remove the z component, divide the x,y components by the z component"""
-        return vecs[:, 0:2]/vecs[:, 2]
+        return (vecs[:, 0:2].T/vecs[:, 2]).T.copy()
 
     def panel_scatter_plot(self, panel_number, ss_coords, fs_coords, style=None):
         r""" Scatter plot points given coordinates (i.e. indices) corresponding to a particular panel.  This will
         take care of the re-mapping to the display coordinates."""
         if style is None: style = self.peak_style
-        vecs = self.pad_geometry[panel_number].indices_to_vectors(ss_coords+1, fs_coords+1)  # FIXME: Why the +1 ???
+        vecs = self.pad_geometry[panel_number].indices_to_vectors(ss_coords, fs_coords)  # FIXME: Why the +1 ???
         vecs = self.vector_coords_to_2d_display_coords(vecs)
         self.add_scatter_plot(vecs[:, 0], vecs[:, 1], **style)
 
