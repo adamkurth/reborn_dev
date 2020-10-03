@@ -153,6 +153,19 @@ def test_radial_profiler_02():
     assert(np.min(prof) >= 0)
 
 
+def test_vector_math():
+
+    pad = detector.PADGeometry(shape=(2, 2), distance=0.1, pixel_size=1e-3)
+    vecs = pad.position_vecs()
+    j, i = pad.vectors_to_indices(vecs, insist_in_pad=False)
+    jj, ii = np.indices(pad.shape())
+    assert(np.max(np.abs(j - jj.ravel())) < 1e-6)
+    assert (np.max(np.abs(i - ii.ravel())) < 1e-6)
+    j, i = pad.vectors_to_indices(vecs, insist_in_pad=True, round=True)
+    assert(np.max(np.abs(j - jj.ravel())) == 0)
+    assert (np.max(np.abs(i - ii.ravel())) == 0)
+
+
 def test_saving():
 
     shapes = [np.array((100, 101)) for _ in range(8)]
