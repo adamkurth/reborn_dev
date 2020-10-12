@@ -126,21 +126,35 @@ def ellipse_parameters(a):
 
 
 def fit_ellipse_pad(pad_geometry, data, threshold, mask=None):
+    r"""
+    Fit an ellipse to pixels above threshold.  In order to deal with the possibility of multiple PADs with different
+    detector distances, the x,y coordinates are projected onto a plane located at a distance of 1 meter from the origin.
+    The x-ray beam is assumed to be along the x direction (we can change this if the need arises).
 
-    pad_geometry = utils.ensure_list(pad_geometry)
+    Args:
+        pad_geometry (list of |PADGeometry|'s): PAD geometry.
+        data (list of |ndarray|'s): Data to threshold.
+        threshold (float): Threshold value.  The x,y coordinates from pixels above this will be used in the fit.
+        mask (list of |ndarray|'s):
+
+    Returns:
+        |ndarray| : Ellipse fit parameters (see :func:`fit_ellipse <reborn.analysis.optimize.fit_ellipse>` function)
+    """
+    pads = utils.ensure_list(pad_geometry)
     data = utils.ensure_list(data)
     if mask is not None:
         mask = utils.ensure_list(mask)
     else:
-        mask = [d*0 + 1 for d in data]
-    efmask = []
-    for i in range(len(pad_geometry)):
-        m = data[i]*0
+        mask = [np.ones(d.shape) for d in data]
+    fitmask = []
+    for i in range(len(pads)):
+        m = np.zeros(data[i].shape)
         m[data[i] >= threshold] = 1
-        efmask.append(m*mask[i])
-    px = np.concatenate([p.position_vecs()[:,0].ravel() for p in pad_geometry])
-    py = np.concatenate([p.position_vecs()[:,1].ravel() for p in pad_geometry])
-    efmask = detector.concat_pad_data(efmask)
-    efit = fit_ellipse(px[efmask == 1], py[efmask == 1])
-    return efit
+        fitmask.append(m*mask[i])
+    px = np.concatenate([p.position_vecs()[:, 0].ravel() / p.position_vecs()[:, 2].ravel() for p in pads])
+    py = np.concatenate([p.position_vecs()[:, 1].ravel() / p.position_vecs()[:, 2].ravel() for p in pads])
+    fitmask = detector.concat_pad_data(fitmask)
+    print(np.sum(fitmask))
+    fit_params = fit_ellipse(px[fitmask == 1], py[fitmask == 1])
+    return fit_params
 

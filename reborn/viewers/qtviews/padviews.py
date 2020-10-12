@@ -247,7 +247,7 @@ class PADView(object):
 
     def update_status_string(self, frame_number=None, n_frames=None):
         r""" Update status string at the bottom of the main window. """
-        self.debug(get_caller(), 2)
+        self.debug(get_caller(), 3)
         if frame_number is not None and n_frames is not None:
             n = np.int(np.ceil(np.log10(n_frames)))
             strn = ' Frame %%%dd of %%%dd | ' % (n, n)
@@ -1215,6 +1215,7 @@ class PADView2(object):
     apply_filters = True
     data_processor = None
     widgets = {}
+    plugins = None
 
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
@@ -1405,6 +1406,12 @@ class PADView2(object):
         analysis_menu = self.menubar.addMenu('Analysis')
         add_menu(analysis_menu, 'Toggle peak finding', connect=self.toggle_peak_finding)
         add_menu(analysis_menu, 'Toggle peaks visible', connect=self.toggle_peaks_visible)
+        plugin_menu = self.menubar.addMenu('Plugins')
+        import functools
+        for plg in glob.glob(os.path.join(plugin_path, '*.py')):
+            self.debug('\tSetup plugin ' + os.path.basename(plg).replace('.py', ''), 2)
+            add_menu(plugin_menu, os.path.basename(plg).replace('.py', '').replace('_', ' '),
+                     connect=functools.partial(self.run_plugin, os.path.basename(plg).replace('.py', '')))
         # add_menu(analysis_menu, 'SNR transform', connect=self.show_snr_filter_widget)
 
     def set_shortcut(self, shortcut, func):
@@ -1436,7 +1443,7 @@ class PADView2(object):
 
     def update_status_string(self, frame_number=None, n_frames=None):
         r""" Update status string at the bottom of the main window. """
-        self.debug(get_caller(), 2)
+        self.debug(get_caller(), 3)
         if frame_number is not None and n_frames is not None:
             n = np.int(np.ceil(np.log10(n_frames)))
             strn = ' Frame %%%dd of %%%dd | ' % (n, n)
@@ -1486,9 +1493,17 @@ class PADView2(object):
         r""" Get the minimum and maximum levels of the current image display. """
         return self.histogram.item.getLevels()
 
-    def set_levels(self, min_value, max_value):
+    def set_levels(self, min_value=None, max_value=None):
         r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
         self.debug(get_caller(), 1)
+        dat = None
+        if min_value is None:
+            dat = detector.concat_pad_data(self.get_pad_display_data()['pad_data'])
+            min_value = dat.min()
+        if max_value is None:
+            if dat is None:
+                dat = detector.concat_pad_data(self.get_pad_display_data()['pad_data'])
+            max_value = dat.max()
         self.histogram.item.setLevels(min_value, max_value)
 
     def get_view_bounding_rect(self):
@@ -1918,6 +1933,18 @@ class PADView2(object):
         self.setup_histogram_tool()
         self.setup_masks()
         self.set_levels(np.percentile(np.ravel(pad_data), 10), np.percentile(np.ravel(pad_data), 90))
+
+    def update_pad_geometry(self, pad_geometry):
+        self.pad_geometry = pad_geometry
+        for i in range(self.n_pads):
+            if self.images is not None:
+                self._apply_pad_transform(self.images[i], self.pad_geometry[i])
+            if self.mask_images is not None:
+                self._apply_pad_transform(self.mask_images[i], self.pad_geometry[i])
+        if self.pad_labels is not None:
+            self.toggle_pad_labels()
+            self.toggle_pad_labels()
+
 
     def update_pads(self):
         self.debug(get_caller(), 1)
@@ -2398,19 +2425,56 @@ class PADView2(object):
         if len(plugins) > 0:
             self.run_plugins(plugins)
 
-    def run_plugins(self, module_names=['subtract_median_ss']):
+    def _import_plugin_module(self, module_name):
         self.debug(get_caller(), 1)
-        self.debug(module_names, 1)
+        try:
+            return self.plugins[module_name]  # Check if module already imported and cached
+        except:
+            pass
+        try:
+            module_path = __package__+'.plugins.'+module_name
+            if module_path[-3:] == '.py':
+                module_path = module_path[:-3]
+            self.debug('\timporting plugin: %s' % module_path)
+            module = importlib.import_module(module_path)  # Attempt to import
+            if self.plugins is None: self.plugins = {}
+            self.plugins[module_name] = module  # Cache the module
+            return module
+        except:
+            self.debug('\tplugin cannot be imported')
+            return None
+
+    def run_plugin(self, module_name):
+        self.debug(get_caller(), 1)
+        if self.plugins is None:
+            self.plugins = {}
+        if not module_name in self.plugins.keys():
+            module = self._import_plugin_module(module_name)  # Get the module (import or retrieve from cache)
+        else:
+            module = self.plugins(module_name)
+        if hasattr(module, 'plugin'):  # If the module has a plugin function, run the function and return
+            module.plugin(self)
+            return
+        if module_name+'.widget' in self.plugins.keys():
+            self.plugins[module_name+'.widget'].show()  # Check if a widget is already cached.  If so, show it.
+            return
+        if hasattr(module, 'Plugin'):
+            plugin_instance = module.Plugin(self)  # Check if the plugin defines a class.  If so, create an instance.
+            self.plugins[module_name+'.class_instance'] = plugin_instance  # Cache the instance
+            self.plugins[module_name + '.widget'] = plugin_instance.widget  # Get the widget and cache it.
+            plugin_instance.widget.show()  # Show the widget.
+            self.debug('\tCreated plugin class instance.  Showing widget.')
+            return
+        self.debug('\tPlugin module has no functions or classes defined.')
+        return
+
+    def run_plugins(self, module_names=[]):
+        self.debug(get_caller(), 1)
+        self.debug('\tplugin module names: '+module_names.__str__(), 1)
         if len(module_names) <= 0:
             return
-        mod = module_names[0]
-        try:
-            self.debug('plugin: %s' % mod)
-            self.debug(__package__)
-            module = importlib.import_module(__package__+'.plugins.'+mod)
-            module.plugin(self)  # This is the syntax for running a plugin
-        except ImportError:
-            print('Failed to find plugin %s' % module)
+        for module_name in module_names:
+            self.run_plugin(module_name)
 
     def get_text(self, title="Title", label="Label", text="Text"):
         r""" Simple popup widget that allows the capture of a text string."""
@@ -2463,7 +2527,7 @@ class PluginWidget(QtGui.QWidget):
         super().__init__()
         self.padview = padview
         self.plugin_files = glob.glob(os.path.join(plugin_path, '*.py'))
-        self.plugin_basenames = [os.path.basename(p) for p in self.plugin_files]
+        self.plugin_basenames = [os.path.basename(p).replace('.py', '').replace('_', ' ').capitalize() for p in self.plugin_files]
         self.layout = QtGui.QGridLayout()
         row = 0
         row += 1
@@ -2477,8 +2541,8 @@ class PluginWidget(QtGui.QWidget):
         self.layout.addWidget(self.run_plugin_button, row, 1, 1, 2)
         self.setLayout(self.layout)
     def run_plugin(self):
-        print(self.combo_box.currentText().split('.')[0])
-        self.padview.run_plugins([self.combo_box.currentText().split('.')[0]])
+        print()
+        self.padview.run_plugins([self.combo_box.currentText().split('.')[0].replace(' ', '_').lower()+'.py'])
 
 
 class PeakfinderConfigWidget(QtGui.QWidget):
@@ -2659,7 +2723,8 @@ if __name__ == '__main__':
         p.fs_vec = np.dot(p.fs_vec, R.T)
         p.t_vec = np.dot(p.t_vec, R.T)
         p.t_vec += T
-    beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3)
+    beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3,
+                       beam_vec=reborn.utils.vec_norm(np.array([0, 0.1, 0.9])))
     def make_images():
         dat = solutions.get_pad_solution_intensity(pads, beam, thickness=10e-6, liquid='water')
         for d in dat:
@@ -2668,14 +2733,20 @@ if __name__ == '__main__':
             xo = np.random.rand() * nx
             yo = np.random.rand() * ny
             d += 100 * np.exp((-(x - xo) ** 2 - (y - yo) ** 2)/3)
-            d.flat[0:10] = 0
+            # d.flat[0:10] = 0
         return dat
     dat = make_images()
+    for p in pads:
+        p.t_vec[0] += 0.2
+    mask = [np.ones(p.shape()) for p in pads]
+    for i in range(len(mask)):
+        mask[i][dat[i] < 40000] = 0
     [print(p) for p in pads]
-    pv = PADView2(raw_data=dat, pad_geometry=pads, debug_level=3)
+    pv = PADView2(raw_data=dat, pad_geometry=pads, mask_data=mask, debug_level=2)
+    pv.run_plugin('fit_ellipse')
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
     # pv.show_fast_scan_directions()
-    # pv.show_coordinate_axes()
+    pv.show_coordinate_axes()
     pv.set_title('testing')
     # pv.toggle_grid()
     pv.start()
