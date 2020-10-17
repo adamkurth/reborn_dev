@@ -55,11 +55,21 @@ class Widget(QtGui.QWidget):
         for p in pads:
             p.t_vec[0] -= X0*p.t_vec[2]
             p.t_vec[1] -= Y0*p.t_vec[2]
+        for e in self.ellipse_items:
+            self.padview.viewbox.removeItem(e)
+        self.ellipse_items = []
         self.padview.update_pad_geometry(pads)
+        for f in self.ellipse_fits:
+            f[8] -= X0
+            f[9] -= Y0
+            self.draw_ellipse(f)
 
     def do_action(self):
         efit = fit_ellipse_pad(self.padview.pad_geometry, self.padview.mask_data, threshold=0.5)
         self.ellipse_fits.append(efit)
+        self.draw_ellipse(efit)
+
+    def draw_ellipse(self, efit):
         a = efit[6]
         b = efit[7]
         X0 = efit[8]
