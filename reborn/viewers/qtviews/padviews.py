@@ -1430,7 +1430,6 @@ class PADView2(object):
         self.set_shortcut("r", self.show_random_frame)
         self.set_shortcut("n", self.show_history_next)
         self.set_shortcut("p", self.show_history_previous)
-        self.set_shortcut("c", self.choose_plugins)
         self.set_shortcut("Ctrl+g", self.toggle_all_geom_info)
         self.set_shortcut("Ctrl+r", self.edit_ring_radii)
         self.set_shortcut("Ctrl+a", self.toggle_coordinate_axes)
@@ -1951,7 +1950,7 @@ class PADView2(object):
         if self.images is None:
             self.setup_pads()
         processed_data = self.get_pad_display_data()
-        mx = np.ravel(processed_data).max()
+        mx = detector.concat_pad_data(processed_data).max()
         for i in range(0, self.n_pads):
             d = processed_data[i]
             if self.show_true_fast_scans:  # For testing - show fast scan axis
@@ -2418,43 +2417,18 @@ class PADView2(object):
         for i in range(self.n_pads):
             self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(a, b, c), snr_threshold=t))
 
-    def choose_plugins(self):
-        self.debug(get_caller(), 1)
-        init = ''
-        init += "subtract_median_fs\n"
-        init += "#subtract_median_ss\n"
-        init += "#subtract_median_radial\n"
-        text = self.get_text(text=init)
-        a = text.strip().split("\n")
-        plugins = []
-        for b in a:
-            if len(b) == 0:
-                continue
-            if b[0] != '#':  # Ignore commented lines
-                c = b.split('#')[0]
-                if c != '':
-                    plugins.append(c)
-        if len(plugins) > 0:
-            self.run_plugins(plugins)
-
     def _import_plugin_module(self, module_name):
         self.debug(get_caller(), 1)
-        try:
+        if module_name in self.plugins:
             return self.plugins[module_name]  # Check if module already imported and cached
-        except:
-            pass
-        try:
-            module_path = __package__+'.plugins.'+module_name
-            if module_path[-3:] == '.py':
-                module_path = module_path[:-3]
-            self.debug('\timporting plugin: %s' % module_path)
-            module = importlib.import_module(module_path)  # Attempt to import
-            if self.plugins is None: self.plugins = {}
-            self.plugins[module_name] = module  # Cache the module
-            return module
-        except:
-            self.debug('\tplugin cannot be imported')
-            return None
+        module_path = __package__+'.plugins.'+module_name
+        if module_path[-3:] == '.py':
+            module_path = module_path[:-3]
+        self.debug('\tImporting plugin: %s' % module_path)
+        module = importlib.import_module(module_path)  # Attempt to import
+        if self.plugins is None: self.plugins = {}
+        self.plugins[module_name] = module  # Cache the module
+        return module
 
     def run_plugin(self, module_name):
         self.debug(get_caller(), 1)
@@ -2748,15 +2722,15 @@ if __name__ == '__main__':
             # d.flat[0:10] = 0
         return dat
     dat = make_images()
-    for p in pads:
-        p.t_vec[0] += 0.2
+    # for p in pads:
+    #     p.t_vec[0] += 0.2
     mask = [np.ones(p.shape()) for p in pads]
-    for i in range(len(mask)):
-        mask[i][dat[i] < 40000] = 0
+    # for i in range(len(mask)):
+    #     mask[i][dat[i] < 40000] = 0
     [print(p) for p in pads]
     pv = PADView2(raw_data=dat, pad_geometry=pads, mask_data=mask, debug_level=2)
     pv.show_coordinate_axes()
-    pv.run_plugin('fit_ellipse')
+    pv.run_plugin('snr_filter')
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
     # pv.show_fast_scan_directions()
     pv.set_title('testing')
@@ -2765,4 +2739,3 @@ if __name__ == '__main__':
     # lw = LevelsWidget(pv)
     # lw.show()
     # app.exec_()
-
