@@ -1197,6 +1197,7 @@ class PADView2(object):
     _mask_rois = None
     images = None
     scatter_plots = None
+    plot_items = None
     rings = []
     grid = None
     coord_axes = None
@@ -1945,7 +1946,6 @@ class PADView2(object):
             self.toggle_pad_labels()
             self.toggle_pad_labels()
 
-
     def update_pads(self):
         self.debug(get_caller(), 1)
         if self.images is None:
@@ -2195,6 +2195,18 @@ class PADView2(object):
         self.display_peaks()
         self.update_status_string(frame_number=self.frame_getter.current_frame, n_frames=self.frame_getter.n_frames)
         self._mouse_moved(self.evt)
+
+    def add_plot_item(self, *args, **kargs):
+        r"""
+        Example: self.add_plot_item(x, y, pen=pg.mkPen(width=3, color='g'))
+        """
+        self.debug(get_caller(), 1)
+        if self.plot_items is None:
+            self.plot_items = []
+        plot_item = pg.PlotDataItem(*args, **kargs)
+        self.plot_items.append(plot_item)
+        self.viewbox.addItem(plot_item)
+        return plot_item
 
     def add_scatter_plot(self, *args, **kargs):
         self.debug(get_caller(), 1)
@@ -2451,7 +2463,7 @@ class PADView2(object):
         if not module_name in self.plugins.keys():
             module = self._import_plugin_module(module_name)  # Get the module (import or retrieve from cache)
         else:
-            module = self.plugins(module_name)
+            module = self.plugins[module_name]
         if hasattr(module, 'plugin'):  # If the module has a plugin function, run the function and return
             module.plugin(self)
             return
@@ -2699,9 +2711,10 @@ if __name__ == '__main__':
     from reborn import detector, source
     from reborn.viewers.qtviews.padviews import PADView2
     np.random.seed(10)
-    theta1 = 0.1
-    theta2 = 0.2
-    Tscl = 0.2
+    beam_vec = [0, 0, 1] #reborn.utils.vec_norm(np.array([0, 0.1, 0.9]))
+    theta1 = 0.0
+    theta2 = 0.0
+    Tscl = 0.0
     dist = 0.1
     pix = 1e-3
     shape = (200, 200)
@@ -2723,8 +2736,7 @@ if __name__ == '__main__':
         p.fs_vec = np.dot(p.fs_vec, R.T)
         p.t_vec = np.dot(p.t_vec, R.T)
         p.t_vec += T
-    beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3,
-                       beam_vec=reborn.utils.vec_norm(np.array([0, 0.1, 0.9])))
+    beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3, beam_vec=beam_vec)
     def make_images():
         dat = solutions.get_pad_solution_intensity(pads, beam, thickness=10e-6, liquid='water')
         for d in dat:
@@ -2743,10 +2755,10 @@ if __name__ == '__main__':
         mask[i][dat[i] < 40000] = 0
     [print(p) for p in pads]
     pv = PADView2(raw_data=dat, pad_geometry=pads, mask_data=mask, debug_level=2)
+    pv.show_coordinate_axes()
     pv.run_plugin('fit_ellipse')
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
     # pv.show_fast_scan_directions()
-    pv.show_coordinate_axes()
     pv.set_title('testing')
     # pv.toggle_grid()
     pv.start()
