@@ -31,6 +31,7 @@ rst_epilog = """
 .. |examples|  replace:: :ref:`examples`
 .. |PAD|  replace:: :mod:`detector <reborn.detector>`
 .. |PADGeometry|  replace:: :class:`PADGeometry <reborn.detector.PADGeometry>`
+.. |FrameGetter|  replace:: :class:`FrameGetter <reborn.fileio.getters.FrameGetter>`
 
 .. |ndarray|  replace:: :class:`ndarray <numpy.ndarray>`
 

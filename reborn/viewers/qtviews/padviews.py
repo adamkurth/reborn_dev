@@ -102,10 +102,8 @@ class PADView(object):
         if raw_data is not None:
             if isinstance(raw_data, dict):
                 pass
-            elif isinstance(raw_data, list):
-                raw_data = {'pad_data': raw_data}
             else:
-                raw_data = {'pad_data': [raw_data]} # Assuming it's a numpy array...
+                raw_data = {'pad_data': reborn.utils.ensure_list(raw_data)}
             self.raw_data = raw_data
 
         if frame_getter is not None:
@@ -1221,46 +1219,47 @@ class PADView2(object):
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
     def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None,
-                 debug_level=0):
+                 beam=None, debug_level=0):
         """
         Arguments:
-            pad_geometry: a list of PADGeometry instances
-            mask_data: a list of numpy arrays
-            logscale: apply log to data before viewing
-            frame_getter: a subclass of the FrameGetter class
+            pad_geometry (|PADGeometry| list): PAD geometry information.
+            mask_data (|ndarray| list): Data masks.
+            raw_data (|ndarray| list or dict): The data arrays, or a dictionary with at least a 'pad_data' key.
+            beam (|Beam|): X-ray beam parameters.
+            logscale (bool): Log the data before viewing (because the viewer is 8bit!).
+            frame_getter (|FrameGetter| subclass): Optionally, a frame getter.
         """
         self.debug_level = debug_level
         self.debug(get_caller(), 1)
         self.logscale = logscale
         self.mask_data = mask_data
         self.pad_geometry = pad_geometry
+        self.beam = beam
         self.dataframe = {}
 
         if raw_data is not None:
             if isinstance(raw_data, dict):
                 pass
-            elif isinstance(raw_data, list):
-                raw_data = {'pad_data': raw_data}
             else:
-                raw_data = {'pad_data': [raw_data]} # Assuming it's a numpy array...
+                raw_data = {'pad_data': reborn.utils.ensure_list(raw_data)}
             self.raw_data = raw_data
 
         if frame_getter is not None:
             self.frame_getter = frame_getter
-            try:
-                self.raw_data = self.frame_getter.get_frame(0)
-            except:
-                self.debug('Failed to get raw data from frame_getter')
+            # TODO: check that this is an appropriate dictionary
+            self.raw_data = self.frame_getter.get_frame(0)
 
         # Possibly, the frame getter has pad_geometry info -- let's have a look:
         if self.pad_geometry is None:
-            self.debug('PAD geometry was not supplied at initialization.')
-            try:
-                self.pad_geometry = self.frame_getter.pad_geometry
-            except AttributeError:
-                self.debug('Failed to get geometry from frame_getter')
+            if self.frame_getter is not None:
+                self.debug('Checking if the frame getter contains PAD geometry...')
+                try:
+                    self.pad_geometry = self.frame_getter.pad_geometry
+                    self.debug('Found PAD geometry.')
+                except AttributeError:
+                    self.debug('Failed to get geometry from frame getter.')
         if self.pad_geometry is None:
-            self.debug('Making up some garbage PAD geometry instances')
+            self.debug('WARNING: Making up some *GARBAGE* PAD geometry because you provided no specification.')
             pad_geometry = []
             shft = 0
             for dat in self.raw_data['pad_data']:
@@ -1269,6 +1268,30 @@ class PADView2(object):
                 shft += pad.shape()[0]
                 pad_geometry.append(pad)
             self.pad_geometry = pad_geometry
+
+        # Possibly, the frame getter has pad_geometry info -- let's have a look:
+        if self.beam is None:
+            if self.frame_getter is not None:
+                self.debug('Checking if the frame getter contains x-ray beam information...')
+                try:
+                    self.beam = self.frame_getter.beam
+                    self.debug('Found x-ray beam information.')
+                except AttributeError:
+                    self.debug('Failed to get x-ray beam information from frame_getter.')
+        if self.pad_geometry is None:
+            self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
+            self.beam = source.Beam(photon_energy=9000*1.602e-19)
+
+        if self.mask_data is None:
+            if self.frame_getter is not None:
+                self.debug('Checking if the frame getter contains pixel masks...')
+                try:
+                    self.mask_data = self.frame_getter.mask_data
+                    self.debug('Found masks.')
+                except AttributeError:
+                    self.debug('Failed to get pixel masks from frame_getter.')
+            self.mask_data = [np.ones_like(d) for d in self.raw_data['pad_data']]
+
         self.app = pg.mkQApp()
         self.setup_ui()
         self.viewbox = pg.ViewBox()
