@@ -102,10 +102,8 @@ class PADView(object):
         if raw_data is not None:
             if isinstance(raw_data, dict):
                 pass
-            elif isinstance(raw_data, list):
-                raw_data = {'pad_data': raw_data}
             else:
-                raw_data = {'pad_data': [raw_data]} # Assuming it's a numpy array...
+                raw_data = {'pad_data': reborn.utils.ensure_list(raw_data)}
             self.raw_data = raw_data
 
         if frame_getter is not None:
@@ -247,7 +245,7 @@ class PADView(object):
 
     def update_status_string(self, frame_number=None, n_frames=None):
         r""" Update status string at the bottom of the main window. """
-        self.debug(get_caller(), 2)
+        self.debug(get_caller(), 3)
         if frame_number is not None and n_frames is not None:
             n = np.int(np.ceil(np.log10(n_frames)))
             strn = ' Frame %%%dd of %%%dd | ' % (n, n)
@@ -1197,6 +1195,7 @@ class PADView2(object):
     _mask_rois = None
     images = None
     scatter_plots = None
+    plot_items = None
     rings = []
     grid = None
     coord_axes = None
@@ -1215,50 +1214,52 @@ class PADView2(object):
     apply_filters = True
     data_processor = None
     widgets = {}
+    plugins = None
 
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
     def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None,
-                 debug_level=0):
+                 beam=None, debug_level=0):
         """
         Arguments:
-            pad_geometry: a list of PADGeometry instances
-            mask_data: a list of numpy arrays
-            logscale: apply log to data before viewing
-            frame_getter: a subclass of the FrameGetter class
+            pad_geometry (|PADGeometry| list): PAD geometry information.
+            mask_data (|ndarray| list): Data masks.
+            raw_data (|ndarray| list or dict): The data arrays, or a dictionary with at least a 'pad_data' key.
+            beam (|Beam|): X-ray beam parameters.
+            logscale (bool): Log the data before viewing (because the viewer is 8bit!).
+            frame_getter (|FrameGetter| subclass): Optionally, a frame getter.
         """
         self.debug_level = debug_level
         self.debug(get_caller(), 1)
         self.logscale = logscale
         self.mask_data = mask_data
         self.pad_geometry = pad_geometry
+        self.beam = beam
         self.dataframe = {}
 
         if raw_data is not None:
             if isinstance(raw_data, dict):
                 pass
-            elif isinstance(raw_data, list):
-                raw_data = {'pad_data': raw_data}
             else:
-                raw_data = {'pad_data': [raw_data]} # Assuming it's a numpy array...
+                raw_data = {'pad_data': reborn.utils.ensure_list(raw_data)}
             self.raw_data = raw_data
 
         if frame_getter is not None:
             self.frame_getter = frame_getter
-            try:
-                self.raw_data = self.frame_getter.get_frame(0)
-            except:
-                self.debug('Failed to get raw data from frame_getter')
+            # TODO: check that this is an appropriate dictionary
+            self.raw_data = self.frame_getter.get_frame(0)
 
         # Possibly, the frame getter has pad_geometry info -- let's have a look:
         if self.pad_geometry is None:
-            self.debug('PAD geometry was not supplied at initialization.')
-            try:
-                self.pad_geometry = self.frame_getter.pad_geometry
-            except AttributeError:
-                self.debug('Failed to get geometry from frame_getter')
+            if self.frame_getter is not None:
+                self.debug('Checking if the frame getter contains PAD geometry...')
+                try:
+                    self.pad_geometry = self.frame_getter.pad_geometry
+                    self.debug('Found PAD geometry.')
+                except AttributeError:
+                    self.debug('Failed to get geometry from frame getter.')
         if self.pad_geometry is None:
-            self.debug('Making up some garbage PAD geometry instances')
+            self.debug('WARNING: Making up some *GARBAGE* PAD geometry because you provided no specification.')
             pad_geometry = []
             shft = 0
             for dat in self.raw_data['pad_data']:
@@ -1267,6 +1268,30 @@ class PADView2(object):
                 shft += pad.shape()[0]
                 pad_geometry.append(pad)
             self.pad_geometry = pad_geometry
+
+        # Possibly, the frame getter has pad_geometry info -- let's have a look:
+        if self.beam is None:
+            if self.frame_getter is not None:
+                self.debug('Checking if the frame getter contains x-ray beam information...')
+                try:
+                    self.beam = self.frame_getter.beam
+                    self.debug('Found x-ray beam information.')
+                except AttributeError:
+                    self.debug('Failed to get x-ray beam information from frame_getter.')
+        if self.pad_geometry is None:
+            self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
+            self.beam = source.Beam(photon_energy=9000*1.602e-19)
+
+        if self.mask_data is None:
+            if self.frame_getter is not None:
+                self.debug('Checking if the frame getter contains pixel masks...')
+                try:
+                    self.mask_data = self.frame_getter.mask_data
+                    self.debug('Found masks.')
+                except AttributeError:
+                    self.debug('Failed to get pixel masks from frame_getter.')
+            self.mask_data = [np.ones_like(d) for d in self.raw_data['pad_data']]
+
         self.app = pg.mkQApp()
         self.setup_ui()
         self.viewbox = pg.ViewBox()
@@ -1405,6 +1430,12 @@ class PADView2(object):
         analysis_menu = self.menubar.addMenu('Analysis')
         add_menu(analysis_menu, 'Toggle peak finding', connect=self.toggle_peak_finding)
         add_menu(analysis_menu, 'Toggle peaks visible', connect=self.toggle_peaks_visible)
+        plugin_menu = self.menubar.addMenu('Plugins')
+        import functools
+        for plg in glob.glob(os.path.join(plugin_path, '*.py')):
+            self.debug('\tSetup plugin ' + os.path.basename(plg).replace('.py', ''), 2)
+            add_menu(plugin_menu, os.path.basename(plg).replace('.py', '').replace('_', ' '),
+                     connect=functools.partial(self.run_plugin, os.path.basename(plg).replace('.py', '')))
         # add_menu(analysis_menu, 'SNR transform', connect=self.show_snr_filter_widget)
 
     def set_shortcut(self, shortcut, func):
@@ -1422,7 +1453,6 @@ class PADView2(object):
         self.set_shortcut("r", self.show_random_frame)
         self.set_shortcut("n", self.show_history_next)
         self.set_shortcut("p", self.show_history_previous)
-        self.set_shortcut("c", self.choose_plugins)
         self.set_shortcut("Ctrl+g", self.toggle_all_geom_info)
         self.set_shortcut("Ctrl+r", self.edit_ring_radii)
         self.set_shortcut("Ctrl+a", self.toggle_coordinate_axes)
@@ -1436,7 +1466,7 @@ class PADView2(object):
 
     def update_status_string(self, frame_number=None, n_frames=None):
         r""" Update status string at the bottom of the main window. """
-        self.debug(get_caller(), 2)
+        self.debug(get_caller(), 3)
         if frame_number is not None and n_frames is not None:
             n = np.int(np.ceil(np.log10(n_frames)))
             strn = ' Frame %%%dd of %%%dd | ' % (n, n)
@@ -1486,9 +1516,17 @@ class PADView2(object):
         r""" Get the minimum and maximum levels of the current image display. """
         return self.histogram.item.getLevels()
 
-    def set_levels(self, min_value, max_value):
+    def set_levels(self, min_value=None, max_value=None):
         r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
         self.debug(get_caller(), 1)
+        dat = None
+        if min_value is None:
+            dat = detector.concat_pad_data(self.get_pad_display_data()['pad_data'])
+            min_value = dat.min()
+        if max_value is None:
+            if dat is None:
+                dat = detector.concat_pad_data(self.get_pad_display_data()['pad_data'])
+            max_value = dat.max()
         self.histogram.item.setLevels(min_value, max_value)
 
     def get_view_bounding_rect(self):
@@ -1919,12 +1957,23 @@ class PADView2(object):
         self.setup_masks()
         self.set_levels(np.percentile(np.ravel(pad_data), 10), np.percentile(np.ravel(pad_data), 90))
 
+    def update_pad_geometry(self, pad_geometry):
+        self.pad_geometry = pad_geometry
+        for i in range(self.n_pads):
+            if self.images is not None:
+                self._apply_pad_transform(self.images[i], self.pad_geometry[i])
+            if self.mask_images is not None:
+                self._apply_pad_transform(self.mask_images[i], self.pad_geometry[i])
+        if self.pad_labels is not None:
+            self.toggle_pad_labels()
+            self.toggle_pad_labels()
+
     def update_pads(self):
         self.debug(get_caller(), 1)
         if self.images is None:
             self.setup_pads()
         processed_data = self.get_pad_display_data()
-        mx = np.ravel(processed_data).max()
+        mx = detector.concat_pad_data(processed_data).max()
         for i in range(0, self.n_pads):
             d = processed_data[i]
             if self.show_true_fast_scans:  # For testing - show fast scan axis
@@ -2169,6 +2218,18 @@ class PADView2(object):
         self.update_status_string(frame_number=self.frame_getter.current_frame, n_frames=self.frame_getter.n_frames)
         self._mouse_moved(self.evt)
 
+    def add_plot_item(self, *args, **kargs):
+        r"""
+        Example: self.add_plot_item(x, y, pen=pg.mkPen(width=3, color='g'))
+        """
+        self.debug(get_caller(), 1)
+        if self.plot_items is None:
+            self.plot_items = []
+        plot_item = pg.PlotDataItem(*args, **kargs)
+        self.plot_items.append(plot_item)
+        self.viewbox.addItem(plot_item)
+        return plot_item
+
     def add_scatter_plot(self, *args, **kargs):
         self.debug(get_caller(), 1)
         if self.scatter_plots is None:
@@ -2270,13 +2331,13 @@ class PADView2(object):
         r""" Convert 3D vector coords to the equivalent coords in the 2D display plane.  This corresponds to ignoring
         the "z" coordinate, and scaling the "x,y" coordinates to that of an equivalent detector located at a distance
         of 1 meter from the origin.  Simply put: remove the z component, divide the x,y components by the z component"""
-        return vecs[:, 0:2]/vecs[:, 2]
+        return (vecs[:, 0:2].T/vecs[:, 2]).T.copy()
 
     def panel_scatter_plot(self, panel_number, ss_coords, fs_coords, style=None):
         r""" Scatter plot points given coordinates (i.e. indices) corresponding to a particular panel.  This will
         take care of the re-mapping to the display coordinates."""
         if style is None: style = self.peak_style
-        vecs = self.pad_geometry[panel_number].indices_to_vectors(ss_coords+1, fs_coords+1)  # FIXME: Why the +1 ???
+        vecs = self.pad_geometry[panel_number].indices_to_vectors(ss_coords, fs_coords)  # FIXME: Why the +1 ???
         vecs = self.vector_coords_to_2d_display_coords(vecs)
         self.add_scatter_plot(vecs[:, 0], vecs[:, 1], **style)
 
@@ -2379,38 +2440,50 @@ class PADView2(object):
         for i in range(self.n_pads):
             self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(a, b, c), snr_threshold=t))
 
-    def choose_plugins(self):
+    def _import_plugin_module(self, module_name):
         self.debug(get_caller(), 1)
-        init = ''
-        init += "subtract_median_fs\n"
-        init += "#subtract_median_ss\n"
-        init += "#subtract_median_radial\n"
-        text = self.get_text(text=init)
-        a = text.strip().split("\n")
-        plugins = []
-        for b in a:
-            if len(b) == 0:
-                continue
-            if b[0] != '#':  # Ignore commented lines
-                c = b.split('#')[0]
-                if c != '':
-                    plugins.append(c)
-        if len(plugins) > 0:
-            self.run_plugins(plugins)
+        if module_name in self.plugins:
+            return self.plugins[module_name]  # Check if module already imported and cached
+        module_path = __package__+'.plugins.'+module_name
+        if module_path[-3:] == '.py':
+            module_path = module_path[:-3]
+        self.debug('\tImporting plugin: %s' % module_path)
+        module = importlib.import_module(module_path)  # Attempt to import
+        if self.plugins is None: self.plugins = {}
+        self.plugins[module_name] = module  # Cache the module
+        return module
 
-    def run_plugins(self, module_names=['subtract_median_ss']):
+    def run_plugin(self, module_name):
         self.debug(get_caller(), 1)
-        self.debug(module_names, 1)
+        if self.plugins is None:
+            self.plugins = {}
+        if not module_name in self.plugins.keys():
+            module = self._import_plugin_module(module_name)  # Get the module (import or retrieve from cache)
+        else:
+            module = self.plugins[module_name]
+        if hasattr(module, 'plugin'):  # If the module has a plugin function, run the function and return
+            module.plugin(self)
+            return
+        if module_name+'.widget' in self.plugins.keys():
+            self.plugins[module_name+'.widget'].show()  # Check if a widget is already cached.  If so, show it.
+            return
+        if hasattr(module, 'Plugin'):
+            plugin_instance = module.Plugin(self)  # Check if the plugin defines a class.  If so, create an instance.
+            self.plugins[module_name+'.class_instance'] = plugin_instance  # Cache the instance
+            self.plugins[module_name + '.widget'] = plugin_instance.widget  # Get the widget and cache it.
+            plugin_instance.widget.show()  # Show the widget.
+            self.debug('\tCreated plugin class instance.  Showing widget.')
+            return
+        self.debug('\tPlugin module has no functions or classes defined.')
+        return
+
+    def run_plugins(self, module_names=[]):
+        self.debug(get_caller(), 1)
+        self.debug('\tplugin module names: '+module_names.__str__(), 1)
         if len(module_names) <= 0:
             return
-        mod = module_names[0]
-        try:
-            self.debug('plugin: %s' % mod)
-            self.debug(__package__)
-            module = importlib.import_module(__package__+'.plugins.'+mod)
-            module.plugin(self)  # This is the syntax for running a plugin
-        except ImportError:
-            print('Failed to find plugin %s' % module)
+        for module_name in module_names:
+            self.run_plugin(module_name)
 
     def get_text(self, title="Title", label="Label", text="Text"):
         r""" Simple popup widget that allows the capture of a text string."""
@@ -2463,7 +2536,7 @@ class PluginWidget(QtGui.QWidget):
         super().__init__()
         self.padview = padview
         self.plugin_files = glob.glob(os.path.join(plugin_path, '*.py'))
-        self.plugin_basenames = [os.path.basename(p) for p in self.plugin_files]
+        self.plugin_basenames = [os.path.basename(p).replace('.py', '').replace('_', ' ').capitalize() for p in self.plugin_files]
         self.layout = QtGui.QGridLayout()
         row = 0
         row += 1
@@ -2477,8 +2550,8 @@ class PluginWidget(QtGui.QWidget):
         self.layout.addWidget(self.run_plugin_button, row, 1, 1, 2)
         self.setLayout(self.layout)
     def run_plugin(self):
-        print(self.combo_box.currentText().split('.')[0])
-        self.padview.run_plugins([self.combo_box.currentText().split('.')[0]])
+        print()
+        self.padview.run_plugins([self.combo_box.currentText().split('.')[0].replace(' ', '_').lower()+'.py'])
 
 
 class PeakfinderConfigWidget(QtGui.QWidget):
@@ -2635,9 +2708,10 @@ if __name__ == '__main__':
     from reborn import detector, source
     from reborn.viewers.qtviews.padviews import PADView2
     np.random.seed(10)
-    theta1 = 0.1
-    theta2 = 0.2
-    Tscl = 0.2
+    beam_vec = [0, 0, 1] #reborn.utils.vec_norm(np.array([0, 0.1, 0.9]))
+    theta1 = 0.0
+    theta2 = 0.0
+    Tscl = 0.0
     dist = 0.1
     pix = 1e-3
     shape = (200, 200)
@@ -2659,7 +2733,7 @@ if __name__ == '__main__':
         p.fs_vec = np.dot(p.fs_vec, R.T)
         p.t_vec = np.dot(p.t_vec, R.T)
         p.t_vec += T
-    beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3)
+    beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3, beam_vec=beam_vec)
     def make_images():
         dat = solutions.get_pad_solution_intensity(pads, beam, thickness=10e-6, liquid='water')
         for d in dat:
@@ -2668,18 +2742,23 @@ if __name__ == '__main__':
             xo = np.random.rand() * nx
             yo = np.random.rand() * ny
             d += 100 * np.exp((-(x - xo) ** 2 - (y - yo) ** 2)/3)
-            d.flat[0:10] = 0
+            # d.flat[0:10] = 0
         return dat
     dat = make_images()
+    # for p in pads:
+    #     p.t_vec[0] += 0.2
+    mask = [np.ones(p.shape()) for p in pads]
+    # for i in range(len(mask)):
+    #     mask[i][dat[i] < 40000] = 0
     [print(p) for p in pads]
-    pv = PADView2(raw_data=dat, pad_geometry=pads, debug_level=3)
+    pv = PADView2(raw_data=dat, pad_geometry=pads, mask_data=mask, debug_level=2)
+    pv.show_coordinate_axes()
+    pv.run_plugin('snr_filter')
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
     # pv.show_fast_scan_directions()
-    # pv.show_coordinate_axes()
     pv.set_title('testing')
     # pv.toggle_grid()
     pv.start()
     # lw = LevelsWidget(pv)
     # lw.show()
     # app.exec_()
-
