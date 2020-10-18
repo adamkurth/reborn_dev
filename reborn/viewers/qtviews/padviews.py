@@ -1521,11 +1521,11 @@ class PADView2(object):
         self.debug(get_caller(), 1)
         dat = None
         if min_value is None:
-            dat = detector.concat_pad_data(self.get_pad_display_data()['pad_data'])
+            dat = detector.concat_pad_data(self.get_pad_display_data())
             min_value = dat.min()
         if max_value is None:
             if dat is None:
-                dat = detector.concat_pad_data(self.get_pad_display_data()['pad_data'])
+                dat = detector.concat_pad_data(self.get_pad_display_data())
             max_value = dat.max()
         self.histogram.item.setLevels(min_value, max_value)
 
