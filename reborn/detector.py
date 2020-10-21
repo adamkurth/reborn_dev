@@ -948,6 +948,8 @@ class RadialProfiler():
         q_mags = concat_pad_data(q_mags)
         if q_range is None:
             q_range = (0, np.max(q_mags))
+        if n_bins is None:
+            n_bins = int(np.sqrt(q_mags.size)/4.0)
         q_range = np.array(q_range)
         bin_size = (q_range[1] - q_range[0]) / float(n_bins - 1)
         bin_centers = np.linspace(q_range[0], q_range[1], n_bins)

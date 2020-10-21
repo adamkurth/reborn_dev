@@ -1278,7 +1278,7 @@ class PADView2(object):
                     self.debug('Found x-ray beam information.')
                 except AttributeError:
                     self.debug('Failed to get x-ray beam information from frame_getter.')
-        if self.pad_geometry is None:
+        if self.beam is None:
             self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
             self.beam = source.Beam(photon_energy=9000*1.602e-19)
 
@@ -1334,35 +1334,35 @@ class PADView2(object):
         self.hbox = QtGui.QHBoxLayout()
         self.splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
         self.setup_widgets()
-        self.side_panel = QtGui.QWidget()
-        self.side_panel_layout = QtGui.QVBoxLayout()
-        self.side_panel_layout.setAlignment(QtCore.Qt.AlignTop)
-        box = misc.CollapsibleBox('Display') ###########################
-        lay = QtGui.QGridLayout()
-        lay.addWidget(QtGui.QLabel('CMap min:'), 1, 1)
-        maxspin = QtGui.QSpinBox()
-        lay.addWidget(maxspin, 1, 2)
-        box.setContentLayout(lay)
-        self.side_panel_layout.addWidget(box)
-        box = misc.CollapsibleBox('Peaks') ##############################
-        lay = QtGui.QGridLayout()
-        lay.addWidget(self.widget_peakfinder_config, 1, 1)
-        box.setContentLayout(lay)
-        self.side_panel_layout.addWidget(box)
-        box = misc.CollapsibleBox('Analysis') ###########################
-        lay = QtGui.QGridLayout()
-        row = 0
-        row += 1
-        lay.addWidget(QtGui.QLabel('Polarization Correction'), row, 1)
-        polarization_button = QtGui.QCheckBox()
-        # polarization_button.toggled.connect()
-        lay.addWidget(polarization_button, row, 2, alignment=QtCore.Qt.AlignCenter)
-        row += 1
-        lay.addWidget(self.widget_plugin, row, 1)
-        box.setContentLayout(lay)
-        self.side_panel_layout.addWidget(box)
-        self.side_panel.setLayout(self.side_panel_layout)
-        self.splitter.addWidget(self.side_panel)
+        # self.side_panel = QtGui.QWidget()
+        # self.side_panel_layout = QtGui.QVBoxLayout()
+        # self.side_panel_layout.setAlignment(QtCore.Qt.AlignTop)
+        # box = misc.CollapsibleBox('Display') ###########################
+        # lay = QtGui.QGridLayout()
+        # lay.addWidget(QtGui.QLabel('CMap min:'), 1, 1)
+        # maxspin = QtGui.QSpinBox()
+        # lay.addWidget(maxspin, 1, 2)
+        # box.setContentLayout(lay)
+        # self.side_panel_layout.addWidget(box)
+        # box = misc.CollapsibleBox('Peaks') ##############################
+        # lay = QtGui.QGridLayout()
+        # lay.addWidget(self.widget_peakfinder_config, 1, 1)
+        # box.setContentLayout(lay)
+        # self.side_panel_layout.addWidget(box)
+        # box = misc.CollapsibleBox('Analysis') ###########################
+        # lay = QtGui.QGridLayout()
+        # row = 0
+        # row += 1
+        # lay.addWidget(QtGui.QLabel('Polarization Correction'), row, 1)
+        # polarization_button = QtGui.QCheckBox()
+        # # polarization_button.toggled.connect()
+        # lay.addWidget(polarization_button, row, 2, alignment=QtCore.Qt.AlignCenter)
+        # row += 1
+        # lay.addWidget(self.widget_plugin, row, 1)
+        # box.setContentLayout(lay)
+        # self.side_panel_layout.addWidget(box)
+        # self.side_panel.setLayout(self.side_panel_layout)
+        # self.splitter.addWidget(self.side_panel)
         self.graphics_view = pg.GraphicsView()
         self.viewbox = pg.ViewBox()
         self.viewbox.invertX()
@@ -1412,11 +1412,12 @@ class PADView2(object):
         add_menu(file_menu, 'Open file...', connect=self.open_data_file)
         add_menu(file_menu, 'Exit', short='Ctrl+Q', connect=self.app.quit)
         geom_menu = self.menubar.addMenu('Geometry')
-        add_menu(geom_menu, 'Toggle coordinates', connect=self.toggle_coordinate_axes)
-        add_menu(geom_menu, 'Toggle grid', connect=self.toggle_grid)
-        add_menu(geom_menu, 'Toggle PAD labels', connect=self.toggle_pad_labels)
-        add_menu(geom_menu, 'Toggle scan directions', connect=self.toggle_fast_scan_directions)
+        add_menu(geom_menu, 'Show coordinates', connect=self.toggle_coordinate_axes)
+        add_menu(geom_menu, 'Show grid', connect=self.toggle_grid)
+        add_menu(geom_menu, 'Show PAD labels', connect=self.toggle_pad_labels)
+        add_menu(geom_menu, 'Show scan directions', connect=self.toggle_fast_scan_directions)
         add_menu(geom_menu, 'Edit ring radii...', connect=self.edit_ring_radii)
+        add_menu(geom_menu, 'Save PAD geometry...', connect=self.save_pad_geometry)
         mask_menu = self.menubar.addMenu('Mask')
         add_menu(mask_menu, 'Toggle masks visible', connect=self.toggle_masks)
         add_menu(mask_menu, 'Mask panel edges...', connect=self.mask_panel_edges)
@@ -1934,6 +1935,26 @@ class PADView2(object):
             return [pad.zeros() for pad in self.pad_geometry]
         return None
 
+    def set_pad_display_data(self, data, auto_levels=False, update_display=True):
+        if type(data) == dict:
+            if 'pad_data' in dict.keys():
+                self.processed_data = data
+        elif type(data) == list:
+            if self.processed_data is None:
+                self.processed_data = {}
+            self.processed_data['pad_data'] = data
+        elif type(data) == np.ndarray:
+            data = detector.split_pad_data(self.pad_geometry, data)
+            if self.processed_data is None:
+                self.processed_data = {}
+            self.processed_data['pad_data'] = data
+        else:
+            raise TypeError('Allowed types are dict, ndarray, list')
+        if update_display:
+            self.update_pads()
+        if auto_levels:
+            self.set_levels()
+
     def setup_pads(self):
         self.debug(get_caller(), 1)
         pad_data = self.get_pad_display_data()
@@ -1983,6 +2004,18 @@ class PADView2(object):
                 d = np.log10(d)
             self.images[i].setImage(d)
         self.histogram.regionChanged()
+
+    def save_pad_geometry(self):
+        r""" Save list of pad geometry specifications in json format. """
+        self.debug(get_caller(), 1)
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save PAD Geometry", "geometry",
+                                                          "reborn PAD Geometry File (*.json);;",
+                                                                 options=options)
+        if file_name == "":
+            return
+        self.debug('Saving PAD geometry to file: %s' % file_name)
+        reborn.detector.save_pad_geometry_list(file_name, self.pad_geometry)
 
     def vector_to_view_coords(self, vec):
         r""" If you have a vector (or vectors) pointing in some direction in space, this function will tell you the 2D
@@ -2753,7 +2786,7 @@ if __name__ == '__main__':
     [print(p) for p in pads]
     pv = PADView2(raw_data=dat, pad_geometry=pads, mask_data=mask, debug_level=2)
     pv.show_coordinate_axes()
-    pv.run_plugin('snr_filter')
+    # pv.run_plugin('snr_filter')
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
     # pv.show_fast_scan_directions()
     pv.set_title('testing')
