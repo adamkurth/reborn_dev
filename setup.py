@@ -39,6 +39,12 @@ ext_modules.append(Extension(
       extra_compile_args=['-Wno-unused-function', '-fopenmp', '-lgomp']
       ))
 ext_modules.append(Extension(
+      name='reborn.fortran.omp_test_f',
+      sources=['reborn/fortran/omp_test.f90'],
+      define_macros=f2py_macros,
+      extra_compile_args=['-Wno-unused-function', '-fopenmp', '-lgomp']
+      ))
+ext_modules.append(Extension(
       name='reborn.fortran.fortran_indexing_f',
       sources=['reborn/fortran/fortran_indexing.f90'],
       define_macros=f2py_macros,
