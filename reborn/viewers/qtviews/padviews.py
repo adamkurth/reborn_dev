@@ -291,10 +291,15 @@ class PADView(object):
         upper = np.percentile(d, percents[1])
         self.set_levels(lower, upper)
 
-    def set_levels(self, min_value, max_value):
+    def set_levels(self, min_value=None, max_value=None, percentiles=None, colormap=None):
         r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
         self.debug(get_caller(), 1)
-        self.main_window.histogram.item.setLevels(min_value, max_value)
+        if (min_value is None) or (max_value is None):
+            self.set_levels_by_percentiles(percents=percentiles)
+        else:
+            self.main_window.histogram.item.setLevels(min_value, max_value)
+        if colormap is not None:
+            self.set_preset_colormap(colormap)
 
     def add_rectangle_roi(self, pos=(0, 0), size=(100, 100)):
         r""" Adds a |pyqtgraph| RectROI """
@@ -1333,7 +1338,7 @@ class PADView2(object):
         self.statusbar = self.main_window.statusBar()
         self.hbox = QtGui.QHBoxLayout()
         self.splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
-        self.setup_widgets()
+        # self.setup_widgets()
         # self.side_panel = QtGui.QWidget()
         # self.side_panel_layout = QtGui.QVBoxLayout()
         # self.side_panel_layout.setAlignment(QtCore.Qt.AlignTop)
@@ -1382,15 +1387,15 @@ class PADView2(object):
         self.main_window.setWindowTitle(title)
         # self.process_events()  # Why?
 
-    def setup_widgets(self):
-        r""" Setup widgets that are supposed to talk to the main window. """
-        self.debug(get_caller(), 1)
-        snr_config = SNRConfigWidget()
-        snr_config.values_changed.connect(self.update_snr_filter_params)
-        self.widget_snr_config = snr_config
-        self.widget_peakfinder_config = PeakfinderConfigWidget()
-        self.widget_peakfinder_config.values_changed.connect(self.update_peakfinder_params)
-        self.widget_plugin = PluginWidget(self)
+    # def setup_widgets(self):
+    #     r""" Setup widgets that are supposed to talk to the main window. """
+    #     self.debug(get_caller(), 1)
+    #     snr_config = SNRConfigWidget()
+    #     snr_config.values_changed.connect(self.update_snr_filter_params)
+    #     self.widget_snr_config = snr_config
+    #     self.widget_peakfinder_config = PeakfinderConfigWidget()
+    #     self.widget_peakfinder_config.values_changed.connect(self.update_peakfinder_params)
+    #     self.widget_plugin = PluginWidget(self)
 
     def setup_mouse_interactions(self):
         r""" I don't know what this does... obviously something about mouse interactions... """
@@ -1419,6 +1424,7 @@ class PADView2(object):
         add_menu(geom_menu, 'Edit ring radii...', connect=self.edit_ring_radii)
         add_menu(geom_menu, 'Save PAD geometry...', connect=self.save_pad_geometry)
         mask_menu = self.menubar.addMenu('Mask')
+        add_menu(mask_menu, 'Clear masks', connect=self.clear_masks)
         add_menu(mask_menu, 'Toggle masks visible', connect=self.toggle_masks)
         add_menu(mask_menu, 'Mask panel edges...', connect=self.mask_panel_edges)
         add_menu(mask_menu, 'Mask above upper limit', connect=self.mask_upper_level)
@@ -1505,30 +1511,30 @@ class PADView2(object):
         self.histogram.setImageItems(self.images)
         pg.QtGui.QApplication.processEvents()
 
-    def set_levels_by_percentiles(self, percents=(1, 99)):
+    def set_levels_by_percentiles(self, percents=(1, 99), colormap=None):
         r""" Set upper and lower levels according to percentiles.  This is based on :func:`numpy.percentile`. """
         self.debug(get_caller(), 1)
         d = reborn.detector.concat_pad_data(self.get_pad_display_data())
         lower = np.percentile(d, percents[0])
         upper = np.percentile(d, percents[1])
-        self.set_levels(lower, upper)
+        self.set_levels(lower, upper, colormap=colormap)
 
     def get_levels(self):
         r""" Get the minimum and maximum levels of the current image display. """
         return self.histogram.item.getLevels()
 
-    def set_levels(self, min_value=None, max_value=None):
+    def set_levels(self, min_value=None, max_value=None, levels=None, percentiles=None, colormap=None):
         r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
         self.debug(get_caller(), 1)
-        dat = None
-        if min_value is None:
-            dat = detector.concat_pad_data(self.get_pad_display_data())
-            min_value = dat.min()
-        if max_value is None:
-            if dat is None:
-                dat = detector.concat_pad_data(self.get_pad_display_data())
-            max_value = dat.max()
-        self.histogram.item.setLevels(min_value, max_value)
+        if levels is not None:
+            min_value = levels[0]
+            max_value = levels[1]
+        if (min_value is None) or (max_value is None):
+            self.set_levels_by_percentiles(percents=percentiles)
+        else:
+            self.histogram.item.setLevels(min_value, max_value)
+        if colormap is not None:
+            self.set_preset_colormap(colormap)
 
     def get_view_bounding_rect(self):
         r""" Bounding rectangle of everything presently visible, in view (i.e real-space, 1-meter plane) coordinates."""
@@ -1915,6 +1921,12 @@ class PADView2(object):
     def mask_hovering_roi_toggle(self):
         self.mask_hovering_roi(toggle=True)
 
+    def clear_masks(self):
+        if self.mask_data is not None:
+            for m in range(self.n_pads):
+                self.mask_data[m] = self.mask_data[m]*0 + 1
+        self.update_masks(self.mask_data)
+
     def get_pad_display_data(self):
         # The logic of what actually gets displayed should go here.  For now, we display processed data if it is
         # available, else we display raw data, else we display zeros based on the pad geometry.  If none of these
@@ -1935,7 +1947,7 @@ class PADView2(object):
             return [pad.zeros() for pad in self.pad_geometry]
         return None
 
-    def set_pad_display_data(self, data, auto_levels=False, update_display=True):
+    def set_pad_display_data(self, data, auto_levels=False, update_display=True, levels=None, percentiles=None, colormap=None):
         if type(data) == dict:
             if 'pad_data' in dict.keys():
                 self.processed_data = data
@@ -1953,7 +1965,9 @@ class PADView2(object):
         if update_display:
             self.update_pads()
         if auto_levels:
-            self.set_levels()
+            self.set_levels_by_percentiles(percents=(2, 98))
+        if (levels is not None) or (percentiles is not None):
+            self.set_levels(levels=levels, percentiles=percentiles, colormap=colormap)
 
     def setup_pads(self):
         self.debug(get_caller(), 1)
@@ -2370,7 +2384,7 @@ class PADView2(object):
         r""" Scatter plot points given coordinates (i.e. indices) corresponding to a particular panel.  This will
         take care of the re-mapping to the display coordinates."""
         if style is None: style = self.peak_style
-        vecs = self.pad_geometry[panel_number].indices_to_vectors(ss_coords, fs_coords)  # FIXME: Why the +1 ???
+        vecs = self.pad_geometry[panel_number].indices_to_vectors(ss_coords, fs_coords)
         vecs = self.vector_coords_to_2d_display_coords(vecs)
         self.add_scatter_plot(vecs[:, 0], vecs[:, 1], **style)
 
