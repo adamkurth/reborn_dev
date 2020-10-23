@@ -948,6 +948,8 @@ class RadialProfiler():
         q_mags = concat_pad_data(q_mags)
         if q_range is None:
             q_range = (0, np.max(q_mags))
+        if n_bins is None:
+            n_bins = int(np.sqrt(q_mags.size)/4.0)
         q_range = np.array(q_range)
         bin_size = (q_range[1] - q_range[0]) / float(n_bins - 1)
         bin_centers = np.linspace(q_range[0], q_range[1], n_bins)
@@ -961,6 +963,7 @@ class RadialProfiler():
         self.q_range = q_range
         self.q_edge_range = q_edge_range
         self.mask = mask
+        self.pad_geometry = pad_geometry
 
     def get_counts_profile(self, mask=None):
         if mask is not None:
@@ -1031,10 +1034,35 @@ class RadialProfiler():
         median = np.zeros(N_bins)
         for i in range(N_bins):
             ind = (self.bin_edges[i] <= q_mags) * (q_mags < self.bin_edges[i+1])
-            
-            median[i] = np.median(data[ind])
+            if np.max(ind):  # False if indices are bad
+                median[i] = np.median(data[ind])
 
         return median
+
+    def subtract_median_profile(self, data, mask=None):
+        r"""
+        Given some PAD data, calculate the radial median and subtract it from the data.
+
+        Args:
+            data:
+            mask:
+
+        Returns:
+
+        """
+        as_list = False
+        if type(data) == list:
+            as_list = True
+        mprof = self.get_median_profile(data, mask=mask)
+        mprofq = self.bin_centers
+        mpat = np.interp(self.q_mags, mprofq, mprof)
+        mpat = concat_pad_data(mpat)
+        data = concat_pad_data(data)
+        data = data.copy()
+        data -= mpat
+        if as_list:
+            data = split_pad_data(self.pad_geometry, data)
+        return data
 
     def get_profile(self, data, mask=None, average=True):
         r"""

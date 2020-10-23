@@ -18,3 +18,4 @@ ${f2py} -c interpolations.f90 -m interpolations_f ${flags}
 ${f2py} -c fortran_indexing.f90 -m fortran_indexing_f ${flags}
 ${f2py} -c density.f90 -m density_f ${flags}
 ${f2py} -c peaks.f90 -m peaks_f ${flags} --f90flags='-fopenmp -O2' -lgomp
+${f2py} -c fortran_omp_test.f90 -m fortran_omp_test_f ${flags} --f90flags='-fopenmp -O2' -lgomp

@@ -48,6 +48,17 @@ except ImportError:
         from . import peaks_f
 
 try:
+    from . import omp_test_f
+except ImportError:
+    try:
+        # Attempt to use openmp if it is available
+        compile_f90('omp_test.f90', extra_args="--f90flags='-fopenmp -O2' -lgomp")
+        from . import omp_test_f
+    except ImportError:
+        compile_f90('omp_test.f90')
+        from . import omp_test_f
+
+try:
     from . import density_f
 except ImportError:
     compile_f90('density.f90')

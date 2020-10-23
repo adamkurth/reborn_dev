@@ -102,10 +102,8 @@ class PADView(object):
         if raw_data is not None:
             if isinstance(raw_data, dict):
                 pass
-            elif isinstance(raw_data, list):
-                raw_data = {'pad_data': raw_data}
             else:
-                raw_data = {'pad_data': [raw_data]} # Assuming it's a numpy array...
+                raw_data = {'pad_data': reborn.utils.ensure_list(raw_data)}
             self.raw_data = raw_data
 
         if frame_getter is not None:
@@ -293,10 +291,15 @@ class PADView(object):
         upper = np.percentile(d, percents[1])
         self.set_levels(lower, upper)
 
-    def set_levels(self, min_value, max_value):
+    def set_levels(self, min_value=None, max_value=None, percentiles=None, colormap=None):
         r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
         self.debug(get_caller(), 1)
-        self.main_window.histogram.item.setLevels(min_value, max_value)
+        if (min_value is None) or (max_value is None):
+            self.set_levels_by_percentiles(percents=percentiles)
+        else:
+            self.main_window.histogram.item.setLevels(min_value, max_value)
+        if colormap is not None:
+            self.set_preset_colormap(colormap)
 
     def add_rectangle_roi(self, pos=(0, 0), size=(100, 100)):
         r""" Adds a |pyqtgraph| RectROI """
@@ -1197,6 +1200,7 @@ class PADView2(object):
     _mask_rois = None
     images = None
     scatter_plots = None
+    plot_items = None
     rings = []
     grid = None
     coord_axes = None
@@ -1220,46 +1224,47 @@ class PADView2(object):
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
     def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None,
-                 debug_level=0):
+                 beam=None, debug_level=0):
         """
         Arguments:
-            pad_geometry: a list of PADGeometry instances
-            mask_data: a list of numpy arrays
-            logscale: apply log to data before viewing
-            frame_getter: a subclass of the FrameGetter class
+            pad_geometry (|PADGeometry| list): PAD geometry information.
+            mask_data (|ndarray| list): Data masks.
+            raw_data (|ndarray| list or dict): The data arrays, or a dictionary with at least a 'pad_data' key.
+            beam (|Beam|): X-ray beam parameters.
+            logscale (bool): Log the data before viewing (because the viewer is 8bit!).
+            frame_getter (|FrameGetter| subclass): Optionally, a frame getter.
         """
         self.debug_level = debug_level
         self.debug(get_caller(), 1)
         self.logscale = logscale
         self.mask_data = mask_data
         self.pad_geometry = pad_geometry
+        self.beam = beam
         self.dataframe = {}
 
         if raw_data is not None:
             if isinstance(raw_data, dict):
                 pass
-            elif isinstance(raw_data, list):
-                raw_data = {'pad_data': raw_data}
             else:
-                raw_data = {'pad_data': [raw_data]} # Assuming it's a numpy array...
+                raw_data = {'pad_data': reborn.utils.ensure_list(raw_data)}
             self.raw_data = raw_data
 
         if frame_getter is not None:
             self.frame_getter = frame_getter
-            try:
-                self.raw_data = self.frame_getter.get_frame(0)
-            except:
-                self.debug('Failed to get raw data from frame_getter')
+            # TODO: check that this is an appropriate dictionary
+            self.raw_data = self.frame_getter.get_frame(0)
 
         # Possibly, the frame getter has pad_geometry info -- let's have a look:
         if self.pad_geometry is None:
-            self.debug('PAD geometry was not supplied at initialization.')
-            try:
-                self.pad_geometry = self.frame_getter.pad_geometry
-            except AttributeError:
-                self.debug('Failed to get geometry from frame_getter')
+            if self.frame_getter is not None:
+                self.debug('Checking if the frame getter contains PAD geometry...')
+                try:
+                    self.pad_geometry = self.frame_getter.pad_geometry
+                    self.debug('Found PAD geometry.')
+                except AttributeError:
+                    self.debug('Failed to get geometry from frame getter.')
         if self.pad_geometry is None:
-            self.debug('Making up some garbage PAD geometry instances')
+            self.debug('WARNING: Making up some *GARBAGE* PAD geometry because you provided no specification.')
             pad_geometry = []
             shft = 0
             for dat in self.raw_data['pad_data']:
@@ -1268,6 +1273,30 @@ class PADView2(object):
                 shft += pad.shape()[0]
                 pad_geometry.append(pad)
             self.pad_geometry = pad_geometry
+
+        # Possibly, the frame getter has pad_geometry info -- let's have a look:
+        if self.beam is None:
+            if self.frame_getter is not None:
+                self.debug('Checking if the frame getter contains x-ray beam information...')
+                try:
+                    self.beam = self.frame_getter.beam
+                    self.debug('Found x-ray beam information.')
+                except AttributeError:
+                    self.debug('Failed to get x-ray beam information from frame_getter.')
+        if self.beam is None:
+            self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
+            self.beam = source.Beam(photon_energy=9000*1.602e-19)
+
+        if self.mask_data is None:
+            if self.frame_getter is not None:
+                self.debug('Checking if the frame getter contains pixel masks...')
+                try:
+                    self.mask_data = self.frame_getter.mask_data
+                    self.debug('Found masks.')
+                except AttributeError:
+                    self.debug('Failed to get pixel masks from frame_getter.')
+            self.mask_data = [np.ones_like(d) for d in self.raw_data['pad_data']]
+
         self.app = pg.mkQApp()
         self.setup_ui()
         self.viewbox = pg.ViewBox()
@@ -1309,36 +1338,36 @@ class PADView2(object):
         self.statusbar = self.main_window.statusBar()
         self.hbox = QtGui.QHBoxLayout()
         self.splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
-        self.setup_widgets()
-        self.side_panel = QtGui.QWidget()
-        self.side_panel_layout = QtGui.QVBoxLayout()
-        self.side_panel_layout.setAlignment(QtCore.Qt.AlignTop)
-        box = misc.CollapsibleBox('Display') ###########################
-        lay = QtGui.QGridLayout()
-        lay.addWidget(QtGui.QLabel('CMap min:'), 1, 1)
-        maxspin = QtGui.QSpinBox()
-        lay.addWidget(maxspin, 1, 2)
-        box.setContentLayout(lay)
-        self.side_panel_layout.addWidget(box)
-        box = misc.CollapsibleBox('Peaks') ##############################
-        lay = QtGui.QGridLayout()
-        lay.addWidget(self.widget_peakfinder_config, 1, 1)
-        box.setContentLayout(lay)
-        self.side_panel_layout.addWidget(box)
-        box = misc.CollapsibleBox('Analysis') ###########################
-        lay = QtGui.QGridLayout()
-        row = 0
-        row += 1
-        lay.addWidget(QtGui.QLabel('Polarization Correction'), row, 1)
-        polarization_button = QtGui.QCheckBox()
-        # polarization_button.toggled.connect()
-        lay.addWidget(polarization_button, row, 2, alignment=QtCore.Qt.AlignCenter)
-        row += 1
-        lay.addWidget(self.widget_plugin, row, 1)
-        box.setContentLayout(lay)
-        self.side_panel_layout.addWidget(box)
-        self.side_panel.setLayout(self.side_panel_layout)
-        self.splitter.addWidget(self.side_panel)
+        # self.setup_widgets()
+        # self.side_panel = QtGui.QWidget()
+        # self.side_panel_layout = QtGui.QVBoxLayout()
+        # self.side_panel_layout.setAlignment(QtCore.Qt.AlignTop)
+        # box = misc.CollapsibleBox('Display') ###########################
+        # lay = QtGui.QGridLayout()
+        # lay.addWidget(QtGui.QLabel('CMap min:'), 1, 1)
+        # maxspin = QtGui.QSpinBox()
+        # lay.addWidget(maxspin, 1, 2)
+        # box.setContentLayout(lay)
+        # self.side_panel_layout.addWidget(box)
+        # box = misc.CollapsibleBox('Peaks') ##############################
+        # lay = QtGui.QGridLayout()
+        # lay.addWidget(self.widget_peakfinder_config, 1, 1)
+        # box.setContentLayout(lay)
+        # self.side_panel_layout.addWidget(box)
+        # box = misc.CollapsibleBox('Analysis') ###########################
+        # lay = QtGui.QGridLayout()
+        # row = 0
+        # row += 1
+        # lay.addWidget(QtGui.QLabel('Polarization Correction'), row, 1)
+        # polarization_button = QtGui.QCheckBox()
+        # # polarization_button.toggled.connect()
+        # lay.addWidget(polarization_button, row, 2, alignment=QtCore.Qt.AlignCenter)
+        # row += 1
+        # lay.addWidget(self.widget_plugin, row, 1)
+        # box.setContentLayout(lay)
+        # self.side_panel_layout.addWidget(box)
+        # self.side_panel.setLayout(self.side_panel_layout)
+        # self.splitter.addWidget(self.side_panel)
         self.graphics_view = pg.GraphicsView()
         self.viewbox = pg.ViewBox()
         self.viewbox.invertX()
@@ -1358,15 +1387,15 @@ class PADView2(object):
         self.main_window.setWindowTitle(title)
         # self.process_events()  # Why?
 
-    def setup_widgets(self):
-        r""" Setup widgets that are supposed to talk to the main window. """
-        self.debug(get_caller(), 1)
-        snr_config = SNRConfigWidget()
-        snr_config.values_changed.connect(self.update_snr_filter_params)
-        self.widget_snr_config = snr_config
-        self.widget_peakfinder_config = PeakfinderConfigWidget()
-        self.widget_peakfinder_config.values_changed.connect(self.update_peakfinder_params)
-        self.widget_plugin = PluginWidget(self)
+    # def setup_widgets(self):
+    #     r""" Setup widgets that are supposed to talk to the main window. """
+    #     self.debug(get_caller(), 1)
+    #     snr_config = SNRConfigWidget()
+    #     snr_config.values_changed.connect(self.update_snr_filter_params)
+    #     self.widget_snr_config = snr_config
+    #     self.widget_peakfinder_config = PeakfinderConfigWidget()
+    #     self.widget_peakfinder_config.values_changed.connect(self.update_peakfinder_params)
+    #     self.widget_plugin = PluginWidget(self)
 
     def setup_mouse_interactions(self):
         r""" I don't know what this does... obviously something about mouse interactions... """
@@ -1388,12 +1417,14 @@ class PADView2(object):
         add_menu(file_menu, 'Open file...', connect=self.open_data_file)
         add_menu(file_menu, 'Exit', short='Ctrl+Q', connect=self.app.quit)
         geom_menu = self.menubar.addMenu('Geometry')
-        add_menu(geom_menu, 'Toggle coordinates', connect=self.toggle_coordinate_axes)
-        add_menu(geom_menu, 'Toggle grid', connect=self.toggle_grid)
-        add_menu(geom_menu, 'Toggle PAD labels', connect=self.toggle_pad_labels)
-        add_menu(geom_menu, 'Toggle scan directions', connect=self.toggle_fast_scan_directions)
+        add_menu(geom_menu, 'Show coordinates', connect=self.toggle_coordinate_axes)
+        add_menu(geom_menu, 'Show grid', connect=self.toggle_grid)
+        add_menu(geom_menu, 'Show PAD labels', connect=self.toggle_pad_labels)
+        add_menu(geom_menu, 'Show scan directions', connect=self.toggle_fast_scan_directions)
         add_menu(geom_menu, 'Edit ring radii...', connect=self.edit_ring_radii)
+        add_menu(geom_menu, 'Save PAD geometry...', connect=self.save_pad_geometry)
         mask_menu = self.menubar.addMenu('Mask')
+        add_menu(mask_menu, 'Clear masks', connect=self.clear_masks)
         add_menu(mask_menu, 'Toggle masks visible', connect=self.toggle_masks)
         add_menu(mask_menu, 'Mask panel edges...', connect=self.mask_panel_edges)
         add_menu(mask_menu, 'Mask above upper limit', connect=self.mask_upper_level)
@@ -1429,7 +1460,6 @@ class PADView2(object):
         self.set_shortcut("r", self.show_random_frame)
         self.set_shortcut("n", self.show_history_next)
         self.set_shortcut("p", self.show_history_previous)
-        self.set_shortcut("c", self.choose_plugins)
         self.set_shortcut("Ctrl+g", self.toggle_all_geom_info)
         self.set_shortcut("Ctrl+r", self.edit_ring_radii)
         self.set_shortcut("Ctrl+a", self.toggle_coordinate_axes)
@@ -1481,30 +1511,30 @@ class PADView2(object):
         self.histogram.setImageItems(self.images)
         pg.QtGui.QApplication.processEvents()
 
-    def set_levels_by_percentiles(self, percents=(1, 99)):
+    def set_levels_by_percentiles(self, percents=(1, 99), colormap=None):
         r""" Set upper and lower levels according to percentiles.  This is based on :func:`numpy.percentile`. """
         self.debug(get_caller(), 1)
         d = reborn.detector.concat_pad_data(self.get_pad_display_data())
         lower = np.percentile(d, percents[0])
         upper = np.percentile(d, percents[1])
-        self.set_levels(lower, upper)
+        self.set_levels(lower, upper, colormap=colormap)
 
     def get_levels(self):
         r""" Get the minimum and maximum levels of the current image display. """
         return self.histogram.item.getLevels()
 
-    def set_levels(self, min_value=None, max_value=None):
+    def set_levels(self, min_value=None, max_value=None, levels=None, percentiles=None, colormap=None):
         r""" Set the minimum and maximum levels, same as sliding the yellow sliders on the histogram tool. """
         self.debug(get_caller(), 1)
-        dat = None
-        if min_value is None:
-            dat = detector.concat_pad_data(self.get_pad_display_data()['pad_data'])
-            min_value = dat.min()
-        if max_value is None:
-            if dat is None:
-                dat = detector.concat_pad_data(self.get_pad_display_data()['pad_data'])
-            max_value = dat.max()
-        self.histogram.item.setLevels(min_value, max_value)
+        if levels is not None:
+            min_value = levels[0]
+            max_value = levels[1]
+        if (min_value is None) or (max_value is None):
+            self.set_levels_by_percentiles(percents=percentiles)
+        else:
+            self.histogram.item.setLevels(min_value, max_value)
+        if colormap is not None:
+            self.set_preset_colormap(colormap)
 
     def get_view_bounding_rect(self):
         r""" Bounding rectangle of everything presently visible, in view (i.e real-space, 1-meter plane) coordinates."""
@@ -1891,6 +1921,12 @@ class PADView2(object):
     def mask_hovering_roi_toggle(self):
         self.mask_hovering_roi(toggle=True)
 
+    def clear_masks(self):
+        if self.mask_data is not None:
+            for m in range(self.n_pads):
+                self.mask_data[m] = self.mask_data[m]*0 + 1
+        self.update_masks(self.mask_data)
+
     def get_pad_display_data(self):
         # The logic of what actually gets displayed should go here.  For now, we display processed data if it is
         # available, else we display raw data, else we display zeros based on the pad geometry.  If none of these
@@ -1910,6 +1946,28 @@ class PADView2(object):
             self.debug('No raw data found - setting display data arrays to zeros')
             return [pad.zeros() for pad in self.pad_geometry]
         return None
+
+    def set_pad_display_data(self, data, auto_levels=False, update_display=True, levels=None, percentiles=None, colormap=None):
+        if type(data) == dict:
+            if 'pad_data' in dict.keys():
+                self.processed_data = data
+        elif type(data) == list:
+            if self.processed_data is None:
+                self.processed_data = {}
+            self.processed_data['pad_data'] = data
+        elif type(data) == np.ndarray:
+            data = detector.split_pad_data(self.pad_geometry, data)
+            if self.processed_data is None:
+                self.processed_data = {}
+            self.processed_data['pad_data'] = data
+        else:
+            raise TypeError('Allowed types are dict, ndarray, list')
+        if update_display:
+            self.update_pads()
+        if auto_levels:
+            self.set_levels_by_percentiles(percents=(2, 98))
+        if (levels is not None) or (percentiles is not None):
+            self.set_levels(levels=levels, percentiles=percentiles, colormap=colormap)
 
     def setup_pads(self):
         self.debug(get_caller(), 1)
@@ -1945,13 +2003,12 @@ class PADView2(object):
             self.toggle_pad_labels()
             self.toggle_pad_labels()
 
-
     def update_pads(self):
         self.debug(get_caller(), 1)
         if self.images is None:
             self.setup_pads()
         processed_data = self.get_pad_display_data()
-        mx = np.ravel(processed_data).max()
+        mx = detector.concat_pad_data(processed_data).max()
         for i in range(0, self.n_pads):
             d = processed_data[i]
             if self.show_true_fast_scans:  # For testing - show fast scan axis
@@ -1961,6 +2018,18 @@ class PADView2(object):
                 d = np.log10(d)
             self.images[i].setImage(d)
         self.histogram.regionChanged()
+
+    def save_pad_geometry(self):
+        r""" Save list of pad geometry specifications in json format. """
+        self.debug(get_caller(), 1)
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save PAD Geometry", "geometry",
+                                                          "reborn PAD Geometry File (*.json);;",
+                                                                 options=options)
+        if file_name == "":
+            return
+        self.debug('Saving PAD geometry to file: %s' % file_name)
+        reborn.detector.save_pad_geometry_list(file_name, self.pad_geometry)
 
     def vector_to_view_coords(self, vec):
         r""" If you have a vector (or vectors) pointing in some direction in space, this function will tell you the 2D
@@ -2196,6 +2265,18 @@ class PADView2(object):
         self.update_status_string(frame_number=self.frame_getter.current_frame, n_frames=self.frame_getter.n_frames)
         self._mouse_moved(self.evt)
 
+    def add_plot_item(self, *args, **kargs):
+        r"""
+        Example: self.add_plot_item(x, y, pen=pg.mkPen(width=3, color='g'))
+        """
+        self.debug(get_caller(), 1)
+        if self.plot_items is None:
+            self.plot_items = []
+        plot_item = pg.PlotDataItem(*args, **kargs)
+        self.plot_items.append(plot_item)
+        self.viewbox.addItem(plot_item)
+        return plot_item
+
     def add_scatter_plot(self, *args, **kargs):
         self.debug(get_caller(), 1)
         if self.scatter_plots is None:
@@ -2303,7 +2384,7 @@ class PADView2(object):
         r""" Scatter plot points given coordinates (i.e. indices) corresponding to a particular panel.  This will
         take care of the re-mapping to the display coordinates."""
         if style is None: style = self.peak_style
-        vecs = self.pad_geometry[panel_number].indices_to_vectors(ss_coords, fs_coords)  # FIXME: Why the +1 ???
+        vecs = self.pad_geometry[panel_number].indices_to_vectors(ss_coords, fs_coords)
         vecs = self.vector_coords_to_2d_display_coords(vecs)
         self.add_scatter_plot(vecs[:, 0], vecs[:, 1], **style)
 
@@ -2406,43 +2487,18 @@ class PADView2(object):
         for i in range(self.n_pads):
             self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(a, b, c), snr_threshold=t))
 
-    def choose_plugins(self):
-        self.debug(get_caller(), 1)
-        init = ''
-        init += "subtract_median_fs\n"
-        init += "#subtract_median_ss\n"
-        init += "#subtract_median_radial\n"
-        text = self.get_text(text=init)
-        a = text.strip().split("\n")
-        plugins = []
-        for b in a:
-            if len(b) == 0:
-                continue
-            if b[0] != '#':  # Ignore commented lines
-                c = b.split('#')[0]
-                if c != '':
-                    plugins.append(c)
-        if len(plugins) > 0:
-            self.run_plugins(plugins)
-
     def _import_plugin_module(self, module_name):
         self.debug(get_caller(), 1)
-        try:
+        if module_name in self.plugins:
             return self.plugins[module_name]  # Check if module already imported and cached
-        except:
-            pass
-        try:
-            module_path = __package__+'.plugins.'+module_name
-            if module_path[-3:] == '.py':
-                module_path = module_path[:-3]
-            self.debug('\timporting plugin: %s' % module_path)
-            module = importlib.import_module(module_path)  # Attempt to import
-            if self.plugins is None: self.plugins = {}
-            self.plugins[module_name] = module  # Cache the module
-            return module
-        except:
-            self.debug('\tplugin cannot be imported')
-            return None
+        module_path = __package__+'.plugins.'+module_name
+        if module_path[-3:] == '.py':
+            module_path = module_path[:-3]
+        self.debug('\tImporting plugin: %s' % module_path)
+        module = importlib.import_module(module_path)  # Attempt to import
+        if self.plugins is None: self.plugins = {}
+        self.plugins[module_name] = module  # Cache the module
+        return module
 
     def run_plugin(self, module_name):
         self.debug(get_caller(), 1)
@@ -2451,7 +2507,7 @@ class PADView2(object):
         if not module_name in self.plugins.keys():
             module = self._import_plugin_module(module_name)  # Get the module (import or retrieve from cache)
         else:
-            module = self.plugins(module_name)
+            module = self.plugins[module_name]
         if hasattr(module, 'plugin'):  # If the module has a plugin function, run the function and return
             module.plugin(self)
             return
@@ -2699,9 +2755,10 @@ if __name__ == '__main__':
     from reborn import detector, source
     from reborn.viewers.qtviews.padviews import PADView2
     np.random.seed(10)
-    theta1 = 0.1
-    theta2 = 0.2
-    Tscl = 0.2
+    beam_vec = [0, 0, 1] #reborn.utils.vec_norm(np.array([0, 0.1, 0.9]))
+    theta1 = 0.0
+    theta2 = 0.0
+    Tscl = 0.0
     dist = 0.1
     pix = 1e-3
     shape = (200, 200)
@@ -2723,8 +2780,7 @@ if __name__ == '__main__':
         p.fs_vec = np.dot(p.fs_vec, R.T)
         p.t_vec = np.dot(p.t_vec, R.T)
         p.t_vec += T
-    beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3,
-                       beam_vec=reborn.utils.vec_norm(np.array([0, 0.1, 0.9])))
+    beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3, beam_vec=beam_vec)
     def make_images():
         dat = solutions.get_pad_solution_intensity(pads, beam, thickness=10e-6, liquid='water')
         for d in dat:
@@ -2736,21 +2792,20 @@ if __name__ == '__main__':
             # d.flat[0:10] = 0
         return dat
     dat = make_images()
-    for p in pads:
-        p.t_vec[0] += 0.2
+    # for p in pads:
+    #     p.t_vec[0] += 0.2
     mask = [np.ones(p.shape()) for p in pads]
-    for i in range(len(mask)):
-        mask[i][dat[i] < 40000] = 0
+    # for i in range(len(mask)):
+    #     mask[i][dat[i] < 40000] = 0
     [print(p) for p in pads]
     pv = PADView2(raw_data=dat, pad_geometry=pads, mask_data=mask, debug_level=2)
-    pv.run_plugin('fit_ellipse')
+    pv.show_coordinate_axes()
+    # pv.run_plugin('snr_filter')
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
     # pv.show_fast_scan_directions()
-    pv.show_coordinate_axes()
     pv.set_title('testing')
     # pv.toggle_grid()
     pv.start()
     # lw = LevelsWidget(pv)
     # lw.show()
     # app.exec_()
-

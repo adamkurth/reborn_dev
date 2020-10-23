@@ -5,17 +5,15 @@ if [[ ! $(basename "$(pwd)") = 'developer' ]]; then
     exit 1
 fi
 
-
-pip uninstall reborn
-bash cleanup_everything.sh
-bash pip_install.sh
-echo '============= importing reborn.fortran ============='
-python -c 'import reborn.fortran'
-echo '============= done ================================='
-echo '============= importing reborn.fortran ============='
-python -c 'import reborn.fortran'
-echo '============= done ================================='
-pip uninstall reborn
+#bash cleanup_everything.sh
+#bash pip_install.sh
+#echo '============= importing reborn.fortran ============='
+#python -c 'import reborn.fortran'
+#echo '============= done ================================='
+#echo '============= importing reborn.fortran ============='
+#python -c 'import reborn.fortran'
+#echo '============= done ================================='
+#pip uninstall reborn
 
 bash cleanup_everything.sh
 bash compile_fortran.sh
@@ -24,7 +22,7 @@ echo '============= importing reborn.fortran ============='
 python -c 'import reborn.fortran'
 echo '============= done ================================='
 echo '============= importing reborn.fortran ============='
-python -c 'import reborn.fortran'
+python -c 'import reborn.fortran; reborn.fortran.omp_test_f.omp_test()'
 echo '============= done ================================='
 cd developer
 
@@ -35,7 +33,7 @@ echo '============= importing reborn.fortran ============='
 python -c 'import reborn.fortran'
 echo '============= done ================================='
 echo '============= importing reborn.fortran ============='
-python -c 'import reborn.fortran'
+python -c 'import reborn.fortran; reborn.fortran.omp_test_f.omp_test()'
 echo '============= done ================================='
 cd developer
 bash cleanup_everything.sh
