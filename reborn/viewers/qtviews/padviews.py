@@ -1423,6 +1423,7 @@ class PADView2(object):
         add_menu(geom_menu, 'Show scan directions', connect=self.toggle_fast_scan_directions)
         add_menu(geom_menu, 'Edit ring radii...', connect=self.edit_ring_radii)
         add_menu(geom_menu, 'Save PAD geometry...', connect=self.save_pad_geometry)
+        add_menu(geom_menu, 'Load PAD geometry...', connect=self.load_pad_geometry)
         mask_menu = self.menubar.addMenu('Mask')
         add_menu(mask_menu, 'Clear masks', connect=self.clear_masks)
         add_menu(mask_menu, 'Toggle masks visible', connect=self.toggle_masks)
@@ -1434,9 +1435,9 @@ class PADView2(object):
         add_menu(mask_menu, 'Add circle ROI', connect=self.add_circle_roi)
         add_menu(mask_menu, 'Save mask...', connect=self.save_masks)
         add_menu(mask_menu, 'Load mask...', connect=self.load_masks)
-        analysis_menu = self.menubar.addMenu('Analysis')
-        add_menu(analysis_menu, 'Toggle peak finding', connect=self.toggle_peak_finding)
-        add_menu(analysis_menu, 'Toggle peaks visible', connect=self.toggle_peaks_visible)
+        # analysis_menu = self.menubar.addMenu('Analysis')
+        # add_menu(analysis_menu, 'Toggle peak finding', connect=self.toggle_peak_finding)
+        # add_menu(analysis_menu, 'Toggle peaks visible', connect=self.toggle_peaks_visible)
         plugin_menu = self.menubar.addMenu('Plugins')
         import functools
         for plg in glob.glob(os.path.join(plugin_path, '*.py')):
@@ -2030,6 +2031,19 @@ class PADView2(object):
             return
         self.debug('Saving PAD geometry to file: %s' % file_name)
         reborn.detector.save_pad_geometry_list(file_name, self.pad_geometry)
+
+    def load_pad_geometry(self):
+        r""" Load list of pad geometry specifications in json format. """
+        self.debug(get_caller(), 1)
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load PAD Geometry", "geometry",
+                                                          "reborn PAD Geometry File (*.json);;",
+                                                                 options=options)
+        if file_name == "":
+            return
+        self.debug('Loading PAD geometry to file: %s' % file_name)
+        pads = reborn.detector.load_pad_geometry_list(file_name)
+        self.update_pad_geometry(pads)
 
     def vector_to_view_coords(self, vec):
         r""" If you have a vector (or vectors) pointing in some direction in space, this function will tell you the 2D
