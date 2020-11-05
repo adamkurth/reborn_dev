@@ -65,6 +65,7 @@ class Widget(QtGui.QWidget):
                 y = y[w]
                 data_diff[i].flat[w] -= data[j][x.astype(int), y.astype(int)]
                 mask_diff[i].flat[w] += np.abs(data[j][x.astype(int), y.astype(int)])
+            mask_diff[i] *= mask[i]
         for i in range(self.n_pads):
             m = mask_diff[i]
             m[m > 0] = 1
@@ -148,7 +149,7 @@ class Widget(QtGui.QWidget):
         for i in range(0, self.n_pads):
             self._apply_pad_transform(self.images[i], self.pad_geometry[i])
         m = np.max(concat(self.get_pad_display_data()))
-        self.set_levels(levels=(-m, m))
+        # self.set_levels(levels=(-m, m))
 
 
 class WidgetOld(QtGui.QWidget):

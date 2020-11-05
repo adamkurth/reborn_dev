@@ -2782,7 +2782,7 @@ if __name__ == '__main__':
     beam_vec = [0, 0, 1] #reborn.utils.vec_norm(np.array([0, 0.1, 0.9]))
     theta1 = 0.0
     theta2 = 0.0
-    Tscl = 0.0
+    Tscl = 1.0
     dist = 0.1
     pix = 1e-3
     shape = (200, 200)
@@ -2821,6 +2821,8 @@ if __name__ == '__main__':
     # for p in pads:
     #     p.t_vec[0] += pix
     mask = [np.ones(p.shape()) for p in pads]
+    for m in mask:
+        m[0:20, 0:20] = 0
     # for i in range(len(mask)):
     #     mask[i][dat[i] < 40000] = 0
     [print(p) for p in pads]
