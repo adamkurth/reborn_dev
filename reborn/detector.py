@@ -584,16 +584,16 @@ def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0
 
     pads = []
 
-    tilefs_sep = pad_shape[1] + pad_gap / pixel_size / 2
+    tilefs_sep = pad_shape[1] + pad_gap / pixel_size
     tilefs_pos = (np.arange(tiling_shape[1]) - (tiling_shape[1] - 1) / 2) * tilefs_sep
-    tiless_sep = pad_shape[0] + pad_gap / pixel_size / 2
+    tiless_sep = pad_shape[0] + pad_gap / pixel_size
     tiless_pos = (np.arange(tiling_shape[0]) - (tiling_shape[0] - 1) / 2) * tiless_sep
-
     for fs_cent in tilefs_pos:  # fast scan
         for ss_cent in tiless_pos:  # slow scan
             pad = PADGeometry(shape=pad_shape, pixel_size=pixel_size, distance=distance)
-            pad.t_vec += pad.fs_vec * fs_cent - 0.5 * pixel_size
-            pad.t_vec += pad.ss_vec * ss_cent - 0.5 * pixel_size
+            pad.t_vec += pad.fs_vec * fs_cent
+            pad.t_vec += pad.ss_vec * ss_cent
+            # pad.t_vec[0:2] += 0.5 * pixel_size
             pads.append(pad)
 
     return pads
@@ -665,6 +665,31 @@ def edge_mask(data, n_edge):
     mask[:, (n_fs - n_edge):n_fs] = 0
 
     return mask
+
+
+# class PADData(list):
+#     r"""
+#     A class for dealing with lists of PAD data.  Contains information about geometry.
+#     """
+#     _beam = None
+#     _pad_data = None
+#     _pad_geometry = None
+#     _masks = None
+#     def __init__(self, pad_data, pad_geometry, beam, masks=None):
+#         self._pad_geometry = utils.ensure_list(pad_geometry)
+#         if type(pad_data) == np.ndarray:
+#             self._pad_data = split_pad_data(self._pad_geometry, pad_data)
+#         else:
+#             self._pad_data = utils.ensure_list(pad_data)
+#         for d in self._pad_data:
+#             self.append(d)
+#         if masks is None:
+#             mask = [p.ones() for p in self.pad_geometry]
+#
+#     def correct_polarization(self):
+#         if not self._polarization_corrected:
+#
+#         self._polarization_corrected = True
 
 
 class PADAssembler():
