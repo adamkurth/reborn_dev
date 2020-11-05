@@ -2814,12 +2814,12 @@ if __name__ == '__main__':
             x, y = np.indices(d.shape)
             xo = np.random.rand() * nx
             yo = np.random.rand() * ny
-            d += 100 * np.exp((-(x - xo) ** 2 - (y - yo) ** 2)/3)
+            d += 100 * np.exp((-(x - xo) ** 2 - (y - yo) ** 2)/3) + np.random.random(d.shape)
             # d.flat[0:10] = 0
         return dat
     dat = make_images()
-    for p in pads:
-        p.t_vec[0] += pix
+    # for p in pads:
+    #     p.t_vec[0] += pix
     mask = [np.ones(p.shape()) for p in pads]
     # for i in range(len(mask)):
     #     mask[i][dat[i] < 40000] = 0
@@ -2828,6 +2828,7 @@ if __name__ == '__main__':
     pv.show_coordinate_axes()
     pv.set_levels(0, 30000)
     pv.run_plugin('central_symmetry')
+    pv.run_plugin('shift_detector')
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
     # pv.show_fast_scan_directions()
     pv.set_title('testing')

@@ -255,7 +255,7 @@ class PADGeometry():
                                   values will be set to nan.
 
         Returns:
-            slow-scan indices, fast-scan indices.  The values will be nan if out of range.
+            slow-scan indices, fast-scan indices.
         """
         vecs = np.atleast_2d(vecs)
         fxs = np.dot(vecs, np.cross(self.ss_vec, self.fs_vec))
@@ -298,6 +298,15 @@ class PADGeometry():
 
         return utils.vec_norm(np.cross(self.fs_vec, self.ss_vec))
 
+    def s_vecs(self):
+        r"""
+        Outgoing unit-vectors (length 1) pointing from sample to pixel.
+
+        Returns: |ndarray|
+        """
+
+        return utils.vec_norm(self.position_vecs())
+
     def ds_vecs(self, beam_vec=None, beam=None):
         r"""
         Scattering vectors :math:`\hat{s} - \hat{s}_0` where :math:`\hat{s}_0` is the incident beam direction
@@ -315,7 +324,7 @@ class PADGeometry():
         if beam is not None:
             beam_vec = beam.beam_vec
 
-        return utils.vec_norm(self.position_vecs()) - beam_vec
+        return self.s_vecs() - beam_vec
 
     def q_vecs(self, beam_vec=None, wavelength=None, beam=None):
         r"""
