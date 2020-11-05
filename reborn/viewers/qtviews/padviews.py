@@ -2784,9 +2784,9 @@ if __name__ == '__main__':
     theta2 = 0.0
     Tscl = 1.0
     dist = 0.1
-    pix = 1e-3
-    shape = (200, 200)
-    tiles = (2, 2)
+    pix = 1e-3/7
+    shape = (4000, 4000)
+    tiles = (1, 1)
     gap = pix
     #pads = [reborn.detector.PADGeometry(pixel_size=1e-3, distance=1, shape=(100, 100))]
     #pads[0].t_vec[0:2] = 0
