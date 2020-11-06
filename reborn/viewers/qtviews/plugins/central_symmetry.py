@@ -3,8 +3,8 @@ from pyqtgraph import QtGui, QtCore
 from reborn.external.pyqtgraph import MultiHistogramLUTWidget
 import pyqtgraph as pg
 import reborn
-import tracemalloc
-tracemalloc.start(10)
+# import tracemalloc
+# tracemalloc.start(10)
 
 concat = reborn.detector.concat_pad_data
 
@@ -18,6 +18,7 @@ class Plugin():
         self.widget.set_levels(levels=(-m, m))
         print('showing widget')
         self.widget.show()
+
 
 class Widget(QtGui.QWidget):
     data_diff = None
@@ -52,32 +53,8 @@ class Widget(QtGui.QWidget):
         r""" We subtract the Friedel mate from the current display data in padview. """
         if self.data_diff is not None:
             return self.data_diff
-        data = self.padview.get_pad_display_data()
-        mask = self.padview.mask_data
-        for i in range(self.n_pads):
-            data[i] = (data[i].copy()*mask[i]).astype(np.float32)
-        pads = self.pad_geometry
-        data_diff = [d.copy() for d in data]
-        mask_diff = [p.zeros().astype(np.float32) for p in pads]
-        for i in range(self.n_pads):
-            vecs = pads[i].position_vecs()
-            for j in range(self.n_pads):
-                v = vecs.copy().astype(np.float32)
-                v[:, 0:2] *= -1  # Invert vectors
-                del vecs
-                x, y = pads[j].vectors_to_indices(v, insist_in_pad=True, round=True)
-                del v
-                w = np.where(np.isfinite(x))
-                x = x[w]
-                y = y[w]
-                data_diff[i].flat[w] -= data[j][x.astype(int), y.astype(int)]
-                mask_diff[i].flat[w] += np.abs(data[j][x.astype(int), y.astype(int)])
-            mask_diff[i] *= mask[i]
-        for i in range(self.n_pads):
-            m = mask_diff[i]
-            m[m > 0] = 1
-            data_diff[i] *= m
-        return data_diff
+        pv = self.padview
+        return reborn.detector.subtract_pad_friedel_mate(pv.get_pad_display_data(), pv.mask_data, pv.pad_geometry)
 
     def setup_pads(self):
         # self.debug(get_caller(), 1)
@@ -153,15 +130,15 @@ class Widget(QtGui.QWidget):
     @QtCore.pyqtSlot()
     def update_pad_geometry(self):
         self.data_diff = None
-        time1 = tracemalloc.take_snapshot()
+        # time1 = tracemalloc.take_snapshot()
         self.update_pads()
         for i in range(0, self.n_pads):
             self._apply_pad_transform(self.images[i], self.pad_geometry[i])
         m = np.percentile(np.abs(concat(self.get_pad_display_data())), 95)
-        time2 = tracemalloc.take_snapshot()
-        stats = time2.compare_to(time1, 'lineno')
-        for stat in stats[:3]:
-            print(stat)
+        # time2 = tracemalloc.take_snapshot()
+        # stats = time2.compare_to(time1, 'lineno')
+        # for stat in stats[:3]:
+        #     print(stat)
         self.set_levels(levels=(-m, m))
 
 

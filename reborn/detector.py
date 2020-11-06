@@ -676,6 +676,36 @@ def edge_mask(data, n_edge):
     return mask
 
 
+def subtract_pad_friedel_mate(data, mask, pads):
+    r""" Subtract the intensities related by Fridel symmetry"""
+    data = utils.ensure_list(data)
+    mask = utils.ensure_list(mask)
+    pads = utils.ensure_list(pads)
+    n_pads = len(pads)
+    for i in range(n_pads):
+        data[i] = (data[i].copy() * mask[i]).astype(np.float32)
+    data_diff = [d.copy() for d in data]
+    mask_diff = [p.zeros().astype(np.float32) for p in pads]
+    for i in range(n_pads):
+        vecs = pads[i].position_vecs()
+        for j in range(n_pads):
+            v = vecs.copy().astype(np.float32)
+            v[:, 0:2] *= -1  # Invert vectors
+            del vecs
+            x, y = pads[j].vectors_to_indices(v, insist_in_pad=True, round=True)
+            del v
+            w = np.where(np.isfinite(x))
+            x = x[w]
+            y = y[w]
+            data_diff[i].flat[w] -= data[j][x.astype(int), y.astype(int)]
+            mask_diff[i].flat[w] += np.abs(data[j][x.astype(int), y.astype(int)])
+        mask_diff[i] *= mask[i]
+    for i in range(n_pads):
+        m = mask_diff[i]
+        m[m > 0] = 1
+        data_diff[i] *= m
+    return data_diff
+
 # class PADData(list):
 #     r"""
 #     A class for dealing with lists of PAD data.  Contains information about geometry.

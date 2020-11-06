@@ -62,6 +62,10 @@ class Widget(QtGui.QWidget):
         self.zs_button.clicked.connect(partial(self.shift_z, direction=1.0))
         self.layout.addWidget(self.zs_button, row, 4)
         self.setLayout(self.layout)
+        QtGui.QShortcut(QtGui.QKeySequence('left'), self).activated.connect(partial(self.shift_x, direction=-1.0))
+        QtGui.QShortcut(QtGui.QKeySequence('right'), self).activated.connect(partial(self.shift_x, direction=1.0))
+        QtGui.QShortcut(QtGui.QKeySequence('up'), self).activated.connect(partial(self.shift_y, direction=-1.0))
+        QtGui.QShortcut(QtGui.QKeySequence('down'), self).activated.connect(partial(self.shift_y, direction=1.0))
 
     def shift_x(self, direction=1.0):
         xs = float(self.xs_spinbox.value())*direction*1e-6
@@ -72,7 +76,7 @@ class Widget(QtGui.QWidget):
         self.padview.update_pad_geometry(pads)
 
     def shift_y(self, direction=1):
-        ys = self.ys_spinbox.value()*direction*1e-6
+        ys = float(self.ys_spinbox.value())*direction*1e-6
         xs, zs = 0, 0
         pads = self.padview.pad_geometry
         for p in pads:
@@ -80,7 +84,7 @@ class Widget(QtGui.QWidget):
         self.padview.update_pad_geometry(pads)
 
     def shift_z(self, direction=1):
-        zs = self.zs_spinbox.value()*direction*1e-6
+        zs = float(self.zs_spinbox.value())*direction*1e-6
         xs, ys = 0, 0
         pads = self.padview.pad_geometry
         for p in pads:

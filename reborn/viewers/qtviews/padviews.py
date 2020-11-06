@@ -2229,20 +2229,32 @@ class PADView2(QtCore.QObject):
     def show_next_frame(self):
         self.debug(get_caller(), 1)
         if self.frame_getter is None:
-            self.debug('no getter', 0)
+            self.debug('There is no frame getter - cannot jump to next frame.', 0)
             return
         dat = self.frame_getter.get_next_frame()
-        self.raw_data = dat
-        self.update_display_data()
+        if dat is None:
+            self.debug('Frame getter returned None.', 0)
+            return
+        if 'pad_data' in dat.keys():
+            self.raw_data = dat
+            self.update_display_data()
+        else:
+            self.debug('Could not find PAD data in frame.', 0)
 
     def show_previous_frame(self):
         self.debug(get_caller(), 1)
         if self.frame_getter is None:
-            self.debug('no getter', 0)
+            self.debug('There is no frame getter - cannot jump to previous frame.', 0)
             return
         dat = self.frame_getter.get_previous_frame()
-        self.raw_data = dat
-        self.update_display_data()
+        if dat is None:
+            self.debug('Frame getter returned None.', 0)
+            return
+        if 'pad_data' in dat.keys():
+            self.raw_data = dat
+            self.update_display_data()
+        else:
+            self.debug('Could not find PAD data in frame.', 0)
 
     def show_random_frame(self):
         self.debug(get_caller(), 1)
