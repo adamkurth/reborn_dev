@@ -20,6 +20,7 @@ class Plugin():
         self.widget.show()
 
 class Widget(QtGui.QWidget):
+    data_diff = None
     def __init__(self, padview):
         super().__init__()
         self.padview = padview
@@ -49,6 +50,8 @@ class Widget(QtGui.QWidget):
 
     def get_pad_display_data(self):
         r""" We subtract the Friedel mate from the current display data in padview. """
+        if self.data_diff is not None:
+            return self.data_diff
         data = self.padview.get_pad_display_data()
         mask = self.padview.mask_data
         for i in range(self.n_pads):
@@ -149,6 +152,7 @@ class Widget(QtGui.QWidget):
 
     @QtCore.pyqtSlot()
     def update_pad_geometry(self):
+        self.data_diff = None
         time1 = tracemalloc.take_snapshot()
         self.update_pads()
         for i in range(0, self.n_pads):
@@ -158,8 +162,7 @@ class Widget(QtGui.QWidget):
         stats = time2.compare_to(time1, 'lineno')
         for stat in stats[:3]:
             print(stat)
-
-        # self.set_levels(levels=(-m, m))
+        self.set_levels(levels=(-m, m))
 
 
 # class WidgetOld(QtGui.QWidget):

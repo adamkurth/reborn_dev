@@ -2785,7 +2785,7 @@ if __name__ == '__main__':
     Tscl = 1.0
     dist = 0.1
     pix = 1e-3/7
-    shape = (4000, 4000)
+    shape = (2000, 2000)
     tiles = (1, 1)
     gap = pix
     #pads = [reborn.detector.PADGeometry(pixel_size=1e-3, distance=1, shape=(100, 100))]
