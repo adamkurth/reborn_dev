@@ -157,7 +157,7 @@ class Widget(QtGui.QWidget):
         self.update_pads()
         for i in range(0, self.n_pads):
             self._apply_pad_transform(self.images[i], self.pad_geometry[i])
-        m = np.max(concat(self.get_pad_display_data()))
+        m = np.percentile(np.abs(concat(self.get_pad_display_data())), 95)
         time2 = tracemalloc.take_snapshot()
         stats = time2.compare_to(time1, 'lineno')
         for stat in stats[:3]:
