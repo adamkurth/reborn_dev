@@ -927,7 +927,7 @@ class CrystalDensityMap(object):
             raise ValueError('The "gaussian" mode does not implement periodic boundaries properly...')  # FIXME
             sigma = fixed_atom_sigma  # Gaussian sigma (i.e. atom "size"); this is a fudge factor and needs to be
             # updated n_atoms = atom_x_vecs.shape[0]
-            orth_mat = self.cryst.unitcell.o_mat.copy()
+            orth_mat = self.crystal_structure.unitcell.o_mat.copy()
             map_x_vecs = self.x_vecs
             n_map_voxels = map_x_vecs.shape[0]
             f_map = np.zeros([n_map_voxels], dtype=np.complex)

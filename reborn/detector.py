@@ -255,7 +255,7 @@ class PADGeometry():
                                   values will be set to nan.
 
         Returns:
-            slow-scan indices, fast-scan indices.  The values will be nan if out of range.
+            slow-scan indices, fast-scan indices.
         """
         vecs = np.atleast_2d(vecs)
         fxs = np.dot(vecs, np.cross(self.ss_vec, self.fs_vec))
@@ -298,6 +298,15 @@ class PADGeometry():
 
         return utils.vec_norm(np.cross(self.fs_vec, self.ss_vec))
 
+    def s_vecs(self):
+        r"""
+        Outgoing unit-vectors (length 1) pointing from sample to pixel.
+
+        Returns: |ndarray|
+        """
+
+        return utils.vec_norm(self.position_vecs())
+
     def ds_vecs(self, beam_vec=None, beam=None):
         r"""
         Scattering vectors :math:`\hat{s} - \hat{s}_0` where :math:`\hat{s}_0` is the incident beam direction
@@ -315,7 +324,7 @@ class PADGeometry():
         if beam is not None:
             beam_vec = beam.beam_vec
 
-        return utils.vec_norm(self.position_vecs()) - beam_vec
+        return self.s_vecs() - beam_vec
 
     def q_vecs(self, beam_vec=None, wavelength=None, beam=None):
         r"""
@@ -584,16 +593,16 @@ def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0
 
     pads = []
 
-    tilefs_sep = pad_shape[1] + pad_gap / pixel_size / 2
+    tilefs_sep = pad_shape[1] + pad_gap / pixel_size
     tilefs_pos = (np.arange(tiling_shape[1]) - (tiling_shape[1] - 1) / 2) * tilefs_sep
-    tiless_sep = pad_shape[0] + pad_gap / pixel_size / 2
+    tiless_sep = pad_shape[0] + pad_gap / pixel_size
     tiless_pos = (np.arange(tiling_shape[0]) - (tiling_shape[0] - 1) / 2) * tiless_sep
-
     for fs_cent in tilefs_pos:  # fast scan
         for ss_cent in tiless_pos:  # slow scan
             pad = PADGeometry(shape=pad_shape, pixel_size=pixel_size, distance=distance)
-            pad.t_vec += pad.fs_vec * fs_cent - 0.5 * pixel_size
-            pad.t_vec += pad.ss_vec * ss_cent - 0.5 * pixel_size
+            pad.t_vec += pad.fs_vec * fs_cent
+            pad.t_vec += pad.ss_vec * ss_cent
+            # pad.t_vec[0:2] += 0.5 * pixel_size
             pads.append(pad)
 
     return pads
@@ -665,6 +674,61 @@ def edge_mask(data, n_edge):
     mask[:, (n_fs - n_edge):n_fs] = 0
 
     return mask
+
+
+def subtract_pad_friedel_mate(data, mask, pads):
+    r""" Subtract the intensities related by Fridel symmetry"""
+    data = utils.ensure_list(data)
+    mask = utils.ensure_list(mask)
+    pads = utils.ensure_list(pads)
+    n_pads = len(pads)
+    for i in range(n_pads):
+        data[i] = (data[i].copy() * mask[i]).astype(np.float32)
+    data_diff = [d.copy() for d in data]
+    mask_diff = [p.zeros().astype(np.float32) for p in pads]
+    for i in range(n_pads):
+        vecs = pads[i].position_vecs()
+        for j in range(n_pads):
+            v = vecs.copy().astype(np.float32)
+            v[:, 0:2] *= -1  # Invert vectors
+            del vecs
+            x, y = pads[j].vectors_to_indices(v, insist_in_pad=True, round=True)
+            del v
+            w = np.where(np.isfinite(x))
+            x = x[w]
+            y = y[w]
+            data_diff[i].flat[w] -= data[j][x.astype(int), y.astype(int)]
+            mask_diff[i].flat[w] += np.abs(data[j][x.astype(int), y.astype(int)])
+        mask_diff[i] *= mask[i]
+    for i in range(n_pads):
+        m = mask_diff[i]
+        m[m > 0] = 1
+        data_diff[i] *= m
+    return data_diff
+
+# class PADData(list):
+#     r"""
+#     A class for dealing with lists of PAD data.  Contains information about geometry.
+#     """
+#     _beam = None
+#     _pad_data = None
+#     _pad_geometry = None
+#     _masks = None
+#     def __init__(self, pad_data, pad_geometry, beam, masks=None):
+#         self._pad_geometry = utils.ensure_list(pad_geometry)
+#         if type(pad_data) == np.ndarray:
+#             self._pad_data = split_pad_data(self._pad_geometry, pad_data)
+#         else:
+#             self._pad_data = utils.ensure_list(pad_data)
+#         for d in self._pad_data:
+#             self.append(d)
+#         if masks is None:
+#             mask = [p.ones() for p in self.pad_geometry]
+#
+#     def correct_polarization(self):
+#         if not self._polarization_corrected:
+#
+#         self._polarization_corrected = True
 
 
 class PADAssembler():

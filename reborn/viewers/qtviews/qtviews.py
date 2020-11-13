@@ -308,7 +308,7 @@ class Scatter3D(object):
 def view_finite_crystal(finite_crystal):
 
     lattices = finite_crystal.lattices
-    cryst = finite_crystal.cryst
+    cryst = finite_crystal.crystal_structure
     scat = Scatter3D()
     for k in range(cryst.spacegroup.n_molecules):
         x = lattices[k].occupied_x_coordinates

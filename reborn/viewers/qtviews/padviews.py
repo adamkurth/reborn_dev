@@ -19,6 +19,12 @@ from pyqtgraph import ImageItem
 from reborn.viewers.qtviews import misc
 # from reborn.external.pyqtgraph import ImageItem
 
+# Add some pre-defined colormaps (called "gradients" in pyqtgraph)
+g = pg.graphicsItems.GradientEditorItem.Gradients
+g['bipolar2'] = {'ticks': [(0.0, (255, 0, 0, 255)), (0.5, (0, 0, 0, 255)), (1.0, (0, 255, 255, 255))], 'mode': 'rgb'}
+pg.graphicsItems.GradientEditorItem.Gradients = g
+
+
 padviewui = pkg_resources.resource_filename('reborn.viewers.qtviews', 'ui/padview.ui')
 snrconfigui = pkg_resources.resource_filename('reborn.viewers.qtviews', 'ui/configs.ui')
 plugin_path = pkg_resources.resource_filename('reborn.viewers.qtviews', 'plugins')
@@ -1173,7 +1179,7 @@ class PADView(object):
             method(*args, **kwargs)
 
 
-class PADView2(object):
+class PADView2(QtCore.QObject):
 
     r"""
     This is supposed to be an easy way to view PAD data, particularly if you have multiple
@@ -1223,6 +1229,8 @@ class PADView2(object):
 
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
+    sig_geometry_changed = QtCore.pyqtSignal()
+
     def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None,
                  beam=None, debug_level=0):
         """
@@ -1234,6 +1242,7 @@ class PADView2(object):
             logscale (bool): Log the data before viewing (because the viewer is 8bit!).
             frame_getter (|FrameGetter| subclass): Optionally, a frame getter.
         """
+        super().__init__()
         self.debug_level = debug_level
         self.debug(get_caller(), 1)
         self.logscale = logscale
@@ -1423,6 +1432,7 @@ class PADView2(object):
         add_menu(geom_menu, 'Show scan directions', connect=self.toggle_fast_scan_directions)
         add_menu(geom_menu, 'Edit ring radii...', connect=self.edit_ring_radii)
         add_menu(geom_menu, 'Save PAD geometry...', connect=self.save_pad_geometry)
+        add_menu(geom_menu, 'Load PAD geometry...', connect=self.load_pad_geometry)
         mask_menu = self.menubar.addMenu('Mask')
         add_menu(mask_menu, 'Clear masks', connect=self.clear_masks)
         add_menu(mask_menu, 'Toggle masks visible', connect=self.toggle_masks)
@@ -1434,9 +1444,9 @@ class PADView2(object):
         add_menu(mask_menu, 'Add circle ROI', connect=self.add_circle_roi)
         add_menu(mask_menu, 'Save mask...', connect=self.save_masks)
         add_menu(mask_menu, 'Load mask...', connect=self.load_masks)
-        analysis_menu = self.menubar.addMenu('Analysis')
-        add_menu(analysis_menu, 'Toggle peak finding', connect=self.toggle_peak_finding)
-        add_menu(analysis_menu, 'Toggle peaks visible', connect=self.toggle_peaks_visible)
+        # analysis_menu = self.menubar.addMenu('Analysis')
+        # add_menu(analysis_menu, 'Toggle peak finding', connect=self.toggle_peak_finding)
+        # add_menu(analysis_menu, 'Toggle peaks visible', connect=self.toggle_peaks_visible)
         plugin_menu = self.menubar.addMenu('Plugins')
         import functools
         for plg in glob.glob(os.path.join(plugin_path, '*.py')):
@@ -2002,6 +2012,7 @@ class PADView2(object):
         if self.pad_labels is not None:
             self.toggle_pad_labels()
             self.toggle_pad_labels()
+        self.sig_geometry_changed.emit()
 
     def update_pads(self):
         self.debug(get_caller(), 1)
@@ -2030,6 +2041,19 @@ class PADView2(object):
             return
         self.debug('Saving PAD geometry to file: %s' % file_name)
         reborn.detector.save_pad_geometry_list(file_name, self.pad_geometry)
+
+    def load_pad_geometry(self):
+        r""" Load list of pad geometry specifications in json format. """
+        self.debug(get_caller(), 1)
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load PAD Geometry", "geometry",
+                                                          "reborn PAD Geometry File (*.json);;",
+                                                                 options=options)
+        if file_name == "":
+            return
+        self.debug('Loading PAD geometry to file: %s' % file_name)
+        pads = reborn.detector.load_pad_geometry_list(file_name)
+        self.update_pad_geometry(pads)
 
     def vector_to_view_coords(self, vec):
         r""" If you have a vector (or vectors) pointing in some direction in space, this function will tell you the 2D
@@ -2205,20 +2229,32 @@ class PADView2(object):
     def show_next_frame(self):
         self.debug(get_caller(), 1)
         if self.frame_getter is None:
-            self.debug('no getter', 0)
+            self.debug('There is no frame getter - cannot jump to next frame.', 0)
             return
         dat = self.frame_getter.get_next_frame()
-        self.raw_data = dat
-        self.update_display_data()
+        if dat is None:
+            self.debug('Frame getter returned None.', 0)
+            return
+        if 'pad_data' in dat.keys():
+            self.raw_data = dat
+            self.update_display_data()
+        else:
+            self.debug('Could not find PAD data in frame.', 0)
 
     def show_previous_frame(self):
         self.debug(get_caller(), 1)
         if self.frame_getter is None:
-            self.debug('no getter', 0)
+            self.debug('There is no frame getter - cannot jump to previous frame.', 0)
             return
         dat = self.frame_getter.get_previous_frame()
-        self.raw_data = dat
-        self.update_display_data()
+        if dat is None:
+            self.debug('Frame getter returned None.', 0)
+            return
+        if 'pad_data' in dat.keys():
+            self.raw_data = dat
+            self.update_display_data()
+        else:
+            self.debug('Could not find PAD data in frame.', 0)
 
     def show_random_frame(self):
         self.debug(get_caller(), 1)
@@ -2758,15 +2794,17 @@ if __name__ == '__main__':
     beam_vec = [0, 0, 1] #reborn.utils.vec_norm(np.array([0, 0.1, 0.9]))
     theta1 = 0.0
     theta2 = 0.0
-    Tscl = 0.0
+    Tscl = 1.0
     dist = 0.1
-    pix = 1e-3
-    shape = (200, 200)
-    tiles = (2, 2)
-    gap = pix*10
+    pix = 1e-3/7
+    shape = (2000, 2000)
+    tiles = (1, 1)
+    gap = pix
     #pads = [reborn.detector.PADGeometry(pixel_size=1e-3, distance=1, shape=(100, 100))]
     #pads[0].t_vec[0:2] = 0
     pads = detector.tiled_pad_geometry_list(pad_shape=shape, pixel_size=pix, distance=dist, tiling_shape=tiles, pad_gap=gap)
+    # pads = pads[0:1]
+    # pads[0].t_vec = [0, 0, pads[0].t_vec[2]]
     ct = np.cos(theta1)
     st = np.sin(theta1)
     R2 = np.array([[1, 0, 0], [0, ct, st], [0, -st, ct]])
@@ -2788,19 +2826,23 @@ if __name__ == '__main__':
             x, y = np.indices(d.shape)
             xo = np.random.rand() * nx
             yo = np.random.rand() * ny
-            d += 100 * np.exp((-(x - xo) ** 2 - (y - yo) ** 2)/3)
+            d += 100 * np.exp((-(x - xo) ** 2 - (y - yo) ** 2)/3) + np.random.random(d.shape)
             # d.flat[0:10] = 0
         return dat
     dat = make_images()
     # for p in pads:
-    #     p.t_vec[0] += 0.2
+    #     p.t_vec[0] += pix
     mask = [np.ones(p.shape()) for p in pads]
+    for m in mask:
+        m[0:20, 0:20] = 0
     # for i in range(len(mask)):
     #     mask[i][dat[i] < 40000] = 0
     [print(p) for p in pads]
     pv = PADView2(raw_data=dat, pad_geometry=pads, mask_data=mask, debug_level=2)
     pv.show_coordinate_axes()
-    # pv.run_plugin('snr_filter')
+    pv.set_levels(0, 30000)
+    pv.run_plugin('central_symmetry')
+    pv.run_plugin('shift_detector')
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
     # pv.show_fast_scan_directions()
     pv.set_title('testing')
