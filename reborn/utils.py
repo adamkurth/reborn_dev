@@ -759,4 +759,23 @@ def get_FSC(f1, f2, labels_radial, N_radials):
 
     return np.abs( (radial_F1F2) / (np.sqrt(radial_F1) * np.sqrt(radial_F2)) )
 
+def atleast_2d(x):
+    r""" Expand dimensions of numpy array.  Add dimensions to the left-most index. """
+    x = np.array(x)
+    if x.ndim < 2:
+        x = np.expand_dims(x, axis=0)
+    return x
 
+def atleast_3d(x):
+    r""" Expand dimensions of numpy array.  Add dimensions to the left-most index. """
+    x = np.array(x)
+    if x.ndim < 3:
+        x = np.expand_dims(atleast_2d(x), axis=0)
+    return x
+
+def atleast_4d(x):
+    r""" Expand dimensions of numpy array.  Add dimensions to the left-most index. """
+    x = np.array(x)
+    if x.ndim < 4:
+        x = np.expand_dims(atleast_3d(x), axis=0)
+    return x

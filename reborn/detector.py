@@ -691,7 +691,7 @@ def subtract_pad_friedel_mate(data, mask, pads):
         for j in range(n_pads):
             v = vecs.copy().astype(np.float32)
             v[:, 0:2] *= -1  # Invert vectors
-            del vecs
+            #del vecs
             x, y = pads[j].vectors_to_indices(v, insist_in_pad=True, round=True)
             del v
             w = np.where(np.isfinite(x))
