@@ -438,9 +438,11 @@ class PADView(object):
         if self.pad_labels is None:
             self.pad_labels = []
             for i in range(0, self.n_pads):
-                lab = pg.TextItem(text="%d" % i, fill=pg.mkBrush(20, 20, 20, 128), color='w', anchor=(0.5, 0.5),
-                                  border=pg.mkPen('w'))
                 g = self.pad_geometry[i]
+                if (not hasattr(g, 'name')) or (g.name is None) or (g.name == ''):
+                    g.name = "%d" % i
+                lab = pg.TextItem(text=g.name, fill=pg.mkBrush(20, 20, 20, 128), color='w', anchor=(0.5, 0.5),
+                                  border=pg.mkPen('w'))
                 fs = g.fs_vec*g.n_fs/2
                 ss = g.ss_vec*g.n_ss/2
                 t = g.t_vec + (g.fs_vec + g.ss_vec)/2
@@ -1438,6 +1440,7 @@ class PADView2(QtCore.QObject):
         mask_menu = self.menubar.addMenu('Mask')
         add_menu(mask_menu, 'Clear masks', connect=self.clear_masks)
         add_menu(mask_menu, 'Toggle masks visible', connect=self.toggle_masks)
+        add_menu(mask_menu, 'Mask PADs by name', connect=self.mask_pads_by_names)
         add_menu(mask_menu, 'Mask panel edges...', connect=self.mask_panel_edges)
         add_menu(mask_menu, 'Mask above upper limit', connect=self.mask_upper_level)
         add_menu(mask_menu, 'Mask below lower limit', connect=self.mask_lower_level)
@@ -1722,17 +1725,20 @@ class PADView2(QtCore.QObject):
 
     def show_pad_labels(self):
         self.debug(get_caller(), 1)
+        self.debug(get_caller(), 1)
         if self.pad_labels is None:
             self.pad_labels = []
             for i in range(0, self.n_pads):
-                lab = pg.TextItem(text="%d" % i, fill=pg.mkBrush(20, 20, 20, 128), color='w', anchor=(0.5, 0.5),
-                                  border=pg.mkPen('w'))
                 g = self.pad_geometry[i]
+                if (not hasattr(g, 'name')) or (g.name is None) or (g.name == ''):
+                    g.name = "%d" % i
+                lab = pg.TextItem(text=g.name, fill=pg.mkBrush(20, 20, 20, 128), color='w', anchor=(0.5, 0.5),
+                                  border=pg.mkPen('w'))
                 fs = g.fs_vec*g.n_fs/2
                 ss = g.ss_vec*g.n_ss/2
                 t = g.t_vec + (g.fs_vec + g.ss_vec)/2
-                x = (fs[0] + ss[0] + t[0])
-                y = (fs[1] + ss[1] + t[1])
+                # x = (fs[0] + ss[0] + t[0])
+                # y = (fs[1] + ss[1] + t[1])
                 vec = self.pad_geometry[i].center_pos_vec()
                 vec = self.vector_to_view_coords(vec)
                 lab.setPos(vec[0], vec[1])
@@ -1900,6 +1906,27 @@ class PADView2(QtCore.QObject):
             self.mask_data = reborn.detector.load_pad_masks(file_name)
         self.update_masks(self.mask_data)
         write('Loaded mask: ' + file_name)
+
+    def mask_pads_by_names(self):
+        self.debug(get_caller(), 1)
+        clear_labels = False
+        if self.pad_labels is None:
+            self.show_pad_labels()
+            clear_labels = True
+        text, ok = QtGui.QInputDialog.getText(self.main_window, "Enter PAD names (comma separated)", "PAD names",
+                                              QtGui.QLineEdit.Normal, "")
+        if clear_labels:
+            self.hide_pad_labels()
+        if ok:
+            if text == '':
+                return
+            names = text.split(',')
+            print(names)
+            for i in range(self.n_pads):
+                print(self.pad_geometry[i].name)
+                if self.pad_geometry[i].name in names:
+                    self.mask_data[i] *= 0
+            self.update_masks(self.mask_data)
 
     def mask_hovering_roi(self, setval=0, toggle=False, mask_outside=False):
         r""" Mask the ROI region that the mouse cursor is hovering over. """

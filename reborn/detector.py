@@ -45,6 +45,7 @@ class PADGeometry():
         self._fs_vec = None
         self._ss_vec = None
         self._t_vec = None
+        self.name = None
 
         if distance is not None and pixel_size is not None:
 
