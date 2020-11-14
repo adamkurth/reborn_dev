@@ -1191,6 +1191,7 @@ class PADView2(QtCore.QObject):
 
     # Note that most of the interface was created using the QT Designer tool.  There are many attributes that are
     # not visible here.
+    _q_mags = None
     dataframe = None
     debug_level = None  # Levels are 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
     logscale = False
@@ -1423,7 +1424,8 @@ class PADView2(QtCore.QObject):
             append_to.addAction(action)
             return action
         file_menu = self.menubar.addMenu('&File')
-        add_menu(file_menu, 'Open file...', connect=self.open_data_file)
+        add_menu(file_menu, 'Open file...', connect=self.open_data_file_dialog)
+        add_menu(file_menu, 'Save File...', connect=self.save_data_file_dialog)
         add_menu(file_menu, 'Exit', short='Ctrl+Q', connect=self.app.quit)
         geom_menu = self.menubar.addMenu('Geometry')
         add_menu(geom_menu, 'Show coordinates', connect=self.toggle_coordinate_axes)
@@ -1505,6 +1507,16 @@ class PADView2(QtCore.QObject):
     #     # FIXME: Try to make sure that this function is never needed.
     #     self.debug(get_caller(), 1)
     #     pg.QtGui.QApplication.processEvents()
+
+    @property
+    def q_mags(self):
+        if self._q_mags is None:
+            if self.beam is None:
+                return None
+            if self.pad_geometry is None:
+                return None
+            self._q_mags = [p.reshape(p.q_mags(beam=self.beam)) for p in self.pad_geometry]
+        return self._q_mags
 
     def setup_histogram_tool(self):
         r""" Set up the histogram/colorbar/colormap tool that is located to the right of the PAD display. """
@@ -2012,6 +2024,7 @@ class PADView2(QtCore.QObject):
         if self.pad_labels is not None:
             self.toggle_pad_labels()
             self.toggle_pad_labels()
+        self._q_mags = None
         self.sig_geometry_changed.emit()
 
     def update_pads(self):
@@ -2105,7 +2118,11 @@ class PADView2(QtCore.QObject):
             fs = int(np.round(fs))
             ss = int(np.round(ss))
             intensity = self.get_pad_display_data()[pid][ss, fs]
-            self._status_string_mouse = ' Panel %2d  |  Pixel %4d,%4d  |  Value=%8g  | ' % (pid, ss, fs, intensity)
+            self._status_string_mouse = '| PAD %2d  |  Pix %4d,%4d  |  Val=%8g  |' % (pid, ss, fs, intensity)
+            if self.q_mags is not None:
+                q = self.q_mags[pid][ss, fs]/1e10
+                self._status_string_mouse += ' q=%8g/A |'  % (q,)
+                self._status_string_mouse += ' d=%8g A |'  % (2*np.pi/q,)
         self.update_status_string()
 
     def edit_ring_radii(self):
@@ -2388,16 +2405,48 @@ class PADView2(QtCore.QObject):
             # self.pad_geometry = geometry_file_to_pad_geometry_list(file_name)
             # self.crystfel_geom_file_name = file_name
 
-    def open_data_file(self):
+    def load_pickled_dataframe(self, file_name):
+        r""" Load data in pickle format.  Should be a dictionary with keys:
+
+        mask_data, pad_display_data, beam, pad_geometry
+        """
+        dataframe = reborn.fileio.misc.load_pickle(file_name)
+        write('Loaded pickled dictionary:' + list(dataframe.keys()).__str__())
+        self.update_masks(dataframe['mask_data'])
+        self.set_pad_display_data(dataframe['pad_display_data'])
+        self.beam = dataframe['beam']
+        self.update_pad_geometry(dataframe['pad_geometry'])
+
+    def save_pickled_dataframe(self, file_name):
+        r""" Save dataframe in pickle format.  It is a dictionary with the keys:
+
+        mask_data, pad_display_data, beam, pad_geometry
+        """
+        dataframe = {}
+        dataframe['pad_display_data'] = [p.astype(np.float32) for p in self.get_pad_display_data()]
+        dataframe['mask_data'] = [m.astype(np.uint8) for m in self.mask_data]
+        dataframe['pad_geometry'] = self.pad_geometry
+        dataframe['beam'] = self.beam
+        write('Saving pickled dictionary:' + list(dataframe.keys()).__str__())
+        if file_name.split('.')[-1] != 'pkl':
+            file_name = file_name + '.pkl'
+        with open(file_name, "wb") as f:
+            pickle.dump(dataframe, f)
+
+    def open_data_file_dialog(self):
         self.debug(get_caller(), 1)
         options = QtGui.QFileDialog.Options()
         file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load data file", "",
-                                                          "Cheetah CXI (*.cxi)", options=options)
+                                                          # "Cheetah CXI (*.cxi);;Python Pickle (*.pkl)",
+                                                          "Python Pickle (*.pkl)",
+                                                                 options=options)
         if file_name == "":
             return
-        if file_type == 'Cheetah CXI (*.cxi)':
-            print('Cheetah CXI not implemented.')
-            pass
+        if file_type == 'Python Pickle (*.pkl)':
+            self.load_pickled_dataframe(file_name)
+        # if file_type == 'Cheetah CXI (*.cxi)':
+        #     print('Cheetah CXI not implemented.')
+        #     pass
             # if self.crystfel_geom_file_name is None:
             #     msg = QtGui.QMessageBox()
             #     msg.setText("You must load a CrystFEL Geometry file before loading a Cheetah CXI file.")
@@ -2408,7 +2457,20 @@ class PADView2(QtCore.QObject):
             #     self.main_window.setWindowTitle(file_name)
             #
             # self.frame_getter = CheetahFrameGetter(file_name, self.crystfel_geom_file_name)
-        self.show_frame(frame_number=0)
+            # self.show_frame(frame_number=0)
+
+    def save_data_file_dialog(self):
+        r""" Save list of masks in pickle or reborn mask format. """
+        self.debug(get_caller(), 1)
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Data Frame", "data",
+                                                                 "Python Pickle (*.pkl)",
+                                                                 # "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
+                                                                 options=options)
+        if file_name == "":
+            return
+        if file_type == 'Python Pickle (*.pkl)':
+            self.save_pickled_dataframe(file_name)
 
     def vector_coords_to_2d_display_coords(self, vecs):
         r""" Convert 3D vector coords to the equivalent coords in the 2D display plane.  This corresponds to ignoring
