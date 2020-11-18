@@ -20,9 +20,12 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     ax = plt.gca()
     ax.set_aspect('equal')
     ax.set_facecolor(np.array([0, 0, 0])+0.2)
-    q_max = np.max(concat_pad_data(pad_data))
-    q_min = np.min(concat_pad_data(pad_data))
-    imshow_args = {"vmin": q_min, "vmax": q_max, "interpolation": 'none', "cmap": 'gnuplot'}
+
+    pad_data_concated = concat_pad_data(pad_data)
+    q_max = np.max(pad_data_concated)
+    q_min = np.min(pad_data_concated)
+
+    imshow_args = {"vmin": 0, "vmax": 4*np.mean(pad_data_concated), "interpolation": 'none', "cmap": 'viridis'}
     bbox = []
     for i in range(len(pads)):
         dat = data[i]
@@ -65,4 +68,4 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     if show:
         plt.show()
 
-    return ax
+    return ax, im
