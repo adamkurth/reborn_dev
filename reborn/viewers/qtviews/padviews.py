@@ -1199,11 +1199,11 @@ class PADView2(QtCore.QObject):
     logscale = False
     raw_data = None   # Dictionary with 'pad_data' and 'peaks' keys
     processed_data = None  # Dictionary with 'pad_data' and 'peaks' keys
-    pad_geometry = []
+    _pad_geometry = []
     beam = None
     crystfel_geom_file_name = None
     pad_labels = None
-    mask_data = None
+    _mask_data = None
     mask_images = None
     mask_color = None
     _mask_rois = None
@@ -1223,7 +1223,6 @@ class PADView2(QtCore.QObject):
     show_true_fast_scans = False
     peak_finders = None
     do_peak_finding = False
-    data_filters = None
     peaks_visible = True
     apply_filters = True
     data_processor = None
@@ -1413,7 +1412,7 @@ class PADView2(QtCore.QObject):
         r""" I don't know what this does... obviously something about mouse interactions... """
         # FIXME: What does this do?
         self.debug(get_caller(), 1)
-        self.proxy = pg.SignalProxy(self.viewbox.scene().sigMouseMoved, rateLimit=60, slot=self._mouse_moved)
+        self.proxy = pg.SignalProxy(self.viewbox.scene().sigMouseMoved, rateLimit=30, slot=self._mouse_moved)
 
     def setup_menubar(self):
         r""" Connect menu items (e.g. "File") so that they actually do something when clicked. """
@@ -1440,13 +1439,15 @@ class PADView2(QtCore.QObject):
         mask_menu = self.menubar.addMenu('Mask')
         add_menu(mask_menu, 'Clear masks', connect=self.clear_masks)
         add_menu(mask_menu, 'Toggle masks visible', connect=self.toggle_masks)
+        add_menu(mask_menu, 'Choose mask color', connect=self.choose_mask_color)
         add_menu(mask_menu, 'Mask PADs by name', connect=self.mask_pads_by_names)
         add_menu(mask_menu, 'Mask panel edges...', connect=self.mask_panel_edges)
         add_menu(mask_menu, 'Mask above upper limit', connect=self.mask_upper_level)
         add_menu(mask_menu, 'Mask below lower limit', connect=self.mask_lower_level)
         add_menu(mask_menu, 'Mask outside limits', connect=self.mask_levels)
-        add_menu(mask_menu, 'Add rectangle ROI', connect=self.toggle_rois)
+        add_menu(mask_menu, 'Add rectangle ROI', connect=self.add_rectangle_roi)
         add_menu(mask_menu, 'Add circle ROI', connect=self.add_circle_roi)
+        add_menu(mask_menu, 'Toggle ROIs visible', connect=self.toggle_rois)
         add_menu(mask_menu, 'Save mask...', connect=self.save_masks)
         add_menu(mask_menu, 'Load mask...', connect=self.load_masks)
         # analysis_menu = self.menubar.addMenu('Analysis')
@@ -1496,6 +1497,16 @@ class PADView2(QtCore.QObject):
         self.statusbar.showMessage(self._status_string_getter + self._status_string_mouse)
 
     @property
+    def pad_geometry(self):
+        return self._pad_geometry
+
+    @pad_geometry.setter
+    def pad_geometry(self, val):
+        self._pad_geometry = val
+        self._q_mags = None
+
+
+    @property
     def n_pads(self):
         r""" Number of PADs in the display. """
         if self.pad_geometry is not None:
@@ -1520,6 +1531,20 @@ class PADView2(QtCore.QObject):
                 return None
             self._q_mags = [p.reshape(p.q_mags(beam=self.beam)) for p in self.pad_geometry]
         return self._q_mags
+
+    @property
+    def mask_data(self):
+        if self._mask_data is not None:
+            return self._mask_data
+        self._mask_data = [p.ones() for p in self.pad_geometry]
+        return self._mask_data
+
+    @mask_data.setter
+    def mask_data(self, val):
+        if type(val) == list:
+            self._mask_data = val
+        else:
+            raise ValueError('mask_data must be a list of numpy arrays')
 
     def setup_histogram_tool(self):
         r""" Set up the histogram/colorbar/colormap tool that is located to the right of the PAD display. """
@@ -1569,10 +1594,13 @@ class PADView2(QtCore.QObject):
     def add_rectangle_roi(self, pos=(0, 0), size=None):
         r""" Adds a |pyqtgraph| RectROI """
         self.debug(get_caller(), 1)
+        if type(pos) != tuple:
+            pos = (0, 0)
         if size is None:
             br = self.get_view_bounding_rect()
             s = min(br[2], br[3])
             size = (s/4, s/4)
+        print(size, pos)
         pos = (pos[0] - size[0]/2, pos[1] - size[0]/2)
         roi = pg.RectROI(pos=pos, size=size, centered=True, sideScalers=True)
         roi.name = 'rectangle'
@@ -1605,19 +1633,27 @@ class PADView2(QtCore.QObject):
         self._mask_rois.append(roi)
         self.viewbox.addItem(roi)
 
+    def show_rois(self):
+        self.debug(get_caller(), 1)
+        if self._mask_rois is not None:
+            for roi in self._mask_rois:
+                roi.setVisible(True)
+
     def hide_rois(self):
         self.debug(get_caller(), 1)
         if self._mask_rois is not None:
             for roi in self._mask_rois:
-                self.viewbox.removeItem(roi)
-            self._mask_rois = None
+                roi.setVisible(False)
 
     def toggle_rois(self):
         self.debug(get_caller(), 1)
         if self._mask_rois is None:
-            self.add_rectangle_roi()
-        else:
-            self.hide_rois()
+            return
+        for roi in self._mask_rois:
+            if roi.isVisible():
+                self.hide_rois()
+                return
+        self.show_rois()
 
     def increase_skip(self):
         self.debug(get_caller(), 1)
@@ -1734,11 +1770,6 @@ class PADView2(QtCore.QObject):
                     g.name = "%d" % i
                 lab = pg.TextItem(text=g.name, fill=pg.mkBrush(20, 20, 20, 128), color='w', anchor=(0.5, 0.5),
                                   border=pg.mkPen('w'))
-                fs = g.fs_vec*g.n_fs/2
-                ss = g.ss_vec*g.n_ss/2
-                t = g.t_vec + (g.fs_vec + g.ss_vec)/2
-                # x = (fs[0] + ss[0] + t[0])
-                # y = (fs[1] + ss[1] + t[1])
                 vec = self.pad_geometry[i].center_pos_vec()
                 vec = self.vector_to_view_coords(vec)
                 lab.setPos(vec[0], vec[1])
@@ -1784,6 +1815,20 @@ class PADView2(QtCore.QObject):
         mask_rgba[:, :, 2] = b
         mask_rgba[:, :, 3] = t
         return mask_rgba
+
+    def choose_mask_color(self):
+        self.debug(get_caller(), 1)
+        color = QtGui.QColorDialog.getColor()
+        if color is None:
+            self.debug('Color is None', 1)
+            return
+        if not color.isValid():
+            self.debug('Color is invalid', 1)
+            return
+        self.mask_color[0] = color.red()
+        self.mask_color[1] = color.green()
+        self.mask_color[2] = color.blue()
+        self.update_masks()
 
     def setup_masks(self, mask_data=None):
         self.debug(get_caller(), 1)
@@ -1881,6 +1926,7 @@ class PADView2(QtCore.QObject):
         file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Masks", "mask",
                                                           "reborn Mask File (*.mask);;Python Pickle (*.pkl)",
                                                                  options=options)
+        print(file_name)
         if file_name == "":
             return
         if file_type == 'Python Pickle (*.pkl)':
@@ -1888,6 +1934,9 @@ class PADView2(QtCore.QObject):
             with open(file_name, "wb") as f:
                 pickle.dump(self.mask_data, f)
         if file_type == 'reborn Mask File (*.mask)':
+            if file_name.split('.')[-1] != 'mask':
+                file_name += '.mask'
+            write('Saving masks: ' + file_name)
             reborn.detector.save_pad_masks(file_name, self.mask_data)
 
     def load_masks(self):
@@ -1921,25 +1970,29 @@ class PADView2(QtCore.QObject):
             if text == '':
                 return
             names = text.split(',')
-            print(names)
             for i in range(self.n_pads):
                 print(self.pad_geometry[i].name)
                 if self.pad_geometry[i].name in names:
                     self.mask_data[i] *= 0
             self.update_masks(self.mask_data)
 
-    def mask_hovering_roi(self, setval=0, toggle=False, mask_outside=False):
-        r""" Mask the ROI region that the mouse cursor is hovering over. """
-        self.debug(get_caller(), 1)
-        if self._mask_rois is None: return
+    def get_hovering_roi_indices(self, flat=True):
+        r"""Get the indices within the ROI that the mouse is presently hovering over.  flat=True indicates that you wish
+        to have the flattened indices, where are pads are concatenated.  If no ROI is selected, return None, None.
+        Otherwise, return indices, roi.name (str).
+        """
+        if flat is False:
+            raise ValueError('flat=False is not implemented in get_hovering_roi_indices (yet)')
+        if self._mask_rois is None:
+            return None, None
         roi = [r for r in self._mask_rois if r.mouseHovering]
-        if len(roi) == 0: return
+        if len(roi) == 0:
+            return None, None
         roi = roi[0]
         p_vecs = np.vstack([p.position_vecs() for p in self.pad_geometry])
         v_vecs = self.vector_to_view_coords(p_vecs)[:, 0:2]
-        mask = detector.concat_pad_data(self.mask_data)
         if roi.name == 'rectangle':  # Find all pixels within the rectangle
-            self.debug('\tmask rectangle roi', 1)
+            self.debug('\tGetting rectangle ROI indices', 1)
             sides = [roi.size()[1], roi.size()[0]]
             corner = np.array([roi.pos()[0], roi.pos()[1]])
             angle = roi.angle() * np.pi / 180
@@ -1950,12 +2003,19 @@ class PADView2(QtCore.QObject):
             ind2 = np.dot(d, v2)
             inds = (ind1 >= 0) * (ind1 <= sides[0]) * (ind2 >= 0) * (ind2 <= sides[1])
         elif roi.name == 'circle':
-            self.debug('\tmask circle roi', 1)
+            self.debug('\tGetting circle ROI indices', 1)
             radius = roi.size()[0]/2.
             center = np.array([roi.pos()[0], roi.pos()[1]]) + radius
             inds = np.sqrt(np.sum((v_vecs - center)**2, axis=1)) < radius
-        else:
+        return inds, roi.name
+
+    def mask_hovering_roi(self, setval=0, toggle=False, mask_outside=False):
+        r""" Mask the ROI region that the mouse cursor is hovering over. """
+        self.debug(get_caller(), 1)
+        inds, typ = self.get_hovering_roi_indices()
+        if inds is None:
             return
+        mask = detector.concat_pad_data(self.mask_data)
         if mask_outside:
             inds = -(inds - 1)
         if toggle:
@@ -2251,6 +2311,9 @@ class PADView2(QtCore.QObject):
             return
         for image in self.images:
             image.setBorder(None)
+
+    # def toggle_pad_borders(self):
+    #     if self.
 
     def show_history_next(self):
         self.debug(get_caller(), 1)
@@ -2886,8 +2949,8 @@ if __name__ == '__main__':
     Tscl = 1.0
     dist = 0.1
     pix = 1e-3/7
-    shape = (2000, 2000)
-    tiles = (1, 1)
+    shape = (1000, 1000)
+    tiles = (2, 2)
     gap = pix
     #pads = [reborn.detector.PADGeometry(pixel_size=1e-3, distance=1, shape=(100, 100))]
     #pads[0].t_vec[0:2] = 0
@@ -2930,8 +2993,9 @@ if __name__ == '__main__':
     pv = PADView2(raw_data=dat, pad_geometry=pads, mask_data=mask, debug_level=2)
     pv.show_coordinate_axes()
     pv.set_levels(0, 30000)
-    pv.run_plugin('central_symmetry')
-    pv.run_plugin('shift_detector')
+    # pv.run_plugin('central_symmetry')
+    # pv.run_plugin('shift_detector')
+    pv.run_plugin('mask_editor')
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
     # pv.show_fast_scan_directions()
     pv.set_title('testing')
