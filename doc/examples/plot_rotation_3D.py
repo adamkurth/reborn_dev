@@ -91,9 +91,19 @@ show_projection(disp_map, disp_str)
 # Rotate.
 
 x_rot = rotate3D(f=rho_au, 
-                 Euler_angles=np.array([0,0,20])*(np.pi/180))
-
-
-disp_map = np.abs(x_rot)
+                 Euler_angles=np.array([0,0,60])*(np.pi/180))
+# x_rot = rotate3D(f=x_rot, 
+#                  Euler_angles=np.array([0,0,30])*(np.pi/180))
+disp_map = (np.real(x_rot))
 disp_str = 'Asymmetric unit rotated: projection'
 show_projection(disp_map, disp_str)
+
+
+
+
+x_rot = rotate3D(f=rho_au, 
+                 Euler_angles=np.array([0,0,60])*(np.pi/180))
+disp_map = (np.abs(x_rot))
+disp_str = 'Asymmetric unit rotated: projection'
+show_projection(disp_map, disp_str)
+
