@@ -33,7 +33,7 @@ class Widget(QtGui.QWidget):
         self.layout.addWidget(self.visible_button, row, 1, 1, 2)
         row += 1
         self.color_button = QtGui.QPushButton("Choose mask color")
-        self.color_button.clicked.connect(QtGui.QColorDialog.getColor)
+        self.color_button.clicked.connect(padview.choose_mask_color)
         self.layout.addWidget(self.color_button, row, 1, 1, 2)
         row += 1
         self.rroi_button = QtGui.QPushButton("Add rectangle ROI")
@@ -42,6 +42,10 @@ class Widget(QtGui.QWidget):
         row += 1
         self.rroi_button = QtGui.QPushButton("Add circle ROI")
         self.rroi_button.clicked.connect(padview.add_circle_roi)
+        self.layout.addWidget(self.rroi_button, row, 1, 1, 2)
+        row += 1
+        self.rroi_button = QtGui.QPushButton("Mask panel edges...")
+        self.rroi_button.clicked.connect(padview.mask_panel_edges)
         self.layout.addWidget(self.rroi_button, row, 1, 1, 2)
         row += 1
         label = QtGui.QLabel('What to do:')
