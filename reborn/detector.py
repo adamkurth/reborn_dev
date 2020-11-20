@@ -8,7 +8,7 @@ import json
 import numpy as np
 from scipy.stats import binned_statistic
 from . import utils
-
+from time import time
 
 class PADGeometry():
     r"""
@@ -959,6 +959,7 @@ class RadialProfiler():
         self._counts_profile = None  # For speed, we cache the counts corresponding to the default _mask
         self.pad_geometry = None  # List of PADGeometry instances
         self.beam = None  # Beam instance for creating q magnitudes
+        self._indices = None  # A list of indices for each radial bin
         self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range, pad_geometry=pad_geometry, beam=beam)
 
     @property
@@ -966,18 +967,22 @@ class RadialProfiler():
         return self._mask
 
     @mask.setter
-    def mask(self, val):
-        if val is not None:
-            self._mask = concat_pad_data(val)  # Ensure a properly flattened array
-        else:
-            self._mask = None
-        self._counts_profile = None  # Wipe out this profile
+    def mask(self, mask):
+        if mask is not None:
+            mask = concat_pad_data(mask)
+            if self._mask is not None:  # Check if we already have an identical mask
+                if np.sum(np.abs(mask - self.mask)) == 0:
+                    return
+            self._mask = mask.copy()  # Ensure a properly flattened array
+            self._counts_profile = None  # Wipe out this profile
+            self._indices = None
 
     def set_mask(self, mask):
         self.mask = mask
 
     @property
     def counts_profile(self):
+        r""" The number of pixels in each radial bin. """
         if self._counts_profile is None:
             if self.mask is None:
                 self._counts_profile, _ = np.histogram(self.q_mags, bins=self.n_bins, range=self.q_edge_range)
@@ -1007,7 +1012,7 @@ class RadialProfiler():
             if pad_geometry is None:
                 raise ValueError("You must provide a |PADGeometry| if q_mags are not provided in RadialProfiler")
             if beam is None:
-                raise ValueError("You must provide a |Beam| if q_mags are not profided in RadialProfiler")
+                raise ValueError("You must provide a |Beam| if q_mags are not provided in RadialProfiler")
             pad_geometry = utils.ensure_list(pad_geometry)
             q_mags = [p.q_mags(beam=beam) for p in pad_geometry]
         q_mags = concat_pad_data(q_mags)
@@ -1029,6 +1034,8 @@ class RadialProfiler():
         self.q_edge_range = q_edge_range
         self.mask = mask
         self.pad_geometry = pad_geometry
+        self._indices = None
+        self.zeros = np.zeros(self.n_bins)
 
     def get_counts_profile(self, mask=None):
         if mask is not None:
@@ -1039,7 +1046,7 @@ class RadialProfiler():
 
     def get_sum_profile(self, data, mask=None):
         r"""
-        Calculate the radial profile of summed intensities.
+        Calculate the radial profile of summed intensities.  This is divided by counts to get an average.
 
         Args:
             data |ndarray|:  The intensity data from which the radial profile is formed.
@@ -1058,12 +1065,13 @@ class RadialProfiler():
         Calculate the radial profile of averaged intensities.
 
         Args:
-            data |ndarray|:  The intensity data from which the radial profile is formed.
-            mask |ndarray|:  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
+            data (|ndarray|):  The intensity data from which the radial profile is formed.
+            mask (|ndarray|):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
                                  provided here, the mask configured with :meth:`set_mask` will be used.
 
         Returns: |ndarray|
         """
+
         if mask is None:
             mask = self.mask  # Use the default mask
         sumdat = self.get_sum_profile(data, mask=mask)
@@ -1071,7 +1079,7 @@ class RadialProfiler():
             cntdat = self.get_sum_profile(mask)
         else:
             cntdat = self.counts_profile
-        return np.divide(sumdat, cntdat, where=(cntdat > 0), out=np.zeros(sumdat.shape))
+        return np.divide(sumdat, cntdat, where=(cntdat > 0), out=self.zeros)
 
     def get_median_profile(self, data, mask=None):
         r"""
@@ -1084,25 +1092,49 @@ class RadialProfiler():
 
         Returns:  |ndarray|
         """
+        # t = time()
         data = concat_pad_data(data)
-        q_mags = self.q_mags.copy()
+        q_mags = self.q_mags
         if mask is not None:
-            mask = concat_pad_data(mask)
-            w = np.where(mask)
+            self.mask = mask
+        if self.mask is not None:
+            w = np.where(self.mask)
             data = data[w]
             q_mags = q_mags[w]
+        med = utils.binned_statistic(q_mags, data, np.median, self.n_bins, (self.bin_edges[0], self.bin_edges[-1]))
+        # print(time()-t)
+        return med
 
-        # Calculate the number of bins
-        N_bins = len(self.bin_edges)-1
+    def subtract_profile(self, data, mask=None, statistic='mean'):
+        r"""
+        Given some PAD data, subtract a radially averaged profile.
 
-        # Grab the data values that is within bin edges and calculate the median of those values.
-        median = np.zeros(N_bins)
-        for i in range(N_bins):
-            ind = (self.bin_edges[i] <= q_mags) * (q_mags < self.bin_edges[i+1])
-            if np.max(ind):  # False if indices are bad
-                median[i] = np.median(data[ind])
+        Args:
+            data:
+            mask:
+            type:
 
-        return median
+        Returns:
+
+        """
+        as_list = False
+        if type(data) == list:
+            as_list = True
+        if statistic == 'mean':
+            mprof = self.get_mean_profile(data, mask=mask)
+        elif statistic == 'median':
+            mprof = self.get_median_profile(data, mask=mask)
+        else:
+            raise ValueError('Statistic %s not recognized' % (statistic,))
+        mprofq = self.bin_centers
+        mpat = np.interp(self.q_mags, mprofq, mprof)
+        mpat = concat_pad_data(mpat)
+        data = concat_pad_data(data)
+        data = data.copy()
+        data -= mpat
+        if as_list:
+            data = split_pad_data(self.pad_geometry, data)
+        return data
 
     def subtract_median_profile(self, data, mask=None):
         r"""
@@ -1115,19 +1147,7 @@ class RadialProfiler():
         Returns:
 
         """
-        as_list = False
-        if type(data) == list:
-            as_list = True
-        mprof = self.get_median_profile(data, mask=mask)
-        mprofq = self.bin_centers
-        mpat = np.interp(self.q_mags, mprofq, mprof)
-        mpat = concat_pad_data(mpat)
-        data = concat_pad_data(data)
-        data = data.copy()
-        data -= mpat
-        if as_list:
-            data = split_pad_data(self.pad_geometry, data)
-        return data
+        return self.subtract_profile(data, mask=mask, statistic='median')
 
     def get_profile(self, data, mask=None, average=True):
         r"""

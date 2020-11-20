@@ -1398,16 +1398,6 @@ class PADView2(QtCore.QObject):
         self.main_window.setWindowTitle(title)
         # self.process_events()  # Why?
 
-    # def setup_widgets(self):
-    #     r""" Setup widgets that are supposed to talk to the main window. """
-    #     self.debug(get_caller(), 1)
-    #     snr_config = SNRConfigWidget()
-    #     snr_config.values_changed.connect(self.update_snr_filter_params)
-    #     self.widget_snr_config = snr_config
-    #     self.widget_peakfinder_config = PeakfinderConfigWidget()
-    #     self.widget_peakfinder_config.values_changed.connect(self.update_peakfinder_params)
-    #     self.widget_plugin = PluginWidget(self)
-
     def setup_mouse_interactions(self):
         r""" I don't know what this does... obviously something about mouse interactions... """
         # FIXME: What does this do?
@@ -1424,10 +1414,12 @@ class PADView2(QtCore.QObject):
             if connect: action.triggered.connect(connect)
             append_to.addAction(action)
             return action
-        file_menu = self.menubar.addMenu('&File')
+        file_menu = self.menubar.addMenu('File')
         add_menu(file_menu, 'Open file...', connect=self.open_data_file_dialog)
         add_menu(file_menu, 'Save File...', connect=self.save_data_file_dialog)
         add_menu(file_menu, 'Exit', short='Ctrl+Q', connect=self.app.quit)
+        data_menu = self.menubar.addMenu('Data')
+        add_menu(data_menu, 'Clear processed data', connect=self.clear_processed_data)
         geom_menu = self.menubar.addMenu('Geometry')
         add_menu(geom_menu, 'Show coordinates', connect=self.toggle_coordinate_axes)
         add_menu(geom_menu, 'Show grid', connect=self.toggle_grid)
@@ -1505,7 +1497,6 @@ class PADView2(QtCore.QObject):
         self._pad_geometry = val
         self._q_mags = None
 
-
     @property
     def n_pads(self):
         r""" Number of PADs in the display. """
@@ -1515,12 +1506,6 @@ class PADView2(QtCore.QObject):
             return len(self.pad_geometry)
         if self.get_pad_display_data() is not None:
             return len(self.get_pad_display_data())
-
-    # def process_events(self):
-    #     r""" Sometimes we need to force events to be processed... I don't understand... """
-    #     # FIXME: Try to make sure that this function is never needed.
-    #     self.debug(get_caller(), 1)
-    #     pg.QtGui.QApplication.processEvents()
 
     @property
     def q_mags(self):
@@ -1561,14 +1546,6 @@ class PADView2(QtCore.QObject):
         self.histogram.setImageItems(self.images)
         pg.QtGui.QApplication.processEvents()
 
-    def set_levels_by_percentiles(self, percents=(1, 99), colormap=None):
-        r""" Set upper and lower levels according to percentiles.  This is based on :func:`numpy.percentile`. """
-        self.debug(get_caller(), 1)
-        d = reborn.detector.concat_pad_data(self.get_pad_display_data())
-        lower = np.percentile(d, percents[0])
-        upper = np.percentile(d, percents[1])
-        self.set_levels(lower, upper, colormap=colormap)
-
     def get_levels(self):
         r""" Get the minimum and maximum levels of the current image display. """
         return self.histogram.item.getLevels()
@@ -1586,10 +1563,13 @@ class PADView2(QtCore.QObject):
         if colormap is not None:
             self.set_preset_colormap(colormap)
 
-    def get_view_bounding_rect(self):
-        r""" Bounding rectangle of everything presently visible, in view (i.e real-space, 1-meter plane) coordinates."""
-        vb = self.viewbox
-        return vb.mapSceneToView(vb.mapToScene(vb.rect()).boundingRect()).boundingRect().getRect()
+    def set_levels_by_percentiles(self, percents=(1, 99), colormap=None):
+        r""" Set upper and lower levels according to percentiles.  This is based on :func:`numpy.percentile`. """
+        self.debug(get_caller(), 1)
+        d = reborn.detector.concat_pad_data(self.get_pad_display_data())
+        lower = np.percentile(d, percents[0])
+        upper = np.percentile(d, percents[1])
+        self.set_levels(lower, upper, colormap=colormap)
 
     def add_rectangle_roi(self, pos=(0, 0), size=None):
         r""" Adds a |pyqtgraph| RectROI """
@@ -1609,16 +1589,6 @@ class PADView2(QtCore.QObject):
             self._mask_rois = []
         self._mask_rois.append(roi)
         self.viewbox.addItem(roi)
-
-    # def add_ellipse_roi(self, pos=(0, 0), size=(100, 100)):
-    #     self.debug(get_caller(), 1)
-    #     roi = pg.EllipseROI(pos=pos, size=size, centered=True, sideScalers=True)
-    #     roi.name = 'ellipse'
-    #     roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
-    #     if self._mask_rois is None:
-    #         self._mask_rois = []
-    #     self._mask_rois.append(roi)
-    #     self.viewbox.addItem(roi)
 
     def add_circle_roi(self, pos=(0, 0), radius=None):
         self.debug(get_caller(), 1)
@@ -2036,6 +2006,14 @@ class PADView2(QtCore.QObject):
                 self.mask_data[m] = self.mask_data[m]*0 + 1
         self.update_masks(self.mask_data)
 
+    def get_raw_pad_data(self):
+        if self.raw_data is not None:
+            if 'pad_data' in self.raw_data.keys():
+                dat = self.raw_data['pad_data']
+                if dat:
+                    return [np.double(d.copy()) for d in dat]
+        return None
+
     def get_pad_display_data(self):
         # The logic of what actually gets displayed should go here.  For now, we display processed data if it is
         # available, else we display raw data, else we display zeros based on the pad geometry.  If none of these
@@ -2046,11 +2024,9 @@ class PADView2(QtCore.QObject):
                 dat = self.processed_data['pad_data']
                 if dat:
                     return [np.double(d) for d in dat]
-        if self.raw_data is not None:
-            if 'pad_data' in self.raw_data.keys():
-                dat = self.raw_data['pad_data']
-                if dat:
-                    return [np.double(d) for d in dat]
+        dat = self.get_raw_pad_data()
+        if dat is not None:
+            return dat
         if self.pad_geometry is not None:
             self.debug('No raw data found - setting display data arrays to zeros')
             return [pad.zeros() for pad in self.pad_geometry]
@@ -2058,7 +2034,7 @@ class PADView2(QtCore.QObject):
 
     def set_pad_display_data(self, data, auto_levels=False, update_display=True, levels=None, percentiles=None, colormap=None):
         if type(data) == dict:
-            if 'pad_data' in dict.keys():
+            if 'pad_data' in list(dict.keys()):
                 self.processed_data = data
         elif type(data) == list:
             if self.processed_data is None:
@@ -2077,6 +2053,11 @@ class PADView2(QtCore.QObject):
             self.set_levels_by_percentiles(percents=(2, 98))
         if (levels is not None) or (percentiles is not None):
             self.set_levels(levels=levels, percentiles=percentiles, colormap=colormap)
+
+    def clear_processed_data(self):
+        r""" Clear processed data and (show raw data). """
+        self.processed_data = None
+        self.update_display_data()
 
     def setup_pads(self):
         self.debug(get_caller(), 1)
@@ -2119,11 +2100,8 @@ class PADView2(QtCore.QObject):
         if self.images is None:
             self.setup_pads()
         processed_data = self.get_pad_display_data()
-        mx = detector.concat_pad_data(processed_data).max()
         for i in range(0, self.n_pads):
             d = processed_data[i]
-            if self.show_true_fast_scans:  # For testing - show fast scan axis
-                d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
             if self.logscale:
                 d[d < 0] = 0
                 d = np.log10(d)
@@ -2191,6 +2169,11 @@ class PADView2(QtCore.QObject):
         sc = self.viewbox.mapSceneToView(self.evt[0])
         self.debug('\tview coords: '+sc.__str__(), 3)
         return sc.x(), sc.y()
+
+    def get_view_bounding_rect(self):
+        r""" Bounding rectangle of everything presently visible, in view (i.e real-space, 1-meter plane) coordinates."""
+        vb = self.viewbox
+        return vb.mapSceneToView(vb.mapToScene(vb.rect()).boundingRect()).boundingRect().getRect()
 
     def _mouse_moved(self, evt):
         self.debug(get_caller(), 3)
@@ -2312,9 +2295,6 @@ class PADView2(QtCore.QObject):
         for image in self.images:
             image.setBorder(None)
 
-    # def toggle_pad_borders(self):
-    #     if self.
-
     def show_history_next(self):
         self.debug(get_caller(), 1)
         if self.frame_getter is None:
@@ -2388,7 +2368,7 @@ class PADView2(QtCore.QObject):
         else:
             self.processed_data = None
 
-    def update_display_data(self, ):
+    def update_display_data(self):
         r"""
         Update display with new data, e.g. when moving to next frame.
 
@@ -2435,52 +2415,52 @@ class PADView2(QtCore.QObject):
                 self.viewbox.removeItem(scat)
         self.scatter_plots = None
 
-    def toggle_filter(self):
-        self.debug(get_caller(), 1)
-        if self.apply_filters is True:
-            self.apply_filters = False
-        else:
-            self.apply_filters = True
+    # def toggle_filter(self):
+    #     self.debug(get_caller(), 1)
+    #     if self.apply_filters is True:
+    #         self.apply_filters = False
+    #     else:
+    #         self.apply_filters = True
 
-    def apply_snr_filter(self):
-        self.debug(get_caller(), 1)
-        t = time()
-        if self.snr_filter_params is None:
-            return
-        if self.snr_filter_params['activate'] is not True:
-            return
-        if self.raw_data is None:
-            return
-        if self.mask_data is None:
-            return
-        a = self.snr_filter_params['inner']
-        b = self.snr_filter_params['center']
-        c = self.snr_filter_params['outer']
-        raw = self.raw_data['pad_data']
-        mask = self.mask_data
-        processed_pads = [None]*self.n_pads
-        self.debug('boxsnr()')
-        for i in range(self.n_pads):
-            snr, signal = boxsnr(raw[i], mask[i], mask[i], a, b, c)
-            m = mask[i]*(snr < 6)
-            snr, signal = boxsnr(raw[i], mask[i], m, a, b, c)
-            processed_pads[i] = snr
-        if self.processed_data is None:
-            self.processed_data = {}
-        self.processed_data['pad_data'] = processed_pads
-        self.debug('%g seconds' % (time()-t,))
+    # def apply_snr_filter(self):
+    #     self.debug(get_caller(), 1)
+    #     t = time()
+    #     if self.snr_filter_params is None:
+    #         return
+    #     if self.snr_filter_params['activate'] is not True:
+    #         return
+    #     if self.raw_data is None:
+    #         return
+    #     if self.mask_data is None:
+    #         return
+    #     a = self.snr_filter_params['inner']
+    #     b = self.snr_filter_params['center']
+    #     c = self.snr_filter_params['outer']
+    #     raw = self.raw_data['pad_data']
+    #     mask = self.mask_data
+    #     processed_pads = [None]*self.n_pads
+    #     self.debug('boxsnr()')
+    #     for i in range(self.n_pads):
+    #         snr, signal = boxsnr(raw[i], mask[i], mask[i], a, b, c)
+    #         m = mask[i]*(snr < 6)
+    #         snr, signal = boxsnr(raw[i], mask[i], m, a, b, c)
+    #         processed_pads[i] = snr
+    #     if self.processed_data is None:
+    #         self.processed_data = {}
+    #     self.processed_data['pad_data'] = processed_pads
+    #     self.debug('%g seconds' % (time()-t,))
 
-    def update_snr_filter_params(self):
-        self.debug(get_caller(), 1)
-        vals = self.widget_snr_config.get_values()
-        if vals['activate']:
-            self.snr_filter_params = vals
-            self.data_processor = self.apply_snr_filter
-            self.update_display_data()
-        else:
-            self.data_processor = None
-            self.processed_data = None
-            self.update_display_data()
+    # def update_snr_filter_params(self):
+    #     self.debug(get_caller(), 1)
+    #     vals = self.widget_snr_config.get_values()
+    #     if vals['activate']:
+    #         self.snr_filter_params = vals
+    #         self.data_processor = self.apply_snr_filter
+    #         self.update_display_data()
+    #     else:
+    #         self.data_processor = None
+    #         self.processed_data = None
+    #         self.update_display_data()
 
     def load_geometry_file(self):
         self.debug(get_caller(), 1)
@@ -2689,25 +2669,35 @@ class PADView2(QtCore.QObject):
         return module
 
     def run_plugin(self, module_name):
-        self.debug(get_caller(), 1)
+        self.debug(get_caller()+' '+module_name, 1)
         if self.plugins is None:
             self.plugins = {}
         if not module_name in self.plugins.keys():
             module = self._import_plugin_module(module_name)  # Get the module (import or retrieve from cache)
         else:
             module = self.plugins[module_name]
-        if hasattr(module, 'plugin'):  # If the module has a plugin function, run the function and return
+        if hasattr(module, 'plugin'):  # If the module has a simple plugin function, run the function and return
             module.plugin(self)
             return
+        # If the plugin has a widget already, show it:
         if module_name+'.widget' in self.plugins.keys():
             self.plugins[module_name+'.widget'].show()  # Check if a widget is already cached.  If so, show it.
+            return
+        # If the plugin is a class with an action method, run it:
+        if module_name+'.action' in self.plugins.keys():
+            self.plugins[module_name+'.action']()
             return
         if hasattr(module, 'Plugin'):
             plugin_instance = module.Plugin(self)  # Check if the plugin defines a class.  If so, create an instance.
             self.plugins[module_name+'.class_instance'] = plugin_instance  # Cache the instance
-            self.plugins[module_name + '.widget'] = plugin_instance.widget  # Get the widget and cache it.
-            plugin_instance.widget.show()  # Show the widget.
-            self.debug('\tCreated plugin class instance.  Showing widget.')
+            self.debug('\tCreated plugin class instance.')
+            if hasattr(plugin_instance, 'widget'):
+                self.plugins[module_name + '.widget'] = plugin_instance.widget  # Get the widget and cache it.
+                plugin_instance.widget.show()  # Show the widget.
+                self.debug('\tShowing widget.')
+            if hasattr(plugin_instance, 'action'):
+                self.plugins[module_name + '.action'] = plugin_instance.action  # Get the widget and cache it.
+                self.debug('\tConfigureing action method.')
             return
         self.debug('\tPlugin module has no functions or classes defined.')
         return
