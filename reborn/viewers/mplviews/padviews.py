@@ -6,7 +6,7 @@ from reborn import utils
 
 
 def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, show_scans=False, show_coords=False,
-                  show=True):
+                  show=True, vmin=None, vmax=None):
     r"""
     Very simple function to show pad data with matplotlib.  This will take a list of data arrays along with a list
     of |PADGeometry| instances and display them with a decent geometrical layout.
@@ -20,9 +20,16 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     ax = plt.gca()
     ax.set_aspect('equal')
     ax.set_facecolor(np.array([0, 0, 0])+0.2)
-    q_max = np.max(concat_pad_data(pad_data))
-    q_min = np.min(concat_pad_data(pad_data))
-    imshow_args = {"vmin": q_min, "vmax": q_max, "interpolation": 'none', "cmap": 'gnuplot'}
+
+    pad_data_concated = concat_pad_data(pad_data)
+
+    if vmin == None:
+        v_min = np.min(pad_data_concated)
+
+    if vmax == None:
+        vmax = np.max(pad_data_concated)
+
+    imshow_args = {"vmin": vmin, "vmax": vmax, "interpolation": 'none', "cmap": 'viridis'}
     bbox = []
     for i in range(len(pads)):
         dat = data[i]
@@ -65,4 +72,4 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     if show:
         plt.show()
 
-    return ax
+    return ax, im

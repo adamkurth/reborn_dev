@@ -424,9 +424,10 @@ class CrystalStructure(object):
 
         """
         x0 = self.x
-        xs = []
+        xs = [] # Initialise an empty array to hold the symmetry partner coordinates
         for (R, T) in zip(self.spacegroup.sym_rotations, self.spacegroup.sym_translations):
             xs.append(np.dot(x0, R.T) + T)
+        # Concatenate and return the coordinates in realspace (orthogonal coordinates)
         return np.dot(np.concatenate(xs), self.unitcell.o_mat.T)
 
     def set_tight_packing(self):

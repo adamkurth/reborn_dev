@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import os
 import numpy as np
 
+from .. import utils
 from .. import detector
 from ..fileio.getters import FrameGetter
 from cfelpyutils import crystfel_utils
@@ -126,6 +127,52 @@ def geometry_file_to_pad_geometry_list(geometry_file):
     pad_list = geometry_dict_to_pad_geometry_list(geometry_dict)
 
     return pad_list
+
+
+def split_data_block(data, geom_dict, frame_number=0):
+    r"""
+    Split a chunk of contiguous data into a list of pad data.
+    """
+    split_data = []
+    for panel_name in geom_dict['panels']:
+        p = geom_dict['panels'][panel_name]
+        d = p['dim_structure']
+        if len(d) != data.ndim:
+            print("The number of data dimensions does not match the geom specification")
+            print("geom dim_structure", d)
+            print("data shape", data.shape)
+            raise ValueError("The number of data dimensions does not match the geom specification.")
+        fs_idx = d.index('fs')
+        ss_idx = d.index('ss')
+        try:
+            fn_idx = d.index('%')
+        except ValueError:
+            fn_idx = None
+        p_idx = None
+        try:  # Panel index identified by checking which type is an integer
+            for i in range(len(d)):
+                if type(d[i]) == int:
+                    p_idx = i
+        except ValueError:
+            pass
+        r = [None]*len(d)
+        r[fs_idx] = [p['min_fs'], p['max_fs'] + 1]
+        r[ss_idx] = [p['min_ss'], p['max_ss'] + 1]
+        if fn_idx is not None:
+            r[fn_idx] = [frame_number, frame_number + 1]
+        if p_idx is not None:
+            r[p_idx] = [int(d[p_idx]), int(d[p_idx]) + 1]
+        if data.ndim == 4:
+            im = data[r[0][0]:r[0][1], r[1][0]:r[1][1], r[2][0]:r[2][1], r[3][0]:r[3][1]]
+        elif data.ndim == 3:
+            im = data[r[0][0]:r[0][1], r[1][0]:r[1][1], r[2][0]:r[2][1]]
+        else:
+            im = data[r[0][0]:r[0][1], r[1][0]:r[1][1]]
+        im = np.squeeze(np.array(im))
+        if ss_idx > fs_idx:
+            im = im.T.copy()
+        split_data.append(im)
+    return split_data
 
 
 def split_image(data, geom_dict):

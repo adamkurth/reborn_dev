@@ -1,7 +1,4 @@
-import numpy as np
-from reborn import detector, source
-
-
+from reborn import detector
 def plugin(self):
     r""" Plugin for PADView. """
     data = detector.concat_pad_data(self.get_pad_display_data())

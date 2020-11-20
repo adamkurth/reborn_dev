@@ -29,3 +29,24 @@ def test_rotation():
     vec_expected[:, 1] = -vec10[:, 0]
 
     assert (np.max(np.abs(vec_rotated - vec_expected)) < 1e-10)
+
+
+def test_binned_statistic():
+
+    x = np.arange(30)/3.0
+    y = np.arange(30)
+    z = utils.binned_statistic(x, y, np.median, 8, (1, 9))
+    a = np.array([4,  7, 10, 13, 16, 19, 22, 25])
+    assert(np.max(np.abs(z - a)) == 0)
+
+    x = np.arange(6)
+    y = np.arange(6)
+    z = utils.binned_statistic(x, y, np.median, 6, (0, 5))
+    a = np.array([0, 1, 2, 3, 4, 0])
+    assert(np.max(np.abs(z - a)) == 0)
+
+    x = np.array([0, 1, 4, 5])
+    y = np.array([0, 1, 4, 5])
+    z = utils.binned_statistic(x, y, np.median, 6, (0, 6))
+    a = np.array([0, 1, 0, 0, 4, 5])
+    assert(np.max(np.abs(z - a)) == 0)

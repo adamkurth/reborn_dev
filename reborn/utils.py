@@ -11,6 +11,7 @@ import pkg_resources
 import numpy as np
 from numpy import sin, cos
 from numpy.fft import fftshift, fft, ifft, fftn
+from scipy.sparse import csr_matrix
 # from numba import jit
 from . import fortran
 
@@ -759,4 +760,61 @@ def get_FSC(f1, f2, labels_radial, N_radials):
 
     return np.abs( (radial_F1F2) / (np.sqrt(radial_F1) * np.sqrt(radial_F2)) )
 
+def atleast_2d(x):
+    r""" Expand dimensions of numpy array.  Add dimensions to the left-most index. """
+    x = np.array(x)
+    if x.ndim < 2:
+        x = np.expand_dims(x, axis=0)
+    return x
 
+def atleast_3d(x):
+    r""" Expand dimensions of numpy array.  Add dimensions to the left-most index. """
+    x = np.array(x)
+    if x.ndim < 3:
+        x = np.expand_dims(atleast_2d(x), axis=0)
+    return x
+
+def atleast_4d(x):
+    r""" Expand dimensions of numpy array.  Add dimensions to the left-most index. """
+    x = np.array(x)
+    if x.ndim < 4:
+        x = np.expand_dims(atleast_3d(x), axis=0)
+    return x
+
+
+def binned_statistic(x, y, func, n_bins, bin_edges, fill_value=0):
+    r""" Similar to :func:`binned_statistic <scipy.stats.binned_statistic>` but faster because regular bin spacing
+    is assumed, and sparse matrix algorithms are used.  Speedups of ~30-fold have been observed.
+
+    Based on the discussion found here:
+    https://stackoverflow.com/questions/26783719/efficiently-get-indices-of-histogram-bins-in-python
+
+    Args:
+        x (|ndarray|): The coordinates that correspond to values y below.  Bin indices derive from x.
+        y (|ndarray|): The values that enter into the statistic.
+        func (function): The function that will be applied to values in each bin
+        n_bins (int): Desired number of bins
+        bin_edges (tuple of floats): The min and max edges of bins (edges, not the centers, of the bins)
+
+    Returns:
+
+    """
+    n_data = len(y)
+    r0, r1 = bin_edges
+    bin_size = float(r1 - r0)/n_bins
+    # To avoid out-of-range values, we add a bin to the left and right.  Out-of-range entries get tossed into those
+    # bins, which we throw away later.
+    n_bins += 2
+    r0 -= bin_size
+    r1 += bin_size
+    digitized = (float(n_bins) / (r1 - r0) * (x - r0)).astype(int)
+    digitized = np.maximum(digitized, 0)
+    digitized = np.minimum(digitized, n_bins-1)
+    mat = csr_matrix((y, [digitized, np.arange(n_data)]), shape=(n_bins, n_data))
+    groups = [group for group in np.split(mat.data, mat.indptr[1:-1])]
+    out = np.empty(n_bins, dtype=y.dtype)
+    out.fill(fill_value)
+    for i in range(n_bins):
+        if len(groups[i]) > 0:
+            out[i] = func(groups[i])
+    return out[1:-1]
