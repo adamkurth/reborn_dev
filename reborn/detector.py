@@ -1177,8 +1177,7 @@ def save_pad_masks(file_name, mask_list, packbits=True):
     """
     if not file_name.endswith('.mask'):
         file_name += '.mask'
-    if not isinstance(mask_list, list):
-        mask_list = [mask_list]
+    mask_list = utils.ensure_list(mask_list)
     if packbits:
         shapes = [np.array(m.shape).astype(int) for m in mask_list]
         masks = [np.packbits(m.ravel().astype(bool).astype(np.uint8)) for m in mask_list]
