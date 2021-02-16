@@ -1529,11 +1529,14 @@ class PADView2(QtCore.QObject):
     def mask_data(self):
         if self._mask_data is not None:
             return self._mask_data
-        self._mask_data = [p.ones() for p in self.pad_geometry]
+        if self.pad_geometry is not None:
+            self._mask_data = [p.ones() for p in self.pad_geometry]
         return self._mask_data
 
     @mask_data.setter
     def mask_data(self, val):
+        if val is None:
+            return
         if type(val) == list:
             self._mask_data = val
         else:

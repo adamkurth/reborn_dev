@@ -11,7 +11,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from .. import detector
 from ..utils import rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance, ensure_list
-from ..external import crystfel
 from . import atoms
 from . import solutions
 from ..target.crystal import CrystalStructure
@@ -23,8 +22,8 @@ r_e = const.value('classical electron radius')
 
 lysozyme_pdb_file = pkg_resources.resource_filename('reborn', 'data/pdb/2LYZ.pdb')
 psi_pdb_file = pkg_resources.resource_filename('reborn', 'data/pdb/1jb0.pdb')
-pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front.geom')
-cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad.geom')
+pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
+cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_geometry.json')
 
 
 def pnccd_pads():
@@ -34,7 +33,7 @@ def pnccd_pads():
 
     Returns: List of |PADGeometry| instances
     """
-    pads = crystfel.geometry_file_to_pad_geometry_list(pnccd_geom_file)
+    pads = detector.load_pad_geometry_list(pnccd_geom_file)
     for p in pads:
         p.t_vec[2] = 0.1
     return pads
@@ -49,7 +48,7 @@ def cspad_pads(detector_distance=0.1):
 
     Returns: List of |PADGeometry| instances
     """
-    pads = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+    pads = detector.load_pad_geometry_list(cspad_geom_file)
     for p in pads:
         p.t_vec[2] = detector_distance
     return pads
