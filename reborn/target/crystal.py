@@ -440,7 +440,7 @@ class CrystalStructure(object):
 class FiniteLattice(object):
     r"""
     A utility for creating finite crystal lattices.  Uses an occupancy model in which a maximum-size array of
-    occupancies is created and set to 1 (occupied), and subsequently facets may be added by specifying the plane at
+    occupancies is created and set to 1 (occupied), and subsequently facets may be added by specifying the plane
     at which the cut is made.  A cut sets the occupancies beyond the plane to 0 (unoccupied).  Lattice vector positions
     can then be generated in the crystal or cartesian basis.  Gaussian disorder may be added.  Special shapes are
     supported, including hexagonal prisms, parallelepipeds, and spheres.
@@ -539,7 +539,7 @@ class FiniteLattice(object):
             shift (numpy array):  The vector :math:`\vec{s}` defined above.
         """
 
-        proj = (self.all_x_coordinates+shift).dot(np.array(plane))
+        proj = (self.all_x_coordinates + shift).dot(np.array(plane))
         w = np.where(proj > length)[0]
         if len(w) > 0:
             self.occupancies.flat[w] = 0
@@ -561,6 +561,7 @@ class FiniteLattice(object):
         Arguments:
             width (float or array): Three widths to specify the prism shape/size, as explained above.
             length (float): Length of the prism, as illustrated above.
+            shift (numpy array):  An optional shift of the entire crystal (defaults to 0).
         """
 
         width = np.array(width).squeeze()
@@ -580,7 +581,13 @@ class FiniteLattice(object):
         self.add_facet(plane=[0, 0, -1], length=length/2, shift=shift)
 
     def make_parallelepiped(self, shape=(5, 5, 5), shift=0):
-        r""" Cuts out a Parallelepiped shape"""
+        r""" Cuts out a Parallelepiped shaped crystal.
+
+        Arguments:
+            shape (3-tuple):  Number of lattice points to include in the parallelepiped in each direction.
+            shift (numpy array):  An optional shift of the entire crystal (defaults to 0).
+        """
+
         self.reset_occupancies()
         self.add_facet(plane=[1, 0, 0],  length=shape[0]/2, shift=shift)
         self.add_facet(plane=[-1, 0, 0], length=shape[0]/2, shift=shift)

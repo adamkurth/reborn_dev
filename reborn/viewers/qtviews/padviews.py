@@ -1181,6 +1181,14 @@ class PADView(object):
             method(*args, **kwargs)
 
 
+class PADViewMainWindow(QtGui.QMainWindow):
+    r""" A QMainWindow that closes all windows when it is closed.  Be careful... """
+    def __init__(self):
+        super().__init__()
+    def closeEvent(self, *args, **kwargs):
+        QtGui.QApplication.instance().closeAllWindows()
+
+
 class PADView2(QtCore.QObject):
 
     r"""
@@ -1204,10 +1212,10 @@ class PADView2(QtCore.QObject):
     crystfel_geom_file_name = None
     pad_labels = None
     _mask_data = None
-    mask_images = None
-    mask_color = None
+    mask_image_items = None
+    mask_color = [128, 0, 0]
     _mask_rois = None
-    images = None
+    pad_image_items = None
     scatter_plots = None
     plot_items = None
     rings = []
@@ -1344,7 +1352,7 @@ class PADView2(QtCore.QObject):
 
     def setup_ui(self):
 
-        self.main_window = QtGui.QMainWindow()
+        self.main_window = PADViewMainWindow() #QtGui.QMainWindow()
         self.menubar = self.main_window.menuBar()
         self.statusbar = self.main_window.statusBar()
         self.hbox = QtGui.QHBoxLayout()
@@ -1521,11 +1529,14 @@ class PADView2(QtCore.QObject):
     def mask_data(self):
         if self._mask_data is not None:
             return self._mask_data
-        self._mask_data = [p.ones() for p in self.pad_geometry]
+        if self.pad_geometry is not None:
+            self._mask_data = [p.ones() for p in self.pad_geometry]
         return self._mask_data
 
     @mask_data.setter
     def mask_data(self, val):
+        if val is None:
+            return
         if type(val) == list:
             self._mask_data = val
         else:
@@ -1535,7 +1546,7 @@ class PADView2(QtCore.QObject):
         r""" Set up the histogram/colorbar/colormap tool that is located to the right of the PAD display. """
         self.debug(get_caller(), 1)
         self.set_preset_colormap('flame')
-        self.histogram.setImageItems(self.images)
+        self.histogram.setImageItems(self.pad_image_items)
 
     def set_preset_colormap(self, preset='flame'):
         r""" Change the colormap to one of the presets configured in pyqtgraph.  Right-click on the colorbar to find
@@ -1543,7 +1554,7 @@ class PADView2(QtCore.QObject):
         """
         self.debug(get_caller(), 1)
         self.histogram.gradient.loadPreset(preset)
-        self.histogram.setImageItems(self.images)
+        self.histogram.setImageItems(self.pad_image_items)
         pg.QtGui.QApplication.processEvents()
 
     def get_levels(self):
@@ -1809,16 +1820,16 @@ class PADView2(QtCore.QObject):
         pad_data = self.get_pad_display_data()
         if self.mask_data is None:
             self.mask_data = [np.ones_like(d) for d in pad_data]
-        if self.mask_color is None:
-            self.mask_color = np.array([128, 0, 0])
+        # if self.mask_color is None:
+        #     self.mask_color = np.array([128, 0, 0])
         for i in range(0, self.n_pads):
             d = self.mask_data[i]
             mask_rgba = self._make_mask_rgba(d)
             im = ImageItem(mask_rgba, autoDownsample='max')
             self._apply_pad_transform(im, self.pad_geometry[i])
-            if self.mask_images is None:
-                self.mask_images = []
-            self.mask_images.append(im)
+            if self.mask_image_items is None:
+                self.mask_image_items = []
+            self.mask_image_items.append(im)
             self.viewbox.addItem(im)
             self.histogram.regionChanged()
 
@@ -1826,10 +1837,10 @@ class PADView2(QtCore.QObject):
         self.debug(get_caller(), 1)
         if mask_data is not None:
             self.mask_data = mask_data
-        if self.mask_images is None:
+        if self.mask_image_items is None:
             self.setup_masks()
         for i in range(0, self.n_pads):
-            self.mask_images[i].setImage(self._make_mask_rgba(self.mask_data[i]))
+            self.mask_image_items[i].setImage(self._make_mask_rgba(self.mask_data[i]))
 
     def mask_panel_edges(self, n_pixels=None):
         self.debug(get_caller(), 1)
@@ -1873,20 +1884,20 @@ class PADView2(QtCore.QObject):
 
     def hide_masks(self):
         self.debug(get_caller(), 1)
-        if self.mask_images is not None:
-            for im in self.mask_images:
+        if self.mask_image_items is not None:
+            for im in self.mask_image_items:
                 im.setVisible(False)
 
     def show_masks(self):
         self.debug(get_caller(), 1)
-        if self.mask_images is not None:
-            for im in self.mask_images:
+        if self.mask_image_items is not None:
+            for im in self.mask_image_items:
                 im.setVisible(True)
 
     def toggle_masks(self):
         self.debug(get_caller(), 1)
-        if self.mask_images is not None:
-            for im in self.mask_images:
+        if self.mask_image_items is not None:
+            for im in self.mask_image_items:
                 im.setVisible(not im.isVisible())
 
     def save_masks(self):
@@ -2063,7 +2074,7 @@ class PADView2(QtCore.QObject):
         self.debug(get_caller(), 1)
         pad_data = self.get_pad_display_data()
         mx = np.ravel(pad_data).max()
-        self.images = []
+        self.pad_image_items = []
         if self.n_pads == 0:
             self.debug("Cannot setup pad display data - there are no pads to display.")
         for i in range(0, self.n_pads):
@@ -2075,7 +2086,7 @@ class PADView2(QtCore.QObject):
                 d[0, 0:int(np.floor(self.pad_geometry[i].n_fs/2))] = mx
             im = ImageItem(d) #, autoDownsample='mean')
             self._apply_pad_transform(im, self.pad_geometry[i])
-            self.images.append(im)
+            self.pad_image_items.append(im)
             self.viewbox.addItem(im)
             self.histogram.regionChanged()
         self.setup_histogram_tool()
@@ -2085,10 +2096,10 @@ class PADView2(QtCore.QObject):
     def update_pad_geometry(self, pad_geometry):
         self.pad_geometry = pad_geometry
         for i in range(self.n_pads):
-            if self.images is not None:
-                self._apply_pad_transform(self.images[i], self.pad_geometry[i])
-            if self.mask_images is not None:
-                self._apply_pad_transform(self.mask_images[i], self.pad_geometry[i])
+            if self.pad_image_items is not None:
+                self._apply_pad_transform(self.pad_image_items[i], self.pad_geometry[i])
+            if self.mask_image_items is not None:
+                self._apply_pad_transform(self.mask_image_items[i], self.pad_geometry[i])
         if self.pad_labels is not None:
             self.toggle_pad_labels()
             self.toggle_pad_labels()
@@ -2097,7 +2108,7 @@ class PADView2(QtCore.QObject):
 
     def update_pads(self):
         self.debug(get_caller(), 1)
-        if self.images is None:
+        if self.pad_image_items is None:
             self.setup_pads()
         processed_data = self.get_pad_display_data()
         for i in range(0, self.n_pads):
@@ -2105,7 +2116,7 @@ class PADView2(QtCore.QObject):
             if self.logscale:
                 d[d < 0] = 0
                 d = np.log10(d)
-            self.images[i].setImage(d)
+            self.pad_image_items[i].setImage(d)
         self.histogram.regionChanged()
 
     def save_pad_geometry(self):
@@ -2267,32 +2278,32 @@ class PADView2(QtCore.QObject):
 
     def show_pad_border(self, n, pen=None):
         self.debug(get_caller(), 1)
-        if self.images is None:
+        if self.pad_image_items is None:
             return
         if pen is None:
             pen = pg.mkPen([0, 255, 0], width=2)
-        self.images[n].setBorder(pen)
+        self.pad_image_items[n].setBorder(pen)
 
     def hide_pad_border(self, n):
         self.debug(get_caller(), 1)
-        if self.images is None:
+        if self.pad_image_items is None:
             return
-        self.images[n].setBorder(None)
+        self.pad_image_items[n].setBorder(None)
 
     def show_pad_borders(self, pen=None):
         self.debug(get_caller(), 1)
-        if self.images is None:
+        if self.pad_image_items is None:
             return
         if pen is None:
             pen = pg.mkPen([0, 255, 0], width=1)
-        for image in self.images:
+        for image in self.pad_image_items:
             image.setBorder(pen)
 
     def hide_pad_borders(self):
         self.debug(get_caller(), 1)
-        if self.images is None:
+        if self.pad_image_items is None:
             return
-        for image in self.images:
+        for image in self.pad_image_items:
             image.setBorder(None)
 
     def show_history_next(self):
@@ -2726,6 +2737,14 @@ class PADView2(QtCore.QObject):
 
     def stop(self):
         self.debug(get_caller(), 1)
+        # # self.app.closeAllWindows()  Why doesn't this work?
+        # if self.plugins is not None:
+        #     for key in self.plugins.keys():
+        #         plugin = self.plugins[key]
+        #         if hasattr(plugin, 'widget'):
+        #             self.debug('Closing widget %s' % key, 1)
+        #             self.plugins[key] = None
+        #             # plugin.widget.close()
         self.app.quit()
         del self.app
 
@@ -2981,11 +3000,11 @@ if __name__ == '__main__':
     #     mask[i][dat[i] < 40000] = 0
     [print(p) for p in pads]
     pv = PADView2(raw_data=dat, pad_geometry=pads, mask_data=mask, debug_level=2)
-    pv.show_coordinate_axes()
+    # pv.show_coordinate_axes()
     pv.set_levels(0, 30000)
     # pv.run_plugin('central_symmetry')
     # pv.run_plugin('shift_detector')
-    pv.run_plugin('mask_editor')
+    # pv.run_plugin('mask_editor')
     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
     # pv.show_fast_scan_directions()
     pv.set_title('testing')
