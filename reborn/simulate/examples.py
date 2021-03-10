@@ -96,7 +96,7 @@ def simulate_water(pad_geometry=None, beam=None, water_thickness=1e-6):
     J = beam.photon_number_fluence
     P = detector.concat_pad_data([p.polarization_factors(beam=beam) for p in pads])
     SA = detector.concat_pad_data([p.solid_angles() for p in pads])
-    F_water = solutions.get_water_profile(q_mags)
+    F_water = detector.concat_pad_data(solutions.get_water_profile(q_mags))
     F2_water = F_water ** 2 * n_water_molecules
     I = r_e ** 2 * J * P * SA * F2_water
     return detector.split_pad_data(pads, I)

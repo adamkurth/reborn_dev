@@ -657,14 +657,17 @@ class CrystalDensityMap(object):
         Arguments:
             cryst (:class:`CrystalStructure` instance) : A crystal structure that contains the spacegroup and lattice
                                                       information.
-            resolution (float) : The desired resolution of the map (will be modified to suit integer samples and a
-                                  square 3D mesh)
+            resolution (float) : The desired resolution of the map.  The resolution :math:`d` is defined such that the
+              number of samples along the :math:`n`__th edge is greater than or equal to :math:`a_n/d` for lattice
+              constant :math:`a_n`.  The actual value will be rounded up toward the nearest multiple of 1, 2, 3, 4, or 6
+              (whichever is appropriate for the spacegroup symmetry).
             oversampling (int) : An oversampling of 2 gives a real-space map that is twice as large as the unit cell. In
                                   Fourier space, there will be one sample between Bragg samples.  And so on for 3,4,...
         """
 
         # Given desired resolution and unit cell, these are the number of voxels along each edge of unit cell.
-        cshape = np.ceil((1/resolution) * (1/vec_mag(cryst.unitcell.a_mat.T)))
+        # cshape = np.ceil((1/resolution) * (1/vec_mag(cryst.unitcell.a_mat.T)))
+        cshape = np.ceil(vec_mag(cryst.unitcell.o_mat.T)/resolution)
 
         # The number of samples along an edge must be a multiple of the shortest translation.  E.g., if an operation
         # consists of a translation of 1/3 or 2/3 distance along the cell, the shape must be a multiple of 3.

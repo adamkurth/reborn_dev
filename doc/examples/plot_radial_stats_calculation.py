@@ -1,6 +1,6 @@
 r"""
 Radial statistics calculation
-============================
+=============================
 
 Calculate radial statistics
 
