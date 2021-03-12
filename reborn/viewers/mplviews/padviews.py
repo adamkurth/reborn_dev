@@ -6,10 +6,12 @@ from reborn import utils
 
 
 def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, show_scans=False, show_coords=False,
-                  show=True, vmin=None, vmax=None):
+                  show=True, vmin=None, vmax=None, background_color=None):
     r"""
     Very simple function to show pad data with matplotlib.  This will take a list of data arrays along with a list
     of |PADGeometry| instances and display them with a decent geometrical layout.
+
+    Arguments:
 
     Returns:
         axis
@@ -19,7 +21,10 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     plt.figure()
     ax = plt.gca()
     ax.set_aspect('equal')
-    ax.set_facecolor(np.array([0, 0, 0])+0.2)
+    # Damn SACLA computers have old versions of python pacakges... had to get rid of the next line...
+    #ax.set_facecolor(np.array([0, 0, 0])+0.2)
+    if background_color is not None:
+        ax.set_facecolor(background_color)
 
     pad_data_concated = concat_pad_data(pad_data)
 
