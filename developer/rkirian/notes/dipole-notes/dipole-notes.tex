@@ -30,21 +30,26 @@ bottom=20mm,
 \def\brcurs{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{fonts/BoldR}}$}}}
 \def\hrcurs{{\mbox{$\hat \brcurs$}}}
 
-\begin{document}
-\section{Overview}
 
+\title{Scattering intensity under the Born approximation.}
+\author{Richard Kirian}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Overview}
 
 There are multiple ways to develop the theory of x-ray diffraction.  In order to make this guide 
 accessible to motivated undergraduates, we will build upon the most popular
-undergraduate electrodynamics textbook by David Griffiths.  The main result that is 
+undergraduate electrodynamics textbook by David Griffiths\cite{Griffiths2018}.  The main result that is 
 derived below is the following equation for the measured diffraction intensity:
 \begin{align}\label{eqn:key}
-    I(\vec{q}) = J_0 r_e^2 \Delta \Omega P(\vec{q})  \abs{\int  f(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;.
+    I(\vec{q}) = J_0 r_e^2 \Delta \Omega P(\vec{q})  \abs{\int  \rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;.
 \end{align}
 The above result assumes (1) perfect plane-wave illumination with wavelength $\lambda$,
 and (2) the first-order Born approximation, which loosely means that the scattering amplitudes are very weak 
-compared to the incident amplitudes.
-The quantities in equation \ref{eqn:key} are as follows:
+compared to the incident amplitudes. The quantities in equation \ref{eqn:key} are as follows:
 \begin{itemize}
 \item $I(\vec{q})$ is the number of photons detected in a detector pixel
 \item $\vec{q}=\vec{k}-\vec{k}_0$ is the wavevector transfer
@@ -54,20 +59,20 @@ The quantities in equation \ref{eqn:key} are as follows:
 \item $\Delta \Omega$ is the solid angle of the detector pixel (assumed very small)
 \item $P(\vec{q})$ is the polarization factor defined below
 \item $r_e = 2.818 \times 10^{-15}$~m is the Classical electron radius
-\item $f(\vec{r})$ is the scattering density, which is usually equal to the electron density $\rho(\vec{r})$.
+\item $\rho(\vec{r})$ is the scattering density, which is approximately equal to the electron density.
 \end{itemize}
 
 As we can see from equation \ref{eqn:key}, under certain approximations, x-ray diffraction intensities 
-allow us to measure the magnitude of the Fourier transform of the scattering density $f(\vec{r})$ of the target:
+allow us to measure the magnitude of the Fourier transform of the scattering density $\rho(\vec{r})$ of the target:
 \begin{align}
-    \abs{F(\vec{q})} \propto \abs{\int  f(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r } \;.
+    \abs{F(\vec{q})} \propto \abs{\int  \rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r } \;.
 \end{align}
 Ideally, we would like to measure the complex \emph{amplitudes} $F(\vec{q})$, in which case
 we could directly recover the scattering density via inverse Fourier transform:
 \begin{align}
-f(\vec{r}) = \frac{1}{2\pi} \int  F(\vec{q}) e^{i \vec{q}\cdot\vec{r}} d^3 q \;.
+\rho(\vec{r}) = \frac{1}{2\pi} \int  F(\vec{q}) e^{i \vec{q}\cdot\vec{r}} d^3 q \;.
 \end{align}
-The task of recovering the desired molecular structure $f(\vec{r})\approx \rho(\vec{r})$ given the 
+The task of recovering the desired molecular structure $\rho(\vec{r})\approx \rho(\vec{r})$ given the 
 information-deficient
 measurement of $\abs{F(\vec{q})}$ is called the ``phase problem'' in diffraction microscopy and
 crystallography.
@@ -130,16 +135,13 @@ radiation field
 \end{align}
 for the remainder of this note.
 
-Consider a point charge that oscillates with position $\vec{r}' = r_0 \cos(-i\omega t) \hvec{r}'$.%, where 
-it is understood that we take the real part to get the observable quantity.
-%, which gives the velocity $\vec{v} = - r_0 \omega \sin(\omega t) \hvec{r}'$ and acceleration
-% $\vec{a} = - r_0 \omega^2 \cos(\omega t) \hvec{r}'$.
+Consider a point charge that oscillates about the origin with position $\vec{r}' = r_0 \cos(-i\omega t) \hvec{r}'$.
 We make the standard dipole radiation assumptions: the dipole is small compared to the distance
 to our observation point, which means that $r \gg r'$ and hence $\brcurs \approx \vec{r}$.
-We further assume that the charged particle is non-relativistic, which means that
-%\footnote{Equivalently, $r_0\omega/c  \ll 1 $ or $r_0/\lambda \ll 1$; the wavelength is much
-%larger than the dipole, and the time it takes light to traverse the extent of the dipole is
-%small compared to the period of oscillation.}
+We further assume that the charged particle is non-relativistic, which means that\footnote{Equivalently, 
+$r_0\omega/c = 2\pi r_0/\lambda \ll 1 $; the wavelength is much
+larger than the dipole, and the time it takes light to traverse the extent of the dipole is
+small compared to the period of oscillation.}
 $v \ll c$, and we may use $\vec{u} \approx c \hrcurs$.  Plugging these in, we get
 \begin{align}\label{eqn:dip1}
 \vec{E}_\text{dip}(\vec{r},t) &= \frac{q}{4\pi\epsilon_0} \frac{r}{(\vec{r}\cdot c \hvec{r})^3}
@@ -147,31 +149,6 @@ $v \ll c$, and we may use $\vec{u} \approx c \hrcurs$.  Plugging these in, we ge
 &= \frac{\mu_0 }{4\pi} \frac{1}{r} [\hvec{r} \times ( \hvec{r} \times  \ddot{\vec{p}}(t_r))
 \end{align}
 where $\vec{p}(t) = q \vec{r}'(t)$ is the dipole moment of the point charge.
-% We can identify the dipole moment as $\vec{p}_0(t_r) = q r_0 \cos(\omega t_r) \hvec{r}'$ and
-%rewrite the above:
-% \begin{align}
-% \vec{E}_\text{dip} =  \frac{\mu_0 }{4\pi} \frac{1}{r} [\hvec{r} \times ( \hvec{r} \times  \ddot{\vec{p}}_0(t_r))] \; .
-% \end{align}
-% If we had many point charges distributed through space that all satisfy the same assumptions
-% mentioned above, we simply sum the fields from each of the dipoles to get
-% \begin{align}
-% \vec{E}_\text{dip} =  \frac{\mu_0 }{4\pi} \frac{1}{r} [\hvec{r} \times ( \hvec{r} \times   \sum_n
-% \ddot{\vec{p}}_n(t_r))] \; .
-% \end{align}
-% We may extend the to the continuum limit and re-write the above as in Griffiths 11.56:
-% \begin{align}
-% \vec{E}_\text{dip} =  \frac{\mu_0 }{4\pi} \frac{1}{r} [\hvec{r} \times ( \hvec{r} \times
-% \ddot{\vec{p}}(t_r)]
-% \end{align}
-% where the total dipole moment is $\vec{p} = \int \rho(\vec{r}') \vec{r}' d\tau'$.  %By ``localized'', we assume that the timescale over which the field changes is
-% much less than $\vec{r}_i'/c$ (we will be more explicit about this in the next section, and you may
-% also look to Griffiths equation 11.50 for further elaboration).
-% We might as well rewrite the above using the total dipole moment $\vec{p}(t_r) = \sum_n
-%\ddot{\vec{p}}_n(t_r)$, which gives us Griffiths equation 11.56:
-% \begin{align}
-% \vec{E}_\text{dip} =  \frac{\mu_0 }{4\pi} \frac{1}{r} [\hvec{r} \times ( \hvec{r} \times
-%\ddot{\vec{p}}(t_r))] \; .
-% \end{align}
 The magnetic field is
 \begin{align}
 \vec{B}_\text{dip} =  \frac{1}{c} \hvec{r} \times \vec{E}_\text{dip} 
@@ -180,19 +157,11 @@ and the pointing vector is
 \begin{align}
 \vec{S} =  \frac{1}{\mu_0} \vec{E}_\text{dip}\times\vec{B}_\text{dip} =  \frac{1}{\mu_0c} E_\text{dip}^2\hvec{r} 
 = \frac{\mu_0}{16 \pi^2 cr^2} |\hvec{r} \times    \ddot{\vec{p}}|^2\hvec{r} \;.\\
-%&=  \frac{1}{\mu_0c} \vec{E}_\text{dip}\times(\hvec{r} \times \vec{E}_\text{dip}) \\
-%&= \frac{1}{\mu_0c}\left[ \hvec{r}  (\vec{E}_\text{dip}\cdot \vec{E}_\text{dip})  - \vec{E}_\text{dip} (\hvec{r}\cdot \vec{E}_\text{dip}) \right] \\
-% &=  \frac{1}{\mu_0c} E_\text{dip}^2\hvec{r} \\
-% &= \frac{\mu_0}{16 \pi^2 cr^2} |\hvec{r} \times    \ddot{\vec{p}}|^2\hvec{r} \;.
 \end{align}
 The differential power radiated through a differential area $d\vec{a} = r^2 \sin\theta d\theta d\phi \hvec{r} = r^2 d\Omega \hvec{r}$ is
 \begin{align}
 dP = \vec{S}\cdot d\vec{a} = \frac{\mu_0 }{16\pi^2 c} |\hvec{r} \times    \ddot{\vec{p}}|^2 d\Omega \; .
 \end{align}
-% We often speak in terms of radiation power per solid angle and write
-% \begin{align}
-% \frac{dP}{d\Omega} = \frac{\mu_0 }{16\pi^2 c} |\hvec{r} \times    \ddot{\vec{p}}|^2   \; .
-% \end{align}
 The total power radiated away is
 \begin{align}
 P = \int \frac{dP}{d\Omega} d\Omega =  \frac{\mu_0 }{16\pi^2 c}  \int |\hvec{r} \times    \ddot{\vec{p}}|^2 d\Omega  \; .
@@ -206,11 +175,11 @@ For sinusoidal oscillations, a time average of the above introduces a factor of 
 \avg{dP} &= \frac{\mu_0 \omega^4 p^2}{32\pi^2 c} |\hvec{r}\times\hvec{p}|^2 d\Omega \\
 \langle P \rangle &=  \frac{\mu_0 \omega^4 p^2}{12\pi c} \; . \label{eqn:avgpwer}
 \end{align}
-% The dipole approximation for an oscillator demands that $r' \ll \omega/c$; the dipole is much smaller than the radiation wavelength.
+
 
 \section{Thompson scatter from a free electron}
 
-An example of a very simple classical scattering process is a free electron exposed to an electromagnetic wave, which results in acceleration and hence re-radiation or \emph{scattering}.  %Electrons are far less massive than protons, and the radiation intensity scales with acceleration squared, therefore electrons are the primary radiators in classical light scattering processes.  
+An example of a very simple classical scattering process is a free electron exposed to an electromagnetic wave, which results in acceleration and hence re-radiation or \emph{scattering}.    
 The force on an electron (mass $m_e$ and charge $e$) due to an incident light beam with oscillating electric field $\vec{E}_0(t)$ 
 results in the acceleration
 \begin{align}
@@ -224,7 +193,7 @@ Plugging this into the dipole radiation formula \ref{eqn:dip1} gives
 \begin{align}
 \vec{E}_\text{dip} =  -\frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  \vec{E}_0(t_r))] 
 \end{align}
-where we simplified the expression by defining the classical electron radius%\footnote{There are other ways to develop the classical electron radius.  It is also the result of equating the rest energy $m_ec^2$ with the energy necessary to assemble a charge $e$ into a sphere of radius $r_e$.}
+where we simplified the expression by defining the classical electron radius
 \begin{align}
 r_e = \frac{1}{4\pi \epsilon_0} \frac{e^2}{m_e c^2} \approx 2.8\times10^{-15} \; \text{m} \;.
 \end{align}
@@ -237,7 +206,6 @@ where $I_0 = |\hvec{E}_0|^2/2\mu_0c$ is the incident radiation intensity.  Integ
 P = \frac{8}{3}\pi r_e^2  I_0  = \sigma_T  I_0 
 \end{align}
 where $\sigma_T$ is the Thompson scattering cross section.
-% In the case of x-rays, the incident frequency is so high that nearly all electrons behave as free electrons, including those bound to atoms.  The above formula gives good quantitative results.  
 
 \section{Weak Diffraction (Born approximation)}
 
@@ -265,13 +233,13 @@ Finally, in order to form a diffraction pattern, we sum over many electrons at p
 \begin{align}
 \vec{E}_\text{diff}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \sum_i e^{-i\vec{q}\cdot\vec{r}_i'} \;.
 \end{align}
-In the continuum limit, with electron density $f(\vec{r})$, we have
+In the continuum limit, with electron density $\rho(\vec{r})$, we have
 \begin{align}
-\vec{E}_\text{diff}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \int f(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r' \;.
+\vec{E}_\text{diff}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \int \rho(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r' \;.
 \end{align}
 We typically define the ``form factor'' as
 \begin{align}
- F(\vec{q}) = \int f(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r' \;.
+ F(\vec{q}) = \int \rho(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r' \;.
 \end{align}
 This form factor is just the Fourier transform of the electron density, with the conjugate variable $\vec{q}$ being defined by the incoming and outgoing wavevectors.  The time-averaged Poynting vector is\footnote{See Appendix \ref{sec:poynt} for details.}
 \begin{align}
@@ -288,8 +256,7 @@ elliptical polarization if we write the field as a superposition of two orthogon
 \end{align}
 where $\hvec{E}_2 = \hvec{k}_0 \times \hvec{E}_1$.  The time-averaged Poynting vector becomes\footnote{See Appendix \ref{sec:poynt} for details.}
 \begin{align}
-\avg{\vec{S}(\vec{r})} &= r_e^2 \frac{1}{r^2} (I_1 | \hvec{r} \times  \hvec{E}_1 |^2 + I_2 | \hvec{r} \times  \hvec{E}_2 |^2) \left| F(\vec{q}) \right|^2 \hvec{r} \;. %\\
- %&= r_e^2 \frac{1}{r^2} (I_1 | \hvec{r} \times  \hvec{E}_1 |^2 + I_2 | \hvec{r} \times  (\hvec{k}_0\times\hvec{E}_1) |^2) \left| F(\vec{q}) \right|^2 \hvec{r}\;.
+\avg{\vec{S}(\vec{r})} &= r_e^2 \frac{1}{r^2} (I_1 | \hvec{r} \times  \hvec{E}_1 |^2 + I_2 | \hvec{r} \times  \hvec{E}_2 |^2) \left| F(\vec{q}) \right|^2 \hvec{r} \;. 
 \end{align}
 If we write the incident intensity as 
 \begin{align}
@@ -306,7 +273,7 @@ I(\vec{q}) = r_e^2 I_0 (\alpha | \hvec{r} \times  \hvec{E}_1 |^2 + (1-\alpha) | 
 \end{align}
 We have now arrived at equation \ref{eqn:key}:
 \begin{align}
-    I(\vec{q}) = J_0 r_e^2 \Delta \Omega P(\vec{q})  \abs{\int  f(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2
+    I(\vec{q}) = J_0 r_e^2 \Delta \Omega P(\vec{q})  \abs{\int  \rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2
 \end{align}
 where the polarization factor is defined as
 \begin{align}\label{eqn:goodpol}
@@ -320,31 +287,6 @@ A convenient form for calculations is
 \begin{align}
  P(\vec{q}) &= 1 - \alpha(\hvec{k} \cdot \hvec{E}_1 )^2 - (1-\alpha)(\hvec{k} \cdot \hvec{E}_2 )^2 \;.
 \end{align}
-
-
-% The two most common polarizations are (1) linear polarization in which $\alpha=1$ and the polarization factor is often written as 
-% \begin{align}
-% P_\text{linear}(\vec{q}) = 1 - \cos^2\theta
-% \end{align}
-% with $\theta$ being the angle between $\hvec{k}$ and $\hvec{E}_1$.  The second
-% case is (2) unpolarized light in which case $\alpha = 0.5$.  If we take $\hvec{k}_0=\hvec{z}$ we may write
-% \begin{align}
-%  P(\vec{q}) = \frac{1}{2} \left( | \hvec{r} \times  \hvec{x} |^2 + | \hvec{r} \times  \hvec{y} |^2\right) \;.
-% \end{align}
-% Since unpolarized light is symmetric about the $\hvec{k}_0$ axis we may choose $\hvec{r} = \sin\phi \hvec{x} + \cos\phi \hvec{z}$
-% and write
-% \begin{align}
-%  P(\vec{q}) %&= \frac{1}{2} \left( | (\sin\phi \hvec{x} + \cos\phi \hvec{z}) \times  \hvec{x} |^2 + | (\sin\phi \hvec{x} + \cos\phi \hvec{z})\times  \hvec{y} |^2\right) \\
-%  &= \frac{1}{2} \left( 1+ \cos^2\phi \right)\;,
-% \end{align}
-% where $\phi$ is the angle between $\vec{k}_0$ and $\vec{k}$.  Although the polarizations are nicer to look at when expressed as 
-% trigonometric functions, the formula in equation \ref{eqn:goodpol} is most convenient when using a  computer and the relation $\abs{\hvec{r}\times\hvec{E}}^2 = 1 - (\hvec{k}\cdot\hvec{E})^2$.
-
-
-% In a diffraction measurement, it is usually straightforward to extract $\left| f(\vec{q}) \right|^2$ -- the magnitude of the Fourier transform of the electron density, or, if you wish, the wavevector amplitudes of the momentum-space representation of the object.  This equation gives quantitatively correct results in the case of x-rays striking small targets, because x-rays have very high frequency and the electrons, even if bound to atoms/molecules, behave approximately as a plasma that scatters weakly.  This scattering equation has been used to solve the vast majority of molecular structures that are presently known.  Many Nobel prizes have been awarded to scientists who have found creative ways to determine the electron density $\rho(\vec{r})$ given only the measured Fourier magnitudes $|F(\vec{q})|$.  It is often referred to as the ``crystallographic phase problem''.
-% 
-% It is noteworthy that the solution to the Schr\"odinger equation, under the assumption of weak scattering, also yields the modulus square of a Fourier transform, however, in this case it is the electrostatic potential rather than the electron density that appears in this Fourier transform.  The weak scattering approximation is also known as the first-order Born approximation.
-
 
 % \section{Rayleigh scatter from a dielectric sphere}
 % 
@@ -467,7 +409,7 @@ $G(\vec{r}, \vec{r}') = G(R)$.  Taking now the radial component of the Laplacian
 \end{align}
 If we look in the regions $R \ne 0$ where $\delta(R)=0$ we have the equation
 \begin{align}
-\frac{\partial}{\partial R}RG(R) =- k^2R G(R) 
+\frac{\partial}{\partial R}RG(R) =- k^2R G(R)  
 \end{align}
 with the usual solutions
 \begin{align}
@@ -494,11 +436,11 @@ We now have the Green's function:
 \end{align}
 
 With the Green's function, we finally plug it into equation \ref{eqn:useg}:
-\begin{align}\label{eqn:useg}
+\begin{align}
 V_\omega(\vec{r}) = \int_\text{Vol} \frac{\rho_\omega(\vec{r}')}{4\pi \epsilon_0} \frac{e^{ik|\vec{r}-\vec{r}'|}}{ |\vec{r}-\vec{r}'|} d^3 r'\;.
 \end{align}
 In order to recover our time variable, we take a Fourier transform of the above:
-\begin{align}\label{eqn:useg}
+\begin{align}
 V(\vec{r}, t) &= \int_{-\infty}^\infty \left\{\int_\text{Vol} \frac{\rho_\omega(\vec{r}')}{4\pi \epsilon_0} \frac{e^{ik|\vec{r}-\vec{r}'|}}{ |\vec{r}-\vec{r}'|} d^3 r' \right\}e^{-i\omega t}d\omega \\
 &=\int_\text{Vol} \left\{ \int_{-\infty}^\infty\rho_\omega(\vec{r}') e^{-i\omega (t -|\vec{r}-\vec{r}'|/c)} d\omega\right\}\frac{1}{4\pi \epsilon_0} \frac{1}{ |\vec{r}-\vec{r}'|} d^3 r'  \;.
 \end{align}
@@ -622,13 +564,7 @@ Therefore the average Poynting vector is
  \avg{\vec{S}} = \frac{1}{2c\mu_0} ( \abs{\vec{E}_1}^2 + \abs{\vec{E}_2}^2)\hvec{k}\;.
 \end{align}
 
-%\ifsolution
-%
-%{\bf Solution} \\
-%\noindent\rule{4cm}{0.4pt}
-%
-%
-%
-%\fi
+\bibliography{\jobname}
+\bibliographystyle{plain}
 
 \end{document}
