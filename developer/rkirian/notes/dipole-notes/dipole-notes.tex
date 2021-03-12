@@ -40,18 +40,20 @@ bottom=20mm,
 
 \section{Overview}
 
+\emph{This note certainly has typos and errors that need to be corrected.  Please let me know if you find any.}
+
 There are multiple ways to develop the theory of x-ray diffraction.  In order to make this guide 
 accessible to motivated undergraduates, we will build upon the most popular
 undergraduate electrodynamics textbook by David Griffiths\cite{Griffiths2018}.  The main result that is 
 derived below is the following equation for the measured diffraction intensity:
 \begin{align}\label{eqn:key}
-    I(\vec{q}) = J_0 r_e^2 \Delta \Omega P(\vec{q})  \abs{\int  \rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;.
+    I(\vec{q}) = I_0 r_e^2 \Delta \Omega P(\vec{q})  \abs{\int  \rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;.
 \end{align}
 The above result assumes (1) perfect plane-wave illumination with wavelength $\lambda$,
 and (2) the first-order Born approximation, which loosely means that the scattering amplitudes are very weak 
 compared to the incident amplitudes. The quantities in equation \ref{eqn:key} are as follows:
 \begin{itemize}
-\item $I(\vec{q})$ is the number of photons detected in a detector pixel
+\item $I(\vec{q})$ is the x-ray diffraction power into a detector pixel
 \item $\vec{q}=\vec{k}-\vec{k}_0$ is the wavevector transfer
 \item $\vec{k}_0$ is the incident wavevector with magnitude $|\vec{k}_0| = |\vec{k}| = \frac{2\pi}{\lambda}$
 \item $\vec{k}$ is the outgoing wavevector that points from the target to the detector pixel

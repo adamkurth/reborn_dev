@@ -19,7 +19,8 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     plt.figure()
     ax = plt.gca()
     ax.set_aspect('equal')
-    ax.set_facecolor(np.array([0, 0, 0])+0.2)
+    # Damn SACLA computers have old versions of python pacakges... had to get rid of the next line...
+    #ax.set_facecolor(np.array([0, 0, 0])+0.2)
 
     pad_data_concated = concat_pad_data(pad_data)
 
