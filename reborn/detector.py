@@ -31,7 +31,7 @@ class PADGeometry():
 
     def __init__(self, n_pixels=None, distance=None, pixel_size=None, shape=None):
         r"""
-        High-level initialization.  Centers the detector in the x-y plane.
+        On initialization, optional arguments may be provided (you must provide *all* of them):
 
         Arguments:
             shape (int or numpy array): Shape of the panels.  The first element is the slow-scan shape.  If there is
@@ -39,6 +39,9 @@ class PADGeometry():
             distance (float): Sample-to-detector distance, where the beam is taken along the third ("Z") axis
             pixel_size (float): Size of the pixels in SI units.
         """
+
+        if n_pixels is not None:
+            utils.depreciate("When initializing PADGeometry, use the 'shape' argument not 'n_pixels'")
 
         self._n_fs = None
         self._n_ss = None
@@ -292,10 +295,19 @@ class PADGeometry():
         return self.indices_to_vectors(j, i)
 
     def center_pos_vec(self):
+        r"""
+        The vector that points from the origin to the center of the PAD
+
+        Returns: |ndarray|
+        """
         return self.t_vec + (self.n_fs - 1) * self.fs_vec / 2.0 + (self.n_ss - 1) * self.ss_vec / 2.0
 
     def norm_vec(self):
-        r""" The vector that is normal to the PAD plane. """
+        r"""
+        The vector that is normal to the PAD plane.
+
+        Returns: |ndarray|
+        """
 
         return utils.vec_norm(np.cross(self.fs_vec, self.ss_vec))
 
@@ -354,7 +366,7 @@ class PADGeometry():
         r"""
         These are the magnitudes that correspond to
 
-        Args:
+        Arguments:
             beam_vec:
             beam:
 
@@ -1048,7 +1060,7 @@ class RadialProfiler():
         r"""
         Calculate the radial profile of summed intensities.  This is divided by counts to get an average.
 
-        Args:
+        Arguments:
             data |ndarray|:  The intensity data from which the radial profile is formed.
             mask |ndarray|:  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.
 
@@ -1064,7 +1076,7 @@ class RadialProfiler():
         r"""
         Calculate the radial profile of averaged intensities.
 
-        Args:
+        Arguments:
             data (|ndarray|):  The intensity data from which the radial profile is formed.
             mask (|ndarray|):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
                                  provided here, the mask configured with :meth:`set_mask` will be used.
@@ -1085,7 +1097,7 @@ class RadialProfiler():
         r"""
         Calculate the radial profile of averaged intensities.
 
-        Args:
+        Arguments:
             data (|ndarray|):  The intensity data from which the radial profile is formed.
             mask (|ndarray|):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
                                  provided here, the mask configured with :meth:`set_mask` will be used.
@@ -1109,7 +1121,7 @@ class RadialProfiler():
         r"""
         Given some PAD data, subtract a radially averaged profile.
 
-        Args:
+        Arguments:
             data:
             mask:
             type:
@@ -1140,7 +1152,7 @@ class RadialProfiler():
         r"""
         Given some PAD data, calculate the radial median and subtract it from the data.
 
-        Args:
+        Arguments:
             data:
             mask:
 

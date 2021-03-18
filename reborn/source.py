@@ -4,6 +4,7 @@ Classes related to x-ray sources.
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import json
 import numpy as np
 from scipy import constants as const
 
@@ -137,3 +138,53 @@ class Beam():
     def energy_fluence(self):
         r""" Pulse fluence in J/m^2."""
         return self.pulse_energy/(np.pi * self.diameter_fwhm**2 / 4.0)
+
+    def to_dict(self):
+        r""" Convert beam to a dictionary.  It contains the following keys:
+
+        photon_energy, beam_profile, beam_vec, polarization_vec,
+        polarization_weight, photon_energy_fwhm, pulse_energy, divergence_fwhm, diameter_fwhm, pulse_energy_fwhm
+
+        """
+        return {'photon_energy': floatif(self.photon_energy),
+                'photon_energy_fwhm': floatif(self.photon_energy_fwhm),
+                'beam_profile': self.beam_profile,
+                'beam_vec': floatif(tuple(self.beam_vec)),
+                'polarization_vec': floatif(tuple(self.polarization_vec)),
+                'polarization_weight': floatif(self.polarization_weight),
+                'pulse_energy': floatif(self.pulse_energy),
+                'pulse_energy_fwhm': floatif(self.pulse_energy_fwhm),
+                'divergence_fwhm': floatif(self.divergence_fwhm),
+                'diameter_fwhm': floatif(self.diameter_fwhm)
+                }
+
+    def from_dict(self, dictionary):
+        r""" Loads geometry from dictionary.  This goes along with the to_dict method."""
+        for k in list(dictionary.keys()):
+            setattr(self, k, dictionary[k])
+
+    def copy(self):
+        r""" Make a copy of this class instance. """
+        b = Beam()
+        b.from_dict(self.to_dict())
+        return b
+
+    def save_json(self, file_name):
+        r""" Save the beam as a json file. """
+        with open(file_name, 'w') as f:
+            json.dump(self.to_dict(), f)
+
+    def load_json(self, file_name):
+        r""" Save the beam as a json file. """
+        with open(file_name, 'r') as f:
+            d = json.load(f)
+        self.from_dict(d)
+
+
+def floatif(val):
+    if val is None:
+        return val
+    if type(val) == tuple:
+        val = tuple([floatif(v) for v in val])
+        return val
+    return float(val)
