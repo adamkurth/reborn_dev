@@ -181,6 +181,30 @@ class Beam():
         self.from_dict(d)
 
 
+def load_beam(file_path):
+    """ Load a beam from a json file (loaded with :meth:`Beam.load_json() <reborn.source.Beam.load_json>` method)
+
+    Arguments:
+        file_path (str): Path to beam json file
+
+    Returns: |Beam|
+    """
+    b = Beam()
+    b.load_json(file_path)
+    return b
+
+
+def save_beam(beam, file_path):
+    """ Save a Beam to a json file (saved with :meth:`Beam.save_json() <reborn.source.Beam.save_json>` method)
+
+    Arguments:
+        beam (|Beam|): The Beam instance to save.
+        file_path (str): Where to save the json file.
+
+    """
+    beam.save_json(file_path)
+
+
 def floatif(val):
     if val is None:
         return val

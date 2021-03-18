@@ -75,7 +75,7 @@ extensions = [
 
 # Configuration for the documentation of examples
 sphinx_gallery_conf = {
-    'filename_pattern': '/plot_',
+    'filename_pattern': '/example_',
     'ignore_pattern': r'__init__\.py',
     'show_memory': True
 }
