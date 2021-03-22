@@ -317,7 +317,7 @@ class StreamfileFrameGetter(FrameGetter):
 
         StreamfileFrameGetter.streamfile_name = streamfile_name
 
-        self.n_frames = crystfel.readStreamfile_get_total_number_of_frames(streamfile_name)
+        self.n_frames = readStreamfile_get_total_number_of_frames(streamfile_name)
         self.current_frame = 0
 
         # self.geom_dict = load_crystfel_geometry(geom_file_name)
@@ -325,7 +325,7 @@ class StreamfileFrameGetter(FrameGetter):
 
     def get_frame(self, frame_number=0):
         dat = {}
-        dat['A_matrix'], dat['cxiFilepath'], dat['cxiFileFrameNumber'] = crystfel.readStreamfile_get_nth_frame(
+        dat['A_matrix'], dat['cxiFilepath'], dat['cxiFileFrameNumber'] = readStreamfile_get_nth_frame(
             StreamfileFrameGetter.streamfile_name, frame_number)
 
         # print(cxiFilepath)
