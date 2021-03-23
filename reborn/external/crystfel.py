@@ -7,8 +7,9 @@ wrap around the cfelpyutils package.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
+import h5py
 import numpy as np
-
+import linecache
 from .. import utils
 from .. import detector
 from ..fileio.getters import FrameGetter
@@ -65,12 +66,20 @@ def geometry_dict_to_pad_geometry_list(geometry_dict):
         pad = detector.PADGeometry()
         pad.name = panel_name
         p = geom['panels'][panel_name]
+        dist = 0
+        if p['coffset']:
+            dist += p['coffset']
+        if isinstance(p['clen'], str):
+            pad.clen = p['clen']
+        else:
+            if p['clen'] != -1:  # Why is clen sometimes -1?  Very annoying.
+                dist += p['clen']
         pix = 1.0 / p['res']
         pad.fs_vec = np.array([p['fsx'], p['fsy'], p['fsz']]) * pix
         pad.n_fs = p['max_fs'] - p['min_fs'] + 1
         pad.ss_vec = np.array([p['ssx'], p['ssy'], p['ssz']]) * pix
         pad.n_ss = p['max_ss'] - p['min_ss'] + 1
-        pad.t_vec = np.array([p['cnx'] * pix, p['cny'] * pix, p['clen']])
+        pad.t_vec = np.array([p['cnx'] * pix, p['cny'] * pix, dist])
         pads.append(pad)
 
     return pads
@@ -131,7 +140,7 @@ def geometry_file_to_pad_geometry_list(geometry_file):
 
 def split_data_block(data, geom_dict, frame_number=0):
     r"""
-    Split a chunk of contiguous data into a list of pad data.
+    Split a chunk of contiguous data (usually 3D) into a list of pad data.
     """
     split_data = []
     for panel_name in geom_dict['panels']:
@@ -198,8 +207,10 @@ def split_image(data, geom_dict):
 
 
 def write_geom_file_single_pad(file_path=None, beam=None, pad_geometry=None):
-
-    r"""  """
+    r""" 
+    Simple geom file writer.  Do not use this -- the file does not adhere 
+    to the CrystFEL specifications...
+    """
 
     pad = pad_geometry
     geom_file = os.path.join(file_path)
@@ -219,44 +230,35 @@ def write_geom_file_single_pad(file_path=None, beam=None, pad_geometry=None):
     fid.close()
 
 
-def readStreamfile_get_total_number_of_frames(streamfile_name):
-
+def readStreamfile_get_total_number_of_frames(stream_file):
     r"""
     Get the total number of frames from a stream file.
+
+    Arguments:
+        stream_file (str): Path to the stream file
+
+    Returns: int
     """
-
-    # Load the streamfile.
-    f = open(streamfile_name, 'r') 
-
+    f = open(stream_file, 'r') 
     count = 0
     for line in f:
         if sta_chunk in line:
             count += 1
-
-    # close the file
     f.close()
-
     return count
 
 
 def readStreamfile_get_nth_frame(streamfile_name, n):
-
     r"""
     Get the A matrix, CXI file path and CXI frame number from the nth frame in a stream file.
     """
-
-    # Load the streamfile
     f = open(streamfile_name, 'r')
-
     count = 0
     for line in f:
         if sta_chunk in line:
             count += 1
-
         if count == n:
             break
-
-
     # Initialising 
     A = np.zeros((3,3))
     cxiFilepath = 0
@@ -302,40 +304,90 @@ def readStreamfile_get_nth_frame(streamfile_name, n):
 
 class StreamfileFrameGetter(FrameGetter):
     r"""
-
-    A frame getter that reads a CrystFEL stream file. More specifically, it:
-    1. Extracts the geometry file (from within the stream file).
-    2. Gets the A star matrix, the cxi file path, and the cxi file frame number for the nth frame in the streamfile.
-
+    A frame getter that reads a CrystFEL stream file along with CXI files.  
     """
 
     # Initialise class variables
-    streamfile_name = None
+    h5_file_path = None
+    h5_file = None
+    current_frame = 0
+    n_frames = 0
 
-    def __init__(self, streamfile_name=None):
-        # FrameGetter.__init__(self)
-
-        StreamfileFrameGetter.streamfile_name = streamfile_name
-
-        self.n_frames = readStreamfile_get_total_number_of_frames(streamfile_name)
-        self.current_frame = 0
-
-        # self.geom_dict = load_crystfel_geometry(geom_file_name)
-        # self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file_name)
+    def __init__(self, stream_file=None, geom_file=None):
+        r"""
+        Arguments:
+            stream_file (str): Path to the stream file
+            geom_file (str): Optional path to a geom file (else search the stream for geometry)
+        """
+        super().__init__()
+        self.stream_file = stream_file
+        f = open(stream_file, 'r') 
+        self.begin_chunk_lines = []  # Cache where the stream chunks are
+        for (n, line) in enumerate(f):
+            if sta_chunk in line:
+                self.begin_chunk_lines.append(n)
+                self.n_frames += 1
+        if geom_file is None:
+            geom_file = 'temp.geom'
+        self.geom_file = geom_file
+        self.geom_dict = load_crystfel_geometry(geom_file)
+        self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file)
 
     def get_frame(self, frame_number=0):
+        if frame_number >= self.n_frames:
+            return None
+        A = np.zeros((3,3))
+        cxi_file_path = None
+        cxi_frame_number = None
+        photon_energy = None
+        n = self.begin_chunk_lines[frame_number]
         dat = {}
-        dat['A_matrix'], dat['cxiFilepath'], dat['cxiFileFrameNumber'] = readStreamfile_get_nth_frame(
-            StreamfileFrameGetter.streamfile_name, frame_number)
-
-        # print(cxiFilepath)
-        # print(cxiFileFrameNumber)
-
-        # Extract data from the cxi file corresponding to the cxiFileFrameNumber (not necessarily the same as frame_number)
-        # h5File = h5py.File(cxiFilepath, 'r')
-        # h5Data = h5File['/entry_1/data_1/data']
-        # theData = np.array(h5Data[cxiFileFrameNumber, :, :]).astype(np.double)
-        # pad_data = crystfel.split_image(theData, self.geom_dict)
-        # dat['pad_data'] = pad_data
-
+        for i in range(1, int(1e6)):
+            line = linecache.getline(self.stream_file, n + i)
+            if end_chunk in line:
+                break
+            if "Image filename:" in line:
+                cxi_file_path = line[16:-1]
+                continue
+            if "Event:" in line:
+                cxi_frame_number = int(line[9:])
+                continue
+            if "photon_energy_eV" in line:
+                photon_energy = float(line.split('=')[1])*1.602e-19
+                continue
+            if "astar = " in line:
+                A[0,0] = float(line[8:19])
+                A[0,1] = float(line[19:30])
+                A[0,2] = float(line[29:40])
+                continue
+            if "bstar = " in line:
+                A[1,0] = float(line[8:19])
+                A[1,1] = float(line[19:30])
+                A[1,2] = float(line[29:40])
+                continue
+            if "cstar = " in line:
+                A[2,0] = float(line[8:19])
+                A[2,1] = float(line[19:30])
+                A[2,2] = float(line[29:40])
+                continue
+            line_split = line.split(':')
+            if len(line_split) == 2:
+                dat[line_split[0].strip()] = line_split[1].strip()
+            line_split = line.split('=')
+            if len(line_split) == 2:
+                dat[line_split[0].strip()] = line_split[1].strip()
+        if np.sum(A) == 0:
+            A = None
+        dat['A_matrix'] = A 
+        dat['cxi_file_path'] = cxi_file_path
+        dat['cxi_frame_number'] = cxi_frame_number
+        dat['photon_energy'] = photon_energy
+        # Extract data from the cxi file
+        if self.h5_file_path != cxi_file_path:
+            self.h5_file_path = cxi_file_path
+            self.h5_file = h5py.File(self.h5_file_path, 'r')
+        h5_data = self.h5_file['/entry_1/data_1/data']
+        pad_data = np.array(h5_data[cxi_frame_number, :, :]).astype(np.double)
+        pad_data = split_image(pad_data, self.geom_dict)
+        dat['pad_data'] = pad_data
         return dat
