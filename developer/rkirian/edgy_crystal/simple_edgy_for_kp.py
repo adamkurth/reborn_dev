@@ -23,7 +23,8 @@ au_map = density_map.place_atoms_in_map(crystal_structure.fractional_coordinates
 # Generate (and save) molecular transforms of each symmetry partner by (1) re-mapping asymmetric unit then (2) FFT
 mol_amps = []
 for k in range(crystal_structure.spacegroup.n_operations):
-    rho = density_map.au_to_k(k, au_map)
+    rho = density_map.au_to_k(k, au_map)  # This and the line below give the same result
+    rho = density_map.symmetry_transform(0, k, au_map)
     mol_amps.append(clcore.to_device(np.fft.fftshift(np.fft.fftn(rho)), dtype=clcore.complex_t))
 # Use the FiniteCrystal tool to form a particular crystal.  We can of course generate lots of them and merge together.
 # For Lysozyme, we make a simple parallelepiped.  There is a disorder option if desired, and also we could randomly

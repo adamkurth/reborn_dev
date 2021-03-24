@@ -431,10 +431,23 @@ class CrystalStructure(object):
         return np.dot(np.concatenate(xs), self.unitcell.o_mat.T)
 
     def set_tight_packing(self):
+        r"""
+        Re-define the atomic coordinates and symmetry transforms so that the center-of-mass of each molecule lies within
+        the unit cell.  Two steps: first shift the coordinates so that the COM of the asymmetric unit lies in the unit
+        cell.  Next, add integral shifts to each of the symmetry operations as needed to put the COM of all symmetry
+        partners into the unit cell.
 
+        Returns: None
+        """
+        # First shift the asymmetric unit so that it's COM lies in the unit cell.  Sometimes it does not.
+        com = self.fractional_coordinates_com
+        self.fractional_coordinates -= com - (com % 1)
+        self.fractional_coordinates_com -= com - (com % 1)
+        # Now re-define the symmetry operations so that all symmetry partners also lie in the unit cell.
         for i in range(self.spacegroup.n_molecules):
             com = self.spacegroup.apply_symmetry_operation(i, self.fractional_coordinates_com)
             self.spacegroup.sym_translations[i] -= com - (com % 1)
+
 
 
 class FiniteLattice(object):
@@ -873,11 +886,10 @@ class CrystalDensityMap(object):
         Returns:
             3D numpy array : Transformed array
         """
-
-        data_out = np.empty_like(data)
-        lut = self.get_sym_luts()[k]
-        data_out.flat[lut] = data.flat[:]
-
+        # data_out = np.empty_like(data)
+        # lut = self.get_sym_luts()[k]
+        # data_out.flat[lut] = data.flat[:]
+        data_out = self.symmetry_transform(0, k, data)
         return data_out
 
     def k_to_au(self, k, data):
@@ -892,10 +904,9 @@ class CrystalDensityMap(object):
         Returns:
             3D numpy array : Transformed array
         """
-
-        lut = self.get_sym_luts()[k]
-        data_out = data.flat[lut].reshape(data.shape)
-
+        # lut = self.get_sym_luts()[k]
+        # data_out = data.flat[lut].reshape(data.shape)
+        data_out = self.symmetry_transform(k, 0, data)
         return data_out
 
     def symmetry_transform(self, i, j, data):
