@@ -1253,3 +1253,5 @@ class FiniteCrystal(object):
         """
         for lat in self.lattices:
             lat.set_gaussian_disorder(sigmas=sigmas)
+
+
