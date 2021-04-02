@@ -381,7 +381,7 @@ class ClCore(object):
         vec_out_dev = self.to_device(vec_out, dtype=self.real_t)
         n = 1
 
-        global_size = np.int(np.ceil(n / np.float(self.group_size)) * self.group_size)
+        global_size = np.int64(np.ceil(n / float(self.group_size)) * self.group_size)
 
         self.test_rotate_vec_cl(self.queue, (global_size,), (self.group_size,), rot, trans, vec, vec_out_dev.data)
 
@@ -508,7 +508,7 @@ class ClCore(object):
             q_dev = self.to_device(q, dtype=self.real_t)
             R = self.vec16(R, dtype=self.real_t)
             U = self.vec4(U, dtype=self.real_t)
-            global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
+            global_size = np.int64(np.ceil(n_pixels / float(self.group_size)) * self.group_size)
             self.phase_factor_qrf_cl(self.queue, (global_size,),
                                      (self.group_size,), q_dev.data, r_dev.data,
                                      f_dev.data, R, U, a_dev.data, n_atoms,
@@ -600,7 +600,7 @@ class ClCore(object):
 
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
+        global_size = np.int64(np.ceil(n_pixels / float(self.group_size)) * self.group_size)
 
         self.phase_factor_pad_cl(self.queue, (global_size,),
                                  (self.group_size,), r_dev.data,
@@ -696,7 +696,7 @@ class ClCore(object):
         q_min = self.vec4(q_min, dtype=self.real_t)
         a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels))
 
-        global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
+        global_size = np.int64(np.ceil(n_pixels / float(self.group_size))
                              * self.group_size)
 
         self.phase_factor_mesh_cl(self.queue, (global_size,),
@@ -788,7 +788,7 @@ class ClCore(object):
             q_min = self.vec4(q_min, dtype=self.real_t)
             a_out_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels,))
 
-            global_size = np.int(np.ceil(n_pixels / np.float(self.group_size))
+            global_size = np.int64(np.ceil(n_pixels / float(self.group_size))
                                  * self.group_size)
 
             self.mesh_interpolation_cl(self.queue, (global_size,), (self.group_size,),
@@ -802,7 +802,7 @@ class ClCore(object):
             q_min = self.vec4(q_min, dtype=self.real_t)
             a_out_dev = self.to_device(a, dtype=self.real_t, shape=(n_pixels,))
 
-            global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
+            global_size = np.int64(np.ceil(n_pixels / float(self.group_size)) * self.group_size)
 
             self.mesh_interpolation_real_cl(self.queue, (global_size,), (self.group_size,), a_map_dev.data, q_dev.data,
                                             a_out_dev.data, n_pixels, N, dq, q_min, R, U, do_translate, add, twopi)

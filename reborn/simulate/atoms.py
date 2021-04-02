@@ -38,7 +38,7 @@ def atomic_symbols_to_numbers(symbols):
         for u in z_u:
             w = np.nonzero(atomic_symbols == u.capitalize())
             z[symbols == u] = w[0] + 1
-        z = z.astype(np.int)
+        z = z.astype(np.int64)
     else:
         w = np.nonzero(atomic_symbols == np.str_(symbols).capitalize())
         z = int(w[0] + 1)
@@ -57,7 +57,7 @@ def atomic_numbers_to_symbols(numbers):
         |ndarray|: Atomic element symbols (such as H, He, Be)
     """
 
-    numbers = np.array(numbers, dtype=np.int)
+    numbers = np.array(numbers, dtype=np.int64)
     symbols = atomic_symbols[numbers - 1]
     return symbols
 
@@ -104,7 +104,7 @@ def henke_scattering_factors(atomic_numbers, photon_energies):
     """
     atomic_numbers = np.array(atomic_numbers).ravel()
     photon_energies = np.array(photon_energies).ravel()
-    f = np.zeros([atomic_numbers.size, photon_energies.size], dtype=np.complex).reshape([atomic_numbers.size,
+    f = np.zeros([atomic_numbers.size, photon_energies.size], dtype=complex).reshape([atomic_numbers.size,
                                                                                          photon_energies.size])
     # Yes the reshape above shouldn't be necessary, obviously, but this is a quirky feature of numpy...
     for z in np.unique(atomic_numbers):
@@ -130,7 +130,7 @@ def get_scattering_factors(atomic_numbers, photon_energy):
     """
 
     atomic_numbers = np.array(atomic_numbers).ravel()
-    f = np.zeros([len(atomic_numbers)], dtype=np.complex)
+    f = np.zeros([len(atomic_numbers)], dtype=complex)
     for z in np.unique(atomic_numbers):
         dat = _get_henke_data(z)
         w = np.where(atomic_numbers == z)

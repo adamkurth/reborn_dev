@@ -692,7 +692,7 @@ class CrystalDensityMap(object):
         cshape = np.ceil(cshape / m) * m
 
         self.cryst = cryst
-        self.oversampling = np.int(np.ceil(oversampling))
+        self.oversampling = np.int64(np.ceil(oversampling))
         self.dx = 1.0 / cshape
         self.cshape = cshape.astype(int)
         self.shape = (cshape * self.oversampling).astype(int)
@@ -867,7 +867,7 @@ class CrystalDensityMap(object):
                 lut = lut % self.shape               # wrap around
                 lut = np.dot(self.strides, lut.T)    # in p space
                 assert np.sum(lut - np.round(lut)) == 0
-                sym_luts.append(lut.astype(np.int))
+                sym_luts.append(lut.astype(np.int64))
             self.sym_luts = sym_luts
 
         return self.sym_luts

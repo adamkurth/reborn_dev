@@ -404,7 +404,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
     data_val = data_val.astype(np.complex128)
     x_min = x_min.astype(np.double)
     x_max = x_max.astype(np.double)
-    n_bin = n_bin.astype(np.int)
+    n_bin = n_bin.astype(np.int64)
 
     # Bin width
     delta_x = (x_max - x_min) / (n_bin - 1)
