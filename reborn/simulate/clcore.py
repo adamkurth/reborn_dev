@@ -519,6 +519,42 @@ class ClCore(object):
         else:
             return a_dev
 
+    def _phase_factor_qrf_global(self, q, r, f=None, R=None, U=None, a=None, add=False, twopi=False, n_chunks=1):
+        r"""
+        This variant of phase_factor_qrf exists for speed tests.  Do not use it.
+        """
+
+        if not hasattr(self, 'phase_factor_qrf_global_cl'):
+            self.phase_factor_qrf_global_cl = self.programs.phase_factor_qrf_global
+            self.phase_factor_qrf_global_cl.set_scalar_arg_dtypes(
+                [None, None, None, None, None, None, self.int_t, self.int_t, self.int_t, self.int_t])
+        n_pixels = self.int_t(q.shape[0])
+        a_dev = self.to_device(a, dtype=self.complex_t, shape=(n_pixels,))
+        if n_chunks > 1:
+            self._phase_factor_qrf_chunk_r(q=q, r=r, f=f, R=R, U=U, a=a, add=add, twopi=twopi, n_chunks=n_chunks)
+        else:
+            if R is None: R = np.eye(3)
+            if U is None: U = np.zeros(3, dtype=self.real_t)
+            add = self.int_t(add)
+            twopi = self.int_t(twopi)
+            if f is None: f = np.ones(r.shape[0])
+            n_atoms = self.int_t(r.shape[0])
+            r_dev = self.to_device(r, dtype=self.real_t)
+            f_dev = self.to_device(f, dtype=self.complex_t)
+            q_dev = self.to_device(q, dtype=self.real_t)
+            R = self.vec16(R, dtype=self.real_t)
+            U = self.vec4(U, dtype=self.real_t)
+            global_size = np.int(np.ceil(n_pixels / np.float(self.group_size)) * self.group_size)
+            self.phase_factor_qrf_global_cl(self.queue, (global_size,),
+                                     (self.group_size,), q_dev.data, r_dev.data,
+                                     f_dev.data, R, U, a_dev.data, n_atoms,
+                                     n_pixels, add, twopi)
+            self.queue.finish()
+        if a is None:
+            return a_dev.get()
+        else:
+            return a_dev
+
     def phase_factor_pad(self, r, f=None, T=None, F=None, S=None, B=None, nF=None, nS=None, w=None, R=None, U=None, a=None,
                          add=False, beam=None, pad=None):
         r"""

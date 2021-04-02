@@ -1,7 +1,7 @@
 from time import time
 from scipy import constants
 
-if 0:
+if False:
     import afnumpy as np
     from afnumpy.fft import fftn, ifftn, fftshift
 else:
@@ -18,7 +18,7 @@ hc = constants.h*constants.c
 
 Niter = 500  # Number of phase-retrieval iterations
 
-load_pdb = True
+load_pdb = False
 
 if not load_pdb:  # Make a phony water molecule
 
@@ -68,17 +68,17 @@ else:  # Alternatively, load a pdb file
 rho0 = np.abs(rho0)
 
 
-if 1:
+if 0:
     print("Showing intial density (volumetric)")
     view = qtviews.Volumetric3D()
     view.add_density(np.abs(rho0))
     view.show(hold=True, kill=True)
 
-if 1:
+if 0:
     print("Showing initial density (slices)")
     qtviews.MapSlices(np.abs(rho0))
 
-if 1:
+if 0:
     print("Showing initial density (projections)")
     qtviews.MapProjection(np.abs(rho0))
 
@@ -86,13 +86,13 @@ if 1:
 S0 = np.zeros(rho0.shape)
 S0.flat[np.abs(rho0.flat) < 0.01*np.max(np.abs(rho0.flat))] = 1
 
-if 1:
+if 0:
     print("Showing initial support (volumetric)")
     view = qtviews.Volumetric3D()
     view.add_density(S0)
     view.show()
 
-if 1:
+if 0:
     print("Showing initial support (slices)")
     qtviews.MapSlices(S0)
 
@@ -100,7 +100,7 @@ if 1:
 I0 = np.abs(fftn(rho0)) ** 2
 sqrtI0 = np.sqrt(I0)
 
-if 1:
+if 0:
     print("Showing intensities (slices)")
     qtviews.MapSlices(np.log(fftshift(I0) + 1))
 
@@ -119,7 +119,7 @@ for i in np.arange(0, Niter):
 delT = time() - t
 print('Total time (s): %g ; Time per iteration (s): %g' % (delT, delT / float(Niter)))
 
-if 1:
+if 0:
     print("Showing reconstruction (volumetric)")
     view = qtviews.Volumetric3D()
     view.add_density(np.abs(rho))
@@ -127,7 +127,7 @@ if 1:
     # plt.imshow(-np.sum(np.abs(rho), axis=0), cmap='gray', interpolation='none')
     # plt.show()
 
-if 1:
+if 0:
     print("Showing reconstruction (projections)")
     view = qtviews.MapProjection(np.abs(rho), axis=0)
     # view.show(hold=True, kill=True)
