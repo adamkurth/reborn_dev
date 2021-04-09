@@ -30,6 +30,7 @@ log.txt
 *.dSYM
 *.so
 *.tar.gz
+*.md5
 .idea
 *~
 .adxv*

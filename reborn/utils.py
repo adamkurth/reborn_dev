@@ -296,19 +296,14 @@ def memoize(function):
     excessive computation or reading from disk.  Search the web for more
     details of how this works.
     """
-
     memo = {}
-
     @wraps(function)
     def wrapper(*args):
-
         if args in memo:
             return memo[args]
-
         rv = function(*args)
         memo[args] = rv
         return rv
-
     return wrapper
 
 
