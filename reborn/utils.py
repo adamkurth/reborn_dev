@@ -2,8 +2,6 @@ r"""
 Some utility functions that might be useful throughout reborn.  Don't put highly specialized functions here.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 from functools import wraps
 import sys
 import os
@@ -255,12 +253,12 @@ def triangle_solid_angle(r1, r2, r3):
     Van Oosterom, A. & Strackee, J. Biomed. Eng., IEEE Transactions on BME-30, 125-126 (1983).
 
     Arguments:
-        r1 (numpy array): Vectors to vertices 1; array of shape (N, 3)
-        r2 (numpy array): Vectors to vertices 1; array of shape (N, 3)
-        r3 (numpy array): Vectors to vertices 1; array of shape (N, 3)
+        r1 (|ndarray|): Vectors to vertices 1; array of shape (N, 3)
+        r2 (|ndarray|): Vectors to vertices 1; array of shape (N, 3)
+        r3 (|ndarray|): Vectors to vertices 1; array of shape (N, 3)
 
     Returns:
-        (numpy array) of length N with solid angles
+        (|ndarray|) of length N with solid angles
     """
 
     top = np.abs(np.sum(r1 * np.cross(r2, r3), axis=-1))
@@ -322,7 +320,7 @@ def max_pair_distance(vecs):
     Determine the maximum distance between to vectors in a list of vectors.
 
     Arguments:
-        vecs (Nx3 numpy array) : Input vectors.
+        vecs (Nx3 |ndarray|) : Input vectors.
 
     Returns:
         float : The maximum pair distance.
@@ -352,13 +350,13 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
     Note 3: The boundary is defined as [x_min-0.5, x_max+0.5).
 
     Arguments:
-        data_coord (Nx3 numpy array) : Coordinates (x,y,z) of the data points that you wish to insert into
+        data_coord (Nx3 |ndarray|) : Coordinates (x,y,z) of the data points that you wish to insert into
                      the regular grid.
-        data_val (Nx1 numpy array) : The values of the data points to be inserted into the grid.
-        x_min (1x3 numpy array) : (x_min, y_min, z_min)
-        x_max (1x3 numpy array) : (x_max, y_max, z_max)
-        n_bin (1x3 numpy array) : Number of bins in each direction (N_x, N_y, N_z)
-        mask (Nx1 numpy array) : Specify which data points to ignore. Non-zero means use, zero means ignore.
+        data_val (Nx1 |ndarray|) : The values of the data points to be inserted into the grid.
+        x_min (1x3 |ndarray|) : (x_min, y_min, z_min)
+        x_max (1x3 |ndarray|) : (x_max, y_max, z_max)
+        n_bin (1x3 |ndarray|) : Number of bins in each direction (N_x, N_y, N_z)
+        mask (Nx1 |ndarray|) : Specify which data points to ignore. Non-zero means use, zero means ignore.
         boundary_mode (str) : Specify how the boundary should be treated. Options are:
                               (1) "truncate" - Ignores all points outside the insertion volume.
                               (2) "periodic" - Equivalent to wrapping around.
@@ -366,9 +364,9 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
     Returns:
         2-element tuple containing the following
 
-        - **dataout** (*3D numpy array*) : Trilinearly summed values that needs to be divided by weightout to give the
+        - **dataout** (*3D |ndarray|*) : Trilinearly summed values that needs to be divided by weightout to give the
           trilinearly inserted values.
-        - **weightout** (*3D numpy array*) : Cumulative trilinear weights.
+        - **weightout** (*3D |ndarray|*) : Cumulative trilinear weights.
     """
 
     # Checks
@@ -528,11 +526,11 @@ def rotate3D(f, euler_angles):
     Note 3: Proper Euler angle convention is used, i.e, zyz.
 
     Arguments:
-        f (*3D numpy array*) : The 3D input array.
-        euler_angles (1x3 numpy array) : The three Euler angles, in zyz format.
+        f (*3D |ndarray|*) : The 3D input array.
+        euler_angles (1x3 |ndarray|) : The three Euler angles, in zyz format.
 
     Returns:
-        - **f_rot** (*3D numpy array*) : The rotated 3D array.
+        - **f_rot** (*3D |ndarray|*) : The rotated 3D array.
     """
 
     # ---------------------------
@@ -765,7 +763,7 @@ def get_FSC(f1, f2, labels_radial, n_radials):
 
 
 def atleast_1d(x):
-    r""" Expand dimensions of numpy array.  Add dimensions to the left-most index. """
+    r""" Expand dimensions of |ndarray|.  Add dimensions to the left-most index. """
     x = np.array(x)
     if x.ndim < 1:
         x = np.expand_dims(x, axis=0)
@@ -773,7 +771,7 @@ def atleast_1d(x):
 
 
 def atleast_2d(x):
-    r""" Expand dimensions of numpy array.  Add dimensions to the left-most index. """
+    r""" Expand dimensions of |ndarray|.  Add dimensions to the left-most index. """
     x = np.array(x)
     if x.ndim < 2:
         x = np.expand_dims(x, axis=0)
@@ -781,7 +779,7 @@ def atleast_2d(x):
 
 
 def atleast_3d(x):
-    r""" Expand dimensions of numpy array.  Add dimensions to the left-most index. """
+    r""" Expand dimensions of |ndarray|.  Add dimensions to the left-most index. """
     x = np.array(x)
     if x.ndim < 3:
         x = np.expand_dims(atleast_2d(x), axis=0)
@@ -789,7 +787,7 @@ def atleast_3d(x):
 
 
 def atleast_4d(x):
-    r""" Expand dimensions of numpy array.  Add dimensions to the left-most index. """
+    r""" Expand dimensions of |ndarray|.  Add dimensions to the left-most index. """
     x = np.array(x)
     if x.ndim < 4:
         x = np.expand_dims(atleast_3d(x), axis=0)

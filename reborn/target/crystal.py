@@ -3,8 +3,6 @@
 Basic utilities for dealing with crystalline objects.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import os
 try:
     import urllib.request
@@ -34,10 +32,11 @@ def get_pdb_file(pdb_id, save_path=".", silent=False):
     this function to avoid downloading the same file multiple times.*
 
     Arguments:
-        pdb_id (string): For example: "101M" or "101M.pdb".  There are also some special strings which so far include
+        pdb_id (str): For example: "101M" or "101M.pdb".  There are also some special strings which so far include
                          "lysozyme" (2LYZ) and "PSI" (1jb0)
         save_path (string): Path to the downloaded file.  The default is the current working directory, which depends
                             on where you run your code.
+        silent (bool): Set to true if you do not want any text printed to stdout.
 
     Returns:
         string : Path to PDB file
@@ -879,12 +878,12 @@ class CrystalDensityMap(object):
         non-zero translation vector -- typically this is not the case but it can happen for example if the symmetry
         operations are chosen such that all molecules are packed within the unit cell.
 
-        Args:
+        Arguments:
             k (int) : The index of the symmetry partner (starting with k=0)
-            data (3D numpy array) : The input data array.
+            data (|ndarray|) : The input data array.
 
         Returns:
-            3D numpy array : Transformed array
+            |ndarray| : Transformed array
         """
         # data_out = np.empty_like(data)
         # lut = self.get_sym_luts()[k]
@@ -899,10 +898,10 @@ class CrystalDensityMap(object):
 
         Args:
             k (int) : The index of the symmetry partner (starting with k=0)
-            data (3D numpy array) : The input data array.
+            data (3D |ndarray|) : The input data array.
 
         Returns:
-            3D numpy array : Transformed array
+            3D |ndarray| : Transformed array
         """
         # lut = self.get_sym_luts()[k]
         # data_out = data.flat[lut].reshape(data.shape)
@@ -911,15 +910,15 @@ class CrystalDensityMap(object):
 
     def symmetry_transform(self, i, j, data):
         r"""
-        Apply crystallographic symmetry transformation to a density map (3D numpy array).  This applies the mapping from
+        Apply crystallographic symmetry transformation to a density map (3D |ndarray|).  This applies the mapping from
         symmetry element i to symmetry element j, where i=0,1,...,N-1 for a spacegroup with N symmetry operations.
 
         Arguments:
             i (int) : The "from" index; symmetry transforms are performed from this index to the j index
             j (int) : The "to" index; symmetry transforms are performed from the i index to this index
-            data (numpy array) : The 3D block of data to apply the symmetry transform on
+            data (|ndarray|) : The 3D block of data to apply the symmetry transform on
 
-        Returns: Numpy array with transformed densities
+        Returns: |ndarray| with transformed densities
         """
 
         luts = self.get_sym_luts()
@@ -1068,6 +1067,7 @@ def pdb_to_dict(pdb_file_path):
         pdb_file_path: path to pdb file
 
     Returns:
+        FIXME: Rick: Think about better formatting of returns.
         A dictionary with the following keys:
            'scale_matrix'
            'scale_translation'

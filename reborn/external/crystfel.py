@@ -4,8 +4,6 @@ dictionary object with the cfelpyutils.crystfel_utils.load_crystfel_geometry() f
 wrap around the cfelpyutils package.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import os
 import h5py
 import numpy as np
