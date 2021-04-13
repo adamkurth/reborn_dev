@@ -26,7 +26,7 @@ def docs():
         docs_file_path = 'https://rkirian.gitlab.io/reborn'
 
     try:
-        import webbrowser
+        import webbrowser  # pylint: disable=import-outside-toplevel
     except ImportError:
         print("Can't open docs because you need to install the webbrowser Python package.")
         print("If using conda, perhaps you could run 'conda install webbrowser'")
@@ -38,9 +38,9 @@ def docs():
 
 def ensure_list(obj):
     r"""
-    Make sure that some object is a list.  This is helpful because, for example, we frequently write code around the 
+    Make sure that some object is a list.  This is helpful because, for example, we frequently write code around the
     assumption that detector geometry comes in the form of a list of |PADGeometry| instances.  However, it is also not
-    so uncommon to have a single |PADGeometry|.  
+    so uncommon to have a single |PADGeometry|.
 
     This function does the following simple task:
 
@@ -152,8 +152,6 @@ def random_rotation():
     depreciate('reborn.utils.random_rotation has been removed.  Use scipy for this:\n'
                'from scipy.spatial.transform import Rotation\n'
                'rotmat = Rotation.random().as_matrix()')
-
-    return None
 
 
 def rotation_about_axis(theta, vec):
@@ -275,7 +273,7 @@ def triangle_solid_angle(r1, r2, r3):
     return s_ang
 
 
-def __fake_numba_jit(*args, **kwargs):
+def __fake_numba_jit(*args, **kwargs):  # pylint: disable=unused-argument
     r"""
     This is a fake decorator.  It is presently used to avoid errors when numba is missing, but will usually result in
     very slow code.
@@ -340,9 +338,9 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
     This function returns two arrays, dataout and weightout.
     weightout is a 3D array containing the accumulated trilinear weights.
     dataout is the accumulated trilinearly inserted values.
-    One needs to divide dataout by weightout (taking care to deal with zeros in weightout) to get the 
-    correct trilinear insertion result. 
-    This is so that the function can be used to sum over many trilinearly inserted arrays in 
+    One needs to divide dataout by weightout (taking care to deal with zeros in weightout) to get the
+    correct trilinear insertion result.
+    This is so that the function can be used to sum over many trilinearly inserted arrays in
     for example a 3D diffracted intensity merge.
 
     Note 1: All input arrays should be C contiguous.
@@ -494,15 +492,6 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
     else:
         raise ValueError('Unrecognized boundary mode')
 
-    # The code in this section is no longer used because we want to return both dataout and weightout.
-    # Returning weightout is useful when we want to interpolate the interpolated slices,
-    # for example in the case of merging slices for a 3D volume.
-
-    # # Calculate the mean value inserted into the array by dividing dataout by weightout.
-    # # For locations where weightout is zero, dataout should also be zero (because no values were inserted),
-    # # deal with this case by setting weightout to 1.
-    # assert np.sum(dataout[weightout == 0]) == 0
-
     # If the original datatype is not complex, then return only the real part.
     if data_val_type != np.complex128:
         data_out = np.real(data_out)
@@ -514,7 +503,7 @@ def rotate3D(f, euler_angles):
     r"""
     Rotate a 3D array of numbers in 3-dimensions.
     The function works by rotating each 2D sections of the 3D array via three shears,
-    as described by Unser et al. (1995) "Convolution-based interpolation for fast, 
+    as described by Unser et al. (1995) "Convolution-based interpolation for fast,
     high-quality rotation of images." IEEE Transactions on Image Processing, 4:1371.
 
     Note 1: If the input array, f, is non-cubic, it will be zero-padded to a cubic array
@@ -583,11 +572,11 @@ def rotate3D(f, euler_angles):
         t = -np.tan(0.5 * dang)
         s = np.sin(dang)
 
-        kxfac = np.exp(constx1 * t)
-        xfac = np.exp(constx2_2 - constx2_3 * t)
+        kxfac = np.exp(cx1 * t)
+        xfac = np.exp(cx2_2 - cx2_3 * t)
 
-        kyfac = np.exp(consty1 * s)
-        yfac = np.exp(consty2_2 - consty2_3 * s)
+        kyfac = np.exp(cy1 * s)
+        yfac = np.exp(cy2_2 - cy2_3 * s)
 
         n90_mod_Four = n90 % 4
 
@@ -630,16 +619,16 @@ def rotate3D(f, euler_angles):
     Y, X = np.meshgrid(np.arange(N), np.arange(N))
 
     y0 = 0.5 * (N - 1)
-    constx1 = -1j * 2.0 * np.pi / N * X * (Y - y0)
-    constx2_1 = -1j * np.pi * (1 - (N % 2) / N)
-    constx2_2 = constx2_1 * X
-    constx2_3 = constx2_1 * (Y - y0)
+    cx1 = -1j * 2.0 * np.pi / N * X * (Y - y0)
+    cx2_1 = -1j * np.pi * (1 - (N % 2) / N)
+    cx2_2 = cx2_1 * X
+    cx2_3 = cx2_1 * (Y - y0)
 
     x0 = 0.5 * (N - 1)
-    consty1 = -1j * 2.0 * np.pi / N * Y * (X - x0)
-    consty2_1 = -1j * np.pi * (1 - (N % 2) / N)
-    consty2_2 = consty2_1 * Y
-    consty2_3 = consty2_1 * (X - x0)
+    cy1 = -1j * 2.0 * np.pi / N * Y * (X - x0)
+    cy2_1 = -1j * np.pi * (1 - (N % 2) / N)
+    cy2_2 = cy2_1 * Y
+    cy2_3 = cy2_1 * (X - x0)
 
     TwoOverPi = 2.0 / np.pi
     PiOvTwo = 0.5 * np.pi
@@ -658,16 +647,16 @@ def make_label_radial_shell(r_bin_vec, n_vec):
     For fast radial statistics calculations - done through a precomputed label array.
 
     Produce a 3D volume with concentric shells of thickness specified by r_bin_vec.
-    Each shell is labelled incrementally by integers starting with 1 at the centre. 
+    Each shell is labelled incrementally by integers starting with 1 at the centre.
     (the label zero is reserved for masked values in the volume).
 
     Voxels outside the maximum radius is given a label of zero.
 
-    Input:
+    Arguments:
         r_bin_vec - Radii of the shells - in voxel units
         n_vec     - Shape of the desired volume
 
-    Output:
+    Returns:
         labels_radial
     """
     nx, ny, nz = n_vec
@@ -824,7 +813,7 @@ def binned_statistic(x, y, func, n_bins, bin_edges, fill_value=0):
     digitized = np.maximum(digitized, 0)
     digitized = np.minimum(digitized, n_bins - 1)
     mat = csr_matrix((y, [digitized, np.arange(n_data)]), shape=(n_bins, n_data))
-    groups = [group for group in np.split(mat.data, mat.indptr[1:-1])]
+    groups = np.split(mat.data, mat.indptr[1:-1])
     out = np.empty(n_bins, dtype=y.dtype)
     out.fill(fill_value)
     for i in range(n_bins):
