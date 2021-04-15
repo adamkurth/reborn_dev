@@ -8,6 +8,7 @@
 pylint --disable too-few-public-methods \
        --disable too-many-instance-attributes \
        --disable too-many-arguments \
+       --disable invalid-name \
        --max-line-length=120 \
        --extension-pkg-whitelist=numpy,reborn.fortran \
        $1
