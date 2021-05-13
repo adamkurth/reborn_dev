@@ -186,6 +186,8 @@ def split_image(data, geom_dict):
 
     r"""
     Split a 2D image into individual panels (useful for working with Cheetah output).
+    If the input data is not a 2D image, then attempt to reshape it according to the
+    expected shape as specified in the geometry dictionary.
 
     Arguments:
         data (numpy array) : Contiguous block of image data
@@ -195,12 +197,18 @@ def split_image(data, geom_dict):
         split_data (list) :
             List of individual PAD panel data
     """
-
+    if len(data.shape) != 2:
+        n_fs = 0
+        n_ss = 0
+        for panel_name in geom_dict['panels']:
+            p = geom_dict['panels'][panel_name]
+            n_ss = max(n_ss, p['max_ss'] + 1)
+            n_fs = max(n_fs, p['max_fs'] + 1)
+        data = data.reshape(n_ss, n_fs)
     split_data = []
     for panel_name in geom_dict['panels']:
         p = geom_dict['panels'][panel_name]
         split_data.append(data[p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)])
-
     return split_data
 
 
