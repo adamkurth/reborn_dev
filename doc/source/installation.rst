@@ -38,7 +38,7 @@ Here are the current contents of that file:
 .. literalinclude:: ../../environment.yml
 
 Some of the core modules of reborn only require |scipy| and its dependencies, but GPU simulations require |pyopencl|,
-working with CrystFEL geometry files requires `cfelpyutils <https://pypi.org/project/cfelpyutils/>`__, and so on.
+viewers require pyqt5, and so on.
 If you use a good package manager you might as well install all of the above dependencies.
 
 Setting up Python with Miniconda

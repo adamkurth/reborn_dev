@@ -7,7 +7,6 @@ pyopencl
 numba
 pyqtgraph
 h5py
-cfelpyutils
 setuptools
 afnumpy
 joblib

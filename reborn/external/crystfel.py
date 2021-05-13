@@ -1,14 +1,14 @@
 r"""
-Utilities for working with CrystFEL files.  Note that you can convert a CrystFEL geometry file to a Python
-dictionary object with the cfelpyutils._crystfel_utils.load_crystfel_geometry() function.  Most of the functions below
-wrap around the cfelpyutils package.
+Utilities for working with CrystFEL files.
+Most of the functions below wrap around the functions in the crystfel_utils module within the cfelpyutils package,
+which is maintained by CFEL.
+The crystfel_utils module is included in reborn so that you do not need to install it with pip.
 """
 
 import os
 import h5py
 import numpy as np
 import linecache
-from .. import utils
 from .. import detector
 from ..fileio.getters import FrameGetter
 from . import _crystfel_utils
@@ -31,8 +31,8 @@ end_crystal = "--- End crystal"
 def load_crystfel_geometry(geometry_file):
 
     r"""
-    Given a CrystFEL geometry file, create a python dictionary object.  This uses the cfelpyutils module - blame
-    Valerio Mariani if it's broken :)
+    Given a CrystFEL geometry file, create a python dictionary object.  The structure of this dictionary is defined
+    by the cfelpyutils.crystfel_utils module, which is maintained by CFEL and included in reborn for convenience.
 
     Arguments:
         geometry_file (str): Path to geometry file

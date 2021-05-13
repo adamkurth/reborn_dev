@@ -23,6 +23,5 @@ dependencies:
 #  - make
   - pip
   - pip:
-    - cfelpyutils
     - sphinx_rtd_theme
     - sphinx-gallery
