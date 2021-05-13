@@ -7,7 +7,7 @@ Overview of reborn package
 --------------------------
 
 The reborn Python package contains utilities for the simulation and analysis of x-ray diffraction under the Born 
-approximation.  There are countless other utilities with identical or similar aspirations: 
+approximation.  There are countless other utilities with related aspirations:
 `thor <https://github.com/tjlane/thor>`_,
 `OnDa <https://github.com/ondateam>`_,
 `DIALS <https://dials.github.io/>`_,
@@ -18,13 +18,14 @@ approximation.  There are countless other utilities with identical or similar as
 `Dragonfly <https://github.com/duaneloh/Dragonfly/wiki/EMC-implementation>`_,
 `BornAgain <www.rebornproject.org>`_.
 
-For clarity, reborn is not a "program".  In order to use it you must write Python code.  It is also not intended
-to be a *general* or *complete* tool at this time -- its content is dictated by what is needed for work done in the
-Kirian Lab.  It is nonetheless available for anyone to use under the GNU V3 License.
+For clarity, reborn is not a "program".  In order to use it you must write Python code.  It is not by any measure
+a *general* or *complete* tool at this time; it's content is presently dictated primarily by what is needed for work
+done by the Kirian group.  It is nonetheless available for anyone to use under the GNU V3
+License.
 
-The reborn package is under constant development, according to our data analysis needs.  However, we do try to maintain
-a suite of tests to make sure that it is reasonably stable.  The icon below indicates if tests are passing.  Hopefully
-it reads "pipeline: passed":
+The reborn package is under constant development.  However, we do try to maintain useful and up-to-date documentation
+along with an extensive suite of tests to make sure that it is reasonably stable.  The icon below indicates if tests are
+presently passing in the master branch:
 
 .. image:: https://gitlab.com/kirianlab/reborn/badges/master/pipeline.svg
 
@@ -45,19 +46,20 @@ In a nutshell, the basic elements reborn are:
 - Tools for displaying diffraction data.
 - A few analysis algorithms.
 
-Before you start using reborn...
---------------------------------
+For Newbies who want to use reborn..
+------------------------------------
 
-- If you have never written code to do data analysis or simulations, you should first learn the basics of the
+- If you are totally new to writing data analysis or simulation code, do learn the basics of
   `shell scripting <https://linuxconfig.org/bash-scripting-tutorial-for-beginners>`_,
   `git <https://www.vogella.com/tutorials/Git/article.html>`_,
   `python <https://becksteinlab.physics.asu.edu/learning/48/learning-python>`_.
+- Learn how to use the |numpy| python package.
 - When you learn python, make sure you learn object-oriented programming concepts.
-- Make sure you at least skim through all of the reborn docs.  Complaints are not allowed until you've done that!
+- Skim through all of the reborn docs so you know what is here.  Complaints are not allowed until you've done that!
 - If documentation is missing or confusing, please fix the problem or notify someone who can.
 - The units in reborn are SI.  Angles are radians.  You rarely need to convert units within reborn.
 - No special coordinate system is assumed in reborn.  You specify the direction of the x-ray beam.
-- We make important assumptions about the shapes and memory layout of numpy arrays in reborn.  Read the docs!
+- We make consistent assumptions about the shapes and memory layout of |numpy| arrays.
 - The :ref:`examples` page is a good place to learn about how we use reborn.
 
 If you plan to develop reborn...

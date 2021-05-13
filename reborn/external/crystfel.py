@@ -1,6 +1,6 @@
 r"""
 Utilities for working with CrystFEL files.  Note that you can convert a CrystFEL geometry file to a Python
-dictionary object with the cfelpyutils.crystfel_utils.load_crystfel_geometry() function.  Most of the functions below
+dictionary object with the cfelpyutils._crystfel_utils.load_crystfel_geometry() function.  Most of the functions below
 wrap around the cfelpyutils package.
 """
 
@@ -11,7 +11,7 @@ import linecache
 from .. import utils
 from .. import detector
 from ..fileio.getters import FrameGetter
-from cfelpyutils import crystfel_utils
+from . import _crystfel_utils
 from scipy import constants as const
 
 eV = const.value('electron volt')
@@ -41,7 +41,7 @@ def load_crystfel_geometry(geometry_file):
         Dict
     """
 
-    return crystfel_utils.load_crystfel_geometry(geometry_file)
+    return _crystfel_utils.load_crystfel_geometry(geometry_file)
 
 
 def geometry_dict_to_pad_geometry_list(geometry_dict):
