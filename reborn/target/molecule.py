@@ -1,10 +1,7 @@
 # coding=utf-8
-r'''
-Utilities for manipulating molecules
-'''
-
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
+r"""
+Utilities for manipulating molecules.
+"""
 import numpy as np
 from ..utils import max_pair_distance
 from ..simulate import atoms

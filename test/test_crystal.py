@@ -3,7 +3,7 @@ from reborn.target import crystal
 from reborn.simulate.examples import lysozyme_pdb_file, psi_pdb_file
 
 
-def test_read_pdb():
+def test_01():
 
     dic = crystal.pdb_to_dict(psi_pdb_file)
     assert dic is not None
@@ -12,7 +12,7 @@ def test_read_pdb():
     assert dic is not None
 
 
-def test_crystal_structure():
+def test_02():
 
     # Check that we can read files and also check that raw SCALE record is correctly generated from the CRYST1 record
     cryst = crystal.CrystalStructure(psi_pdb_file)
@@ -22,7 +22,7 @@ def test_crystal_structure():
     assert np.max(np.abs(cryst.pdb_dict['scale_matrix']*1e10 - cryst.unitcell.o_mat_inv))/np.max(np.abs(cryst.unitcell.o_mat_inv)) < 0.001
 
 
-def test_spacegroup():
+def test_03():
 
     # Round-trip forward/reverse symmetry operations
     cryst = crystal.CrystalStructure(psi_pdb_file)
@@ -32,7 +32,7 @@ def test_spacegroup():
     assert np.max(np.sqrt(np.sum((x_vecs - x_vecs_mod)**2))) < 1e-6
 
 
-def test_unitcell():
+def test_04():
 
     # Test some known lattice vectors
     cryst = crystal.CrystalStructure(psi_pdb_file)
@@ -41,7 +41,7 @@ def test_unitcell():
     assert(np.max(np.abs(cell.a_mat_inv[0, :] - np.array([2.81e-08, 0.00e+00, 0.00e+00]))) < 1e-8)
 
 
-def test_finite_lattice():
+def test_05():
 
     # Very basic test
     siz = 5
@@ -51,7 +51,7 @@ def test_finite_lattice():
     lat.add_facet(plane=[1, 0, 0], length=2)
 
 
-def test_density_map_1():
+def test_06():
 
     # Testing h_vecs and that it is consistent with numpy FFT.
 
@@ -95,7 +95,7 @@ def test_density_map_1():
     assert np.sqrt(np.sum((i_fft - i_dft)**2) / np.sum(i_fft**2)) < 1e-6
 
 
-def test_density_map_2():
+def test_07():
 
     # Round-trip test on au_to_k and k_to_au
     cryst = crystal.CrystalStructure('4ET8', tight_packing=True)
@@ -103,5 +103,18 @@ def test_density_map_2():
     dat = np.arange(np.product(cdmap.shape)).reshape(cdmap.shape)
     dat1 = cdmap.au_to_k(0, dat)
     dat2 = cdmap.k_to_au(0, dat1)
-    assert np.sum(np.abs(dat - dat1)) != 0
+    # assert np.sum(np.abs(dat - dat1)) != 0
     assert np.sum(np.abs(dat - dat2)) == 0
+
+
+def test_08():
+
+    # Check that au_to_k is the same as symmetry_transform
+    for pdb in ['2LYZ', '4ET8']:
+        cryst = crystal.CrystalStructure(pdb, tight_packing=True)
+        cdmap = crystal.CrystalDensityMap(cryst, 10e-11, 2)
+        dat = np.arange(np.product(cdmap.shape)).reshape(cdmap.shape)
+        for k in range(cryst.spacegroup.n_molecules):
+            dat1 = cdmap.au_to_k(k, dat)
+            dat2 = cdmap.symmetry_transform(0, k, dat)
+            assert np.sum(np.abs(dat2 - dat1)) == 0

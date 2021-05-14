@@ -5,7 +5,6 @@ the `LCLS Data Analysis Confluence pages <https://confluence.slac.stanford.edu/d
 Note that there is documentation on `LCLS PAD geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
 import re
 import numpy as np
 import reborn

@@ -29,6 +29,8 @@ log.txt
 ._*
 *.dSYM
 *.so
+*.tar.gz
+*.md5
 .idea
 *~
 .adxv*

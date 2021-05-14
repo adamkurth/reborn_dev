@@ -265,9 +265,8 @@ static dsfloat2 phase_factor(
 //
 //    SUM_i f_i * exp(-i*q.(r_i+U))
 //
-// ** There is one complication: we attempt to speed up the summation by making workers move atomic coordinates
-// and scattering factors to a local memory buffer in parallel, in hopes of faster computation (is it really faster?)
-static dsfloat2 phase_factor_slow(
+// ** This does not attempt to use the local memory trick (as in phase_factor_qrf)
+static dsfloat2 phase_factor_global(
     const dsfloat4 q,         // Scattering vector
     const dsfloat16 R,        // Rotation applied to positions
     const dsfloat4 U,         // Shift added to positions (after rotation)
@@ -343,6 +342,36 @@ kernel void phase_factor_qrf(
     // Again, check that this pixel index is not out of bounds
     if (gi < n_pixels){a[gi] = a[gi]*add + a_sum;}
 }
+
+// Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
+// This variant allows for an arbitrary collection of scattering vectors
+kernel void phase_factor_qrf_global(
+    global const dsfloat *q,  // Scattering vectors
+    global const dsfloat *r,  // Atomic postion vectors
+    global const dsfloat2 *f, // Atomic scattering factors
+    const dsfloat16 R,        // Rotation matrix
+    const dsfloat4 U,         // Translation vector acting on positions
+    global dsfloat2 *a,       // The summed scattering amplitudes (output)
+    const int n_atoms,        // Number of atoms
+    const int n_pixels,       // Number of pixels
+    const int add,            // Set to 1 if you wish to add to the existing amplitude (a) buffer; 0 will overwrite it
+    const int twopi           // Multiply q by 2 pi
+){
+    const int gi = get_global_id(0); /* Global index */
+    const int li = get_local_id(0);  /* Local group index */
+    dsfloat4 qmod = (dsfloat4)(0.0f,0.0f,0.0f,0.0f);
+    dsfloat2 a_sum = (dsfloat2)(0.0f,0.0f);
+//    local dsfloat4 rg[GROUP_SIZE];
+//    local dsfloat2 fg[GROUP_SIZE];
+    // If the pixel index is not out of bounds, move the global scattering vector to private memory
+    if (gi < n_pixels){qmod = (dsfloat4)(q[gi*3],q[gi*3+1],q[gi*3+2],0.0f);}
+    if (twopi == 1){qmod *= PI2;}
+    // Sum over atomic scattering amplitudes
+    a_sum = phase_factor_global(qmod, R, U, r, f, n_atoms); //, rg, fg, li);
+    // Again, check that this pixel index is not out of bounds
+    if (gi < n_pixels){a[gi] = a[gi]*add + a_sum;}
+}
+
 
 // Sum the amplitudes from a collection of atoms for given scattering vectors: SUM_i f_i * exp(i*q.r_i)
 // This variant internally computes scattering vectors corresponding to a pixel-array detector

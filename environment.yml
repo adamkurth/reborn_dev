@@ -3,7 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - python
-#  - future
   - scipy
   - h5py
   - matplotlib
@@ -24,6 +23,5 @@ dependencies:
 #  - make
   - pip
   - pip:
-    - cfelpyutils
     - sphinx_rtd_theme
     - sphinx-gallery

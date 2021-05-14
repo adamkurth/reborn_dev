@@ -5,7 +5,8 @@ if [[ "$(conda env list | grep reborn-minimal)" == "" ]]; then
 fi
 
 source activate reborn-minimal
-./build_inplace.sh
+#./build_inplace.sh
+export PYTHONPATH=".."
 python << EOF
 import reborn
 assert reborn is not None

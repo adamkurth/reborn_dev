@@ -2,8 +2,6 @@ r"""
 Classes related to x-ray sources.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import json
 import numpy as np
 from scipy import constants as const
@@ -11,7 +9,7 @@ from scipy import constants as const
 hc = const.h*const.c  # pylint: disable=invalid-name
 
 
-class Beam():
+class Beam:
 
     r"""
     A minimal containor to gather x-ray beam properties.
@@ -58,6 +56,12 @@ class Beam():
 
     @property
     def hash(self):
+        r"""
+        Hash the |Beam| instance in order to determine if the beam instance has changed.
+
+        Returns:
+            int
+        """
         return hash(self.__str__())
 
     @property
@@ -141,21 +145,27 @@ class Beam():
 
     def to_dict(self):
         r""" Convert beam to a dictionary.  It contains the following keys:
-
-        photon_energy, beam_profile, beam_vec, polarization_vec,
-        polarization_weight, photon_energy_fwhm, pulse_energy, divergence_fwhm, diameter_fwhm, pulse_energy_fwhm
-
+        - photon_energy
+        - beam_profile
+        - beam_vec
+        - polarization_vec
+        - polarization_weight
+        - photon_energy_fwhm
+        - pulse_energy
+        - divergence_fwhm
+        - diameter_fwhm
+        - pulse_energy_fwhm
         """
-        return {'photon_energy': floatif(self.photon_energy),
-                'photon_energy_fwhm': floatif(self.photon_energy_fwhm),
+        return {'photon_energy': float_tuple(self.photon_energy),
+                'photon_energy_fwhm': float_tuple(self.photon_energy_fwhm),
                 'beam_profile': self.beam_profile,
-                'beam_vec': floatif(tuple(self.beam_vec)),
-                'polarization_vec': floatif(tuple(self.polarization_vec)),
-                'polarization_weight': floatif(self.polarization_weight),
-                'pulse_energy': floatif(self.pulse_energy),
-                'pulse_energy_fwhm': floatif(self.pulse_energy_fwhm),
-                'divergence_fwhm': floatif(self.divergence_fwhm),
-                'diameter_fwhm': floatif(self.diameter_fwhm)
+                'beam_vec': float_tuple(tuple(self.beam_vec)),
+                'polarization_vec': float_tuple(tuple(self.polarization_vec)),
+                'polarization_weight': float_tuple(self.polarization_weight),
+                'pulse_energy': float_tuple(self.pulse_energy),
+                'pulse_energy_fwhm': float_tuple(self.pulse_energy_fwhm),
+                'divergence_fwhm': float_tuple(self.divergence_fwhm),
+                'diameter_fwhm': float_tuple(self.diameter_fwhm)
                 }
 
     def from_dict(self, dictionary):
@@ -182,7 +192,7 @@ class Beam():
 
 
 def load_beam(file_path):
-    """ Load a beam from a json file (loaded with :meth:`Beam.load_json() <reborn.source.Beam.load_json>` method)
+    r""" Load a beam from a json file (loaded with :meth:`Beam.load_json() <reborn.source.Beam.load_json>` method)
 
     Arguments:
         file_path (str): Path to beam json file
@@ -195,7 +205,7 @@ def load_beam(file_path):
 
 
 def save_beam(beam, file_path):
-    """ Save a Beam to a json file (saved with :meth:`Beam.save_json() <reborn.source.Beam.save_json>` method)
+    r""" Save a Beam to a json file (saved with :meth:`Beam.save_json() <reborn.source.Beam.save_json>` method)
 
     Arguments:
         beam (|Beam|): The Beam instance to save.
@@ -205,10 +215,19 @@ def save_beam(beam, file_path):
     beam.save_json(file_path)
 
 
-def floatif(val):
+def float_tuple(val):
+    r"""
+    Convert to float.  If object is a tuple, convert each element to a float.
+
+    Arguments:
+        val: Input to convert to floats.
+
+    Returns:
+
+    """
     if val is None:
         return val
     if type(val) == tuple:
-        val = tuple([floatif(v) for v in val])
+        val = tuple([float_tuple(v) for v in val])
         return val
     return float(val)

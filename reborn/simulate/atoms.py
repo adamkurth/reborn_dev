@@ -38,7 +38,7 @@ def atomic_symbols_to_numbers(symbols):
         for u in z_u:
             w = np.nonzero(atomic_symbols == u.capitalize())
             z[symbols == u] = w[0] + 1
-        z = z.astype(np.int)
+        z = z.astype(np.int64)
     else:
         w = np.nonzero(atomic_symbols == np.str_(symbols).capitalize())
         z = int(w[0] + 1)
@@ -57,7 +57,7 @@ def atomic_numbers_to_symbols(numbers):
         |ndarray|: Atomic element symbols (such as H, He, Be)
     """
 
-    numbers = np.array(numbers, dtype=np.int)
+    numbers = np.array(numbers, dtype=np.int64)
     symbols = atomic_symbols[numbers - 1]
     return symbols
 
@@ -104,7 +104,7 @@ def henke_scattering_factors(atomic_numbers, photon_energies):
     """
     atomic_numbers = np.array(atomic_numbers).ravel()
     photon_energies = np.array(photon_energies).ravel()
-    f = np.zeros([atomic_numbers.size, photon_energies.size], dtype=np.complex).reshape([atomic_numbers.size,
+    f = np.zeros([atomic_numbers.size, photon_energies.size], dtype=complex).reshape([atomic_numbers.size,
                                                                                          photon_energies.size])
     # Yes the reshape above shouldn't be necessary, obviously, but this is a quirky feature of numpy...
     for z in np.unique(atomic_numbers):
@@ -130,7 +130,7 @@ def get_scattering_factors(atomic_numbers, photon_energy):
     """
 
     atomic_numbers = np.array(atomic_numbers).ravel()
-    f = np.zeros([len(atomic_numbers)], dtype=np.complex)
+    f = np.zeros([len(atomic_numbers)], dtype=complex)
     for z in np.unique(atomic_numbers):
         dat = _get_henke_data(z)
         w = np.where(atomic_numbers == z)
@@ -370,7 +370,7 @@ def get_cromermann_parameters(atomic_numbers=None):
                parameters are listed in order as a_1, a_2, a_3, a_4, b_1, b_2, b_3, b_4, c
     """
     if atomic_numbers is None:
-        raise ValueError('Atomic numbers were not provided')
+        atomic_numbers = np.arange(89) + 1
     atom_types = np.unique(atomic_numbers)
     cromermann = {}
     for i, a in enumerate(atom_types):
@@ -380,6 +380,26 @@ def get_cromermann_parameters(atomic_numbers=None):
             print('Element number %d not in Cromer-Mann form factor parameter database' % a)
             raise RuntimeError('Could not get critical parameters for computation')
     return cromermann
+
+
+def get_cromer_mann_densities(Z, r):
+
+    Z = utils.atleast_1d(Z)
+    r = utils.atleast_1d(r)
+    out = np.zeros((Z.size, r.size))
+    cmann = get_cromermann_parameters()
+    for (zi, z) in enumerate(Z):
+        if z == 1:
+            rho = (1/(np.pi*5.291e-30))*np.exp(-2*r/5.291e-10)
+            out[zi, :] = rho
+            continue
+        a = cmann[z]
+        b = a[4:]
+        rho = np.zeros(r.size)
+        for i in range(4):
+            rho += a[i]*8*(np.pi/b[i])**(3/2)*np.exp(-12*np.pi**2*(r*1e10)**2/b[i])
+        out[zi, :] = rho
+    return out
 
 
 # def get_cromermann_parameters_legacy(atomic_numbers, max_num_atom_types=None):

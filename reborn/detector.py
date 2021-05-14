@@ -271,7 +271,7 @@ class PADGeometry():
         if insist_in_pad:
             ii = i + 0.5
             jj = j + 0.5
-            m = np.zeros(ii.shape, dtype=np.int)
+            m = np.zeros(ii.shape, dtype=np.int64)
             m[ii < 0] = 1
             m[jj < 0] = 1
             m[ii > self.n_fs] = 1
@@ -759,7 +759,7 @@ class PADAssembler():
         position_vecs_concat = np.concatenate([p.position_vecs() for p in pad_list])
         position_vecs_concat -= np.min(position_vecs_concat, axis=0)
         position_vecs_concat /= pixel_size
-        position_vecs_concat = np.floor(position_vecs_concat).astype(np.int)
+        position_vecs_concat = np.floor(position_vecs_concat).astype(np.int64)
         maxval = np.max(position_vecs_concat, axis=0)
         assembled = np.zeros([maxval[0] + 1, maxval[1] + 1])
         self.position_vecs_concat = position_vecs_concat

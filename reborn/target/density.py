@@ -1,4 +1,3 @@
-from __future__ import (absolute_import, division, print_function, unicode_literals)
 import numpy as np
 from ..fortran import density_f
 try:
@@ -98,9 +97,9 @@ def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, o
     # centers of the bins, indicated by the * symbol.  Supposing we want to place a Gaussian centered at the x position,
     # we need to calculate distances to sample points indexed with 0, 1, 2 but with wrap-around factored in.
 
-    shape = shape.astype(np.int)
-    sum_map = np.zeros(shape.astype(np.int), dtype=f.dtype)
-    tmp = np.zeros(shape.astype(np.int), dtype=f.dtype)
+    shape = shape.astype(np.int64)
+    sum_map = np.zeros(shape.astype(np.int64), dtype=f.dtype)
+    tmp = np.zeros(shape.astype(np.int64), dtype=f.dtype)
     _build_atomic_scattering_density_map_numba(x_vecs=x_vecs, f=f, sigma=sigma, x_min=x_min, x_max=x_max, shape=shape,
                                                orth_mat=orth_mat, max_radius=max_radius, sum_map=sum_map, tmp=tmp)
 

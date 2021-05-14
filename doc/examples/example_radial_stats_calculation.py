@@ -13,7 +13,7 @@ Contributed by Joe Chen.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from reborn.utils import make_label_radialShell, radial_stats
+from reborn.utils import make_label_radial_shell, radial_stats
 
 Nx = 20
 Ny = 20
@@ -27,10 +27,10 @@ f = np.random.rand(Nx, Ny, Nz)
 r_bin_vec = np.linspace(0, int(Nx/2), N_radials)
 
 # Set up the radial labels
-labels_radial = make_label_radialShell(r_bin_vec, N_vec=(Nx, Ny, Nz))
+labels_radial = make_label_radial_shell(r_bin_vec, n_vec=(Nx, Ny, Nz))
 
 # Calculate the radial median
-radial_median = radial_stats(f=f, labels_radial=labels_radial, N_radials=N_radials, mode="median")
+radial_median = radial_stats(f=f, labels_radial=labels_radial, n_radials=N_radials, mode="median")
 
 
 # %%

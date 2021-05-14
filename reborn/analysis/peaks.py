@@ -1,5 +1,3 @@
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import numpy as np
 from scipy.ndimage import measurements
 from ..fortran import peaks_f
@@ -178,25 +176,35 @@ def boxsnr(dat, mask_in, mask_out, n_in, n_cent, n_out):
     (4) Compute the standard deviation :math:`\sigma` in the square annulus.  Pixels within `mask_out` will be ignored.
 
     (5) Divide the locally-integrated signal-minus-background by the standard error.  The standard error is 
-        equal to :math:`\sigma*\sqrt(M)` where :math:`M` is the number of unmasked pixels in the locally-integratied
+        equal to :math:`\sigma/\sqrt{M}` where :math:`M` is the number of unmasked pixels in the locally-integratied
         signal region, and :math:`\sigma` comes from step (4).
 
-    Note: The use of two distinct masks allows for multi-pass SNR computations in which the results of the first pass 
+    The use of two distinct masks allows for multi-pass SNR computations in which the results of the first pass
     may be used to exclude high-SNR regions from contributing to error estimates in the annulus.  See
     :func:`snr_mask <reborn.analysis.peaks.snr_mask>` if you want to generate a mask this way.
 
-    Note: This routine will attempt to use openmp to parallelize the computations.  It is affected by the environment
-    variable `OMP_NUM_THREADS`.
+    Note:
+        This routine will attempt to use openmp to parallelize the computations.  It is affected by the environment
+        variable `OMP_NUM_THREADS`.  You can check how many cores are used by openmp by running the following:
+
+        .. code-block::
+
+            import reborn.fortran; reborn.fortran.omp_test_f.omp_test()
 
     Arguments:
-        dat: The image to analyze
-        mask_in: The mask for the square central integration region
-        mask_out: The mask for the square annulus integration region
-        n_in: Size of the central integration region; integrate from (-nin, nin), inclusively.
-        n_cent: Define the annulus integration region; we ignore the box from (-ncent, ncent), inclusively
-        n_out: Define the annulus integration region; we include the box from (-nout, nout), inclusively
+        dat (|ndarray|): The image to analyze.
+        mask_in (|ndarray|): The mask for the square central integration region.
+        mask_out (|ndarray|): The mask for the square annulus integration region.
+        n_in (int): Size of the central integration region; integrate from :math:`(-n_{in}, n_{in})`, inclusively.
+        n_cent (int): Define the annulus integration region; we ignore the box from (-n_cent, n_cent), inclusively.
+        n_out (int): Define the annulus integration region; we include the box from (-n_out, n_out), inclusively.
 
-    Returns: snr (numpy array), signal (numpy array)
+    Returns:
+        (tuple):
+
+        **snr** (|ndarray|): The SNR array.
+
+        **signal** (|ndarray|): The signal array.
     """
 
     float_t = np.float64
