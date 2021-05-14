@@ -197,14 +197,14 @@ def split_image(data, geom_dict):
         split_data (list) :
             List of individual PAD panel data
     """
-    if len(data.shape) != 2:
-        n_fs = 0
-        n_ss = 0
-        for panel_name in geom_dict['panels']:
-            p = geom_dict['panels'][panel_name]
-            n_ss = max(n_ss, p['max_ss'] + 1)
-            n_fs = max(n_fs, p['max_fs'] + 1)
-        data = data.reshape(n_ss, n_fs)
+    #if len(data.shape) != 2:
+    n_fs = 0
+    n_ss = 0
+    for panel_name in geom_dict['panels']:
+        p = geom_dict['panels'][panel_name]
+        n_ss = max(n_ss, p['max_ss'] + 1)
+        n_fs = max(n_fs, p['max_fs'] + 1)
+    data = data.reshape(n_ss, n_fs)
     split_data = []
     for panel_name in geom_dict['panels']:
         p = geom_dict['panels'][panel_name]
@@ -212,12 +212,35 @@ def split_image(data, geom_dict):
     return split_data
 
 
+def unsplit_image(data, geom_dict):
+    r"""
+    Undo the action of split_image
+
+    Arguments:
+        data (list of |ndarray|) :  List of individual pads
+        geom_dict (dict) : Geometry dictionary
+
+    Returns:
+        |ndarray|
+    """
+    n_fs = 0
+    n_ss = 0
+    for panel_name in geom_dict['panels']:
+        p = geom_dict['panels'][panel_name]
+        n_ss = max(n_ss, p['max_ss'] + 1)
+        n_fs = max(n_fs, p['max_fs'] + 1)
+    data_cont = np.zeros((n_ss, n_fs), dtype=data[0].dtype)
+    for (i, panel_name) in enumerate(geom_dict['panels']):
+        p = geom_dict['panels'][panel_name]
+        data_cont[p['min_ss']:(p['max_ss'] + 1), p['min_fs']:(p['max_fs'] + 1)] = data[i]
+    return data_cont
+
+
 def write_geom_file_single_pad(file_path=None, beam=None, pad_geometry=None):
     r""" 
     Simple geom file writer.  Do not use this -- the file does not adhere 
     to the CrystFEL specifications...
     """
-
     pad = pad_geometry
     geom_file = os.path.join(file_path)
     fid = open(geom_file, 'w')
