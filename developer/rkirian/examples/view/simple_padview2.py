@@ -1,7 +1,7 @@
 import numpy as np
 import reborn
 from reborn.simulate import examples
-from reborn.viewers.qtviews.padviews import PADView, PADView2
+from reborn.viewers.qtviews.padviews import PADView2
 
 np.random.seed(0)
 

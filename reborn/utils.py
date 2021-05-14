@@ -5,6 +5,7 @@ Some utility functions that might be useful throughout reborn.  Don't put highly
 from functools import wraps
 import sys
 import os
+import inspect
 import pkg_resources
 import numpy as np
 from numpy import sin, cos
@@ -820,3 +821,14 @@ def binned_statistic(x, y, func, n_bins, bin_edges, fill_value=0):
         if len(groups[i]) > 0:
             out[i] = func(groups[i])
     return out[1:-1]
+
+
+def get_caller():
+    r""" Get the name of the function that calls this one. """
+    try:
+        stack = inspect.stack()
+        if len(stack) > 1:
+            return inspect.stack()[1][3]
+    except:
+        pass
+    return 'get_caller'
