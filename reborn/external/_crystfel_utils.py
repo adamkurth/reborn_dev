@@ -396,7 +396,8 @@ def load_crystfel_geometry(filename):
     default_panel = {
         "cnx": None,
         "cny": None,
-        "clen": None,
+        "clen": -1,
+        "clen_from": None,
         "coffset": 0.0,
         "res": -1.0,
         "badrow": "-",
@@ -590,6 +591,7 @@ def load_crystfel_geometry(filename):
                 )
             )
         if panel["clen"] is None and panel["clen_from"] is None:
+            #panel["clen"] = -1
             raise RuntimeError(
                 "Please specify the camera length for panel {}.".format(panel_name)
             )
