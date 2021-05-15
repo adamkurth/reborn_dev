@@ -341,7 +341,7 @@ class StreamfileFrameGetter(FrameGetter):
     h5_file = None
     current_frame = 0
     n_frames = 0
-    cxi_file_path_str_replace = None  # Set to tuple of strings (remove, replace)
+    cxi_path_replace = None  # Set to tuple of strings (remove, replace)
 
     def __init__(self, stream_file=None, geom_file=None):
         r"""
@@ -409,8 +409,8 @@ class StreamfileFrameGetter(FrameGetter):
         if np.sum(A) == 0:
             A = None
         dat['A_matrix'] = A
-        if self.cxi_file_path_str_replace is not None:
-            cxi_file_path.replace(*self.cxi_file_path_str_replace)
+        if self.cxi_path_replace is not None:
+            cxi_file_path = cxi_file_path.replace(*self.cxi_path_replace)
         dat['cxi_file_path'] = cxi_file_path
         dat['cxi_frame_number'] = cxi_frame_number
         dat['photon_energy'] = photon_energy
