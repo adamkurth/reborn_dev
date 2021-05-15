@@ -1069,16 +1069,16 @@ def pdb_to_dict(pdb_file_path):
     Returns:
         FIXME: Rick: Think about better formatting of returns.
         A dictionary with the following keys:
-           'scale_matrix'
-           'scale_translation'
-           'atomic_coordinates'
-           'atomic_symbols'
-           'unit_cell'
-           'spacegroup_symbol'
-           'spacegroup_rotations'
-           'spacegroup_translations'
-           'ncs_rotations'
-           'ncs_translations'
+        - 'scale_matrix'
+        - 'scale_translation'
+        - 'atomic_coordinates'
+        - 'atomic_symbols'
+        - 'unit_cell'
+        - 'spacegroup_symbol'
+        - 'spacegroup_rotations'
+        - 'spacegroup_translations'
+        - 'ncs_rotations'
+        - 'ncs_translations'
     """
 
     atomic_coordinates = np.zeros([10000, 3])
