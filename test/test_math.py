@@ -26,6 +26,8 @@ def test_kabsch():
     from reborn.math.kabsch import kabsch
     from scipy.stats import special_ortho_group
 
+    np.random.seed(42)
+
     small = 1.0e-12 # Error we want the result to be smaller than
 
     # Generate a random A matrix
@@ -43,7 +45,7 @@ def test_kabsch():
     A_home = A_home.T
 
     # Now run the Kabsch algorithm and convert the output to a rotation matrix
-    R_est = kabsch(A_home, A)
+    R_est = kabsch(A, A_home)
 
     assert (np.sum(np.abs(R - R_est)) < small)
 
