@@ -93,6 +93,7 @@ class PADView2(QtCore.QObject):
     data_processor = None
     widgets = {}
     plugins = None
+    _auto_percentiles = None
 
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
@@ -963,6 +964,11 @@ class PADView2(QtCore.QObject):
         self._q_mags = None
         self.sig_geometry_changed.emit()
 
+    def set_auto_level_percentiles(self, percents=(1, 99)):
+        r""" Set to None if auto scaling is not desired """
+        self._auto_percentiles = percents
+        self.update_display_data()
+
     def update_pads(self):
         self.debug(get_caller(), 1)
         if self.pad_image_items is None:
@@ -974,6 +980,8 @@ class PADView2(QtCore.QObject):
                 d[d < 0] = 0
                 d = np.log10(d)
             self.pad_image_items[i].setImage(d)
+        if self._auto_percentiles is not None:
+            self.set_levels_by_percentiles(percents=self._auto_percentiles)
         self.histogram.regionChanged()
 
     def save_pad_geometry(self):
@@ -1188,13 +1196,13 @@ class PADView2(QtCore.QObject):
             return
         dat = self.frame_getter.get_next_frame()
         if dat is None:
-            self.debug('Frame getter returned None.', 0)
+            self.debug('Frame getter returned None.', 1)
             return
         if 'pad_data' in dat.keys():
             self.raw_data = dat
             self.update_display_data()
         else:
-            self.debug('Could not find PAD data in frame.', 0)
+            self.debug('Could not find PAD data in frame.', 1)
 
     def show_previous_frame(self):
         self.debug(get_caller(), 1)

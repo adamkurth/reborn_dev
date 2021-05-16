@@ -20,9 +20,12 @@ dats = examples.simulate_water(pad_geometry=pads, beam=beam, water_thickness=1e-
 # for d in dats:
 #     x, y = np.indices(d.shape)
 #     d -= x/100
-padview = PADView2(raw_data=dats, pad_geometry=pads, debug_level=0)
+framegetter = examples.LysozymeFrameGetter(pad_geometry=pads, beam=beam)
+# padview = PADView2(raw_data=dats, pad_geometry=pads, beam=beam, debug_level=1)
+padview = PADView2(frame_getter=framegetter, pad_geometry=pads, beam=beam, debug_level=1)
 padview.show_pad_labels()
 padview.show_coordinate_axes()
 padview.set_title('Title')
+padview.set_auto_level_percentiles((2, 98))
 padview.start()
 
