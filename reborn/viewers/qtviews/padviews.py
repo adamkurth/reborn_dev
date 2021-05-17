@@ -100,7 +100,7 @@ class PADView2(QtCore.QObject):
     sig_geometry_changed = QtCore.pyqtSignal()
 
     def __init__(self, pad_geometry=None, mask_data=None, logscale=False, frame_getter=None, raw_data=None,
-                 beam=None, debug_level=0):
+                 beam=None, percentiles=None, debug_level=0):
         """
         Arguments:
             pad_geometry (|PADGeometry| list): PAD geometry information.
@@ -118,6 +118,7 @@ class PADView2(QtCore.QObject):
         self.pad_geometry = pad_geometry
         self.beam = beam
         self.dataframe = {}
+        self._auto_percentiles = percentiles
 
         if raw_data is not None:
             if isinstance(raw_data, dict):
