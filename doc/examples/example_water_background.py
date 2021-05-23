@@ -10,16 +10,12 @@ Contributed by Richard A. Kirian.
 import numpy as np
 from reborn import detector, source
 from reborn.simulate import solutions
-from scipy import constants as const
 from reborn.viewers.mplviews import view_pad_data
 
 np.random.seed(0)
-r_e = const.value('classical electron radius')
-eV = const.value('electron volt')
-concat = detector.concat_pad_data
 
 detector_distance = 0.1
-photon_energy = 6000*eV
+photon_energy = 6000*1.602e-19
 beam_diameter = 5e-6
 pulse_energy = 5e-3
 jet_diameter = 10e-6

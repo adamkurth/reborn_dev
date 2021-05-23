@@ -51,7 +51,6 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
         bbox.append(np.array([[t[0], t[1]], [t[0]+f[0], t[1]+f[1]], [t[0]+s[0], t[1]+s[1]],
                               [t[0]+f[0]+s[0], t[1]+f[1]+s[1]]]))
         im = ax.imshow(dat, **imshow_args)
-        print(imshow_args)
         trans = mpl.transforms.Affine2D(np.array([[f[0], s[0], t[0]],
                                                   [f[1], s[1], t[1]],
                                                   [   0,    0,    1]])) + ax.transData
