@@ -27,18 +27,6 @@ jet_temperature = 300
 
 pads = detector.epix10k_pad_geometry_list(detector_distance=detector_distance)
 beam = source.Beam(photon_energy=photon_energy, diameter_fwhm=beam_diameter, pulse_energy=pulse_energy)
-I = solutions.get_pad_solution_intensity(pad_geometry=pads, beam=beam, thickness=jet_diameter,
-                                         liquid='water', temperature=298, poisson=True)
-view_pad_data(pad_geometry=pads, pad_data=I)
-
-# n_water_molecules = jet_diameter * beam.diameter_fwhm**2 * solutions.water_number_density()
-# q_mags = pads.q_mags(beam)
-# J = beam.photon_number_fluence
-# P = concat([p.polarization_factors(beam=beam) for p in pads])
-# SA = concat([p.solid_angles() for p in pads])
-# F = solutions.get_water_profile(q_mags, temperature=jet_temperature)
-# F2 = F**2*n_water_molecules
-# I = r_e**2 * J * P * SA * F2
-# I = np.random.poisson(I)
-# I = detector.split_pad_data(pads, I)
-# view_pad_data(pad_geometry=pads, pad_data=I)
+intensity = solutions.get_pad_solution_intensity(pad_geometry=pads, beam=beam, thickness=jet_diameter,
+                                                 liquid='water', temperature=298, poisson=True)
+view_pad_data(pad_geometry=pads, pad_data=intensity)
