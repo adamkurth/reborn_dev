@@ -601,6 +601,8 @@ class PADGeometry:
 class PADGeometryList(list):
 
     def __init__(self, pad_geometry):
+        r""" A subclass of list that does operations on lists of |PADGeometry| instances.  Is helpful, for example.
+        when getting q vectors for many separate PADs. """
         super().__init__()
         if pad_geometry is not None:
             pad_geometry = utils.ensure_list(pad_geometry)
@@ -611,6 +613,14 @@ class PADGeometryList(list):
         s = ''
         for item in self: s += '\n'+item.__str__()
         return s
+
+    def split_data(self, data):
+        r""" Split a contiguous |ndarray| into list of 2D |ndarray|s."""
+        return split_pad_data(self, data)
+
+    def concat_data(self, data):
+        r""" Concatenate a list of |ndarray|s into a single 1D |ndarray|."""
+        return concat_pad_data(data)
 
     @property
     def hash(self):
