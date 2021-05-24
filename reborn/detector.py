@@ -6,11 +6,11 @@ detectors (PADs).
 import os
 import json
 import numpy as np
-from scipy.stats import binned_statistic
 from . import utils
-from time import time
+import pkg_resources
 
-class PADGeometry():
+
+class PADGeometry:
     r"""
     A container for pixel-array detector (PAD) geometry specification, with helpful methods for generating:
 
@@ -48,25 +48,20 @@ class PADGeometry():
         self._fs_vec = None
         self._ss_vec = None
         self._t_vec = None
-        self.name = None
+        self.name = ''
 
         if distance is not None and pixel_size is not None:
 
             self.simple_setup(n_pixels=n_pixels, distance=distance, pixel_size=pixel_size, shape=shape)
 
     def __str__(self):
-        out = ''
+        out = self.name+'\n'
         out += 'n_fs: %s\n' % self.n_fs.__str__()
         out += 'n_ss: %s\n' % self.n_ss.__str__()
         out += 'fs_vec: %s\n' % self.fs_vec.__str__()
         out += 'ss_vec: %s\n' % self.ss_vec.__str__()
         out += 't_vec: %s' % self.t_vec.__str__()
         return out
-
-    @property
-    def hash(self):
-        r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
-        return hash(self.__str__())
 
     def __eq__(self, other):
         if not isinstance(other, PADGeometry):
@@ -87,8 +82,37 @@ class PADGeometry():
         return not self.__eq__(other)
 
     @property
+    def hash(self):
+        r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
+        return hash(self.__str__())
+
+    def validate(self, raise_error=False):
+        r""" Determine if this instance has all the needed parameters defined.
+
+        Arguments:
+            raise_error (bool): Raise ValueError if the validation fails
+
+        Returns:
+            bool: True if validation passes, False otherwise
+        """
+        status = True
+        if not isinstance(self._n_fs, int):
+            status = False
+        if not isinstance(self._n_ss, int):
+            status = False
+        if not isinstance(self._fs_vec, np.ndarray):
+            status = False
+        if not isinstance(self._ss_vec, np.ndarray):
+            status = False
+        if not isinstance(self._t_vec, np.ndarray):
+            status = False
+        if raise_error:
+            raise ValueError("Something is wrong with this PADGeometry (missing parameter, or bad type)")
+        return status
+
+    @property
     def n_fs(self):
-        r"""Number of fast-scan pixels."""
+        r"""(*int*) Number of fast-scan pixels."""
         if self._n_fs is None:
             raise ValueError('n_fs has not been defined for this PADGeometry!')
         return self._n_fs
@@ -144,8 +168,12 @@ class PADGeometry():
         self._t_vec = np.array(t_vec)
 
     def to_dict(self):
-        r""" Convert geometry to a dictionary.  It contains n_fs, n_ss, fs_vec, ss_vec and t_vec keys."""
-        return {'n_fs': self.n_fs, 'n_ss': self.n_ss, 'fs_vec': tuple(self.fs_vec), 'ss_vec': tuple(self.ss_vec), 't_vec': tuple(self.t_vec)}
+        r""" Convert geometry to a dictionary.
+
+        Returns: (dict): Dictionary containing the keys **n_fs**, **n_ss**, **fs_vec**, **ss_vec** and **t_vec**.
+        """
+        return {'n_fs': self.n_fs, 'n_ss': self.n_ss, 'fs_vec': tuple(self.fs_vec), 'ss_vec': tuple(self.ss_vec),
+                't_vec': tuple(self.t_vec)}
 
     def from_dict(self, dictionary):
         r""" Loads geometry from dictionary.  This goes along with the to_dict method."""
@@ -568,6 +596,120 @@ class PADGeometry():
     def corner_position_vectors(self):
         t, f, s, nf, ns = self.t_vec, self.fs_vec, self.ss_vec, self.n_fs, self.n_ss
         return np.array([t, t+nf*f, t+nf*f+ns*s, t+ns*s])
+
+
+class PADGeometryList(list):
+
+    def __init__(self, pad_geometry):
+        r""" A subclass of list that does operations on lists of |PADGeometry| instances.  Is helpful, for example.
+        when getting q vectors for many separate PADs. """
+        super().__init__()
+        if pad_geometry is not None:
+            pad_geometry = utils.ensure_list(pad_geometry)
+            for p in pad_geometry:
+                self.append(p)
+
+    def __str__(self):
+        s = ''
+        for item in self: s += '\n'+item.__str__()
+        return s
+
+    def split_data(self, data):
+        r""" Split a contiguous |ndarray| into list of 2D |ndarray|s."""
+        return split_pad_data(self, data)
+
+    def concat_data(self, data):
+        r""" Concatenate a list of |ndarray|s into a single 1D |ndarray|."""
+        return concat_pad_data(data)
+
+    @property
+    def hash(self):
+        r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
+        s = ''
+        for p in self: s += p.__str__()
+        return hash(s)
+
+    def validate(self, raise_error=False):
+        r""" Same as the the matching method in |PADGeometry|."""
+        status = True
+        for p in self:
+            status *= p.validate(raise_error=raise_error)
+        if status: return True
+        else: return False
+
+    @property
+    def n_pixels(self):
+        r""" Sums the output of the matching method in |PADGeometry|"""
+        return np.sum(np.array([p.n_pixels for p in self]))
+
+    def copy(self):
+        r""" Same as the the matching method in |PADGeometry|."""
+        return PADGeometryList([p.copy() for p in self])
+
+    def save_json(self, file_name):
+        r""" Same as the the matching method in |PADGeometry|."""
+        save_pad_geometry_list(file_name, self)
+
+    def position_vecs(self):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.position_vecs() for p in self])
+
+    def s_vecs(self):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.s_vecs() for p in self])
+
+    def ds_vecs(self, beam):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.ds_vecs(beam=beam) for p in self])
+
+    def q_vecs(self, beam):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.q_vecs(beam=beam) for p in self])
+
+    def q_mags(self, beam):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.q_mags(beam=beam) for p in self])
+
+    def solid_angles(self):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.solid_angles() for p in self])
+
+    def solid_angles1(self):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.solid_angles1() for p in self])
+
+    def solid_angles2(self):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.solid_angles2() for p in self])
+
+    def polarization_factors(self, beam):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.polarization_factors(beam=beam) for p in self])
+
+    def scattering_angles(self, beam):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.scattering_angles(beam=beam) for p in self])
+
+    def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.beamstop_mask(beam, q_min, min_angle) for p in self])
+
+    def zeros(self):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.zeros() for p in self])
+
+    def ones(self):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.ones() for p in self])
+
+    def random(self):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.random() for p in self])
+
+    def max_resolution(self, beam):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.max(np.array([p.max_resolution(beam=beam) for p in self]))
+
 
 def save_pad_geometry_list(file_name, geom_list):
     r""" Save a list of PADGeometry instances as a json file. """
@@ -1221,3 +1363,73 @@ def load_pad_masks(file_name):
     else:
         masks = [out[keys[i]] for i in _range(n) + 1]
     return masks
+
+
+pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
+cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_geometry.json')
+epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k_geometry.json')
+
+
+def pnccd_pad_geometry_list(detector_distance=0.1):
+    r"""
+    Generate a list of :class:`PADGeometry <reborn.detector.PADGeometry>` instances that are inspired by
+    the `pnCCD <https://doi.org/10.1016/j.nima.2009.12.053>`_ detector.
+
+    Returns: List of |PADGeometry| instances
+    """
+    pads = load_pad_geometry_list(pnccd_geom_file)
+    for p in pads: p.t_vec[2] = detector_distance
+    return pads
+
+
+def cspad_pad_geometry_list(detector_distance=0.1):
+    r"""
+    Generate a list of |PADGeometry| instances that are inspired by the |CSPAD| detector.
+
+    Arguments:
+        detector_distance (float): Detector distance in SI units
+
+    Returns: List of |PADGeometry| instances
+    """
+    pads = load_pad_geometry_list(cspad_geom_file)
+    for p in pads: p.t_vec[2] = detector_distance
+    return pads
+
+
+def jungfrau4m_pad_geometry_list(detector_distance=0.1, binning=1):
+    r"""
+    Generate a list of |PADGeometry| instances that are inspired by the |Jungfrau| 4M detector.
+
+    Arguments:
+        detector_distance (float): Detector distance in SI units
+        binning (int): Bin the detector into larger NxN virtual pixels.
+
+    Returns: List of |PADGeometry| instances
+    """
+    pads = tiled_pad_geometry_list(pad_shape=(int(512/binning), int(1024/binning)), pixel_size=75e-6*binning,
+                                            distance=detector_distance, tiling_shape=(4, 2), pad_gap=36 * 75e-6)
+    gap = 9e-3
+    pads[0].t_vec += + np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
+    pads[1].t_vec += + np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
+    pads[2].t_vec += - np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
+    pads[3].t_vec += - np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
+    pads[4].t_vec += + np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
+    pads[5].t_vec += + np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
+    pads[6].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
+    pads[7].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
+    return pads
+
+
+def epix10k_pad_geometry_list(detector_distance=0.1):
+    r"""
+    Generate a list of |PADGeometry| instances that are inspired by the epix10k detector.
+
+    Arguments:
+        detector_distance (float): Detector distance in SI units.
+
+    Returns:
+        (list): List of |PADGeometry| instances.
+    """
+    pads = load_pad_geometry_list(epix10k_geom_file)
+    for p in pads: p.t_vec[2] = detector_distance
+    return PADGeometryList(pads)

@@ -21,15 +21,14 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     plt.figure()
     ax = plt.gca()
     ax.set_aspect('equal')
-    # Damn SACLA computers have old versions of python pacakges... had to get rid of the next line...
-    #ax.set_facecolor(np.array([0, 0, 0])+0.2)
+    ax.set_facecolor(np.array([0, 0, 0])+0.2)
     if background_color is not None:
         ax.set_facecolor(background_color)
 
     pad_data_concated = concat_pad_data(pad_data)
 
     if vmin == None:
-        v_min = np.min(pad_data_concated)
+        vmin = np.min(pad_data_concated)
 
     if vmax == None:
         vmax = np.max(pad_data_concated)
@@ -58,9 +57,7 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
         im.set_transform(trans)
         if pad_numbers:
             ax.text(c[0], c[1], s=str(i), color='c', ha='center', va='center', bbox=dict(boxstyle="square",
-                   ec=(0.5, 0.5, 0.5),
-                   fc=(0.3, 0.3, 0.3),
-                   alpha=0.5
+                   ec=(0.5, 0.5, 0.5), fc=(0.3, 0.3, 0.3), alpha=0.5
                    ))
         if show_scans:
             plt.arrow(t[0], t[1], f[0]*dat.shape[0]/2, f[1]*dat.shape[1]/2, fc='b', ec='r', width=10,

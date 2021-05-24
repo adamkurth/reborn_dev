@@ -127,21 +127,22 @@ def get_pad_solution_intensity(pad_geometry, beam, thickness=10e-6, liquid='wate
         thickness (float): Thickness of the liquid (assumed to be a sheet geometry)
         liquid (str): We can only do "water" at this time...
         temperature (float): Temperature of the liquid.
+        poisson (bool): If True, add Poisson noise (default=True)
 
     Returns:
         List of |ndarray| instances containing intensities.
     """
     if liquid != 'water':
         raise ValueError('Sorry, we can only simulate water at this time...')
-    pad_geometry = reborn.utils.ensure_list(pad_geometry)
+    pads = reborn.detector.PADGeometryList(pad_geometry)
     n_water_molecules = thickness * beam.diameter_fwhm ** 2 * water_number_density()
-    qmags = reborn.detector.concat_pad_data([p.q_mags(beam=beam) for p in pad_geometry])
-    J = beam.fluence
-    P = reborn.detector.concat_pad_data([p.polarization_factors(beam=beam) for p in pad_geometry])
-    SA = reborn.detector.concat_pad_data([p.solid_angles() for p in pad_geometry])
-    F = get_water_profile(qmags, temperature=temperature)
+    q_mags = pads.q_mags(beam)
+    J = beam.photon_number_fluence
+    P = pads.polarization_factors(beam)
+    SA = pads.solid_angles()
+    F = get_water_profile(q_mags, temperature=temperature)
     F2 = F ** 2 * n_water_molecules
-    I = 2.8179403262e-15 ** 2 * J * P * SA * F2 / beam.photon_energy
-    if poisson: I = np.double(np.random.poisson(I))
-    I = reborn.detector.split_pad_data(pad_geometry, I)
-    return I
+    intensity = 2.8179403262e-15 ** 2 * J * P * SA * F2
+    if poisson: intensity = np.double(np.random.poisson(intensity))
+    intensity = pads.split_data(intensity)
+    return intensity

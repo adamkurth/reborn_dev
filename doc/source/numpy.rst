@@ -12,9 +12,9 @@ Indexing and internal memory layout of ndarray objects
 
 *People who are familiar with numpy ndarrays and their memory layout can skip this section -- the synopsis is simple:
 some parts of the reborn package (particularly those that have underlying Fortran or OpenCL code) assume that
-ndarrays are are in the default c-contiguous ordering.  There are some cases in which errors will result if you pass
+ndarrays are in the default c-contiguous ordering.  There are some cases in which errors will result if you pass
 in an array that is not c-contiguous, and in other cases arrays are re-written before passing to Fortran or OpenCL
-functions, which will cause in speed reductions.*
+functions, which will result in speed reductions.*
 
 Some users of numpy can carry out all of their Python/numpy calculations without knowledge of the internal memory
 structure of numpy ndarray objects.
@@ -40,7 +40,7 @@ From the output it is evident that the underlying memory buffer of the *a* array
 say that *by changing a we also changed b*.
 Presumably, the reason for this behavior is that ndarrays are designed to avoid unnecessary time-consuming memory
 (re)writes.
-The numpy ndarray class is also meant to provide a clean interface that removes the need to direcly manipulate memory so
+The numpy ndarray class is also meant to provide a clean interface that removes the need to directly manipulate memory so
 that you can write programs faster, but this apparent simplicity comes at the cost of obscurity.
 Students who begin using numpy without consideration of computer memory are often frustrated by this obscurity.
 
