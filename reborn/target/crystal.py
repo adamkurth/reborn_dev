@@ -3,8 +3,6 @@
 Basic utilities for dealing with crystalline objects.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import os
 try:
     import urllib.request
@@ -34,10 +32,11 @@ def get_pdb_file(pdb_id, save_path=".", silent=False):
     this function to avoid downloading the same file multiple times.*
 
     Arguments:
-        pdb_id (string): For example: "101M" or "101M.pdb".  There are also some special strings which so far include
+        pdb_id (str): For example: "101M" or "101M.pdb".  There are also some special strings which so far include
                          "lysozyme" (2LYZ) and "PSI" (1jb0)
         save_path (string): Path to the downloaded file.  The default is the current working directory, which depends
                             on where you run your code.
+        silent (bool): Set to true if you do not want any text printed to stdout.
 
     Returns:
         string : Path to PDB file
@@ -431,10 +430,23 @@ class CrystalStructure(object):
         return np.dot(np.concatenate(xs), self.unitcell.o_mat.T)
 
     def set_tight_packing(self):
+        r"""
+        Re-define the atomic coordinates and symmetry transforms so that the center-of-mass of each molecule lies within
+        the unit cell.  Two steps: first shift the coordinates so that the COM of the asymmetric unit lies in the unit
+        cell.  Next, add integral shifts to each of the symmetry operations as needed to put the COM of all symmetry
+        partners into the unit cell.
 
+        Returns: None
+        """
+        # First shift the asymmetric unit so that it's COM lies in the unit cell.  Sometimes it does not.
+        com = self.fractional_coordinates_com
+        self.fractional_coordinates -= com - (com % 1)
+        self.fractional_coordinates_com -= com - (com % 1)
+        # Now re-define the symmetry operations so that all symmetry partners also lie in the unit cell.
         for i in range(self.spacegroup.n_molecules):
             com = self.spacegroup.apply_symmetry_operation(i, self.fractional_coordinates_com)
             self.spacegroup.sym_translations[i] -= com - (com % 1)
+
 
 
 class FiniteLattice(object):
@@ -657,14 +669,17 @@ class CrystalDensityMap(object):
         Arguments:
             cryst (:class:`CrystalStructure` instance) : A crystal structure that contains the spacegroup and lattice
                                                       information.
-            resolution (float) : The desired resolution of the map (will be modified to suit integer samples and a
-                                  square 3D mesh)
+            resolution (float) : The desired resolution of the map.  The resolution :math:`d` is defined such that the
+              number of samples along the :math:`n`__th edge is greater than or equal to :math:`a_n/d` for lattice
+              constant :math:`a_n`.  The actual value will be rounded up toward the nearest multiple of 1, 2, 3, 4, or 6
+              (whichever is appropriate for the spacegroup symmetry).
             oversampling (int) : An oversampling of 2 gives a real-space map that is twice as large as the unit cell. In
                                   Fourier space, there will be one sample between Bragg samples.  And so on for 3,4,...
         """
 
         # Given desired resolution and unit cell, these are the number of voxels along each edge of unit cell.
-        cshape = np.ceil((1/resolution) * (1/vec_mag(cryst.unitcell.a_mat.T)))
+        # cshape = np.ceil((1/resolution) * (1/vec_mag(cryst.unitcell.a_mat.T)))
+        cshape = np.ceil(vec_mag(cryst.unitcell.o_mat.T)/resolution)
 
         # The number of samples along an edge must be a multiple of the shortest translation.  E.g., if an operation
         # consists of a translation of 1/3 or 2/3 distance along the cell, the shape must be a multiple of 3.
@@ -676,7 +691,7 @@ class CrystalDensityMap(object):
         cshape = np.ceil(cshape / m) * m
 
         self.cryst = cryst
-        self.oversampling = np.int(np.ceil(oversampling))
+        self.oversampling = np.int64(np.ceil(oversampling))
         self.dx = 1.0 / cshape
         self.cshape = cshape.astype(int)
         self.shape = (cshape * self.oversampling).astype(int)
@@ -851,7 +866,7 @@ class CrystalDensityMap(object):
                 lut = lut % self.shape               # wrap around
                 lut = np.dot(self.strides, lut.T)    # in p space
                 assert np.sum(lut - np.round(lut)) == 0
-                sym_luts.append(lut.astype(np.int))
+                sym_luts.append(lut.astype(np.int64))
             self.sym_luts = sym_luts
 
         return self.sym_luts
@@ -863,18 +878,17 @@ class CrystalDensityMap(object):
         non-zero translation vector -- typically this is not the case but it can happen for example if the symmetry
         operations are chosen such that all molecules are packed within the unit cell.
 
-        Args:
+        Arguments:
             k (int) : The index of the symmetry partner (starting with k=0)
-            data (3D numpy array) : The input data array.
+            data (|ndarray|) : The input data array.
 
         Returns:
-            3D numpy array : Transformed array
+            |ndarray| : Transformed array
         """
-
-        data_out = np.empty_like(data)
-        lut = self.get_sym_luts()[k]
-        data_out.flat[lut] = data.flat[:]
-
+        # data_out = np.empty_like(data)
+        # lut = self.get_sym_luts()[k]
+        # data_out.flat[lut] = data.flat[:]
+        data_out = self.symmetry_transform(0, k, data)
         return data_out
 
     def k_to_au(self, k, data):
@@ -884,28 +898,27 @@ class CrystalDensityMap(object):
 
         Args:
             k (int) : The index of the symmetry partner (starting with k=0)
-            data (3D numpy array) : The input data array.
+            data (3D |ndarray|) : The input data array.
 
         Returns:
-            3D numpy array : Transformed array
+            3D |ndarray| : Transformed array
         """
-
-        lut = self.get_sym_luts()[k]
-        data_out = data.flat[lut].reshape(data.shape)
-
+        # lut = self.get_sym_luts()[k]
+        # data_out = data.flat[lut].reshape(data.shape)
+        data_out = self.symmetry_transform(k, 0, data)
         return data_out
 
     def symmetry_transform(self, i, j, data):
         r"""
-        Apply crystallographic symmetry transformation to a density map (3D numpy array).  This applies the mapping from
+        Apply crystallographic symmetry transformation to a density map (3D |ndarray|).  This applies the mapping from
         symmetry element i to symmetry element j, where i=0,1,...,N-1 for a spacegroup with N symmetry operations.
 
         Arguments:
             i (int) : The "from" index; symmetry transforms are performed from this index to the j index
             j (int) : The "to" index; symmetry transforms are performed from the i index to this index
-            data (numpy array) : The 3D block of data to apply the symmetry transform on
+            data (|ndarray|) : The 3D block of data to apply the symmetry transform on
 
-        Returns: Numpy array with transformed densities
+        Returns: |ndarray| with transformed densities
         """
 
         luts = self.get_sym_luts()
@@ -1054,17 +1067,18 @@ def pdb_to_dict(pdb_file_path):
         pdb_file_path: path to pdb file
 
     Returns:
+        FIXME: Rick: Think about better formatting of returns.
         A dictionary with the following keys:
-           'scale_matrix'
-           'scale_translation'
-           'atomic_coordinates'
-           'atomic_symbols'
-           'unit_cell'
-           'spacegroup_symbol'
-           'spacegroup_rotations'
-           'spacegroup_translations'
-           'ncs_rotations'
-           'ncs_translations'
+        - 'scale_matrix'
+        - 'scale_translation'
+        - 'atomic_coordinates'
+        - 'atomic_symbols'
+        - 'unit_cell'
+        - 'spacegroup_symbol'
+        - 'spacegroup_rotations'
+        - 'spacegroup_translations'
+        - 'ncs_rotations'
+        - 'ncs_translations'
     """
 
     atomic_coordinates = np.zeros([10000, 3])
@@ -1250,3 +1264,5 @@ class FiniteCrystal(object):
         """
         for lat in self.lattices:
             lat.set_gaussian_disorder(sigmas=sigmas)
+
+

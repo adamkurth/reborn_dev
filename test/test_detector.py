@@ -24,7 +24,6 @@ def make_pad_list():
     pad.n_fs = 100
     pad.n_ss = 150
     pad_geom.append(pad)
-
     return pad_geom
 
 
@@ -94,42 +93,30 @@ def test_radial_profiler_01():
     rad = detector.RadialProfiler(q_mags=q_mags, mask=None, n_bins=3, q_range=[0, 9283185])
     # rad.bin_edges = [-2320796.25  2320796.25  6962388.75 11603981.25]
     profile = rad.get_profile(dat, average=False)  # Sums over
-
     assert profile[0] == 1
     assert profile[1] == 4
     assert profile[2] == 4
-
     profile = rad.get_profile(dat, average=True)  # Sums over
-
     assert profile[0] == 1
     assert profile[1] == 1
     assert profile[2] == 1
-
     mask = np.ones([3, 3])
     mask[0, 0] = 0
-
     profile = rad.get_profile(dat, mask=mask, average=False)  # Sums over
-
     assert profile[0] == 1
     assert profile[1] == 4
     assert profile[2] == 3
-
     mask = np.ones([3, 3])
     mask[0, 0] = 0
-
     rad.set_mask(mask)
     profile = rad.get_profile(dat, average=False)  # Sums over
-
     assert profile[0] == 1
     assert profile[1] == 4
     assert profile[2] == 3
-
     mask = np.ones([3, 3])
     mask[0, 0] = 0
-
     rad.set_mask(mask)
     profile = rad.get_profile(dat, average=True)  # Sums over
-
     assert profile[0] == 1
     assert profile[1] == 1
     assert profile[2] == 1
@@ -138,16 +125,11 @@ def test_radial_profiler_01():
 def test_radial_profiler_02():
 
     pad_geom = make_pad_list()
-
     beam = [0, 0, 1]
     wav = 1.5e-10
-
     q_mags = np.ravel([p.q_mags(beam_vec=beam, wavelength=wav) for p in pad_geom])
-
     rad = detector.RadialProfiler(q_mags=q_mags, mask=None, n_bins=100, q_range=None)
-
     data = np.ravel([np.random.rand(p.n_ss, p.n_fs) for p in pad_geom])
-
     prof = rad.get_profile(data, average=True)
     assert(np.max(prof) <= 1)
     assert(np.min(prof) >= 0)
@@ -171,16 +153,49 @@ def test_saving():
     shapes = [np.array((100, 101)) for _ in range(8)]
     masks = [np.round(np.random.random(shapes[i]) * 0.6).astype(int) for i in range(8)]
     assert np.sum(masks[0]) > 0
-
     detector.save_pad_masks('unpacked.mask', masks, packbits=False)
     detector.save_pad_masks('packed', masks)
-
     unpacked = detector.load_pad_masks('unpacked.mask')
     print('loaded unpacked')
     packed = detector.load_pad_masks('packed.mask')
     for i in range(len(masks)):
         assert np.max(packed[i] - unpacked[i]) == 0
         assert np.max(masks[i] - unpacked[i]) == 0
-
     os.remove('unpacked.mask')
     os.remove('packed.mask')
+
+
+def test_standard_pads():
+    cspad = detector.cspad_pad_geometry_list()
+    pnccd = detector.pnccd_pad_geometry_list()
+    epix = detector.epix10k_pad_geometry_list()
+    jungfrau = detector.jungfrau4m_pad_geometry_list()
+
+
+def test_padlist():
+    beam = source.Beam(photon_energy=9000*1.602e-19)
+    pads = detector.cspad_pad_geometry_list()
+    pads2 = detector.epix10k_pad_geometry_list()
+    padlist = detector.PADGeometryList(pads)
+    padlist2 = detector.PADGeometryList(pads2)
+    padlist3 = padlist.copy()
+    padlist3.save_json('test.json')
+    padlist4 = detector.load_pad_geometry_list('test.json')
+    padlist5 = detector.PADGeometryList(padlist)
+    assert(padlist != padlist2)
+    assert(padlist.hash != padlist2.hash)
+    assert(padlist.hash == padlist3.hash)
+    assert(len(padlist) == 64)
+    assert(padlist3 == padlist)
+    assert(padlist3 == padlist4)
+    assert(padlist.validate() is True)
+    assert(padlist.position_vecs().shape[1] == 3)
+    assert(padlist.s_vecs().shape[1] == 3)
+    assert(padlist.ds_vecs(beam).shape[1] == 3)
+    assert(padlist.q_vecs(beam).shape[1] == 3)
+    assert(padlist.q_mags(beam).size == padlist.n_pixels)
+    assert(padlist.solid_angles().size == padlist.n_pixels)
+    assert(padlist.polarization_factors(beam).size == padlist.n_pixels)
+    assert(padlist.random().size == padlist.n_pixels)
+    assert(isinstance(padlist5, list))
+    assert(isinstance(padlist, detector.PADGeometryList))

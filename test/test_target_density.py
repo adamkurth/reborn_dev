@@ -14,7 +14,7 @@ def test_01():
     for d in np.array([5, 10])*1e-10:
 
         dens = crystal.CrystalDensityMap(cryst, d, 1)
-        dat0 = np.reshape(np.arange(0, dens.size), dens.shape).astype(np.float)
+        dat0 = np.reshape(np.arange(0, dens.size), dens.shape).astype(float)
         dat1 = dens.symmetry_transform(0, 1, dat0)
         dat2 = dens.symmetry_transform(1, 0, dat1)
 
@@ -24,7 +24,7 @@ def test_01():
     for d in np.array([5, 10])*1e-10:
 
         dens = crystal.CrystalDensityMap(cryst, d, 2)
-        dat0 = np.reshape(np.arange(0, dens.size), dens.shape).astype(np.float)
+        dat0 = np.reshape(np.arange(0, dens.size), dens.shape).astype(float)
         dat1 = dens.symmetry_transform(0, 1, dat0)
         dat2 = dens.symmetry_transform(1, 0, dat1)
 
@@ -38,7 +38,7 @@ def test_02():
     for d in [0.2, 0.3, 0.4, 0.5]:
 
         mt = crystal.CrystalDensityMap(cryst, d, 1)
-        dat0 = np.reshape(np.arange(0, mt.size), mt.shape).astype(np.float)
+        dat0 = np.reshape(np.arange(0, mt.size), mt.shape).astype(float)
         dat1 = mt.symmetry_transform(0, 1, dat0)
         dat2 = mt.symmetry_transform(1, 0, dat1)
 

@@ -31,6 +31,7 @@ rst_epilog = """
 .. |examples|  replace:: :ref:`examples`
 .. |PAD|  replace:: :mod:`detector <reborn.detector>`
 .. |PADGeometry|  replace:: :class:`PADGeometry <reborn.detector.PADGeometry>`
+.. |PADGeometryList|  replace:: :class:`PADGeometryList <reborn.detector.PADGeometryList>`
 .. |FrameGetter|  replace:: :class:`FrameGetter <reborn.fileio.getters.FrameGetter>`
 
 .. |ndarray|  replace:: :class:`ndarray <numpy.ndarray>`
@@ -42,6 +43,8 @@ rst_epilog = """
 .. |Miniconda|  replace:: `Miniconda <https://conda.io/miniconda.html>`__
 .. |scipy|  replace:: `scipy <https://www.scipy.org>`__
 .. |pyqtgraph|  replace:: `pyqtgraph <http://www.pyqtgraph.org>`__
+.. |numpy|  replace:: `numpy <https://numpy.org>`__
+.. |git|  replace:: `git <https://git-scm.com>`__
 
 .. |GriffithsEM|  replace:: `Griffiths E&M <https://www.cambridge.org/core/books/introduction-to-electrodynamics/3AB220820DBB628E5A43D52C4B011ED4>`__
 .. |Cromer1968|  replace:: `Cromer et al. (1968) <https://doi.org/10.1107/S0567739468000550>`__
@@ -74,7 +77,7 @@ extensions = [
 
 # Configuration for the documentation of examples
 sphinx_gallery_conf = {
-    'filename_pattern': '/plot_',
+    'filename_pattern': '/example_',
     'ignore_pattern': r'__init__\.py',
     'show_memory': True
 }

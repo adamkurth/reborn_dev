@@ -2,15 +2,14 @@ r"""
 Classes related to x-ray sources.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
+import json
 import numpy as np
 from scipy import constants as const
 
 hc = const.h*const.c  # pylint: disable=invalid-name
 
 
-class Beam():
+class Beam:
 
     r"""
     A minimal containor to gather x-ray beam properties.
@@ -55,8 +54,23 @@ class Beam():
         out += 'photon_number_fluence: %s\n' % self.photon_number_fluence.__str__()
         return out
 
+    def validate(self, raise_error=False):
+        r""" Validate this Beam instance.  Presently, this method only checks that there is a wavelength."""
+        if self.photon_energy is not None:
+            return True
+        if raise_error:
+            raise ValueError('Something is wrong with this Beam instance.')
+        else:
+            return False
+
     @property
     def hash(self):
+        r"""
+        Hash the |Beam| instance in order to determine if the beam instance has changed.
+
+        Returns:
+            int
+        """
         return hash(self.__str__())
 
     @property
@@ -137,3 +151,92 @@ class Beam():
     def energy_fluence(self):
         r""" Pulse fluence in J/m^2."""
         return self.pulse_energy/(np.pi * self.diameter_fwhm**2 / 4.0)
+
+    def to_dict(self):
+        r""" Convert beam to a dictionary.  It contains the following keys:
+        - photon_energy
+        - beam_profile
+        - beam_vec
+        - polarization_vec
+        - polarization_weight
+        - photon_energy_fwhm
+        - pulse_energy
+        - divergence_fwhm
+        - diameter_fwhm
+        - pulse_energy_fwhm
+        """
+        return {'photon_energy': float_tuple(self.photon_energy),
+                'photon_energy_fwhm': float_tuple(self.photon_energy_fwhm),
+                'beam_profile': self.beam_profile,
+                'beam_vec': float_tuple(tuple(self.beam_vec)),
+                'polarization_vec': float_tuple(tuple(self.polarization_vec)),
+                'polarization_weight': float_tuple(self.polarization_weight),
+                'pulse_energy': float_tuple(self.pulse_energy),
+                'pulse_energy_fwhm': float_tuple(self.pulse_energy_fwhm),
+                'divergence_fwhm': float_tuple(self.divergence_fwhm),
+                'diameter_fwhm': float_tuple(self.diameter_fwhm)
+                }
+
+    def from_dict(self, dictionary):
+        r""" Loads geometry from dictionary.  This goes along with the to_dict method."""
+        for k in list(dictionary.keys()):
+            setattr(self, k, dictionary[k])
+
+    def copy(self):
+        r""" Make a copy of this class instance. """
+        b = Beam()
+        b.from_dict(self.to_dict())
+        return b
+
+    def save_json(self, file_name):
+        r""" Save the beam as a json file. """
+        with open(file_name, 'w') as f:
+            json.dump(self.to_dict(), f)
+
+    def load_json(self, file_name):
+        r""" Save the beam as a json file. """
+        with open(file_name, 'r') as f:
+            d = json.load(f)
+        self.from_dict(d)
+
+
+def load_beam(file_path):
+    r""" Load a beam from a json file (loaded with :meth:`Beam.load_json() <reborn.source.Beam.load_json>` method)
+
+    Arguments:
+        file_path (str): Path to beam json file
+
+    Returns: |Beam|
+    """
+    b = Beam()
+    b.load_json(file_path)
+    return b
+
+
+def save_beam(beam, file_path):
+    r""" Save a Beam to a json file (saved with :meth:`Beam.save_json() <reborn.source.Beam.save_json>` method)
+
+    Arguments:
+        beam (|Beam|): The Beam instance to save.
+        file_path (str): Where to save the json file.
+
+    """
+    beam.save_json(file_path)
+
+
+def float_tuple(val):
+    r"""
+    Convert to float.  If object is a tuple, convert each element to a float.
+
+    Arguments:
+        val: Input to convert to floats.
+
+    Returns:
+
+    """
+    if val is None:
+        return val
+    if type(val) == tuple:
+        val = tuple([float_tuple(v) for v in val])
+        return val
+    return float(val)

@@ -10,6 +10,7 @@ import pkg_resources
 import numpy as np
 from scipy.spatial.transform import Rotation
 from .. import detector
+from ..fileio.getters import FrameGetter
 from ..utils import rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance, ensure_list
 from . import atoms
 from . import solutions
@@ -77,6 +78,7 @@ def jungfrau4m_pads(detector_distance=0.1, binning=1):
     pads[7].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
     return pads
 
+
 def simulate_water(pad_geometry=None, beam=None, water_thickness=1e-6):
     r"""
     Simulate water scatter.  Takes a PAD geometry and beam specification and returns list of 2D numpy arrays with the
@@ -96,15 +98,14 @@ def simulate_water(pad_geometry=None, beam=None, water_thickness=1e-6):
     J = beam.photon_number_fluence
     P = detector.concat_pad_data([p.polarization_factors(beam=beam) for p in pads])
     SA = detector.concat_pad_data([p.solid_angles() for p in pads])
-    F_water = solutions.get_water_profile(q_mags)
+    F_water = detector.concat_pad_data(solutions.get_water_profile(q_mags))
     F2_water = F_water ** 2 * n_water_molecules
     I = r_e ** 2 * J * P * SA * F2_water
     return detector.split_pad_data(pads, I)
 
+
 def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=True):
-
     r"""
-
     Simple simulation of lysozyme molecule using :class:`ClCore <reborn.simulate.clcore.ClCore>`.
 
     Arguments:
@@ -113,13 +114,12 @@ def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=Tru
         random_rotation: If True generate a random rotation.  Default is True.
 
     Returns: dictionary with {'pad_geometry': pads, 'intensity': data_list}
-
     """
 
     photon_energy = hc / wavelength
 
-    if pad_geometry is None:
-        pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+    # if pad_geometry is None:
+    #     pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
 
     sim = ClCore(group_size=32, double_precision=False)
 
@@ -151,7 +151,7 @@ class PDBMoleculeSimulator(object):
 
     """
 
-    def __init__(self, pdb_file=None, pad_geometry=None, wavelength=1.5e-10, random_rotation=True):
+    def __init__(self, pdb_file=None, pad_geometry=None, beam=None, wavelength=1.5e-10, random_rotation=True):
 
         r"""
 
@@ -164,12 +164,15 @@ class PDBMoleculeSimulator(object):
             random_rotation (bool): True or False
         """
 
-        if pdb_file is None:
-            pdb_file = lysozyme_pdb_file
+        # if pdb_file is None:
+        #     pdb_file = lysozyme_pdb_file
 
-        if pad_geometry is None:
-            pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+        # if pad_geometry is None:
+        #     pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
+        self.random_rotation = random_rotation
 
+        if beam is not None:
+            wavelength = beam.wavelength
         photon_energy = hc / wavelength
 
         self.clcore = ClCore(group_size=32)
@@ -201,7 +204,8 @@ class PDBMoleculeSimulator(object):
         else:
             rot = None
 
-        self.clcore.phase_factor_qrf(self.q_gpu, self.r_gpu, self.f_gpu, rot, self.a_gpu)
+        #self.clcore.hase_factor_qrf(q, r, f=None, R=None, U=None, a=None, add=False, twopi=False, n_chunks=1)
+        self.clcore.phase_factor_qrf(self.q_gpu, self.r_gpu, self.f_gpu, R=rot, a=self.a_gpu)
         intensity = self.a_gpu.get()
         return np.abs(intensity)**2
 
@@ -391,3 +395,16 @@ class CrystalSimulatorV1(object):
                 intensity[i] = np.random.poisson(intensity[i])
 
         return intensity
+
+
+class LysozymeFrameGetter(FrameGetter):
+
+    def __init__(self, pad_geometry=None, beam=None, random_rotation=True):
+        super().__init__()
+        self.molsim = PDBMoleculeSimulator(pdb_file=lysozyme_pdb_file, pad_geometry=pad_geometry,
+                                            beam=beam, random_rotation=True)
+        self.pad_geometry = pad_geometry
+
+    def get_frame(self, frame_number=None):
+        pad_data = detector.split_pad_data(self.pad_geometry,  self.molsim.next())
+        return {'pad_data': pad_data}

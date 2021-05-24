@@ -40,7 +40,7 @@ Contributed by Richard Kirian.
 # ------------------------
 #
 # Importantly, if you want your code to actually run and produce output, then you need to prefix the name of
-# your file with `plot_`.  Then, magically, plots will show up in the documentation!
+# your file with `example_`.  Then, magically, examples will show up in the documentation!
 
 import numpy as np
 import matplotlib.pyplot as plt

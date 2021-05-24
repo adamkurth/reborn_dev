@@ -183,9 +183,7 @@ class Widget(QtGui.QWidget):
         if self.everywhere_radio.isChecked():
             inds = np.arange(mask.size)
         else:
-            print('get inds')
             inds, typ = self.padview.get_hovering_roi_indices()
-            print('got inds')
             if inds is None:
                 self.padview.debug('No ROI selected', 1)
                 return

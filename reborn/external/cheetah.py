@@ -3,8 +3,6 @@ Utilities for working with data created by Cheetah.  I make no promises that any
 are wild animals.
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import h5py
 import numpy as np
 from . import crystfel
