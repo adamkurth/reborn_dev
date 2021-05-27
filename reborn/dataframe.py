@@ -1,4 +1,5 @@
 r""" Classes for handling dataframes. """
+import numpy as np
 from . import detector
 
 
@@ -85,3 +86,9 @@ class DataFrame:
 
     def get_q_vecs(self):
         return self._pad_geometry.q_vecs(self._beam)
+
+    def get_bragg_peaks(self):
+        pass
+
+    def set_bragg_peaks(self, bragg_peaks):
+        pass

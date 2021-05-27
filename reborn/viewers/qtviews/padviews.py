@@ -5,6 +5,7 @@ import importlib
 import pickle
 import numpy as np
 import pkg_resources
+import functools
 import reborn
 from reborn.fileio.getters import FrameGetter
 from reborn.analysis.peaks import PeakFinder
@@ -20,9 +21,6 @@ g = pg.graphicsItems.GradientEditorItem.Gradients
 g['bipolar2'] = {'ticks': [(0.0, (255, 0, 0, 255)), (0.5, (0, 0, 0, 255)), (1.0, (0, 255, 255, 255))], 'mode': 'rgb'}
 pg.graphicsItems.GradientEditorItem.Gradients = g
 
-
-# padviewui = pkg_resources.resource_filename('reborn.viewers.qtviews', 'ui/padview.ui')
-# snrconfigui = pkg_resources.resource_filename('reborn.viewers.qtviews', 'ui/configs.ui')
 plugin_path = pkg_resources.resource_filename('reborn.viewers.qtviews', 'plugins')
 
 
@@ -90,11 +88,10 @@ class PADView2(QtCore.QObject):
     do_peak_finding = False
     peaks_visible = True
     apply_filters = True
-    data_processor = None
-    widgets = {}
     plugins = None
     _auto_percentiles = None
 
+    status_bar_style = "background-color:rgb(30, 30, 30);color:rgb(255,0,255);font-weight:bold;font-family:monospace;"
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
     sig_geometry_changed = QtCore.pyqtSignal()
@@ -120,60 +117,75 @@ class PADView2(QtCore.QObject):
         self.dataframe = {}
         self._auto_percentiles = percentiles
 
+        # We allow for various ways to initialize PADView.
+        # - A FrameGetter may be used to serve up the diffraction intensities.
+        # -- The FrameGetter might have PADGeometry instances available.
+        # -- The FrameGetter might have a Beam instance available.
+        # -- The FrameGetter might have a mask available.
+        # - Data corresponding to a single frame may be provided.
+        # - PADGeometry instances may be provided.
+        # - The Beam instance may be provided.
+
+        # FIXME: Moving forward, we will not allow PADView to be initialized without data.  Initializing without data
+        # FIXME: results in many complications and runtime errors.  If there is no data initially, PADView could
+        # FIXME: begin with a dialog box that asks the user to identify the data they wish to look at.
+
+        # FIXME: We will put all of the complicated data-checking into the DataFrame class.  It will have a "validate"
+        # FIXME: method that will confirm that all needed data is present.  The needed data are: diffraction
+        # FIXME: intensities, pad geometry, and beam info.  Optional are: pixel masks, Bragg peak locations, etc.
+
+        # First question: do we have a FrameGetter?  If so, see what info we can get from it.  The info in the
+        # FrameGetter will overtake the other keyword inputs.
+        # FIXME: We will need to change the way that FrameGetter works.  It presently returns a dictionary, but I would
+        # FIXME: like to instead have it return a DataFrame class, which will have the "validate" method.  Since many
+        # FIXME: programs already use the FrameGetter class, I suggest we make a new "DataFrameGetter" class.  As usual,
+        # FIXME: we will add a "depreciation" warning on the FrameGetter class to phase out its use.
+        if frame_getter is not None:
+            self.frame_getter = frame_getter
+            # If so, does it have geometry, beam, and or mask information?
+            if hasattr(frame_getter, 'pad_geometry'):
+                pad_geometry = frame_getter.pad_geometry
+                self.debug('Found PAD geometry in frame_getter.')
+            if hasattr(frame_getter, 'beam'):
+                beam = frame_getter.beam
+                self.debug('Found beam info in frame_getter.')
+            if hasattr(frame_getter, 'mask_data'):
+                mask_data = frame_getter.mask_data
+                self.debug('Found mask in frame_getter.')
+            raw_data = self.frame_getter.get_frame(0)
+        # Handling of raw diffraction intensities:
         if raw_data is not None:
             if isinstance(raw_data, dict):
                 pass
             else:
                 raw_data = {'pad_data': reborn.utils.ensure_list(raw_data)}
-            self.raw_data = raw_data
-
-        if frame_getter is not None:
-            self.frame_getter = frame_getter
-            # TODO: check that this is an appropriate dictionary
-            self.raw_data = self.frame_getter.get_frame(0)
-
-        # Possibly, the frame getter has pad_geometry info -- let's have a look:
-        if self.pad_geometry is None:
-            if self.frame_getter is not None:
-                self.debug('Checking if the frame getter contains PAD geometry...')
-                try:
-                    self.pad_geometry = self.frame_getter.pad_geometry
-                    self.debug('Found PAD geometry.')
-                except AttributeError:
-                    self.debug('Failed to get geometry from frame getter.')
-        if self.pad_geometry is None:
+            raw_data = raw_data
+        # Handling of geometry info:
+        if pad_geometry is None:
             self.debug('WARNING: Making up some *GARBAGE* PAD geometry because you provided no specification.')
             pad_geometry = []
             shft = 0
-            for dat in self.raw_data['pad_data']:
+            for dat in raw_data['pad_data']:
                 pad = reborn.detector.PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
                 pad.t_vec[0] += shft
                 shft += pad.shape()[0]
                 pad_geometry.append(pad)
-            self.pad_geometry = pad_geometry
-
-        # Possibly, the frame getter has pad_geometry info -- let's have a look:
-        if self.beam is None:
-            if self.frame_getter is not None:
-                self.debug('Checking if the frame getter contains x-ray beam information...')
-                try:
-                    self.beam = self.frame_getter.beam
-                    self.debug('Found x-ray beam information.')
-                except AttributeError:
-                    self.debug('Failed to get x-ray beam information from frame_getter.')
-        if self.beam is None:
+            pad_geometry = pad_geometry
+        # Handling of beam info:
+        if beam is None:
             self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
-            self.beam = reborn.source.Beam(photon_energy=9000*1.602e-19)
+            beam = reborn.source.Beam(photon_energy=9000*1.602e-19)
+        # Handling of mask info:
+        if mask_data is None:
+            mask_data = [np.ones_like(d) for d in self.raw_data['pad_data']]
 
-        if self.mask_data is None:
-            if self.frame_getter is not None:
-                self.debug('Checking if the frame getter contains pixel masks...')
-                try:
-                    self.mask_data = self.frame_getter.mask_data
-                    self.debug('Found masks.')
-                except AttributeError:
-                    self.debug('Failed to get pixel masks from frame_getter.')
-            self.mask_data = [np.ones_like(d) for d in self.raw_data['pad_data']]
+        # This is a summary of the data that PADView displays.  Note that raw_data is a dictionary.  It has the
+        # diffraction intensities, and may also have things like Bragg peak locations.
+        # FIXME: This will all go into the DataFrame class.
+        self.raw_data = raw_data
+        self.pad_geometry = pad_geometry
+        self.beam = beam
+        self.mask_data = mask_data
 
         self.app = pg.mkQApp()
         self.setup_ui()
@@ -184,9 +196,7 @@ class PADView2(QtCore.QObject):
         self.setup_mouse_interactions()
         self.setup_shortcuts()
         self.setup_menubar()
-        # self.setup_widgets()
-        self.statusbar.setStyleSheet("background-color:rgb(30, 30, 30);color:rgb(255,0,255);"
-                                                 "font-weight:bold;font-family:monospace;")
+        self.statusbar.setStyleSheet(self.status_bar_style)
         if self.raw_data is not None:
             self.setup_pads()
             self.show_frame()
@@ -216,7 +226,6 @@ class PADView2(QtCore.QObject):
         self.statusbar = self.main_window.statusBar()
         self.hbox = QtGui.QHBoxLayout()
         self.splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
-        # self.setup_widgets()
         # self.side_panel = QtGui.QWidget()
         # self.side_panel_layout = QtGui.QVBoxLayout()
         # self.side_panel_layout.setAlignment(QtCore.Qt.AlignTop)
@@ -263,7 +272,6 @@ class PADView2(QtCore.QObject):
         r""" Set the title of the main window. """
         self.debug(get_caller(), 1)
         self.main_window.setWindowTitle(title)
-        # self.process_events()  # Why?
 
     def setup_mouse_interactions(self):
         r""" I don't know what this does... obviously something about mouse interactions... """
@@ -309,16 +317,11 @@ class PADView2(QtCore.QObject):
         add_menu(mask_menu, 'Toggle ROIs visible', connect=self.toggle_rois)
         add_menu(mask_menu, 'Save mask...', connect=self.save_masks)
         add_menu(mask_menu, 'Load mask...', connect=self.load_masks)
-        # analysis_menu = self.menubar.addMenu('Analysis')
-        # add_menu(analysis_menu, 'Toggle peak finding', connect=self.toggle_peak_finding)
-        # add_menu(analysis_menu, 'Toggle peaks visible', connect=self.toggle_peaks_visible)
         plugin_menu = self.menubar.addMenu('Plugins')
-        import functools
         for plg in glob.glob(os.path.join(plugin_path, '*.py')):
             self.debug('\tSetup plugin ' + os.path.basename(plg).replace('.py', ''), 2)
             add_menu(plugin_menu, os.path.basename(plg).replace('.py', '').replace('_', ' '),
                      connect=functools.partial(self.run_plugin, os.path.basename(plg).replace('.py', '')))
-        # add_menu(analysis_menu, 'SNR transform', connect=self.show_snr_filter_widget)
 
     def set_shortcut(self, shortcut, func):
         r""" Setup one keyboard shortcut so it connects to some function, assuming no arguments are needed. """
@@ -326,6 +329,7 @@ class PADView2(QtCore.QObject):
 
     def setup_shortcuts(self):
         r""" Connect all standard keyboard shortcuts to functions. """
+        # FIXME: Many of these shortcuts were randomly assigned in a hurry.  Need to re-think the keystrokes.
         self.debug(get_caller(), 1)
         self.set_shortcut(QtCore.Qt.Key_Right, self.show_next_frame)
         self.set_shortcut(QtCore.Qt.Key_Left, self.show_previous_frame)
@@ -355,15 +359,21 @@ class PADView2(QtCore.QObject):
             self._status_string_getter = strn % (frame_number, n_frames)
         self.statusbar.showMessage(self._status_string_getter + self._status_string_mouse)
 
+    # FIXME: pad_geometry, mask_data, beam, etc. should all come from a DataFrame instance.  All of these parameters
+    # FIXME: can change from one frame to the next.  For example, self.pad_geometry becomes self.dataframe.pad_geometry.
+    # FIXME: There will be a singular method "set_dataframe" that handles updating.  This method should check if the
+    # FIXME: geometry or beam properties have changed, and update the display accordingly.
     @property
     def pad_geometry(self):
         return self._pad_geometry
 
+    # FIXME: This will be replaced with self.dataframe methods.
     @pad_geometry.setter
     def pad_geometry(self, val):
         self._pad_geometry = val
         self._q_mags = None
 
+    # FIXME: This will be replaced with self.dataframe methods.
     @property
     def n_pads(self):
         r""" Number of PADs in the display. """
@@ -374,6 +384,8 @@ class PADView2(QtCore.QObject):
         if self.get_pad_display_data() is not None:
             return len(self.get_pad_display_data())
 
+    # FIXME: This will be replaced with self.dataframe methods.  Note that the DataFrame class can allow for caching
+    # FIXME: of derived quantities such as q vector magnitudes, which depend on the beam and geometry.
     @property
     def q_mags(self):
         if self._q_mags is None:
@@ -384,6 +396,7 @@ class PADView2(QtCore.QObject):
             self._q_mags = [p.reshape(p.q_mags(beam=self.beam)) for p in self.pad_geometry]
         return self._q_mags
 
+    # FIXME: This will be replaced with self.dataframe methods.
     @property
     def mask_data(self):
         if self._mask_data is not None:
@@ -392,6 +405,7 @@ class PADView2(QtCore.QObject):
             self._mask_data = [p.ones() for p in self.pad_geometry]
         return self._mask_data
 
+    # FIXME: This will be replaced with self.dataframe methods.
     @mask_data.setter
     def mask_data(self, val):
         if val is None:
@@ -401,6 +415,8 @@ class PADView2(QtCore.QObject):
         else:
             raise ValueError('mask_data must be a list of numpy arrays')
 
+    # FIXME: For some reason, the histogram is only updated on the first frame.  Need to track down this issue.
+    # FIXME: Also, we need to allow for the histogram to be disabled since it takes time to compute.
     def setup_histogram_tool(self):
         r""" Set up the histogram/colorbar/colormap tool that is located to the right of the PAD display. """
         self.debug(get_caller(), 1)
@@ -457,9 +473,12 @@ class PADView2(QtCore.QObject):
         roi.addRotateHandle(pos=(0, 1), center=(0.5, 0.5))
         if self._mask_rois is None:
             self._mask_rois = []
+        # FIXME: We need better handling of these ROIs: better manipulations of sizes/shapes, more features (e.g. the
+        # FIXME: ability to show a histogram of pixels within the ROI)
         self._mask_rois.append(roi)
         self.viewbox.addItem(roi)
 
+    # FIXME: Circle ROI should have an option to fix the center on the beam center.
     def add_circle_roi(self, pos=(0, 0), radius=None):
         self.debug(get_caller(), 1)
         if radius is None:
@@ -495,14 +514,17 @@ class PADView2(QtCore.QObject):
                 return
         self.show_rois()
 
+    # FIXME: This frame skip stuff should be in the frame navigator.
     def increase_skip(self):
         self.debug(get_caller(), 1)
         self.frame_getter.skip = 10**np.floor(np.log10(self.frame_getter.skip)+1)
 
+    # FIXME: Move into frame navigator.
     def decrease_skip(self):
         self.debug(get_caller(), 1)
         self.frame_getter.skip = np.max([10**(np.floor(np.log10(self.frame_getter.skip))-1), 1])
 
+    # FIXME: Move into frame navigator.
     def show_coordinate_axes(self):
         self.debug(get_caller(), 1)
         if self.coord_axes is None:
@@ -904,6 +926,7 @@ class PADView2(QtCore.QObject):
 
     def set_pad_display_data(self, data, auto_levels=False, update_display=True, levels=None, percentiles=None, colormap=None):
         if type(data) == dict:
+            # FIXME: This test for data type is redundant and should be handled by the new DataFrame class.
             if 'pad_data' in list(dict.keys()):
                 self.processed_data = data
         elif type(data) == list:
@@ -952,6 +975,7 @@ class PADView2(QtCore.QObject):
         self.setup_masks()
         self.set_levels(np.percentile(np.ravel(pad_data), 10), np.percentile(np.ravel(pad_data), 90))
 
+    # FIXME: We also need an update_beam method.
     def update_pad_geometry(self, pad_geometry):
         self.pad_geometry = pad_geometry
         for i in range(self.n_pads):
@@ -1018,6 +1042,7 @@ class PADView2(QtCore.QObject):
         vec[:, 2] = 1
         return np.squeeze(vec)
 
+    # FIXME: Needs good documentation.
     def get_pad_coords_from_view_coords(self, view_coords):
         self.debug(get_caller(), 3)
         x = view_coords[0]
@@ -1031,6 +1056,7 @@ class PADView2(QtCore.QObject):
                 break
         return ss_idx, fs_idx, pad_idx
 
+    # FIXME: Needs good documentation.
     def get_pad_coords_from_mouse_pos(self):
         self.debug(get_caller(), 3)
         view_coords = self.get_view_coords_from_mouse_pos()
@@ -1090,6 +1116,8 @@ class PADView2(QtCore.QObject):
             self.remove_rings()
             self.add_rings(rad)
 
+    # FIXME: Rings are dependent on beam and geometry.  They need to be updated as needed.
+    # FIXME: Add option to put labels on rings that indicate resolution or q magnitudes.
     def add_rings(self, radii=[], pens=None, radius_handle=False):
         r""" Plot rings.  Note that these are in a plane located 1 meter from the sample position; calculate the radius
         Needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is tan(theta)"""
@@ -1172,6 +1200,7 @@ class PADView2(QtCore.QObject):
         for image in self.pad_image_items:
             image.setBorder(None)
 
+    # FIXME: This should be handled by the frame navigator
     def show_history_next(self):
         self.debug(get_caller(), 1)
         if self.frame_getter is None:
@@ -1181,6 +1210,7 @@ class PADView2(QtCore.QObject):
         self.raw_data = dat
         self.update_display_data()
 
+    # FIXME: This should be handled by the frame navigator
     def show_history_previous(self):
         self.debug(get_caller(), 1)
         if self.frame_getter is None:
@@ -1190,6 +1220,7 @@ class PADView2(QtCore.QObject):
         self.raw_data = dat
         self.update_display_data()
 
+    # FIXME: This should be handled by the frame navigator
     def show_next_frame(self):
         self.debug(get_caller(), 1)
         if self.frame_getter is None:
@@ -1205,6 +1236,7 @@ class PADView2(QtCore.QObject):
         else:
             self.debug('Could not find PAD data in frame.', 1)
 
+    # FIXME: This should be handled by the frame navigator
     def show_previous_frame(self):
         self.debug(get_caller(), 1)
         if self.frame_getter is None:
@@ -1220,12 +1252,14 @@ class PADView2(QtCore.QObject):
         else:
             self.debug('Could not find PAD data in frame.', 0)
 
+    # FIXME: This should be handled by the frame navigator
     def show_random_frame(self):
         self.debug(get_caller(), 1)
         dat = self.frame_getter.get_random_frame()
         self.raw_data = dat
         self.update_display_data()
 
+    # FIXME: This should be handled by the frame navigator
     def show_frame(self, frame_number=0):
         self.debug(get_caller(), 1)
         if self.frame_getter is None:
@@ -1238,13 +1272,6 @@ class PADView2(QtCore.QObject):
                 self.raw_data = raw_data
         self.update_display_data()
 
-    def process_data(self):
-        self.debug(get_caller(), 1)
-        if self.data_processor is not None:
-            self.data_processor()
-        else:
-            self.processed_data = None
-
     def update_display_data(self):
         r"""
         Update display with new data, e.g. when moving to next frame.
@@ -1255,8 +1282,6 @@ class PADView2(QtCore.QObject):
         Returns:
         """
         self.debug(get_caller(), 1)
-        if self.data_processor is not None:
-            self.process_data()
         self.update_pads()
         self.remove_scatter_plots()
         if self.do_peak_finding is True:
@@ -1291,53 +1316,6 @@ class PADView2(QtCore.QObject):
             for scat in self.scatter_plots:
                 self.viewbox.removeItem(scat)
         self.scatter_plots = None
-
-    # def toggle_filter(self):
-    #     self.debug(get_caller(), 1)
-    #     if self.apply_filters is True:
-    #         self.apply_filters = False
-    #     else:
-    #         self.apply_filters = True
-
-    # def apply_snr_filter(self):
-    #     self.debug(get_caller(), 1)
-    #     t = time()
-    #     if self.snr_filter_params is None:
-    #         return
-    #     if self.snr_filter_params['activate'] is not True:
-    #         return
-    #     if self.raw_data is None:
-    #         return
-    #     if self.mask_data is None:
-    #         return
-    #     a = self.snr_filter_params['inner']
-    #     b = self.snr_filter_params['center']
-    #     c = self.snr_filter_params['outer']
-    #     raw = self.raw_data['pad_data']
-    #     mask = self.mask_data
-    #     processed_pads = [None]*self.n_pads
-    #     self.debug('boxsnr()')
-    #     for i in range(self.n_pads):
-    #         snr, signal = boxsnr(raw[i], mask[i], mask[i], a, b, c)
-    #         m = mask[i]*(snr < 6)
-    #         snr, signal = boxsnr(raw[i], mask[i], m, a, b, c)
-    #         processed_pads[i] = snr
-    #     if self.processed_data is None:
-    #         self.processed_data = {}
-    #     self.processed_data['pad_data'] = processed_pads
-    #     self.debug('%g seconds' % (time()-t,))
-
-    # def update_snr_filter_params(self):
-    #     self.debug(get_caller(), 1)
-    #     vals = self.widget_snr_config.get_values()
-    #     if vals['activate']:
-    #         self.snr_filter_params = vals
-    #         self.data_processor = self.apply_snr_filter
-    #         self.update_display_data()
-    #     else:
-    #         self.data_processor = None
-    #         self.processed_data = None
-    #         self.update_display_data()
 
     def load_geometry_file(self):
         self.debug(get_caller(), 1)
@@ -1483,55 +1461,57 @@ class PADView2(QtCore.QObject):
                 return self.raw_data['peaks']
         return None
 
-    def update_peakfinder_params(self):
-        r""" Reset the peak finders with new parameters.  This also launges a peakfinding job.
-        FIXME: Need to make this more intelligent so that unnecessary jobs are not launched."""
-        self.peakfinder_params = self.widget_peakfinder_config.get_values()
-        self.setup_peak_finders()
-        self.find_peaks()
-        self.hide_peaks()
-        if self.peakfinder_params['activate']:
-            self.show_peaks()
-        else:
-            self.hide_peaks()
+    # FIXME: Peakfinding stuff should be handled by a separate widget.
+    # def update_peakfinder_params(self):
+    #     r""" Reset the peak finders with new parameters.  This also launges a peakfinding job.
+    #     FIXME: Need to make this more intelligent so that unnecessary jobs are not launched."""
+    #     self.peakfinder_params = self.widget_peakfinder_config.get_values()
+    #     self.setup_peak_finders()
+    #     self.find_peaks()
+    #     self.hide_peaks()
+    #     if self.peakfinder_params['activate']:
+    #         self.show_peaks()
+    #     else:
+    #         self.hide_peaks()
+    #
+    # def find_peaks(self):
+    #     r""" Launch a peak-finding job, and cache the results.  This will not display anything. """
+    #     self.debug(get_caller(), 1)
+    #     if self.peak_finders is None:
+    #         self.setup_peak_finders()
+    #     centroids = [None]*self.n_pads
+    #     n_peaks = 0
+    #     for i in range(self.n_pads):
+    #         pfind = self.peak_finders[i]
+    #         pfind.find_peaks(data=self.raw_data['pad_data'][i], mask=self.mask_data[i])
+    #         n_peaks += pfind.n_labels
+    #         centroids[i] = pfind.centroids
+    #     self.debug('Found %d peaks' % (n_peaks))
+    #     self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
+    #
+    # def toggle_peak_finding(self):
+    #     r""" Toggle peakfinding on/off.  Set this to true if you want to automatically do peakfinding when a new
+    #     image data is displayed. """
+    #     self.debug(get_caller(), 1)
+    #     if self.do_peak_finding is False:
+    #         self.do_peak_finding = True
+    #     else:
+    #         self.do_peak_finding = False
+    #     self.update_display_data()
+    #
+    # def setup_peak_finders(self):
+    #     r""" Create peakfinder class instances.  We use peakfinder classes rather than functions in order to tidy up
+    #     the data structure. """
+    #     self.debug(get_caller(), 1)
+    #     self.peak_finders = []
+    #     a = self.peakfinder_params['inner']
+    #     b = self.peakfinder_params['center']
+    #     c = self.peakfinder_params['outer']
+    #     t = self.peakfinder_params['snr_threshold']
+    #     for i in range(self.n_pads):
+    #         self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(a, b, c), snr_threshold=t))
 
-    def find_peaks(self):
-        r""" Launch a peak-finding job, and cache the results.  This will not display anything. """
-        self.debug(get_caller(), 1)
-        if self.peak_finders is None:
-            self.setup_peak_finders()
-        centroids = [None]*self.n_pads
-        n_peaks = 0
-        for i in range(self.n_pads):
-            pfind = self.peak_finders[i]
-            pfind.find_peaks(data=self.raw_data['pad_data'][i], mask=self.mask_data[i])
-            n_peaks += pfind.n_labels
-            centroids[i] = pfind.centroids
-        self.debug('Found %d peaks' % (n_peaks))
-        self.raw_data['peaks'] = {'centroids': centroids, 'n_peaks': n_peaks}
-
-    def toggle_peak_finding(self):
-        r""" Toggle peakfinding on/off.  Set this to true if you want to automatically do peakfinding when a new
-        image data is displayed. """
-        self.debug(get_caller(), 1)
-        if self.do_peak_finding is False:
-            self.do_peak_finding = True
-        else:
-            self.do_peak_finding = False
-        self.update_display_data()
-
-    def setup_peak_finders(self):
-        r""" Create peakfinder class instances.  We use peakfinder classes rather than functions in order to tidy up
-        the data structure. """
-        self.debug(get_caller(), 1)
-        self.peak_finders = []
-        a = self.peakfinder_params['inner']
-        b = self.peakfinder_params['center']
-        c = self.peakfinder_params['outer']
-        t = self.peakfinder_params['snr_threshold']
-        for i in range(self.n_pads):
-            self.peak_finders.append(PeakFinder(mask=self.mask_data[i], radii=(a, b, c), snr_threshold=t))
-
+    # FIXME: The entire plugin model needs to be considered more carefully.
     def _import_plugin_module(self, module_name):
         self.debug(get_caller(), 1)
         if module_name in self.plugins:
@@ -1596,6 +1576,7 @@ class PADView2(QtCore.QObject):
         r""" Simple popup widget that allows the capture of a float number."""
         return float(self.get_text(title=title, label=label, text=text))
 
+    # FIXME: Figure out how to make start work without blocking the ipython terminal.
     def start(self):
         self.debug(get_caller(), 1)
         self.app.aboutToQuit.connect(self.stop)
@@ -1603,6 +1584,7 @@ class PADView2(QtCore.QObject):
 
     def stop(self):
         self.debug(get_caller(), 1)
+        # FIXME: Figure out how to make the main window close all other windows.
         # # self.app.closeAllWindows()  Why doesn't this work?
         # if self.plugins is not None:
         #     for key in self.plugins.keys():
@@ -1619,6 +1601,8 @@ class PADView2(QtCore.QObject):
         self.main_window.show()
         # self.main_window.callback_pb_load()
 
+    # FIXME: This should be eliminated, if we can figure out how to start PADView without blocking the terminal.  It's
+    # FIXME: purpose is for debugging.
     def call_method_by_name(self, method_name=None, *args, **kwargs):
         r""" Call a method via it's name in string format. Try not to do this... """
         self.debug(get_caller(), 1)
@@ -1631,105 +1615,3 @@ class PADView2(QtCore.QObject):
 
 
 PADView = PADView2
-
-
-
-# def get_caller():
-#     r""" Get the name of the function that calls this one. """
-#     try:
-#         stack = inspect.stack()
-#         if len(stack) > 1:
-#             return inspect.stack()[1][3]
-#     except:
-#         pass
-#     return 'get_caller'
-
-
-# class PluginWidget(QtGui.QWidget):
-#     def __init__(self, padview=None):
-#         super().__init__()
-#         self.padview = padview
-#         self.plugin_files = glob.glob(os.path.join(plugin_path, '*.py'))
-#         self.plugin_basenames = [os.path.basename(p).replace('.py', '').replace('_', ' ').capitalize() for p in self.plugin_files]
-#         self.layout = QtGui.QGridLayout()
-#         row = 0
-#         row += 1
-#         self.layout.addWidget(QtGui.QLabel('Plugin:'), row, 1)
-#         self.combo_box = QtGui.QComboBox()
-#         self.combo_box.addItems(self.plugin_basenames)
-#         self.layout.addWidget(self.combo_box, row, 2, alignment=QtCore.Qt.AlignCenter)
-#         row += 1
-#         self.run_plugin_button = QtGui.QPushButton("Run Plugin")
-#         self.run_plugin_button.clicked.connect(self.run_plugin)
-#         self.layout.addWidget(self.run_plugin_button, row, 1, 1, 2)
-#         self.setLayout(self.layout)
-#     def run_plugin(self):
-#         print()
-#         self.padview.run_plugins([self.combo_box.currentText().split('.')[0].replace(' ', '_').lower()+'.py'])
-
-
-# if __name__ == '__main__':
-#     from reborn.simulate import solutions
-#     from reborn import detector, source
-#     from reborn.viewers.qtviews.padviews import PADView2
-#     np.random.seed(10)
-#     beam_vec = [0, 0, 1] #reborn.utils.vec_norm(np.array([0, 0.1, 0.9]))
-#     theta1 = 0.0
-#     theta2 = 0.0
-#     Tscl = 1.0
-#     dist = 0.1
-#     pix = 1e-3/7
-#     shape = (1000, 1000)
-#     tiles = (2, 2)
-#     gap = pix
-#     #pads = [reborn.detector.PADGeometry(pixel_size=1e-3, distance=1, shape=(100, 100))]
-#     #pads[0].t_vec[0:2] = 0
-#     pads = detector.tiled_pad_geometry_list(pad_shape=shape, pixel_size=pix, distance=dist, tiling_shape=tiles, pad_gap=gap)
-#     # pads = pads[0:1]
-#     # pads[0].t_vec = [0, 0, pads[0].t_vec[2]]
-#     ct = np.cos(theta1)
-#     st = np.sin(theta1)
-#     R2 = np.array([[1, 0, 0], [0, ct, st], [0, -st, ct]])
-#     ct = np.cos(theta2)
-#     st = np.sin(theta2)
-#     R1 = np.array([[ct, st, 0], [-st, ct, 0], [0, 0, 1]])
-#     R = np.dot(R2, R1.T)
-#     T = np.array([0.05, -0.07, 0])*Tscl
-#     for p in pads:
-#         p.ss_vec = np.dot(p.ss_vec, R.T)
-#         p.fs_vec = np.dot(p.fs_vec, R.T)
-#         p.t_vec = np.dot(p.t_vec, R.T)
-#         p.t_vec += T
-#     beam = source.Beam(photon_energy=8000 * 1.602e-19, diameter_fwhm=1e-6, pulse_energy=0.1e-3, beam_vec=beam_vec)
-#     def make_images():
-#         dat = solutions.get_pad_solution_intensity(pads, beam, thickness=10e-6, liquid='water')
-#         for d in dat:
-#             nx, ny = d.shape
-#             x, y = np.indices(d.shape)
-#             xo = np.random.rand() * nx
-#             yo = np.random.rand() * ny
-#             d += 100 * np.exp((-(x - xo) ** 2 - (y - yo) ** 2)/3) + np.random.random(d.shape)
-#             # d.flat[0:10] = 0
-#         return dat
-#     dat = make_images()
-#     # for p in pads:
-#     #     p.t_vec[0] += pix
-#     mask = [np.ones(p.shape()) for p in pads]
-#     for m in mask:
-#         m[0:20, 0:20] = 0
-#     # for i in range(len(mask)):
-#     #     mask[i][dat[i] < 40000] = 0
-#     [print(p) for p in pads]
-#     pv = PADView2(raw_data=dat, pad_geometry=pads, mask_data=mask, debug_level=2)
-#     # pv.show_coordinate_axes()
-#     pv.set_levels(0, 30000)
-#     # pv.run_plugin('central_symmetry')
-#     # pv.run_plugin('shift_detector')
-#     # pv.run_plugin('mask_editor')
-#     # pv.add_circle_roi(pos=(0.1, 0.1), radius=0.01)
-#     # pv.show_fast_scan_directions()
-#     pv.set_title('testing')
-#     # pv.toggle_grid()
-#     pv.start()
-#     # lw.show()
-#     # app.exec_()
