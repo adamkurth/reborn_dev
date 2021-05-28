@@ -106,7 +106,7 @@ class PADGeometry:
             status = False
         if not isinstance(self._t_vec, np.ndarray):
             status = False
-        if raise_error:
+        if raise_error and status is False:
             raise ValueError("Something is wrong with this PADGeometry (missing parameter, or bad type)")
         return status
 
@@ -778,10 +778,8 @@ def concat_pad_data(data):
 
     Returns: 1D numpy array
     """
-
     if isinstance(data, np.ndarray):
         return data.ravel()
-
     return np.concatenate([d.ravel() for d in data])
 
 
@@ -798,14 +796,14 @@ def split_pad_data(pad_list, data):
         A list of 2D numpy arrays
 
     """
-
+    if isinstance(data, list):
+        return data
     data_list = []
-
     offset = 0
+    data = data.ravel()
     for pad in pad_list:
         data_list.append(pad.reshape(data[offset:(offset + pad.n_pixels)]))
         offset += pad.n_pixels
-
     return data_list
 
 
@@ -1256,7 +1254,6 @@ class RadialProfiler():
             data = data[w]
             q_mags = q_mags[w]
         med = utils.binned_statistic(q_mags, data, np.median, self.n_bins, (self.bin_edges[0], self.bin_edges[-1]))
-        # print(time()-t)
         return med
 
     def subtract_profile(self, data, mask=None, statistic='mean'):

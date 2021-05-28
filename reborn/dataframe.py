@@ -19,15 +19,27 @@ class DataFrame:
     _frame_id = None
     _pad_geometry = None
     _beam = None
-    _raw_data_list = None
     _raw_data = None
-    _processed_data_list = None
     _processed_data = None
 
-    def __init__(self, beam=None, pad_geometry=None, event_id=None):
+    def __init__(self, raw_data=None, processed_data=None, mask=None, beam=None, pad_geometry=None, frame_id=0):
         self.set_pad_geometry(pad_geometry)
         self.set_beam(beam)
-        self.set_event_id(event_id)
+        self.set_raw_data(raw_data)
+        if mask is not None: self.set_mask(mask)
+        if processed_data is not None: self.set_processed_data(processed_data)
+        self.set_frame_id(frame_id)
+
+    def validate(self):
+        if self._frame_id is None: return False
+        if self._beam is None: return False
+        if self._pad_geometry is None: return False
+        if self._raw_data is None: return False
+        if self._beam is False: return False
+        if self._beam.validate() is False: return False
+        if self._pad_geometry.validate() is False: return False
+        if not isinstance(self._raw_data, np.ndarray): return False
+        return True
 
     def get_frame_id(self):
         r""" Unique identifier for this dataframe.  Most often this is an integer, but in some cases, such as the LCLS,
@@ -63,26 +75,43 @@ class DataFrame:
 
     def get_raw_data_list(self):
         r""" Get the raw data as a list of 2D arrays."""
-        pass
+        return self._pad_geometry.concat_data(self.get_raw_data_flat())
 
     def get_raw_data_flat(self):
         r""" Get the raw data as a contiguous 1D array, with all PADs concatenated."""
-        pass
+        return self._raw_data.copy()
 
-    def set_raw_data(self, raw_data):
+    def set_raw_data(self, data):
         r""" Set the raw data.  You may pass a list or a concatentated 1D array."""
+        self._raw_data = self._pad_geometry.concat_data(data.copy())
+
+    def get_mask_list(self):
+        r""" Get the mask as a list of 2D arrays."""
+        return self._pad_geometry.concat_data(self.get_mask_flat())
+
+    def get_mask_flat(self):
+        r""" Get the mask as a contiguous 1D array, with all PADs concatenated."""
+        return self._mask.copy()
+
+    def set_mask(self, mask):
+        r""" Set the mask.  You may pass a list or a concatentated 1D array."""
+        self._mask = self._pad_geometry.concat_data(mask.copy())
 
     def get_processed_data_list(self):
         r""" See corresponding _raw_ method."""
-        pass
+        if self._processed_data is None:
+            self._processed_data = self._raw_data.copy()
+        return self._pad_geometry.concat_data(self.get_processed_data_flat())
 
     def get_processed_data_flat(self):
         r""" See corresponding _raw_ method."""
-        pass
+        if self._processed_data is None:
+            self._processed_data = self._raw_data.copy()
+        return self._processed_data.copy()
 
-    def set_processed_data_flat(self):
+    def set_processed_data(self, data):
         r""" See corresponding _raw_ method."""
-        pass
+        self._processed_data = self._pad_geometry.concat_data(data)
 
     def get_q_vecs(self):
         return self._pad_geometry.q_vecs(self._beam)

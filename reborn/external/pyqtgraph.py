@@ -11,6 +11,80 @@ def keep_open():
     pg.QtGui.QApplication.instance().exec_()
 
 
+images = []
+
+
+def image(*args, **kargs):
+    """
+    Create and return an :class:`ImageWindow <pyqtgraph.ImageWindow>`
+    (this is just a window with :class:`ImageView <pyqtgraph.ImageView>` widget inside), show image data inside.
+    Will show 2D or 3D image data.
+    Accepts a *title* argument to set the title of the window.
+    All other arguments are used to show data. (see :func:`ImageView.setImage() <pyqtgraph.ImageView.setImage>`)
+
+    Note:
+        This is a direct copy of the equivalent (undocumented?) function in |pyqtgraph|, except that it adds the
+        *view* argument so that you can easily put your image in a plot axis.
+    """
+    pg.mkQApp()
+    w = ImageWindow(*args, **kargs)
+    images.append(w)
+    w.show()
+    return w
+
+
+class ImageWindow(pg.ImageView):
+    """
+    (deprecated; use ImageView instead)
+
+    Note:
+        This is a direct copy of the equivalent (undocumented?) class in |pyqtgraph|, except that it adds the
+        *view* argument so that you can easily put your image in a plot axis.
+    """
+    def __init__(self, *args, **kargs):
+        pg.mkQApp()
+        self.win = pg.QtGui.QMainWindow()
+        self.win.resize(800, 600)
+        if 'title' in kargs:
+            self.win.setWindowTitle(kargs['title'])
+            del kargs['title']
+        view = None
+        fs_lims = None
+        ss_lims = None
+        if 'view' in kargs:
+            view = kargs['view']
+            if view == 'plot':
+                view = pg.PlotItem()
+            del kargs['view']
+            if 'fs_lims' in kargs:
+                fs_lims = kargs['fs_lims']
+            if 'ss_lims' in kargs:
+                ss_lims = kargs['ss_lims']
+        if 'fs_lims' in kargs:
+            del kargs['fs_lims']
+        if 'ss_lims' in kargs:
+            del kargs['ss_lims']
+        if view is not None:
+            img = args[0]
+            if fs_lims is not None and ss_lims is not None:
+                fs_width = fs_lims[1] - fs_lims[0]
+                ss_width = ss_lims[1] - ss_lims[0]
+                dfs = fs_width/img.shape[1]
+                dss = ss_width/img.shape[0]
+                kargs['pos'] = (ss_lims[0]-0.5*dss, fs_lims[0]-0.5*dfs)
+                kargs['scale'] = (ss_width/(img.shape[0]-1), fs_width/(img.shape[1]-1))
+        pg.ImageView.__init__(self, self.win, view=view)
+        self.view.setAspectLocked(False)
+        self.view.enableAutoRange(True)
+        self.view.invertY(False)
+        if len(args) > 0 or len(kargs) > 0:
+            self.setImage(*args, **kargs)
+        self.win.setCentralWidget(self)
+        for m in ['resize']:
+            setattr(self, m, getattr(self.win, m))
+        self.win.show()
+
+
 class MultiHistogramLUTWidget(pg.GraphicsView):
 
     r"""

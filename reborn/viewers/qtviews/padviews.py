@@ -111,10 +111,9 @@ class PADView2(QtCore.QObject):
         self.debug_level = debug_level
         self.debug(get_caller(), 1)
         self.logscale = logscale
-        self.mask_data = mask_data
-        self.pad_geometry = pad_geometry
-        self.beam = beam
-        self.dataframe = {}
+        # self.mask_data = mask_data
+        # self.pad_geometry = pad_geometry
+        # self.beam = beam
         self._auto_percentiles = percentiles
 
         # We allow for various ways to initialize PADView.
@@ -170,14 +169,14 @@ class PADView2(QtCore.QObject):
                 pad.t_vec[0] += shft
                 shft += pad.shape()[0]
                 pad_geometry.append(pad)
-            pad_geometry = pad_geometry
+        pad_geometry = reborn.detector.PADGeometryList(pad_geometry)
         # Handling of beam info:
         if beam is None:
             self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
             beam = reborn.source.Beam(photon_energy=9000*1.602e-19)
         # Handling of mask info:
         if mask_data is None:
-            mask_data = [np.ones_like(d) for d in self.raw_data['pad_data']]
+            mask_data = [p.ones() for p in pad_geometry]
 
         # This is a summary of the data that PADView displays.  Note that raw_data is a dictionary.  It has the
         # diffraction intensities, and may also have things like Bragg peak locations.
@@ -186,6 +185,12 @@ class PADView2(QtCore.QObject):
         self.pad_geometry = pad_geometry
         self.beam = beam
         self.mask_data = mask_data
+        # FIXME: Start implementing the new DataFrame class internally.
+        self.dataframe = reborn.dataframe.DataFrame(raw_data=raw_data['pad_data'], pad_geometry=pad_geometry, beam=beam,
+                                                    mask=mask_data)
+        # FIXME: This is how we should validate dataframes from now on!
+        if not self.dataframe.validate():
+            print('DataFrame is not valid!')
 
         self.app = pg.mkQApp()
         self.setup_ui()
