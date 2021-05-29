@@ -16,7 +16,8 @@ class DataFrame:
     - An event ID.  This may be an integer, or any other data type (such as a tuple in the case of LCLS).
     """
 
-    _frame_id = None
+    _frame_index = 0
+    _frame_id = 0
     _pad_geometry = None
     _beam = None
     _raw_data = None
@@ -41,6 +42,15 @@ class DataFrame:
         if not isinstance(self._raw_data, np.ndarray): return False
         return True
 
+    def get_frame_index(self):
+        r""" This is an integer index the is unique to this frame.  It is understood to be a context-dependent parameter
+        that might, for example, be the index in a list of frames."""
+        return self._frame_index
+
+    def set_frame_index(self, index):
+        r""" See corresponding get_ method. """
+        self._frame_index = int(index)
+
     def get_frame_id(self):
         r""" Unique identifier for this dataframe.  Most often this is an integer, but in some cases, such as the LCLS,
         it may be something else such as a tuple.  LCLS uses a tuple of integers: seconds, nanoseconds, and fiducial."""
@@ -52,7 +62,7 @@ class DataFrame:
         self._frame_id = frame_id
 
     def get_beam(self):
-        r""" Get the |Beam| instance."""
+        r""" Get the |Beam| instance, which contains x-ray wavelength, beam direction, etc."""
         return self._beam.copy()
 
     def set_beam(self, beam):
