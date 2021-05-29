@@ -1,4 +1,5 @@
 from reborn import utils
+from reborn.target import density
 import numpy as np
 
 # The usage of N_data and N_pattern in some of the tests below can be interpreted as:
@@ -9,9 +10,9 @@ import numpy as np
 
 
 def test_1():
-    data_coord = np.array([[0.1, 0, 0]])
-    data_val = np.array([1])
-    mask = np.ones(len(data_val))
+    data_coord = np.array([[0.1, 0, 0]], dtype=np.float64)
+    data_val = np.array([1], dtype=np.float64)
+    mask = np.ones(len(data_val), dtype=np.float64)
 
     N_bin = np.array([3, 3, 3])
     x_min = np.array([-1, -1, -1])
@@ -36,6 +37,19 @@ def test_1():
     dataout /= weightout
 
     assert np.sum(np.abs(dataout - ans)) < 1e-9
+
+    dataout = np.zeros(N_bin, dtype=np.float64)
+    weightout = np.zeros(N_bin, dtype=np.float64)
+    print('\n', '='*80, dataout.dtype, weightout.dtype)
+    # breakit
+    density.trilinear_insertion(dataout, weightout, data_coord, data_val, x_min=x_min, x_max=x_max)
+    print(dataout)
+    print(weightout)
+    w = np.where(weightout != 0)
+    data_avg = dataout.copy()
+    data_avg[w] /= weightout[w]
+    print(data_avg)
+    assert np.sum(np.abs(data_avg - ans)) < 1e-9
 
 
 def test_2():
@@ -1092,3 +1106,7 @@ def test_33():
 
     assert np.sum(np.abs(dataout - ans_dataout)) < 1e-9
     assert np.sum(np.abs(np.sum(dataout) - ans_dataout_sum)) < 1e-9
+
+
+if __name__ == '__main__':
+    test_1()

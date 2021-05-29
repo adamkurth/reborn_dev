@@ -334,10 +334,10 @@ def trilinear_insertion(densities, weights, vectors, insert_vals, corners=None, 
         deltas = np.array(deltas).copy()
     else:
         if (x_min is None) or (x_max is None):
-            raise ValueError('trilinear_interpolation requires the x_min and x_max arguments')
+            raise ValueError('trilinear_insertion requires the x_min and x_max arguments')
         shape = np.array(densities.shape)
         if len(shape) != 3:
-            raise ValueError('trilinear_interpolation requires a 3D densities argument')
+            raise ValueError('trilinear_insertion requires a 3D densities argument')
         x_min = np.atleast_1d(np.array(x_min))
         x_max = np.atleast_1d(np.array(x_max))
         if len(x_min) == 1:
@@ -348,6 +348,8 @@ def trilinear_insertion(densities, weights, vectors, insert_vals, corners=None, 
         corners = x_min
     corners = corners.astype(np.float64)
     deltas = deltas.astype(np.float64)
+    print('>'*80, densities.dtype)
+    print('\n','<'*80, densities.dtype != np.float64)
     if densities.dtype != np.float64:
         if densities.dtype != np.complex128:
             raise ValueError('trilinear_interpolation requires densities of numpy.float64 or numpy.complex128 type')

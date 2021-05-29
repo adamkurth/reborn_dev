@@ -8,6 +8,10 @@ subroutine trilinear_interpolation(densities, vectors, corners, deltas, out)
     nx = size(densities, 1)
     ny = size(densities, 2)
     nz = size(densities, 3)
+    !$OMP parallel default(None) private(ii,k_f,j_f,i_f,i0,j0,k0,i1,j1,k1,x0,y0,z0,x1,y1,z1) &
+    !$OMP & shared(vectors,corners,deltas,densities,out,nn,nx,ny,nz)
+
+    !$OMP do schedule(static)
     do ii=1,nn
         k_f = 1.0 + (vectors(1, ii) - corners(1)) / deltas(1)
         j_f = 1.0 + (vectors(2, ii) - corners(2)) / deltas(2)
@@ -34,6 +38,8 @@ subroutine trilinear_interpolation(densities, vectors, corners, deltas, out)
                   densities(i1, j1, k0) * x0 * y0 * z1 + &
                   densities(i1, j1, k1) * x0 * y0 * z0
     enddo
+    !$OMP enddo nowait
+    !$OMP end parallel
 end subroutine trilinear_interpolation
 
 subroutine trilinear_interpolation_complex(densities, vectors, corners, deltas, out)
@@ -47,6 +53,10 @@ subroutine trilinear_interpolation_complex(densities, vectors, corners, deltas, 
     nx = size(densities, 1)
     ny = size(densities, 2)
     nz = size(densities, 3)
+    !$OMP parallel default(None) private(ii,k_f,j_f,i_f,i0,j0,k0,i1,j1,k1,x0,y0,z0,x1,y1,z1) &
+    !$OMP & shared(vectors,corners,deltas,densities,out,nn,nx,ny,nz)
+
+    !$OMP do schedule(static)
     do ii=1,nn
         k_f = 1.0 + (vectors(1, ii) - corners(1)) / deltas(1)
         j_f = 1.0 + (vectors(2, ii) - corners(2)) / deltas(2)
@@ -73,6 +83,8 @@ subroutine trilinear_interpolation_complex(densities, vectors, corners, deltas, 
                   densities(i1, j1, k0) * x0 * y0 * z1 + &
                   densities(i1, j1, k1) * x0 * y0 * z0
     enddo
+    !$OMP enddo nowait
+    !$OMP end parallel
 end subroutine trilinear_interpolation_complex
 
 subroutine trilinear_insertion_real(densities, weights, vectors, vals, corners, deltas)

@@ -17,6 +17,7 @@
       <w>inds</w>
       <w>luts</w>
       <w>lysozyme</w>
+      <w>menubar</w>
       <w>miniconda</w>
       <w>ndarray</w>
       <w>opencl</w>
@@ -25,10 +26,12 @@
       <w>powershell</w>
       <w>pyopencl</w>
       <w>pyqt</w>
+      <w>pyqtgraph</w>
       <w>spacegroup</w>
       <w>trilinear</w>
       <w>vals</w>
       <w>vecs</w>
+      <w>viewbox</w>
       <w>xraylib</w>
     </words>
   </dictionary>

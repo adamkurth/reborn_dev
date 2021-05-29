@@ -112,7 +112,7 @@ interpolations_f = import_f90('interpolations')
 fortran_indexing_f = import_f90('fortran_indexing')
 peaks_f = import_f90('peaks', extra_args="--f90flags='-fopenmp -O2' -lgomp")
 omp_test_f = import_f90('omp_test', extra_args="--f90flags='-fopenmp -O2' -lgomp")
-density_f = import_f90('density')
+density_f = import_f90('density', extra_args="--f90flags='-fopenmp -O2' -lgomp")
 
 # try:
 #     check_hash(os.path.join(fortran_path, 'utils.f90'))
