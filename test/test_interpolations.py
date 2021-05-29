@@ -40,15 +40,10 @@ def test_1():
 
     dataout = np.zeros(N_bin, dtype=np.float64)
     weightout = np.zeros(N_bin, dtype=np.float64)
-    print('\n', '='*80, dataout.dtype, weightout.dtype)
-    # breakit
     density.trilinear_insertion(dataout, weightout, data_coord, data_val, x_min=x_min, x_max=x_max)
-    print(dataout)
-    print(weightout)
     w = np.where(weightout != 0)
     data_avg = dataout.copy()
     data_avg[w] /= weightout[w]
-    print(data_avg)
     assert np.sum(np.abs(data_avg - ans)) < 1e-9
 
 
