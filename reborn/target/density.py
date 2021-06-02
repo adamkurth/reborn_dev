@@ -404,32 +404,5 @@ def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, c
     Returns:
         None.  This function modifies the densities and weights arrays; it returns nothing.
     """
-    if (corners is not None) and (deltas is not None):
-        corners = np.array(corners).copy()
-        deltas = np.array(deltas).copy()
-    else:
-        if (x_min is None) or (x_max is None):
-            raise ValueError('trilinear_insertion requires the x_min and x_max arguments')
-        shape = np.array(densities.shape)
-        if len(shape) != 3:
-            raise ValueError('trilinear_insertion requires a 3D densities argument')
-        x_min = np.atleast_1d(np.array(x_min))
-        x_max = np.atleast_1d(np.array(x_max))
-        if len(x_min) == 1:
-            x_min = np.squeeze(np.array([x_min, x_min, x_min]))
-        if len(x_max) == 1:
-            x_max = np.squeeze(np.array([x_max, x_max, x_max]))
-        deltas = (x_max - x_min)/(shape - 1)
-        corners = x_min
-    corners = corners.astype(np.float64)
-    deltas = deltas.astype(np.float64)
-    print('>'*80, densities.dtype)
-    print('\n','<'*80, densities.dtype != np.float64)
-    if densities.dtype != np.float64:
-        if densities.dtype != np.complex128:
-            raise ValueError('trilinear_interpolation requires densities of numpy.float64 or numpy.complex128 type')
-    if insert_vals.dtype != np.float64:
-        if insert_vals.dtype != np.complex128:
-            raise ValueError('trilinear_interpolation requires insert_vals of numpy.float64 or numpy.complex128 type')
     trilinear_insertion_factor_real(densities, vectors, insert_vals, corners, deltas, weight_factor)
     return None
