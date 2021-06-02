@@ -404,5 +404,5 @@ def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, c
     Returns:
         None.  This function modifies the densities and weights arrays; it returns nothing.
     """
-    trilinear_insertion_factor_real(densities, vectors, insert_vals, corners, deltas, weight_factor)
+    trilinear_insertion_factor(densities, vectors, insert_vals, corners, deltas, weight_factor)
     return None
