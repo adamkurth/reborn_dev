@@ -47,6 +47,9 @@ def test_1():
     assert np.sum(np.abs(data_avg - ans)) < 1e-9
 
 
+
+
+
 def test_2():
     data_coord = np.array([[0.5, 0.5, 0.5]])
     data_val = np.array([1])
@@ -1103,5 +1106,171 @@ def test_33():
     assert np.sum(np.abs(np.sum(dataout) - ans_dataout_sum)) < 1e-9
 
 
+
+def test_34():
+    """ Test 1 for the trilinear_insertion_factor function which multiplies 
+        a factor onto the insertion weights that Rainier needs for the MCEMC project.
+    """
+
+    # Set up input
+    data_coord = np.array([[0.1, 0, 0]], dtype=np.float64)
+    data_val = np.array([1], dtype=np.float64)
+
+    N_bin = np.array([3, 3, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    densities = np.zeros([3,3,3,2])
+    weight_factor = 1.0
+
+    # Do the trilinear insertion
+    density.trilinear_insertion_factor(densities=densities, 
+                                       weight_factor=weight_factor, 
+                                       vectors=data_coord, 
+                                       insert_vals=data_val, 
+                                       corners=None, 
+                                       deltas=None, 
+                                       x_min=x_min, 
+                                       x_max=x_max)
+
+    # Expected answer
+    ans = np.array([[[ 0. ,  0. ,  0. ],
+                        [ 0. ,  0. ,  0. ],
+                        [ 0. ,  0. ,  0. ]],
+
+                       [[ 0. ,  0. ,  0. ],
+                        [ 0. ,  1.0,  0. ],
+                        [ 0. ,  0. ,  0. ]],
+
+                       [[ 0. ,  0. ,  0. ],
+                        [ 0. ,  1.0,  0. ],
+                        [ 0. ,  0. ,  0. ]]])
+
+    # Extract the inserted array and weights from the 4D "density" array
+    dataout = densities[:,:,:,0]
+    weightout = densities[:,:,:,1]
+    w = np.where(weightout != 0)
+    data_avg = dataout.copy()
+    data_avg[w] /= weightout[w]
+
+    assert np.sum(np.abs(data_avg - ans)) < 1e-9
+
+
+
+def test_35():
+    """ Test 2 for the trilinear_insertion_factor function which multiplies 
+        a factor onto the insertion weights that Rainier needs for the MCEMC project.
+    """
+
+    data_coord = np.array([[1.5, 1.5, 1.5], [1.5, 1.5, 1.5]], dtype=np.float64)
+    data_val = np.array([1, 1], dtype=np.float64)
+
+    N_bin = np.array([3, 3, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([1, 1, 1])
+
+    densities = np.zeros([3,3,3,2])
+    weight_factor = 1.0
+
+    # Do the trilinear insertion
+    density.trilinear_insertion_factor(densities=densities, 
+                                       weight_factor=weight_factor, 
+                                       vectors=data_coord, 
+                                       insert_vals=data_val, 
+                                       corners=None, 
+                                       deltas=None, 
+                                       x_min=x_min, 
+                                       x_max=x_max)
+    # Expected answer
+    ans = np.array([[[ 1.0,  0.   ,  1.0],
+                     [ 0.   ,  0.   ,  0.   ],
+                     [ 1.0,  0.   ,  1.0]],
+
+                    [[ 0.   ,  0.   ,  0.   ],
+                     [ 0.   ,  0.   ,  0.   ],
+                     [ 0.   ,  0.   ,  0.   ]],
+
+                    [[ 1.0,  0.   ,  1.0],
+                     [ 0.   ,  0.   ,  0.   ],
+                     [ 1.0,  0.   ,  1.0]]])
+
+
+    # Extract the inserted array and weights from the 4D "density" array
+    dataout = densities[:,:,:,0]
+    weightout = densities[:,:,:,1]
+    w = np.where(weightout != 0)
+    data_avg = dataout.copy()
+    data_avg[w] /= weightout[w]
+
+    assert np.sum(np.abs(data_avg - ans)) < 1e-9
+
+
+
+#============================================================================
+# There is potentially a bug given by this test code below that needs to be investigated.
+
+'''
+def test_36():
+    """ Test 3 for the trilinear_insertion_factor function which multiplies 
+        a factor onto the insertion weights that Rainier needs for the MCEMC project.
+    """
+
+    # data_coord = np.array([[1.0, 1.0, 1.0], \
+    #                        [0,0,0]])
+    # data_val = np.array([ 1.0,  1.0])
+    data_coord = np.array([[1.0, 1.0, 1.0]])
+    data_val = np.array([ 2.0])
+
+    N_bin = np.array([2, 2, 3])
+    x_min = np.array([-1, -1, -1])
+    x_max = np.array([2, 2, 2])
+
+    densities = np.zeros(np.append(N_bin, 2)) # The 2 is because the densities array is now 4D with the fourth dimension storing the weights
+    weight_factor = 1.0
+
+    # Do the trilinear insertion
+    density.trilinear_insertion_factor(densities=densities.T, 
+                                       weight_factor=weight_factor, 
+                                       vectors=data_coord.T, 
+                                       insert_vals=data_val, 
+                                       corners=None, 
+                                       deltas=None, 
+                                       x_min=x_min, 
+                                       x_max=x_max)
+    
+    yay3
+    # Expected answer
+    dataout, weightout = utils.trilinear_insert(data_coord, 
+                                                data_val, 
+                                                x_min, 
+                                                x_max, 
+                                                N_bin, 
+                                                mask=np.ones(len(data_val)), 
+                                                boundary_mode="periodic")
+    weightout[weightout == 0] = 1
+    ans = dataout / weightout
+
+    # Extract the inserted array and weights from the 4D "density" array
+    dataout = densities[:,:,:,0]
+    weightout = densities[:,:,:,1]
+    w = np.where(weightout != 0)
+    data_avg = dataout.copy()
+    data_avg[w] /= weightout[w]
+
+    print(np.sum(np.abs(data_avg - ans)))
+    print(ans)
+    print(data_avg)
+
+    assert np.sum(np.abs(data_avg - ans)) < 1e-7
+
+
+test_36()
+'''
+#============================================================================
+
+
+
+
 if __name__ == '__main__':
     test_1()
+
