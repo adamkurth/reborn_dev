@@ -203,7 +203,7 @@ subroutine trilinear_insertion_factor_real(summedvalues, vectors, vals, corners,
     nx = size(summedvalues, 2)
     ny = size(summedvalues, 3)
     nz = size(summedvalues, 4)
-    
+
     do ii=1,nn
         k_f = 1.0 + (vectors(1, ii) - corners(1)) / deltas(1)
         j_f = 1.0 + (vectors(2, ii) - corners(2)) / deltas(2)
@@ -235,8 +235,8 @@ subroutine trilinear_insertion_factor_real(summedvalues, vectors, vals, corners,
         summedvalues(2, i0, j0, k0) = summedvalues(2, i0, j0, k0) + factor2 * f1
         summedvalues(1, i1, j0, k0) = summedvalues(1, i1, j0, k0) + val * f2
         summedvalues(2, i1, j0, k0) = summedvalues(2, i1, j0, k0) + factor2 * f2
-        summedvalues(1, i0, j1, k0) = summedvalues(1, i1, j0, k0) + val * f3
-        summedvalues(2, i0, j1, k0) = summedvalues(2, i1, j0, k0) + factor2 * f3
+        summedvalues(1, i0, j1, k0) = summedvalues(1, i1, j1, k0) + val * f3
+        summedvalues(2, i0, j1, k0) = summedvalues(2, i1, j1, k0) + factor2 * f3
         summedvalues(1, i0, j0, k1) = summedvalues(1, i0, j0, k1) + val * f4
         summedvalues(2, i0, j0, k1) = summedvalues(2, i0, j0, k1) + factor2 * f4
         summedvalues(1, i1, j0, k1) = summedvalues(1, i1, j0, k1) + val * f5

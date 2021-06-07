@@ -1209,7 +1209,7 @@ def test_35():
 #============================================================================
 # There is potentially a bug given by this test code below that needs to be investigated.
 
-'''
+
 def test_36():
     """ Test 3 for the trilinear_insertion_factor function which multiplies 
         a factor onto the insertion weights that Rainier needs for the MCEMC project.
@@ -1218,10 +1218,10 @@ def test_36():
     # data_coord = np.array([[1.0, 1.0, 1.0], \
     #                        [0,0,0]])
     # data_val = np.array([ 1.0,  1.0])
-    data_coord = np.array([[1.0, 1.0, 1.0]])
-    data_val = np.array([ 2.0])
+    data_coord = np.array([[1.1, 1.0, 1.0]])
+    data_val = np.array([ 1.7])
 
-    N_bin = np.array([2, 2, 3])
+    N_bin = np.array([3, 3, 4])
     x_min = np.array([-1, -1, -1])
     x_max = np.array([2, 2, 2])
 
@@ -1229,17 +1229,17 @@ def test_36():
     weight_factor = 1.0
 
     # Do the trilinear insertion
-    density.trilinear_insertion_factor(densities=densities.T, 
+    density.trilinear_insertion_factor(densities=densities, 
                                        weight_factor=weight_factor, 
-                                       vectors=data_coord.T, 
+                                       vectors=data_coord, 
                                        insert_vals=data_val, 
                                        corners=None, 
                                        deltas=None, 
                                        x_min=x_min, 
                                        x_max=x_max)
     
-    yay3
-    # Expected answer
+    # yay3
+    # # Expected answer
     dataout, weightout = utils.trilinear_insert(data_coord, 
                                                 data_val, 
                                                 x_min, 
@@ -1250,6 +1250,11 @@ def test_36():
     weightout[weightout == 0] = 1
     ans = dataout / weightout
 
+    print("Joe")
+    print(dataout)
+    print(dataout[1,2,1])
+
+
     # Extract the inserted array and weights from the 4D "density" array
     dataout = densities[:,:,:,0]
     weightout = densities[:,:,:,1]
@@ -1257,15 +1262,19 @@ def test_36():
     data_avg = dataout.copy()
     data_avg[w] /= weightout[w]
 
-    print(np.sum(np.abs(data_avg - ans)))
-    print(ans)
-    print(data_avg)
+    print("Rick")
+    print(dataout)
+    print(dataout[1,2,1])
+
+    # print(np.sum(np.abs(data_avg - ans)))
+    # print(ans)
+    # print(data_avg)
 
     assert np.sum(np.abs(data_avg - ans)) < 1e-7
 
 
 test_36()
-'''
+
 #============================================================================
 
 

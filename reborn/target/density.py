@@ -399,10 +399,10 @@ def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, c
     Returns:
         None.  This function modifies the densities and weights arrays; it returns nothing.
     """
-    
-    # Convert to f-contiguous arrays required by f2py
-    densities = densities.T
-    vectors = vectors.T
+
+    # # Convert to f-contiguous arrays required by f2py
+    # densities = densities.T
+    # vectors = vectors.T
 
     if (corners is not None) and (deltas is not None):
         corners = np.array(corners).copy()
@@ -420,7 +420,7 @@ def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, c
         if len(x_max) == 1:
             x_max = np.squeeze(np.array([x_max, x_max, x_max]))
         
-        shape_3D = np.array(densities[0,:,:,:].shape)
+        shape_3D = np.array(densities[:,:,:,0].shape)
         deltas = (x_max - x_min)/(shape_3D - 1)
         corners = x_min
 
@@ -428,5 +428,7 @@ def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, c
     deltas = deltas.astype(np.float64)
 
 
-    density_f.trilinear_insertion_factor_real(densities, vectors, insert_vals, corners, deltas, weight_factor)
+    print(densities.shape)
+    print(vectors.shape)
+    density_f.trilinear_insertion_factor_real(densities.T, vectors.T, insert_vals.T, corners.T, deltas.T, weight_factor)
     return None
