@@ -185,6 +185,7 @@ subroutine trilinear_insertion_complex(densities, weights, vectors, vals, corner
     enddo
 end subroutine trilinear_insertion_complex
 
+
 subroutine trilinear_insertion_factor_real(summedvalues, vectors, vals, corners, deltas,factor2)
     implicit none
     real(kind=8), intent(inout) :: summedvalues(:,:,:,:)
@@ -194,6 +195,7 @@ subroutine trilinear_insertion_factor_real(summedvalues, vectors, vals, corners,
     real(kind=8) :: i_f,j_f,k_f,x0,y0,z0,x1,y1,z1
     real(kind=8) :: f1,f2,f3,f4,f5,f6,f7,f8
     integer(kind=4) :: i0,j0,k0,i1,j1,k1,ii,nx,ny,nz,nn
+
     nn = size(vals, 1)
     if (size(summedvalues,1).ne.2) then
        stop 'fix me'
@@ -201,6 +203,7 @@ subroutine trilinear_insertion_factor_real(summedvalues, vectors, vals, corners,
     nx = size(summedvalues, 2)
     ny = size(summedvalues, 3)
     nz = size(summedvalues, 4)
+    
     do ii=1,nn
         k_f = 1.0 + (vectors(1, ii) - corners(1)) / deltas(1)
         j_f = 1.0 + (vectors(2, ii) - corners(2)) / deltas(2)

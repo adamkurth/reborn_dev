@@ -348,8 +348,11 @@ def trilinear_insertion(densities, weights, vectors, insert_vals, corners=None, 
         corners = x_min
     corners = corners.astype(np.float64)
     deltas = deltas.astype(np.float64)
-    print('>'*80, densities.dtype)
-    print('\n','<'*80, densities.dtype != np.float64)
+
+    # Debugging code
+    # print('>'*80, densities.dtype)
+    # print('\n','<'*80, densities.dtype != np.float64)
+
     if densities.dtype != np.float64:
         if densities.dtype != np.complex128:
             raise ValueError('trilinear_interpolation requires densities of numpy.float64 or numpy.complex128 type')
@@ -365,12 +368,7 @@ def trilinear_insertion(densities, weights, vectors, insert_vals, corners=None, 
 
 def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, corners=None, deltas=None, x_min=None, x_max=None):
     r"""
-    Perform the "inverse" of a `trilinear interpolation <https://en.wikipedia.org/wiki/Trilinear_interpolation>`__ .
-    That is, take an arbitrary set of sample values along with their 3D vector locations and "insert" them into a 3D
-    grid of densities.  The values are distributed amongst the nearest 8 grid points so that they sum to the original
-    insert value.
-
-    FIXME: Be more clear about the mathematical operation that this function performs...
+    Performs trilinear insert with a factor being multiplied onto the weights.
 
     Notes:
         * This function behaves as if the density is periodic; points that lie out of bounds will wrap around.  This
@@ -380,8 +378,7 @@ def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, c
           think you have points that lie outside of the grid, consider handling them separately.
         * You may specify the output array, which is useful if you wish to simply add to an existing 3D array that you
           have already allocated.  This can make your code faster and reduce memory.  Beware: the out array is not
-          over-written -- the underlying fortran function will *add* to the existing ``densities`` array.
-        * Only double precision arrays (both real and complex are allowed).
+          over-written -- the underlying fortran function will *add* to the existing ``densities[1,:,:,:]`` array.
         * Make sure that all your arrays are c-contiguous.
         * An older version of this code allowed the arguments ``corners`` and ``deltas``.  They are discouraged because
           we aim to standardize on the ``x_min`` and ``x_max`` arguments documented below.  They may be removed in the
@@ -391,9 +388,7 @@ def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, c
     Arguments:
         densities (numpy array): A 4D array containing the densities, into which values are inserted.  Note that an
                                  "insertion" means that the ``insert_vals`` below are multiplied by ``weights`` below.
-        weights (numpy array): A 3D array containing weights.  These are needed in order to perform a weighted average.
-                               After calling this function one or more times, the average densities are calculated by
-                               dividing ``densities`` by ``weights``.  Be mindful of divide-by-zero errors.
+        weight_factor (numpy array): A number that gets multiplied with the trilinear insertion weights.
         vectors (numpy array): The 3D vector positions corresponding to the values to be inserted.
         insert_vals (numpy array): The values to be inserted into the 3D map.  They are multiplied by weights before
                                    being inserted into the densities map.
@@ -404,5 +399,34 @@ def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, c
     Returns:
         None.  This function modifies the densities and weights arrays; it returns nothing.
     """
-    trilinear_insertion_factor(densities, vectors, insert_vals, corners, deltas, weight_factor)
+    
+    # Convert to f-contiguous arrays required by f2py
+    densities = densities.T
+    vectors = vectors.T
+
+    if (corners is not None) and (deltas is not None):
+        corners = np.array(corners).copy()
+        deltas = np.array(deltas).copy()
+    else:
+        if (x_min is None) or (x_max is None):
+            raise ValueError('trilinear_insertion requires the x_min and x_max arguments')
+        shape = np.array(densities.shape)
+        if len(shape) != 4:
+            raise ValueError('trilinear_insertion requires a 4D densities argument')
+        x_min = np.atleast_1d(np.array(x_min))
+        x_max = np.atleast_1d(np.array(x_max))
+        if len(x_min) == 1:
+            x_min = np.squeeze(np.array([x_min, x_min, x_min]))
+        if len(x_max) == 1:
+            x_max = np.squeeze(np.array([x_max, x_max, x_max]))
+        
+        shape_3D = np.array(densities[0,:,:,:].shape)
+        deltas = (x_max - x_min)/(shape_3D - 1)
+        corners = x_min
+
+    corners = corners.astype(np.float64)
+    deltas = deltas.astype(np.float64)
+
+
+    density_f.trilinear_insertion_factor_real(densities, vectors, insert_vals, corners, deltas, weight_factor)
     return None
