@@ -10,12 +10,14 @@ def rotate180(f):
 def rotate270(f):
    return np.transpose(np.flipud(f))
 
-@profile
 def shiftx(f,scale,N):
    y0 = 0.5*(N-1)
    nint = np.arange(N)
-   kfac = np.outer(2.0*np.pi/N*scale*nint,nint-y0)
-   kfac = np.cos(kfac)-1j*np.sin(kfac)
+   ck = -1j*2.0*np.pi/N*scale
+   k1 = np.exp(ck*(nint-y0))
+   kfac = np.ones((N,N),dtype=np.complex128)
+   for i in range(1,N):
+      kfac[i,:] = kfac[i-1,:]*k1
    c = -1j*np.pi*(1-(N%2)/N)
    x1 = np.tile(np.exp(c*nint),(N,1))
    x2 = np.tile(np.exp(-c*(nint-y0)*scale),(N,1))
@@ -27,12 +29,15 @@ def shiftx(f,scale,N):
    fs *= xfac
    return fs
 
-@profile
 def shifty(f,scale,N):
    x0 = 0.5*(N-1)
    nint = np.arange(N)
-   kfac = np.outer(nint-x0,2.0*np.pi/N*scale*nint)
-   kfac = np.cos(kfac)-1j*np.sin(kfac)
+   ck = -1j*2.0*np.pi/N*scale
+   kfac = np.zeros((N,N),dtype=np.complex128)
+   k1 = np.exp(ck*nint)
+   kfac[0,:] = np.exp(-ck*nint*x0)
+   for i in range(1,N):
+      kfac[i,:] = kfac[i-1,:]*k1
    cy = -1j*np.pi*(1-(N%2)/N)
    y1 = np.tile(np.exp(cy*nint),(N,1))
    y2 = np.tile(np.exp(-cy*(nint-x0)*scale),(N,1))
@@ -44,7 +49,6 @@ def shifty(f,scale,N):
    fs *= yfac
    return fs
 
-@profile
 def shiftrotate(f,ang,N):
    n90 = np.rint(ang*2.0/np.pi)
    dang = ang-n90*np.pi*0.5
