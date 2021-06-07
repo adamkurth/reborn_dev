@@ -1,4 +1,3 @@
-from scipy import misc
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -11,13 +10,16 @@ def rotate180(f):
 def rotate270(f):
    return np.transpose(np.flipud(f))
 
+@profile
 def shiftx(f,scale,N):
    y0 = 0.5*(N-1)
-   kfac = np.zeros((N,N),dtype=np.complex128)
-   xfac = np.zeros((N,N),dtype=np.complex128)
-   for i in range(N):
-      kfac[:,i] = np.exp(-1j*2.0*np.pi/N*np.arange(N)*scale*(i-y0))
-      xfac[:,i] = np.exp(-1j*np.pi*(1-(N%2)/N)*(np.arange(N)-scale*(i-y0)))
+   nint = np.arange(N)
+   kfac = np.outer(2.0*np.pi/N*scale*nint,nint-y0)
+   kfac = np.cos(kfac)-1j*np.sin(kfac)
+   c = -1j*np.pi*(1-(N%2)/N)
+   x1 = np.tile(np.exp(c*nint),(N,1))
+   x2 = np.tile(np.exp(-c*(nint-y0)*scale),(N,1))
+   xfac = np.transpose(x1)*x2
    fk = np.fft.fft(f,axis=0)
    fk = np.fft.fftshift(fk,axes=0)
    fk *= kfac
@@ -25,13 +27,16 @@ def shiftx(f,scale,N):
    fs *= xfac
    return fs
 
+@profile
 def shifty(f,scale,N):
    x0 = 0.5*(N-1)
-   kfac = np.zeros((N,N),dtype=np.complex128)
-   yfac = np.zeros((N,N),dtype=np.complex128)
-   for i in range(N):
-      kfac[i,:] = np.exp(-1j*2.0*np.pi/N*np.arange(N)*scale*(i-x0))
-      yfac[i,:] = np.exp(-1j*np.pi*(1-(N%2)/N)*(np.arange(N)-scale*(i-x0)))
+   nint = np.arange(N)
+   kfac = np.outer(nint-x0,2.0*np.pi/N*scale*nint)
+   kfac = np.cos(kfac)-1j*np.sin(kfac)
+   cy = -1j*np.pi*(1-(N%2)/N)
+   y1 = np.tile(np.exp(cy*nint),(N,1))
+   y2 = np.tile(np.exp(-cy*(nint-x0)*scale),(N,1))
+   yfac = y1*np.transpose(y2)
    fk = np.fft.fft(f,axis=1)
    fk = np.fft.fftshift(fk,axes=1)
    fk *= kfac
@@ -39,6 +44,7 @@ def shifty(f,scale,N):
    fs *= yfac
    return fs
 
+@profile
 def shiftrotate(f,ang,N):
    n90 = np.rint(ang*2.0/np.pi)
    dang = ang-n90*np.pi*0.5
@@ -56,7 +62,7 @@ def shiftrotate(f,ang,N):
    fr = shiftx(fr,t,N)
    return fr
 
-fin = misc.imread('bw.pgm').astype(np.float64)
+fin = plt.imread('bw.pgm').astype(np.float64)
 assert(fin.shape[0] == fin.shape[1])
 N0 = fin.shape[0]
 Nadd = int(np.ceil(np.sqrt(2)*N0/2)-N0/2)
