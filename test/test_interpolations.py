@@ -1206,10 +1206,6 @@ def test_35():
 
 
 
-#============================================================================
-# There is potentially a bug given by this test code below that needs to be investigated.
-
-
 def test_36():
     """ Test 3 for the trilinear_insertion_factor function which multiplies 
         a factor onto the insertion weights that Rainier needs for the MCEMC project.
@@ -1229,35 +1225,6 @@ def test_36():
     # print(data_val)
 
 
-
-    # data_coord = np.array([[1.1, 1.0, 1.0]])
-    # data_val = np.array([ 1.7])
-
-    # N_bin = np.array([3, 3, 4])
-    # x_min = np.array([-1, -1, -1])
-    # x_max = np.array([2, 2, 2])
-
-    
-
-
-    # data_coord = np.array([[1.0, 1.0, 1.0], \
-    #                        [0,0,0], \
-    #                        [-56.912701, -89.495757,  -69.0889544], \
-    #                        [7.5068156,  74.737885,  -16.23046],  \
-    #                        [400.71784,  60.451844,  -33.82541], \
-    #                        [-23.791852,  70.368846,  0.36841697], \
-    #                        [-90.728055,  0.40624265,  -0.82445448]])
-    # data_val = np.array([ 19.43855069,  0.17395744,  1.306821901,  6.04473423, \
-    #         22.1702885,   5.80547311,  152.1111933])
-    # # mask = np.ones(N_data)
-
-    # N_bin = np.array([5, 4, 6])
-    # x_min = np.array([-100, -99, -71])
-    # x_max = np.array([200, 300, -2])
-
-
-
-
     densities = np.zeros(np.append(N_bin, 2)) # The 2 is because the densities array is now 4D with the fourth dimension storing the weights
     weight_factor = 1.0
 
@@ -1271,7 +1238,6 @@ def test_36():
                                        x_min=x_min, 
                                        x_max=x_max)
     
-    # yay3
     # # Expected answer
     dataout, weightout = utils.trilinear_insert(data_coord, 
                                                 data_val, 
@@ -1283,11 +1249,6 @@ def test_36():
     weightout[weightout == 0] = 1
     ans = dataout / weightout
 
-    # print("Joe")
-    # print(dataout)
-    # print(dataout[1,2,1])
-
-
     # Extract the inserted array and weights from the 4D "density" array
     dataout = densities[:,:,:,0]
     weightout = densities[:,:,:,1]
@@ -1295,20 +1256,11 @@ def test_36():
     data_avg = dataout.copy()
     data_avg[w] /= weightout[w]
 
-    # print("Rick")
-    # print(dataout)
-    # print(dataout[1,2,1])
-
     # print(np.sum(np.abs(data_avg - ans)))
     # print(ans)
     # print(data_avg)
 
     assert np.sum(np.abs(data_avg - ans)) < 1e-7
-
-
-# test_36()
-
-#============================================================================
 
 
 
