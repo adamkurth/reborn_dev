@@ -427,8 +427,14 @@ def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, c
     corners = corners.astype(np.float64)
     deltas = deltas.astype(np.float64)
 
+    assert densities.flags.c_contiguous
+    assert vectors.flags.c_contiguous
+    assert insert_vals.flags.c_contiguous
+    assert corners.flags.c_contiguous
+    assert deltas.flags.c_contiguous
 
-    print(densities.shape)
-    print(vectors.shape)
+
+    # print(densities.shape)
+    # print(vectors.shape)
     density_f.trilinear_insertion_factor_real(densities.T, vectors.T, insert_vals.T, corners.T, deltas.T, weight_factor)
     return None
