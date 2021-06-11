@@ -38,20 +38,25 @@ def rotate3Dy(f,dang):
    x1 = np.tile(np.exp(cx*nint),(N,1))
    x2 = np.tile(np.exp(-cx*(nint-c0)*scalex),(N,1))
    xfac = x1*np.transpose(x2)
+   x1t = np.transpose(x1)
 
    for i in range(N):
       ftmp = f[:,i,:]
-      ftmp = fft.fftshift(fft.fft(ftmp,axis=0),axes=0)
+      ftmp *= x1t
+      ftmp = fft.fft(ftmp,axis=0)
       ftmp *= kfacz
       ftmp = fft.ifft(ftmp,axis=0)
       ftmp *= zfac
 
-      ftmp = fft.fftshift(fft.fft(ftmp,axis=1),axes=1)
+      
+      ftmp *= z1
+      ftmp = fft.fft(ftmp,axis=1)
       ftmp *= kfacx
       ftmp = fft.ifft(ftmp,axis=1)
       ftmp *= xfac
 
-      ftmp = fft.fftshift(fft.fft(ftmp,axis=0),axes=0)
+      ftmp *= x1t
+      ftmp = fft.fft(ftmp,axis=0)
       ftmp *= kfacz
       ftmp = fft.ifft(ftmp,axis=0)
       ftmp *= zfac
@@ -64,11 +69,11 @@ def rotate3Dz(f,dang):
    n90 = np.rint(dang*2.0/np.pi)
    dang = dang-n90*np.pi*0.5
    if (n90 % 4 == 1):
-      f = np.transpose(np.flip(f,axis=1),axes=(1,0,2))
+      f = np.transpose(np.flip(f,axis=1),axes=(0,2,1))
    if (n90 % 4 == 2):
-      f = np.flip(f,axis=(0,1))
+      f = np.flip(f,axis=(1,2))
    if (n90 % 4 == 3):
-      f = np.transpose(np.flip(f,axis=0),axes=(1,0,2))
+      f = np.transpose(np.flip(f,axis=2),axes=(0,2,1))
    scalex  = -np.tan(0.5*dang)
    scaley = np.sin(dang)
    c0 = 0.5*(N-1)
@@ -144,6 +149,8 @@ if __name__ == "__main__":
    
    euler = (0.1, 0.17, 0.35)
    eulerj = (-0.1, 0.17, -0.35)
+   euler = (5.1, 0.0, 0.0)
+   eulerj = (-5.1, 0.0, 0.0)
 # For these to be identical, with no negative signs, change joe's code to
 # f_rot[ii, :, :] = np.transpose(rotate2D(np.transpose(f[ii, :, :]), kxfac, xfac, kyfac, yfac, n90_mod_Four))
    
