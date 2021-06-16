@@ -73,7 +73,7 @@ def compile_f90(f90_file, extra_args=''):
     numpy.f2py.compile(open(os.path.join(fortran_path, f90_file), "rb").read(),
                        modulename=f90_file.replace('.f90', '_f'),
                        extension='.f90',
-                       extra_args=extra_args,
+                       extra_args=extra_args+' -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION', # -DNPY_DISTUTILS_APPEND_FLAGS=0',
                        verbose=False)
     files = glob('*%s*' % (f90_file.replace('.f90', '_f'),))
     for f in files:
