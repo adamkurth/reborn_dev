@@ -66,3 +66,9 @@ class Molecule(object):
         if self._max_atomic_pair_distance is None:
             self._max_atomic_pair_distance = max_pair_distance(self.coordinates)
         return self._max_atomic_pair_distance
+
+    def get_molecular_weight(self):
+        r"""
+        Returns the molecular weight in SI units (kg).
+        """
+        return np.sum(atoms.atomic_weights[self.atomic_numbers])

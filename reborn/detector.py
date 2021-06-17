@@ -711,6 +711,25 @@ class PADGeometryList(list):
         return np.max(np.array([p.max_resolution(beam=beam) for p in self]))
 
 
+def f2_to_photon_counts(f_squared, beam=None, pad_geometry=None):
+    r"""
+    Convert computed scattering factors :math:`F(\vec{q})^2` into photon counts.  This multiplies :math:`F(\vec{q})^2`
+    by the incident beam fluence, the classical electron area, the pixel solid angles, and the beam polarization
+    factor.
+
+    Args:
+        f_squared:
+        beam:
+        pad_geometry:
+
+    Returns:
+
+    """
+    SA = pad_geometry.solid_angles()
+    P = pad_geometry.polarization_factors(beam=beam)
+    return f_squared * 2.18e-15 ** 2 * SA * P * beam.photon_number_fluence
+
+
 def save_pad_geometry_list(file_name, geom_list):
     r""" Save a list of PADGeometry instances as a json file. """
     if not isinstance(geom_list, list):
@@ -1308,6 +1327,15 @@ class RadialProfiler():
         if average is True:
             return self.get_mean_profile(data, mask=mask)
         return self.get_sum_profile(data, mask=mask)
+
+
+def get_radial_profile(data, beam, pad_geometry, mask=None, n_bins=None, q_range=None):
+    r"""
+    For convenience, runs the RadialProfiler.get_mean_profile method without the need to create a RadialProfiler
+    instance.
+    """
+    radial_profiler = RadialProfiler(beam=beam, pad_geometry=pad_geometry, mask=mask, n_bins=n_bins, q_range=q_range)
+    return radial_profiler.get_mean_profile(data), radial_profiler.bin_centers
 
 
 def save_pad_masks(file_name, mask_list, packbits=True):

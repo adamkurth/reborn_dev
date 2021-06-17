@@ -73,7 +73,7 @@ def compile_f90(f90_file, extra_args=''):
     numpy.f2py.compile(open(os.path.join(fortran_path, f90_file), "rb").read(),
                        modulename=f90_file.replace('.f90', '_f'),
                        extension='.f90',
-                       extra_args=extra_args+' -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION', # -DNPY_DISTUTILS_APPEND_FLAGS=0',
+                       extra_args=extra_args+' -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION -DDISABLE_WARNING_PUSH=-Wunused-function', # -DNPY_DISTUTILS_APPEND_FLAGS=0',
                        verbose=False)
     files = glob('*%s*' % (f90_file.replace('.f90', '_f'),))
     for f in files:
@@ -113,6 +113,8 @@ fortran_indexing_f = import_f90('fortran_indexing')
 peaks_f = import_f90('peaks', extra_args="--f90flags='-fopenmp -O2' -lgomp")
 omp_test_f = import_f90('omp_test', extra_args="--f90flags='-fopenmp -O2' -lgomp")
 density_f = import_f90('density', extra_args="--f90flags='-fopenmp -O2' -lgomp")
+
+from . import omp_test
 
 # try:
 #     check_hash(os.path.join(fortran_path, 'utils.f90'))

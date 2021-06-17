@@ -1043,6 +1043,14 @@ class ClCore(object):
         self.queue.finish()
 
 
+def phase_factor_qrf(q, r, f):
+    r"""
+    Same as ClCore.phase_factor_qrf, but this skips the step of creating the ClCore instance first for convenience.
+    """
+    simulation_core = ClCore()
+    return simulation_core.phase_factor_qrf(q, r, f)
+
+
 # class ClCoreDerek(ClCore):
 #
 #     def __init__(self, *args, **kwargs):
