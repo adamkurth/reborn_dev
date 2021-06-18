@@ -29,14 +29,13 @@ contains
    integer(kind=i4), intent(in) :: nin
    complex(kind=c8), intent(inout) :: f(nin,nin,nin)
    integer(kind=i4) :: n90,ix,iy,iz
-   real(kind=r8) :: dang,eni
+   real(kind=r8) :: dang
    complex(kind=c8) :: fftshift(nin)
    complex(kind=c8) :: xkfac(nin,nin),xfac(nin,nin)
    complex(kind=c8) :: ykfac(nin,nin),yfac(nin,nin)
    n90=modulo(nint(ang*2.0_r8/pi),4)
    dang=ang-n90*0.5_r8*pi
    if ((dang.eq.0.0_r8).and.(n90.eq.0)) return
-   eni=1.0_r8/n
    if (dang.ne.0.0_r8) call setupfacs(dang,xkfac,xfac,ykfac,yfac,fftshift)
    do iz=1,n
       select case (n90)
@@ -71,21 +70,21 @@ contains
       call dfftw_execute_dft(iplanx,ftmp1,ftmp2)
       ftmp2=ftmp2*xkfac
       call dfftw_execute_dft(iplanxi,ftmp2,ftmp1)
-      ftmp1=ftmp1*xfac*eni
-      do ix=1,n
-         ftmp1(ix,:)=ftmp1(ix,:)*fftshift
+      ftmp1=ftmp1*xfac
+      do iy=1,n
+         ftmp1(:,iy)=ftmp1(:,iy)*fftshift(iy)
       enddo
       call dfftw_execute_dft(iplany,ftmp1,ftmp2)
       ftmp2=ftmp2*ykfac
       call dfftw_execute_dft(iplanyi,ftmp2,ftmp1)
-      ftmp1=ftmp1*yfac*eni
+      ftmp1=ftmp1*yfac
       do iy=1,n
          ftmp1(:,iy)=ftmp1(:,iy)*fftshift
       enddo
       call dfftw_execute_dft(iplanx,ftmp1,ftmp2)
       ftmp2=ftmp2*xkfac
       call dfftw_execute_dft(iplanxi,ftmp2,ftmp1)
-      f(:,:,iz)=ftmp1*xfac*eni
+      f(:,:,iz)=ftmp1*xfac
    enddo
    end subroutine rotate3dz
 
@@ -94,14 +93,13 @@ contains
    integer(kind=i4), intent(in) :: nin
    complex(kind=c8), intent(inout) :: f(nin,nin,nin)
    integer(kind=i4) :: n90,ix,iy,iz
-   real(kind=r8) :: dang,eni
+   real(kind=r8) :: dang
    complex(kind=c8) :: fftshift(nin)
    complex(kind=c8) :: xkfac(nin,nin),xfac(nin,nin)
    complex(kind=c8) :: ykfac(nin,nin),yfac(nin,nin)
    n90=modulo(nint(ang*2.0_r8/pi),4)
    dang=ang-n90*0.5_r8*pi
    if ((dang.eq.0.0_r8).and.(n90.eq.0)) return
-   eni=1.0_r8/n
    if (dang.ne.0.0_r8) call setupfacs(dang,xkfac,xfac,ykfac,yfac,fftshift)
 ! same as rotate3dz but put cycle coordinates x->y->z->x of f
    do iz=1,n
@@ -141,14 +139,14 @@ contains
       call dfftw_execute_dft(iplanx,ftmp1,ftmp2)
       ftmp2=ftmp2*xkfac
       call dfftw_execute_dft(iplanxi,ftmp2,ftmp1)
-      ftmp1=ftmp1*xfac*eni
-      do ix=1,n
-         ftmp1(ix,:)=ftmp1(ix,:)*fftshift
+      ftmp1=ftmp1*xfac
+      do iy=1,n
+         ftmp1(:,iy)=ftmp1(:,iy)*fftshift(iy)
       enddo
       call dfftw_execute_dft(iplany,ftmp1,ftmp2)
       ftmp2=ftmp2*ykfac
       call dfftw_execute_dft(iplanyi,ftmp2,ftmp1)
-      ftmp1=ftmp1*yfac*eni
+      ftmp1=ftmp1*yfac
       do iy=1,n
          ftmp1(:,iy)=ftmp1(:,iy)*fftshift
       enddo
@@ -156,7 +154,7 @@ contains
       ftmp2=ftmp2*xkfac
       call dfftw_execute_dft(iplanxi,ftmp2,ftmp1)
       do ix=1,n
-         f(:,iz,ix)=ftmp1(ix,:)*xfac(ix,:)*eni
+         f(:,iz,ix)=ftmp1(ix,:)*xfac(ix,:)
       enddo
    enddo
    end subroutine rotate3dy
@@ -184,6 +182,8 @@ contains
 !         xfac(ix,iy)=exp(-ci*pi*(1.0_r8-mod(n,2)*eni)*(ix-1-scalex*(iy-1-c0)))
 !         ykfac(ix,iy)=exp(-ci*2.0_r8*pi*eni*scaley*(iy-1)*(ix-1-c0))
 !         yfac(ix,iy)=exp(-ci*pi*(1.0_r8-mod(n,2)*eni)*(iy-1-scaley*(ix-1-c0)))
+!         xfac(ix,iy)=xfac(ix,iy)*eni
+!         yfac(ix,iy)=yfac(ix,iy)*eni
 !      enddo
 !   enddo
    ex1=exp(-ci*2.0_r8*pi*eni*scalex)
@@ -199,7 +199,7 @@ contains
    ex1=exp(-ci*pi*(1.0_r8-mod(n,2)*eni))
    ex2=exp(ci*pi*(1.0_r8-mod(n,2)*eni)*scalex)
    ex3=exp(-ci*pi*(1.0_r8-mod(n,2)*eni)*scalex*c0)
-   xfac(1,1)=ex3
+   xfac(1,1)=ex3*eni
    do ix=2,n
       xfac(ix,1)=xfac(ix-1,1)*ex1
    enddo
@@ -219,7 +219,7 @@ contains
    ex1=exp(-ci*pi*(1.0_r8-mod(n,2)*eni))
    ex2=exp(ci*pi*(1.0_r8-mod(n,2)*eni)*scaley)
    ex3=exp(-ci*pi*(1.0_r8-mod(n,2)*eni)*scaley*c0)
-   yfac(1,1)=ex3
+   yfac(1,1)=ex3*eni
    do iy=2,n
       yfac(1,iy)=yfac(1,iy-1)*ex1
    enddo
