@@ -101,21 +101,25 @@ def rotate3Dz(f,dang):
    cy = -1j*np.pi*(1-(N%2)/N)
    y1 = np.tile(np.exp(cy*nint),(N,1))
    y2 = np.tile(np.exp(-cy*(nint-c0)*scaley),(N,1))
-   yfac = y2*np.transpose(y1)
+   y1t = np.transpose(y1)
+   yfac = y2*y1t
 
    for i in range(N):
       ftmp = f[i,:,:]
-      ftmp = fft.fftshift(fft.fft(ftmp,axis=1),axes=1)
+      ftmp *= x1
+      ftmp = fft.fft(ftmp,axis=1)
       ftmp *= kfacx
       ftmp = fft.ifft(ftmp,axis=1)
       ftmp *= xfac
 
-      ftmp = fft.fftshift(fft.fft(ftmp,axis=0),axes=0)
+      ftmp *= y1t
+      ftmp = fft.fft(ftmp,axis=0)
       ftmp *= kfacy
       ftmp = fft.ifft(ftmp,axis=0)
       ftmp *= yfac
 
-      ftmp = fft.fftshift(fft.fft(ftmp,axis=1),axes=1)
+      ftmp *= x1
+      ftmp = fft.fft(ftmp,axis=1)
       ftmp *= kfacx
       ftmp = fft.ifft(ftmp,axis=1)
       ftmp *= xfac
