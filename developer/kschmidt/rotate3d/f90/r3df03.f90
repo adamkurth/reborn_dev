@@ -33,8 +33,9 @@ contains
    complex(kind=c8) :: fftshift(nin)
    complex(kind=c8) :: xkfac(nin,nin),xfac(nin,nin)
    complex(kind=c8) :: ykfac(nin,nin),yfac(nin,nin)
-   n90=modulo(nint(ang*2.0_r8/pi),4)
+   n90=nint(ang*2.0_r8/pi)
    dang=ang-n90*0.5_r8*pi
+   n90=modulo(n90,4)
    if ((dang.eq.0.0_r8).and.(n90.eq.0)) return
    if (dang.ne.0.0_r8) call setupfacs(dang,xkfac,xfac,ykfac,yfac,fftshift)
    do iz=1,n
@@ -97,8 +98,9 @@ contains
    complex(kind=c8) :: fftshift(nin)
    complex(kind=c8) :: xkfac(nin,nin),xfac(nin,nin)
    complex(kind=c8) :: ykfac(nin,nin),yfac(nin,nin)
-   n90=modulo(nint(ang*2.0_r8/pi),4)
+   n90=nint(ang*2.0_r8/pi)
    dang=ang-n90*0.5_r8*pi
+   n90=modulo(n90,4)
    if ((dang.eq.0.0_r8).and.(n90.eq.0)) return
    if (dang.ne.0.0_r8) call setupfacs(dang,xkfac,xfac,ykfac,yfac,fftshift)
 ! same as rotate3dz but put cycle coordinates x->y->z->x of f
