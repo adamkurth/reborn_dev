@@ -263,37 +263,3 @@ contains
    end subroutine cleanfft
 
 end module fftwrotate_m
-
-subroutine rotate3dz(f,ang,nin)
-use fftwrotate_m, only : rotate3dzm => rotate3dz
-complex(8) :: f(nin,nin,nin)
-real(8) :: ang
-integer(4) :: nin
-call rotate3dzm(f,ang,nin)
-end subroutine rotate3dz
-
-subroutine rotate3dy(f,ang,nin)
-use fftwrotate_m, only : rotate3dym => rotate3dy
-complex(8) :: f(nin,nin,nin)
-real(8) :: ang
-integer(4) :: nin
-call rotate3dym(f,ang,nin)
-end subroutine rotate3dy
-
-subroutine cleanfft
-use fftwrotate_m, only : cleanfftm => cleanfft
-call cleanfftm
-end subroutine cleanfft
-
-subroutine initfft(nin)
-use fftwrotate_m, only : initfftm => initfft
-integer(4) :: nin
-call initfftm(nin)
-end subroutine initfft
-
-function nfft(nin)
-use fftwrotate_m, only : nfftm => nfft
-integer(4) :: nfft,nin
-nfft=nfftm()
-end function nfft
-
