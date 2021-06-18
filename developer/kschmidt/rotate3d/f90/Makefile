@@ -15,7 +15,7 @@ r3df03py.pyf: r3df03py.f90
 	f2py -m r3df03py -h r3df03py.pyf r3df03py.f90
 
 distclean:
-	rm -f *\.o *\.mod *\.pyf *\.so gmon.out
+	rm -f *\.o *\.mod *\.pyf *\.so gmon.out r3ddriver
 	rm -fr __pycache__
 
 clean:
