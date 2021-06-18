@@ -1,0 +1,31 @@
+FFLAGS=-Ofast -xHost -I/usr/include -fpic
+INTELLIBPATH=/opt/intel/oneapi/compiler/2021.2.0/linux/compiler/lib/intel64_lin/
+
+all: r3df03.o r3df03py.o r3df03py.pyf
+	f2py -L$(INTELLIBPATH) -lifcore -L -lfftw3\
+   -c r3df03py.pyf r3df03py.o r3df03.o
+
+r3df03.o: r3df03.f90
+	ifort -c $(FFLAGS) r3df03.f90
+
+r3df03py.o: r3df03.o r3df03py.f90
+	ifort -c --fcompiler=intelem $(FFLAGS) r3df03py.f90
+
+r3df03py.pyf: r3df03py.f90
+	rm -f r3df03py.pyf
+	f2py -m r3df03py -h r3df03py.pyf r3df03py.f90
+
+distclean:
+	rm -f *\.o *\.mod *\.pyf *\.so
+	rm -fr __pycache__
+
+clean:
+	rm -f *\.o *\.mod *\.pyf
+	rm -fr __pycache__
+
+
+r3ddriver: r3ddriver.f90 ran.o r3df03.o
+	ifort $(FFLAGS) -o r3ddriver ran.o r3df03.o r3ddriver.f90 -lfftw3
+
+ran.o: ran.f90
+	ifort $(FFLAGS) -c ran.f90
