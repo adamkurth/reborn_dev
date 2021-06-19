@@ -600,6 +600,16 @@ class PADGeometry:
 
 class PADGeometryList(list):
 
+    _q_mags = None
+
+    def append(self, item):
+        r""" Override append method.  Check the type, name the panel if it has no name. """
+        if not isinstance(item, PADGeometry):
+            raise ValueError('Not a PADGeometry instance.')
+        if not item.name:
+            item.name = len(self).__str__()
+        super(PADGeometryList, self).append(item)
+
     def __init__(self, pad_geometry):
         r""" A subclass of list that does operations on lists of |PADGeometry| instances.  Is helpful, for example.
         when getting q vectors for many separate PADs. """
