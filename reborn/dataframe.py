@@ -111,6 +111,7 @@ class DataFrame:
         r""" Set the raw data.  You may pass a list or a concatentated 1D array."""
         self._raw_data = self._pad_geometry.concat_data(data.copy()).astype(np.double)
         self._raw_data.flags.writeable = False
+        self._processed_data = None
 
     def get_mask_list(self):
         r""" Get the mask as a list of 2D arrays."""
