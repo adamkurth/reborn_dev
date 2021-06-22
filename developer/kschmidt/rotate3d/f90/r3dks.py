@@ -43,24 +43,9 @@ def rotate3Dy(f,dang):
 
    for i in range(N):
       ftmp = f[:,i,:]
-      ftmp *= x1t
-      ftmp = fft.fft(ftmp,axis=0)
-      ftmp *= kfacz
-      ftmp = fft.ifft(ftmp,axis=0)
-      ftmp *= zfac
-
-      
-      ftmp *= z1
-      ftmp = fft.fft(ftmp,axis=1)
-      ftmp *= kfacx
-      ftmp = fft.ifft(ftmp,axis=1)
-      ftmp *= xfac
-
-      ftmp *= x1t
-      ftmp = fft.fft(ftmp,axis=0)
-      ftmp *= kfacz
-      ftmp = fft.ifft(ftmp,axis=0)
-      ftmp *= zfac
+      ftmp = zfac*fft.ifft(fft.fft(x1t*ftmp,axis=0)*kfacz,axis=0)
+      ftmp = xfac*fft.ifft(fft.fft(ftmp*z1,axis=1)*kfacx,axis=1)
+      ftmp = zfac*fft.ifft(fft.fft(x1t*ftmp,axis=0)*kfacz,axis=0)
       f[:,i,:] = ftmp
 
    return f
@@ -106,23 +91,9 @@ def rotate3Dz(f,dang):
 
    for i in range(N):
       ftmp = f[i,:,:]
-      ftmp *= x1
-      ftmp = fft.fft(ftmp,axis=1)
-      ftmp *= kfacx
-      ftmp = fft.ifft(ftmp,axis=1)
-      ftmp *= xfac
-
-      ftmp *= y1t
-      ftmp = fft.fft(ftmp,axis=0)
-      ftmp *= kfacy
-      ftmp = fft.ifft(ftmp,axis=0)
-      ftmp *= yfac
-
-      ftmp *= x1
-      ftmp = fft.fft(ftmp,axis=1)
-      ftmp *= kfacx
-      ftmp = fft.ifft(ftmp,axis=1)
-      ftmp *= xfac
+      ftmp = xfac*fft.ifft(fft.fft(x1*ftmp,axis=1)*kfacx,axis=1)
+      ftmp = yfac*fft.ifft(fft.fft(y1t*ftmp,axis=0)*kfacy,axis=0)
+      ftmp = xfac*fft.ifft(fft.fft(x1*ftmp,axis=1)*kfacx,axis=1)
       f[i,:,:] = ftmp
 
    return f
