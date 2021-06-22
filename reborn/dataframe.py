@@ -38,11 +38,12 @@ class DataFrame:
         self.set_frame_id(frame_id)
 
     def validate(self):
+        r""" Check that this dataframe is valid.  A valid dataframe must at minimum have a frame ID, a valid Beam
+        instance, a valid PADGeometryList instance, and raw data.  """
         if self._frame_id is None: return False
         if self._beam is None: return False
         if self._pad_geometry is None: return False
         if self._raw_data is None: return False
-        if self._beam is False: return False
         if self._beam.validate() is False: return False
         if self._pad_geometry.validate() is False: return False
         if not isinstance(self._raw_data, np.ndarray): return False
@@ -144,19 +145,27 @@ class DataFrame:
         r""" See corresponding _raw_ method."""
         self._processed_data = self._pad_geometry.concat_data(data).astype(np.double)
 
+    def clear_processed_data(self):
+        r""" Clear the processed data.  After this operation, the get_processed_data method will return a copy of
+        the raw data. """
+        self._processed_data = None
+
     def get_q_vecs(self):
+        r""" Get q vectors as an Nx3 array with all PADs concatenated. """
         if self._q_vecs is None:
             self._q_vecs = self._pad_geometry.q_vecs(self._beam)
             self._q_vecs.flags.writeable = False
         return self._q_vecs.copy()
 
     def get_q_mags_flat(self):
+        r""" Get q magnitudes as a flat array. """
         if self._q_mags is None:
             self._q_mags = self._pad_geometry.q_mags(self._beam)
             self._q_mags.flags.writeable = False
         return self._q_mags.copy()
 
     def get_q_mags_list(self):
+        r""" Get q magnitudes as a list of 2D arrays. """
         return self._pad_geometry.split_data(self.get_q_mags_flat())
 
     def get_bragg_peaks(self):
