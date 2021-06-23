@@ -14,6 +14,9 @@ module fftwrotate_m
    type(c_ptr), private, save :: iplanx,iplanxi,iplany,iplanyi
    complex(kind=c8), private, pointer, save :: ftmp1(:,:),ftmp2(:,:)
    type(c_ptr), private, save :: p1,p2
+   complex(kind=c8), private, allocatable :: fftshift(:)
+   complex(kind=c8), private, allocatable :: xkfac(:,:),xfac(:,:)
+   complex(kind=c8), private, allocatable :: ykfac(:,:),yfac(:,:)
 
    public :: rotate3dz,rotate3dy,initfft,cleanfft,nfft
 
@@ -30,14 +33,11 @@ contains
    complex(kind=c8), intent(inout) :: f(nin,nin,nin)
    integer(kind=i4) :: n90,ix,iy,iz
    real(kind=r8) :: dang
-   complex(kind=c8) :: fftshift(nin)
-   complex(kind=c8) :: xkfac(nin,nin),xfac(nin,nin)
-   complex(kind=c8) :: ykfac(nin,nin),yfac(nin,nin)
    n90=nint(ang*2.0_r8/pi)
    dang=ang-n90*0.5_r8*pi
    n90=modulo(n90,4)
    if ((dang.eq.0.0_r8).and.(n90.eq.0)) return
-   if (dang.ne.0.0_r8) call setupfacs(dang,xkfac,xfac,ykfac,yfac,fftshift)
+   if (dang.ne.0.0_r8) call setupfacs(dang)
    do iz=1,n
       select case (n90)
          case(0)
@@ -95,15 +95,12 @@ contains
    complex(kind=c8), intent(inout) :: f(nin,nin,nin)
    integer(kind=i4) :: n90,ix,iy,iz
    real(kind=r8) :: dang
-   complex(kind=c8) :: fftshift(nin)
-   complex(kind=c8) :: xkfac(nin,nin),xfac(nin,nin)
-   complex(kind=c8) :: ykfac(nin,nin),yfac(nin,nin)
    n90=nint(ang*2.0_r8/pi)
    dang=ang-n90*0.5_r8*pi
    n90=modulo(n90,4)
    if ((dang.eq.0.0_r8).and.(n90.eq.0)) return
-   if (dang.ne.0.0_r8) call setupfacs(dang,xkfac,xfac,ykfac,yfac,fftshift)
-! same as rotate3dz but put cycle coordinates x->y->z->x of f
+   if (dang.ne.0.0_r8) call setupfacs(dang)
+! same as rotate3dz but put cycled coordinates x->y->z->x of f
    do iz=1,n
       select case (n90)
          case(0)
@@ -161,9 +158,8 @@ contains
    enddo
    end subroutine rotate3dy
 
-   subroutine setupfacs(dang,xkfac,xfac,ykfac,yfac,fftshift)
-   complex(kind=c8) :: xkfac(:,:),xfac(:,:),ykfac(:,:),yfac(:,:),fftshift(:)
-   real(kind=r8) :: dang
+   subroutine setupfacs(dang)
+   real(kind=r8),intent(in) :: dang
    real(kind=r8) :: scalex,scaley,c0,eni
    complex(kind=c8) :: ex1,ex2,ex3
    integer(kind=i4) :: ix,iy
@@ -251,6 +247,8 @@ contains
       FFTW_FORWARD,iflags)
    call dfftw_plan_many_dft(iplanyi,1,n,n,ftmp1,n,n,1,ftmp2,n,n,1, &
       FFTW_BACKWARD,iflags)
+   allocate(fftshift(nin),xkfac(nin,nin),xfac(nin,nin))
+   allocate(ykfac(nin,nin),yfac(nin,nin))
    end subroutine initfft
 
    subroutine cleanfft
@@ -262,6 +260,7 @@ contains
    call dfftw_destroy_plan(iplanyi)
    call fftw_free(p1)
    call fftw_free(p2)
+   deallocate(fftshift,xkfac,xfac,ykfac,yfac)
    end subroutine cleanfft
 
 end module fftwrotate_m
