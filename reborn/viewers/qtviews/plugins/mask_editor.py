@@ -45,7 +45,11 @@ class Widget(QtGui.QWidget):
         self.layout.addWidget(self.rroi_button, row, 1, 1, 2)
         row += 1
         self.rroi_button = QtGui.QPushButton("Mask panel edges...")
-        self.rroi_button.clicked.connect(padview.mask_panel_edges)
+        self.rroi_button.clicked.connect(self.mask_panel_edges)
+        self.layout.addWidget(self.rroi_button, row, 1, 1, 2)
+        row += 1
+        self.rroi_button = QtGui.QPushButton("Mask panels by names...")
+        self.rroi_button.clicked.connect(self.mask_pads_by_names)
         self.layout.addWidget(self.rroi_button, row, 1, 1, 2)
         row += 1
         label = QtGui.QLabel('What to do:')
@@ -121,58 +125,11 @@ class Widget(QtGui.QWidget):
         self.load_button = QtGui.QPushButton("Load masks...")
         self.load_button.clicked.connect(padview.load_masks)
         self.layout.addWidget(self.load_button, row, 1, 1, 2)
-        # number_group.addButton(r0)
-        # r1 = QtGui.QRadioButton("1")
-        # number_group.addButton(r1)
-        # layout.addWidget(r0)
-        # layout.addWidget(r1)
-        # row += 1
-        # self.
-        # row += 1
-        # self.layout.addWidget(QtGui.QLabel('Activate Peakfinder'), row, 1)
-        # self.activate_peakfinder_button = QtGui.QCheckBox()
-        # self.activate_peakfinder_button.toggled.connect(self.do_action)
-        # self.layout.addWidget(self.activate_peakfinder_button, row, 2, alignment=QtCore.Qt.AlignCenter)
-        # row += 1
-        # self.layout.addWidget(QtGui.QLabel('Show SNR Transform'), row, 1)
-        # self.activate_snrview_button = QtGui.QCheckBox()
-        # self.activate_snrview_button.toggled.connect(self.do_action)
-        # self.layout.addWidget(self.activate_snrview_button, row, 2, alignment=QtCore.Qt.AlignCenter)
-        # row += 1
-        # self.layout.addWidget(QtGui.QLabel('SNR Threshold'), row, 1)
-        # self.snr_spinbox = QtGui.QDoubleSpinBox()
-        # self.snr_spinbox.setMinimum(0)
-        # self.snr_spinbox.setValue(6)
-        # self.layout.addWidget(self.snr_spinbox, row, 2)
-        # row += 1
-        # self.layout.addWidget(QtGui.QLabel('Inner Size'), row, 1)
-        # self.inner_spinbox = QtGui.QSpinBox()
-        # self.inner_spinbox.setMinimum(1)
-        # self.inner_spinbox.setValue(1)
-        # self.layout.addWidget(self.inner_spinbox, row, 2)
-        # row += 1
-        # self.layout.addWidget(QtGui.QLabel('Center Size'), row, 1)
-        # self.center_spinbox = QtGui.QSpinBox()
-        # self.center_spinbox.setMinimum(1)
-        # self.center_spinbox.setValue(5)
-        # self.layout.addWidget(self.center_spinbox, row, 2)
-        # row += 1
-        # self.layout.addWidget(QtGui.QLabel('Outer Size'), row, 1)
-        # self.outer_spinbox = QtGui.QSpinBox()
-        # self.outer_spinbox.setMinimum(2)
-        # self.outer_spinbox.setValue(10)
-        # self.layout.addWidget(self.outer_spinbox, row, 2)
-        # row += 1
-        # self.layout.addWidget(QtGui.QLabel('Max Filter Iterations'), row, 1)
-        # self.iter_spinbox = QtGui.QSpinBox()
-        # self.iter_spinbox.setMinimum(3)
-        # self.iter_spinbox.setValue(3)
-        # self.layout.addWidget(self.iter_spinbox, row, 2)
         self.setLayout(self.layout)
 
     def apply_mask(self):
         self.padview.debug('apply_mask', 1)
-        mask = reborn.detector.concat_pad_data(self.padview.mask_data)
+        mask = self.padview.dataframe.get_mask_flat()  # reborn.detector.concat_pad_data(self.padview.mask_data)
         data = None
         if self.mask_radio.isChecked():
             setval = 0
@@ -215,21 +172,50 @@ class Widget(QtGui.QWidget):
             for i in range(self.padview.n_pads):
                 if i == pid:
                     continue
-                inds[i][:,:] = 0
+                inds[i][:, :] = 0
             inds = reborn.detector.concat_pad_data(inds)
         if setval is None:
             mask[inds] = -(mask[inds] - 1)
         else:
             mask[inds] = setval
-        self.padview.update_masks(reborn.detector.split_pad_data(self.padview.pad_geometry, mask))
-    # def do_action(self):
-    #     self.padview.debug('PeakfinderConfigWidget.get_values()', 1)
-    #     dat = {}
-    #     dat['activate'] = self.activate_peakfinder_button.isChecked()
-    #     dat['show_snr'] = self.activate_snrview_button.isChecked()
-    #     dat['inner'] = self.inner_spinbox.value()
-    #     dat['center'] = self.center_spinbox.value()
-    #     dat['outer'] = self.outer_spinbox.value()
-    #     dat['snr_threshold'] = self.snr_spinbox.value()
-    #     dat['max_iterations'] = self.iter_spinbox.value()
-    #     print(dat)
+        self.padview.dataframe.set_mask(mask)
+        self.padview.update_masks()
+
+    def mask_panel_edges(self, n_pixels=None):
+        padview = self.padview
+        if n_pixels is None or n_pixels is False:
+            text, ok = QtGui.QInputDialog.getText(padview.main_window, "Edge mask", "Specify number of edge pixels to mask",
+                                                  QtGui.QLineEdit.Normal, "1")
+            if ok:
+                if text == '':
+                    return
+                n_pixels = int(str(text).strip())
+        mask = padview.dataframe.get_mask_list()
+        for i in range(len(mask)):
+            mask[i] *= reborn.detector.edge_mask(mask[i], n_pixels)
+        padview.dataframe.set_mask(mask)
+        padview.update_masks()
+
+    def mask_pads_by_names(self):
+        padview = self.padview
+        clear_labels = False
+        if padview.pad_labels is None:
+            padview.show_pad_labels()
+            clear_labels = True
+        text, ok = QtGui.QInputDialog.getText(padview.main_window, "Enter PAD names (comma separated)", "PAD names",
+                                              QtGui.QLineEdit.Normal, "")
+        print('ok', ok)
+        if clear_labels:
+            padview.hide_pad_labels()
+        if ok:
+            if text == '':
+                return
+            names = text.split(',')
+            geom = padview.dataframe.get_pad_geometry()
+            mask = padview.dataframe.get_mask_list()
+            for i in range(padview.dataframe.n_pads):
+                print(geom[i].name)
+                if geom[i].name in names:
+                    mask[i] *= 0
+            padview.dataframe.set_mask(mask)
+            padview.update_masks()

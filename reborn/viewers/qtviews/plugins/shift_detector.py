@@ -70,7 +70,7 @@ class Widget(QtGui.QWidget):
     def shift_x(self, direction=1.0):
         xs = float(self.xs_spinbox.value())*direction*1e-6
         ys, zs = 0, 0
-        pads = self.padview.pad_geometry
+        pads = self.padview.dataframe.get_pad_geometry()
         for p in pads:
             p.t_vec += np.array([xs, ys, zs])
         self.padview.update_pad_geometry(pads)
@@ -78,7 +78,7 @@ class Widget(QtGui.QWidget):
     def shift_y(self, direction=1):
         ys = float(self.ys_spinbox.value())*direction*1e-6
         xs, zs = 0, 0
-        pads = self.padview.pad_geometry
+        pads = self.padview.dataframe.get_pad_geometry()
         for p in pads:
             p.t_vec += np.array([xs, ys, zs])
         self.padview.update_pad_geometry(pads)
@@ -86,7 +86,7 @@ class Widget(QtGui.QWidget):
     def shift_z(self, direction=1):
         zs = float(self.zs_spinbox.value())*direction*1e-6
         xs, ys = 0, 0
-        pads = self.padview.pad_geometry
+        pads = self.padview.dataframe.get_pad_geometry()
         for p in pads:
             p.t_vec += np.array([xs, ys, zs])
         self.padview.update_pad_geometry(pads)

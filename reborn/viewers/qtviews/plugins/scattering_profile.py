@@ -11,7 +11,9 @@ class Plugin():
         self.update_profile()
     def update_profile(self):
         padview = self.padview
-        profiler = reborn.detector.RadialProfiler(pad_geometry=padview.pad_geometry, beam=padview.beam, mask=padview.mask_data)
+        dataframe = self.padview.dataframe
+        profiler = reborn.detector.RadialProfiler(pad_geometry=dataframe.get_pad_geometry(), beam=dataframe.get_beam(),
+                                                  mask=dataframe.get_mask_list())
         profile = profiler.get_mean_profile(padview.get_pad_display_data())
         self.widget.plot_widget.plot(profiler.bin_centers, profile)
         pg.QtGui.QApplication.processEvents()

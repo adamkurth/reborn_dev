@@ -62,17 +62,18 @@ class Widget(QtGui.QWidget):
 
     def apply_snr_filter(self):
         self.padview.debug(get_caller(), 1)
+        dataframe = self.padview.dataframe
         inner = self.inner_spinbox.value()
         center = self.center_spinbox.value()
         outer = self.outer_spinbox.value()
         threshold = self.thresh_spinbox.value()
         max_iterations = self.iter_spinbox.value()
         t = time()
-        raw = self.padview.get_pad_display_data()
-        mask = self.padview.mask_data
-        processed_pads = [None]*self.padview.n_pads
-        for i in range(self.padview.n_pads):
-            d = raw[i]
+        data = dataframe.get_processed_data_list()
+        mask = dataframe.get_mask_list()
+        processed_data = [None]*dataframe.n_pads
+        for i in range(dataframe.n_pads):
+            d = data[i]
             m1 = mask[i]
             m2 = mask[i].copy()
             for j in range(max_iterations):
@@ -80,10 +81,9 @@ class Widget(QtGui.QWidget):
                 ab = snr > threshold
                 ab *= snr < -threshold
                 m2[ab] = 0
-            processed_pads[i] = snr
-        if self.padview.processed_data is None:
-            self.padview.processed_data = {}
-        self.padview.processed_data['pad_data'] = processed_pads
+            processed_data[i] = snr
+        dataframe.set_processed_data(processed_data)
+        self.padview.dataframe = dataframe
         self.padview.update_display_data()
         if self.update_colorbar_button.isChecked():
             self.padview.set_levels(0, 10)
