@@ -116,29 +116,6 @@ class PADView2(QtCore.QObject):
         self.debug(get_caller(), 1)
         self._auto_percentiles = percentiles
 
-        # We allow for various ways to initialize PADView.
-        # - A FrameGetter may be used to serve up the diffraction intensities.
-        # -- The FrameGetter might have PADGeometry instances available.
-        # -- The FrameGetter might have a Beam instance available.
-        # -- The FrameGetter might have a mask available.
-        # - Data corresponding to a single frame may be provided.
-        # - PADGeometry instances may be provided.
-        # - The Beam instance may be provided.
-
-        # FIXME: Moving forward, we will not allow PADView to be initialized without data.  Initializing without data
-        # FIXME: results in many complications and runtime errors.  If there is no data initially, PADView could
-        # FIXME: begin with a dialog box that asks the user to identify the data they wish to look at.
-
-        # FIXME: We will put all of the complicated data-checking into the DataFrame class.  It will have a "validate"
-        # FIXME: method that will confirm that all needed data is present.  The needed data are: diffraction
-        # FIXME: intensities, pad geometry, and beam info.  Optional are: pixel masks, Bragg peak locations, etc.
-
-        # First question: do we have a FrameGetter?  If so, see what info we can get from it.  The info in the
-        # FrameGetter will overtake the other keyword inputs.
-        # FIXME: We will need to change the way that FrameGetter works.  It presently returns a dictionary, but I would
-        # FIXME: like to instead have it return a DataFrame class, which will have the "validate" method.  Since many
-        # FIXME: programs already use the FrameGetter class, I suggest we make a new "DataFrameGetter" class.  As usual,
-        # FIXME: we will add a "depreciation" warning on the FrameGetter class to phase out its use.
         if frame_getter is not None:
             self.frame_getter = frame_getter
             # If so, does it have geometry, beam, and or mask information?
@@ -183,10 +160,8 @@ class PADView2(QtCore.QObject):
 
             self.dataframe = reborn.dataframe.DataFrame(raw_data=raw_data['pad_data'], pad_geometry=pad_geometry, beam=beam,
                                                         mask=mask_data)
-        # FIXME: This is how we should validate dataframes from now on!
         if not self.dataframe.validate():
             print('DataFrame is not valid!')
-
         self.app = pg.mkQApp()
         self.setup_ui()
         self.setup_mouse_interactions()
