@@ -132,7 +132,7 @@ class PADView2(QtCore.QObject):
             if isinstance(raw_data, DataFrame):
                 self.dataframe = raw_data
 
-        if self.dataframe is not None:  # In case frame_getter does not return a DataFrame
+        if self.dataframe is None:  # In case frame_getter does not return a DataFrame
             # Handling of raw diffraction intensities:
             if raw_data is not None:
                 if isinstance(raw_data, dict):
