@@ -999,74 +999,37 @@ class PADView2(QtCore.QObject):
     # FIXME: This should be handled by the frame navigator
     def show_history_next(self):
         self.debug(get_caller(), 1)
-        if self.frame_getter is None:
-            self.debug('no getter')
-            return
-        dat = self.frame_getter.get_history_next()
-        self.raw_data = dat
+        self.dataframe = ensure_dataframe(self.frame_getter.get_history_next(), self.dataframe)
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_history_previous(self):
         self.debug(get_caller(), 1)
-        if self.frame_getter is None:
-            self.debug('no getter', 0)
-            return
-        dat = self.frame_getter.get_history_previous()
-        self.raw_data = dat
+        self.dataframe = ensure_dataframe(self.frame_getter.get_history_previous(), self.dataframe)
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_next_frame(self):
         self.debug(get_caller(), 1)
-        if self.frame_getter is None:
-            self.debug('There is no frame getter - cannot jump to next frame.', 0)
-            return
-        dat = self.frame_getter.get_next_frame()
-        if dat is None:
-            self.debug('Frame getter returned None.', 1)
-            return
-        self.dataframe = ensure_dataframe(dat, self.dataframe)
-        if 'pad_data' in dat.keys():
-            # self.raw_data = dat
-            self.update_display_data()
-        else:
-            self.debug('Could not find PAD data in frame.', 1)
+        self.dataframe = ensure_dataframe(self.frame_getter.get_next_frame(), self.dataframe)
+        self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_previous_frame(self):
         self.debug(get_caller(), 1)
-        if self.frame_getter is None:
-            self.debug('There is no frame getter - cannot jump to previous frame.', 0)
-            return
-        dat = self.frame_getter.get_previous_frame()
-        if dat is None:
-            self.debug('Frame getter returned None.', 0)
-            return
-        if 'pad_data' in dat.keys():
-            self.raw_data = dat
-            self.update_display_data()
-        else:
-            self.debug('Could not find PAD data in frame.', 0)
+        self.dataframe = ensure_dataframe(self.frame_getter.get_previous_frame(), self.dataframe)
+        self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_random_frame(self):
         self.debug(get_caller(), 1)
-        dat = self.frame_getter.get_random_frame()
-        self.raw_data = dat
+        self.dataframe = ensure_dataframe(self.frame_getter.get_random_frame(), self.dataframe)
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_frame(self, frame_number=0):
         self.debug(get_caller(), 1)
-        if self.frame_getter is None:
-            self.debug("Note: there is no frame getter configured.")
-        else:
-            raw_data = self.frame_getter.get_frame(frame_number=frame_number)
-            if raw_data is None:
-                self.debug("Note: frame getter returned None.")
-            else:
-                self.raw_data = raw_data
+        self.dataframe = ensure_dataframe(self.frame_getter.get_frame(frame_number=frame_number), self.dataframe)
         self.update_display_data()
 
     def update_display_data(self):
