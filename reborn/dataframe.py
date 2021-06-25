@@ -83,8 +83,9 @@ class DataFrame:
     def set_beam(self, beam):
         r""" See the corresponding get_ method."""
         self.clear_cache()
-        beam = beam.copy()
-        beam.validate(raise_error=True)
+        if beam is not None:
+            beam = beam.copy()
+            beam.validate(raise_error=True)
         self._beam = beam
 
     def get_pad_geometry(self):
@@ -96,9 +97,10 @@ class DataFrame:
     def set_pad_geometry(self, pads):
         r""" See the corresponding get_ method. """
         self.clear_cache()
-        pads = detector.PADGeometryList(pads)
-        pads.validate(raise_error=True)
-        self._pad_geometry = pads.copy()
+        if pads is not None:
+            pads = detector.PADGeometryList(pads.copy())
+            pads.validate(raise_error=True)
+        self._pad_geometry = pads
 
     def get_raw_data_list(self):
         r""" Get the raw data as a list of 2D arrays."""
