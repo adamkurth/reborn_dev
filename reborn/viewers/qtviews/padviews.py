@@ -152,33 +152,37 @@ class PADView2(QtCore.QObject):
                 mask_data = frame_getter.mask_data
                 self.debug('Found mask in frame_getter.')
             raw_data = self.frame_getter.get_frame(0)
-        # Handling of raw diffraction intensities:
-        if raw_data is not None:
-            if isinstance(raw_data, dict):
-                pass
-            else:
-                raw_data = {'pad_data': utils.ensure_list(raw_data)}
-        # Handling of geometry info:
-        if pad_geometry is None:
-            self.debug('WARNING: Making up some *GARBAGE* PAD geometry because you provided no specification.')
-            pad_geometry = []
-            shft = 0
-            for dat in raw_data['pad_data']:
-                pad = detector.PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
-                pad.t_vec[0] += shft
-                shft += pad.shape()[0]
-                pad_geometry.append(pad)
-        pad_geometry = detector.PADGeometryList(pad_geometry)
-        # Handling of beam info:
-        if beam is None:
-            self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
-            beam = source.Beam(photon_energy=9000*1.602e-19)
-        # Handling of mask info:
-        if mask_data is None:
-            mask_data = [p.ones() for p in pad_geometry]
+            if isinstance(raw_data, DataFrame):
+                self.dataframe = raw_data
 
-        self.dataframe = reborn.dataframe.DataFrame(raw_data=raw_data['pad_data'], pad_geometry=pad_geometry, beam=beam,
-                                                    mask=mask_data)
+        if self.dataframe is not None:  # In case frame_getter does not return a DataFrame
+            # Handling of raw diffraction intensities:
+            if raw_data is not None:
+                if isinstance(raw_data, dict):
+                    pass
+                else:
+                    raw_data = {'pad_data': utils.ensure_list(raw_data)}
+            # Handling of geometry info:
+            if pad_geometry is None:
+                self.debug('WARNING: Making up some *GARBAGE* PAD geometry because you provided no specification.')
+                pad_geometry = []
+                shft = 0
+                for dat in raw_data['pad_data']:
+                    pad = detector.PADGeometry(distance=1.0, pixel_size=1.0, shape=dat.shape)
+                    pad.t_vec[0] += shft
+                    shft += pad.shape()[0]
+                    pad_geometry.append(pad)
+            pad_geometry = detector.PADGeometryList(pad_geometry)
+            # Handling of beam info:
+            if beam is None:
+                self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
+                beam = source.Beam(photon_energy=9000*1.602e-19)
+            # Handling of mask info:
+            if mask_data is None:
+                mask_data = [p.ones() for p in pad_geometry]
+
+            self.dataframe = reborn.dataframe.DataFrame(raw_data=raw_data['pad_data'], pad_geometry=pad_geometry, beam=beam,
+                                                        mask=mask_data)
         # FIXME: This is how we should validate dataframes from now on!
         if not self.dataframe.validate():
             print('DataFrame is not valid!')
