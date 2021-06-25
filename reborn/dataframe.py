@@ -28,9 +28,12 @@ class DataFrame:
     _q_vecs = None
 
     def __init__(self, raw_data=None, processed_data=None, mask=None, beam=None, pad_geometry=None, frame_id=0):
-        self.set_pad_geometry(pad_geometry)
-        self.set_beam(beam)
-        self.set_raw_data(raw_data)
+        if pad_geometry is not None:
+            self.set_pad_geometry(pad_geometry)
+        if beam is not None:
+            self.set_beam(beam)
+        if raw_data is not None:
+            self.set_raw_data(raw_data)
         if mask is not None:
             self.set_mask(mask)
         if processed_data is not None:
@@ -83,9 +86,8 @@ class DataFrame:
     def set_beam(self, beam):
         r""" See the corresponding get_ method."""
         self.clear_cache()
-        if beam is not None:
-            beam = beam.copy()
-            beam.validate(raise_error=True)
+        beam = beam.copy()
+        beam.validate(raise_error=True)
         self._beam = beam
 
     def get_pad_geometry(self):
@@ -97,9 +99,8 @@ class DataFrame:
     def set_pad_geometry(self, pads):
         r""" See the corresponding get_ method. """
         self.clear_cache()
-        if pads is not None:
-            pads = detector.PADGeometryList(pads.copy())
-            pads.validate(raise_error=True)
+        pads = detector.PADGeometryList(pads.copy())
+        pads.validate(raise_error=True)
         self._pad_geometry = pads
 
     def get_raw_data_list(self):
