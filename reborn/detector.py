@@ -757,7 +757,7 @@ def load_pad_geometry_list(file_name):
         pad = PADGeometry()
         pad.from_dict(d)
         out.append(pad)
-    return out
+    return PADGeometryList(out)
 
 
 def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0.1, tiling_shape=(4, 2), pad_gap=0):
@@ -1467,4 +1467,4 @@ def epix10k_pad_geometry_list(detector_distance=0.1):
     """
     pads = load_pad_geometry_list(epix10k_geom_file)
     for p in pads: p.t_vec[2] = detector_distance
-    return PADGeometryList(pads)
+    return pads
