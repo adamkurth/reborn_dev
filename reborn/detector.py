@@ -1457,7 +1457,7 @@ def jungfrau4m_pad_geometry_list(detector_distance=0.1, binning=1):
     pads[5].t_vec += + np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
     pads[6].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
     pads[7].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
-    return pads
+    return PADGeometryList(pads)
 
 
 def epix10k_pad_geometry_list(detector_distance=0.1):
