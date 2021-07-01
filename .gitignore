@@ -32,6 +32,9 @@ log.txt
 *.tar.gz
 *.md5
 .idea
+*.out
+*.pyf
+*.mod
 *~
 .adxv*
 doc/source/reborn.*

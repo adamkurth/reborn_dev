@@ -1,11 +1,12 @@
 import os
+import tempfile
 from reborn import detector
 from reborn import source
 import numpy as np
 import scipy.constants as const
 eV = const.value('electron volt')
 np.random.seed(0)
-
+tempdir = tempfile.gettempdir()
 
 def make_pad_list():
     r""" Simply check the creation of a pad list. """
@@ -36,7 +37,7 @@ def test_solid_angles():
 
 
 def test_save_pad():
-    file_name = 'test.json'
+    file_name = os.path.join(tempdir, 'test.json')
     pad1 = detector.PADGeometry(pixel_size=100e-6, distance=1, shape=(100, 100))
     pad1.save_json(file_name)
     pad2 = detector.PADGeometry()
@@ -46,7 +47,7 @@ def test_save_pad():
 
 
 def test_save_pad_list():
-    file_name = 'test.json'
+    file_name = os.path.join(tempdir, 'test.json')
     pads1 = make_pad_list()
     detector.save_pad_geometry_list(file_name, pads1)
     pads2 = detector.load_pad_geometry_list(file_name)
@@ -153,16 +154,18 @@ def test_saving():
     shapes = [np.array((100, 101)) for _ in range(8)]
     masks = [np.round(np.random.random(shapes[i]) * 0.6).astype(int) for i in range(8)]
     assert np.sum(masks[0]) > 0
-    detector.save_pad_masks('unpacked.mask', masks, packbits=False)
-    detector.save_pad_masks('packed', masks)
-    unpacked = detector.load_pad_masks('unpacked.mask')
+    file_name_1 = os.path.join(tempdir, 'unpacked.mask')
+    file_name_2 = os.path.join(tempdir, 'packed.mask')
+    detector.save_pad_masks(file_name_1, masks, packbits=False)
+    detector.save_pad_masks(file_name_2, masks)
+    unpacked = detector.load_pad_masks(file_name_1)
     print('loaded unpacked')
-    packed = detector.load_pad_masks('packed.mask')
+    packed = detector.load_pad_masks(file_name_2)
     for i in range(len(masks)):
         assert np.max(packed[i] - unpacked[i]) == 0
         assert np.max(masks[i] - unpacked[i]) == 0
-    os.remove('unpacked.mask')
-    os.remove('packed.mask')
+    os.remove(file_name_1)
+    os.remove(file_name_2)
 
 
 def test_standard_pads():
@@ -170,6 +173,10 @@ def test_standard_pads():
     pnccd = detector.pnccd_pad_geometry_list()
     epix = detector.epix10k_pad_geometry_list()
     jungfrau = detector.jungfrau4m_pad_geometry_list()
+    assert(isinstance(cspad, detector.PADGeometryList))
+    assert (isinstance(pnccd, detector.PADGeometryList))
+    assert (isinstance(epix, detector.PADGeometryList))
+    assert (isinstance(jungfrau, detector.PADGeometryList))
 
 
 def test_padlist():
@@ -179,8 +186,9 @@ def test_padlist():
     padlist = detector.PADGeometryList(pads)
     padlist2 = detector.PADGeometryList(pads2)
     padlist3 = padlist.copy()
-    padlist3.save_json('test.json')
-    padlist4 = detector.load_pad_geometry_list('test.json')
+    file_name = os.path.join(tempdir, 'test.json')
+    padlist3.save_json(file_name)
+    padlist4 = detector.load_pad_geometry_list(file_name)
     padlist5 = detector.PADGeometryList(padlist)
     assert(padlist != padlist2)
     assert(padlist.hash != padlist2.hash)

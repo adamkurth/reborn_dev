@@ -1162,6 +1162,11 @@ class RadialProfiler():
         self.mask = mask
 
     @property
+    def q_bin_centers(self):
+        r""" The centers of the q bins. """
+        return self.bin_centers.copy()
+
+    @property
     def counts_profile(self):
         r""" The number of pixels in each radial bin. """
         if self._counts_profile is None:
