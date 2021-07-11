@@ -44,7 +44,7 @@ if __name__ == "__main__":
    print("set up done, time = ",t1-t0," seconds")
 
    t1 = time.time()
-   rotate3dfftw(f3.T,-euler)
+   rotate3dfftw(f3.T,euler)
    t2 = time.time()
    print("fftw ",t2-t1,"seconds")
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
    print("joe order pure python plus copies",t2-t1,"seconds")
 
    t1 = time.time()
-   rotate3dfftw(f3a.T,-euler)
+   rotate3dfftw(f3a.T,euler)
    t2 = time.time()
    print("fftw second call",t2-t1,"seconds")
 
