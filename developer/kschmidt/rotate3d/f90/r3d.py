@@ -23,12 +23,18 @@ if __name__ == "__main__":
    f3 = np.zeros((N,N,N),dtype=np.complex128)
    for i in range(Nadd,N-Nadd):
       f3d[i,:,:] = fr
-      f3[i,:,:] = fr
-   
+   f3 = f3d.copy()
+   N2 = (N/2)**2  
+   i0 = np.reshape(np.outer(np.ones((N,N)),np.arange(N)),(N,N,N))
+   i1 = np.transpose(i0,axes=(1,2,0))
+   i2 = np.transpose(i0,axes=(2,0,1))
+   truncate = (i0-N/2)**2+(i1-N/2)**2+(i2-N/2)**2 > (N/2)**2
+   f3d[truncate] = 0.0
+   f3[truncate] = 0.0
    euler = np.zeros(3,dtype=np.float64)
    eulerj = np.zeros(3,dtype=np.float64)
    euler[0] = 0.1+np.pi
-   euler[1] = 0.70
+   euler[1] = 0.22
    euler[2] = 0.35
    eulerj[:] = -euler[:]
    R = scipy.spatial.transform.Rotation.from_euler('xyx',eulerj)
@@ -57,8 +63,7 @@ if __name__ == "__main__":
    t2 = time.time()
    print("joe order pure python plus copies",t2-t1,"seconds")
 
-   for i in range(Nadd,N-Nadd):
-      f3[i,:,:] = fr
+   f3 = f3d.copy()
    t1 = time.time()
    rotate3dfftw(f3.T,euler)
    t2 = time.time()
@@ -73,6 +78,7 @@ if __name__ == "__main__":
    f5 = r3df.f
    t2 = time.time()
    print("vkfft plus copies",t2-t1,"seconds")
+   del r3df # clean up opencl
    ns=3*N//4
    print("original",f3d[ns,ns,ns])
    print("joe, kevin, fftw, joeorder, vkfft ")

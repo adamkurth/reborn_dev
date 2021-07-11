@@ -15,17 +15,50 @@ import reborn.simulate.clcore
 
 
 class rotate3D:
+   r"""
+    Base class to rotate a 3D array of double precision complex numbers in
+    3-dimensions.  The function works by rotating each 2D sections of
+    the 3D array via three shears, as described by Unser et al. (1995)
+    "Convolution-based interpolation for fast, high-quality rotation of images."
+    IEEE Transactions on Image Processing, 4:1371.
+
+    Note 1: The input array must be 3d, double complex, and have all three
+            dimension sizes equal. Otherwise it raises a ValueError exception.
+
+    Note 2: If you don't want wrap arounds, make sure the input array, f,
+            is zero-padded to at least sqrt(3) times the largest dimension
+            of the desired object.
+
+    Arguments:
+        f (*3D |ndarray|*) : The 3D input array. f is the corresponding
+        class member for output.
+
+    Methods:
+      rotation(R): R is a rotation specified as a
+                   scipy.spatial.transform.Rotation 
+ 
+      newf(f): 
+   """
 
    def __init__(self,f3d):
+      self.N = 0
+      self.f = self.newf(f3d)
+
+   def newf(self,f3d):
 #check f3d is 3d, cubic, double complex
       if len(f3d.shape) != 3:
          raise ValueError("rotate3D: f3d must be 3 dimensional")
-      self.N = int(f3d.shape[0])
+      if self.N == 0:
+         self.N = int(f3d.shape[0])
       if f3d.shape.count(self.N) != 3:
-         raise ValueError("rotate3D: f3d must have all dimensions equal")
+         if self.N == 0:
+            raise ValueError("rotate3D: f3d must have all dimensions equal")
+         else:
+            raise ValueError(
+               "rotate3D: f3d must have all dimensions equal to N")
       if f3d.dtype != np.complex128:
          raise ValueError("rotate3D: f3d must be complex128")
-      self.f = f3d.copy()
+      return f3d.copy()
 
    def rotation(self,R):
       euler = R.as_euler('xyx')
@@ -103,6 +136,11 @@ class rotate3D:
       return x0,k0,x1
 
 class rotate3Djoeorder(rotate3D):
+   r"""
+    This is identical to rotate3D except that the shear orders are
+    the same as in Joe's original code. It is slightly less efficient
+    since the arrays are transposed and then transposed back.
+  """
 
    def __init__(self,f3d):
       super().__init__(f3d)
@@ -121,6 +159,12 @@ class rotate3Djoeorder(rotate3D):
 
 
 class rotate3Dvkfft(rotate3D):
+   r"""
+    This should give results identical to rotate3D for sizes
+    that are products of powers of 2,3,5,7,11,13.  It uses the pyvkfft
+    wrapper to VkFFT to perform Fourier transforms on a gpu. Since this
+    is my first opencl code, it is no doubt written inefficiently.
+   """
 
    def __init__(self,f3d):
       super().__init__(f3d)
@@ -149,6 +193,15 @@ class rotate3Dvkfft(rotate3D):
             at[io+1] = a[ii+1];
          }
          """).build ()
+      dummy  = np.ndarray((self.N,self.N),np.complex128)
+      self.x0_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.x1_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.x2_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.x3_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.k0_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.k1_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.f_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.ft_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
 
    def rotate3Dx(self,angin):
       ang=-angin
@@ -161,14 +214,12 @@ class rotate3Dvkfft(rotate3D):
       x1, k1, x2 = self._getmultipliers(scale1)
       x1 = np.transpose(x1)*x3
       x2 = np.transpose(x2)*x0
-      x0_dev = cl.array.to_device(self.q,x0,allocator=self.mem_pool)
-      x1_dev = cl.array.to_device(self.q,x1,allocator=self.mem_pool)
-      x2_dev = cl.array.to_device(self.q,x2,allocator=self.mem_pool)
-      x3_dev = cl.array.to_device(self.q,x3,allocator=self.mem_pool)
-      k0_dev = cl.array.to_device(self.q,k0,allocator=self.mem_pool)
-      k1_dev = cl.array.to_device(self.q,k1,allocator=self.mem_pool)
-      ft = np.ndarray((self.N,self.N),dtype=np.complex128)
-      ft_dev = cl.array.to_device(self.q,ft,allocator=self.mem_pool)
+      cl.enqueue_copy(self.q,self.x0_dev.data,x0)
+      cl.enqueue_copy(self.q,self.x1_dev.data,x1)
+      cl.enqueue_copy(self.q,self.x2_dev.data,x2)
+      cl.enqueue_copy(self.q,self.x3_dev.data,x3)
+      cl.enqueue_copy(self.q,self.k0_dev.data,k0)
+      cl.enqueue_copy(self.q,self.k1_dev.data,k1)
       for i in range(self.N):
          ftmp = self.f[i,:,:]
          if (n90 == 1):
@@ -178,28 +229,25 @@ class rotate3Dvkfft(rotate3D):
          if (n90 == 3):
             ftmp = np.rot90(ftmp,-1,axes=(1,0))
          ftmp = ftmp.copy()
-         if i == 0:
-            f_dev = cl.array.to_device(self.q,ftmp,allocator=self.mem_pool)
-         else:
-            cl.enqueue_copy(self.q,f_dev.data,ftmp)
-         f_dev = x0_dev*f_dev
-         self.app.fft(f_dev)
-         f_dev = k0_dev*f_dev
-         self.app.ifft(f_dev)
-         f_dev = x1_dev*f_dev
-         self.prg.transpose(self.q,(self.N,self.N),None,ft_dev.data,
-            f_dev.data,np.uint32(self.N))
-         self.app.fft(ft_dev)
-         ft_dev = k1_dev*ft_dev
-         self.app.ifft(ft_dev)
-         self.prg.transpose(self.q,(self.N,self.N),None,f_dev.data,
-            ft_dev.data,np.uint32(self.N))
-         f_dev = x2_dev*f_dev
-         self.app.fft(f_dev)
-         f_dev = k0_dev*f_dev
-         self.app.ifft(f_dev)
-         f_dev = x3_dev*f_dev
-         cl.enqueue_copy(self.q,ftmp,f_dev.data)
+         cl.enqueue_copy(self.q,self.f_dev.data,ftmp)
+         self.f_dev = self.x0_dev*self.f_dev
+         self.app.fft(self.f_dev)
+         self.f_dev = self.k0_dev*self.f_dev
+         self.app.ifft(self.f_dev)
+         self.f_dev = self.x1_dev*self.f_dev
+         self.prg.transpose(self.q,(self.N,self.N),None,self.ft_dev.data,
+            self.f_dev.data,np.uint32(self.N))
+         self.app.fft(self.ft_dev)
+         self.ft_dev = self.k1_dev*self.ft_dev
+         self.app.ifft(self.ft_dev)
+         self.prg.transpose(self.q,(self.N,self.N),None,self.f_dev.data,
+            self.ft_dev.data,np.uint32(self.N))
+         self.f_dev = self.x2_dev*self.f_dev
+         self.app.fft(self.f_dev)
+         self.f_dev = self.k0_dev*self.f_dev
+         self.app.ifft(self.f_dev)
+         self.f_dev = self.x3_dev*self.f_dev
+         cl.enqueue_copy(self.q,ftmp,self.f_dev.data)
          self.f[i,:,:] = ftmp
 
    def rotate3Dy(self,ang):
@@ -215,14 +263,12 @@ class rotate3Dvkfft(rotate3D):
       x1, k1, x2 = self._getmultipliers(scale1)
       x1 = np.transpose(x1)*x3
       x2 = np.transpose(x2)*x0
-      x0_dev = cl.array.to_device(self.q,x0,allocator=self.mem_pool)
-      x1_dev = cl.array.to_device(self.q,x1,allocator=self.mem_pool)
-      x2_dev = cl.array.to_device(self.q,x2,allocator=self.mem_pool)
-      x3_dev = cl.array.to_device(self.q,x3,allocator=self.mem_pool)
-      k0_dev = cl.array.to_device(self.q,k0,allocator=self.mem_pool)
-      k1_dev = cl.array.to_device(self.q,k1,allocator=self.mem_pool)
-      ft = np.ndarray((self.N,self.N),dtype=np.complex128)
-      ft_dev = cl.array.to_device(self.q,ft,allocator=self.mem_pool)
+      cl.enqueue_copy(self.q,self.x0_dev.data,x0)
+      cl.enqueue_copy(self.q,self.x1_dev.data,x1)
+      cl.enqueue_copy(self.q,self.x2_dev.data,x2)
+      cl.enqueue_copy(self.q,self.x3_dev.data,x3)
+      cl.enqueue_copy(self.q,self.k0_dev.data,k0)
+      cl.enqueue_copy(self.q,self.k1_dev.data,k1)
       for i in range(self.N):
          ftmp = self.f[:,i,:]
          if (n90 == 1):
@@ -232,26 +278,23 @@ class rotate3Dvkfft(rotate3D):
          if (n90 == 3):
             ftmp = np.rot90(ftmp,-1,axes=(1,0))
          ftmp = ftmp.copy()
-         if i == 0:
-            f_dev = cl.array.to_device(self.q,ftmp,allocator=self.mem_pool)
-         else:
-            cl.enqueue_copy(self.q,f_dev.data,ftmp)
-         f_dev = x0_dev*f_dev
-         self.app.fft(f_dev)
-         f_dev = k0_dev*f_dev
-         self.app.ifft(f_dev)
-         f_dev = x1_dev*f_dev
-         self.prg.transpose(self.q,(self.N,self.N),None,ft_dev.data,
-            f_dev.data,np.uint32(self.N))
-         self.app.fft(ft_dev)
-         ft_dev = k1_dev*ft_dev
-         self.app.ifft(ft_dev)
-         self.prg.transpose(self.q,(self.N,self.N),None,f_dev.data,
-            ft_dev.data,np.uint32(self.N))
-         f_dev = x2_dev*f_dev
-         self.app.fft(f_dev)
-         f_dev = k0_dev*f_dev
-         self.app.ifft(f_dev)
-         f_dev = x3_dev*f_dev
-         cl.enqueue_copy(self.q,ftmp,f_dev.data)
+         cl.enqueue_copy(self.q,self.f_dev.data,ftmp)
+         self.f_dev = self.x0_dev*self.f_dev
+         self.app.fft(self.f_dev)
+         self.f_dev = self.k0_dev*self.f_dev
+         self.app.ifft(self.f_dev)
+         self.f_dev = self.x1_dev*self.f_dev
+         self.prg.transpose(self.q,(self.N,self.N),None,self.ft_dev.data,
+            self.f_dev.data,np.uint32(self.N))
+         self.app.fft(self.ft_dev)
+         self.ft_dev = self.k1_dev*self.ft_dev
+         self.app.ifft(self.ft_dev)
+         self.prg.transpose(self.q,(self.N,self.N),None,self.f_dev.data,
+            self.ft_dev.data,np.uint32(self.N))
+         self.f_dev = self.x2_dev*self.f_dev
+         self.app.fft(self.f_dev)
+         self.f_dev = self.k0_dev*self.f_dev
+         self.app.ifft(self.f_dev)
+         self.f_dev = self.x3_dev*self.f_dev
+         cl.enqueue_copy(self.q,ftmp,self.f_dev.data)
          self.f[:,i,:] = ftmp
