@@ -27,8 +27,8 @@ class Widget(QtGui.QWidget):
         row += 1
         self.layout.addWidget(QtGui.QLabel('Inner Size'), row, 1)
         self.inner_spinbox = QtGui.QSpinBox()
-        self.inner_spinbox.setMinimum(1)
-        self.inner_spinbox.setValue(1)
+        self.inner_spinbox.setMinimum(0)
+        self.inner_spinbox.setValue(0)
         self.layout.addWidget(self.inner_spinbox, row, 2)
         row += 1
         self.layout.addWidget(QtGui.QLabel('Center Size'), row, 1)
