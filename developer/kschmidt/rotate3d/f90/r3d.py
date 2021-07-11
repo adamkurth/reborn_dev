@@ -9,38 +9,42 @@ if __name__ == "__main__":
    from r3dks import rotate3Djoeorder
    from r3dks import rotate3Dvkfft
    import scipy
-   
+   print("read in image and pad")
+   t0 = time.time()
+   N = 512
    fin = plt.imread('../bw.png').astype(np.float64)
    assert(fin.shape[0] == fin.shape[1])
    N0 = fin.shape[0]
-   Nadd = int(np.ceil(np.sqrt(2)*N0/2)-N0/2)
-   Nadd += 10
-   N = N0+2*Nadd
-   print("N",N)
+   Nadd = int((N-N0)/2)
+#   Nadd = int(np.ceil(np.sqrt(2)*N0/2)-N0/2)
+#   Nadd += 10
+#   N = N0+2*Nadd
+   print("N set to ",N)
    fr = np.zeros((N,N),dtype=np.float64)
    fr[Nadd:Nadd+N0,Nadd:Nadd+N0] = fin
    f3d = np.zeros((N,N,N),dtype=np.complex128)
    f3 = np.zeros((N,N,N),dtype=np.complex128)
    for i in range(Nadd,N-Nadd):
       f3d[i,:,:] = fr
-   f3 = f3d.copy()
    N2 = (N/2)**2  
    i0 = np.reshape(np.outer(np.ones((N,N)),np.arange(N)),(N,N,N))
    i1 = np.transpose(i0,axes=(1,2,0))
    i2 = np.transpose(i0,axes=(2,0,1))
    truncate = (i0-N/2)**2+(i1-N/2)**2+(i2-N/2)**2 > (N/2)**2
    f3d[truncate] = 0.0
-   f3[truncate] = 0.0
+   f3a = f3d.copy()
+   f3 = f3d.copy()
    euler = np.zeros(3,dtype=np.float64)
    eulerj = np.zeros(3,dtype=np.float64)
    euler[0] = 0.1+np.pi
    euler[1] = 0.22
    euler[2] = 0.35
-   eulerj[:] = -euler[:]
-   R = scipy.spatial.transform.Rotation.from_euler('xyx',eulerj)
+   R = scipy.spatial.transform.Rotation.from_euler('xyx',euler)
+   t1 = time.time()
+   print("set up done, time = ",t1-t0," seconds")
 
    t1 = time.time()
-   rotate3dfftw(f3.T,euler)
+   rotate3dfftw(f3.T,-euler)
    t2 = time.time()
    print("fftw ",t2-t1,"seconds")
 
@@ -63,9 +67,8 @@ if __name__ == "__main__":
    t2 = time.time()
    print("joe order pure python plus copies",t2-t1,"seconds")
 
-   f3 = f3d.copy()
    t1 = time.time()
-   rotate3dfftw(f3.T,euler)
+   rotate3dfftw(f3a.T,-euler)
    t2 = time.time()
    print("fftw second call",t2-t1,"seconds")
 
@@ -88,21 +91,21 @@ if __name__ == "__main__":
    print("kevin-fftw",np.max(np.abs(f2-f3)))
    print("kevin-vkfft",np.max(np.abs(f2-f5)))
    print("joe-joeorder",np.max(np.abs(f1-f4)))
-
+   n2 = int(N/2)
    print("joe rotation")
-   plt.imshow(np.real(f1[ns,:,:]),cmap=plt.cm.gray)
+   plt.imshow(np.real(f1[n2,:,:]),cmap=plt.cm.gray)
    plt.show()
    print("kevin rotation")
-   plt.imshow(np.real(f2[ns,:,:]),cmap=plt.cm.gray)
+   plt.imshow(np.real(f2[n2,:,:]),cmap=plt.cm.gray)
    plt.show()
    print("fftw rotation")
-   plt.imshow(np.real(f3[ns,:,:]),cmap=plt.cm.gray)
+   plt.imshow(np.real(f3[n2,:,:]),cmap=plt.cm.gray)
    plt.show()
    print("vkfft rotation")
-   plt.imshow(np.real(f5[ns,:,:]),cmap=plt.cm.gray)
+   plt.imshow(np.real(f5[n2,:,:]),cmap=plt.cm.gray)
    plt.show()
    print("joeorder rotation")
-   plt.imshow(np.real(f4[ns,:,:]),cmap=plt.cm.gray)
+   plt.imshow(np.real(f4[n2,:,:]),cmap=plt.cm.gray)
    plt.show()
 
 
