@@ -138,7 +138,7 @@ class rotate3D:
 class rotate3Djoeorder(rotate3D):
    r"""
     This is identical to rotate3D except that the shear orders are
-    the same as in Joe's original code. It is slightly less efficient
+    the same as in Joe's original code. It is somewhat less efficient
     since the arrays are transposed and then transposed back.
   """
 
@@ -149,11 +149,9 @@ class rotate3Djoeorder(rotate3D):
       euler = R.as_euler('xyx')
       self.f = np.transpose(self.f,axes=(0,2,1))
       self.rotate3Dx(-euler[0])
-      self.f = np.transpose(self.f,axes=(0,2,1))
-      self.f = np.transpose(self.f,axes=(2,1,0))
+      self.f = np.transpose(self.f,axes=(1,2,0)) #(0,2,1) then (2,1,0) = (1,2,0)
       self.rotate3Dy(-euler[1])
-      self.f = np.transpose(self.f,axes=(2,1,0))
-      self.f = np.transpose(self.f,axes=(0,2,1))
+      self.f = np.transpose(self.f,axes=(2,0,1)) #(2,1,0) then (0,2,1) = (2,0,1)
       self.rotate3Dx(-euler[2])
       self.f = np.transpose(self.f,axes=(0,2,1))
 
