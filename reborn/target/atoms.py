@@ -4,7 +4,7 @@ Resources for working with atoms: atomic scattering factors, electron densities.
 
 import pkg_resources
 import numpy as np
-from .. import utils
+from reborn import utils
 from scipy import constants as const
 
 eV = const.value('electron volt')
@@ -123,6 +123,22 @@ def henke_scattering_factors(atomic_numbers, photon_energies):
         w = np.where(atomic_numbers == z)
         f[w, :] = np.interp(photon_energies, dat['Photon Energy'], dat['Scatter Factor'], left=-9999, right=-9999)
     return np.squeeze(f)
+
+
+def henke_dispersion_corrections(atomic_numbers, photon_energies):
+    r"""
+    Same as henke_scattering_factors but subtracts the atomic number
+    Args:
+        atomic_numbers:
+        photon_energies:
+
+    Returns:
+
+    """
+    f = henke_scattering_factors(atomic_numbers, photon_energies)
+    f =  f.T
+    f -= atomic_numbers
+    return f.T.copy()
 
 
 def get_scattering_factors(atomic_numbers, photon_energy):

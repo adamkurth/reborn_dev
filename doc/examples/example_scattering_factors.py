@@ -11,7 +11,7 @@ Imports:
 
 import xraylib
 import numpy as np
-from reborn.simulate import atoms
+from reborn.target import atoms
 import matplotlib.pyplot as plt
 import scipy.constants as const
 

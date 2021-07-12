@@ -69,3 +69,7 @@ def sphere_form_factor(radius, q_mags, check_divide_by_zero=True):
     else:
         amp = 4 * np.pi * radius ** 3 * (np.sin(qr) - qr * np.cos(qr)) / qr ** 3
     return amp
+
+
+# def debye_molecular_form_factor():
+#
