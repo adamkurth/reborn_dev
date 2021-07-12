@@ -26,7 +26,7 @@ class rotate3D:
             dimension sizes equal. Otherwise it raises a ValueError exception.
 
     Note 2: If you don't want wrap arounds, make sure the input array, f,
-            is zero-padded to at least sqrt(3) times the largest dimension
+            is zero-padded to at least sqrt(2) times the largest dimension
             of the desired object.
 
     Arguments:
