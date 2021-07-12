@@ -513,25 +513,25 @@ ffcoeff = {
 
 
 if __name__ == "__main__":
+    # Configuration
     pdb_id = '1LYZ'
     pdb_file = crystal.get_pdb_file(pdb_id)
     pdb = PDB(pdb_file)
     basename, ext = os.path.splitext(pdb_file)
     q = np.linspace(0, 1, 1001)
     photon_energies = np.linspace(280, 290, 20)
-
+    # Fancy colors for plotting
     n_colors = len(photon_energies)
     cm = plt.get_cmap('gist_rainbow')
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_prop_cycle(color=[cm(1. * i / n_colors) for i in range(n_colors)])
-    # for i in range(n_colors):
-    #     ax.plot(np.arange(10) * (i + 1))
-
+    # Calculate and plot
     for E in photon_energies:
         Iq, Pr = pdb2sas(pdb, q=q, return_pr=True, photon_energy=E)
-        plt.semilogy(q, Iq[:, 1], label=('%0.1g' % E))
+        plt.semilogy(q, Iq[:, 1], label=('%6.2f' % E))
     plt.legend()
     plt.show()
+    # Save files?
     # np.savetxt(basename+'.Iq.dat', Iq, delimiter=' ', fmt='%.8e')
     # np.savetxt(basename+'.Pr.dat', Pr, delimiter=' ', fmt='%.8e')
