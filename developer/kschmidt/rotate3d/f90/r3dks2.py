@@ -2,6 +2,7 @@
 Some environment variables that affect the behavior of this module:
 PYOPENCL_CTX: This sets the device and platform automatically.
 """
+import sys
 import numpy as np
 import scipy
 import scipy.fftpack as fft
@@ -14,17 +15,56 @@ import reborn.simulate.clcore
 
 
 class rotate3D:
+   r"""
+    Base class to rotate a 3D array of double precision complex numbers in
+    3-dimensions.  The function works by rotating each 2D sections of
+    the 3D array via three shears, as described by Unser et al. (1995)
+    "Convolution-based interpolation for fast, high-quality rotation of images."
+    IEEE Transactions on Image Processing, 4:1371.
+
+    Note 1: The input array must be 3d, double complex, and have all three
+            dimension sizes equal. Otherwise it raises a ValueError exception.
+
+    Note 2: If you don't want wrap arounds, make sure the input array, f,
+            is zero-padded to at least sqrt(3) times the largest dimension
+            of the desired object.
+
+    Arguments:
+        f (*3D |ndarray|*) : The 3D input array. f is the corresponding
+        class member for output.
+
+    Methods:
+      rotation(R): R is a rotation specified as a
+                   scipy.spatial.transform.Rotation 
+   """
 
    def __init__(self,f3d):
+      self.N = 0
+      self.f = f3d
+
+   @property
+   def f(self):
+      return self._f
+
+   @f.setter
+   def f(self,f):
+      self.checkf(f)
+      self._f = f.copy()
+
+   def checkf(self,f3d):
 #check f3d is 3d, cubic, double complex
       if len(f3d.shape) != 3:
          raise ValueError("rotate3D: f3d must be 3 dimensional")
-      self.N = int(f3d.shape[0])
+      if self.N == 0:
+         self.N = int(f3d.shape[0])
       if f3d.shape.count(self.N) != 3:
-         raise ValueError("rotate3D: f3d must have all dimensions equal")
+         if self.N == 0:
+            raise ValueError("rotate3D: f3d must have all dimensions equal")
+         else:
+            raise ValueError(
+               "rotate3D: f3d must have all dimensions equal to N")
       if f3d.dtype != np.complex128:
          raise ValueError("rotate3D: f3d must be complex128")
-      self.f = f3d.copy()
 
    def rotation(self,R):
       euler = R.as_euler('xyx')
@@ -32,20 +72,21 @@ class rotate3D:
       self.rotate3Dy(euler[1])
       self.rotate3Dx(euler[2])
 
-   def rotate3Dx(self,ang):
-      ang=-ang
+   def rotate3Dx(self,angin):
+# angle negative since done in order z then y
+      ang = -angin
       n90 = np.rint(ang*2.0/np.pi)
       dang = ang-n90*np.pi*0.5
       n90 = int(n90 % 4)
       scale0  = -np.tan(0.5*dang)
-      x0, k0, x3 = self.__getmultipliers(scale0)
+      x0, k0, x3 = self._getmultipliers(scale0)
       scale1 = np.sin(dang)
-      x1, k1, x2 = self.__getmultipliers(scale1)
+      x1, k1, x2 = self._getmultipliers(scale1)
       x1 = np.transpose(x1)*x3
       k1 = np.transpose(k1).copy()
       x2 = np.transpose(x2)*x0
       for i in range(self.N):
-         ftmp = self.f[i,:,:]
+         ftmp = self._f[i,:,:]
          if (n90 == 1):
             ftmp = np.rot90(ftmp,1,axes=(1,0))
          if (n90 == 2):
@@ -55,21 +96,25 @@ class rotate3D:
          ftmp = fft.ifft(fft.fft(x0*ftmp,axis=1)*k0,axis=1)
          ftmp = fft.ifft(fft.fft(x1*ftmp,axis=0)*k1,axis=0)
          ftmp = x3*fft.ifft(fft.fft(x2*ftmp,axis=1)*k0,axis=1)
-         self.f[i,:,:] = ftmp
+         self._f[i,:,:] = ftmp
 
    def rotate3Dy(self,ang):
+# identical to x rotation except angle positive since
+# this is done in the order z then x, and the array slices
+# in for loop are x-z.
+      
       n90 = np.rint(ang*2.0/np.pi)
       dang = ang-n90*np.pi*0.5
       n90 = int(n90 % 4)
       scale0  = -np.tan(0.5*dang)
-      x0, k0, x3 = self.__getmultipliers(scale0)
+      x0, k0, x3 = self._getmultipliers(scale0)
       scale1 = np.sin(dang)
-      x1, k1, x2 = self.__getmultipliers(scale1)
+      x1, k1, x2 = self._getmultipliers(scale1)
       x1 = np.transpose(x1)*x3
       k1 = np.transpose(k1).copy()
       x2 = np.transpose(x2)*x0
       for i in range(self.N):
-         ftmp = self.f[:,i,:]
+         ftmp = self._f[:,i,:]
          if (n90 == 1):
             ftmp = np.rot90(ftmp,1,axes=(1,0))
          if (n90 == 2):
@@ -79,9 +124,9 @@ class rotate3D:
          ftmp = fft.ifft(fft.fft(x0*ftmp,axis=1)*k0,axis=1)
          ftmp = fft.ifft(fft.fft(x1*ftmp,axis=0)*k1,axis=0)
          ftmp = x3*fft.ifft(fft.fft(x2*ftmp,axis=1)*k0,axis=1)
-         self.f[:,i,:] = ftmp
+         self._f[:,i,:] = ftmp
 
-   def __getmultipliers(self,scale):
+   def _getmultipliers(self,scale):
       c0 = 0.5*(self.N-1)
       nint = np.arange(self.N)
       ck = -1j*2.0*np.pi/self.N*scale
@@ -96,10 +141,37 @@ class rotate3D:
       x1 = np.transpose(x2)*x0
       return x0,k0,x1
 
-class rotate3Dvkfft(rotate3D):
+class rotate3Djoeorder(rotate3D):
+   r"""
+    This is identical to rotate3D except that the shear orders are
+    the same as in Joe's original code. It is somewhat less efficient
+    since the arrays are transposed and then transposed back.
+  """
 
    def __init__(self,f3d):
-      super().__init__(rotate3D,self).__init__(f3d)
+      super().__init__(f3d)
+
+   def rotation(self,R):
+      euler = R.as_euler('xyx')
+      self._f = np.transpose(self.f,axes=(0,2,1))
+      self.rotate3Dx(-euler[0])
+      self._f = np.transpose(self.f,axes=(1,2,0))
+      self.rotate3Dy(-euler[1])
+      self._f = np.transpose(self.f,axes=(2,0,1))
+      self.rotate3Dx(-euler[2])
+      self._f = np.transpose(self.f,axes=(0,2,1))
+
+
+class rotate3Dvkfft(rotate3D):
+   r"""
+    This should give results identical to rotate3D for sizes
+    that are products of powers of 2,3,5,7,11,13.  It uses the pyvkfft
+    wrapper to VkFFT to perform Fourier transforms on a gpu. Since this
+    is my first opencl code, it is no doubt written inefficiently.
+   """
+
+   def __init__(self,f3d):
+      super().__init__(f3d)
       vkfft_primes = (2,3,5,7,11,13)
       modprimes = self.N
       for i in range(len(vkfft_primes)):
@@ -111,9 +183,12 @@ class rotate3Dvkfft(rotate3D):
          raise ValueError("rotate3D: N must be a product of 2,3,5,7,11,13")
       self.ctx = reborn.simulate.clcore.create_some_gpu_context()
       self.q = cl.CommandQueue(self.ctx)
-      self.mem_pool = cl.tools.MemoryPool(cl.tools.ImmediateAllocator(self.q))
+#      self.mem_pool = cl.tools.MemoryPool(cl.tools.ImmediateAllocator(self.q))
+      self.mem_pool = None
+      self.app = pyvkfft.opencl.VkFFTApp((self.N,self.N),
+         dtype=np.complex128,queue=self.q,ndim=1)
 #stupid complex transpose for pyvkfft on gpu -- improve me
-      prg = cl.Program(ctx, """
+      self.prg = cl.Program(self.ctx, """
          __kernel void transpose( __global double *at, __global double *a,
             unsigned n) {
             int ii = 2*(get_global_id(0)+get_global_id(1)*n);
@@ -122,30 +197,340 @@ class rotate3Dvkfft(rotate3D):
             at[io+1] = a[ii+1];
          }
          """).build ()
+      dummy  = np.ndarray((self.N,self.N),np.complex128)
+      self.x0_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.x1_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.x2_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.x3_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.k0_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.k1_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.f_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
+      self.ft_dev = cl.array.to_device(self.q,dummy,allocator=self.mem_pool)
 
-   def rotate3Dx(self,ang):
-      ang=-ang
+   def rotate3Dx(self,angin):
+      ang=-angin
       n90 = np.rint(ang*2.0/np.pi)
       dang = ang-n90*np.pi*0.5
       n90 = int(n90 % 4)
       scale0  = -np.tan(0.5*dang)
-      x0, k0, x3 = self.__getmultipliers(scale0)
+      x0, k0, x3 = self._getmultipliers(scale0)
       scale1 = np.sin(dang)
-      x1, k1, x2 = self.__getmultipliers(scale1)
+      x1, k1, x2 = self._getmultipliers(scale1)
       x1 = np.transpose(x1)*x3
       x2 = np.transpose(x2)*x0
-      x0_dev = cl.array.to_device(self.q,x0,allocator=self.mem_pool)
+      cl.enqueue_copy(self.q,self.x0_dev.data,x0)
+      cl.enqueue_copy(self.q,self.x1_dev.data,x1)
+      cl.enqueue_copy(self.q,self.x2_dev.data,x2)
+      cl.enqueue_copy(self.q,self.x3_dev.data,x3)
+      cl.enqueue_copy(self.q,self.k0_dev.data,k0)
+      cl.enqueue_copy(self.q,self.k1_dev.data,k1)
       for i in range(self.N):
-         ftmp = self.f[i,:,:]
+         ftmp = self._f[i,:,:]
          if (n90 == 1):
             ftmp = np.rot90(ftmp,1,axes=(1,0))
          if (n90 == 2):
             ftmp = np.rot90(ftmp,2,axes=(1,0))
          if (n90 == 3):
             ftmp = np.rot90(ftmp,-1,axes=(1,0))
+         ftmp = ftmp.copy()
+         cl.enqueue_copy(self.q,self.f_dev.data,ftmp)
+         self.f_dev = self.x0_dev*self.f_dev
+         self.app.fft(self.f_dev)
+         self.f_dev = self.k0_dev*self.f_dev
+         self.app.ifft(self.f_dev)
+         self.f_dev = self.x1_dev*self.f_dev
+         self.prg.transpose(self.q,(self.N,self.N),None,self.ft_dev.data,
+            self.f_dev.data,np.uint32(self.N))
+         self.app.fft(self.ft_dev)
+         self.ft_dev = self.k1_dev*self.ft_dev
+         self.app.ifft(self.ft_dev)
+         self.prg.transpose(self.q,(self.N,self.N),None,self.f_dev.data,
+            self.ft_dev.data,np.uint32(self.N))
+         self.f_dev = self.x2_dev*self.f_dev
+         self.app.fft(self.f_dev)
+         self.f_dev = self.k0_dev*self.f_dev
+         self.app.ifft(self.f_dev)
+         self.f_dev = self.x3_dev*self.f_dev
+         cl.enqueue_copy(self.q,ftmp,self.f_dev.data)
+         self._f[i,:,:] = ftmp
 
-         ftmp = fft.ifft(fft.fft(x0*ftmp,axis=1)*k0,axis=1)
-         ftmp = fft.ifft(fft.fft(x1*ftmp,axis=0)*k1,axis=0)
-         ftmp = x3*fft.ifft(fft.fft(x2*ftmp,axis=1)*k0,axis=1)
+   def rotate3Dy(self,ang):
+# identical to x rotation except angle positive since
+# this is done in the order z then x, and the array slices
+# in for loop are x-z.
+      n90 = np.rint(ang*2.0/np.pi)
+      dang = ang-n90*np.pi*0.5
+      n90 = int(n90 % 4)
+      scale0  = -np.tan(0.5*dang)
+      x0, k0, x3 = self._getmultipliers(scale0)
+      scale1 = np.sin(dang)
+      x1, k1, x2 = self._getmultipliers(scale1)
+      x1 = np.transpose(x1)*x3
+      x2 = np.transpose(x2)*x0
+      cl.enqueue_copy(self.q,self.x0_dev.data,x0)
+      cl.enqueue_copy(self.q,self.x1_dev.data,x1)
+      cl.enqueue_copy(self.q,self.x2_dev.data,x2)
+      cl.enqueue_copy(self.q,self.x3_dev.data,x3)
+      cl.enqueue_copy(self.q,self.k0_dev.data,k0)
+      cl.enqueue_copy(self.q,self.k1_dev.data,k1)
+      for i in range(self.N):
+         ftmp = self._f[:,i,:]
+         if (n90 == 1):
+            ftmp = np.rot90(ftmp,1,axes=(1,0))
+         if (n90 == 2):
+            ftmp = np.rot90(ftmp,2,axes=(1,0))
+         if (n90 == 3):
+            ftmp = np.rot90(ftmp,-1,axes=(1,0))
+         ftmp = ftmp.copy()
+         cl.enqueue_copy(self.q,self.f_dev.data,ftmp)
+         self.f_dev = self.x0_dev*self.f_dev
+         self.app.fft(self.f_dev)
+         self.f_dev = self.k0_dev*self.f_dev
+         self.app.ifft(self.f_dev)
+         self.f_dev = self.x1_dev*self.f_dev
+         self.prg.transpose(self.q,(self.N,self.N),None,self.ft_dev.data,
+            self.f_dev.data,np.uint32(self.N))
+         self.app.fft(self.ft_dev)
+         self.ft_dev = self.k1_dev*self.ft_dev
+         self.app.ifft(self.ft_dev)
+         self.prg.transpose(self.q,(self.N,self.N),None,self.f_dev.data,
+            self.ft_dev.data,np.uint32(self.N))
+         self.f_dev = self.x2_dev*self.f_dev
+         self.app.fft(self.f_dev)
+         self.f_dev = self.k0_dev*self.f_dev
+         self.app.ifft(self.f_dev)
+         self.f_dev = self.x3_dev*self.f_dev
+         cl.enqueue_copy(self.q,ftmp,self.f_dev.data)
+         self._f[:,i,:] = ftmp
 
-         self.f[i,:,:] = ftmp
+class rotate3Dvkfft_stored_on_device(rotate3D):
+   r"""
+    This should give results identical to rotate3D for sizes
+    that are products of powers of 2,3,5,7,11,13.  It uses the pyvkfft
+    wrapper to VkFFT to perform Fourier transforms on a gpu. Since this
+    is my first opencl code, it is no doubt written inefficiently.
+   """
+
+   def __init__(self,f3d):
+      self.N = 0
+      self.f_dev = None
+      self.checkf(f3d)
+      vkfft_primes = (2,3,5,7,11,13)
+      modprimes = self.N
+      for i in range(len(vkfft_primes)):
+         while modprimes % vkfft_primes[i] == 0:
+            modprimes /= vkfft_primes[i]
+         if modprimes == 1:
+            break
+      if modprimes != 1:
+         raise ValueError("rotate3D: N must be a product of 2,3,5,7,11,13")
+      self.ctx = reborn.simulate.clcore.create_some_gpu_context()
+      self.q = cl.CommandQueue(self.ctx)
+      self.app = pyvkfft.opencl.VkFFTApp((self.N,self.N,self.N),
+         dtype=np.complex128,queue=self.q,ndim=1)
+      self.factors = np.ndarray((18,self.N,self.N),np.complex128)
+      self.factors_dev = cl.array.to_device(self.q,self.factors)
+      self.f_dev = cl.array.to_device(self.q,f3d)
+      #stupid routines on gpu -- improve me
+      self.prg = cl.Program(self.ctx, """
+         __kernel void transposeyz(  __global double *a, unsigned n) {
+            double tempr,tempi;
+            int ii = 2*(get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n);
+            int io = 2*(get_global_id(1)+(get_global_id(0)+get_global_id(2)*n)*n);
+            if (ii <= io) {
+               tempr = a[io];
+               tempi = a[io+1];
+               a[io] = a[ii];
+               a[io+1] = a[ii+1];
+               a[ii] = tempr;
+               a[ii+1] = tempi;
+            }
+         }
+   
+         __kernel void transposexy( __global double *a, unsigned n) {
+            double tempr,tempi;
+            int ii = 2*(get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n);
+            int io = 2*(get_global_id(0)+(get_global_id(2)+get_global_id(1)*n)*n);
+            if (ii <= io) {
+               tempr = a[io];
+               tempi = a[io+1];
+               a[io] = a[ii];
+               a[io+1] = a[ii+1];
+               a[ii] = tempr;
+               a[ii+1] = tempi;
+            }
+         }
+   
+         __kernel void multiply( __global double *factor, __global double *a,
+            unsigned n) {
+            int ifac = 2*(get_global_id(0)+n*get_global_id(1));
+            int i = 2*(get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n);
+            double tempr = a[i];
+            a[i] = factor[ifac]*a[i]-factor[ifac+1]*a[i+1];
+            a[i+1] = factor[ifac]*a[i+1]+factor[ifac+1]*tempr;
+         }
+   
+         __kernel void multiply_ith( __global double *factor, __global double *a,
+            unsigned n, unsigned ith) {
+            int ifac = 2*(get_global_id(0)+n*(get_global_id(1)+n*ith));
+            int i = 2*(get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n);
+            double tempr = a[i];
+            a[i] = factor[ifac]*a[i]-factor[ifac+1]*a[i+1];
+            a[i+1] = factor[ifac]*a[i+1]+factor[ifac+1]*tempr;
+         }
+   
+         """). build ()
+
+   @property
+   def f(self):
+      return self.f_dev.get()
+
+   @f.setter
+   def f(self,f):
+      cl.enqueue_copy(self.q,self.f_dev.data,f)
+
+   def rotation(self,R):
+      euler = R.as_euler('xyx')
+      ang=-euler[0]
+      n90 = np.rint(ang*2.0/np.pi)
+      dang = ang-n90*np.pi*0.5
+      n90 = int(n90 % 4)
+      if n90 != 0:
+         print("90 degree rotations not implemented",n90)
+         sys.exit()
+      scale0  = -np.tan(0.5*dang)
+      x0, k0, x3 = self._getmultipliers(scale0)
+      scale1 = np.sin(dang)
+      x1, k1, x2 = self._getmultipliers(scale1)
+      x1 = np.transpose(x1)*x3
+      x2 = np.transpose(x2)*x0
+      self.factors[0,:,:] = x0
+      self.factors[1,:,:] = k0
+      self.factors[2,:,:] = x1
+      self.factors[3,:,:] = k1
+      self.factors[4,:,:] = x2
+      self.factors[5,:,:] = x3
+      euler = R.as_euler('xyx')
+      ang=euler[1]
+      n90 = np.rint(ang*2.0/np.pi)
+      dang = ang-n90*np.pi*0.5
+      n90 = int(n90 % 4)
+      if n90 != 0:
+         print("90 degree rotations not implemented",n90)
+         sys.exit()
+      scale0  = -np.tan(0.5*dang)
+      x0, k0, x3 = self._getmultipliers(scale0)
+      scale1 = np.sin(dang)
+      x1, k1, x2 = self._getmultipliers(scale1)
+      x1 = np.transpose(x1)*x3
+      x2 = np.transpose(x2)*x0
+      self.factors[6,:,:] = x0
+      self.factors[7,:,:] = k0
+      self.factors[8,:,:] = x1
+      self.factors[9,:,:] = k1
+      self.factors[10,:,:] = x2
+      self.factors[11,:,:] = x3
+      ang=-euler[2]
+      n90 = np.rint(ang*2.0/np.pi)
+      dang = ang-n90*np.pi*0.5
+      n90 = int(n90 % 4)
+      if n90 != 0:
+         print("90 degree rotations not implemented",n90)
+         sys.exit()
+      scale0  = -np.tan(0.5*dang)
+      x0, k0, x3 = self._getmultipliers(scale0)
+      scale1 = np.sin(dang)
+      x1, k1, x2 = self._getmultipliers(scale1)
+      x1 = np.transpose(x1)*x3
+      x2 = np.transpose(x2)*x0
+      self.factors[12,:,:] = x0
+      self.factors[13,:,:] = k0
+      self.factors[14,:,:] = x1
+      self.factors[15,:,:] = k1
+      self.factors[16,:,:] = x2
+      self.factors[17,:,:] = x3
+      cl.enqueue_copy(self.q,self.factors_dev.data,self.factors)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(0))
+      self.app.fft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(1))
+      self.app.ifft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(2))
+      self.prg.transposeyz(self.q,(self.N,self.N,self.N),None,
+         self.f_dev.data,np.uint32(self.N))
+      self.app.fft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(3))
+      self.app.ifft(self.f_dev)
+      self.prg.transposeyz(self.q,(self.N,self.N,self.N),None,
+         self.f_dev.data,np.uint32(self.N))
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(4))
+      self.app.fft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(1))
+      self.app.ifft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(5))
+
+      self.prg.transposexy(self.q,(self.N,self.N,self.N),None,
+         self.f_dev.data,np.uint32(self.N))
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(6))
+      self.app.fft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(7))
+      self.app.ifft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(8))
+      self.prg.transposeyz(self.q,(self.N,self.N,self.N),None,
+         self.f_dev.data,np.uint32(self.N))
+      self.app.fft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(9))
+      self.app.ifft(self.f_dev)
+      self.prg.transposeyz(self.q,(self.N,self.N,self.N),None,
+         self.f_dev.data,np.uint32(self.N))
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(10))
+      self.app.fft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(7))
+      self.app.ifft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(11))
+      self.prg.transposexy(self.q,(self.N,self.N,self.N),None,
+         self.f_dev.data,np.uint32(self.N))
+
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(12))
+      self.app.fft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(13))
+      self.app.ifft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(14))
+      self.prg.transposeyz(self.q,(self.N,self.N,self.N),None,
+         self.f_dev.data,np.uint32(self.N))
+      self.app.fft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(15))
+      self.app.ifft(self.f_dev)
+      self.prg.transposeyz(self.q,(self.N,self.N,self.N),None,
+         self.f_dev.data,np.uint32(self.N))
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(16))
+      self.app.fft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(13))
+      self.app.ifft(self.f_dev)
+      self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
+         self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(17))
+
+   def rotate3Dx(self,angin):
+      pass #fix me
+
+   def rotate3Dy(self,ang):
+      pass #fix me
