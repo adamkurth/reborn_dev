@@ -5,9 +5,13 @@ if __name__ == "__main__":
    import matplotlib.pyplot as plt
    from reborn.utils import rotate3D
    from r3df03py import rotate3dfftw
-   from r3dks import rotate3D as rotate3Dks
-   from r3dks import rotate3Djoeorder
-   from r3dks import rotate3Dvkfft
+   from r3dks2 import rotate3D as rotate3Dks
+   from r3dks2 import rotate3Djoeorder
+   from r3dks2 import rotate3Dvkfft
+   from r3dks2 import rotate3Dvkfft_stored_on_device
+#   from r3dks import rotate3D as rotate3Dks
+#   from r3dks import rotate3Djoeorder
+#   from r3dks import rotate3Dvkfft
    import scipy
    print("read in image and pad")
    t0 = time.time()
@@ -36,7 +40,7 @@ if __name__ == "__main__":
    f3 = f3d.copy()
    euler = np.zeros(3,dtype=np.float64)
    eulerj = np.zeros(3,dtype=np.float64)
-   euler[0] = 0.1+np.pi
+   euler[0] = 0.1
    euler[1] = 0.22
    euler[2] = 0.35
    R = scipy.spatial.transform.Rotation.from_euler('xyx',euler)
@@ -73,10 +77,12 @@ if __name__ == "__main__":
    print("fftw second call",t2-t1,"seconds")
 
    t1 = time.time()
-   r3df = rotate3Dvkfft(f3d)
+#   r3df = rotate3Dvkfft(f3d)
+   r3df = rotate3Dvkfft_stored_on_device(f3d)
    t2 = time.time()
    print("vkfft create instance",t2-t1,"seconds")
    t1 = time.time()
+#   r3df.f = f3d
    r3df.rotation(R)
    f5 = r3df.f
    t2 = time.time()
