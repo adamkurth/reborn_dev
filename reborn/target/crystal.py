@@ -21,7 +21,8 @@ except ImportError:
 
 
 pdb_data_path = pkg_resources.resource_filename('reborn.data', 'pdb')
-temp_dir = tempfile.gettempdir()
+temp_dir = os.path.join(tempfile.gettempdir(), 'reborn')
+os.makedirs(temp_dir, exist_ok=True)
 
 
 def get_pdb_file(pdb_id, save_path=temp_dir, silent=False):
@@ -295,7 +296,8 @@ class CrystalStructure(object):
         """
 
         if not os.path.exists(pdb_file_path):
-            pdb_file_path = get_pdb_file(pdb_file_path, save_path='.')
+            print("PDB file not found.  Attempting to download it.")
+            pdb_file_path = get_pdb_file(pdb_file_path, save_path=temp_dir)
 
         dic = pdb_to_dict(pdb_file_path)
         self.pdb_dict = dic
