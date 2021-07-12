@@ -82,11 +82,16 @@ if __name__ == "__main__":
    t2 = time.time()
    print("vkfft create instance",t2-t1,"seconds")
    t1 = time.time()
-#   r3df.f = f3d
    r3df.rotation(R)
    f5 = r3df.f
    t2 = time.time()
-   print("vkfft plus copies",t2-t1,"seconds")
+   print("vkfft copy out only",t2-t1,"seconds")
+   t1 = time.time()
+   r3df.f = f3d
+   r3df.rotation(R)
+   f5 = r3df.f
+   t2 = time.time()
+   print("vkfft plus both copies",t2-t1,"seconds")
    del r3df # clean up opencl
    ns=3*N//4
    print("original",f3d[ns,ns,ns])
