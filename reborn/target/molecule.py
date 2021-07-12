@@ -4,7 +4,7 @@ Utilities for manipulating molecules.
 """
 import numpy as np
 from ..utils import max_pair_distance
-from ..simulate import atoms
+from . import atoms
 from scipy import constants as const
 
 hc = const.h*const.c

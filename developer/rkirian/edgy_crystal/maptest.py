@@ -1,8 +1,7 @@
 import numpy as np
 from reborn.target import crystal
-from reborn.simulate import clcore, atoms
+from reborn.simulate import clcore
 import pyqtgraph as pg
-from scipy import constants
 
 # The CrystalStructure object has a UnitCell, SpaceGroup, and other information.  The input can be any path to a PDB
 # file or it can be the name of a PDB entry.  The PDB will be fetched from the web if necessary and possible.  The

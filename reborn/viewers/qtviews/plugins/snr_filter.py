@@ -1,6 +1,4 @@
 from time import time
-import numpy as np
-import pyqtgraph as pg
 from reborn.viewers.qtviews.padviews import get_caller
 from pyqtgraph.Qt import QtGui, QtCore
 from reborn.analysis.peaks import boxsnr

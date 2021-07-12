@@ -21,7 +21,7 @@ prof_r_max = 10e-10
 prof_n = 1000
 prof_dr = prof_r_max/(prof_n-1)
 prof_r = np.arange(prof_n)*prof_dr
-profs = reborn.target.atoms.get_cromer_mann_densities(np.arange(89)+1, prof_r)
+profs = reborn.target.atoms.get_cromer_mann_densities(np.arange(89) + 1, prof_r)
 r_max = 5e-10  # max radius
 
 dens = np.zeros(n_x)  # The density map

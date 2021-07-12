@@ -3,8 +3,7 @@ The target package contains classes, functions, etc. that are related to the obj
 molecules, atoms, electron density maps, and so on.
 """
 
-from . import crystal
+from . import crystal, atoms
 from . import density
 from . import molecule
 from . import placer
-from ..simulate import atoms
