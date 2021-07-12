@@ -530,8 +530,9 @@ if __name__ == "__main__":
     for E in photon_energies:
         Iq, Pr = pdb2sas(pdb, q=q, return_pr=True, photon_energy=E)
         plt.semilogy(q, Iq[:, 1], label=('%6.2f' % E))
+        # Save files?
+        if True:
+            np.savetxt('Iq_%6.2f.dat' % E, Iq, delimiter=' ', fmt='%.8e')
+            np.savetxt('Pr_%6.2f.dat' % E, Pr, delimiter=' ', fmt='%.8e')
     plt.legend()
     plt.show()
-    # Save files?
-    # np.savetxt(basename+'.Iq.dat', Iq, delimiter=' ', fmt='%.8e')
-    # np.savetxt(basename+'.Pr.dat', Pr, delimiter=' ', fmt='%.8e')
