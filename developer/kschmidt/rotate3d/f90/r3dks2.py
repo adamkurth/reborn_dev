@@ -153,13 +153,13 @@ class rotate3Djoeorder(rotate3D):
 
    def rotation(self,R):
       euler = R.as_euler('xyx')
-      self._f = np.transpose(self.f,axes=(0,2,1))
+      self._f = np.transpose(self._f,axes=(0,2,1))
       self.rotate3Dx(-euler[0])
-      self._f = np.transpose(self.f,axes=(1,2,0))
+      self._f = np.transpose(self._f,axes=(1,2,0))
       self.rotate3Dy(-euler[1])
-      self._f = np.transpose(self.f,axes=(2,0,1))
+      self._f = np.transpose(self._f,axes=(2,0,1))
       self.rotate3Dx(-euler[2])
-      self._f = np.transpose(self.f,axes=(0,2,1))
+      self._f = np.transpose(self._f,axes=(0,2,1))
 
 
 class rotate3Dvkfft(rotate3D):
