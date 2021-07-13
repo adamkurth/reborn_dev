@@ -189,12 +189,11 @@ class rotate3Dvkfft(rotate3D):
          dtype=np.complex128,queue=self.q,ndim=1)
 #stupid complex transpose for pyvkfft on gpu -- improve me
       self.prg = cl.Program(self.ctx, """
-         __kernel void transpose( __global double *at, __global double *a,
+         __kernel void transpose( __global double2 *at, __global double2 *a,
             unsigned n) {
-            int ii = 2*(get_global_id(0)+get_global_id(1)*n);
-            int io = 2*(get_global_id(1)+get_global_id(0)*n);
+            int ii = get_global_id(0)+get_global_id(1)*n;
+            int io = get_global_id(1)+get_global_id(0)*n;
             at[io] = a[ii];
-            at[io+1] = a[ii+1];
          }
          """).build ()
       dummy  = np.ndarray((self.N,self.N),np.complex128)
@@ -333,52 +332,102 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       self.f_dev = cl.array.to_device(self.q,f3d)
       #stupid routines on gpu -- improve me
       self.prg = cl.Program(self.ctx, """
-         __kernel void transposeyz(  __global double *a, unsigned n) {
-            double tempr,tempi;
-            int ii = 2*(get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n);
-            int io = 2*(get_global_id(1)+(get_global_id(0)+get_global_id(2)*n)*n);
+         __kernel void transposeyz(  __global double2 *a, unsigned n) {
+            double2 temp;
+            int ii = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
+            int io = get_global_id(1)+(get_global_id(0)+get_global_id(2)*n)*n;
             if (ii <= io) {
-               tempr = a[io];
-               tempi = a[io+1];
+               temp = a[io];
                a[io] = a[ii];
-               a[io+1] = a[ii+1];
-               a[ii] = tempr;
-               a[ii+1] = tempi;
+               a[ii] = temp;
             }
          }
    
-         __kernel void transposexy( __global double *a, unsigned n) {
-            double tempr,tempi;
-            int ii = 2*(get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n);
-            int io = 2*(get_global_id(0)+(get_global_id(2)+get_global_id(1)*n)*n);
+         __kernel void transposexy( __global double2 *a, unsigned n) {
+            double2 temp;
+            int ii = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
+            int io = get_global_id(0)+(get_global_id(2)+get_global_id(1)*n)*n;
             if (ii <= io) {
-               tempr = a[io];
-               tempi = a[io+1];
+               temp = a[io];
                a[io] = a[ii];
-               a[io+1] = a[ii+1];
-               a[ii] = tempr;
-               a[ii+1] = tempi;
+               a[ii] = temp;
             }
          }
    
-         __kernel void multiply( __global double *factor, __global double *a,
+         __kernel void multiply( __global double2 *factor, __global double2 *a,
             unsigned n) {
-            int ifac = 2*(get_global_id(0)+n*get_global_id(1));
-            int i = 2*(get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n);
-            double tempr = a[i];
-            a[i] = factor[ifac]*a[i]-factor[ifac+1]*a[i+1];
-            a[i+1] = factor[ifac]*a[i+1]+factor[ifac+1]*tempr;
+            int ifac = get_global_id(0)+n*get_global_id(1);
+            int i = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
+            double tempr = a[i].x;
+            a[i].x = factor[ifac].x*a[i].x-factor[ifac].y*a[i].y;
+            a[i].y = factor[ifac].x*a[i].y+factor[ifac].y*tempr;
          }
    
-         __kernel void multiply_ith( __global double *factor, __global double *a,
+         __kernel void multiply_ith( __global double2 *factor, __global double2 *a,
             unsigned n, unsigned ith) {
-            int ifac = 2*(get_global_id(0)+n*(get_global_id(1)+n*ith));
-            int i = 2*(get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n);
-            double tempr = a[i];
-            a[i] = factor[ifac]*a[i]-factor[ifac+1]*a[i+1];
-            a[i+1] = factor[ifac]*a[i+1]+factor[ifac+1]*tempr;
+            int ifac = get_global_id(0)+n*(get_global_id(1)+n*ith);
+            int i = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
+            double tempr = a[i].x;
+            a[i].x = factor[ifac].x*a[i].x-factor[ifac].y*a[i].y;
+            a[i].y = factor[ifac].x*a[i].y+factor[ifac].y*tempr;
          }
-   
+         // Call with (n/2,n/2,n)
+         __kernel void rot90ev( __global double2 *a, unsigned n) {
+            int n2=n/2;
+            int i0 =\
+               n2+get_global_id(0)+n*(n2+get_global_id(1)+n*get_global_id(2));
+            int i1 =\
+               n2-get_global_id(1)-1+n*(n2+get_global_id(0)+n*get_global_id(2));
+            int i2 =\
+               n2-get_global_id(0)-1+n*(n2-get_global_id(1)-1+n*get_global_id(2));
+            int i3 =\
+               n2+get_global_id(1)+n*(n2-get_global_id(0)-1+n*get_global_id(2));
+            double2 temp = a[i0];
+            a[i0] = a[i3];
+            a[i3] = a[i2];
+            a[i2] = a[i1];
+            a[i1] = temp;
+         }
+
+         // Call with (n/2,n/2,n)
+         __kernel void rot270ev( __global double2 *a, unsigned n) {
+            int n2=n/2;
+            int i0 =\
+               n2+get_global_id(0)+n*(n2+get_global_id(1)+n*get_global_id(2));
+            int i1 =\
+               n2-get_global_id(1)-1+n*(n2+get_global_id(0)+n*get_global_id(2));
+            int i2 =\
+               n2-get_global_id(0)-1+n*(n2-get_global_id(1)-1+n*get_global_id(2));
+            int i3 =\
+               n2+get_global_id(1)+n*(n2-get_global_id(0)-1+n*get_global_id(2));
+            double2 temp = a[i0];
+            a[i0] = a[i1];
+            a[i1] = a[i2];
+            a[i2] = a[i3];
+            a[i3] = temp;
+         }
+
+         // Call with (n/2,n/2,n)
+         __kernel void rot180ev( __global double2 *a, unsigned n) {
+            //This could be made more efficient with (n,n/2,n) and do just
+            //one interchange per item.
+            int n2=n/2;
+            int i0 =\
+               n2+get_global_id(0)+n*(n2+get_global_id(1)+n*get_global_id(2));
+            int i1 =\
+               n2-get_global_id(1)-1+n*(n2+get_global_id(0)+n*get_global_id(2));
+            int i2 =\
+               n2-get_global_id(0)-1+n*(n2-get_global_id(1)-1+n*get_global_id(2));
+            int i3 =\
+               n2+get_global_id(1)+n*(n2-get_global_id(0)-1+n*get_global_id(2));
+            double2 temp = a[i0];
+            a[i0] = a[i2];
+            a[i2] = temp;
+            temp = a[i1];
+            a[i1] = a[i3];
+            a[i3] = temp;
+         }
+
          """). build ()
 
    @property
@@ -387,6 +436,7 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
 
    @f.setter
    def f(self,f):
+      self.checkf(f)
       cl.enqueue_copy(self.q,self.f_dev.data,f)
 
    def rotation(self,R):
@@ -394,10 +444,7 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       ang=-euler[0]
       n90 = np.rint(ang*2.0/np.pi)
       dang = ang-n90*np.pi*0.5
-      n90 = int(n90 % 4)
-      if n90 != 0:
-         print("90 degree rotations not implemented",n90)
-         sys.exit()
+      self.n90x1 = int(n90 % 4)
       scale0  = -np.tan(0.5*dang)
       x0, k0, x3 = self._getmultipliers(scale0)
       scale1 = np.sin(dang)
@@ -414,10 +461,7 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       ang=euler[1]
       n90 = np.rint(ang*2.0/np.pi)
       dang = ang-n90*np.pi*0.5
-      n90 = int(n90 % 4)
-      if n90 != 0:
-         print("90 degree rotations not implemented",n90)
-         sys.exit()
+      self.n90y = int(n90 % 4)
       scale0  = -np.tan(0.5*dang)
       x0, k0, x3 = self._getmultipliers(scale0)
       scale1 = np.sin(dang)
@@ -433,10 +477,7 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       ang=-euler[2]
       n90 = np.rint(ang*2.0/np.pi)
       dang = ang-n90*np.pi*0.5
-      n90 = int(n90 % 4)
-      if n90 != 0:
-         print("90 degree rotations not implemented",n90)
-         sys.exit()
+      self.n90x2 = int(n90 % 4)
       scale0  = -np.tan(0.5*dang)
       x0, k0, x3 = self._getmultipliers(scale0)
       scale1 = np.sin(dang)
@@ -450,6 +491,22 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       self.factors[16,:,:] = x2
       self.factors[17,:,:] = x3
       cl.enqueue_copy(self.q,self.factors_dev.data,self.factors)
+      if self.N%2 == 0:
+         if self.n90x1 < 2:
+            if self.n90x1 > 0:
+               self.prg.rot90ev(self.q,(int(self.N/2),int(self.N/2),self.N),
+                  None,self.f_dev.data,np.uint32(self.N))
+         else:
+            if self.n90x1 < 3:
+               self.prg.rot180ev(self.q,(int(self.N/2),int(self.N/2),self.N),
+                  None,self.f_dev.data,np.uint32(self.N))
+            else:
+               self.prg.rot270ev(self.q,(int(self.N/2),int(self.N/2),self.N),
+                  None,self.f_dev.data,np.uint32(self.N))
+      else:     
+         if self.n90x1 != 0:
+            print("n90 odd N not implemented")
+            sys.exit()
       self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
          self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(0))
       self.app.fft(self.f_dev)
@@ -477,6 +534,22 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
 
       self.prg.transposexy(self.q,(self.N,self.N,self.N),None,
          self.f_dev.data,np.uint32(self.N))
+      if self.N%2 == 0:
+         if self.n90y < 2:
+            if self.n90y > 0:
+               self.prg.rot90ev(self.q,(int(self.N/2),int(self.N/2),self.N),
+                  None,self.f_dev.data,np.uint32(self.N))
+         else:
+            if self.n90y < 3:
+               self.prg.rot180ev(self.q,(int(self.N/2),int(self.N/2),self.N),
+                  None,self.f_dev.data,np.uint32(self.N))
+            else:
+               self.prg.rot270ev(self.q,(int(self.N/2),int(self.N/2),self.N),
+                  None,self.f_dev.data,np.uint32(self.N))
+      else:     
+         if self.n90y != 0:
+            print("n90 odd N not implemented")
+            sys.exit()
       self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
          self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(6))
       self.app.fft(self.f_dev)
@@ -504,6 +577,22 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       self.prg.transposexy(self.q,(self.N,self.N,self.N),None,
          self.f_dev.data,np.uint32(self.N))
 
+      if self.N%2 == 0:
+         if self.n90x2 < 2:
+            if self.n90x2 > 0:
+               self.prg.rot90ev(self.q,(int(self.N/2),int(self.N/2),self.N),
+                  None,self.f_dev.data,np.uint32(self.N))
+         else:
+            if self.n90x2 < 3:
+               self.prg.rot180ev(self.q,(int(self.N/2),int(self.N/2),self.N),
+                  None,self.f_dev.data,np.uint32(self.N))
+            else:
+               self.prg.rot270ev(self.q,(int(self.N/2),int(self.N/2),self.N),
+                  None,self.f_dev.data,np.uint32(self.N))
+      else:     
+         if self.n90x2 != 0:
+            print("n90 odd N not implemented")
+            sys.exit()
       self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
          self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(12))
       self.app.fft(self.f_dev)
