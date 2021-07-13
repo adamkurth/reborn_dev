@@ -335,7 +335,8 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
          dtype=self.dev_dtype,queue=self.q,ndim=1)
       self.factors = np.ndarray((18,self.N,self.N),self.dev_dtype)
       self.factors_dev = cl.array.to_device(self.q,self.factors)
-      self.f_dev = cl.array.to_device(self.q,f3d.astype(self.dev_dtype))
+      self.f_dev = cl.array.to_device(self.q,
+         f3d.astype(self.dev_dtype,order='C'))
       #stupid routines on gpu -- improve me
       prg_double = cl.Program(self.ctx, """
          __kernel void transposeyz(  __global double2 *a, unsigned n) {
@@ -671,7 +672,8 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
    @f.setter
    def f(self,f):
       self._checkf(f)
-      cl.enqueue_copy(self.q,self.f_dev.data,f.astype(self.dev_dtype))
+      cl.enqueue_copy(self.q,self.f_dev.data,
+         f.astype(self.dev_dtype,order='C'))
 
    def rotation(self,R):
       euler = R.as_euler('xyx')
