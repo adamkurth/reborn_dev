@@ -89,17 +89,18 @@ contains
    enddo
    end subroutine rotate3dz
 
-   subroutine rotate3dy(f,ang,nin)
-   real(kind=r8), intent(in) :: ang
+   subroutine rotate3dy(f,angin,nin)
+   real(kind=r8), intent(in) :: angin
    integer(kind=i4), intent(in) :: nin
    complex(kind=c8), intent(inout) :: f(nin,nin,nin)
    integer(kind=i4) :: n90,ix,iy,iz
-   real(kind=r8) :: dang
+   real(kind=r8) :: dang,ang
 ! same as rotate3dz but change sign of ang and
 ! put cycled coordinates x->y->z->x of f and interchange order to
 ! agree with python version
-   n90=nint(-ang*2.0_r8/pi)
-   dang=-ang-n90*0.5_r8*pi
+   ang=-angin
+   n90=nint(ang*2.0_r8/pi)
+   dang=ang-n90*0.5_r8*pi
    n90=modulo(n90,4)
    if ((dang.eq.0.0_r8).and.(n90.eq.0)) return
    if (dang.ne.0.0_r8) call setupfacs(dang)
@@ -112,7 +113,8 @@ contains
          case(1)
             do ix=1,n
                do iy=1,n
-                  ftmp1(ix,n+1-iy)=f(iy,iz,ix)
+!                  ftmp1(ix,n+1-iy)=f(iy,iz,ix)
+                  ftmp1(n+1-ix,iy)=f(iy,iz,ix)
                enddo
             enddo
          case(2)
@@ -124,7 +126,8 @@ contains
          case(3)
             do ix=1,n
                do iy=1,n
-                  ftmp1(n+1-ix,iy)=f(iy,iz,ix)
+!                  ftmp1(n+1-ix,iy)=f(iy,iz,ix)
+                  ftmp1(ix,n+1-iy)=f(iy,iz,ix)
                enddo
             enddo
       end select
