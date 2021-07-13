@@ -309,11 +309,16 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
     that are products of powers of 2,3,5,7,11,13.  It uses the pyvkfft
     wrapper to VkFFT to perform Fourier transforms on a gpu. Since this
     is my first opencl code, it is no doubt written inefficiently.
+
+    Additional Argument:
+       dev_dtype: defaults to np.complex128. Setting it to np.complex64
+       makes the device calculations single precision.
    """
 
-   def __init__(self,f3d):
+   def __init__(self,f3d,dev_dtype=np.complex128):
       self.N = 0
       self.f_dev = None
+      self.dev_dtype = dev_dtype
       self._checkf(f3d)
       vkfft_primes = (2,3,5,7,11,13)
       modprimes = self.N
@@ -327,12 +332,12 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       self.ctx = reborn.simulate.clcore.create_some_gpu_context()
       self.q = cl.CommandQueue(self.ctx)
       self.app = pyvkfft.opencl.VkFFTApp((self.N,self.N,self.N),
-         dtype=np.complex128,queue=self.q,ndim=1)
-      self.factors = np.ndarray((18,self.N,self.N),np.complex128)
+         dtype=self.dev_dtype,queue=self.q,ndim=1)
+      self.factors = np.ndarray((18,self.N,self.N),self.dev_dtype)
       self.factors_dev = cl.array.to_device(self.q,self.factors)
-      self.f_dev = cl.array.to_device(self.q,f3d)
+      self.f_dev = cl.array.to_device(self.q,f3d.astype(self.dev_dtype))
       #stupid routines on gpu -- improve me
-      self.prg = cl.Program(self.ctx, """
+      prg_double = cl.Program(self.ctx, """
          __kernel void transposeyz(  __global double2 *a, unsigned n) {
             double2 temp;
             int ii = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
@@ -491,7 +496,173 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
             a[i3] = temp;
          }
 
-         """). build ()
+         """)
+
+      prg_single = cl.Program(self.ctx, """
+         __kernel void transposeyz(  __global float2 *a, unsigned n) {
+            float2 temp;
+            int ii = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
+            int io = get_global_id(1)+(get_global_id(0)+get_global_id(2)*n)*n;
+            if (ii <= io) {
+               temp = a[io];
+               a[io] = a[ii];
+               a[ii] = temp;
+            }
+         }
+   
+         __kernel void transposexy( __global float2 *a, unsigned n) {
+            float2 temp;
+            int ii = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
+            int io = get_global_id(0)+(get_global_id(2)+get_global_id(1)*n)*n;
+            if (ii <= io) {
+               temp = a[io];
+               a[io] = a[ii];
+               a[ii] = temp;
+            }
+         }
+   
+         __kernel void multiply_ith( __global float2 *factor,\
+             __global float2 *a, unsigned n, unsigned ith) {
+            int ifac = get_global_id(0)+n*(get_global_id(1)+n*ith);
+            int i = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
+            float tempr = a[i].x;
+            a[i].x = factor[ifac].x*a[i].x-factor[ifac].y*a[i].y;
+            a[i].y = factor[ifac].x*a[i].y+factor[ifac].y*tempr;
+         }
+
+         // Call with (n/2,n/2,n)
+         __kernel void rot90ev( __global float2 *a, unsigned n) {
+            int n2=n/2;
+            int i0 =\
+               n2+get_global_id(0)+n*(n2+get_global_id(1)+n*get_global_id(2));
+            int i1 =\
+               n2-get_global_id(1)-1+n*(n2+get_global_id(0)+n*get_global_id(2));
+            int i2 =\
+               n2-get_global_id(0)-1\
+               +n*(n2-get_global_id(1)-1+n*get_global_id(2));
+            int i3 =\
+               n2+get_global_id(1)+n*(n2-get_global_id(0)-1+n*get_global_id(2));
+            float2 temp = a[i0];
+            a[i0] = a[i3];
+            a[i3] = a[i2];
+            a[i2] = a[i1];
+            a[i1] = temp;
+         }
+
+         // Call with (n/2,n/2,n)
+         __kernel void rot270ev( __global float2 *a, unsigned n) {
+            int n2=n/2;
+            int i0 =\
+               n2+get_global_id(0)+n*(n2+get_global_id(1)+n*get_global_id(2));
+            int i1 =\
+               n2-get_global_id(1)-1+n*(n2+get_global_id(0)+n*get_global_id(2));
+            int i2 =\
+               n2-get_global_id(0)-1\
+               +n*(n2-get_global_id(1)-1+n*get_global_id(2));
+            int i3 =\
+               n2+get_global_id(1)\
+               +n*(n2-get_global_id(0)-1+n*get_global_id(2));
+            float2 temp = a[i0];
+            a[i0] = a[i1];
+            a[i1] = a[i2];
+            a[i2] = a[i3];
+            a[i3] = temp;
+         }
+
+         // Call with (n/2,n/2,n)
+         __kernel void rot180ev( __global float2 *a, unsigned n) {
+            //This could be made more efficient with (n,n/2,n) and do just
+            //one interchange per item.
+            int n2=n/2;
+            int i0 =\
+               n2+get_global_id(0)+n*(n2+get_global_id(1)+n*get_global_id(2));
+            int i1 =\
+               n2-get_global_id(1)-1+n*(n2+get_global_id(0)+n*get_global_id(2));
+            int i2 =\
+               n2-get_global_id(0)-1\
+               +n*(n2-get_global_id(1)-1+n*get_global_id(2));
+            int i3 =\
+               n2+get_global_id(1)+n*(n2-get_global_id(0)-1+n*get_global_id(2));
+            float2 temp = a[i0];
+            a[i0] = a[i2];
+            a[i2] = temp;
+            temp = a[i1];
+            a[i1] = a[i3];
+            a[i3] = temp;
+         }
+
+         // Call with ((n+1)/2,(n-1)/2,n)
+         __kernel void rot90odd( __global float2 *a, unsigned n) {
+            int n2=(n+1)/2;
+            int i0 =\
+               n2-1+get_global_id(0)\
+               +n*(n2+get_global_id(1)+n*get_global_id(2));
+            int i1 =\
+               n2-2-get_global_id(1)\
+               +n*(n2-1+get_global_id(0)+n*get_global_id(2));
+            int i2 =\
+               n2-1-get_global_id(0)\
+               +n*(n2-2-get_global_id(1)+n*get_global_id(2));
+            int i3 =\
+               n2+get_global_id(1)+n*(n2-1-get_global_id(0)+n*get_global_id(2));
+            float2 temp = a[i0];
+            a[i0] = a[i3];
+            a[i3] = a[i2];
+            a[i2] = a[i1];
+            a[i1] = temp;
+         }
+
+         // Call with ((n+1)/2,(n-1)/2,n)
+         __kernel void rot270odd( __global float2 *a, unsigned n) {
+            int n2=(n+1)/2;
+            int i0 =\
+               n2-1+get_global_id(0)\
+               +n*(n2+get_global_id(1)+n*get_global_id(2));
+            int i1 =\
+               n2-2-get_global_id(1)\
+               +n*(n2-1+get_global_id(0)+n*get_global_id(2));
+            int i2 =\
+               n2-1-get_global_id(0)\
+               +n*(n2-2-get_global_id(1)+n*get_global_id(2));
+            int i3 =\
+               n2+get_global_id(1)\
+               +n*(n2-1-get_global_id(0)+n*get_global_id(2));
+            float2 temp = a[i0];
+            a[i0] = a[i1];
+            a[i1] = a[i2];
+            a[i2] = a[i3];
+            a[i3] = temp;
+         }
+
+         // Call with ((n+1)/2,(n-1)/2,n)
+         __kernel void rot180odd( __global float2 *a, unsigned n) {
+            int n2=(n+1)/2;
+            int i0 =\
+               n2-1+get_global_id(0)\
+               +n*(n2+get_global_id(1)+n*get_global_id(2));
+            int i1 =\
+               n2-2-get_global_id(1)\
+               +n*(n2-1+get_global_id(0)+n*get_global_id(2));
+            int i2 =\
+               n2-1-get_global_id(0)
+               +n*(n2-2-get_global_id(1)+n*get_global_id(2));
+            int i3 =\
+               n2+get_global_id(1)\
+               +n*(n2-1-get_global_id(0)+n*get_global_id(2));
+            float2 temp = a[i0];
+            a[i0] = a[i2];
+            a[i2] = temp;
+            temp = a[i1];
+            a[i1] = a[i3];
+            a[i3] = temp;
+         }
+
+         """)
+
+      if self.dev_dtype == np.complex128:
+         self.prg = prg_double.build()
+      else:
+         self.prg = prg_single.build()
 
    @property
    def f(self):
@@ -500,7 +671,7 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
    @f.setter
    def f(self,f):
       self._checkf(f)
-      cl.enqueue_copy(self.q,self.f_dev.data,f)
+      cl.enqueue_copy(self.q,self.f_dev.data,f.astype(self.dev_dtype))
 
    def rotation(self,R):
       euler = R.as_euler('xyx')
@@ -514,12 +685,12 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       x1, k1, x2 = self._getmultipliers(scale1)
       x1 = np.transpose(x1)*x3
       x2 = np.transpose(x2)*x0
-      self.factors[0,:,:] = x0
-      self.factors[1,:,:] = k0
-      self.factors[2,:,:] = x1
-      self.factors[3,:,:] = k1
-      self.factors[4,:,:] = x2
-      self.factors[5,:,:] = x3
+      self.factors[0,:,:] = x0.astype(self.dev_dtype)
+      self.factors[1,:,:] = k0.astype(self.dev_dtype)
+      self.factors[2,:,:] = x1.astype(self.dev_dtype)
+      self.factors[3,:,:] = k1.astype(self.dev_dtype)
+      self.factors[4,:,:] = x2.astype(self.dev_dtype)
+      self.factors[5,:,:] = x3.astype(self.dev_dtype)
       euler = R.as_euler('xyx')
       ang=euler[1]
       n90 = np.rint(ang*2.0/np.pi)
@@ -531,12 +702,12 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       x1, k1, x2 = self._getmultipliers(scale1)
       x1 = np.transpose(x1)*x3
       x2 = np.transpose(x2)*x0
-      self.factors[6,:,:] = x0
-      self.factors[7,:,:] = k0
-      self.factors[8,:,:] = x1
-      self.factors[9,:,:] = k1
-      self.factors[10,:,:] = x2
-      self.factors[11,:,:] = x3
+      self.factors[6,:,:] = x0.astype(self.dev_dtype)
+      self.factors[7,:,:] = k0.astype(self.dev_dtype)
+      self.factors[8,:,:] = x1.astype(self.dev_dtype)
+      self.factors[9,:,:] = k1.astype(self.dev_dtype)
+      self.factors[10,:,:] = x2.astype(self.dev_dtype)
+      self.factors[11,:,:] = x3.astype(self.dev_dtype)
       ang=-euler[2]
       n90 = np.rint(ang*2.0/np.pi)
       dang = ang-n90*np.pi*0.5
@@ -547,12 +718,12 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       x1, k1, x2 = self._getmultipliers(scale1)
       x1 = np.transpose(x1)*x3
       x2 = np.transpose(x2)*x0
-      self.factors[12,:,:] = x0
-      self.factors[13,:,:] = k0
-      self.factors[14,:,:] = x1
-      self.factors[15,:,:] = k1
-      self.factors[16,:,:] = x2
-      self.factors[17,:,:] = x3
+      self.factors[12,:,:] = x0.astype(self.dev_dtype)
+      self.factors[13,:,:] = k0.astype(self.dev_dtype)
+      self.factors[14,:,:] = x1.astype(self.dev_dtype)
+      self.factors[15,:,:] = k1.astype(self.dev_dtype)
+      self.factors[16,:,:] = x2.astype(self.dev_dtype)
+      self.factors[17,:,:] = x3.astype(self.dev_dtype)
       cl.enqueue_copy(self.q,self.factors_dev.data,self.factors)
       if self.N%2 == 0:
          if self.n90x1 < 2:
