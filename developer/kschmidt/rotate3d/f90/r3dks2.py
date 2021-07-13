@@ -2,16 +2,10 @@
 Some environment variables that affect the behavior of this module:
 PYOPENCL_CTX: This sets the device and platform automatically.
 """
-import sys
 import numpy as np
 import scipy
 import scipy.fftpack as fft
-import pyopencl as cl
-import pyopencl.array
-import pyvkfft.opencl
-import reborn
-import reborn.simulate
-import reborn.simulate.clcore
+
 
 
 class rotate3D:
@@ -161,6 +155,13 @@ class rotate3Djoeorder(rotate3D):
       self._rotate3Dx(-euler[2])
       self._f = np.transpose(self._f,axes=(0,2,1))
 
+
+import pyopencl as cl
+import pyopencl.array
+import pyvkfft.opencl
+import reborn
+import reborn.simulate
+import reborn.simulate.clcore
 
 class rotate3Dvkfft(rotate3D):
    r"""
