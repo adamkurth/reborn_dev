@@ -135,10 +135,10 @@ class rotate3D:
       for i in range(1,self.N):
          k0[i,:] = k0[i-1,:]*k
       k0 = np.transpose(k0).copy()
-      c = -1j*np.pi*(1-(self.N%2)/self.N)
+      c = 1j*np.pi*(1-(self.N%2)/self.N)
       x0 = np.tile(np.exp(c*nint),(self.N,1))
-      x2 = np.tile(np.exp(-c*(nint-c0)*scale),(self.N,1))
-      x1 = np.transpose(x2)*x0
+      x2 = np.tile(np.exp(c*(nint-c0)*scale),(self.N,1))
+      x1 = np.transpose(x2)*np.conjugate(x0)
       return x0,k0,x1
 
 class rotate3Djoeorder(rotate3D):
