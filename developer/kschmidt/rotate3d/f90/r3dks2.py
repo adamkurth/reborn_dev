@@ -667,7 +667,7 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
 
    @property
    def f(self):
-      return self.f_dev.get()
+      return self.f_dev.get().astype(np.complex128)
 
    @f.setter
    def f(self,f):
