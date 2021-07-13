@@ -42,10 +42,10 @@ class rotate3D:
 
    @f.setter
    def f(self,f):
-      self.checkf(f)
+      self._checkf(f)
       self._f = f.copy()
 
-   def checkf(self,f3d):
+   def _checkf(self,f3d):
 #check f3d is 3d, cubic, double complex
       if len(f3d.shape) != 3:
          raise ValueError("rotate3D: f3d must be 3 dimensional")
@@ -314,7 +314,7 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
    def __init__(self,f3d):
       self.N = 0
       self.f_dev = None
-      self.checkf(f3d)
+      self._checkf(f3d)
       vkfft_primes = (2,3,5,7,11,13)
       modprimes = self.N
       for i in range(len(vkfft_primes)):
@@ -499,7 +499,7 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
 
    @f.setter
    def f(self,f):
-      self.checkf(f)
+      self._checkf(f)
       cl.enqueue_copy(self.q,self.f_dev.data,f)
 
    def rotation(self,R):
