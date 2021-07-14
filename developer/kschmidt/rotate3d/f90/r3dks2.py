@@ -338,7 +338,7 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       self.f_dev = cl.array.to_device(self.q,
          f3d.astype(self.dev_dtype,order='C'))
       #stupid routines on gpu -- improve me
-      prg_double = cl.Program(self.ctx, """
+      src_double = """
          __kernel void transposeyz(  __global double2 *a, unsigned n) {
             double2 temp;
             int ii = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
@@ -497,173 +497,15 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
             a[i3] = temp;
          }
 
-         """)
-
-      prg_single = cl.Program(self.ctx, """
-         __kernel void transposeyz(  __global float2 *a, unsigned n) {
-            float2 temp;
-            int ii = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
-            int io = get_global_id(1)+(get_global_id(0)+get_global_id(2)*n)*n;
-            if (ii <= io) {
-               temp = a[io];
-               a[io] = a[ii];
-               a[ii] = temp;
-            }
-         }
-   
-         __kernel void transposexy( __global float2 *a, unsigned n) {
-            float2 temp;
-            int ii = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
-            int io = get_global_id(0)+(get_global_id(2)+get_global_id(1)*n)*n;
-            if (ii <= io) {
-               temp = a[io];
-               a[io] = a[ii];
-               a[ii] = temp;
-            }
-         }
-   
-         __kernel void multiply_ith( __global float2 *factor,\
-             __global float2 *a, unsigned n, unsigned ith) {
-            int ifac = get_global_id(0)+n*(get_global_id(1)+n*ith);
-            int i = get_global_id(0)+(get_global_id(1)+get_global_id(2)*n)*n;
-            float tempr = a[i].x;
-            a[i].x = factor[ifac].x*a[i].x-factor[ifac].y*a[i].y;
-            a[i].y = factor[ifac].x*a[i].y+factor[ifac].y*tempr;
-         }
-
-         // Call with (n/2,n/2,n)
-         __kernel void rot90ev( __global float2 *a, unsigned n) {
-            int n2=n/2;
-            int i0 =\
-               n2+get_global_id(0)+n*(n2+get_global_id(1)+n*get_global_id(2));
-            int i1 =\
-               n2-get_global_id(1)-1+n*(n2+get_global_id(0)+n*get_global_id(2));
-            int i2 =\
-               n2-get_global_id(0)-1\
-               +n*(n2-get_global_id(1)-1+n*get_global_id(2));
-            int i3 =\
-               n2+get_global_id(1)+n*(n2-get_global_id(0)-1+n*get_global_id(2));
-            float2 temp = a[i0];
-            a[i0] = a[i3];
-            a[i3] = a[i2];
-            a[i2] = a[i1];
-            a[i1] = temp;
-         }
-
-         // Call with (n/2,n/2,n)
-         __kernel void rot270ev( __global float2 *a, unsigned n) {
-            int n2=n/2;
-            int i0 =\
-               n2+get_global_id(0)+n*(n2+get_global_id(1)+n*get_global_id(2));
-            int i1 =\
-               n2-get_global_id(1)-1+n*(n2+get_global_id(0)+n*get_global_id(2));
-            int i2 =\
-               n2-get_global_id(0)-1\
-               +n*(n2-get_global_id(1)-1+n*get_global_id(2));
-            int i3 =\
-               n2+get_global_id(1)\
-               +n*(n2-get_global_id(0)-1+n*get_global_id(2));
-            float2 temp = a[i0];
-            a[i0] = a[i1];
-            a[i1] = a[i2];
-            a[i2] = a[i3];
-            a[i3] = temp;
-         }
-
-         // Call with (n/2,n/2,n)
-         __kernel void rot180ev( __global float2 *a, unsigned n) {
-            //This could be made more efficient with (n,n/2,n) and do just
-            //one interchange per item.
-            int n2=n/2;
-            int i0 =\
-               n2+get_global_id(0)+n*(n2+get_global_id(1)+n*get_global_id(2));
-            int i1 =\
-               n2-get_global_id(1)-1+n*(n2+get_global_id(0)+n*get_global_id(2));
-            int i2 =\
-               n2-get_global_id(0)-1\
-               +n*(n2-get_global_id(1)-1+n*get_global_id(2));
-            int i3 =\
-               n2+get_global_id(1)+n*(n2-get_global_id(0)-1+n*get_global_id(2));
-            float2 temp = a[i0];
-            a[i0] = a[i2];
-            a[i2] = temp;
-            temp = a[i1];
-            a[i1] = a[i3];
-            a[i3] = temp;
-         }
-
-         // Call with ((n+1)/2,(n-1)/2,n)
-         __kernel void rot90odd( __global float2 *a, unsigned n) {
-            int n2=(n+1)/2;
-            int i0 =\
-               n2-1+get_global_id(0)\
-               +n*(n2+get_global_id(1)+n*get_global_id(2));
-            int i1 =\
-               n2-2-get_global_id(1)\
-               +n*(n2-1+get_global_id(0)+n*get_global_id(2));
-            int i2 =\
-               n2-1-get_global_id(0)\
-               +n*(n2-2-get_global_id(1)+n*get_global_id(2));
-            int i3 =\
-               n2+get_global_id(1)+n*(n2-1-get_global_id(0)+n*get_global_id(2));
-            float2 temp = a[i0];
-            a[i0] = a[i3];
-            a[i3] = a[i2];
-            a[i2] = a[i1];
-            a[i1] = temp;
-         }
-
-         // Call with ((n+1)/2,(n-1)/2,n)
-         __kernel void rot270odd( __global float2 *a, unsigned n) {
-            int n2=(n+1)/2;
-            int i0 =\
-               n2-1+get_global_id(0)\
-               +n*(n2+get_global_id(1)+n*get_global_id(2));
-            int i1 =\
-               n2-2-get_global_id(1)\
-               +n*(n2-1+get_global_id(0)+n*get_global_id(2));
-            int i2 =\
-               n2-1-get_global_id(0)\
-               +n*(n2-2-get_global_id(1)+n*get_global_id(2));
-            int i3 =\
-               n2+get_global_id(1)\
-               +n*(n2-1-get_global_id(0)+n*get_global_id(2));
-            float2 temp = a[i0];
-            a[i0] = a[i1];
-            a[i1] = a[i2];
-            a[i2] = a[i3];
-            a[i3] = temp;
-         }
-
-         // Call with ((n+1)/2,(n-1)/2,n)
-         __kernel void rot180odd( __global float2 *a, unsigned n) {
-            int n2=(n+1)/2;
-            int i0 =\
-               n2-1+get_global_id(0)\
-               +n*(n2+get_global_id(1)+n*get_global_id(2));
-            int i1 =\
-               n2-2-get_global_id(1)\
-               +n*(n2-1+get_global_id(0)+n*get_global_id(2));
-            int i2 =\
-               n2-1-get_global_id(0)
-               +n*(n2-2-get_global_id(1)+n*get_global_id(2));
-            int i3 =\
-               n2+get_global_id(1)\
-               +n*(n2-1-get_global_id(0)+n*get_global_id(2));
-            float2 temp = a[i0];
-            a[i0] = a[i2];
-            a[i2] = temp;
-            temp = a[i1];
-            a[i1] = a[i3];
-            a[i3] = temp;
-         }
-
-         """)
+         """
 
       if self.dev_dtype == np.complex128:
-         self.prg = prg_double.build()
+         self.prg = cl.Program(self.ctx,src_double).build()
       else:
-         self.prg = prg_single.build()
+         # Make sure no variables or routine names contain the string
+         # double or this simple substitution will not work.
+         self.prg = cl.Program(self.ctx,
+            src_double.replace("double","float")).build()
 
    @property
    def f(self):
