@@ -1,5 +1,6 @@
 import numpy as np
 from reborn.target import atoms
+from reborn.simulate import atoms as atoms2
 from scipy import constants as const
 
 eV = const.value('electron volt')
