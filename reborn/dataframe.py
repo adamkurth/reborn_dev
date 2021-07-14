@@ -102,7 +102,7 @@ class DataFrame:
         return self._frame_index
 
     def set_frame_index(self, index):
-        r""" See corresponding get_ method. """
+        r""" See corresponding get_frame_index method. """
         self._frame_index = int(index)
 
     def get_frame_id(self):
@@ -112,7 +112,7 @@ class DataFrame:
         return self._frame_id
 
     def set_frame_id(self, frame_id):
-        r""" See the corresponding get_ method."""
+        r""" See the corresponding get_frame_id method."""
         self._frame_id = frame_id
 
     def get_beam(self):
@@ -120,7 +120,7 @@ class DataFrame:
         return self._beam.copy()
 
     def set_beam(self, beam):
-        r""" See the corresponding get_ method."""
+        r""" See the corresponding get_beam method."""
         self.clear_cache()
         beam = beam.copy()
         beam.validate(raise_error=True)
@@ -133,7 +133,7 @@ class DataFrame:
         return self._pad_geometry.copy()
 
     def set_pad_geometry(self, pads):
-        r""" See the corresponding get_ method. """
+        r""" See the corresponding get_pad_geometry method. """
         self.clear_cache()
         pads = detector.PADGeometryList(pads.copy())
         pads.validate(raise_error=True)

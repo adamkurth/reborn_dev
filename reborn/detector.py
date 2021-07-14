@@ -625,11 +625,11 @@ class PADGeometryList(list):
         return s
 
     def split_data(self, data):
-        r""" Split a contiguous |ndarray| into list of 2D |ndarray|s."""
+        r""" Split a contiguous 1D |ndarray| into list of 2D |ndarray| instances."""
         return split_pad_data(self, data)
 
     def concat_data(self, data):
-        r""" Concatenate a list of |ndarray|s into a single 1D |ndarray|."""
+        r""" Concatenate a list of |ndarray| instances into a single concatenated 1D |ndarray| ."""
         return concat_pad_data(data)
 
     @property
