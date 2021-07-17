@@ -167,7 +167,7 @@ plt.legend()
 # Here are the total scattering factors :math:`f(q, E)` that come from |Henke1993| and |xraylib|.  Probably, the best
 # way to go is to use the form factors from |Hubbel1975|, while using the dispersion corrections from |Henke1993|.
 # A simple way to do this is to use the reborn function
-# :func:`hubbel_henke_scattering_factors <reborn.simulate.atoms.hubbel_henke_scattering_factors>` as demonstrated
+# :func:`hubbel_henke_scattering_factors <reborn.target.atoms.hubbel_henke_scattering_factors>` as demonstrated
 # below:
 
 q_mags = 1e10*4*np.pi*np.arange(1000)*3/1000

@@ -144,7 +144,7 @@ def henke_dispersion_corrections(atomic_numbers, photon_energies):
 def get_scattering_factors(atomic_numbers, photon_energy):
     r"""
     Get complex atomic scattering factors (from Henke tables) for a single photon energy and a range of atomic numbers.
-    The scattering factor data come from the function :func:`get_henke_data <reborn.simulate.atoms.get_henke_data>`.
+    The scattering factor data come from the function :func:`get_henke_data <reborn.target.atoms.get_henke_data>`.
     See the function :func:`get_scattering_factors_fixed_z` if you have a range of photon energies and one atomic
     number.
 
