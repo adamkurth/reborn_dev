@@ -1,1 +1,1 @@
-from ..target import atoms
+from . import atoms
