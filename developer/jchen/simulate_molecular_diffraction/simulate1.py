@@ -12,9 +12,9 @@ eV = const.value('electron volt')
 r_e = const.value('classical electron radius')
 np.random.seed(42)  # Make random numbers that are reproducible
 
-beam = Beam(photon_energy=9000*eV, diameter_fwhm=0.2e-6, pulse_energy=2)
+beam = Beam(photon_energy=8000*eV, diameter_fwhm=0.2e-6, pulse_energy=3e-3)
 fluence = beam.photon_number_fluence
-pads = jungfrau4m_pads(detector_distance=0.2, binning=16)  # Speed up simulations by binning pixels 16x16
+pads = jungfrau4m_pads(detector_distance=0.36, binning=1)  # Speed up simulations by binning pixels 16x16
 q_vecs = [pad.q_vecs(beam=beam) for pad in pads]
 solid_angles = [pad.solid_angles() for pad in pads]
 polarization_factors = [pad.polarization_factors(beam=beam) for pad in pads]
@@ -44,7 +44,14 @@ for z in uniq_z:
                                                             atomic_number=z))
 
 
-R = np.eye(3)#Rotation.random().as_matrix()  # Just for fun, let's rotate the molecule
+thet = 90/180 * np.pi
+c = np.cos(thet)
+s = np.sin(thet)
+R = np.array([[c, 0, s], [0, 1 ,0], [-s, 0 , c]])#np.eye(3)#Rotation.random().as_matrix()  # Just for fun, let's rotate the molecule
+
+from reborn.utils.
+
+
 intensities = []
 for i in range(len(pads)):
     pad = pads[i]
@@ -64,5 +71,5 @@ for i in range(len(pads)):
 
 print('# photons total: %d' % np.round(np.sum(detector.concat_pad_data(intensities))))
 
-dispim = [np.log10(d+1) for d in intensities]
+dispim = [np.log10(d+0) for d in intensities]
 view_pad_data(pad_data=dispim, pad_geometry=pads)
