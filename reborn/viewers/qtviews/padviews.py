@@ -57,6 +57,15 @@ def ensure_dataframe(data, parent):
         return dataframe
 
 
+class DummyFrameGetter(FrameGetter):
+    def __init__(self, dataframe):
+        super().__init__()
+        self.dataframe = dataframe
+        dataframe.validate()
+    def get_frame(self, frame_number=None):
+        return self.dataframe
+
+
 class PADView2(QtCore.QObject):
 
     r"""
@@ -133,12 +142,6 @@ class PADView2(QtCore.QObject):
                 self.dataframe = raw_data
 
         if self.dataframe is None:  # In case frame_getter does not return a DataFrame
-            # Handling of raw diffraction intensities:
-            if raw_data is not None:
-                if isinstance(raw_data, dict):
-                    pass
-                else:
-                    raw_data = {'pad_data': utils.ensure_list(raw_data)}
             # Handling of geometry info:
             if pad_geometry is None:
                 self.debug('WARNING: Making up some *GARBAGE* PAD geometry because you provided no specification.')
@@ -150,6 +153,12 @@ class PADView2(QtCore.QObject):
                     shft += pad.shape()[0]
                     pad_geometry.append(pad)
             pad_geometry = detector.PADGeometryList(pad_geometry)
+            # Handling of raw diffraction intensities:
+            if raw_data is not None:
+                if isinstance(raw_data, dict):
+                    pass
+                else:
+                    raw_data = {'pad_data': pad_geometry.split_data(raw_data)}
             # Handling of beam info:
             if beam is None:
                 self.debug('WARNING: Making up some *GARBAGE* beam information because you provided no specification.')
@@ -157,9 +166,10 @@ class PADView2(QtCore.QObject):
             # Handling of mask info:
             if mask_data is None:
                 mask_data = [p.ones() for p in pad_geometry]
-
             self.dataframe = reborn.dataframe.DataFrame(raw_data=raw_data['pad_data'], pad_geometry=pad_geometry, beam=beam,
                                                         mask=mask_data)
+            self.frame_getter = DummyFrameGetter(self.dataframe)
+
         if not self.dataframe.validate():
             print('DataFrame is not valid!')
         self.app = pg.mkQApp()
@@ -815,7 +825,7 @@ class PADView2(QtCore.QObject):
         if file_name == "":
             return
         self.debug('Saving PAD geometry to file: %s' % file_name)
-        detector.save_pad_geometry_list(file_name, self.pad_geometry)
+        detector.save_pad_geometry_list(file_name, self.dataframe.get_pad_geometry())
 
     def load_pad_geometry(self):
         r""" Load list of pad geometry specifications in json format. """
@@ -1338,8 +1348,8 @@ class PADView2(QtCore.QObject):
         #             self.debug('Closing widget %s' % key, 1)
         #             self.plugins[key] = None
         #             # plugin.widget.close()
-        self.app.quit()
-        del self.app
+        # self.app.quit()
+        # del self.app
 
     def show(self):
         self.debug(get_caller(), 1)
@@ -1357,6 +1367,12 @@ class PADView2(QtCore.QObject):
         method = getattr(self, method_name, None)
         if method is not None:
             method(*args, **kwargs)
+
+
+def view_pad_data(pad_data=None, pad_geometry=None, show=True):
+    pv = PADView(raw_data=pad_data, pad_geometry=pad_geometry)
+    if show:
+        pv.start()
 
 
 PADView = PADView2

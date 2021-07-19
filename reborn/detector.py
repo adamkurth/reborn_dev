@@ -1407,6 +1407,7 @@ def load_pad_masks(file_name):
 
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
 cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_geometry.json')
+cspad_2x2_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_2x2_geometry.json')
 epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k_geometry.json')
 
 
@@ -1432,6 +1433,20 @@ def cspad_pad_geometry_list(detector_distance=0.1):
     Returns: List of |PADGeometry| instances
     """
     pads = load_pad_geometry_list(cspad_geom_file)
+    for p in pads: p.t_vec[2] = detector_distance
+    return pads
+
+
+def cspad_2x2_pad_geometry_list(detector_distance=2.4):
+    r"""
+    Generate a list of |PADGeometry| instances that are inspired by the |CSPAD| detector.
+
+    Arguments:
+        detector_distance (float): Detector distance in SI units
+
+    Returns: List of |PADGeometry| instances
+    """
+    pads = load_pad_geometry_list(cspad_2x2_geom_file)
     for p in pads: p.t_vec[2] = detector_distance
     return pads
 

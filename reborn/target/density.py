@@ -5,6 +5,7 @@ try:
 except ImportError:
     from ..utils import __fake_numba_jit as jit
 
+
 class DensityMap(object):
 
     shape = None    # : Shape of the array, numpy style

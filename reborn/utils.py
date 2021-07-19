@@ -11,9 +11,8 @@ import numpy as np
 from numpy import sin, cos
 from numpy.fft import fftshift, fft, ifft, fftn
 from scipy.sparse import csr_matrix
-# from numba import jit
 from . import fortran
-# from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Rotation
 
 def docs():
     r""" Open the reborn documentation in a web browser (if available)."""
@@ -153,6 +152,7 @@ def random_rotation():
     depreciate('reborn.utils.random_rotation has been removed.  Use scipy for this:\n'
                'from scipy.spatial.transform import Rotation\n'
                'rotmat = Rotation.random().as_matrix()')
+    return Rotation.random().as_matrix()
 
 
 def rotation_about_axis(theta, vec):
