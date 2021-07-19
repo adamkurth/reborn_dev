@@ -13,7 +13,7 @@ from numpy.fft import fftshift, fft, ifft, fftn
 from scipy.sparse import csr_matrix
 # from numba import jit
 from . import fortran
-
+# from scipy.spatial.transform import Rotation as R
 
 def docs():
     r""" Open the reborn documentation in a web browser (if available)."""
@@ -500,7 +500,7 @@ def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_m
     return data_out, weightout
 
 
-def rotate3D(f, euler_angles):
+def rotate3D(f, R_in):
     r"""
     Rotate a 3D array of numbers in 3-dimensions.
     The function works by rotating each 2D sections of the 3D array via three shears,
@@ -636,6 +636,24 @@ def rotate3D(f, euler_angles):
 
     # ---------------------------
     # Do the rotations
+
+    # print(euler_angles)
+    
+    #--------------------
+    # Joe's implementation
+    euler_angles = R_in.as_euler('xyx')
+    # euler_angles = R.from_euler('zyz', euler_angles).as_euler('xyx')
+    euler_angles[1] = -euler_angles[1]
+    #--------------------
+    # Kevin's implementation
+    # euler_angles = input_rotation.as_euler('xyx') # input_rotation will be a scipy object when we change the interface to the rotate3D function
+    # euler_angles = -euler_angles
+    #--------------------
+
+    # print(euler_angles)
+
+
+
     f_rot = __rotate_euler_z(f_rot, ang=euler_angles[0])
     f_rot = __rotate_euler_y(f_rot, ang=euler_angles[1])
     f_rot = __rotate_euler_z(f_rot, ang=euler_angles[2])

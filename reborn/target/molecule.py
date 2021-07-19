@@ -4,7 +4,7 @@ Utilities for manipulating molecules.
 """
 import numpy as np
 from ..utils import max_pair_distance
-from ..simulate import atoms
+from . import atoms
 from scipy import constants as const
 
 hc = const.h*const.c
@@ -42,7 +42,7 @@ class Molecule(object):
         r"""
         Get atomic scattering factors.  You need to specify the photon energy or pass a Beam class instance in.
 
-        This wraps the function :func:`reborn.simulate.atoms.get_scattering_factors` for more details; see the docs
+        This wraps the function :func:`reborn.target.atoms.get_scattering_factors` for more details; see the docs
         for more details.
 
         Args:

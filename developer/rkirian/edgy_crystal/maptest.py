@@ -1,8 +1,7 @@
 import numpy as np
 from reborn.target import crystal
-from reborn.simulate import clcore, atoms
+from reborn.simulate import clcore
 import pyqtgraph as pg
-from scipy import constants
 
 # The CrystalStructure object has a UnitCell, SpaceGroup, and other information.  The input can be any path to a PDB
 # file or it can be the name of a PDB entry.  The PDB will be fetched from the web if necessary and possible.  The
@@ -35,7 +34,7 @@ f[1] = 1j
 # METHOD 1:
 # Simulate amplitudes using atomistic coordinates, structure factors, and a direct summation over
 #                              F(h) =  sum_n f_n*exp(-i 2*pi*h.x_n)
-# Recipcorcal-space coordinates are chosen such that they will correspond to a numpy FFT operation.  The limits of that
+# Reciprocal-space coordinates are chosen such that they will correspond to a numpy FFT operation.  The limits of that
 # sample grid are provided by the CrystalDensityMap class:
 g_min = cdmap.h_min * 2 * np.pi
 g_max = cdmap.h_max * 2 * np.pi

@@ -6,6 +6,7 @@ The crystfel_utils module is included in reborn so that you do not need to insta
 """
 
 import os
+import tempfile
 import h5py
 import numpy as np
 import linecache
@@ -80,7 +81,7 @@ def geometry_dict_to_pad_geometry_list(geometry_dict):
         pad.t_vec = np.array([p['cnx'] * pix, p['cny'] * pix, dist])
         pads.append(pad)
 
-    return pads
+    return detector.PADGeometryList(pads)
 
 
 def extract_geom_from_stream(stream_path, geom_path=None):
@@ -118,7 +119,6 @@ def extract_geom_from_stream(stream_path, geom_path=None):
 
 
 def geometry_file_to_pad_geometry_list(geometry_file):
-
     r"""
     Given a CrystFEL geometry file, create a list of `:class:<reborn.geometry.PADGeometry` objects.  This will also
     append extra crystfel-specific items like fsx, max_fs, etc.
@@ -133,7 +133,7 @@ def geometry_file_to_pad_geometry_list(geometry_file):
     geometry_dict = load_crystfel_geometry(geometry_file)
     pad_list = geometry_dict_to_pad_geometry_list(geometry_dict)
 
-    return pad_list
+    return detector.PADGeometryList(pad_list)
 
 
 def split_data_block(data, geom_dict, frame_number=0):
@@ -183,7 +183,6 @@ def split_data_block(data, geom_dict, frame_number=0):
 
 
 def split_image(data, geom_dict):
-
     r"""
     Split a 2D image into individual panels (useful for working with Cheetah output).
     If the input data is not a 2D image, then attempt to reshape it according to the
@@ -239,7 +238,7 @@ def unsplit_image(data, geom_dict):
 def write_geom_file_single_pad(file_path=None, beam=None, pad_geometry=None):
     r""" 
     Simple geom file writer.  Do not use this -- the file does not adhere 
-    to the CrystFEL specifications...
+    to the CrystFEL specifications, and we do not attempt to maintain compatibility...
     """
     pad = pad_geometry
     geom_file = os.path.join(file_path)

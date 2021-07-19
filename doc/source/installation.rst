@@ -142,6 +142,27 @@ create a symbolic link like this:
 If the above fails, read through the tips in the
 `pyopencl documentation <https://documen.tician.de/pyopencl/misc.html>`_.
 
+
+Installing pyvkfft for performing FFTs on GPUs
+----------------------------------------------
+
+`vkfft <https://github.com/DTolm/VkFFT/>`_ is a GPU-accelerated multi-dimensional Fast Fourier Transform library supporting many backends (Vulkan, CUDA, HIP and OpenCL). To get it to install (as of July 2021) the instructions below should be of help.
+
+.. code-block:: bash
+
+    conda env create --name name_of_your_environment --file environment.yml
+    conda install cython
+    conda install -c conda-forge pycuda
+    conda install -c conda-forge ocl-icd-system
+    pip install pyvkfft
+
+and on Agave, to request an interactive node with GPUs you can do something like
+
+.. code-block:: bash
+
+    interactive -p gpu -q wildfire -t 60 --gres=gpu:1 
+
+
 Testing your setup
 ------------------
 

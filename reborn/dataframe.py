@@ -26,11 +26,16 @@ class DataFrame:
     # Cached arrays
     _q_mags = None
     _q_vecs = None
+    _sa = None
+    _pfac = None
 
     def __init__(self, raw_data=None, processed_data=None, mask=None, beam=None, pad_geometry=None, frame_id=0):
-        self.set_pad_geometry(pad_geometry)
-        self.set_beam(beam)
-        self.set_raw_data(raw_data)
+        if pad_geometry is not None:
+            self.set_pad_geometry(pad_geometry)
+        if beam is not None:
+            self.set_beam(beam)
+        if raw_data is not None:
+            self.set_raw_data(raw_data)
         if mask is not None:
             self.set_mask(mask)
         if processed_data is not None:
@@ -38,23 +43,58 @@ class DataFrame:
         self.set_frame_id(frame_id)
 
     def validate(self):
+        r""" Check that this dataframe is valid.  A valid dataframe must at minimum have a frame ID, a valid Beam
+        instance, a valid PADGeometryList instance, and raw data.  """
         if self._frame_id is None: return False
         if self._beam is None: return False
         if self._pad_geometry is None: return False
         if self._raw_data is None: return False
-        if self._beam is False: return False
         if self._beam.validate() is False: return False
         if self._pad_geometry.validate() is False: return False
         if not isinstance(self._raw_data, np.ndarray): return False
         return True
 
+    def copy(self):
+        df = DataFrame()
+        df.set_pad_geometry(self.get_pad_geometry().copy())
+        df.set_beam(self.get_beam().copy())
+        df.set_raw_data(self.raw_data)
+        df.set_processed_data(self.processed_data)
+        return df
+
     @property
     def n_pads(self):
         return len(self.get_processed_data_list())
 
+    @property
+    def raw_data(self):
+        return self.get_raw_data_flat()
+
+    @property
+    def processed_data(self):
+        return self.get_processed_data_flat()
+
+    @property
+    def q_mags(self):
+        return self.get_q_mags_flat()
+
+    @property
+    def q_vecs(self):
+        return self.get_q_vecs()
+
+    @property
+    def solid_angles(self):
+        return self.get_solid_angles_flat()
+
+    @property
+    def polarization_factors(self):
+        return self.get_polarization_factors_flat()
+
     def clear_cache(self):
         self._q_mags = None
         self._q_vecs = None
+        self._sa = None
+        self._pfac = None
 
     def get_frame_index(self):
         r""" This is an integer index the is unique to this frame.  It is understood to be a context-dependent parameter
@@ -62,7 +102,7 @@ class DataFrame:
         return self._frame_index
 
     def set_frame_index(self, index):
-        r""" See corresponding get_ method. """
+        r""" See corresponding get_frame_index method. """
         self._frame_index = int(index)
 
     def get_frame_id(self):
@@ -72,7 +112,7 @@ class DataFrame:
         return self._frame_id
 
     def set_frame_id(self, frame_id):
-        r""" See the corresponding get_ method."""
+        r""" See the corresponding get_frame_id method."""
         self._frame_id = frame_id
 
     def get_beam(self):
@@ -80,7 +120,7 @@ class DataFrame:
         return self._beam.copy()
 
     def set_beam(self, beam):
-        r""" See the corresponding get_ method."""
+        r""" See the corresponding get_beam method."""
         self.clear_cache()
         beam = beam.copy()
         beam.validate(raise_error=True)
@@ -93,11 +133,11 @@ class DataFrame:
         return self._pad_geometry.copy()
 
     def set_pad_geometry(self, pads):
-        r""" See the corresponding get_ method. """
+        r""" See the corresponding get_pad_geometry method. """
         self.clear_cache()
-        pads = detector.PADGeometryList(pads)
+        pads = detector.PADGeometryList(pads.copy())
         pads.validate(raise_error=True)
-        self._pad_geometry = pads.copy()
+        self._pad_geometry = pads
 
     def get_raw_data_list(self):
         r""" Get the raw data as a list of 2D arrays."""
@@ -109,7 +149,7 @@ class DataFrame:
 
     def set_raw_data(self, data):
         r""" Set the raw data.  You may pass a list or a concatentated 1D array."""
-        self._raw_data = self._pad_geometry.concat_data(data.copy()).astype(np.double)
+        self._raw_data = detector.concat_pad_data(data.copy()).astype(np.double)
         self._raw_data.flags.writeable = False
         self._processed_data = None
 
@@ -125,7 +165,7 @@ class DataFrame:
 
     def set_mask(self, mask):
         r""" Set the mask.  You may pass a list or a concatentated 1D array."""
-        self._mask = self._pad_geometry.concat_data(mask.copy())
+        self._mask = detector.concat_pad_data(mask.copy())
         self._mask.flags.writeable = False
 
     def get_processed_data_list(self):
@@ -142,22 +182,38 @@ class DataFrame:
 
     def set_processed_data(self, data):
         r""" See corresponding _raw_ method."""
-        self._processed_data = self._pad_geometry.concat_data(data).astype(np.double)
+        self._processed_data = detector.concat_pad_data(data).astype(np.double)
+
+    def clear_processed_data(self):
+        r""" Clear the processed data.  After this operation, the get_processed_data method will return a copy of
+        the raw data. """
+        self._processed_data = None
 
     def get_q_vecs(self):
+        r""" Get q vectors as an Nx3 array with all PADs concatenated. """
         if self._q_vecs is None:
             self._q_vecs = self._pad_geometry.q_vecs(self._beam)
             self._q_vecs.flags.writeable = False
         return self._q_vecs.copy()
 
     def get_q_mags_flat(self):
+        r""" Get q magnitudes as a flat array. """
         if self._q_mags is None:
             self._q_mags = self._pad_geometry.q_mags(self._beam)
             self._q_mags.flags.writeable = False
         return self._q_mags.copy()
 
     def get_q_mags_list(self):
+        r""" Get q magnitudes as a list of 2D arrays. """
         return self._pad_geometry.split_data(self.get_q_mags_flat())
+
+    def get_solid_angles_flat(self):
+        r""" Get pixel solid angles as flat array. """
+        return self._pad_geometry.solid_angles()
+
+    def get_polarization_factors_flat(self):
+        r""" Get polarization factors as a flat array. """
+        return self._pad_geometry.polarization_factors(beam=self._beam)
 
     def get_bragg_peaks(self):
         pass

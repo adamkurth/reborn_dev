@@ -1,6 +1,6 @@
 .. _numpy_anchor:
 
-Numpy
+numpy
 =====
 
 Numpy is the most important Python package that reborn uses when working with arrays.  Below are a few declarations
@@ -11,10 +11,9 @@ Indexing and internal memory layout of ndarray objects
 ------------------------------------------------------
 
 *People who are familiar with numpy ndarrays and their memory layout can skip this section -- the synopsis is simple:
-some parts of the reborn package (particularly those that have underlying Fortran or OpenCL code) assume that
+some functions in reborn that wrap fortran code assume that
 ndarrays are in the default c-contiguous ordering.  There are some cases in which errors will result if you pass
-in an array that is not c-contiguous, and in other cases arrays are re-written before passing to Fortran or OpenCL
-functions, which will result in speed reductions.*
+in an array that is not c-contiguous.*
 
 Some users of numpy can carry out all of their Python/numpy calculations without knowledge of the internal memory
 structure of numpy ndarray objects.

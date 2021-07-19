@@ -1,7 +1,11 @@
 Targets
 =======
 
-Targets are things that we hit with x-rays, such as atoms, molecles, crystals etc.
+Targets are things that we shoot with x-rays, such as atoms, molecules, crystals, electron densities, etc.  Here we
+describe how various target types are handled in reborn.
 
-There will be more to follow here... once we clean up this part of the code and settle on some
-standards.
+.. toctree::
+   :maxdepth: 1
+
+   targets/crystals
+   targets/sampling_binning

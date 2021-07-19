@@ -4,6 +4,7 @@ Basic utilities for dealing with crystalline objects.
 """
 
 import os
+import tempfile
 try:
     import urllib.request
 except ImportError:
@@ -11,7 +12,7 @@ except ImportError:
 import pkg_resources
 import numpy as np
 from .molecule import Molecule
-from ..simulate import atoms
+from . import atoms
 from ..utils import warn, vec_mag, trilinear_insert
 try:
     from numba import jit
@@ -20,9 +21,11 @@ except ImportError:
 
 
 pdb_data_path = pkg_resources.resource_filename('reborn.data', 'pdb')
+temp_dir = os.path.join(tempfile.gettempdir(), 'reborn')
+os.makedirs(temp_dir, exist_ok=True)
 
 
-def get_pdb_file(pdb_id, save_path=".", silent=False):
+def get_pdb_file(pdb_id, save_path=temp_dir, silent=False):
     r"""
     Download a PDB file from the PDB web server and return the path to the downloaded file.  There is a data directory
     included with reborn that includes a few PDB files for testing purposes - if the requested PDB file exists there,
@@ -293,7 +296,8 @@ class CrystalStructure(object):
         """
 
         if not os.path.exists(pdb_file_path):
-            pdb_file_path = get_pdb_file(pdb_file_path, save_path='.')
+            print("PDB file not found.  Attempting to download it.")
+            pdb_file_path = get_pdb_file(pdb_file_path, save_path=temp_dir)
 
         dic = pdb_to_dict(pdb_file_path)
         self.pdb_dict = dic
@@ -313,14 +317,14 @@ class CrystalStructure(object):
 
                 # We will set the unit cell to be the difference between the max and min of the atomic coordinates in the three directions.
                 r_min = np.zeros(3)
-                r_min[0] = np.min(dic['atomic_coordinates'][:,0])
-                r_min[1] = np.min(dic['atomic_coordinates'][:,1])
-                r_min[2] = np.min(dic['atomic_coordinates'][:,2])
+                r_min[0] = np.min(dic['atomic_coordinates'][:, 0])
+                r_min[1] = np.min(dic['atomic_coordinates'][:, 1])
+                r_min[2] = np.min(dic['atomic_coordinates'][:, 2])
 
                 r_max = np.zeros(3)
-                r_max[0] = np.max(dic['atomic_coordinates'][:,0])
-                r_max[1] = np.max(dic['atomic_coordinates'][:,1])
-                r_max[2] = np.max(dic['atomic_coordinates'][:,2])
+                r_max[0] = np.max(dic['atomic_coordinates'][:, 0])
+                r_max[1] = np.max(dic['atomic_coordinates'][:, 1])
+                r_max[2] = np.max(dic['atomic_coordinates'][:, 2])
 
                 self.unitcell = UnitCell((r_max[0] - r_min[0])*1e-10, (r_max[1] - r_min[1])*1e-10, (r_max[2] - r_min[2])*1e-10, 90*np.pi/180, 90*np.pi/180, 90*np.pi/180)
                 S = self.unitcell.o_mat_inv * 1e-10 # Convert to meters
@@ -331,12 +335,10 @@ class CrystalStructure(object):
                 S = dic['scale_matrix']
                 U = dic['scale_translation']
 
-
         if np.sum(np.abs(U)) > 0:
             if not no_warnings:
                 warn('\nThe U vector is not equal to zero, which could be a serious problem.  Look here:\n'
                      'https://rkirian.gitlab.io/reborn/crystals.html.\n')
-
 
         # These are the initial coordinates with strange origin
         r = dic['atomic_coordinates']
@@ -385,7 +387,6 @@ class CrystalStructure(object):
             Z = np.round(Z*12)/12
             rotations.append(W)
             translations.append(Z)
-
 
         if spacegroup is not None:
             self.spacegroup = spacegroup
@@ -446,7 +447,6 @@ class CrystalStructure(object):
         for i in range(self.spacegroup.n_molecules):
             com = self.spacegroup.apply_symmetry_operation(i, self.fractional_coordinates_com)
             self.spacegroup.sym_translations[i] -= com - (com % 1)
-
 
 
 class FiniteLattice(object):

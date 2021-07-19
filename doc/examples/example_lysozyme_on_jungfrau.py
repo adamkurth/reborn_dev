@@ -15,9 +15,8 @@ from scipy.spatial.transform import Rotation
 from reborn import detector
 from reborn.simulate.examples import jungfrau4m_pads
 from reborn.source import Beam
-from reborn.target import crystal
-from reborn.simulate import atoms, clcore
-from reborn.utils import max_pair_distance
+from reborn.target import crystal, atoms
+from reborn.simulate import clcore
 from reborn.viewers.mplviews import view_pad_data
 
 # %%

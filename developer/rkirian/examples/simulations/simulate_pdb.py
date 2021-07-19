@@ -55,7 +55,7 @@ n_atoms = r.shape[0]
 
 # Look up atomic scattering factors (they are complex numbers)
 print('Getting scattering factors')
-f = ba.simulate.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, hc / wavelength)
+f = ba.target.atoms.get_scattering_factors(cryst.molecule.atomic_numbers, hc / wavelength)
 
 n_trials = 3
 

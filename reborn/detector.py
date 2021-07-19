@@ -625,11 +625,11 @@ class PADGeometryList(list):
         return s
 
     def split_data(self, data):
-        r""" Split a contiguous |ndarray| into list of 2D |ndarray|s."""
+        r""" Split a contiguous 1D |ndarray| into list of 2D |ndarray| instances."""
         return split_pad_data(self, data)
 
     def concat_data(self, data):
-        r""" Concatenate a list of |ndarray|s into a single 1D |ndarray|."""
+        r""" Concatenate a list of |ndarray| instances into a single concatenated 1D |ndarray| ."""
         return concat_pad_data(data)
 
     @property
@@ -757,7 +757,7 @@ def load_pad_geometry_list(file_name):
         pad = PADGeometry()
         pad.from_dict(d)
         out.append(pad)
-    return out
+    return PADGeometryList(out)
 
 
 def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0.1, tiling_shape=(4, 2), pad_gap=0):
@@ -1162,6 +1162,11 @@ class RadialProfiler():
         self.mask = mask
 
     @property
+    def q_bin_centers(self):
+        r""" The centers of the q bins. """
+        return self.bin_centers.copy()
+
+    @property
     def counts_profile(self):
         r""" The number of pixels in each radial bin. """
         if self._counts_profile is None:
@@ -1452,7 +1457,7 @@ def jungfrau4m_pad_geometry_list(detector_distance=0.1, binning=1):
     pads[5].t_vec += + np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
     pads[6].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
     pads[7].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
-    return pads
+    return PADGeometryList(pads)
 
 
 def epix10k_pad_geometry_list(detector_distance=0.1):
@@ -1467,4 +1472,4 @@ def epix10k_pad_geometry_list(detector_distance=0.1):
     """
     pads = load_pad_geometry_list(epix10k_geom_file)
     for p in pads: p.t_vec[2] = detector_distance
-    return PADGeometryList(pads)
+    return pads

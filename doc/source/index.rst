@@ -89,9 +89,6 @@ Contents
    beams
    geometry
    targets
-   numpy
-   crystals
-   sampling_binning
    simulations
    examples
    tips

@@ -74,16 +74,16 @@ we could directly recover the scattering density via inverse Fourier transform:
 \begin{align}
 \rho(\vec{r}) = \frac{1}{2\pi} \int  F(\vec{q}) e^{i \vec{q}\cdot\vec{r}} d^3 q \;.
 \end{align}
-The task of recovering the desired molecular structure $\rho(\vec{r})\approx \rho(\vec{r})$ given the 
+The task of recovering the desired molecular structure $\rho(\vec{r})$ given the
 information-deficient
 measurement of $\abs{F(\vec{q})}$ is called the ``phase problem'' in diffraction microscopy and
-crystallography.
+crystallography.  The phase problem will be addressed in a separate note.
 
 
 \section{Electromagnetic fields from a moving point charge}
 
 Here we briefly outline how the electromagnetic 
-fields from a moving point charge may be derived starting with Maxwell's equations
+fields from a moving point charge were derived Griffiths, starting with Maxwell's equations
 in vacuum:
 \begin{align}
 \nabla \cdot \vec{E} &= \rho/\epsilon_0  &\ \nabla\times\vec{E} &= -\frac{\partial\vec{B}}{\partial t} \\
@@ -102,19 +102,20 @@ Maxwell's equations are reduced to a set of four inhomogeneous wave equations:
 \begin{align}
 \nabla^2 V - \mu_0\epsilon_0 \frac{\partial^2 V}{\partial t^2} &= -\rho / \epsilon_0 & \nabla^2 \vec{A} - \mu_0\epsilon_0 \frac{\partial^2 \vec{A}}{\partial t^2} &= -\mu_0 \vec{J} \;.\label{eqn:ihA}
 \end{align}
-The inhomogeneous wave equations may be solved using Green's method, which yields the
-retarded potentials:
+The inhomogeneous wave equations may be solved using Green's method\footnote{See
+Appendix \ref{appendix:inhomogeneous}.}, which yields the retarded potentials:
 \begin{align}
 V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}\int \frac{\rho(\vec{r}', t_r)}{\rcurs}d^3r' & \vec{A}(\vec{r}, t) &= \frac{\mu_0}{4\pi}\int \frac{\vec{J}(\vec{r}', t_r)}{\rcurs}d^3r'
 \end{align}
 where $\brcurs = \vec{r} - \vec{r}'(t_r)$ and the retarded time is $t_r = t -\rcurs/c$.  For a \emph{point charge} 
-moving on the \emph{trajectory} $\vec{r}'(t)$, the retarded potentials become the Li\'enard-Wiechert potentials:
+moving on the \emph{trajectory} $\vec{r}'(t)$, the retarded potentials become the Li\'enard-Wiechert
+potentials\footnote{See Appenxix \ref{appendix:lienard}}:
 \begin{align}
 V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}    \frac{q}{\left| \rcurs - \brcurs \cdot \vec{\beta} \right|} &
 \vec{A}(\vec{r}, t) &= \frac{\mu_0}{4\pi}    \frac{q\vec{v}}{\left| \rcurs - \brcurs \cdot \vec{\beta} \right|} \;,
 \end{align}
-where $\vec{\beta} = \vec{v}/c = \dot{\vec{r}}'(t_r)/c$. From the Li\'enard-Wiechert potentials, we use equation \ref{eqn:pots} work out the fields for a 
-point charge:
+where $\vec{\beta} = \vec{v}/c = \dot{\vec{r}}'(t_r)/c$. From the Li\'enard-Wiechert potentials, Griffiths used equation
+\ref{eqn:pots} work out the fields for a point charge:
 \begin{align}\label{eqn:Erad}
 \vec{E}(\vec{r}, t)= \frac{q}{4\pi\epsilon_0} \frac{\rcurs}{(\brcurs \cdot \vec{u})^3}
 [(c^2 - v^2)\vec{u} + \brcurs \times (\vec{u} \times \vec{a})] \; , \quad\quad \vec{B}(\vec{r}, t)
@@ -155,7 +156,7 @@ The magnetic field is
 \begin{align}
 \vec{B}_\text{dip} =  \frac{1}{c} \hvec{r} \times \vec{E}_\text{dip} 
 \end{align}
-and the pointing vector is
+and the Poynting vector is
 \begin{align}
 \vec{S} =  \frac{1}{\mu_0} \vec{E}_\text{dip}\times\vec{B}_\text{dip} =  \frac{1}{\mu_0c} E_\text{dip}^2\hvec{r} 
 = \frac{\mu_0}{16 \pi^2 cr^2} |\hvec{r} \times    \ddot{\vec{p}}|^2\hvec{r} \;.\\
@@ -181,9 +182,10 @@ For sinusoidal oscillations, a time average of the above introduces a factor of 
 
 \section{Thompson scatter from a free electron}
 
-An example of a very simple classical scattering process is a free electron exposed to an electromagnetic wave, which results in acceleration and hence re-radiation or \emph{scattering}.    
-The force on an electron (mass $m_e$ and charge $e$) due to an incident light beam with oscillating electric field $\vec{E}_0(t)$ 
-results in the acceleration
+An example of a very simple classical scattering process is a free electron exposed to an electromagnetic wave, which
+results in acceleration and hence re-radiation or \emph{scattering}.  Unfortunately, this is not covered in Griffiths.
+The force on an electron (mass $m_e$ and charge $e$) due to an incident light beam with oscillating electric field
+$\vec{E}_0(t)$ results in the acceleration
 \begin{align}
 \vec{a}(t) =  -\frac{e}{m_e} \vec{E}_0(t) \;.
 \end{align}
@@ -348,7 +350,10 @@ A convenient form for calculations is
 %nonetheless these results can explain the blue sky and orange/red sunsets among many other scattering phenomena.  If you put a bit of milk into a jar of water and shine a flahslight through it you can emulate the sunset and blue sky.  The little fat globules in milk are quite large (micrometer scale) and lie in the ``Mie'' scattering regime (the two limits of Mie scattering theory are Rayleigh scatter when $\lambda \gg R$ and the ray optics regime when $\lambda \ll R$), but nonetheless the same effect is seen.  In the ray optics regime, we get rainbows, which you can also calculate, using the Fresnel equations developed in this class.
 \newpage
 
+\appendix
+
 \section{Appendix: Solution to the inhomogeneous wave equation}
+\label{appendix:inhomogeneous}
 
 We wish to solve for $V(\vec{r}, t)$ in the inhomogeneous equation
 \begin{align}\label{eqn:ihV2}
@@ -453,6 +458,7 @@ V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}\int \frac{\rho(\vec{r}', t_r)}{\rcurs}
 
 \newpage
 \section{Appendix: Li\'enard-Wiechert potential}
+\label{appendix:lienard}
 
 We have a particle moving along the trajectory $\vec{w}(t)$, and we want the retarded potential at position $\vec{r}$:
 \begin{align}

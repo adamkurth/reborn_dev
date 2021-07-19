@@ -13,7 +13,7 @@ pulse_energy = 32e-9
 beam_diameter = 1e-6
 sample_thickness = 100e-9
 n_frames = 1000
-pdb_id = '1LYZ'
+pdb_id = '1JB0'
 concentration = 10  # mg/ml = kg/m^3
 # ==================================================
 
@@ -23,12 +23,15 @@ sample_volume = sample_thickness * np.pi * (beam_diameter / 2) ** 2
 protein_number_density = concentration/cryst.molecule.get_molecular_weight()
 n_proteins = sample_volume*protein_number_density
 
+print(np.unique(cryst.molecule.atomic_symbols))
+
 for photon_energy in photon_energies:
 
     beam = source.Beam(photon_energy=photon_energy, pulse_energy=pulse_energy, diameter_fwhm=beam_diameter)
     q_vecs = pad_geometry.q_vecs(beam=beam)
     r_vecs = cryst.molecule.coordinates  # These are atomic coordinates (Nx3 array)
     f = cryst.molecule.get_scattering_factors(beam=beam)
+    print(photon_energy/1.6022e-19, np.abs(np.unique(f)))
 
     A = simcore.phase_factor_qrf(q_vecs, r_vecs, f)
     F2 = np.abs(A) ** 2

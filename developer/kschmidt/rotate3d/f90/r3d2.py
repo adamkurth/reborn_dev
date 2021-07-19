@@ -5,9 +5,13 @@ if __name__ == "__main__":
    import matplotlib.pyplot as plt
    from reborn.utils import rotate3D
    from r3df03py import rotate3dfftw
-   from r3dks import rotate3D as rotate3Dks
-   from r3dks import rotate3Djoeorder
-   from r3dks import rotate3Dvkfft
+   from r3dks2 import rotate3D as rotate3Dks
+   from r3dks2 import rotate3Djoeorder
+   from r3dks2 import rotate3Dvkfft
+   from r3dks2 import rotate3Dvkfft_stored_on_device
+#   from r3dks import rotate3D as rotate3Dks
+#   from r3dks import rotate3Djoeorder
+#   from r3dks import rotate3Dvkfft
    import scipy
    print("read in image and pad")
    t0 = time.time()
@@ -36,9 +40,9 @@ if __name__ == "__main__":
    f3 = f3d.copy()
    euler = np.zeros(3,dtype=np.float64)
    eulerj = np.zeros(3,dtype=np.float64)
-   euler[0] = 0.1+np.pi
-   euler[1] = 0.22
-   euler[2] = 0.35
+   euler[0] = 0.1+np.pi*0.0
+   euler[1] = 0.27+np.pi*0.0
+   euler[2] = 0.35+np.pi*0.0
    R = scipy.spatial.transform.Rotation.from_euler('xyx',euler)
    t1 = time.time()
    print("set up done, time = ",t1-t0," seconds")
@@ -73,15 +77,52 @@ if __name__ == "__main__":
    print("fftw second call",t2-t1,"seconds")
 
    t1 = time.time()
-   r3df = rotate3Dvkfft(f3d)
+   r3df = rotate3Dvkfft_stored_on_device(f3d)
    t2 = time.time()
-   print("vkfft create instance",t2-t1,"seconds")
+   print("vkfft stored create instance",t2-t1,"seconds")
    t1 = time.time()
    r3df.rotation(R)
    f5 = r3df.f
    t2 = time.time()
-   print("vkfft plus copies",t2-t1,"seconds")
+   print("vkfft copy out only",t2-t1,"seconds")
+   t1 = time.time()
+   r3df.f = f3d
+   r3df.rotation(R)
+   f5 = r3df.f
+   t2 = time.time()
+   print("vkfft plus both copies",t2-t1,"seconds")
+   t1 = time.time()
+   for i in range(10):
+       r3df.f = f3d
+       r3df.rotation(R)
+       f5 = r3df.f
    del r3df # clean up opencl
+   t2 = time.time()
+   print("vkfft plus both copies average of 10",(t2-t1)/10,"seconds")
+
+   t1 = time.time()
+   r3df = rotate3Dvkfft_stored_on_device(f3d,dev_dtype=np.complex64)
+   t2 = time.time()
+   print("vkfft single create instance",t2-t1,"seconds")
+   t1 = time.time()
+   r3df.rotation(R)
+   f5 = r3df.f
+   t2 = time.time()
+   print("vkfft single copy out only",t2-t1,"seconds")
+   t1 = time.time()
+   r3df.f = f3d
+   r3df.rotation(R)
+   f5 = r3df.f
+   t2 = time.time()
+   print("vkfft single plus both copies",t2-t1,"seconds")
+   t1 = time.time()
+   for i in range(10):
+       r3df.f = f3d
+       r3df.rotation(R)
+       f5 = r3df.f
+   t2 = time.time()
+   del r3df # clean up opencl
+   print("vkfft single plus both copies average of 10",(t2-t1)/10,"seconds")
    ns=3*N//4
    print("original",f3d[ns,ns,ns])
    print("joe, kevin, fftw, joeorder, vkfft ")

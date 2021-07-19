@@ -12,7 +12,7 @@ from scipy.spatial.transform import Rotation
 from .. import detector
 from ..fileio.getters import FrameGetter
 from ..utils import rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance, ensure_list
-from . import atoms
+from ..target import atoms
 from . import solutions
 from ..target.crystal import CrystalStructure
 from .clcore import ClCore
