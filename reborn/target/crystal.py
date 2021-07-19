@@ -286,14 +286,15 @@ class CrystalStructure(object):
     pdb_dict = None
     _au_com = None
 
-    def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False, tight_packing=False, unitcell=None, spacegroup=None):
+    def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False, tight_packing=False,
+                       unitcell=None, spacegroup=None):
         r"""
         This class is initialized with a PDB file.
 
         FIXME: Allow initialization without a PDB file.
 
         Arguments:
-            pdb_file_path (string): Path to a pdb file
+            pdb_file_path (string): Path to a pdb file (or just PDB ID if you want it auto-downloaded)
             no_warnings (bool): Suppress warnings concerning ambiguities in symmetry operations
             expand_ncs_coordinates (bool): Choose whether or not to expand non-crystallographic symmetry (NCS) partners.
             tight_packing (bool): Choose whether or not to enable a physical arrangement of the asymmetric unit symmetry partners - No difference for inifinite crystals but makes sense for a finite crystal.
@@ -302,7 +303,7 @@ class CrystalStructure(object):
         """
 
         if not os.path.exists(pdb_file_path):
-            print("PDB file not found.  Attempting to download it to %s." % temp_dir)
+            # print("PDB file not found.  Attempting to download it to %s." % temp_dir)
             pdb_file_path = get_pdb_file(pdb_file_path, save_path=temp_dir)
 
         dic = pdb_to_dict(pdb_file_path)
