@@ -1110,6 +1110,17 @@ class IcosphereGeometry():
 class RadialProfiler():
 
     # pylint: disable=too-many-instance-attributes
+    n_bins = None  # Number of bins in radial profile
+    q_range = None  # The range of q magnitudes in the 1D profile.  These correspond to bin centers
+    q_edge_range = None  # Same as above, but corresponds to bin edges not centers
+    bin_centers = None  # q magnitudes corresponding to 1D profile bin centers
+    bin_edges = None  # q magnitudes corresponding to 1D profile bin edges (length is n_bins+1)
+    bin_size = None  # The size of the 1D profile bin in q space
+    q_mags = None  # q magnitudes corresponding to diffraction pattern intensities
+    _mask = None  # The default mask, in case no mask is provided upon requesting profiles
+    _counts_profile = None  # For speed, we cache the counts corresponding to the default _mask
+    pad_geometry = None  # List of PADGeometry instances
+    beam = None  # Beam instance for creating q magnitudes
 
     def __init__(self, q_mags=None, mask=None, n_bins=None, q_range=None, pad_geometry=None, beam=None):
         r"""
@@ -1129,18 +1140,6 @@ class RadialProfiler():
             beam (|Beam| instance): Optional, unless pad_geometry is provided.  Wavelength and beam direction are
                                      needed in order to calculate q magnitudes.
         """
-        self.n_bins = None  # Number of bins in radial profile
-        self.q_range = None  # The range of q magnitudes in the 1D profile.  These correspond to bin centers
-        self.q_edge_range = None  # Same as above, but corresponds to bin edges not centers
-        self.bin_centers = None  # q magnitudes corresponding to 1D profile bin centers
-        self.bin_edges = None  # q magnitudes corresponding to 1D profile bin edges (length is n_bins+1)
-        self.bin_size = None  # The size of the 1D profile bin in q space
-        self.q_mags = None  # q magnitudes corresponding to diffraction pattern intensities
-        self._mask = None  # The default mask, in case no mask is provided upon requesting profiles
-        self._counts_profile = None  # For speed, we cache the counts corresponding to the default _mask
-        self.pad_geometry = None  # List of PADGeometry instances
-        self.beam = None  # Beam instance for creating q magnitudes
-        self._indices = None  # A list of indices for each radial bin
         self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range, pad_geometry=pad_geometry, beam=beam)
 
     @property
@@ -1156,9 +1155,13 @@ class RadialProfiler():
                     return
             self._mask = mask.copy()  # Ensure a properly flattened array
             self._counts_profile = None  # Wipe out this profile
-            self._indices = None
 
     def set_mask(self, mask):
+        r""" Update the mask.
+
+        Arguments:
+            mask (|ndarray| or list of |ndarray|): Mask
+        """
         self.mask = mask
 
     @property
@@ -1199,8 +1202,8 @@ class RadialProfiler():
                 raise ValueError("You must provide a |PADGeometry| if q_mags are not provided in RadialProfiler")
             if beam is None:
                 raise ValueError("You must provide a |Beam| if q_mags are not provided in RadialProfiler")
-            pad_geometry = utils.ensure_list(pad_geometry)
-            q_mags = [p.q_mags(beam=beam) for p in pad_geometry]
+            pad_geometry = PADGeometryList(pad_geometry)
+            q_mags = pad_geometry.q_mags(beam=beam)
         q_mags = concat_pad_data(q_mags)
         if q_range is None:
             q_range = (0, np.max(q_mags))
@@ -1220,15 +1223,42 @@ class RadialProfiler():
         self.q_edge_range = q_edge_range
         self.mask = mask
         self.pad_geometry = pad_geometry
-        self._indices = None
-        self.zeros = np.zeros(self.n_bins)
+
+    def get_profile_statistic(self, data, mask=None, statistic=None):
+        r"""
+        Calculate the radial profile of averaged intensities.
+
+        Arguments:
+            data (|ndarray|): The intensity data from which the radial profile is formed.
+            mask (|ndarray|): Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
+                                 provided here, the mask configured with :meth:`set_mask` will be used.
+            statistic (function): Provide a function of your choice that runs on each radial bin.
+
+
+        Returns: |ndarray|
+        """
+        data = concat_pad_data(data)
+        q_mags = self.q_mags
+        if mask is not None:
+            self.mask = mask
+        if self.mask is not None:
+            w = np.where(self.mask)
+            data = data[w]
+            q_mags = q_mags[w]
+        stat = utils.binned_statistic(q_mags, data, statistic, self.n_bins, (self.bin_edges[0], self.bin_edges[-1]))
+        return stat
 
     def get_counts_profile(self, mask=None):
-        if mask is not None:
-            mask = concat_pad_data(mask)
-            cntdat, _ = np.histogram(self.q_mags, weights=mask, bins=self.n_bins, range=self.q_edge_range)
-            return cntdat
-        return self.counts_profile
+        r""" Calculate the radial profile of counts that fall in each bin.
+
+        Arguments:
+            mask (|ndarray|): Optional mask (one means "good")
+
+        Returns:
+            |ndarray| : The counts profile
+        """
+        data = np.ones(self.pad_geometry.n_pixels)
+        return self.get_profile_statistic(data, mask=mask, statistic=np.sum)
 
     def get_sum_profile(self, data, mask=None):
         r"""
@@ -1241,10 +1271,7 @@ class RadialProfiler():
         Returns:  |ndarray|
         """
         data = concat_pad_data(data)
-        if mask is not None:
-            data *= concat_pad_data(mask)
-        cntdat, _ = np.histogram(self.q_mags, weights=data, bins=self.n_bins, range=self.q_edge_range)
-        return cntdat
+        return self.get_profile_statistic(data, mask=mask, statistic=np.sum)
 
     def get_mean_profile(self, data, mask=None):
         r"""
@@ -1257,15 +1284,8 @@ class RadialProfiler():
 
         Returns: |ndarray|
         """
-
-        if mask is None:
-            mask = self.mask  # Use the default mask
-        sumdat = self.get_sum_profile(data, mask=mask)
-        if mask is not None:
-            cntdat = self.get_sum_profile(mask)
-        else:
-            cntdat = self.counts_profile
-        return np.divide(sumdat, cntdat, where=(cntdat > 0), out=self.zeros)
+        data = concat_pad_data(data)
+        return self.get_profile_statistic(data, mask=mask, statistic=np.mean)
 
     def get_median_profile(self, data, mask=None):
         r"""
@@ -1278,26 +1298,32 @@ class RadialProfiler():
 
         Returns:  |ndarray|
         """
-        # t = time()
         data = concat_pad_data(data)
-        q_mags = self.q_mags
-        if mask is not None:
-            self.mask = mask
-        if self.mask is not None:
-            w = np.where(self.mask)
-            data = data[w]
-            q_mags = q_mags[w]
-        med = utils.binned_statistic(q_mags, data, np.median, self.n_bins, (self.bin_edges[0], self.bin_edges[-1]))
-        return med
+        return self.get_profile_statistic(data, mask=mask, statistic=np.median)
+
+    def get_sdev_profile(self, data, mask=None):
+        r"""
+        Calculate the standard deviations of radial bin.
+
+        Arguments:
+            data (|ndarray|):  The intensity data from which the radial profile is formed.
+            mask (|ndarray|):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
+                                 provided here, the mask configured with :meth:`set_mask` will be used.
+
+        Returns:  |ndarray|
+        """
+        data = concat_pad_data(data)
+        return self.get_profile_statistic(data, mask=mask, statistic=np.std)
 
     def subtract_profile(self, data, mask=None, statistic='mean'):
         r"""
-        Given some PAD data, subtract a radially averaged profile.
+        Given some PAD data, subtract a radial profile (mean or median).
 
         Arguments:
-            data:
-            mask:
-            type:
+            data (|ndarray|):  The intensity data from which the radial profile is formed.
+            mask (|ndarray|):  Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
+                                 provided here, the mask configured with :meth:`set_mask` will be used.
+            statistic (function): Provide a function of your choice that runs on each radial bin.
 
         Returns:
 
@@ -1344,13 +1370,27 @@ class RadialProfiler():
         return self.get_sum_profile(data, mask=mask)
 
 
-def get_radial_profile(data, beam, pad_geometry, mask=None, n_bins=None, q_range=None):
+def get_radial_profile(data, beam, pad_geometry, mask=None, n_bins=None, q_range=None, statistic=np.mean):
     r"""
-    For convenience, runs the RadialProfiler.get_mean_profile method without the need to create a RadialProfiler
+    For convenience, runs the RadialProfiler.get_profile_statistic method without the need to create a RadialProfiler
     instance.
+
+    Arguments:
+        data (|ndarray| or list of |ndarray|): Data to get profiles from.
+        beam (|Beam|): Beam info.
+        pad_geometry (|PADGeometryList|): PAD geometry info.
+        mask (|ndarray| or list of |ndarray|): Mask (one is good, zero is bad).
+        n_bins (int): Number of radial bins.
+        q_range (tuple of floats): Centers of the min and max q bins.
+        statistic (function): The function you want to apply to each bin (default: np.mean).
+
+    Returns:
+        (tuple): tuple containing:
+            - **statistic** (|ndarray|) -- Radial statistic.
+            - **bins** (|ndarray|) -- The values of q at the bin centers.
     """
     radial_profiler = RadialProfiler(beam=beam, pad_geometry=pad_geometry, mask=mask, n_bins=n_bins, q_range=q_range)
-    return radial_profiler.get_mean_profile(data), radial_profiler.bin_centers
+    return radial_profiler.get_profile_statistic(data, mask=None, statistic=statistic), radial_profiler.bin_centers
 
 
 def save_pad_masks(file_name, mask_list, packbits=True):
