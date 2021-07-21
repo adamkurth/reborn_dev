@@ -581,14 +581,14 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
       cl.enqueue_copy(self.q,self.factors_dev.data,self.factors)
       if self.n90x1 < 2:
          if self.n90x1 > 0:
-            self.prg.rot90(self.q,(int(self.N/2),int(self.N/2),self.N),
+            self.prg.rot90(self.q,(int((self.N+1)/2),int(self.N/2),self.N),
                None,self.f_dev.data,np.uint32(self.N))
       else:
          if self.n90x1 < 3:
-            self.prg.rot180(self.q,(int(self.N/2),int(self.N/2),self.N),
+            self.prg.rot180(self.q,(int((self.N+1)/2),int(self.N/2),self.N),
                None,self.f_dev.data,np.uint32(self.N))
          else:
-            self.prg.rot270(self.q,(int(self.N/2),int(self.N/2),self.N),
+            self.prg.rot270(self.q,(int((self.N+1)/2),int(self.N/2),self.N),
                None,self.f_dev.data,np.uint32(self.N))
       self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
          self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(0))
@@ -619,14 +619,14 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
          self.f_dev.data,np.uint32(self.N))
       if self.n90y < 2:
          if self.n90y > 0:
-            self.prg.rot90(self.q,(int(self.N/2),int(self.N/2),self.N),
+            self.prg.rot90(self.q,(int((self.N+1)/2),int(self.N/2),self.N),
                None,self.f_dev.data,np.uint32(self.N))
       else:
          if self.n90y < 3:
-            self.prg.rot180(self.q,(int(self.N/2),int(self.N/2),self.N),
+            self.prg.rot180(self.q,(int((self.N+1)/2),int(self.N/2),self.N),
                None,self.f_dev.data,np.uint32(self.N))
          else:
-            self.prg.rot270(self.q,(int(self.N/2),int(self.N/2),self.N),
+            self.prg.rot270(self.q,(int((self.N+1)/2),int(self.N/2),self.N),
                None,self.f_dev.data,np.uint32(self.N))
       self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
          self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(6))
@@ -657,14 +657,14 @@ class rotate3Dvkfft_stored_on_device(rotate3D):
 
       if self.n90x2 < 2:
          if self.n90x2 > 0:
-            self.prg.rot90(self.q,(int(self.N/2),int(self.N/2),self.N),
+            self.prg.rot90(self.q,(int((self.N+1)/2),int(self.N/2),self.N),
                None,self.f_dev.data,np.uint32(self.N))
       else:
          if self.n90x2 < 3:
-            self.prg.rot180(self.q,(int(self.N/2),int(self.N/2),self.N),
+            self.prg.rot180(self.q,(int((self.N+1)/2),int(self.N/2),self.N),
                None,self.f_dev.data,np.uint32(self.N))
          else:
-            self.prg.rot270(self.q,(int(self.N/2),int(self.N/2),self.N),
+            self.prg.rot270(self.q,(int((self.N+1)/2),int(self.N/2),self.N),
                None,self.f_dev.data,np.uint32(self.N))
       self.prg.multiply_ith(self.q,(self.N,self.N,self.N),None,
          self.factors_dev.data,self.f_dev.data,np.uint32(self.N),np.uint32(12))
