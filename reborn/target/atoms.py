@@ -7,8 +7,11 @@ import numpy as np
 from reborn import utils
 from scipy import constants as const
 
+r_e = const.value('classical electron radius')
 eV = const.value('electron volt')
 NA = const.value('Avogadro constant')
+h = const.h
+c = const.c
 
 henke_data_path = pkg_resources.resource_filename('reborn', 'data/scatter/henke')
 
@@ -144,7 +147,7 @@ def henke_dispersion_corrections(atomic_numbers, photon_energies):
 def get_scattering_factors(atomic_numbers, photon_energy):
     r"""
     Get complex atomic scattering factors (from Henke tables) for a single photon energy and a range of atomic numbers.
-    The scattering factor data come from the function :func:`get_henke_data <reborn.simulate.atoms.get_henke_data>`.
+    The scattering factor data come from the function :func:`get_henke_data <reborn.target.atoms.get_henke_data>`.
     See the function :func:`get_scattering_factors_fixed_z` if you have a range of photon energies and one atomic
     number.
 
@@ -209,6 +212,61 @@ def xraylib_scattering_factors(q_mags, atomic_number, photon_energy):
     fi = Fi(atomic_number, photon_energy)
     fii = Fii(atomic_number, photon_energy)
     return f0 + fi - 1j*fii
+
+
+def xraylib_refractive_index(compound='H2O', density=1000, photon_energy=10000*eV, approximate=False):
+    r"""
+    Get the x-ray refractive index given a chemical compound, density, and photon energy.
+
+    Arguments:
+        compound (str): Chemical compound formula (e.g. H20)
+        density (float): Mass density in SI
+        photon_energy (float): Photon energy in SI
+        approximate (bool): Approximate with the non-resonant, high-frequency limit (Equation 1.1 of |Guinier|)
+                            (Default: False)
+
+    Returns:
+        float: Refractive index
+    """
+    import xraylib
+    cmp = xraylib.CompoundParser(compound)
+    MM = cmp['molarMass']  # g/mol
+    N = NA * density / (MM / 1000)  # Number density of molecules (SI)
+    n = 0  # Refractive index
+    E_keV = photon_energy / (1000 * eV)  # This is energy in **keV**, the default for xraylib
+    ne = 0  # Number of electrons per molecule
+    for i in range(cmp['nElements']):
+        Z = cmp['Elements'][i]
+        nZ = cmp['nAtoms'][i]
+        ne += Z*nZ
+        # mf = cmp['massFractions'][i]
+        f = xraylib.FF_Rayl(Z, 0) + xraylib.Fi(Z, E_keV) - 1j * xraylib.Fii(Z, E_keV)
+        n += N * f * nZ
+    n = 1 - (n * (h*c/photon_energy) ** 2 * r_e / (2 * np.pi))
+    if approximate:
+        n = 1 - r_e * N * ne * (h*c/photon_energy) ** 2 / 2 / np.pi
+    return n
+
+
+def xraylib_scattering_density(compound='H2O', density=1000, photon_energy=10000*eV, approximate=False):
+    r"""
+    Calculate scattering density of compound given density and photon energy.  This is approximately equal to the
+    electron density far from resonance.
+
+    Args:
+        compound (str): Chemical compound formula (e.g. H20)
+        density (float): Mass density in SI
+        photon_energy (float): Photon energy in SI
+        approximate (bool): Approximate with the non-resonant, high-frequency limit (Equation 1.1 of |Guinier|)
+                            (Default: False)
+
+    Returns:
+        float: Scattering density
+    """
+    n = xraylib_refractive_index(compound=compound, density=density, photon_energy=photon_energy,
+                                 approximate=approximate)
+    rho = (1 - n)*2*np.pi/(h*c/photon_energy)**2/r_e
+    return rho
 
 
 def hubbel_form_factors(q_mags, atomic_number):

@@ -304,6 +304,13 @@ class Scatter3D(object):
             del self.app
 
 
+def scatter_plot(vecs):
+
+    scat = Scatter3D()
+    scat.add_points(vecs)
+    scat.show()
+
+
 def view_finite_crystal(finite_crystal):
 
     lattices = finite_crystal.lattices

@@ -96,6 +96,8 @@ class UnitCell(object):
         r"""
         Always initialize with the lattice parameters.  Units are SI and radians.
 
+        FIXME: Allow initialization by other specifications
+
         Arguments:
             a: Lattice constant
             b: Lattice constant
@@ -195,7 +197,7 @@ class SpaceGroup(object):
     r"""
     Container for crystallographic spacegroup information.  Most importantly, transformation matices and vectors.  These
     transformations are purely in the fractional coordinate basis.  Note that this class has no awareness of the
-    meanings of spacegroup symbols -- I have not yet found a good way to programatically go from a spacegroup symbol
+    meanings of spacegroup symbols -- I have not yet found a good way to programmatically go from a spacegroup symbol
     string to a set of symmetry operators.
     """
 
@@ -284,10 +286,15 @@ class CrystalStructure(object):
     pdb_dict = None
     _au_com = None
 
-    def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False, tight_packing=False, unitcell=None, spacegroup=None):
+    def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False, tight_packing=False,
+                       unitcell=None, spacegroup=None):
         r"""
+        This class is initialized with a PDB file.
+
+        FIXME: Allow initialization without a PDB file.
+
         Arguments:
-            pdb_file_path (string): Path to a pdb file
+            pdb_file_path (string): Path to a pdb file (or just PDB ID if you want it auto-downloaded)
             no_warnings (bool): Suppress warnings concerning ambiguities in symmetry operations
             expand_ncs_coordinates (bool): Choose whether or not to expand non-crystallographic symmetry (NCS) partners.
             tight_packing (bool): Choose whether or not to enable a physical arrangement of the asymmetric unit symmetry partners - No difference for inifinite crystals but makes sense for a finite crystal.
@@ -296,7 +303,7 @@ class CrystalStructure(object):
         """
 
         if not os.path.exists(pdb_file_path):
-            print("PDB file not found.  Attempting to download it.")
+            # print("PDB file not found.  Attempting to download it to %s." % temp_dir)
             pdb_file_path = get_pdb_file(pdb_file_path, save_path=temp_dir)
 
         dic = pdb_to_dict(pdb_file_path)
@@ -353,7 +360,6 @@ class CrystalStructure(object):
         # Check for non-crystallographic symmetry.  Construct asymmetric unit from them.
         if expand_ncs_coordinates:
             ncs_partners = [r]
-            # print(len(dic['ncs_rotations']))
             n_ncs_partners = len(dic['ncs_rotations'])
             i_given = dic['i_given']
             for i in range(n_ncs_partners):
@@ -937,7 +943,7 @@ class CrystalDensityMap(object):
         Arguments:
             atom_x_vecs      (numpy array) : An nx3 array of position vectors
             atom_fs          (numpy array) : An n-length array of densities (must be real)
-            mode             (str)         : Either 'gaussian' or 'trilinear' (default: 'trilinear')
+            mode             (str)         : Either 'nearest', 'trilinear', or 'gaussian' (default: 'trilinear')
             fixed_atom_sigma (float)       : Standard deviation of the Gaussian atoms
 
         Returns:
@@ -965,11 +971,30 @@ class CrystalDensityMap(object):
                                       mask=np.full(len(atom_fs), True, dtype=bool))
             return rho
 
-        # elif mode == 'nearest':
-        #     mm = [0, self.oversampling]
-        #     rng = [mm, mm, mm]
-        #     a, _, _ = binned_statistic_dd(atom_x_vecs, atom_fs, statistic='sum', bins=[self.shape] * 3, range=rng)
-        #     return a
+        elif mode == 'nearest':
+            rho = np.zeros(self.shape, dtype=atom_fs.dtype)
+            dx = (self.x_max - self.x_min)/(self.shape - 1)
+            indices = (np.round((atom_x_vecs - self.x_min)/dx) % self.shape).astype(int)
+            for i in range(len(atom_fs)):
+                xi = indices[i, 0]
+                yi = indices[i, 1]
+                zi = indices[i, 2]
+                rho[xi, yi, zi] += atom_fs[i]
+            return rho
+
+    @property
+    def voxel_volume(self):
+        r"""
+        Get the volume of a voxel in orthogonal coordinates (i.e. Cartesian).
+
+        Returns:
+            float: Voxel volume
+        """
+        omat = self.cryst.unitcell.o_mat.copy()
+        dx = self.dx.copy()
+        v = omat*dx
+        vol = np.abs(np.dot(v[:, 0], np.cross(v[:, 1], v[:, 2])))
+        return vol
 
 
 @jit(nopython=True)
@@ -1019,9 +1044,6 @@ def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, o
         sum_map += sum_map_temp
 
 
-
-
-
 @jit(nopython=True)
 def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f_map_tmp):
     r"""
@@ -1059,26 +1081,27 @@ def place_atoms_in_map(x_vecs, atom_fs, sigma, s, orth_mat, map_x_vecs, f_map, f
         f_map += atom_fs[n] * f_map_tmp/w_tot
 
 
-def pdb_to_dict(pdb_file_path):
+def pdb_to_dict(pdb_file_path, ignore_waters=False):
     r"""Return a dictionary with a subset of PDB information.  If there are multiple atomic
     models, only the first will be extracted.  Units are the standard PDB units: angstrom and degrees.
 
     Arguments:
-        pdb_file_path: path to pdb file
+        pdb_file_path: Path to pdb file
+        ignore_waters: Ignore water molecules if True.  (Default: False)
 
     Returns:
         FIXME: Rick: Think about better formatting of returns.
         A dictionary with the following keys:
-        - 'scale_matrix'
-        - 'scale_translation'
-        - 'atomic_coordinates'
-        - 'atomic_symbols'
-        - 'unit_cell'
-        - 'spacegroup_symbol'
-        - 'spacegroup_rotations'
-        - 'spacegroup_translations'
-        - 'ncs_rotations'
-        - 'ncs_translations'
+        - 'scale_matrix' (from SCALE)
+        - 'scale_translation' (from SCALE)
+        - 'atomic_coordinates'  (from ATOM or HETATM)
+        - 'atomic_symbols'  (from ATOM or HETATM)
+        - 'unit_cell'  (from CRYST1)
+        - 'spacegroup_symbol'  (from CRYST1)
+        - 'spacegroup_rotations'  (from SMTRY)
+        - 'spacegroup_translations'  (from SMTRY)
+        - 'ncs_rotations'  (from MTRIX)
+        - 'ncs_translations'  (from MTRIX)
     """
 
     atomic_coordinates = np.zeros([10000, 3])
@@ -1092,7 +1115,7 @@ def pdb_to_dict(pdb_file_path):
     spacegroup_rotations = []
     spacegroup_symbol = None
     spacegroup_translations = []
-
+    poorly_formatted_atoms = False
     smtry_index = 0
     mtrix_index = 0
     atom_index = 0
@@ -1154,21 +1177,39 @@ def pdb_to_dict(pdb_file_path):
 
                 mtrix_index += 1
 
+            if ignore_waters and ((line[17:20] == "HOH") or (line[17:20] == "TIP")):
+                continue
+
             # Atomic coordinates (these are the orthogonal, cartesian coordinates denoted as r in the docs).
             if line[:6] == 'ATOM  ' or line[:6] == "HETATM":
                 atomic_coordinates[atom_index, 0] = float(line[30:38])
                 atomic_coordinates[atom_index, 1] = float(line[38:46])
                 atomic_coordinates[atom_index, 2] = float(line[46:54])
-                atomic_symbols.append(line[76:78].strip().capitalize())
+                at = ''
+                if len(line) >= 78:
+                    at = line[76:78].strip().capitalize()
+                # It is common that the atom type is not in the right place... try something else if so:
+                if at == '':
+                    at = line[12:14].strip().capitalize()
+                    if poorly_formatted_atoms is False:
+                        poorly_formatted_atoms = True
+                        warn('Poorly formatted PDB.  Atom types might be wrong.')
+                atomic_symbols.append(at)
+
                 atom_index += 1
             if atom_index == atomic_coordinates.shape[0]:  # Make the array larger if need be.
                 atomic_coordinates = np.vstack([atomic_coordinates, np.zeros((atomic_coordinates.shape[0], 3))])
 
     spacegroup_rotations = []
     spacegroup_translations = []
-    for i in range(int(smtry_index/3)):
-        spacegroup_rotations.append(smtry[i*3:i*3+3, 2:5])
-        spacegroup_translations.append(smtry[i * 3:i * 3 + 3, 5])
+    if smtry_index == 0:
+        warn('No spacegroup operations found.')
+        spacegroup_rotations.append(np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))
+        spacegroup_translations.append(np.array([0, 0, 0]))
+    else:
+        for i in range(int(smtry_index/3)):
+            spacegroup_rotations.append(smtry[i*3:i*3+3, 2:5])
+            spacegroup_translations.append(smtry[i * 3:i * 3 + 3, 5])
 
     ncs_rotations = []
     ncs_translations = []

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from reborn.detector import concat_pad_data
+from reborn.detector import concat_pad_data, PADGeometryList
 from reborn import utils
 
 
@@ -16,8 +16,8 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     Returns:
         axis
     """
-    pads = utils.ensure_list(pad_geometry)
-    data = utils.ensure_list(pad_data)
+    pads = PADGeometryList(pad_geometry)
+    data = pads.split_data(pad_data)
     plt.figure()
     ax = plt.gca()
     ax.set_aspect('equal')

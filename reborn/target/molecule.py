@@ -42,7 +42,7 @@ class Molecule(object):
         r"""
         Get atomic scattering factors.  You need to specify the photon energy or pass a Beam class instance in.
 
-        This wraps the function :func:`reborn.simulate.atoms.get_scattering_factors` for more details; see the docs
+        This wraps the function :func:`reborn.target.atoms.get_scattering_factors` for more details; see the docs
         for more details.
 
         Args:
@@ -72,3 +72,12 @@ class Molecule(object):
         Returns the molecular weight in SI units (kg).
         """
         return np.sum(atoms.atomic_weights[self.atomic_numbers])
+
+    def get_centered_coordinates(self):
+        r"""
+        Get the coordinates with center of mass set to the origin.
+
+        Returns:
+            |ndarray|: An Nx3 array of coordinates.
+        """
+        return self.coordinates - np.sum((self.atomic_numbers*self.coordinates.T).T, axis=0)/np.sum(self.atomic_numbers)

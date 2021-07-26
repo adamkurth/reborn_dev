@@ -34,7 +34,7 @@ f[1] = 1j
 # METHOD 1:
 # Simulate amplitudes using atomistic coordinates, structure factors, and a direct summation over
 #                              F(h) =  sum_n f_n*exp(-i 2*pi*h.x_n)
-# Recipcorcal-space coordinates are chosen such that they will correspond to a numpy FFT operation.  The limits of that
+# Reciprocal-space coordinates are chosen such that they will correspond to a numpy FFT operation.  The limits of that
 # sample grid are provided by the CrystalDensityMap class:
 g_min = cdmap.h_min * 2 * np.pi
 g_max = cdmap.h_max * 2 * np.pi

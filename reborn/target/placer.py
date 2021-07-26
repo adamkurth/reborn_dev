@@ -94,3 +94,42 @@ def place_spheres(volume_fraction, radius=1., box_edge=None, n_spheres=1000, tol
             break
 
     return p.data
+
+
+def particles_in_a_sphere(sphere_diameter, n_particles, particle_diameter, max_attempts=1e6):
+    r"""
+    Place particles randomly in a spherical volume.  Assume particles are spheres and they cannot touch any other
+    particle.
+
+    Args:
+        sphere_radius:
+        n_particles:
+        particle_diameter:
+        max_attempts:
+
+    Returns:
+
+    """
+    dmax = particle_diameter / sphere_diameter
+    pos_vecs = np.zeros((n_particles, 3))
+    for i in range(n_particles):
+        for a in range(int(max_attempts)):
+            vec = np.random.rand(3) - 0.5  # Random position
+            if np.sqrt(np.sum(vec**2)) > 0.5:  # Check if it's in the sphere
+                continue
+            if i > 0:
+                dist = np.min(np.sqrt(np.sum((pos_vecs[0:i] - vec)**2)))  # Check closest neighbor
+                if dist < dmax:
+                    continue
+            break  # If we made it here, success!
+        pos_vecs[i, :] = vec
+        if a == int(max_attempts) - 1:
+            print('Failed to place all particles!!')
+    return pos_vecs * sphere_diameter * 2
+
+
+
+
+
+
+

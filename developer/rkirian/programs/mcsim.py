@@ -180,7 +180,7 @@ def mcsim(
     else:
         r = cryst.molecule.coordinates
         Z = cryst.molecule.atomic_numbers
-    f = ba.simulate.atoms.get_scattering_factors(Z, photon_energy=beam.photon_energy)
+    f = ba.target.atoms.get_scattering_factors(Z, photon_energy=beam.photon_energy)
     write('done\n')
     write('%d atoms per unit cell\n' % (len(f)))
 
