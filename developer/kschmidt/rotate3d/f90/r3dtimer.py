@@ -14,7 +14,6 @@ if __name__ == "__main__":
    import matplotlib.pyplot as plt
    import scipy
    Ns = (27, 32, 50, 64, 81, 128, 150, 256, 384, 507, 512)
-   Ns = (27, 32)
    Nr = 20
    routines = [rotate3Dpy , rotate3Dvkfft]
    types = [np.complex128, np.complex64, np.float64, np.float32]
