@@ -14,6 +14,7 @@ if __name__ == "__main__":
    import matplotlib.pyplot as plt
    import scipy
    Ns = (27, 32, 50, 64, 81, 128, 150, 256, 384, 507, 512)
+   Ns = (27, 32)
    Nr = 20
    routines = [rotate3Dpy , rotate3Dvkfft]
    types = [np.complex128, np.complex64, np.float64, np.float32]
@@ -56,14 +57,18 @@ if __name__ == "__main__":
       
    with open("timing.out","w") as f:
       sys.stdout = f
-      print("Method ",Ns)
+      print(('{:25s} '+'{:10n} '*len(Ns)).format("Method",*Ns))
       ic = -1
       for t in types:
          for r in routines:
             ic += 1
-            print(r.__name__ + t.__name__, rot_times[ic,:])
-
-      print("Joe python" + np.complex128.__name__,rot_times[ic,:])
+            rname = r.__name__+t.__name__
+            print(('{:25s} '+'{:10.6f} '*len(rot_times[ic,:]))\
+               .format(rname,*rot_times[ic,:]))
+      ic += 1
+      rname = "Joe python"+np.complex128.__name__
+      print(('{:25s} '+'{:10.6f} '*len(rot_times[ic,:]))\
+         .format(rname,*rot_times[ic,:]))
 
    l = ["-bo", "-ro", "-go", "-yo", "-bx", "-rx", "-gx", "-yx", "-co"]
    ic = -1
