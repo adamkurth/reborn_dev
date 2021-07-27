@@ -1,4 +1,5 @@
 if __name__ == "__main__":
+   import sys
    import gc
    import numpy as np
    import time
@@ -13,7 +14,6 @@ if __name__ == "__main__":
    import matplotlib.pyplot as plt
    import scipy
    Ns = (27, 32, 50, 64, 81, 128, 150, 256, 384, 507, 512)
-#   Ns = (32, 50)
    Nr = 20
    routines = [rotate3Dpy , rotate3Dvkfft]
    types = [np.complex128, np.complex64, np.float64, np.float32]
@@ -54,6 +54,17 @@ if __name__ == "__main__":
       t1 = time.time()
       rot_times[ic,iin] = (t1-t0)/Nr
       
+   with open("timing.out","w") as f:
+      sys.stdout = f
+      print("Method ",Ns)
+      ic = -1
+      for t in types:
+         for r in routines:
+            ic += 1
+            print(r.__name__ + t.__name__, rot_times[ic,:])
+
+      print("Joe python" + np.complex128.__name__,rot_times[ic,:])
+
    l = ["-bo", "-ro", "-go", "-yo", "-bx", "-rx", "-gx", "-yx", "-co"]
    ic = -1
    for t in types:
@@ -61,7 +72,7 @@ if __name__ == "__main__":
          ic += 1
          plt.plot(Ns,rot_times[ic,:],l[ic],label=r.__name__ + t.__name__)
    ic += 1
-   plt.plot(Ns,rot_times[ic,:],l[ic],label="Joe pythone" + np.complex128.__name__)
+   plt.plot(Ns,rot_times[ic,:],l[ic],label="Joe python" + np.complex128.__name__)
    plt.yscale("log")
    plt.xlabel("N")
    plt.ylabel("Time(s)")
