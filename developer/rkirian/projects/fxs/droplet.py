@@ -24,15 +24,15 @@ c = const.c
 # Configurations
 #######################################################################
 water_density = 1000  # SI units, like everything else in reborn
-photon_energy = 8000*eV
-detector_distance = 2.4
-pulse_energy = 0.5e-3
+photon_energy = 7000*eV
+detector_distance = 1  #2.4
+pulse_energy = 3e-3
 drop_radius = 150e-9/2
-beam_diameter = 0.3e-6
+beam_diameter = 0.2e-6
 d_map = 0.2e-9  # Minimum resolution for 3D density map
 s_map = 2       # Oversampling factor for 3D density map
 cell_size = 200e-10  # Unit cell size (assume P1, cubic)
-pdb_file = '1SS8'  # '1PCQ' '2LYZ' '1SS8' 'BDNA25_sp.pdb'
+pdb_file = '3IYF'  # '1PCQ' '2LYZ' '1SS8' 'BDNA25_sp.pdb'
 #########################################################################
 
 wavelength = h*c/photon_energy
@@ -89,13 +89,13 @@ I_protd = np.abs(np.concatenate(I_protd))**2
 ################################################################################
 # FXS Simulation
 ################################################################################
-n_shots = np.int(12 * 3600 * 120 * 0.01)
+n_shots = int(12 * 3600 * 120 * 0.01)
 print('N Shots:', n_shots)
 C = 10  # Concentration in mg/ml = kg/m^3
 MW = cryst.molecule.get_molecular_weight()  # In kg
 n_dens = C/MW  # Number density of molecules
 drop_vol = 4/3*np.pi*(drop_radius)**3
-n_molecules = np.int(n_dens * drop_vol)
+n_molecules = int(n_dens * drop_vol)
 print('Molecules per drop:', n_molecules)
 L = cryst.molecule.max_atomic_pair_distance  # Nominal particle size
 print('Particle size:', L)
@@ -144,9 +144,8 @@ acf_sum += np.mean(acf_sum_nonoise[1:m]) - np.mean(acf_sum[1:m])
 plt.plot(phi[1:m]*180/np.pi, acf_sum[1:m], '.r')
 plt.xlabel(r'$\Delta \phi$ (degrees)')
 plt.ylabel(r'$C(q, q, \Delta\phi)$')
-
 view_pad_data(pad_data=np.log10(I_sphere+1), pad_geometry=cspads2x2, show=True)
-view_pad_data(pad_data=np.log10(I_prot+1), pad_geometry=cspads2x2, show=True)
+view_pad_data(pad_data=np.random.poisson(np.log10(I_prot+1)), pad_geometry=cspads2x2, show=True)
 # dispim = np.abs(rho_cell).astype(np.float64)
 # dispim /= np.abs(f_dens*voxel_vol)
 # dispim = np.sum(dispim, axis=0)
@@ -156,19 +155,19 @@ if 1:
     fig.add_subplot(2, 3, 1)
     I = np.abs(I).astype(np.float64)
     rho = np.abs(rho).astype(np.float64)
-    dispim = np.log10(I[np.floor(dmap.shape[0] / 2).astype(np.int), :, :] + 10)
+    dispim = np.log10(I[int(dmap.shape[0] / 2), :, :] + 10)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
     fig.add_subplot(2, 3, 4)
     dispim = np.sum(rho, axis=0)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
     fig.add_subplot(2, 3, 2)
-    dispim = np.log10(I[:, np.floor(dmap.shape[1] / 2).astype(np.int), :] + 10)
+    dispim = np.log10(I[:, int(dmap.shape[1] / 2), :] + 10)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
     fig.add_subplot(2, 3, 5)
     dispim = np.sum(rho, axis=1)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
     fig.add_subplot(2, 3, 3)
-    dispim = np.log10(I[:, :, np.floor(dmap.shape[2] / 2).astype(np.int)] + 10)
+    dispim = np.log10(I[:, :, int(dmap.shape[2] / 2)] + 10)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
     fig.add_subplot(2, 3, 6)
     dispim = np.sum(rho, axis=2)

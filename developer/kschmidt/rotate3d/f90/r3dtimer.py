@@ -13,17 +13,19 @@ if __name__ == "__main__":
       matplotlib.use('agg')
    import matplotlib.pyplot as plt
    import scipy
+   import scipy.spatial
+   rng = np.random.default_rng(1717171717)
    Ns = (27, 32, 50, 64, 81, 128, 150, 256, 384, 507, 512)
    Nr = 20
    routines = [rotate3Dpy , rotate3Dvkfft]
    types = [np.complex128, np.complex64, np.float64, np.float32]
    rot_times = np.zeros((len(types)*len(routines)+1,len(Ns)),dtype=np.float64)
-   Rs = scipy.spatial.transform.Rotation.random(Nr)
+   Rs = scipy.spatial.transform.Rotation.random(Nr,random_state=rng)
    iin = -1
    for N in Ns:
       iin += 1
-      tempr = np.random.normal(size=(N,N,N))
-      tempi = np.random.normal(size=(N,N,N))
+      tempr = rng.normal(size=(N,N,N))
+      tempi = rng.normal(size=(N,N,N))
       f3d = tempr+1j*tempi
       f3dr = tempr.copy()
       f30 = np.zeros((N,N,N),np.complex128)
