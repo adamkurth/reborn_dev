@@ -36,6 +36,7 @@ class rotate3D:
       self.f = f3d
       self.keep_last_even_k = keep_last_even_k
       self.dtf = self._f.dtype
+      self._setkorderc0()
 
    @property
    def f(self):
@@ -170,22 +171,24 @@ class rotate3D:
          ftmp = fft.ifft(fft.fft(ftmp,axis=1)*k0,axis=1)
          self._f[:,i,:] = ftmp
 
-   def _getkmult(self,scale):
-      nint = np.arange(self.N)
-      k0 = np.zeros((self.N,self.N),np.complex128)
-      c0 = 0.5*(self.N-1)
-      ck = -1j*2.0*np.pi/self.N*scale
+   def _setkorderc0(self):
+      self.c0 = 0.5*(self.N-1)
       if self.N % 2 == 0:
          kint0 = np.arange(-self.N/2,self.N/2)
          if not self.keep_last_even_k:
             kint0[0] = 0
       else:
          kint0 = np.arange((1-self.N)/2,(1+self.N)/2)
-      kint = np.zeros(self.N,np.float64)
-      kint[(self.N+1)//2:] = kint0[0:self.N//2]
-      kint[0:(self.N+1)//2] = kint0[self.N//2:]
+      self.kint = np.zeros(self.N,np.float64)
+      self.kint[(self.N+1)//2:] = kint0[0:self.N//2]
+      self.kint[0:(self.N+1)//2] = kint0[self.N//2:]
+
+   def _getkmult(self,scale):
+      nint = np.arange(self.N)
+      k0 = np.zeros((self.N,self.N),np.complex128)
+      ck = -1j*2.0*np.pi/self.N*scale
       for k in range(self.N):
-         k0[k,:] = np.exp(ck*(nint-c0)*kint[k])
+         k0[k,:] = np.exp(ck*(nint-self.c0)*self.kint[k])
       if self.dtf == np.complex64 or self.dtf == np.float32:
          k0 = k0.astype(dtype=np.complex64)
       return k0
@@ -277,6 +280,7 @@ class rotate3Dvkfft(rotate3D):
          self.dtfac = self.dtf
       self.factors = np.ndarray((6,self.N,self.N),self.dtfac)
       self.factors_dev = cl.array.to_device(self.q,self.factors)
+      self._setkorderc0()
       #stupid routines on gpu -- improve me
       src_double = """
 #ifdef R2C
