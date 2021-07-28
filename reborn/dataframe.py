@@ -64,14 +64,17 @@ class DataFrame:
 
     @property
     def n_pads(self):
+        r""" Number of PADs. """
         return len(self.get_processed_data_list())
 
     @property
     def raw_data(self):
+        r""" Raw data (closest to the source). """
         return self.get_raw_data_flat()
 
     @property
     def processed_data(self):
+        r""" Some modification of the raw data. """
         return self.get_processed_data_flat()
 
     @property

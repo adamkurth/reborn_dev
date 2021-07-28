@@ -7,9 +7,10 @@
 #
 # https://rkirian.gitlab.io/reborn
 
-#[ -d source/api ] && rm -r source/api
+[ -d source/api ] && rm -r source/api
 #[ -d source/auto_examples ] && rm -r source/auto_examples
-sphinx-apidoc --output-dir source/api --module-first ../reborn ../reborn/fortran ../reborn/simulate/atoms.py ../reborn/simulate/numbacore.py
+sphinx-apidoc --maxdepth 10 --templatedir source/templates --output-dir source/api ../reborn \
+ ../reborn/data ../reborn/fortran ../reborn/simulate/atoms.py ../reborn/simulate/numbacore.py
 # FIXME: How do we properly change the title of the auto-generated API page?  Below we do it brute-force...
 #tail -n+3 source/api/modules.rst > tmp.rst
 #echo 'API Reference' > source/api/modules.rst
@@ -19,6 +20,16 @@ sphinx-apidoc --output-dir source/api --module-first ../reborn ../reborn/fortran
 make clean
 make doctest
 make html
+exit
+#sed -i.bak '/>*package</d' build/html/api/modules.html
+#sed -i.bak '/>*contents</d' build/html/api/modules.html
+sed -i.bak '/>*Submodules</d' build/html/api/modules.html
+sed -i.bak '/>*Subpackages</d' build/html/api/modules.html
+sed -i.bak '/>Module contents</d' build/html/api/modules.html
+#sed -i.bak '/>*package</d' build/html/api/modules.html
+#sed -i.bak '/>*package</d' build/html/api/modules.html
+#sed -i.bak '/>*package</d' build/html/api/modules.html
+
 #perl -p -i -e 's{<head>\n}{<head>\n  <meta name="robots" content="noindex, nofollow" />\n}' build/html/*.html
 #perl -p -i -e 's{toctree-l2}{toctree-l1}' build/html/api/modules.html
 #perl -p -i -e 's{toctree-l3}{toctree-l1}' build/html/api/modules.html

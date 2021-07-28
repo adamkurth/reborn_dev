@@ -46,6 +46,7 @@ rst_epilog = """
 .. |numpy|  replace:: `numpy <https://numpy.org>`__
 .. |git|  replace:: `git <https://git-scm.com>`__
 .. |matplotlib|  replace:: `matplotlib <https://matplotlib.org/>`__
+.. |pycodestyle|  replace:: `pycodestyle <https://pypi.org/project/pycodestyle/>`__
 
 .. |GriffithsEM|  replace:: `Griffiths E&M <https://www.cambridge.org/core/books/introduction-to-electrodynamics/3AB220820DBB628E5A43D52C4B011ED4>`__
 .. |Cromer1968|  replace:: `Cromer et al. (1968) <https://doi.org/10.1107/S0567739468000550>`__

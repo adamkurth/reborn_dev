@@ -206,7 +206,6 @@ def boxsnr(dat, mask_in, mask_out, n_in, n_cent, n_out):
 
         **signal** (|ndarray|): The signal array.
     """
-
     float_t = np.float64
     snr = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
     signal = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
@@ -215,6 +214,41 @@ def boxsnr(dat, mask_in, mask_out, n_in, n_cent, n_out):
     m2 = np.asfortranarray(mask_out.astype(float_t))
     peaks_f.boxsnr(d, m, m2, snr, signal, n_in, n_cent, n_out)
     return snr, signal
+
+
+def snr_filter(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_iterations=1):
+    r"""
+    Transform an image into a map of local signal-to-noise ratio.
+
+    Arguments:
+        dat (numpy array) : Input data to calculate SNR from.
+        mask (numpy array) : Mask indicating bad pixels (zero means bad, one means ok)
+        nin (int) : See boxsnr function.
+        ncent (int) : See boxsnr function.
+        nout (int) : See boxsnr function.
+        threshold (float) : Reject pixels above this SNR.
+        mask_negative (bool) : Also reject pixels below the negative of the SNR threshold (default: True).
+        max_iterations (int) : The maxumum number of iterations (note: the loop exits if the mask stops changing).
+
+    Returns:
+        numpy array : The SNR map
+    """
+    if isinstance(dat, list):
+        return [snr_filter(d, m, nin, ncent, nout, threshold=threshold, mask_negative=mask_negative,
+                           max_iterations=max_iterations) for (d, m) in zip(dat, mask)]
+    mask_a = mask.copy()
+    prev = 0
+    for i in range(max_iterations):
+        a, _ = boxsnr(dat, mask, mask_a, nin, ncent, nout)
+        if mask_negative:
+            a = np.abs(a)
+        ab = a > threshold
+        above = np.sum(ab)
+        mask_a[ab] = 0
+        if above == prev:
+            break
+        prev = above
+    return a
 
 
 def snr_mask(dat, mask, nin, ncent, nout, threshold, mask_negative=True, max_iterations=3):

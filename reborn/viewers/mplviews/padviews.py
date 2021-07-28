@@ -6,7 +6,7 @@ from reborn import utils
 
 
 def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, show_scans=False, show_coords=False,
-                  show=True, vmin=None, vmax=None, background_color=None):
+                  show=True, vmin=None, vmax=None, background_color=None, cmap='viridis'):
     r"""
     Very simple function to show pad data with matplotlib.  This will take a list of data arrays along with a list
     of |PADGeometry| instances and display them with a decent geometrical layout.
@@ -33,11 +33,13 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     if vmax == None:
         vmax = np.max(pad_data_concated)
 
-    imshow_args = {"vmin": vmin, "vmax": vmax, "interpolation": 'none', "cmap": 'viridis'}
+    imshow_args = {"vmin": vmin, "vmax": vmax, "interpolation": 'none', "cmap": cmap}
     bbox = []
     for i in range(len(pads)):
         dat = data[i]
         pad = pads[i]
+        nf = pad.n_fs
+        ns = pad.n_ss
         f = pad.fs_vec.copy()
         s = pad.ss_vec.copy()
         t = pad.t_vec.copy()
@@ -48,8 +50,8 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
         t /= scl
         c /= scl
         # This bbox is for finding the bounding box of all panels -- need coords of all four corners of each...
-        bbox.append(np.array([[t[0], t[1]], [t[0]+f[0], t[1]+f[1]], [t[0]+s[0], t[1]+s[1]],
-                              [t[0]+f[0]+s[0], t[1]+f[1]+s[1]]]))
+        bbox.append(np.array([[t[0], t[1]], [t[0]+f[0]*nf, t[1]+f[1]*nf], [t[0]+s[0]*ns, t[1]+s[1]*ns],
+                              [t[0]+f[0]*nf+s[0]*ns, t[1]+f[1]*nf+s[1]*ns]]))
         im = ax.imshow(dat, **imshow_args)
         trans = mpl.transforms.Affine2D(np.array([[f[0], s[0], t[0]],
                                                   [f[1], s[1], t[1]],
@@ -62,14 +64,19 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
         if show_scans:
             plt.arrow(t[0], t[1], f[0]*dat.shape[0]/2, f[1]*dat.shape[1]/2, fc='b', ec='r', width=10,
                       length_includes_head=True)
-    b = np.max(np.abs(np.vstack(bbox)))+1
-    ax.set_xlim(-b, b)  # work in pixel units
-    ax.set_ylim(b, -b)
+    bbs = np.vstack(bbox)
+    r = np.max(np.abs(bbs))+1
+    xmn = np.min(bbs[:, 0])
+    xmx = np.max(bbs[:, 0])
+    ymn = np.min(bbs[:, 1])
+    ymx = np.max(bbs[:, 1])
+    ax.set_xlim(xmn, xmx)  # work in pixel units
+    ax.set_ylim(ymx, ymn)
     if beam_center:
-        ax.add_patch(plt.Circle(xy=(0, 0), radius=b/100, fc='none', ec=[0, 1, 0]))
+        ax.add_patch(plt.Circle(xy=(0, 0), radius=r/100, fc='none', ec=[0, 1, 0]))
     if show_coords:
-        plt.arrow(0, 0, b/10, 0, fc=[1, 0, 0], ec=[1, 0, 0], width=10, length_includes_head=True)
-        plt.arrow(0, 0, 0, b / 10, fc=[0, 1, 0], ec=[0, 1, 0], width=10, length_includes_head=True)
+        plt.arrow(0, 0, r/10, 0, fc=[1, 0, 0], ec=[1, 0, 0], width=10, length_includes_head=True)
+        plt.arrow(0, 0, 0, r / 10, fc=[0, 1, 0], ec=[0, 1, 0], width=10, length_includes_head=True)
         ax.add_patch(plt.Circle(xy=(0, 0), radius=10, fc=[0, 0, 1], ec=[0, 0, 1], zorder=100))
     if show:
         plt.show()

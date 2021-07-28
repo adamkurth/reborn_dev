@@ -14,45 +14,35 @@ class PADGeometry:
     r"""
     A container for pixel-array detector (PAD) geometry specification, with helpful methods for generating:
 
-    - Vectors from sample to pixel
-    - Scattering vectors (i.e. "q" vectors... provided beam information)
+    - Vectors from sample to pixel.
+    - Scattering vectors (i.e. "q" vectors... provided beam information).
     - Scattering vector magnitudes.
     - Scattering angles (twice the Bragg angle).
-    - Polarization factors
-
-    There are also a few methods for generating new arrays (zeros, ones, random) and re-shaping flattened arrays to 2D
-    arrays.
-
+    - Polarization factors.
+    - etc.
     """
-
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
     # These are the configurable parameters.  No defaults.  One must think.
+    _n_fs = None
+    _n_ss = None
+    _fs_vec = None
+    _ss_vec = None
+    _t_vec = None
+    name = ''
 
-    def __init__(self, n_pixels=None, distance=None, pixel_size=None, shape=None):
+    def __init__(self, distance=None, pixel_size=None, shape=None, **kwargs):
         r"""
         On initialization, optional arguments may be provided (you must provide *all* of them):
 
         Arguments:
-            shape (int or numpy array): Shape of the panels.  The first element is the slow-scan shape.  If there is
-                                           only one element, or if it is an int, then it will be a square panel.
-            distance (float): Sample-to-detector distance, where the beam is taken along the third ("Z") axis
-            pixel_size (float): Size of the pixels in SI units.
+            shape (tuple): (optional) Shape of the PAD.
+            distance (float): (optional) Sample-to-detector distance.
+            pixel_size (float): (optional) Size of the pixels in SI units.
         """
-
-        if n_pixels is not None:
-            utils.depreciate("When initializing PADGeometry, use the 'shape' argument not 'n_pixels'")
-
-        self._n_fs = None
-        self._n_ss = None
-        self._fs_vec = None
-        self._ss_vec = None
-        self._t_vec = None
-        self.name = ''
-
-        if distance is not None and pixel_size is not None:
-
-            self.simple_setup(n_pixels=n_pixels, distance=distance, pixel_size=pixel_size, shape=shape)
+        if None in [distance, pixel_size, shape]:
+            return
+        self.simple_setup(distance=distance, pixel_size=pixel_size, shape=shape)
 
     def __str__(self):
         out = self.name+'\n'
@@ -90,10 +80,10 @@ class PADGeometry:
         r""" Determine if this instance has all the needed parameters defined.
 
         Arguments:
-            raise_error (bool): Raise ValueError if the validation fails
+            raise_error (bool): Raise ValueError if the validation fails.  Default: False.
 
         Returns:
-            bool: True if validation passes, False otherwise
+            bool: True if validation passes, False otherwise.
         """
         status = True
         if not isinstance(self._n_fs, int):
@@ -200,59 +190,40 @@ class PADGeometry:
             d = json.load(f)
         self.from_dict(d)
 
-    def simple_setup(self, n_pixels=None, pixel_size=None, distance=None, shape=None):
+    def simple_setup(self, pixel_size=None, distance=None, shape=None, **kwargs):
         r""" Make this a square PAD with beam at center.
 
         Arguments:
-            shape : The shape of the panel, consistent with a numpy array shape.
-            pixel_size : Pixel size in SI units.
-            distance : Detector distance in SI units.
-            n_pixels : (utils.depreciateD) Either the shape of the panel, or a single number if a square detector is desired.
-                       Do not use this input as it will be removed in the future.
-
-        Returns:
-            object:
+            shape (tuple): The shape of the panel, consistent with a numpy array shape.
+            pixel_size (float): Pixel size in SI units.
+            distance (float): Detector distance in SI units.
         """
-
-        if n_pixels is not None:
-            utils.depreciate('The redundant "n_pixels" keyword argument in simple_setup is utils.depreciated.  Use "shape" keyword '
-                             'instead.')
-
+        if 'n_pixels' in kwargs:
+            utils.depreciate('Use "shape" keyword instead of "n_pixels".')
+            n = kwargs['n_pixels']
+            shape = (n, n)
         if pixel_size is None:
             utils.warn('Setting pixel_size in simple_setup to 100e-6.  You should specify this value explicitly.')
             pixel_size = 100e-6
-
         if distance is None:
             utils.warn('Setting distance in simple_setup to 0.1.  You should specify this value explicitly.')
             distance = 0.1
-
-        if shape is not None:
-            self.n_fs = shape[1]
-            self.n_ss = shape[0]
-        else:
-            if n_pixels is None:
-                utils.warn('Setting n_pixels in simple_setup to 1000.  You should specify this value explicitly.')
-                n_pixels = 1000
-            try:
-                self.n_fs = n_pixels[1]
-                self.n_ss = n_pixels[0]
-            except TypeError:
-                self.n_fs = n_pixels
-                self.n_ss = n_pixels
-
+        if shape is None:
+            utils.warn('Setting shape to (1000, 1000).  You should specify this value explicitly.')
+            shape = (1000, 1000)
+        self.n_fs = shape[1]
+        self.n_ss = shape[0]
         self.fs_vec = np.array([pixel_size, 0, 0])
         self.ss_vec = np.array([0, pixel_size, 0])
         self.t_vec = np.array([pixel_size * -(self.n_fs / 2.0 - 0.5), pixel_size * -(self.n_ss / 2.0 - 0.5), distance])
 
     def pixel_size(self):
         r""" Return pixel size, assuming square pixels. """
-
         return np.mean([utils.vec_mag(self.fs_vec), utils.vec_mag(self.ss_vec)])
 
     def shape(self):
         r""" Return tuple corresponding to the numpy shape of this PAD. """
-
-        return self.n_ss, self.n_fs
+        return (self.n_ss, self.n_fs)
 
     def indices_to_vectors(self, idx_ss, idx_fs):
         r"""
@@ -260,15 +231,12 @@ class PADGeometry:
         The positions need not lie on the actual panel; this assums an infinite plane.
 
         Arguments:
-            idx_fs (float) :
-                Fast-scan index.
-            idx_ss (float) :
-                Slow-scan index.
+            idx_fs (float) : Fast-scan index.
+            idx_ss (float) : Slow-scan index.
 
         Returns:
-            Nx3 numpy array
+            |ndarray| : Nx3 vector array.
         """
-
         idx_fs = np.array(idx_fs)
         idx_ss = np.array(idx_ss)
         f_vec = np.outer(idx_fs.ravel(), self.fs_vec)
@@ -276,10 +244,10 @@ class PADGeometry:
         return self.t_vec + f_vec + s_vec
 
     def vectors_to_indices(self, vecs, insist_in_pad=True, round=False):
-        r""" Suppose you have a vector pointing away from the origin and you want to know which pixel the vector
-        will intercept (if scaled by an appropriate constant).  This function will do that calculation for you.  It will
-        return the indices corresponding to the point where the vector intercepts the PAD.  Note that the indices are
-        floating points, so you might need to convert to integers if you use them for indexing.
+        r""" Suppose you have a vector pointing away from the origin and you want to know which pixel the vector will
+        intercept.  This function will do that calculation for you.  It will return the indices corresponding to the
+        point where the vector intercepts the PAD.  Note that the indices are floating points, so you might need to
+        convert to integers if you use them for indexing.
 
         Arguments:
             vecs (|ndarray|): An array of vectors, with shape (N, 3) or shape (3)
@@ -287,7 +255,7 @@ class PADGeometry:
                                   values will be set to nan.
 
         Returns:
-            slow-scan indices, fast-scan indices.
+            (tuple) : Slow-scan indices, Fast-scan indices.
         """
         vecs = np.atleast_2d(vecs)
         fxs = np.dot(vecs, np.cross(self.ss_vec, self.fs_vec))
@@ -597,6 +565,34 @@ class PADGeometry:
         t, f, s, nf, ns = self.t_vec, self.fs_vec, self.ss_vec, self.n_fs, self.n_ss
         return np.array([t, t+nf*f, t+nf*f+ns*s, t+ns*s])
 
+    def binned(self, binning=2):
+        r"""
+        Make the pixel size bigger by an integer multiple, while keeping the array size approximately the same.
+
+        Note:
+            This may result in loss of information.  Example: with binning set to 2, a 5x7 PAD results in a 2x3 PAD
+            with pixels twice the size.  There is no way to recover the initial 5x7 shape from the binned PAD.
+
+        Note:
+            This operation is not inplace.  It does not affect the current instance of PADGeometry.  It returns a new
+            PADGeometry.
+
+        Args:
+            binning (int): An integer value of 1,2,3,etc.  The pixel size will be increased by this factor.
+
+        Returns:
+            |PADGeometry| : The new, binned, PAD geometry.
+        """
+        if not isinstance(binning, int):
+            raise ValueError('binning should be an integer')
+        p = self.copy()
+        p.n_fs = np.int(p.n_fs / binning)
+        p.n_ss = np.int(p.n_ss / binning)
+        p.t_vec += (p.fs_vec + p.ss_vec) * (binning - 1) / 2
+        p.fs_vec *= binning
+        p.ss_vec *= binning
+        return p
+
 
 class PADGeometryList(list):
 
@@ -621,7 +617,8 @@ class PADGeometryList(list):
 
     def __str__(self):
         s = ''
-        for item in self: s += '\n'+item.__str__()
+        for item in self:
+            s += '\n'+item.__str__()
         return s
 
     def split_data(self, data):
@@ -636,7 +633,8 @@ class PADGeometryList(list):
     def hash(self):
         r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
         s = ''
-        for p in self: s += p.__str__()
+        for p in self:
+            s += p.__str__()
         return hash(s)
 
     def validate(self, raise_error=False):
@@ -644,8 +642,10 @@ class PADGeometryList(list):
         status = True
         for p in self:
             status *= p.validate(raise_error=raise_error)
-        if status: return True
-        else: return False
+        if status:
+            return True
+        else:
+            return False
 
     @property
     def n_pixels(self):
@@ -719,6 +719,11 @@ class PADGeometryList(list):
     def max_resolution(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return np.max(np.array([p.max_resolution(beam=beam) for p in self]))
+
+    def binned(self, binning=2):
+        r""" See corresponding method in |PADGeometry|. """
+        binned = [p.binned(binning) for p in self]
+        return PADGeometryList(binned)
 
 
 def f2_to_photon_counts(f_squared, beam=None, pad_geometry=None):
@@ -873,7 +878,6 @@ def subtract_pad_friedel_mate(data, mask, pads):
         for j in range(n_pads):
             v = vecs.copy().astype(np.float32)
             v[:, 0:2] *= -1  # Invert vectors
-            #del vecs
             x, y = pads[j].vectors_to_indices(v, insist_in_pad=True, round=True)
             del v
             w = np.where(np.isfinite(x))
@@ -1315,7 +1319,7 @@ class RadialProfiler():
         data = concat_pad_data(data)
         return self.get_profile_statistic(data, mask=mask, statistic=np.std)
 
-    def subtract_profile(self, data, mask=None, statistic='mean'):
+    def subtract_profile(self, data, mask=None, statistic=np.median):
         r"""
         Given some PAD data, subtract a radial profile (mean or median).
 
@@ -1336,7 +1340,8 @@ class RadialProfiler():
         elif statistic == 'median':
             mprof = self.get_median_profile(data, mask=mask)
         else:
-            raise ValueError('Statistic %s not recognized' % (statistic,))
+            mprof = self.get_profile_statistic(data, mask=mask, statistic=statistic)
+            # raise ValueError('Statistic %s not recognized' % (statistic,))
         mprofq = self.bin_centers
         mpat = np.interp(self.q_mags, mprofq, mprof)
         mpat = concat_pad_data(mpat)
@@ -1372,8 +1377,8 @@ class RadialProfiler():
 
 def get_radial_profile(data, beam, pad_geometry, mask=None, n_bins=None, q_range=None, statistic=np.mean):
     r"""
-    For convenience, runs the RadialProfiler.get_profile_statistic method without the need to create a RadialProfiler
-    instance.
+    Compute a radial profile from a PAD (or list of pads).  Calculates the mean by default, but you may pass it any
+    function handle (e.g. :func:`np.median` or :func:`np.std` ).
 
     Arguments:
         data (|ndarray| or list of |ndarray|): Data to get profiles from.
@@ -1382,15 +1387,15 @@ def get_radial_profile(data, beam, pad_geometry, mask=None, n_bins=None, q_range
         mask (|ndarray| or list of |ndarray|): Mask (one is good, zero is bad).
         n_bins (int): Number of radial bins.
         q_range (tuple of floats): Centers of the min and max q bins.
-        statistic (function): The function you want to apply to each bin (default: np.mean).
+        statistic (function): The function you want to apply to each bin (default: :func:`np.mean`).
 
     Returns:
-        (tuple): tuple containing:
+        (tuple):
             - **statistic** (|ndarray|) -- Radial statistic.
             - **bins** (|ndarray|) -- The values of q at the bin centers.
     """
-    radial_profiler = RadialProfiler(beam=beam, pad_geometry=pad_geometry, mask=mask, n_bins=n_bins, q_range=q_range)
-    return radial_profiler.get_profile_statistic(data, mask=None, statistic=statistic), radial_profiler.bin_centers
+    rp = RadialProfiler(beam=beam, pad_geometry=pad_geometry, mask=mask, n_bins=n_bins, q_range=q_range)
+    return (rp.get_profile_statistic(data, mask=None, statistic=statistic), radial_profiler.bin_centers)
 
 
 def save_pad_masks(file_name, mask_list, packbits=True):
@@ -1407,7 +1412,7 @@ def save_pad_masks(file_name, mask_list, packbits=True):
         mask_list (list): A list of |ndarray| masks.  Will be converted to bool type before saving.
         packbits (bool): Specify if :func:`numpy.packbits` should be used to reduce file size.  (Default: True).
 
-    Returns: str: File name
+    Returns: str: File name.
     """
     if not file_name.endswith('.mask'):
         file_name += '.mask'
@@ -1459,7 +1464,8 @@ def pnccd_pad_geometry_list(detector_distance=0.1):
     Returns: List of |PADGeometry| instances
     """
     pads = load_pad_geometry_list(pnccd_geom_file)
-    for p in pads: p.t_vec[2] = detector_distance
+    for p in pads:
+        p.t_vec[2] = detector_distance
     return pads
 
 
@@ -1473,7 +1479,8 @@ def cspad_pad_geometry_list(detector_distance=0.1):
     Returns: List of |PADGeometry| instances
     """
     pads = load_pad_geometry_list(cspad_geom_file)
-    for p in pads: p.t_vec[2] = detector_distance
+    for p in pads:
+        p.t_vec[2] = detector_distance
     return pads
 
 
@@ -1487,7 +1494,8 @@ def cspad_2x2_pad_geometry_list(detector_distance=2.4):
     Returns: List of |PADGeometry| instances
     """
     pads = load_pad_geometry_list(cspad_2x2_geom_file)
-    for p in pads: p.t_vec[2] = detector_distance
+    for p in pads:
+        p.t_vec[2] = detector_distance
     return pads
 
 
@@ -1502,7 +1510,7 @@ def jungfrau4m_pad_geometry_list(detector_distance=0.1, binning=1):
     Returns: List of |PADGeometry| instances
     """
     pads = tiled_pad_geometry_list(pad_shape=(int(512/binning), int(1024/binning)), pixel_size=75e-6*binning,
-                                            distance=detector_distance, tiling_shape=(4, 2), pad_gap=36 * 75e-6)
+                                   distance=detector_distance, tiling_shape=(4, 2), pad_gap=36 * 75e-6)
     gap = 9e-3
     pads[0].t_vec += + np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
     pads[1].t_vec += + np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
@@ -1526,5 +1534,6 @@ def epix10k_pad_geometry_list(detector_distance=0.1):
         (list): List of |PADGeometry| instances.
     """
     pads = load_pad_geometry_list(epix10k_geom_file)
-    for p in pads: p.t_vec[2] = detector_distance
+    for p in pads:
+        p.t_vec[2] = detector_distance
     return pads
