@@ -32,120 +32,50 @@ wr = rng.random(Ngr)-0.5
 gi0 = (rng.random((Ngi,3))-0.5)*sigma
 wi = rng.random(Ngi)-0.5
 Ns = [7, 16, 27, 32, 48, 64, 75]
+methods = [rotate3Dpy, rotate3Dv, rotate3Dl, rotate3Dj]
+types = [np.complex128, np.complex64, np.float64, np.float32]
 for N in Ns:
    gr = gr0.copy()
    gi = gi0.copy()
    datar = makegaussians(wr,gr,sigma,N)
    data = datar+1j*makegaussians(wi,gi,sigma,N)
    
-   print("Python complex128",N)
-   gr = gr0.copy()
-   gi = gi0.copy()
-   r3df = rotate3Dpy(data)
-   dmax = np.max(np.abs(data))
-   for ir in Rs:
-      gr = ir.apply(gr)
-      gi = ir.apply(gi)
-      r3df.rotation(ir)
-      print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)\
-         -1j*makegaussians(wi,gi,sigma,N)))/dmax)
-   
-   print("vkfft complex128",N)
-   gr = gr0.copy()
-   gi = gi0.copy()
-   r3df = rotate3Dv(data)
-   dmax = np.max(np.abs(data))
-   for ir in Rs:
-      gr = ir.apply(gr)
-      gi = ir.apply(gi)
-      r3df.rotation(ir)
-      print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)\
-         -1j*makegaussians(wi,gi,sigma,N)))/dmax)
-
-   print("python legacy complex128",N)
-   gr = gr0.copy()
-   gi = gi0.copy()
-   r3df = rotate3Dl(data)
-   dmax = np.max(np.abs(data))
-   for ir in Rs:
-      gr = ir.apply(gr)
-      gi = ir.apply(gi)
-      r3df.rotation(ir)
-      print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)\
-         -1j*makegaussians(wi,gi,sigma,N)))/dmax)
-   
-   print("joe complex128",N)
-   gr = gr0.copy()
-   gi = gi0.copy()
-   dmax = np.max(np.abs(data))
-   datan = data.copy()
-   for ir in Rs:
-      gr = ir.apply(gr)
-      gi = ir.apply(gi)
-      datan = rotate3Dj(datan,ir)
-      print("Error",np.max(np.abs(datan-makegaussians(wr,gr,sigma,N)\
-         -1j*makegaussians(wi,gi,sigma,N)))/dmax)
-   
-   print("Python complex64",N)
-   gr = gr0.copy()
-   gi = gi0.copy()
-   r3df = rotate3Dpy(data.astype(np.complex64))
-   dmax = np.max(np.abs(data))
-   for ir in Rs:
-      gr = ir.apply(gr)
-      gi = ir.apply(gi)
-      r3df.rotation(ir)
-      print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)\
-         -1j*makegaussians(wi,gi,sigma,N)))/dmax)
-   
-   print("vkfft complex64",N)
-   gr = gr0.copy()
-   gi = gi0.copy()
-   r3df = rotate3Dv(data.astype(np.complex64))
-   dmax = np.max(np.abs(data))
-   for ir in Rs:
-      gr = ir.apply(gr)
-      gi = ir.apply(gi)
-      r3df.rotation(ir)
-      print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)\
-         -1j*makegaussians(wi,gi,sigma,N)))/dmax)
-   
-   print("Python float64",N)
-   gr = gr0.copy()
-   gi = gi0.copy()
-   r3df = rotate3Dpy(datar)
-   dmax = np.max(np.abs(datar))
-   for ir in Rs:
-      gr = ir.apply(gr)
-      r3df.rotation(ir)
-      print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)))/dmax)
-   
-   print("vkfft float64",N)
-   gr = gr0.copy()
-   gi = gi0.copy()
-   r3df = rotate3Dv(datar)
-   dmax = np.max(np.abs(datar))
-   for ir in Rs:
-      gr = ir.apply(gr)
-      r3df.rotation(ir)
-      print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)))/dmax)
-   
-   print("Python float32",N)
-   gr = gr0.copy()
-   gi = gi0.copy()
-   r3df = rotate3Dpy(datar.astype(np.float32))
-   dmax = np.max(np.abs(datar))
-   for ir in Rs:
-      gr = ir.apply(gr)
-      r3df.rotation(ir)
-      print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)))/dmax)
-   
-   print("vkfft float32",N)
-   gr = gr0.copy()
-   gi = gi0.copy()
-   r3df = rotate3Dv(datar.astype(np.float32))
-   dmax = np.max(np.abs(datar))
-   for ir in Rs:
-      gr = ir.apply(gr)
-      r3df.rotation(ir)
-      print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)))/dmax)
+   for t in types:
+      for m in methods:
+         dmax = np.max(np.abs(data))
+         if m == rotate3Dj:
+            if t == np.complex128:
+               print("Joe " + t.__name__,N)
+               gr = gr0.copy()
+               gi = gi0.copy()
+               datan = data.copy()
+               for ir in Rs:
+                  gr = ir.apply(gr)
+                  gi = ir.apply(gi)
+                  datan = rotate3Dj(datan,ir)
+                  print("Error",np.max(np.abs(datan\
+                     -makegaussians(wr,gr,sigma,N)\
+                     -1j*makegaussians(wi,gi,sigma,N)))/dmax)
+               continue
+            continue
+         if m == rotate3Dl and t != np.complex128:
+            continue
+         print(m.__name__ + " " + t.__name__,N)
+         gr = gr0.copy()
+         gi = gi0.copy()
+         if t == np.complex128 or t == np.complex64:
+            r3df = m(data.astype(t))
+            dmax = np.max(np.abs(data))
+         else:
+            r3df = m(datar.astype(t))
+            dmax = np.max(np.abs(datar))
+         for ir in Rs:
+            gr = ir.apply(gr)
+            gi = ir.apply(gi)
+            r3df.rotation(ir)
+            if t == np.complex128 or t == np.complex64:
+               print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)\
+                  -1j*makegaussians(wi,gi,sigma,N)))/dmax)
+            else:
+               print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)\
+                  ))/dmax)
