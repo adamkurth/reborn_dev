@@ -31,7 +31,7 @@ gr0 = (rng.random((Ngr,3))-0.5)*sigma
 wr = rng.random(Ngr)-0.5
 gi0 = (rng.random((Ngi,3))-0.5)*sigma
 wi = rng.random(Ngi)-0.5
-Ns = [16, 27, 32, 48, 64, 75]
+Ns = [7, 16, 27, 32, 48, 64, 75]
 for N in Ns:
    gr = gr0.copy()
    gi = gi0.copy()
@@ -54,6 +54,18 @@ for N in Ns:
    gr = gr0.copy()
    gi = gi0.copy()
    r3df = rotate3Dv(data)
+   dmax = np.max(np.abs(data))
+   for ir in Rs:
+      gr = ir.apply(gr)
+      gi = ir.apply(gi)
+      r3df.rotation(ir)
+      print("Error",np.max(np.abs(r3df.f-makegaussians(wr,gr,sigma,N)\
+         -1j*makegaussians(wi,gi,sigma,N)))/dmax)
+
+   print("python legacy complex128",N)
+   gr = gr0.copy()
+   gi = gi0.copy()
+   r3df = rotate3Dl(data)
    dmax = np.max(np.abs(data))
    for ir in Rs:
       gr = ir.apply(gr)
