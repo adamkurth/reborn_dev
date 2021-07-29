@@ -93,47 +93,58 @@ def test_radial_profiler_01():
     dat = np.ones([3, 3])
     rad = detector.RadialProfiler(q_mags=q_mags, mask=None, n_bins=3, q_range=[0, 9283185])
     # rad.bin_edges = [-2320796.25  2320796.25  6962388.75 11603981.25]
-    profile = rad.get_profile(dat, average=False)  # Sums over
+    profile = rad.get_sum_profile(dat)  # Sums over
     assert profile[0] == 1
     assert profile[1] == 4
     assert profile[2] == 4
-    profile = rad.get_profile(dat, average=True)  # Sums over
+    profile = rad.get_mean_profile(dat)  # Sums over
     assert profile[0] == 1
     assert profile[1] == 1
     assert profile[2] == 1
     mask = np.ones([3, 3])
     mask[0, 0] = 0
-    profile = rad.get_profile(dat, mask=mask, average=False)  # Sums over
+    profile = rad.get_sum_profile(dat, mask=mask)  # Sums over
     assert profile[0] == 1
     assert profile[1] == 4
     assert profile[2] == 3
     mask = np.ones([3, 3])
     mask[0, 0] = 0
     rad.set_mask(mask)
-    profile = rad.get_profile(dat, average=False)  # Sums over
+    profile = rad.get_sum_profile(dat)  # Sums over
     assert profile[0] == 1
     assert profile[1] == 4
     assert profile[2] == 3
     mask = np.ones([3, 3])
     mask[0, 0] = 0
     rad.set_mask(mask)
-    profile = rad.get_profile(dat, average=True)  # Sums over
+    profile = rad.get_mean_profile(dat)  # Sums over
     assert profile[0] == 1
     assert profile[1] == 1
     assert profile[2] == 1
 
 
 def test_radial_profiler_02():
-
     pad_geom = make_pad_list()
     beam = [0, 0, 1]
     wav = 1.5e-10
     q_mags = np.ravel([p.q_mags(beam_vec=beam, wavelength=wav) for p in pad_geom])
     rad = detector.RadialProfiler(q_mags=q_mags, mask=None, n_bins=100, q_range=None)
     data = np.ravel([np.random.rand(p.n_ss, p.n_fs) for p in pad_geom])
-    prof = rad.get_profile(data, average=True)
+    prof = rad.get_mean_profile(data)
     assert(np.max(prof) <= 1)
     assert(np.min(prof) >= 0)
+
+
+def test_radial_profiler_03():
+    pads = detector.cspad_2x2_pad_geometry_list()
+    beam = source.Beam(wavelength=1.0e-10)
+    rad = detector.RadialProfiler(beam=beam, pad_geometry=pads, mask=None, n_bins=100)
+    data = pads.random()
+    prof1 = rad.get_mean_profile(data)
+    prof2 = rad.get_profile_statistic(data, statistic=np.mean)
+    prof3, _ = detector.get_radial_profile(data, beam, pads, n_bins=100, statistic=np.mean)
+    assert(np.max(np.abs(prof1-prof2)) == 0)
+    assert(np.max(np.abs(prof3-prof2)) == 0)
 
 
 def test_vector_math():

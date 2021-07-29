@@ -1369,8 +1369,10 @@ class PADView2(QtCore.QObject):
             method(*args, **kwargs)
 
 
-def view_pad_data(pad_data=None, pad_geometry=None, show=True, **kwargs):
+def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwargs):
     pv = PADView(raw_data=pad_data, pad_geometry=pad_geometry, **kwargs)
+    if title is not None:
+        pv.set_title(title)
     if show:
         pv.start()
 
