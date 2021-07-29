@@ -10,10 +10,10 @@ Imports:
 """
 
 import numpy as np
-import xraylib
 from reborn.source import Beam
+from reborn.target import atoms
 from reborn.simulate.form_factors import sphere_form_factor
-from reborn.simulate.examples import jungfrau4m_pads
+from reborn.detector import jungfrau4m_pad_geometry_list
 from reborn.viewers.mplviews import view_pad_data
 import scipy.constants as const
 
@@ -28,10 +28,10 @@ h = const.h
 c = const.c
 water_density = 1000  # SI units, like everything else in reborn!
 photon_energy = 2000*eV
-wavelength = h*c/photon_energy
 detector_distance = .5
 pulse_energy = 1e-3
 drop_radius = 20e-9
+wavelength = h*c/photon_energy
 
 # %%
 # Set up the x-ray source:
@@ -43,12 +43,11 @@ fluence = beam.photon_number_fluence
 # Construct a |Jungfrau| 4M detector, made up of 8 modules arranged around a 9mm beam hole.  The number of pixels per
 # module is 1024 x 512 and the pixel size is 75 microns.
 
-binning = 3
-pads = jungfrau4m_pads(detector_distance=detector_distance, binning=binning)
+pads = jungfrau4m_pad_geometry_list(detector_distance=detector_distance)
+pads = pads.binned(3)
 
 # %%
-# Let's see if we can use the |xraylib| python interface in order to determine the refractive index of water.  The
-# refractive index is
+# Below we use |xraylib| to get the refractive index of water.  It is equal to
 #
 # .. math::
 #
@@ -56,19 +55,7 @@ pads = jungfrau4m_pads(detector_distance=detector_distance, binning=binning)
 #
 # where :math:`N_n` is the number density of scatterer :math:`n` with scattering factor :math:`f_n(\lambda)`.
 
-cmp = xraylib.CompoundParser('H2O')
-dens = water_density
-MM = cmp['molarMass']
-N = dens/(MM/NA/1000)  # Number density of molecules (SI)
-ref_idx = 0
-E_keV = photon_energy / (1000 * eV)  # This is energy in **keV**, the default for xraylib
-for i in range(cmp['nElements']):
-    Z = cmp['Elements'][i]
-    nZ = cmp['nAtoms'][i]
-    mf = cmp['massFractions'][i]
-    f = xraylib.FF_Rayl(Z, 0) + xraylib.Fi(Z, E_keV) - 1j * xraylib.Fii(Z, E_keV)
-    ref_idx += N * mf * f
-ref_idx = 1 - (ref_idx * wavelength**2 * r_e / (2*np.pi))
+ref_idx = atoms.xraylib_refractive_index(compound='H2O', density=1000, beam=beam)
 
 # %%
 # If you know the refractive index :math:`n(\vec{r})`, then the scattering intensity under the 1st Born approximation is

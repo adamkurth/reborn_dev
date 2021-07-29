@@ -214,7 +214,7 @@ def xraylib_scattering_factors(q_mags, atomic_number, photon_energy):
     return f0 + fi - 1j*fii
 
 
-def xraylib_refractive_index(compound='H2O', density=1000, photon_energy=10000*eV, approximate=False):
+def xraylib_refractive_index(compound='H2O', density=1000, photon_energy=10000*eV, beam=None, approximate=False):
     r"""
     Get the x-ray refractive index given a chemical compound, density, and photon energy.
 
@@ -222,6 +222,7 @@ def xraylib_refractive_index(compound='H2O', density=1000, photon_energy=10000*e
         compound (str): Chemical compound formula (e.g. H20)
         density (float): Mass density in SI
         photon_energy (float): Photon energy in SI
+        beam (|Beam|): For convenience, an alternative to photon_energy
         approximate (bool): Approximate with the non-resonant, high-frequency limit (Equation 1.1 of |Guinier|)
                             (Default: False)
 
@@ -229,6 +230,8 @@ def xraylib_refractive_index(compound='H2O', density=1000, photon_energy=10000*e
         float: Refractive index
     """
     import xraylib
+    if beam is not None:
+        photon_energy = beam.photon_energy
     cmp = xraylib.CompoundParser(compound)
     MM = cmp['molarMass']  # g/mol
     N = NA * density / (MM / 1000)  # Number density of molecules (SI)
@@ -248,7 +251,7 @@ def xraylib_refractive_index(compound='H2O', density=1000, photon_energy=10000*e
     return n
 
 
-def xraylib_scattering_density(compound='H2O', density=1000, photon_energy=10000*eV, approximate=False):
+def xraylib_scattering_density(compound='H2O', density=1000, photon_energy=10000*eV, beam=None, approximate=False):
     r"""
     Calculate scattering density of compound given density and photon energy.  This is approximately equal to the
     electron density far from resonance.
@@ -263,7 +266,7 @@ def xraylib_scattering_density(compound='H2O', density=1000, photon_energy=10000
     Returns:
         float: Scattering density
     """
-    n = xraylib_refractive_index(compound=compound, density=density, photon_energy=photon_energy,
+    n = xraylib_refractive_index(compound=compound, density=density, photon_energy=photon_energy, beam=beam,
                                  approximate=approximate)
     rho = (1 - n)*2*np.pi/(h*c/photon_energy)**2/r_e
     return rho

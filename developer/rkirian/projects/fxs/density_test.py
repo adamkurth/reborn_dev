@@ -20,7 +20,7 @@ fftmethod = True
 
 pdb_file = lysozyme_pdb_file
 pdb_file = 'BDNA25_sp.pdb'
-pdb_file = '1SS8'
+pdb_file = '3IYF'
 print('Loading pdb file (%s)' % pdb_file)
 cryst = crystal.CrystalStructure(pdb_file, tight_packing=True)
 
@@ -58,19 +58,20 @@ h = dmap.h_vecs  # Miller indices (fractional)
 def show(I, rho_cell, dmap):
     fig = plt.figure()
     fig.add_subplot(2, 3, 1)
-    dispim = np.log10(I[np.floor(dmap.shape[0] / 2).astype(np.int), :, :] + 10)
+    print(I.shape)
+    dispim = np.log10(I[int(I.shape[0] / 2), :, :] + 10)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
     fig.add_subplot(2, 3, 4)
     dispim = np.sum(rho_cell, axis=0)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
     fig.add_subplot(2, 3, 2)
-    dispim = np.log10(I[:, np.floor(dmap.shape[1] / 2).astype(np.int), :] + 10)
+    dispim = np.log10(I[:, int(I.shape[1] / 2), :] + 10)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
     fig.add_subplot(2, 3, 5)
     dispim = np.sum(rho_cell, axis=1)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
     fig.add_subplot(2, 3, 3)
-    dispim = np.log10(I[:, :, np.floor(dmap.shape[2] / 2).astype(np.int)] + 10)
+    dispim = np.log10(I[:, :, int(I.shape[2] / 2)] + 10)
     plt.imshow(dispim, interpolation='nearest', cmap='gray')
     fig.add_subplot(2, 3, 6)
     dispim = np.sum(rho_cell, axis=2)
@@ -88,13 +89,13 @@ rho_cell = np.zeros(dmap.shape)
 for i in range(1): #range(0, len(dmap.get_sym_luts())):
     rho_cell += dmap.symmetry_transform(0, i, rho)
 rho_cell = fftshift(rho_cell)
-show(I, rho_cell, dmap)
+show(I, np.real(rho_cell), np.real(dmap))
 plt.suptitle('Atomistic direct amplitude calculation')
 
 # Make a density map from atoms, then FFT to get amplities
 print('Creating density map directly from atoms')
 x = cryst.x
-rho = dmap.place_atoms_in_map(cryst.x % dmap.oversampling, np.real(np.abs(f)), mode='nearest')
+rho = dmap.place_atoms_in_map(cryst.x % dmap.oversampling, f, mode='nearest')
 voxel_vol = dmap.voxel_volume
 f_dens = atoms.xraylib_scattering_density(compound='H20', density=1000, photon_energy=7000*1.6022e-19)
 
@@ -102,11 +103,11 @@ rho[rho == 0] = f_dens*voxel_vol
 F = fftn(rho)
 I = np.abs(F)**2
 rho_cell = np.zeros_like(rho)
-for i in range(1): #range(0, len(dmap.get_sym_luts())):
+for i in range(1): # range(0, len(dmap.get_sym_luts())):
     rho_cell += dmap.symmetry_transform(0, i, rho)
 I = fftshift(I)
 rho_cell = fftshift(rho_cell)
-show(I, rho_cell, dmap)
+show(I, np.real(rho_cell), np.real(dmap))
 plt.suptitle('Fourier transform of density map')
 
 
