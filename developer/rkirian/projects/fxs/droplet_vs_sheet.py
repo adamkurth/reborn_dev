@@ -28,7 +28,7 @@ rho = atoms.xraylib_scattering_density(compound='H2O', density=1000, beam=beam)
 # print(rho, 3.35e29)
 amps = r_e*rho*sphere_form_factor(radius=drop_diameter/2, q_mags=q_mags)
 intensities = np.random.poisson(np.abs(amps)**2*solid_angles*polarization_factors*fluence)
-view_pad_data(pad_geometry=pads, pad_data=intensities, show=False, title='%3.0f nm drop' % (drop_diameter*2*1e9))
-intensities = solutions.get_pad_solution_intensity(pad_geometry=pads, beam=beam, thickness=drop_diameter*2,
+view_pad_data(pad_geometry=pads, pad_data=intensities, show=False, title='%3.0f nm drop' % (drop_diameter*1e9))
+intensities = solutions.get_pad_solution_intensity(pad_geometry=pads, beam=beam, thickness=drop_diameter,
                                                  liquid='water', poisson=True)
-view_pad_data(pad_geometry=pads, pad_data=intensities, title='%3.0f nm sheet' % (drop_diameter*2*1e9))
+view_pad_data(pad_geometry=pads, pad_data=intensities, title='%3.0f nm sheet' % (drop_diameter*1e9))
