@@ -11,11 +11,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy.fft import fftn, ifftn, fftshift
 from skimage import data, transform
+np.random.seed(1)
 
 # Phase retrieval algorithm parameters
 n_iterations = 200  # What is this?
 cycle = 50
-it_IPA = 45
+it_IPA = 48
 # Difference map update parameters
 beta_DM = 0.95
 gamma_M = -1 / beta_DM
