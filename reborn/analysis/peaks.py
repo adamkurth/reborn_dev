@@ -251,7 +251,7 @@ def snr_filter(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max
     return a
 
 
-def snr_mask(dat, mask, nin, ncent, nout, threshold, mask_negative=True, max_iterations=3):
+def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_iterations=3):
     r"""
     Mask out pixels above some chosen SNR threshold.  The image is converted to a map of SNR using boxsnr.  Additional
     iterations follow, in which pixels above threshold in the previous run are also masked in the annulus.
@@ -270,38 +270,19 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold, mask_negative=True, max_ite
     Returns:
         numpy array : The mask with pixels above the SNR threshold
     """
-
+    if isinstance(dat, list):
+        return [snr_filter(d, m, nin, ncent, nout, threshold=threshold, mask_negative=mask_negative,
+                           max_iterations=max_iterations) for (d, m) in zip(dat, mask)]
     mask_a = mask.copy()
+    prev = 0
     for i in range(max_iterations):
         a, _ = boxsnr(dat, mask, mask_a, nin, ncent, nout)
-        ab = a > threshold
         if mask_negative:
-            ab *= a < -threshold
-        if np.sum(ab) > 0:
-            mask_a[ab] = 0
-        else:
+            a = np.abs(a)
+        ab = a > threshold
+        above = np.sum(ab)
+        mask_a[ab] = 0
+        if above == prev:
             break
+        prev = above
     return mask_a
-
-
-
-# def boxconv(dat, width):
-#
-#     r"""
-#     Arguments:
-#         dat: The image to analyze
-#         mask: The mask for the square central integration region
-#         mask2: The mask for the square annulus integration region
-#         nin: Size of the central integration region; integrate from (-nin, nin), inclusively.
-#         ncent: Define the annulus integration region; we ignore the box from (-ncent, ncent), inclusively
-#         nout: Define the annulus integration region; we include the box from (-nout, nout), inclusively
-#
-#     Returns: snr (numpy array), signal (numpy array)
-#     """
-#
-#     float_t = np.float64
-#     datconv = np.asfortranarray(np.ones(dat.shape, dtype=float_t))
-#     d = np.asfortranarray(dat.astype(float_t))
-#     peaks_f.boxconv(d, datconv, width)
-#     return datconv
-#

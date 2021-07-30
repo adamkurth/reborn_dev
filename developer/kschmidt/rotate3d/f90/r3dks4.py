@@ -175,8 +175,6 @@ class rotate3D:
       self.c0 = 0.5*(self.N-1)
       if self.N % 2 == 0:
          kint0 = np.arange(-self.N/2,self.N/2)
-         if not self.keep_last_even_k:
-            kint0[0] = 0
       else:
          kint0 = np.arange((1-self.N)/2,(1+self.N)/2)
       self.kint = np.zeros(self.N,np.float64)
@@ -189,6 +187,8 @@ class rotate3D:
       ck = -1j*2.0*np.pi/self.N*scale
       for k in range(self.N):
          k0[k,:] = np.exp(ck*(nint-self.c0)*self.kint[k])
+      if self.N % 2 == 0 and not self.keep_last_even_k:
+         k0[self.N//2] = 0.0
       if self.dtf == np.complex64 or self.dtf == np.float32:
          k0 = k0.astype(dtype=np.complex64)
       return k0
@@ -234,7 +234,7 @@ class rotate3Dvkfft(rotate3D):
     is my first opencl code, it is no doubt written inefficiently.
    """
 
-   def __init__(self,f3d,keep_last_even_k=True):
+   def __init__(self,f3d,keep_last_even_k=False):
       self.keep_last_even_k = keep_last_even_k
       self.N = 0
       self.f_dev = None
@@ -265,8 +265,6 @@ class rotate3Dvkfft(rotate3D):
          self.f_dev = cl.array.to_device(self.q,ftmp)
          ftmp = None
          self.multsize = (self.N//2+1,self.N,self.N)
-#         self.multsize = (self.N//2,self.N,self.N)
-#         self.multsize = (self.N,self.N,self.N//2+1)
       else:
          self.app = pyvkfft.opencl.VkFFTApp((self.N,self.N,self.N),
             dtype=self.dtf,queue=self.q,ndim=1)
@@ -616,7 +614,6 @@ class rotate3Dvkfft(rotate3D):
       k1 = np.transpose(k1).copy()
       self.factors[0,:,:] = k0.astype(self.dtfac)
       self.factors[1,:,:] = k1.astype(self.dtfac)
-      euler = R.as_euler('xyx')
       ang=euler[1]
       n90 = np.rint(ang*2.0/np.pi)
       dang = ang-n90*np.pi*0.5
