@@ -12,7 +12,25 @@ import pkg_resources
 
 class PADGeometry:
     r"""
-    A container for pixel-array detector (PAD) geometry specification, with helpful methods for generating:
+    A container for pixel-array detector (PAD) geometry specification.  The complete specification of PAD geometry is
+    understood to be the following 5 parameters, which must be defined for a proper instance of PADGeometry:
+
+    - n_fs: The number of pixels along the fast-scan direction.
+    - n_ss: The number of pixels along the slow-scan direction.
+    - t_vec: The vector that points from the origin (interaction point) to the center of the first pixel in memory.
+    - fs_vec: The vector that points from the first pixel in memory, to the next pixel in the fast-scan direction.
+    - ss_vec: The vector that points from the first pixel in memory, to the next pixel in the slow-scan direction.
+
+    In the above:
+
+    - The term "fast-scan" corresponds to the right-most index of a 2D numpy |ndarray| containing PAD data.
+    - The term "slow-scan" corresponds to the left-most index of a 2D |ndarray| containing PAD data.
+    - In the default memory buffer layout of an |ndarray|, the fast-scan direction corresponds to pixels that are
+      contiguous in memory, and which therefore have the smallest stride.  If the phrase "contiguous in memory" and the
+      term "stride" does not mean anything to you, then you need to read the |numpy| documentation for |ndarray|.
+
+    In addition to providing a standard way to specify the above 5 parameters, PADGeometry provides methods that make
+    it convenient to generate:
 
     - Vectors from sample to pixel.
     - Scattering vectors (i.e. "q" vectors... provided beam information).
@@ -20,6 +38,9 @@ class PADGeometry:
     - Scattering angles (twice the Bragg angle).
     - Polarization factors.
     - etc.
+
+    Some of the above parameters require more than a PADGeometry instance -- they also require information about the
+    x-ray beam.  The |Beam| class in reborn provides a standard way to specify the properties of an x-ray beam.
     """
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
@@ -76,29 +97,26 @@ class PADGeometry:
         r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
         return hash(self.__str__())
 
-    def validate(self, raise_error=False):
+    def validate(self, raise_error=None):
         r""" Determine if this instance has all the needed parameters defined.
 
-        Arguments:
-            raise_error (bool): Raise ValueError if the validation fails.  Default: False.
-
         Returns:
-            bool: True if validation passes, False otherwise.
+            bool: True if validation passes.
+
+        Raises:
+            ValueError: If any of n_fs, n_ss, fs_vec, ss_vec, t_vec are not defined properly.
         """
-        status = True
         if not isinstance(self._n_fs, int):
-            status = False
+            raise ValueError("The n_fs parameter is undefined in your PADGeometry instance.")
         if not isinstance(self._n_ss, int):
-            status = False
+            raise ValueError("The n_ss parameter is undefined in your PADGeometry instance.")
         if not isinstance(self._fs_vec, np.ndarray):
-            status = False
+            raise ValueError("The fs_vec parameter is undefined in your PADGeometry instance.")
         if not isinstance(self._ss_vec, np.ndarray):
-            status = False
+            raise ValueError("The ss_vec parameter is undefined in your PADGeometry instance.")
         if not isinstance(self._t_vec, np.ndarray):
-            status = False
-        if raise_error and status is False:
-            raise ValueError("Something is wrong with this PADGeometry (missing parameter, or bad type)")
-        return status
+            raise ValueError("The t_vec parameter is undefined in your PADGeometry instance.")
+        return True
 
     @property
     def n_fs(self):
@@ -109,7 +127,7 @@ class PADGeometry:
 
     @n_fs.setter
     def n_fs(self, val):
-        self._n_fs = val
+        self._n_fs = int(val)
 
     @property
     def n_ss(self):
@@ -120,7 +138,7 @@ class PADGeometry:
 
     @n_ss.setter
     def n_ss(self, val):
-        self._n_ss = val
+        self._n_ss = int(val)
 
     @property
     def n_pixels(self):
@@ -147,15 +165,21 @@ class PADGeometry:
 
     @fs_vec.setter
     def fs_vec(self, fs_vec):
-        self._fs_vec = np.array(fs_vec)
+        self._fs_vec = np.array(fs_vec).reshape((3,))
+        if self._fs_vec.size != 3:
+            raise ValueError('PADGeometry vectors should have a length of 3 (it is a vector)')
 
     @ss_vec.setter
     def ss_vec(self, ss_vec):
-        self._ss_vec = np.array(ss_vec)
+        self._ss_vec = np.array(ss_vec).reshape((3,))
+        if self._ss_vec.size != 3:
+            raise ValueError('PADGeometry vectors should have a length of 3 (it is a vector)')
 
     @t_vec.setter
     def t_vec(self, t_vec):
-        self._t_vec = np.array(t_vec)
+        self._t_vec = np.array(t_vec).reshape((3,))
+        if self._t_vec.size != 3:
+            raise ValueError('PADGeometry vectors should have a length of 3 (it is a vector)')
 
     def to_dict(self):
         r""" Convert geometry to a dictionary.
