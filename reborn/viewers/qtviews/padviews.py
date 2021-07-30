@@ -1370,6 +1370,7 @@ class PADView2(QtCore.QObject):
 
 
 def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwargs):
+    r""" Convenience function that creates a PADView2 instance and starts it. """
     pv = PADView(raw_data=pad_data, pad_geometry=pad_geometry, **kwargs)
     if title is not None:
         pv.set_title(title)

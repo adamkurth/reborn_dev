@@ -247,7 +247,8 @@ def xraylib_refractive_index(compound='H2O', density=1000, photon_energy=10000*e
         n += N * f * nZ
     n = 1 - (n * (h*c/photon_energy) ** 2 * r_e / (2 * np.pi))
     if approximate:
-        n = 1 - r_e * N * ne * (h*c/photon_energy) ** 2 / 2 / np.pi
+        print(N*ne)
+        n = 1 - r_e * N * ne * (h*c/photon_energy) ** 2 / (2 * np.pi)
     return n
 
 
@@ -266,6 +267,8 @@ def xraylib_scattering_density(compound='H2O', density=1000, photon_energy=10000
     Returns:
         float: Scattering density
     """
+    if beam is not None:
+        photon_energy = beam.photon_energy
     n = xraylib_refractive_index(compound=compound, density=density, photon_energy=photon_energy, beam=beam,
                                  approximate=approximate)
     rho = (1 - n)*2*np.pi/(h*c/photon_energy)**2/r_e
