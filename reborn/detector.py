@@ -1395,7 +1395,7 @@ def get_radial_profile(data, beam, pad_geometry, mask=None, n_bins=None, q_range
             - **bins** (|ndarray|) -- The values of q at the bin centers.
     """
     rp = RadialProfiler(beam=beam, pad_geometry=pad_geometry, mask=mask, n_bins=n_bins, q_range=q_range)
-    return (rp.get_profile_statistic(data, mask=None, statistic=statistic), rp.bin_centers)
+    return rp.get_profile_statistic(data, mask=None, statistic=statistic), rp.bin_centers
 
 
 def save_pad_masks(file_name, mask_list, packbits=True):

@@ -5,7 +5,7 @@ phasing explorations.
 
 Date Created: 14 Apr 2018
 Last Modified: 28 Mar 2018
-Humans Responsible: Joe P. Chen
+Humans Responsible: Joe P. Chen, R. A. Kirian
 """
 import numpy as np
 import matplotlib.pyplot as plt
