@@ -27,9 +27,9 @@ Rs = scipy.spatial.transform.Rotation.random(Nr,random_state=rng)
 Ngr = 8 
 Ngi = 8
 sigma = 0.05
-gr0 = (rng.random((Ngr,3))-0.5)*sigma
+gr0 = (rng.random((Ngr,3))-0.5)*sigma*3.0
 wr = rng.random(Ngr)-0.5
-gi0 = (rng.random((Ngi,3))-0.5)*sigma
+gi0 = (rng.random((Ngi,3))-0.5)*sigma*3.0
 wi = rng.random(Ngi)-0.5
 Ns = [7, 16, 27, 32, 48, 64, 75]
 methods = [rotate3Dpy, rotate3Dv, rotate3Dl, rotate3Dj]
