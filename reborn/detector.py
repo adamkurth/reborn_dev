@@ -15,11 +15,11 @@ class PADGeometry:
     A container for pixel-array detector (PAD) geometry specification.  The complete specification of PAD geometry is
     understood to be the following 5 parameters, which must be defined for a proper instance of PADGeometry:
 
-    - n_fs: The number of pixels along the fast-scan direction.
-    - n_ss: The number of pixels along the slow-scan direction.
-    - t_vec: The vector that points from the origin (interaction point) to the center of the first pixel in memory.
-    - fs_vec: The vector that points from the first pixel in memory, to the next pixel in the fast-scan direction.
-    - ss_vec: The vector that points from the first pixel in memory, to the next pixel in the slow-scan direction.
+    - **n_fs**: The number of pixels along the fast-scan direction.
+    - **n_ss**: The number of pixels along the slow-scan direction.
+    - **t_vec**: The vector that points from the origin (interaction point) to the center of the first pixel in memory.
+    - **fs_vec**: The vector that points from the first pixel in memory, to the next pixel in the fast-scan direction.
+    - **ss_vec**: The vector that points from the first pixel in memory, to the next pixel in the slow-scan direction.
 
     In the above:
 
@@ -29,14 +29,16 @@ class PADGeometry:
       contiguous in memory, and which therefore have the smallest stride.  If the phrase "contiguous in memory" and the
       term "stride" does not mean anything to you, then you need to read the |numpy| documentation for |ndarray|.
 
-    In addition to providing a standard way to specify the above 5 parameters, PADGeometry provides methods that make
-    it convenient to generate:
+    In addition to providing a standard way to parameterized PAD geometry, the PADGeometry class also provides methods
+    that make it easy to generate:
 
     - Vectors from sample to pixel.
     - Scattering vectors (i.e. "q" vectors... provided beam information).
     - Scattering vector magnitudes.
     - Scattering angles (twice the Bragg angle).
     - Polarization factors.
+    - Pixel solid angles.
+    - Maximum resolution.
     - etc.
 
     Some of the above parameters require more than a PADGeometry instance -- they also require information about the
@@ -50,7 +52,7 @@ class PADGeometry:
     _fs_vec = None
     _ss_vec = None
     _t_vec = None
-    name = ''
+    _name = ''
 
     def __init__(self, distance=None, pixel_size=None, shape=None, **kwargs):
         r"""
@@ -119,6 +121,15 @@ class PADGeometry:
         return True
 
     @property
+    def name(self):
+        r""" (*str*) The unique name of this panel. """
+        return self._name
+
+    @name.setter
+    def name(self, val):
+        self._name = str(val)
+
+    @property
     def n_fs(self):
         r"""(*int*) Number of fast-scan pixels."""
         if self._n_fs is None:
@@ -147,20 +158,19 @@ class PADGeometry:
 
     @property
     def fs_vec(self):
-        r""" Fast-scan basis vector. """
+        r""" (|ndarray|) Fast-scan basis vector. """
 
         return self._fs_vec
 
     @property
     def ss_vec(self):
-        r""" Slow-scan basis vector. """
+        r""" (|ndarray|) Slow-scan basis vector. """
 
         return self._ss_vec
 
     @property
     def t_vec(self):
-        r""" Translation vector pointing from origin to center of corner pixel, which is first in memory. """
-
+        r""" (|ndarray|) Translation vector pointing from origin to center of corner pixel, which is first in memory. """
         return self._t_vec
 
     @fs_vec.setter
