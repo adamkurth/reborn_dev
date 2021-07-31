@@ -1,12 +1,12 @@
 import sys
 import time
 import numpy as np
-from reborn import detector
-from reborn.source import Beam
+from reborn import utils, source, detector, dataframe
 from reborn.target import crystal, atoms, placer
 from reborn.simulate.form_factors import sphere_form_factor
+from reborn.fileio.getters import FrameGetter
 import pyqtgraph as pg
-from reborn.viewers.qtviews import view_pad_data, scatter_plot
+from reborn.viewers.qtviews import view_pad_data, scatter_plot, PADView
 import scipy.constants as const
 from numpy.fft import fftn, ifftn, fftshift
 from reborn.simulate.clcore import ClCore
@@ -27,20 +27,23 @@ water_density = 1000
 # Configurations
 #######################################################################
 pad_geometry_file = detector.cspad_2x2_geom_file
+pad_binning = 3
 photon_energy = 7000 * eV
 detector_distance = 1  # 2.4
 pulse_energy = 3e-3
 drop_radius = 100e-9 / 2
 beam_diameter = 0.2e-6
-d_map = 0.2e-9  # Minimum resolution for 3D density map
-s_map = 2  # Oversampling factor for 3D density map
+map_resolution = 0.2e-9  # Minimum resolution for 3D density map
+map_oversample = 2  # Oversampling factor for 3D density map
 cell_size = 200e-10  # Unit cell size (assume P1, cubic)
-pdb_file = '3IYF'  # '1PCQ' '2LYZ' '1SS8' 'BDNA25_sp.pdb'
+pdb_file = '1SS8' #'3IYF' '1PCQ' '2LYZ' 'BDNA25_sp.pdb'
 protein_concentration = 10  # Protein concentration in mg/ml = kg/m^3
 hit_frac = 0.01  # Hit fraction
 freq = 120  # XFEL frequency
 runtime = 0.1 * 3600  # Run time in seconds
 random_seed = None  # Seed for random number generator (choose None to make it random)
+cl_double_precision = True
+cl_group_size = 32
 
 #########################################################################
 # Derived parameters
@@ -49,24 +52,20 @@ if random_seed is not None:
     np.random.seed(random_seed)  # Make random numbers that are reproducible
 n_shots = int(runtime * freq * hit_frac)
 wavelength = h * c / photon_energy
-beam = Beam(photon_energy=photon_energy, diameter_fwhm=beam_diameter, pulse_energy=pulse_energy)
+beam = source.Beam(photon_energy=photon_energy, diameter_fwhm=beam_diameter, pulse_energy=pulse_energy)
 fluence = beam.photon_number_fluence
 f_dens_water = atoms.xraylib_scattering_density('H2O', water_density, photon_energy, approximate=True)
-cspads2x2 = detector.load_pad_geometry_list(pad_geometry_file)
-for p in cspads2x2:
+pads = detector.load_pad_geometry_list(pad_geometry_file)
+for p in pads:
     p.t_vec[2] = detector_distance
-q_mags = cspads2x2.q_mags(beam=beam)
-solid_angles = cspads2x2.solid_angles()
-polarization_factors = cspads2x2.polarization_factors(beam=beam)
-# FIXME: Simulation in the wrong place (shouldn't be mixed with parameters)
-amps = r_e * f_dens_water * sphere_form_factor(radius=drop_radius, q_mags=q_mags)
-I_sphere = np.abs(amps) ** 2 * solid_angles * polarization_factors * fluence
-I_sphere = np.random.poisson(I_sphere)  # Add some Poisson noise
-print('Loading pdb file (%s)' % pdb_file)
+pads = pads.binned(3)
+q_mags = pads.q_mags(beam=beam)
+solid_angles = pads.solid_angles()
+polarization_factors = pads.polarization_factors(beam=beam)
 uc = crystal.UnitCell(cell_size, cell_size, cell_size, np.pi / 2, np.pi / 2, np.pi / 2)
 sg = crystal.SpaceGroup('P1', [np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])], [np.zeros(3)])
 cryst = crystal.CrystalStructure(pdb_file, spacegroup=sg, unitcell=uc)
-dmap = crystal.CrystalDensityMap(cryst, d_map, s_map)
+dmap = crystal.CrystalDensityMap(cryst, map_resolution, map_oversample)
 f = cryst.molecule.get_scattering_factors(beam=beam)
 x = cryst.unitcell.r2x(cryst.molecule.get_centered_coordinates())
 rho = dmap.place_atoms_in_map(x, f, mode='nearest')  # FIXME: replace 'nearest' with Cromer Mann densities
@@ -74,11 +73,11 @@ rho[rho != 0] -= f_dens_water * dmap.voxel_volume  # FIXME: Need a better model 
 F = fftshift(fftn(rho))
 I = np.abs(F) ** 2
 rho_cell = fftshift(rho)
-clcore = ClCore(double_precision=False, group_size=32)
+clcore = ClCore(double_precision=cl_double_precision, group_size=cl_group_size)
 F_gpu = clcore.to_device(F)
-q_vecs_gpu = clcore.to_device(cspads2x2.q_vecs(beam=beam))
-q_mags_gpu = clcore.to_device(cspads2x2.q_mags(beam=beam))
-amps_gpu = clcore.to_device(shape=cspads2x2.n_pixels, dtype=clcore.complex_t)
+q_vecs_gpu = clcore.to_device(pads.q_vecs(beam=beam))
+q_mags_gpu = clcore.to_device(pads.q_mags(beam=beam))
+amps_gpu = clcore.to_device(shape=pads.n_pixels, dtype=clcore.complex_t)
 q_min = dmap.q_min
 q_max = dmap.q_max
 protein_number_density = protein_concentration/cryst.molecule.get_molecular_weight()
@@ -89,32 +88,31 @@ print('Molecules per drop:', n_proteins_per_drop)
 print('Particle diameter:', protein_diameter)
 print('Density map grid size: (%d, %d, %d)' % tuple(dmap.shape))
 
-R = Rotation.random().as_matrix()
-clcore.mesh_interpolation(F_gpu, q_vecs_gpu, N=dmap.shape, q_min=q_min, q_max=q_max, R=R, U=None, a=amps_gpu, add=False)
-I_prot = np.abs(amps_gpu.get()) ** 2 * r_e ** 2 * solid_angles * polarization_factors * fluence
-# I_prot = np.random.poisson(I_prot)
-print('# photons:', np.sum(I_prot))
-
 ###########################################################################
 # Water droplet with protein, 2D PAD simulation
 ##########################################################################
-t = time.time()
-dd = drop_radius*2 + (np.random.rand()-0.5)*drop_radius/10
-nppd = int(protein_number_density*4/3*np.pi*(dd/2)**3)
-p_vecs = placer.particles_in_a_sphere(sphere_diameter=dd, n_particles=nppd, particle_diameter=protein_diameter)
-for p in range(n_proteins_per_drop):
-    add = 1  # Default: add amplitudes of protein diffraction
-    if p == 0:  # For the first molecule, do not add amplitudes.  Overwrite the GPU memory buffer instead.
-        add = 0
-    R = Rotation.random().as_matrix()
-    U = p_vecs[p, :]
-    clcore.mesh_interpolation(F_gpu, q_vecs_gpu, N=dmap.shape, q_min=q_min, q_max=q_max, R=R, U=U, a=amps_gpu, add=add)
-clcore.sphere_form_factor(r=drop_radius, q=q_mags_gpu, a=amps_gpu, add=True)
-amps = amps_gpu.get()
-I = np.abs(amps)**2*r_e**2*solid_angles*polarization_factors*fluence
-I = np.random.poisson(I)
-print('Time: ', time.time()-t)
-view_pad_data(pad_data=I, pad_geometry=cspads2x2)
+class DropletGetter(FrameGetter):
+    def __init__(self):
+        super().__init__()
+        self.n_frames = np.inf
+    def get_frame(self, frame_number=0):
+        dd = drop_radius*2 + (np.random.rand()-0.5)*drop_radius/5
+        nppd = int(protein_number_density*4/3*np.pi*(dd/2)**3)
+        p_vecs = placer.particles_in_a_sphere(sphere_diameter=dd, n_particles=nppd, particle_diameter=protein_diameter)
+        add = False
+        for p in range(nppd):
+            R = Rotation.random().as_matrix()
+            U = p_vecs[p, :]
+            clcore.mesh_interpolation(F_gpu,q_vecs_gpu,N=dmap.shape,q_min=q_min,q_max=q_max,R=R,U=U,a=amps_gpu,add=add)
+            add = True
+        clcore.sphere_form_factor(r=drop_radius, q=q_mags_gpu, a=amps_gpu, add=add)
+        I = np.abs(amps_gpu.get())**2*r_e**2*solid_angles*polarization_factors*fluence
+        I = np.random.poisson(I)
+        df = dataframe.DataFrame(pad_geometry=pads, beam=beam, raw_data=I)
+        return df
+fg = DropletGetter()
+pv = PADView(frame_getter=fg)
+pv.start()
 sys.exit()
 
 ################################################################################
@@ -165,8 +163,8 @@ acf_sum_noisy += np.mean(acf_sum[1:m]) - np.mean(acf_sum_noisy[1:m])
 plt.plot(phi[1:m] * 180 / np.pi, acf_sum_noisy[1:m], '.r')
 plt.xlabel(r'$\Delta \phi$ (degrees)')
 plt.ylabel(r'$C(q, q, \Delta\phi)$')
-view_pad_data(pad_data=np.log10(I_sphere + 1), pad_geometry=cspads2x2, show=True)
-view_pad_data(pad_data=np.random.poisson(np.log10(I_prot + 1)), pad_geometry=cspads2x2, show=True)
+view_pad_data(pad_data=np.log10(I_sphere + 1), pad_geometry=pads, show=True)
+view_pad_data(pad_data=np.random.poisson(np.log10(I_prot + 1)), pad_geometry=pads, show=True)
 if 1:
     fig = plt.figure()
     fig.add_subplot(2, 3, 1)

@@ -333,10 +333,16 @@ class PADView2(QtCore.QObject):
     def update_status_string(self, frame_number=None, n_frames=None):
         r""" Update status string at the bottom of the main window. """
         self.debug(get_caller(), 3)
-        if frame_number is not None and n_frames is not None:
-            n = np.int(np.ceil(np.log10(n_frames)))
-            strn = ' Frame %%%dd of %%%dd | ' % (n, n)
-            self._status_string_getter = strn % (frame_number, n_frames)
+        strn = ''
+        if frame_number is not None:
+            strn += ' Frame %d' % frame_number
+            if n_frames is not None:
+                if n_frames == np.inf:
+                    strn += ' of inf'
+                else:
+                    strn += ' of %d' % n_frames
+            strn += ' | '
+            self._status_string_getter = strn
         self.statusbar.showMessage(self._status_string_getter + self._status_string_mouse)
 
     # FIXME: For some reason, the histogram is only updated on the first frame.  Need to track down this issue.
