@@ -1,5 +1,4 @@
 numpy
-sphinx_rtd_theme
 matplotlib
 scipy
 xraylib
@@ -7,6 +6,3 @@ pyopencl
 numba
 pyqtgraph
 h5py
-setuptools
-afnumpy
-joblib

@@ -466,6 +466,45 @@ class ClCore(object):
         else:
             return a_dev
 
+    def sphere_form_factor(self, r, q, a=None, add=False):
+        r"""
+        Form factor :math:`f(q)` for a sphere of radius :math:`r`, at given :math:`q` magnitudes.  The formula is
+
+        .. math::
+
+            f(q) = 4 \pi \frac{\sin(qr) - qr \cos(qr)}{q^3}
+
+        When :math:`q = 0`, the following limit is used:
+
+        .. math::
+
+            f(0) = \frac{4}{3} \pi r^3
+
+        Formula can be found, for example, in Table A.1 of |Guinier|.  There are no approximations in this formula
+        beyond the 1st Born approximation; it is not a small-angle formula.
+
+        Note that you need to multiply this by the electron density of the sphere if you want reasonable amplitudes.
+        E.g., water molecules have 10 electrons, a molecular weight of 18 g/mol and a density of 1 g/ml, so you can google
+        search the electron density of water, which is 10*(1 g/cm^3)/(18 g/6.022e23) = 3.346e29 per m^3 .
+
+        Arguments:
+            r (float): Sphere radius.
+            q (clarray): Scattering vector magnitudes.
+            a (clarray): Amplitude array.
+
+        Returns: None
+        """
+        if not hasattr(self, 'sphere_form_factor_cl'):
+            self.sphere_form_factor_cl = self.programs.sphere_form_factor
+            self.sphere_form_factor_cl.set_scalar_arg_dtypes([None, None, self.real_t, self.int_t, self.int_t])
+        a_dev = self.to_device(a, dtype=self.complex_t)
+        q_dev = self.to_device(q, dtype=self.real_t)
+        r = self.real_t(r)
+        n = self.int_t(q.shape[0])
+        add = self.int_t(add)
+        global_size = np.int64(np.ceil(n / float(self.group_size)) * self.group_size)
+        self.sphere_form_factor_cl(self.queue, (global_size,), (self.group_size,), q_dev.data, a_dev.data, r, n, add)
+
     def phase_factor_qrf(self, q, r, f=None, R=None, U=None, a=None, add=False, twopi=False, n_chunks=1):
         r"""
         Calculate diffraction amplitudes according to the sum:

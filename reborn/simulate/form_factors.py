@@ -30,7 +30,6 @@ eV = const.value('electron volt')
 
 
 def sphere_form_factor(radius, q_mags, check_divide_by_zero=True):
-
     r"""
     Form factor :math:`f(q)` for a sphere of radius :math:`r`, at given :math:`q` magnitudes.  The formula is
 
@@ -44,9 +43,8 @@ def sphere_form_factor(radius, q_mags, check_divide_by_zero=True):
 
         f(0) = \frac{4}{3} \pi r^3
 
-    Formula can be cound, for example, in Table A.1 in Guinier's "X-ray diffraction in crystals, imperfect crystals, and
-    amorphous bodies".  There are no approximations in this formula beyond the 1st Born approximation; it is not a
-    small-angle formula.
+    Formula can be found, for example, in Table A.1 of |Guinier|.  There are no approximations in this formula beyond
+    the 1st Born approximation; it is not a small-angle formula.
 
     Note that you need to multiply this by the electron density of the sphere if you want reasonable amplitudes.
     E.g., water molecules have 10 electrons, a molecular weight of 18 g/mol and a density of 1 g/ml, so you can google
@@ -59,7 +57,6 @@ def sphere_form_factor(radius, q_mags, check_divide_by_zero=True):
 
     Returns: numpy array
     """
-
     qr = q_mags*radius
     if check_divide_by_zero is True:
         amp = np.zeros_like(qr)

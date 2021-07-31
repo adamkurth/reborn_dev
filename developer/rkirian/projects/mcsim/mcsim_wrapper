@@ -19,7 +19,7 @@ import h5py
 from glob import glob
 from scipy.special import erf
 
-sys.path.append("..")  # This path setting won't be needed once reborn is properly installed
+sys.path.append("../..")  # This path setting won't be needed once reborn is properly installed
 import reborn as ba
 from reborn.simulate import solutions
 from reborn.simulate import simutils

@@ -76,8 +76,13 @@ def get_pdb_file(pdb_id, save_path=temp_dir, silent=False):
 
 class UnitCell(object):
     r"""
-    Simple class for unit cell information.  Provides the convenience methods r2x(), x2r(), q2h() and h2q() for
-    transforming between fractional and orthogonal coordinates in real space and reciprocal space.
+    Simple class for *primitive* unit cell information.  Provides the convenience methods r2x(), x2r(), q2h() and h2q()
+    for transforming between fractional and orthogonal coordinates in real space and reciprocal space.
+
+    .. note::
+
+        We do not handle non-primitive unit cells in reborn.  We always assume that the unit cell contains one and only
+        one crystal lattice point per cell.
     """
 
     a = None  #: Lattice constant (float)
@@ -835,6 +840,22 @@ class CrystalDensityMap(object):
             numpy array
         """
         return np.floor((self.shape - 1) / 2) / self.oversampling
+
+    @property
+    def q_vecs(self):
+        r""" For convenience, converts self.h_vecs to q vectors (using self.cryst.unitcell.h2q method). """
+        return self.cryst.unitcell.h2q(self.h_vecs)
+
+    @property
+    def q_min(self):
+        r""" For convenience, converts self.h_min to a q vector (using self.cryst.unitcell.h2q method).  Note that
+        sampling in q space will not match with the sampling in h space unless the unit cell is orthorhombic. """
+        return self.cryst.unitcell.h2q(self.h_min)
+
+    @property
+    def q_max(self):
+        r""" For convenience, converts self.h_max to a q vector (using self.cryst.unitcell.h2q method). """
+        return self.cryst.unitcell.h2q(self.h_max)
 
     def get_sym_luts(self):
         r"""

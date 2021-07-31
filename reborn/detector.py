@@ -1,6 +1,5 @@
 """
-Classes for analyzing/simulating diffraction data contained in pixel array
-detectors (PADs).
+Classes for analyzing/simulating diffraction data contained in pixel array detectors (PADs).
 """
 
 import os
@@ -789,6 +788,8 @@ def save_pad_geometry_list(file_name, geom_list):
 
 def load_pad_geometry_list(file_name):
     r""" Load a list of PADGeometry instances stored in json format. """
+    if file_name == '_pnccd':
+        return
     with open(file_name, 'r') as f:
         dicts = json.load(f)
     out = []
