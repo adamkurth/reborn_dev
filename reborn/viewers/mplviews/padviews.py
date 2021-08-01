@@ -38,6 +38,7 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     for i in range(len(pads)):
         dat = data[i]
         pad = pads[i]
+        dat = pad.reshape(dat)
         nf = pad.n_fs
         ns = pad.n_ss
         f = pad.fs_vec.copy()

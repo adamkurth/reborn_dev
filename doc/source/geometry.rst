@@ -1,5 +1,9 @@
+.. _docs_detectors:
+
 Detectors
 =========
+
+.. _docs_pads:
 
 Pixel-Array Detectors
 ---------------------
@@ -13,29 +17,30 @@ Pixel-Array Detectors
 The :class:`PADGeometry <reborn.detector.PADGeometry>` class contains the data and methods needed to deal
 with "pixel-array detectors" (PADs).  This detector is assumed to consist of an orthogonal 2D grid of
 pixels.  We specify the locations of detector pixels with respect to an arbitrary origin that is also
-the origin of the coordinates of the object that creates the diffraction pattern.  Note that we always assume far-field
-diffraction, in which case an overall shift of the origin does not affect diffraction intensities (but this shift does
-effect the phases of the complex diffraction amplitudes).  The 2D grid of pixels is described by the following vectors:
+the origin of the coordinates of the object that creates the diffraction pattern.  The 2D grid of pixels is described by
+the following vectors:
 
-:math:`\vec{t}` is the vector pointing from the origin to the *center* of the detector pixel that is the first pixel in
-memory, which is a pixel at the corner of the PAD.
+- :math:`\vec{t}` is the vector that points from the origin to the *center* of the first pixel in memory.
+- :math:`\vec{f}` is the vector that points from the first pixel in memory to the next pixel in the fast-scan direction.
+- :math:`\vec{s}` The vector that points from the first pixel in memory, to the next pixel in the slow-scan direction.
+- :math:`n_f` is the number of pixels along the fast-scan direction.
+- :math:`n_s` is the number of pixels along the slow-scan direction.
 
-:math:`\vec{f}` is the vector that points along the "fast-scan" direction.  The length of this vector indicates the
-pixel size along this direction. In this context, "fast-scan" refers to the direction in which values are stored
-contiguously in computer memory.  For a default numpy |ndarray| , this is the right-most index.
+In the above:
 
-:math:`n_f` is the number of fast-scan pixels in the detector.  This is the right-most element of the "shape" of an
-numpy |ndarray| .
+- The lengths of the :math:`\vec{f}` and :math:`\vec{s}` vectors encode the size of the (possibly rectangular) pixel.
+  They moreover form the *basis* of the 2D grid that maps the pixel positions in the 3D space of the measurement.
+- The term "fast-scan" corresponds to the right-most index of a 2D numpy |ndarray| containing PAD data.
+- The term "slow-scan" corresponds to the left-most index of a 2D |ndarray| containing PAD data.
+- In the default memory buffer layout of an |ndarray|, the fast-scan direction corresponds to pixels that are
+  contiguous in memory, and which therefore have the smallest stride.  If the phrase "contiguous in memory" and the
+  term "stride" does not mean anything to you, then you need to read the |numpy| documentation for |ndarray|.
 
-:math:`\vec{s}` is the vector that points along the "slow-scan" direction.  This is much like the :math:`\vec{f}`
-vector, but these pixels are only adjacent in physical space but not in computer memory.  In computer memory,
-adjacent pixels have a memory stride of length :math:`n_f`.
+.. note::
 
-:math:`n_s` is the number of slow-scan pixels in the detector.
-
-Note that there are no angles involved in describing the detector geometry.  That is because angles are confusing due
-to the many different conventions used by different literature and software.  Importantly, *rotation
-operations do not commute*, which only adds to the confusion.
+    The reborn package never uses angles to describe detector geometry.  Angles are a truly awful specification due to
+    the many different conventions used by different literature and software, and, as all good students know, *rotation
+    operations do not commute*.
 
 Additional vectors that are important for calculating things related to x-ray scattering, but which are not inherently
 related to detector geometry, are:

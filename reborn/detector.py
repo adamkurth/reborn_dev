@@ -32,6 +32,8 @@ class PADGeometry:
 
     In the above:
 
+    - The lengths of the **fs_vec** and **ss_vec** vectors encode the size of the (possibly rectangular) pixel.  They
+      moreover form the *basis* of the 2D grid that maps the pixel positions in the 3D space of the measurement.
     - The term "fast-scan" corresponds to the right-most index of a 2D numpy |ndarray| containing PAD data.
     - The term "slow-scan" corresponds to the left-most index of a 2D |ndarray| containing PAD data.
     - In the default memory buffer layout of an |ndarray|, the fast-scan direction corresponds to pixels that are
@@ -78,11 +80,11 @@ class PADGeometry:
 
     def __str__(self):
         out = self.name+'\n'
-        out += 'n_fs: %s\n' % self.n_fs.__str__()
-        out += 'n_ss: %s\n' % self.n_ss.__str__()
-        out += 'fs_vec: %s\n' % self.fs_vec.__str__()
-        out += 'ss_vec: %s\n' % self.ss_vec.__str__()
-        out += 't_vec: %s' % self.t_vec.__str__()
+        out += 'n_fs: %s\n' % self._n_fs.__str__()
+        out += 'n_ss: %s\n' % self._n_ss.__str__()
+        out += 'fs_vec: %s\n' % self._fs_vec.__str__()
+        out += 'ss_vec: %s\n' % self._ss_vec.__str__()
+        out += 't_vec: %s' % self._t_vec.__str__()
         return out
 
     def __eq__(self, other):
