@@ -11,8 +11,18 @@ import pkg_resources
 
 class PADGeometry:
     r"""
-    A container for pixel-array detector (PAD) geometry specification.  The complete specification of PAD geometry is
-    understood to be the following 5 parameters, which must be defined for a proper instance of PADGeometry:
+    A container for pixel-array detector (PAD) geometry specification.  By definition, a PAD consists of a single 2D
+    grid of pixels.
+
+    .. note::
+
+        A common point of confusion is that XFELs detectors typically consist of *multiple* PADs, in which case your
+        code must handle *multiple PADGeometry instances*.  If that is the case for your data, then you should look to
+        the |PADGeometryList| documentation as it extends Python's built-in list class with useful methods for
+        PADGeometry instances.  Before you look to |PADGeometryList|, you should finish reading this documentation.
+
+    The complete specification of an individual PAD geometry is understood to be the following 5 parameters, which must
+    be defined for a proper instance of PADGeometry:
 
     - **n_fs**: The number of pixels along the fast-scan direction.
     - **n_ss**: The number of pixels along the slow-scan direction.
@@ -227,7 +237,7 @@ class PADGeometry:
         r""" Make this a square PAD with beam at center.
 
         Arguments:
-            shape (tuple): The shape of the panel, consistent with a numpy array shape.
+            shape (tuple): The shape of the 2D panel, consistent with a numpy array with two dimensions.
             pixel_size (float): Pixel size in SI units.
             distance (float): Detector distance in SI units.
         """
@@ -244,6 +254,8 @@ class PADGeometry:
         if shape is None:
             utils.warn('Setting shape to (1000, 1000).  You should specify this value explicitly.')
             shape = (1000, 1000)
+        if len(shape) != 2:
+            raise ValueError('A PADGeometry shape must have exactly two elements.')
         self.n_fs = shape[1]
         self.n_ss = shape[0]
         self.fs_vec = np.array([pixel_size, 0, 0])
