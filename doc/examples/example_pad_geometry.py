@@ -1,4 +1,6 @@
 r"""
+.. _example_pad_geometry:
+
 Working with Pixel Array Detectors (PADs)
 =========================================
 
@@ -21,7 +23,7 @@ Contributed by Richard Kirian.
 # .. note::
 #
 #     This documentation does not describe what a PAD is.  If you are unfamiliar with the basic concept of a PAD and the
-#     vectors used to describe PAD geometry in reborn, first read the :ref:`documentation <_doc_pads>` before moving
+#     vectors used to describe PAD geometry in reborn, first read the :ref:`documentation <doc_pads>` before moving
 #     forward from this point.
 #
 # The starting point for working with PAD data is to specify the geometry of the PADs.  The reborn package provides the
@@ -229,10 +231,16 @@ data_concat = pads.concat_data(data_split)
 print(data_concat.shape)
 
 # %%
-# As shown above, we can easily move between concatenated data arrays and lists of individual 2D |ndarray|s.  If you
+# As shown above, we can easily move between concatenated data arrays and lists of individual 2D |ndarray| s.  If you
 # are doing image-processing steps using functions in scipy (for example), you will almost certainly need to write loops
-# over the individual 2D |ndarray|s.
-#
+# over the individual 2D |ndarray| s.  For example:
+
+from scipy.ndimage import gaussian_filter
+for i in range(len(data_split)):
+    data_split[i] = gaussian_filter(data_split[i], sigma=4)
+view_pad_data(pad_data=data_split, pad_geometry=pads, pad_numbers=True)
+
+# %%
 # The |PADGeometryList| class attempts to provide all of the generalizations to the corresponding |PADGeometry| methods
 # that you'd hope for:
 

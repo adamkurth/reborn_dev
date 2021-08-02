@@ -12,45 +12,49 @@ import pkg_resources
 class PADGeometry:
     r"""
     A container for pixel-array detector (PAD) geometry specification.  By definition, a PAD consists of a single 2D
-    grid of pixels.
+    grid of pixels; see the extended description in the :ref:`documentation <doc_detectors>`.
 
     .. note::
 
         A common point of confusion is that XFELs detectors typically consist of *multiple* PADs, in which case your
-        code must handle *multiple PADGeometry instances*.  If that is the case for your data, then you should look to
+        code must handle *multiple* |PADGeometry| instances.  If that is the case for your data, then you should look to
         the |PADGeometryList| documentation as it extends Python's built-in list class with useful methods for
         PADGeometry instances.  Before you look to |PADGeometryList|, you should finish reading this documentation.
 
     The complete specification of an individual PAD geometry is understood to be the following 5 parameters, which must
-    be defined for a proper instance of PADGeometry:
+    be defined for a proper instance of |PADGeometry|:
 
-    - **n_fs**: The number of pixels along the fast-scan direction.
-    - **n_ss**: The number of pixels along the slow-scan direction.
-    - **t_vec**: The vector that points from the origin (interaction point) to the center of the first pixel in memory.
-    - **fs_vec**: The vector that points from the first pixel in memory, to the next pixel in the fast-scan direction.
-    - **ss_vec**: The vector that points from the first pixel in memory, to the next pixel in the slow-scan direction.
+        * **n_fs**: The number of pixels along the fast-scan direction.
+        * **n_ss**: The number of pixels along the slow-scan direction.
+        * **t_vec**: The vector that points from the origin (interaction point) to the center of the first pixel in
+          memory.
+        * **fs_vec**: The vector that points from the first pixel in memory, to the next pixel in the fast-scan
+          direction.
+        * **ss_vec**: The vector that points from the first pixel in memory, to the next pixel in the slow-scan
+          direction.
 
     In the above:
 
-    - The lengths of the **fs_vec** and **ss_vec** vectors encode the size of the (possibly rectangular) pixel.  They
-      moreover form the *basis* of the 2D grid that maps the pixel positions in the 3D space of the measurement.
-    - The term "fast-scan" corresponds to the right-most index of a 2D numpy |ndarray| containing PAD data.
-    - The term "slow-scan" corresponds to the left-most index of a 2D |ndarray| containing PAD data.
-    - In the default memory buffer layout of an |ndarray|, the fast-scan direction corresponds to pixels that are
-      contiguous in memory, and which therefore have the smallest stride.  If the phrase "contiguous in memory" and the
-      term "stride" does not mean anything to you, then you need to read the |numpy| documentation for |ndarray|.
+        * The lengths of the **fs_vec** and **ss_vec** vectors encode the size of the (possibly rectangular) pixel. They
+          moreover form the *basis* of the 2D grid that maps the pixel positions in the 3D space of the measurement.
+        * The term "fast-scan" corresponds to the right-most index of a 2D numpy |ndarray| containing PAD data.
+        * The term "slow-scan" corresponds to the left-most index of a 2D |ndarray| containing PAD data.
+        * In the default memory buffer layout of an |ndarray|, the fast-scan direction corresponds to pixels that are
+          contiguous in memory, and which therefore have the smallest stride.  If the phrase "contiguous in memory" and
+          the term "stride" does not mean anything to you, then you need to read the |numpy| documentation for
+          |ndarray|.
 
     In addition to providing a standard way to parameterized PAD geometry, the PADGeometry class also provides methods
     that make it easy to generate:
 
-    - Vectors from sample to pixel.
-    - Scattering vectors (i.e. "q" vectors... provided beam information).
-    - Scattering vector magnitudes.
-    - Scattering angles (twice the Bragg angle).
-    - Polarization factors.
-    - Pixel solid angles.
-    - Maximum resolution.
-    - etc.
+        * Vectors from sample to pixel.
+        * Scattering vectors (i.e. "q" vectors... provided beam information).
+        * Scattering vector magnitudes.
+        * Scattering angles (twice the Bragg angle).
+        * Polarization factors.
+        * Pixel solid angles.
+        * Maximum resolution.
+        * etc.
 
     Some of the above parameters require more than a PADGeometry instance -- they also require information about the
     x-ray beam.  The |Beam| class in reborn provides a standard way to specify the properties of an x-ray beam.

@@ -1,9 +1,9 @@
-.. _docs_detectors:
+.. _doc_detectors:
 
 Detectors
 =========
 
-.. _docs_pads:
+.. _doc_pads:
 
 Pixel-Array Detectors
 ---------------------
@@ -14,25 +14,25 @@ Pixel-Array Detectors
 
     Schematic of a Pixel-Array Detector.
 
-The :class:`PADGeometry <reborn.detector.PADGeometry>` class contains the data and methods needed to deal
+The |PADGeometry| class contains the data and methods needed to deal
 with "pixel-array detectors" (PADs).  This detector is assumed to consist of an orthogonal 2D grid of
 pixels.  We specify the locations of detector pixels with respect to an arbitrary origin that is also
 the origin of the coordinates of the object that creates the diffraction pattern.  The 2D grid of pixels is described by
 the following vectors:
 
-- :math:`\vec{t}` is the vector that points from the origin to the *center* of the first pixel in memory.
-- :math:`\vec{f}` is the vector that points from the first pixel in memory to the next pixel in the fast-scan direction.
-- :math:`\vec{s}` The vector that points from the first pixel in memory, to the next pixel in the slow-scan direction.
-- :math:`n_f` is the number of pixels along the fast-scan direction.
-- :math:`n_s` is the number of pixels along the slow-scan direction.
+* :math:`\vec{t}` is the vector that points from the origin to the *center* of the first pixel in memory.
+* :math:`\vec{f}` is the vector that points from the first pixel in memory to the next pixel in the fast-scan direction.
+* :math:`\vec{s}` The vector that points from the first pixel in memory, to the next pixel in the slow-scan direction.
+* :math:`n_f` is the number of pixels along the fast-scan direction.
+* :math:`n_s` is the number of pixels along the slow-scan direction.
 
 In the above:
 
-- The lengths of the :math:`\vec{f}` and :math:`\vec{s}` vectors encode the size of the (possibly rectangular) pixel.
+* The lengths of the :math:`\vec{f}` and :math:`\vec{s}` vectors encode the size of the (possibly rectangular) pixel.
   They moreover form the *basis* of the 2D grid that maps the pixel positions in the 3D space of the measurement.
-- The term "fast-scan" corresponds to the right-most index of a 2D numpy |ndarray| containing PAD data.
-- The term "slow-scan" corresponds to the left-most index of a 2D |ndarray| containing PAD data.
-- In the default memory buffer layout of an |ndarray|, the fast-scan direction corresponds to pixels that are
+* The term "fast-scan" corresponds to the right-most index of a 2D numpy |ndarray| containing PAD data.
+* The term "slow-scan" corresponds to the left-most index of a 2D |ndarray| containing PAD data.
+* In the default memory buffer layout of an |ndarray|, the fast-scan direction corresponds to pixels that are
   contiguous in memory, and which therefore have the smallest stride.  If the phrase "contiguous in memory" and the
   term "stride" does not mean anything to you, then you need to read the |numpy| documentation for |ndarray|.
 
@@ -102,6 +102,10 @@ where the vector normal to the PAD is
 
 The :class:`PADGeometry <reborn.detector.PADGeometry>` class can currently generate the above quantities for you, along with other helpful functions.
 
+.. note::
+
+    Once the above is understood, you might want to look at the :ref:`example <example_pad_geometry>` of how to use the
+    PAD geometry tools provided by reborn.
 
 Data and geometry formats
 -------------------------
@@ -126,18 +130,18 @@ operations on all panels at once with the numpy ravel function.
 Working with CrystFEL geometry files
 ------------------------------------
 
-The following is relevant if you need to work with a CrystFEL ".geom" file.  They are ubiquitous in XFEL work, and
+The following is relevant if you need to work with a CrystFEL ".geom" file.  They are ubiquitous in SFX work, and
 thus we have a bit of code included in reborn for handling them.
 
 Firstly, you need to read about the CrystFEL `geom <http://www.desy.de/~twhite/crystfel/manual-crystfel_geometry.html>`_ 
 file specification.  Note that CrystFEL geom files contain a lot more than geometry information.  They also contain
 information about...
 
-- detector properties (e.g. saturation levels, common-mode noise and conversions between digital data units and
+* detector properties (e.g. saturation levels, common-mode noise and conversions between digital data units and
   deposited x-ray energy),
-- information about how to obtain encoder values that specify detector positions,
-- formatting of the files that contain the diffraction data,
-- how programs like indexamajig should treat the data (e.g. the no_index card)
+* information about how to obtain encoder values that specify detector positions,
+* formatting of the files that contain the diffraction data,
+* how programs like indexamajig should treat the data (e.g. the no_index card)
 
 If you want to read in the complete information from a geom file you can convert it to a python dictionary using the
 :func:`load_crystfel_geometry() <reborn.external.crystfel.load_crystfel_geometry>` function, which is just a wrapper
