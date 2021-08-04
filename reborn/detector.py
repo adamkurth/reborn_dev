@@ -78,9 +78,8 @@ class PADGeometry:
             distance (float): (optional) Sample-to-detector distance.
             pixel_size (float): (optional) Size of the pixels in SI units.
         """
-        if None in [distance, pixel_size, shape]:
-            return
-        self.simple_setup(distance=distance, pixel_size=pixel_size, shape=shape)
+        if [a for a in [distance, pixel_size, shape] if a is not None]:
+            self.simple_setup(distance=distance, pixel_size=pixel_size, shape=shape, **kwargs)
 
     def __str__(self):
         out = self.name+'\n'
@@ -247,19 +246,27 @@ class PADGeometry:
             pixel_size (float): Pixel size in SI units.
             distance (float): Detector distance in SI units.
         """
-        if 'n_pixels' in kwargs:
-            utils.depreciate('Use "shape" keyword instead of "n_pixels".')
-            n = kwargs['n_pixels']
-            shape = (n, n)
-        if pixel_size is None:
-            utils.warn('Setting pixel_size in simple_setup to 100e-6.  You should specify this value explicitly.')
-            pixel_size = 100e-6
+        if len(kwargs) > 0:  # Deal with depreciated keywords
+            if 'n_pixels' in kwargs:
+                utils.depreciate('Use the "shape" keyword instead of "n_pixels" keyword.')
+                n = int(kwargs['n_pixels'])
+                del kwargs['n_pixels']
+                shape = (n, n)
+        if len(kwargs) > 0:
+            raise ValueError('Keywords not recognized:' + '%s '*len(kwargs) % kwargs)
+        # if None in [distance, pixel_size, shape]:
+        #     raise ValueError('PADGeometry initialization requires either all or *none* of the keywords'
+        #                      'distance, pixel_size, and shape parameters.')
         if distance is None:
             utils.warn('Setting distance in simple_setup to 0.1.  You should specify this value explicitly.')
             distance = 0.1
+        if pixel_size is None:
+            utils.warn('Setting pixel_size in simple_setup to 100e-6.  You should specify this value explicitly.')
+            pixel_size = 100e-6
         if shape is None:
             utils.warn('Setting shape to (1000, 1000).  You should specify this value explicitly.')
             shape = (1000, 1000)
+        shape = tuple(shape)
         if len(shape) != 2:
             raise ValueError('A PADGeometry shape must have exactly two elements.')
         self.n_fs = shape[1]
