@@ -1437,8 +1437,8 @@ class RadialProfiler():
 
 def get_radial_profile(data, beam, pad_geometry, mask=None, n_bins=None, q_range=None, statistic=np.mean):
     r"""
-    Compute a radial profile from a PAD (or list of pads).  Calculates the mean by default, but you may pass it any
-    function handle (e.g. :func:`np.median` or :func:`np.std` ).
+    Compute a radial profile from a PAD (or list of pads).  Groups pixels according to bins in q-space, and then applies
+    whatever function you desire to the data values in each bin.  Calculates the mean by default.
 
     Arguments:
         data (|ndarray| or list of |ndarray|): Data to get profiles from.

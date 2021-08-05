@@ -23,9 +23,9 @@ class FrameGetter(object):
                 super().__init__()
                 # Possibly set the n_frames attribute during initialization
                 self.n_frames = something_based_on_arguments
-            def get_frame(self, index):
+            def get_frame(self, frame_number):
                 # Do something to fetch data with specified index
-                return {'pad_data':pad_data}
+                return {'pad_data':pad_data} or DataFrame instance
 
     Minimally, your FrameGetter subclass should set the n_frames attribute that specifies how many frames there are, and
     the get_frame method should be defined.  The FrameGetter base class will then implement other conveniences such as
