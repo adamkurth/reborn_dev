@@ -9,6 +9,14 @@ from . import utils
 import pkg_resources
 
 
+pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
+cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_geometry.json')
+cspad_2x2_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_2x2_geometry.json')
+epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k_geometry.json')
+mpccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/mpccd_geometry.json')  # FIXME: Kosta
+jungfrau4m_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/jungfrau4m_geometry.json')
+
+
 class PADGeometry:
     r"""
     A container for pixel-array detector (PAD) geometry specification.  By definition, a PAD consists of a single 2D
@@ -1510,12 +1518,6 @@ def load_pad_masks(file_name):
     return masks
 
 
-pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
-cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_geometry.json')
-cspad_2x2_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_2x2_geometry.json')
-epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k_geometry.json')
-
-
 def pnccd_pad_geometry_list(detector_distance=0.1):
     r"""
     Generate a list of :class:`PADGeometry <reborn.detector.PADGeometry>` instances that are inspired by
@@ -1559,7 +1561,7 @@ def cspad_2x2_pad_geometry_list(detector_distance=2.4):
     return pads
 
 
-def jungfrau4m_pad_geometry_list(detector_distance=0.1, binning=1):
+def jungfrau4m_pad_geometry_list(detector_distance=0.1):
     r"""
     Generate a list of |PADGeometry| instances that are inspired by the |Jungfrau| 4M detector.
 
@@ -1569,18 +1571,10 @@ def jungfrau4m_pad_geometry_list(detector_distance=0.1, binning=1):
 
     Returns: List of |PADGeometry| instances
     """
-    pads = tiled_pad_geometry_list(pad_shape=(int(512/binning), int(1024/binning)), pixel_size=75e-6*binning,
-                                   distance=detector_distance, tiling_shape=(4, 2), pad_gap=36 * 75e-6)
-    gap = 9e-3
-    pads[0].t_vec += + np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
-    pads[1].t_vec += + np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
-    pads[2].t_vec += - np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
-    pads[3].t_vec += - np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
-    pads[4].t_vec += + np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
-    pads[5].t_vec += + np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
-    pads[6].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
-    pads[7].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
-    return PADGeometryList(pads)
+    pads = load_pad_geometry_list(jungfrau4m_geom_file)
+    for p in pads:
+        p.t_vec[2] = detector_distance
+    return pads
 
 
 def epix10k_pad_geometry_list(detector_distance=0.1):
@@ -1594,6 +1588,22 @@ def epix10k_pad_geometry_list(detector_distance=0.1):
         (list): List of |PADGeometry| instances.
     """
     pads = load_pad_geometry_list(epix10k_geom_file)
+    for p in pads:
+        p.t_vec[2] = detector_distance
+    return pads
+
+
+def mpccd_pad_geometry_list(detector_distance=0.1):
+    r"""
+    Generate a list of |PADGeometry| instances that are inspired by the epix10k detector.
+
+    Arguments:
+        detector_distance (float): Detector distance in SI units.
+
+    Returns:
+        (list): List of |PADGeometry| instances.
+    """
+    pads = load_pad_geometry_list(mpccd_geom_file)
     for p in pads:
         p.t_vec[2] = detector_distance
     return pads
