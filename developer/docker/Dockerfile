@@ -6,6 +6,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get -q -y install curl make gfortran pocl-opencl-icd libgl1-mesa-glx && \
     apt-get -q -y autoremove && \
     apt-get -q -y clean
+RUN apt-get -q -y install texlive-latex-base
 RUN export DEBIAN_FRONTEND=noninteractive && \
     curl -s https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh --output /tmp/reborn/miniconda.sh && \
     bash /tmp/reborn/miniconda.sh -b -p /usr/local/miniconda && \

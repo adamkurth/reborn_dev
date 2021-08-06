@@ -31,8 +31,8 @@ bottom=20mm,
 \def\hrcurs{{\mbox{$\hat \brcurs$}}}
 
 
-\title{Scattering intensity under the Born approximation.}
-\author{Richard Kirian}
+\title{Far-field x-ray scattering under the first Born approximation}
+\author{Richard A. Kirian}
 \date{\today}
 
 \begin{document}
@@ -44,13 +44,14 @@ bottom=20mm,
 
 There are multiple ways to develop the theory of x-ray diffraction.  In order to make this guide 
 accessible to motivated undergraduates, we will build upon the most popular
-undergraduate electrodynamics textbook by David Griffiths\cite{Griffiths2018}.  The main result that is 
-derived below is the following equation for the measured diffraction intensity:
+undergraduate electrodynamics textbook by David Griffiths\cite{Griffiths2018}.  The main result we derive is
+the diffraction intensity equation:
 \begin{align}\label{eqn:key}
     I(\vec{q}) = I_0 r_e^2 \Delta \Omega P(\vec{q})  \abs{\int  \rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;.
 \end{align}
-The above result assumes (1) perfect plane-wave illumination with wavelength $\lambda$,
-and (2) the first-order Born approximation, which loosely means that the scattering amplitudes are very weak 
+The above result assumes (1) perfect plane-wave illumination with wavelength $\lambda$, (2) far-field measurements (the
+distance to the detector is \emph{much} greater than the size of the object)
+and (3) the first-order Born approximation, which loosely means that the scattering amplitudes are very weak
 compared to the incident amplitudes. The quantities in equation \ref{eqn:key} are as follows:
 \begin{itemize}
 \item $I(\vec{q})$ is the x-ray diffraction power into a detector pixel
@@ -64,26 +65,26 @@ compared to the incident amplitudes. The quantities in equation \ref{eqn:key} ar
 \item $\rho(\vec{r})$ is the scattering density, which is approximately equal to the electron density.
 \end{itemize}
 
-As we can see from equation \ref{eqn:key}, under certain approximations, x-ray diffraction intensities 
-allow us to measure the magnitude of the Fourier transform of the scattering density $\rho(\vec{r})$ of the target:
-\begin{align}
-    \abs{F(\vec{q})} \propto \abs{\int  \rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r } \;.
-\end{align}
-Ideally, we would like to measure the complex \emph{amplitudes} $F(\vec{q})$, in which case
-we could directly recover the scattering density via inverse Fourier transform:
-\begin{align}
-\rho(\vec{r}) = \frac{1}{2\pi} \int  F(\vec{q}) e^{i \vec{q}\cdot\vec{r}} d^3 q \;.
-\end{align}
-The task of recovering the desired molecular structure $\rho(\vec{r})$ given the
-information-deficient
-measurement of $\abs{F(\vec{q})}$ is called the ``phase problem'' in diffraction microscopy and
-crystallography.  The phase problem will be addressed in a separate note.
+%As we can see from equation \ref{eqn:key}, under certain approximations, x-ray diffraction intensities
+%allow us to measure the magnitude of the Fourier transform of the scattering density $\rho(\vec{r})$ of the target:
+%\begin{align}
+%    \abs{F(\vec{q})} \propto \abs{\int  \rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r } \;.
+%\end{align}
+%Ideally, we would like to measure the complex \emph{amplitudes} $F(\vec{q})$, in which case
+%we could directly recover the scattering density via inverse Fourier transform:
+%\begin{align}
+%\rho(\vec{r}) = \frac{1}{2\pi} \int  F(\vec{q}) e^{i \vec{q}\cdot\vec{r}} d^3 q \;.
+%\end{align}
+%The task of recovering the desired molecular structure $\rho(\vec{r})$ given the
+%information-deficient
+%measurement of $\abs{F(\vec{q})}$ is called the ``phase problem'' in diffraction microscopy and
+%crystallography.  The phase problem will be addressed in a separate note.
 
 
 \section{Electromagnetic fields from a moving point charge}
 
 Here we briefly outline how the electromagnetic 
-fields from a moving point charge were derived Griffiths, starting with Maxwell's equations
+fields from a moving point charge were derived by Griffiths, starting with Maxwell's equations
 in vacuum:
 \begin{align}
 \nabla \cdot \vec{E} &= \rho/\epsilon_0  &\ \nabla\times\vec{E} &= -\frac{\partial\vec{B}}{\partial t} \\
@@ -92,7 +93,7 @@ in vacuum:
 As developed in Griffiths chapter 10, Maxwell's equations may be written in terms of the scalar
 and vector potentials that are defined as
 \begin{align}\label{eqn:pots}
-\vec{B} &= \nabla \times \vec{A} & \vec{E} &= -\nabla V -\frac{\partial \vec{A}}{\partial t} \;.
+\vec{B} &= \nabla \times \vec{A}\;, & \vec{E} &= -\nabla V -\frac{\partial \vec{A}}{\partial t} \;.
 \end{align}
 When working in the Lorenz gauge, namely
 \begin{align}
@@ -247,7 +248,7 @@ We typically define the ``form factor'' as
 \end{align}
 This form factor is just the Fourier transform of the electron density, with the conjugate variable $\vec{q}$ being defined by the incoming and outgoing wavevectors.  The time-averaged Poynting vector is\footnote{See Appendix \ref{sec:poynt} for details.}
 \begin{align}
-\avg{\vec{S}(\vec{r})} = \frac{1}{2\mu_0} \Re\{\vec{E}_\text{dip}\times\vec{B}_\text{dip}^*\} = r_e^2 \frac{1}{r^2} I_0 | \hvec{r} \times  \hvec{E}_0 |^2 \left| F(\vec{q}) \right|^2 \hvec{r} \;.
+\avg{\vec{S}(\vec{r})} = \frac{1}{2\mu_0} \Re\{\vec{E}_\text{dip}\}\times\Re\{\vec{B}_\text{dip}^*\} = r_e^2 \frac{1}{r^2} I_0 | \hvec{r} \times  \hvec{E}_0 |^2 \left| F(\vec{q}) \right|^2 \hvec{r} \;.
 \end{align}
 Where we have again used the incident intensity $I_0 = |\vec{E}_0|^2/2\mu_0$.  Assuming a detector pixel with area $d\vec{a} = r^2 d\Omega \hvec{r}$, the power into the detector pixel is
 \begin{align}

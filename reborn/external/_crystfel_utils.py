@@ -19,7 +19,7 @@ CrystFEL utilities.
 This module contains Python reimplementations of some functions from the `CrystFEL
 <http://www.desy.de/~twhite/crystfel>`_ software package.
 """
-from __future__ import absolute_import, division, print_function
+# from __future__ import absolute_import, division, print_function
 
 import collections
 import copy

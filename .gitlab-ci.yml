@@ -25,6 +25,8 @@ tests:
 
 doc:
   script:
+  - cd $reborn/doc/latex
+  - make
   - cd $reborn/doc
   - bash update_docs.sh
   except:
