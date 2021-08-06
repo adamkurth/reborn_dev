@@ -14,12 +14,12 @@ dependencies:
   - pyopengl            # Only if you need 3D graphics
   - xraylib             # Only if you need scattering factors
 #  - pillow
-#  - memory_profiler
 #  - pocl               # Possibly helpful if pyopencl doesn't work
 #  - ocl-icd-system     # Possibly helpful if pyopencl doesn't work
 #  - fortran-compiler   # Possibly helpful for strange computers (windows, mac)
 #  - make               # Possibly helpful for strange computers (windows, mac)
   - sphinx              # Only if you are building docs
+  - memory_profiler     # Only if you are building docs
   - pip                 # Only if you are building docs
   - pip:
     - sphinx_rtd_theme  # Only if you are building docs

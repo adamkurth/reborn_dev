@@ -288,6 +288,7 @@ def hubbel_form_factors(q_mags, atomic_number):
         |ndarray| : Atomic form factor :math:`f(q)`
     """
     import xraylib
+    atomic_number = int(atomic_number)
     qq = np.array(q_mags).ravel()  # In case input is just  scalar
     qq = qq*1e-10/4.0/np.pi  # xraylib is in inv. angstrom units without the 4 pi
     f = np.array([xraylib.FF_Rayl(atomic_number, q) for q in qq])
