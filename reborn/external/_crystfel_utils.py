@@ -514,7 +514,8 @@ def load_crystfel_geometry(filename):
             "Number of placeholders in mask cannot be larger the number than for data."
         )
     dim_length = None
-    for panel_name, panel in viewitems(detector["panels"]):
+    # for panel_name, panel in viewitems(detector["panels"]):
+    for panel_name, panel in detector["panels"].items():
         if panel["dim_structure"] is None:
             panel["dim_structure"] = copy.deepcopy(default_dim)
 
@@ -559,7 +560,8 @@ def load_crystfel_geometry(filename):
             )
         if dim_length == 1:
             raise RuntimeError("Number of dim coordinates must be at least two.")
-    for panel_name, panel in viewitems(detector["panels"]):
+    # for panel_name, panel in viewitems(detector["panels"]):
+    for panel_name, panel in detector["panels"].items():
         if panel["origin_min_fs"] < 0:
             raise RuntimeError(
                 "Please specify the minimum fs coordinate for panel {}.".format(
@@ -617,7 +619,8 @@ def load_crystfel_geometry(filename):
             panel["clen_for_centering"] = 0.0
         panel["w"] = panel["origin_max_fs"] - panel["origin_min_fs"] + 1
         panel["h"] = panel["origin_max_ss"] - panel["origin_min_ss"] + 1
-    for bad_region_name, bad_region in viewitems(detector["bad"]):
+    # for bad_region_name, bad_region in viewitems(detector["bad"]):
+    for bad_region_name, bad_region in detector["bad"].items():
         if bad_region["is_fsss"] == 99:
             raise RuntimeError(
                 "Please specify the coordinate ranges for bad region {}.".format(
