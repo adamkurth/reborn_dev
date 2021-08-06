@@ -1,6 +1,8 @@
 Simulations
 ===========
 
+Notes
+
 TODO: Document the simulation code...
 
 Currently, all GPU simulation utilities in reborn utilize the pyopencl package.  You can check if opencl is installed correctly 
@@ -12,10 +14,10 @@ we can explore that option.
 The basic simulation functions are accessed by creating an instance of the
 :class:`ClCore <reborn.simulate.clcore.ClCore>` class.  This class is meant to do some of the following
 
-- maintain an opencl context and queue
-- manage the compute group size
-- manage the precision (double/single)
-- make it easy for you to move data between GPU memory and RAM (using the context and queue)
+* maintain an opencl context and queue
+* manage the compute group size
+* manage the precision (double/single)
+* make it easy for you to move data between GPU memory and RAM (using the context and queue)
 
 The above model seems to work well when using a single GPU device, but note that it has not been designed to
 make use of multiple GPU devices (this might be easy to do, but we've not had a need thus far).

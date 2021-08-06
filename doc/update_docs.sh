@@ -20,6 +20,7 @@ sphinx-apidoc --maxdepth 10 --templatedir source/templates --output-dir source/a
 make clean
 make doctest
 make html
+cp -r source/files build/html
 exit
 #sed -i.bak '/>*package</d' build/html/api/modules.html
 #sed -i.bak '/>*contents</d' build/html/api/modules.html

@@ -8,7 +8,7 @@ before_script:
   - cd $reborn/developer
   - bash test_minimal_dependencies.sh
   - bash cleanup_everything.sh
-  - source activate reborn # Set up in developer/docker/build_docker.sh
+  - source activate reborn # This was set up in developer/docker/build_docker.sh
 #  - conda list # Helpful for debugging in the future...
 #  - python --version
 #  - cat /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl.icd
@@ -25,7 +25,8 @@ tests:
 
 doc:
   script:
-#  - tlmgr install --force pdftexcmds
+  - cd $reborn/doc/latex/blocks
+  - make
   - cd $reborn/doc/latex/dipole
   - make
   - cd $reborn/doc

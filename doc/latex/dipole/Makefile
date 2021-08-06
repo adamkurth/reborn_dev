@@ -5,6 +5,7 @@ ${filename}.pdf: ${filename}.tex
 	bibtex ${filename}
 	pdflatex ${filename}
 	pdflatex ${filename}
+	cp ${filename}.pdf ../../source/files
 # 	rm *.out *.log *.bbl *.aux *synctex* *.blg
 
 .PHONY: clean

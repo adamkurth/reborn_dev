@@ -86,6 +86,7 @@ Contents
 
    self
    installation
+   theory
    beams
    geometry
    targets
