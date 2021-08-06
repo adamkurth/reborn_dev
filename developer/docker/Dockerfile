@@ -1,12 +1,12 @@
 FROM ubuntu:20.04
-RUN mkdir /tmp/reborn
-COPY environment.yml /tmp/reborn/environment.yml
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get -q -y update && \
-    apt-get -q -y install curl make gfortran pocl-opencl-icd libgl1-mesa-glx && \
+    apt-get -q -y install apt-utils curl make gfortran pocl-opencl-icd libgl1-mesa-glx && \
     apt-get -q -y autoremove && \
     apt-get -q -y clean
-RUN apt-get -q -y install texlive-latex-base
+RUN apt-get -q -y install texlive-latex-base texlive-fonts-recommended texlive-latex-extra
+RUN mkdir /tmp/reborn
+COPY environment.yml /tmp/reborn/environment.yml
 RUN export DEBIAN_FRONTEND=noninteractive && \
     curl -s https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh --output /tmp/reborn/miniconda.sh && \
     bash /tmp/reborn/miniconda.sh -b -p /usr/local/miniconda && \

@@ -5,7 +5,7 @@ ${filename}.pdf: ${filename}.tex
 	bibtex ${filename}
 	pdflatex ${filename}
 	pdflatex ${filename}
-	rm *.out *.log *.bbl *.aux *synctex* *.blg
+# 	rm *.out *.log *.bbl *.aux *synctex* *.blg
 
 .PHONY: clean
 clean: 
