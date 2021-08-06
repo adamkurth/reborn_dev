@@ -14,8 +14,10 @@ from .. import detector
 from ..fileio.getters import FrameGetter
 from . import _crystfel_utils
 from scipy import constants as const
+import pkg_resources
 
 eV = const.value('electron volt')
+example_stream_file_path = pkg_resources.resource_filename('reborn', 'data/misc/test.stream')
 
 # ------------------------------------------------
 # Stream file delimiters
