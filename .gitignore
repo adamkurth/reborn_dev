@@ -13,6 +13,8 @@ __pycache__
 .metadata
 .DS_Store
 log.txt
+*.pdb
+*.pdf
 *.egg*
 *.npz
 *.npy
@@ -46,3 +48,4 @@ developer/rkirian/data
 *.log
 *.blg
 *.synctex.*
+file_header_*.txt
