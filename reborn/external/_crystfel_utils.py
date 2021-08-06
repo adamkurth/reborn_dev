@@ -27,7 +27,7 @@ import math
 import re
 from typing import Any, Dict, List, Union, Tuple  # pylint: disable=unused-import
 
-from future.utils import viewitems
+# from future.utils import viewitems
 
 
 def _assplode_algebraic(value):
