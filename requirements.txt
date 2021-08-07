@@ -1,8 +1,0 @@
-numpy
-matplotlib
-scipy
-xraylib
-pyopencl
-numba
-pyqtgraph
-h5py
