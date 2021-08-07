@@ -13,8 +13,8 @@ sphinx-apidoc --maxdepth 10 --templatedir source/templates --output-dir source/a
  ../reborn/data ../reborn/fortran ../reborn/simulate/atoms.py ../reborn/simulate/numbacore.py
 # FIXME: How do we properly change the title of the auto-generated API page?  Below we do it brute-force...
 tail -n+3 source/api/modules.rst > tmp.rst
-echo 'API Reference' > source/api/modules.rst
-echo '=============' >> source/api/modules.rst
+echo 'reborn API' > source/api/modules.rst
+echo '==========' >> source/api/modules.rst
 cat tmp.rst >> source/api/modules.rst
 rm tmp.rst &> /dev/null
 #make clean
