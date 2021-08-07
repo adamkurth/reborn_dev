@@ -7,21 +7,26 @@
 #
 # https://rkirian.gitlab.io/reborn
 
-[ -d source/api ] && rm -r source/api
+#[ -d source/api ] && rm -r source/api
 #[ -d source/auto_examples ] && rm -r source/auto_examples
 sphinx-apidoc --maxdepth 10 --templatedir source/templates --output-dir source/api ../reborn \
  ../reborn/data ../reborn/fortran ../reborn/simulate/atoms.py ../reborn/simulate/numbacore.py
 # FIXME: How do we properly change the title of the auto-generated API page?  Below we do it brute-force...
-#tail -n+3 source/api/modules.rst > tmp.rst
-#echo 'API Reference' > source/api/modules.rst
-#echo '=============' >> source/api/modules.rst
-#cat tmp.rst >> source/api/modules.rst
-#rm tmp.rst &> /dev/null
-make clean
+tail -n+3 source/api/modules.rst > tmp.rst
+echo 'API Reference' > source/api/modules.rst
+echo '=============' >> source/api/modules.rst
+cat tmp.rst >> source/api/modules.rst
+rm tmp.rst &> /dev/null
+#make clean
 make doctest
 make html
+prev=$(pwd)
+cd ../latex/dipole
+make
+cd $prev
 cp -r source/files build/html
 exit
+# Attempting to make the ugly API more readable... failed
 #sed -i.bak '/>*package</d' build/html/api/modules.html
 #sed -i.bak '/>*contents</d' build/html/api/modules.html
 sed -i.bak '/>*Submodules</d' build/html/api/modules.html
