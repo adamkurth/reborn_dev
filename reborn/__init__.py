@@ -25,5 +25,6 @@ from . import dataframe
 from . import simulate
 from . import target
 from . import fileio
+from . import misc
 
 temp_dir = os.path.join(tempfile.gettempdir(), 'reborn')

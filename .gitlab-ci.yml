@@ -25,8 +25,6 @@ tests:
 
 doc:
   script:
-  - cd $reborn/doc/latex/blocks
-  - make
   - cd $reborn/doc/latex/dipole
   - make
   - cd $reborn/doc
@@ -36,6 +34,8 @@ doc:
 
 pages:
   script:
+  - cd $reborn/doc/latex/dipole
+  - make
   - cd $reborn/doc
   - bash update_docs.sh
   - cp -r build/html ../public
