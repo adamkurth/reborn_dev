@@ -21,7 +21,7 @@ rm tmp.rst &> /dev/null
 make doctest
 make html
 prev=$(pwd)
-cd ../latex/dipole
+cd latex/dipole
 make
 cd $prev
 cp -r source/files build/html
