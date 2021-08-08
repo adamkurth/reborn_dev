@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python
-  - scipy               # Installing scipy will install the minimal dependencies (e.g. numpy)
+  - scipy               # Installing scipy will install the minimal dependencies
   - h5py                # Only if loading data using tools in reborn.external
   - matplotlib          # Only if you use the GUIs in reborn.viewers.mplviews
   - numba               # A few functions run faster with this

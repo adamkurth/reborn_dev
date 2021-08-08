@@ -45,24 +45,25 @@ accessible to motivated undergraduates, we will build upon the most popular
 undergraduate electrodynamics textbook by David Griffiths\cite{Griffiths2018}.  The main result we derive is
 the diffraction intensity equation:
 \begin{align}\label{eqn:key}
-    I(\vec{q}) = I_0 r_e^2 \Delta \Omega P(\vec{q})  \abs{\int  \rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;.
+    I(\vec{q}) = J_0 r_e^2 \Delta \Omega \mathcal{P}(\vec{q})  \abs{\int  
+\rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2 \;.
 \end{align}
 The above result assumes (1) perfect plane-wave illumination with wavelength $\lambda$, (2) far-field measurements (the
 distance to the detector is \emph{much} greater than the size of the object)
 and (3) the first-order Born approximation, which loosely means that the scattering amplitudes are very weak
 compared to the incident amplitudes. The quantities in equation \ref{eqn:key} are as follows:
 \begin{itemize}
-\item $I(\vec{q})$ is the x-ray diffraction power into a detector pixel
+\item $I(\vec{q})$ is the x-ray diffraction signal in a pixel (energy or 
+photons per pixel)
 \item $\vec{q}=\vec{k}-\vec{k}_0$ is the wavevector transfer
 \item $\vec{k}_0$ is the incident wavevector with magnitude $|\vec{k}_0| = |\vec{k}| = \frac{2\pi}{\lambda}$
 \item $\vec{k}$ is the outgoing wavevector that points from the target to the detector pixel
-\item $I_0$ is the incident intensity (energy per area per time)
+\item $J_0$ is the incident fluence (energy or photons per area)
 \item $\Delta \Omega$ is the solid angle of the detector pixel (assumed very small)
-\item $P(\vec{q})$ is the polarization factor defined below
+\item $\mathcal{P}(\vec{q})$ is the polarization factor defined below
 \item $r_e = 2.818 \times 10^{-15}$~m is the Classical electron radius
 \item $\rho(\vec{r})$ is the scattering density, which is approximately equal to the electron density.
 \end{itemize}
-
 %As we can see from equation \ref{eqn:key}, under certain approximations, x-ray diffraction intensities
 %allow us to measure the magnitude of the Fourier transform of the scattering density $\rho(\vec{r})$ of the target:
 %\begin{align}
@@ -189,7 +190,7 @@ $\vec{E}_0(t)$ results in the acceleration
 \vec{a}(t) =  -\frac{e}{m_e} \vec{E}_0(t) \;.
 \end{align}
 If the electron was bound to an atom we could develop a crude model by adding a restoring force and damping force as in Griffiths chapter 9.  In our simple model for a \emph{free} electron, the second derivative of the dipole moment is 
-\begin{align}
+\begin{align} \label{eqn:pddot_thompson}
 \ddot{\vec{p}} =  -e \vec{a} = \frac{e^2}{m_e} \vec{E}_0(t) \;.
 \end{align}  
 Plugging this into the dipole radiation formula \ref{eqn:dip1} gives
@@ -200,15 +201,75 @@ where we simplified the expression by defining the classical electron radius
 \begin{align}
 r_e = \frac{1}{4\pi \epsilon_0} \frac{e^2}{m_e c^2} \approx 2.8\times10^{-15} \; \text{m} \;.
 \end{align}
-We therefore have 
-\begin{align}
-\avg{dP}  = \frac{r_e^2 E_0^2}{ 2 \mu_0 c}  |\hvec{r}\times\hvec{E}_0|^2 d\Omega  = r_e^2  |\hvec{r}\times\hvec{E}_0|^2 I_0 d\Omega   \; .
+We therefore have the power captured by a detector pixel:
+\begin{align}\label{eqn:dpthompson}
+\avg{dP}  = \frac{r_e^2 E_0^2}{ 2 \mu_0 c}  |\hvec{r}\times\hvec{E}_0|^2 d\Omega 
+ = I_0 r_e^2  |\hvec{r}\times\hvec{E}_0|^2  d\Omega   \; .
 \end{align}
 where $I_0 = |\hvec{E}_0|^2/2\mu_0c$ is the incident radiation intensity.  Integrating over all angles we get
 \begin{align}
 P = \frac{8}{3}\pi r_e^2  I_0  = \sigma_T  I_0 
 \end{align}
 where $\sigma_T$ is the Thompson scattering cross section.
+
+\section{Polarization Factor}
+
+The ``polarization factor'' is the term $\mathcal{P}=| \hvec{r} 
+\times  \hvec{E}_0 |^2=\sin^2\theta$ in equation \ref{eqn:dpthompson}, which
+corresponds to linear polarization along the direction $\hvec{E}_0$.  We may 
+generalize to an arbitrary elliptical polarization if we write the field as a 
+superposition of two orthogonal polarizations:
+\begin{align}
+ \vec{E}_0 = \vec{E}_1 + e^{i\phi}\vec{E}_2 
+\end{align}
+where $\hvec{E}_2 = \hvec{k}_0 \times \hvec{E}_1$.  The time-averaged Poynting 
+vector becomes\footnote{See Appendix \ref{sec:poynt} for details.}
+\begin{align}
+\avg{\vec{S}(\vec{r})} &= r_e^2 \frac{1}{r^2} (I_1 | \hvec{r} \times  \hvec{E}_1 
+|^2 + I_2 | \hvec{r} \times  \hvec{E}_2 |^2)  \hvec{r} \;. 
+\end{align}
+If we write the overall incident intensity as 
+\begin{align}
+ I_0 = I_1 + I_2 
+\end{align}
+and parameterize the intensity components according to the polarization 
+power weight $\alpha$ such that
+\begin{align}
+ I_1 &=\alpha I_0\\
+ I_2 &= (1-\alpha)I_0
+\end{align}
+we may write the generalization of equation \ref{eqn:dpthompson}:
+\begin{align}\label{eqn:genthompson}
+\avg{dP} = I_0 r_e^2  (\alpha | \hvec{r} \times  \hvec{E}_1 |^2 + (1-\alpha) 
+| \hvec{r} \times  \hvec{E}_2 |^2)  d\Omega\;.
+\end{align}
+We typically work in terms of the fluence (time-integrated intensity) $J_0$, 
+which gives the expression for the measured diffraction signal\footnote{The 
+units here are either energy or photons per pixel, depending on the units 
+chosen for $J_0$.  Photons are often the preferred unit since the noise 
+characteristics often depend on photon counts.}
+\begin{align}\label{eqn:keyF}
+    I(\vec{q}) = J_0 r_e^2  \mathcal{P}(\vec{q}) \Delta \Omega
+\end{align}
+where the polarization factor is defined as
+\begin{align}\label{eqn:goodpol}
+ \mathcal{P}(\vec{q}) = \alpha | \hvec{k} \times  \hvec{E}_1 |^2 + (1-\alpha) | 
+\hvec{k} \times \hvec{E}_2 |^2
+\end{align}
+with the understanding that 
+\begin{align}
+ \hvec{r} = \hvec{k} = \frac{\vec{q} - \vec{k}_0}{\abs{\vec{q} - \vec{k}_0}} \;.
+\end{align}
+A convenient form for calculations\footnote{The use of dot products rather 
+than angles is preferred since angles are often defined in different ways by 
+different textbooks and software packages.  Dot products are invariant to the 
+usual coordinate transformations.} is
+\begin{align}
+ \mathcal{P}(\vec{q}) &= 1 - \alpha(\hvec{k} \cdot \hvec{E}_1 )^2 - 
+(1-\alpha)(\hvec{k} \cdot \hvec{E}_2 )^2 \;.
+\end{align}
+
+
 
 \section{Weak Diffraction (Born approximation)}
 
@@ -241,7 +302,7 @@ In the continuum limit, with electron density $\rho(\vec{r})$, we have
 \vec{E}_\text{diff}(\vec{r},t) =  r_e\frac{e^{ikr}}{r} e^{-i\omega t}[\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )] \int \rho(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r' \;.
 \end{align}
 We typically define the ``form factor'' as
-\begin{align}
+\begin{align}\label{eqn:formfactor}
  F(\vec{q}) = \int \rho(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r' \;.
 \end{align}
 This form factor is just the Fourier transform of the electron density, with the conjugate variable $\vec{q}$ being defined by the incoming and outgoing wavevectors.  The time-averaged Poynting vector is\footnote{See Appendix \ref{sec:poynt} for details.}
@@ -252,87 +313,140 @@ Where we have again used the incident intensity $I_0 = |\vec{E}_0|^2/2\mu_0$.  A
 \begin{align}
 I(\vec{q}) = \avg{\vec{S}(\vec{r})} \cdot d\vec{a} = r_e^2 I_0 | \hvec{r} \times  \hvec{E}_0 |^2 \left| F(\vec{q}) \right|^2 d\Omega\;.
 \end{align}
-The ``polarization factor'' is usually defined as $P=| \hvec{r} \times  \hvec{E}_0 |^2=\sin^2\theta$, and in this case the polarization factor corresponds to linear polarization along the direction $\hvec{E}_0$.  We may allow for the possibility of
-elliptical polarization if we write the field as a superposition of two orthogonal polarizations:
-\begin{align}
- \vec{E}_0 = \vec{E}_1 + e^{i\phi}\vec{E}_2 
+Generalizing the polarization factor yields equation \ref{eqn:key}:
+\begin{align}\label{eqn:keyF}
+    I(\vec{q}) = J_0 r_e^2  \mathcal{P}(\vec{q})  
+\abs{F(\vec{q})}^2 \Delta \Omega \;.
 \end{align}
-where $\hvec{E}_2 = \hvec{k}_0 \times \hvec{E}_1$.  The time-averaged Poynting vector becomes\footnote{See Appendix \ref{sec:poynt} for details.}
+The only difference between a single point-like electron (equation  
+\ref{eqn:genthompson}) and a charge distribution (the above equation) is the 
+appearance of the form factor $F(\vec{q})$.   
+
+
+\section{Anomalous Dispersion}
+
+A simple classical model for ``anomalous dispersion'' was developed in 
+Griffiths chapter 9, as follows.  Instead of the free electron we considered in 
+the previous sections, we allow for a restoring force and a damping force in 
+addition to the driving force of the external field.  This model gets us 
+closer to one that includes the affects of the atom to which the electrons 
+are bound.  The position $\vec{x}$ of the electron obeys the following 
+differential equation:
 \begin{align}
-\avg{\vec{S}(\vec{r})} &= r_e^2 \frac{1}{r^2} (I_1 | \hvec{r} \times  \hvec{E}_1 |^2 + I_2 | \hvec{r} \times  \hvec{E}_2 |^2) \left| F(\vec{q}) \right|^2 \hvec{r} \;. 
+m_e \frac{d^2\vec{x}}{dt^2} + m_e \gamma \frac{d\vec{x}}{dt} + m_e\omega_0^2 
+\vec{x} = e \vec{E}_0 \exp(-i\omega t) \;.
 \end{align}
-If we write the incident intensity as 
+The solution for $\vec{x}(t)$ gives the dipole moment
+\begin{align}\label{eqn:dddipole}
+\vec{p}(t) = e \vec{x}(t) = \frac{e^2/m_e}{\omega_0^2 - \omega^2 - i \gamma 
+\omega}\vec{E}_0 \exp(-i\omega t) \;.
+\end{align}
+Comparing the above with equation \ref{eqn:pddot_thompson}, we see that the 
+correction we should make to the radiation field is
 \begin{align}
- I_0 = I_1 + I_2 
+\vec{E}_\text{dip} =  -\frac{\omega^2}{\omega_0^2 - \omega^2 - i \gamma 
+\omega}\frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  
+\vec{E}_0(t_r))] \;
 \end{align}
-and parameterize the intensity components according to the weight $\alpha$ such that
+We may call the term involving $\omega$ the ``anomalous dispersion correction''.
+Although it is a very simple model, captures many of the basic 
+frequency-dependent features of diffraction.  The correction to be made to our 
+previous derivations is to make the following replacement:
 \begin{align}
- I_1 &=\alpha I_0\\
- I_2 &= (1-\alpha)I_0
-\end{align}
-we may write the diffraction intensity as
-\begin{align}
-I(\vec{q}) = r_e^2 I_0 (\alpha | \hvec{r} \times  \hvec{E}_1 |^2 + (1-\alpha) | \hvec{r} \times  \hvec{E}_2 |^2) \left| F(\vec{q}) \right|^2 d\Omega\;.
-\end{align}
-We have now arrived at equation \ref{eqn:key}:
-\begin{align}
-    I(\vec{q}) = J_0 r_e^2 \Delta \Omega P(\vec{q})  \abs{\int  \rho(\vec{r}) e^{-i \vec{q}\cdot\vec{r}} d^3 r }^2
-\end{align}
-where the polarization factor is defined as
-\begin{align}\label{eqn:goodpol}
- P(\vec{q}) = \alpha | \hvec{k} \times  \hvec{E}_1 |^2 + (1-\alpha) | \hvec{k} \times \hvec{E}_2 |^2
-\end{align}
-with the understanding that 
-\begin{align}
- \hvec{r} = \hvec{k} = \frac{\vec{q} - \vec{k}_0}{\abs{\vec{q} - \vec{k}_0}} \;.
-\end{align}
-A convenient form for calculations is
-\begin{align}
- P(\vec{q}) &= 1 - \alpha(\hvec{k} \cdot \hvec{E}_1 )^2 - (1-\alpha)(\hvec{k} \cdot \hvec{E}_2 )^2 \;.
+    r_e^2 \rightarrow \frac{\omega^4}{(\omega_0^2-\omega^2)^2+\gamma^2 
+\omega^2}r_e^2 \;.
 \end{align}
 
-% \section{Rayleigh scatter from a dielectric sphere}
-% 
-% Outside of the weak-scattering approximation, diffraction is a complicated process.  There are few exact analytic solutions in such cases.  However, if the object is much smaller than the wavelength of the light, then our dipole approximations can be used, provided that we can determine the relationship between the incident field $\vec{E}_0$ and the dipole that it induces:
-% \begin{align}
-% \vec{p} = \alpha \vec{E} \;,
-% \end{align}
-% where $\alpha$ is sometimes referred to as the polarizability of the object.  For asymmetric objects, the induced dipole vector will point in a direction that differs from the polarization of the incident field, in which case $\alpha$ would take the form of a $3\times3$ tensor.  
-% 
-% In Griffiths chapter 4, you considered a dielectric sphere with relative permittivity $\epsilon_r$ placed in a uniform field, and found that the internal field $\vec{E}_0$ within the sphere is 
-% \begin{align}
-% \vec{E}_\text{int} = \frac{3}{\epsilon_r + 2} \vec{E}_0 \;.
-% \end{align}
-% Assuming that the sphere is much smaller than the wavelength of the radiation, we may use this result to determine the Rayleigh scattering cross section for a dielectric sphere.  The polarization (dipole moment per volume) is $\vec{P}=\epsilon_0\chi_e \vec{E}_\text{int} = \epsilon_0(\epsilon_r - 1) \vec{E}_\text{int}$, and hence the total dipole moment of a sphere of radius $R$ is
-% \begin{align}
-% \vec{p} = \frac{4}{3} \pi R^3 \vec{P} = 4 \pi R^3 \epsilon_0  \frac{\epsilon_r-1}{\epsilon_r + 2} \vec{E}_0 \;.
-% \end{align}
-% Next we plug this dipole moment into our differential radiated power (equation \ref{eqn:avgpwer}):
-%\begin{align}
-%\left\langle \frac{dP}{d\Omega} \right\rangle &= \frac{\mu_0  \epsilon_0^2 \omega^4 }{2 c} |\hvec{r}\times\hvec{p}|^2   R^6  \left(\frac{\epsilon_r-1}{\epsilon_r + 2}\right)^2 E_0^2 \; .
-%\end{align}
-%We relate the above to the incident intensity (power per area) $I_0 = \frac{1}{2\mu_0 c} E_0^2$ to get
-%\begin{align}
-%\left\langle \frac{dP}{d\Omega} \right\rangle &= \frac{\omega^4}{2c^4}  |\hvec{r}\times\hvec{p}|^2   R^6  \left(\frac{\epsilon_r-1}{\epsilon_r + 2}\right)^2 I_0 \; .
-%\end{align}
-%We can integrate over all solid angles to get
-% \begin{align}
-% P  &= \frac{\omega^4}{2c^4}  \frac{8}{3}\pi   R^6  \left(\frac{\epsilon_r-1}{\epsilon_r + 2}\right)^2 I_0 \; .
-% \end{align}
-% This is the Rayleigh scattering formula, which may be written as
-% \begin{align}
-% P &= \sigma_R I_0 \;.
-% \end{align}
-% The total scattering cross section (area units) is often written in terms of the sphere diameter $D$, wavelength $\lambda$, and refractive index $n$:
-% \begin{align}
-% \sigma_R = \frac{2}{3} \pi^5   \frac{D^6}{\lambda^4}  \left(\frac{n^2-1}{n^2 + 2}\right)^2 \;.
-% \end{align}
-% There are tons of nanoparticles in the air that scatter light in this way; that's why you can see a bright laser beam in a dark room.  There are also various density fluctuations in the refractive index of materials that are nominally ``homogeneous and isotropic'' -- Rayleigh scattering qualitatively explains why you can also see scattering from a bright laser even in ultrapure water or air.   The blue sky is partly due to the wavelength dependence of Rayleigh scatter; we see more blue light than red because blue scatters more strongly.
-%The Rayleigh scattering equation is relevant to my own research because the $\sim$60nm viruses and $\sim$5nm protein molecules that I shoot with x-rays radiate green laser light according to that formula (within reasonable approximation).  I use to determine what optical laser power is needed to see a high-speed beam of biomolecules as they fly into the femtosecond x-ray beam.
-% 
+
+\section{Atomic Scattering Factors}
+
+When far from resonance, the simplest model for an atomic scattering 
+factor is to assume the atom has an
+electron density $\rho_n^{(0)}(r)$ and calculate the form factor in equation 
+\ref{eqn:formfactor}.  For a rotationally symmetric atom\footnote{Most 
+tabulations of scattering factors use a rotational symmetry approximation, and 
+it is very rare to image with resolutions that can resolve internal atomic 
+structure.} situated at the origin, the atomic scattering factor is defined
+as\footnote{Appendix \ref{sec:3d1d} derives \ref{eqn:form}.}
+\begin{align}
+f_n^{(0)}(q)  = \int_{-\infty}^\infty \rho_n^{(0)}(r) \exp(-i 
+\vec{q}\cdot\vec{r}) \; d^3r = \int_0^\infty \rho_n^{(0)}(r)   
+\frac{\sin(qr)}{qr}  4\pi r^2 dr \; . \label{eqn:form}
+\end{align}
+For an atom located at the position $\vec{r}_n$, the scattering factor takes on 
+the phase shift
+\begin{align}
+f_n^{(0)}(\vec{q})  = \int_{-\infty}^\infty \rho_n(|\vec{r}-\vec{r}_n|) \exp(-i 
+\vec{q}\cdot\vec{r}) d^3r = f_n^{(0)}(q)
+\exp(-i \vec{q}\cdot\vec{r}_n)  \; .
+\end{align}
+A very common way of accounting for anomalous dispersion in atomic scattering 
+factors is to include real and imaginary energy-dependent ``dispersion 
+correction'' terms to the scattering factors:
+\begin{align}
+f_n(q) = f_n^{(0)}(q) + \Delta f_n(E) = f_n^{(0)}(q) + f_n'(E) + i f_n''(E)  \;.
+\end{align}
+The above three terms can be found in many tabulations in the literature.
+
+For an assembly of atoms, the overall form factor (equivalent to equation 
+\ref{eqn:formfactor}) is
+\begin{align}
+F(\vec{q})  = \sum_n f_n(q)
+\exp(-i \vec{q}\cdot\vec{r}_n)  \; .
+\end{align}
+We sometimes define the ``scattering density'' as the inverse 
+Fourier transform of the above:
+\begin{align}\label{eqn:scatterdens}
+\rho(\vec{r})  &= \sum_n^N \rho_n^{(0)}(|\vec{r}-\vec{r}_n|) +  
+\delta(\vec{r}-\vec{r}_n) \Delta f_n(E) \; .
+\end{align}
+
+
+\section{Refractive Index}
+
+Starting at equation \ref{eqn:dddipole} and assuming we have a number density 
+$N$ of such ``atoms'', the polarization (dipole moment per volume) is
+\begin{align}
+\vec{P}(t) = N \frac{e^2/m_e}{\omega_0^2 - \omega^2 - i \gamma \omega}\vec{E}_0 
+\exp(-i\omega t) \;.
+\end{align}
+Using the usual definitions for a linear material, $\vec{P} = \epsilon_0 \chi_e 
+\vec{E}$, $\epsilon = \epsilon_0 (1+\chi_e)$, and $n = 
+\sqrt{\epsilon/\epsilon_0}$, we arrive at the refractive index 
+\begin{align}
+ n = \sqrt{1+N \frac{e^2/m_e\epsilon_0}{\omega_0^2 - \omega^2 - i 
+\gamma \omega}} 
+\end{align}
+In the high-frequency limit, we have
+\begin{align}
+ n \approx 1 - \frac{N e^2}{2 m \epsilon_0 \omega^2}  \;.
+\end{align}
+The above is usually written in terms of the classical electron radius $r_e$:
+\begin{align}
+ n \approx 1 - \frac{1}{2\pi} r_e N \lambda^2 \;.
+\end{align}
+Note that the refractive index for x-rays is usually very close to 1, but 
+slightly less than 1.  We may relate the index of refraction to the scattering 
+density from equation \ref{eqn:scatterdens}:
+\begin{align}
+ n(\vec{r}) \approx 1 - \frac{1}{2\pi} r_e \rho(\vec{r}) \lambda^2 \;.
+\end{align}
+
 % \section{Attenuation}
 % 
-% Red sunsets can be understood as a result of light attenuation, caused by wavelength-dependent absorption and scattering processes.  Suppose we have a number density $n$ of scatterers with total scattering cross section $\sigma$.  A very thin slab of area $A$ and infinitesimal thickness $dz$ contains $M = n A dz$ particles within the slab.  Suppose a collimated beam of incident intensity $I(z)$ is directed at the slab, and the intensity that exits the other side of the slab is $I(z+dz)$ (assume this intensity is measured far from the slab, where the detector does not detect the scattered light).  The total power radiated away can be equated as
+% The complex wavevector is defined as 
+% \begin{align}
+%  k = \sqrt{\epsilon\mu_0}\omega
+% \end{align}
+
+
+% Suppose we have a number density $n$ of scatterers with total scattering cross 
+% section $\sigma$.  A very thin slab of area $A$ and infinitesimal thickness $dz$ 
+% contains $M = n A dz$ particles within the slab.  Suppose a collimated beam of 
+% incident intensity $I(z)$ is directed at the slab, and the intensity that exits 
+% the other side of the slab is $I(z+dz)$ (assume this intensity is measured far 
+% from the slab, where the detector does not detect the scattered light).  The 
+% total power radiated away can be equated as
 % \begin{align}
 % dP = (I(z+dz) - I(z)) A =  -M \sigma A I(z) \;.
 % \end{align}
@@ -346,7 +460,80 @@ A convenient form for calculations is
 % \end{align}
 % For a dilute suspension of particles the attenuation length is equal to $z_0 = 1/n\sigma$.  For dense suspensions of particles, we need to consider multiple scattering, but this result holds for particles that absorb with cross section $\sigma$.
 
-%nonetheless these results can explain the blue sky and orange/red sunsets among many other scattering phenomena.  If you put a bit of milk into a jar of water and shine a flahslight through it you can emulate the sunset and blue sky.  The little fat globules in milk are quite large (micrometer scale) and lie in the ``Mie'' scattering regime (the two limits of Mie scattering theory are Rayleigh scatter when $\lambda \gg R$ and the ray optics regime when $\lambda \ll R$), but nonetheless the same effect is seen.  In the ray optics regime, we get rainbows, which you can also calculate, using the Fresnel equations developed in this class.
+% \section{Rayleigh scatter from a dielectric sphere}
+% 
+% Outside of the weak-scattering approximation, diffraction is a complicated 
+% process.  There are few exact analytic solutions in such cases.  However, if the 
+% object is much smaller than the wavelength of the light, then our dipole 
+% approximations can be used, provided that we can determine the relationship 
+% between the incident field $\vec{E}_0$ and the dipole that it induces:
+% \begin{align}
+% \vec{p} = \alpha \vec{E} \;,
+% \end{align}
+% where $\alpha$ is sometimes referred to as the polarizability of the object.  
+% For asymmetric objects, the induced dipole vector will point in a direction that 
+% differs from the polarization of the incident field, in which case $\alpha$ 
+% would take the form of a $3\times3$ tensor.  
+% 
+% In Griffiths chapter 4, you considered a dielectric sphere with relative 
+% permittivity $\epsilon_r$ placed in a uniform field, and found that the internal 
+% field $\vec{E}_0$ within the sphere is 
+% \begin{align}
+% \vec{E}_\text{int} = \frac{3}{\epsilon_r + 2} \vec{E}_0 \;.
+% \end{align}
+% Assuming that the sphere is much smaller than the wavelength of the radiation, 
+% we may use this result to determine the Rayleigh scattering cross section for a 
+% dielectric sphere.  The polarization (dipole moment per volume) is 
+% $\vec{P}=\epsilon_0\chi_e \vec{E}_\text{int} = \epsilon_0(\epsilon_r - 1) 
+% \vec{E}_\text{int}$, and hence the total dipole moment of a sphere of radius $R$ 
+% is
+% \begin{align}
+% \vec{p} = \frac{4}{3} \pi R^3 \vec{P} = 4 \pi R^3 \epsilon_0  
+% \frac{\epsilon_r-1}{\epsilon_r + 2} \vec{E}_0 \;.
+% \end{align}
+% Next we plug this dipole moment into our differential radiated power (equation 
+% \ref{eqn:avgpwer}):
+%\begin{align}
+%\left\langle \frac{dP}{d\Omega} \right\rangle &= \frac{\mu_0  \epsilon_0^2 
+% \omega^4 }{2 c} |\hvec{r}\times\hvec{p}|^2   R^6  
+% \left(\frac{\epsilon_r-1}{\epsilon_r + 2}\right)^2 E_0^2 \; .
+%\end{align}
+%We relate the above to the incident intensity (power per area) $I_0 = 
+% \frac{1}{2\mu_0 c} E_0^2$ to get
+%\begin{align}
+%\left\langle \frac{dP}{d\Omega} \right\rangle &= \frac{\omega^4}{2c^4}  
+% |\hvec{r}\times\hvec{p}|^2   R^6  \left(\frac{\epsilon_r-1}{\epsilon_r + 
+% 2}\right)^2 I_0 \; .
+%\end{align}
+%We can integrate over all solid angles to get
+% \begin{align}
+% P  &= \frac{\omega^4}{2c^4}  \frac{8}{3}\pi   R^6  
+% \left(\frac{\epsilon_r-1}{\epsilon_r + 2}\right)^2 I_0 \; .
+% \end{align}
+% This is the Rayleigh scattering formula, which may be written as
+% \begin{align}
+% P &= \sigma_R I_0 \;.
+% \end{align}
+% The total scattering cross section (area units) is often written in terms of 
+% the sphere diameter $D$, wavelength $\lambda$, and refractive index $n$:
+% \begin{align}
+% \sigma_R = \frac{2}{3} \pi^5   \frac{D^6}{\lambda^4}  \left(\frac{n^2-1}{n^2 + 
+% 2}\right)^2 \;.
+% \end{align}
+% There are tons of nanoparticles in the air that scatter light in this way; 
+% that's why you can see a bright laser beam in a dark room.  There are also 
+% various density fluctuations in the refractive index of materials that are 
+% nominally ``homogeneous and isotropic'' -- Rayleigh scattering qualitatively 
+% explains why you can also see scattering from a bright laser even in ultrapure 
+% water or air.   The blue sky is partly due to the wavelength dependence of 
+% Rayleigh scatter; we see more blue light than red because blue scatters more 
+% strongly.
+%The Rayleigh scattering equation is relevant to my own research because the 
+% $\sim$60nm viruses and $\sim$5nm protein molecules that I shoot with x-rays 
+% radiate green laser light according to that formula (within reasonable 
+% approximation).  I use to determine what optical laser power is needed to see a 
+% high-speed beam of biomolecules as they fly into the femtosecond x-ray beam.
+
 \newpage
 
 \appendix
@@ -532,6 +719,7 @@ This same procedure may be applied to each of the components of $\vec{A}$ to get
 \vec{A}(\vec{r}, t) = \frac{1}{4\pi\epsilon_0}    \frac{q\vec{v}}{\left| \rcurs - \brcurs \cdot \vec{\beta} \right|} \;.
 \end{align}
 
+
 \section{Appendix: Time-averaged Poynting vector}\label{sec:poynt}
 
 Supposing that we have the electric field $\vec{E}(t)=\vec{E}_0 e^{-i\omega t}$ and corresponding magnetic field $\vec{B}(t)=\vec{B}_0 e^{-i\omega t}=\frac{1}{c} \hvec{k}\times \vec{E}_0e^{-i\omega t}$, and we want the time averaged Poynting vector
@@ -569,6 +757,31 @@ Due to the orthogonality of the field components, the cross terms vanish: e.g.
 Therefore the average Poynting vector is
 \begin{align}
  \avg{\vec{S}} = \frac{1}{2c\mu_0} ( \abs{\vec{E}_1}^2 + \abs{\vec{E}_2}^2)\hvec{k}\;.
+\end{align}
+
+\newpage
+\section{Appendix: Fourier transform of rotationally symmetric object}
+\label{sec:3d1d}
+
+If we consider just a single atom situated at the origin, the atomic form factor 
+is equal to
+\begin{align}
+ f(\vec{q})  = \int \rho(r) \exp(-i \vec{q}\cdot\vec{r}) \; d^3r \; .
+\end{align}
+Due to rotational symmetry, we are free to choose a convenient direction 
+$\vec{q} = q \hvec{z}$ such that in the
+spherical coordinate system we have $\vec{q}\cdot\vec{r} =  q r \cos\theta$.  
+Now we write down our Fourier transform with
+reference only to the magnitudes $q$ and $r$:
+\begin{align}
+f(\vec{q})  &= \int_0^{2\pi} d\phi \int_0^\infty \rho(r) r^2 dr \int_0^\pi 
+\sin\theta d\theta  \exp(-i q r \cos\theta)\\
+&=2\pi \int_0^\infty \rho(r) r^2 dr \int_{-1}^1  d\cos\theta  \exp(-i q r 
+\cos\theta)  \\
+&=2\pi \int_0^\infty \rho(r) r^2 dr \frac{1}{-iqr}\int_{iqr}^{-iqr}  du  \exp(u) 
+ \\
+&=2\pi \int_0^\infty \rho(r) r^2 dr \frac{\exp(iqr) - \exp(-iqr)}{iqr}   \\
+f(q) &= \int_0^\infty \rho(r)   \frac{\sin(qr)}{qr}  4\pi r^2 dr  
 \end{align}
 
 \bibliography{\jobname}

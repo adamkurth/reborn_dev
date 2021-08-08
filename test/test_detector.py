@@ -197,13 +197,17 @@ def test_saving():
 
 def test_standard_pads():
     cspad = detector.cspad_pad_geometry_list()
+    cspad2x2 = detector.cspad_2x2_pad_geometry_list()
     pnccd = detector.pnccd_pad_geometry_list()
     epix = detector.epix10k_pad_geometry_list()
     jungfrau = detector.jungfrau4m_pad_geometry_list()
+    mpccd = detector.mpccd_pad_geometry_list()
     assert(isinstance(cspad, detector.PADGeometryList))
+    assert(isinstance(cspad2x2, detector.PADGeometryList))
     assert (isinstance(pnccd, detector.PADGeometryList))
     assert (isinstance(epix, detector.PADGeometryList))
     assert (isinstance(jungfrau, detector.PADGeometryList))
+    assert (isinstance(mpccd, detector.PADGeometryList))
 
 
 def test_padlist():
