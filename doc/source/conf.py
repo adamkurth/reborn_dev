@@ -93,7 +93,11 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
-    'sphinx_gallery.gen_gallery']
+    'sphinx_gallery.gen_gallery',
+    'scrapers']
+
+
+
 
 # Configuration for the documentation of examples
 sphinx_gallery_conf = {
@@ -101,6 +105,13 @@ sphinx_gallery_conf = {
     'ignore_pattern': r'__init__\.py',
     'show_memory': True
 }
+
+try:
+    import scrapers
+    sphinx_gallery_conf['image_scrapers'] = scrapers.qt.qtscraper
+    sphinx_gallery_conf['reset_modules'] = scrapers.qt.reset_qapp
+except ImportError:
+    pass
 
 # Don't sort autodocumention alphabetically
 autodoc_member_order = 'bysource'

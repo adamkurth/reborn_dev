@@ -7,6 +7,8 @@
 #
 # https://rkirian.gitlab.io/reborn
 
+export PYTHONPATH=$(pwd)/source:$PYTHONPATH  # Needed for qtgallery
+pwd
 #[ -d source/api ] && rm -r source/api
 #[ -d source/auto_examples ] && rm -r source/auto_examples
 sphinx-apidoc --maxdepth 10 --templatedir source/templates --output-dir source/api ../reborn \
