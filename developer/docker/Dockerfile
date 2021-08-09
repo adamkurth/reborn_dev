@@ -18,3 +18,5 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 # We use the pocl.icd from apt because the pocl.icd from from conda is broken as of July 2020!
 RUN ln -s /etc/OpenCL/vendors/pocl.icd /usr/local/miniconda/envs/reborn/etc/OpenCL/vendors/pocl.icd
 RUN /usr/local/miniconda/envs/reborn/bin/python -c 'import PyQt5, OpenGL, pyopencl; print(pyopencl.get_platforms())'
+# The following is for the sphinx-gallery qt scraper.  Hopefully we can remove the dependency.
+RUN apt-get -q -y install xvfb
