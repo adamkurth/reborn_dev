@@ -76,6 +76,7 @@ Cameron Howard.  Code found in reborn has been inspired by numerous open-source 
 Development is supported by National Science Foundation awards
 `1231306 <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1231306>`__,
 `1943448 <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1943448>`__,
+`1817862 <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1817862>`__,
 and `1565180 <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1565180>`__.
 
 Contents
