@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.append('../..')
-
-import reborn as ba
-#ba.set_global('debug', 0)
 from reborn.simulate import examples
 from reborn.viewers.qtviews import PADView
 from reborn import detector
 from reborn.fileio.getters import FrameGetter
 import numpy as np
 
-pad_geometry = examples.cspad_pads()
-# pads = examples.pnccd_pads()
+pad_geometry = detector.pnccd_pad_geometry_list()
 
 for pad in pad_geometry:
     pad.t_vec[2] = 0.3

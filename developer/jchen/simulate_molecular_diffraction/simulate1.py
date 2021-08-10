@@ -14,7 +14,7 @@ np.random.seed(42)  # Make random numbers that are reproducible
 
 beam = Beam(photon_energy=8000*eV, diameter_fwhm=0.2e-6, pulse_energy=3e-3)
 fluence = beam.photon_number_fluence
-pads = jungfrau4m_pads(detector_distance=0.36, binning=1)  # Speed up simulations by binning pixels 16x16
+pads = detector.jungfrau4m_pad_geometry_list(detector_distance=0.36)
 q_vecs = [pad.q_vecs(beam=beam) for pad in pads]
 solid_angles = [pad.solid_angles() for pad in pads]
 polarization_factors = [pad.polarization_factors(beam=beam) for pad in pads]

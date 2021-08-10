@@ -28,7 +28,6 @@ import numpy as np
 import scipy.constants as const
 from scipy.spatial.transform import Rotation
 from reborn import detector
-from reborn.simulate.examples import jungfrau4m_pads
 from reborn.source import Beam
 from reborn.target import crystal, atoms
 from reborn.simulate import clcore
@@ -45,7 +44,9 @@ np.random.seed(0)  # Make random numbers that are reproducible
 # of detector panels for things like scattering vectors, pixel solid angles, etc.
 beam = Beam(photon_energy=9000*eV, diameter_fwhm=0.2e-6, pulse_energy=2)
 fluence = beam.photon_number_fluence
-pads = jungfrau4m_pads(detector_distance=0.2, binning=16)  # Speed up simulations by binning pixels 16x16
+pads = detector.jungfrau4m_pad_geometry_list(detector_distance=0.2)
+# Speed up simulations by binning pixels 16x16
+pads = pads.binned(16)
 q_vecs = [pad.q_vecs(beam=beam) for pad in pads]
 solid_angles = [pad.solid_angles() for pad in pads]
 polarization_factors = [pad.polarization_factors(beam=beam) for pad in pads]

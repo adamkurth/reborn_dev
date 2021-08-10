@@ -14,3 +14,6 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 #from . import atoms
+
+from . import solutions
+from . import form_factors

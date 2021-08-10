@@ -23,11 +23,15 @@ Contributed by Richard Kirian.
 
 """
 
-from reborn import source, detector
+from reborn import source, detector, simulate
 from reborn.viewers.qtviews import PADView2
 
-pads = detector.cspad_2x2_pad_geometry_list()
-dat = [p.random() for p in pads]
+# %%
+# First create some simulated data to look at
+
+beam = source.Beam(wavelength=1.5e-10)
+pads = detector.cspad_pad_geometry_list()
+dat = simulate.solutions
 beam = source.Beam(wavelength=1.5e-10)
 pv = PADView2(raw_data=dat, pad_geometry=pads, beam=beam)
 pv.show()
@@ -37,7 +41,6 @@ pv.show()
 
 pads = detector.cspad_pad_geometry_list()
 dat = [p.random() for p in pads]
-beam = source.Beam(wavelength=1.5e-10)
 pv = PADView2(raw_data=dat, pad_geometry=pads, beam=beam)
 pv.show()
 

@@ -10,4 +10,4 @@ ${filename}.pdf: ${filename}.tex
 
 .PHONY: clean
 clean: 
-	rm *.pdf *.out *.log *.bbl *.aux *synctex* *.blg
+	@rm -f *.pdf *.out *.log *.bbl *.aux *synctex* *.blg &> /dev/null

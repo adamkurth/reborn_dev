@@ -14,11 +14,7 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-
-Some simple examples for testing purposes.
-
-Don't build any of this into your code.
-
+Some simple examples for testing purposes.  Don't build any of this into your code.
 """
 
 import pkg_resources
@@ -40,58 +36,6 @@ lysozyme_pdb_file = pkg_resources.resource_filename('reborn', 'data/pdb/2LYZ.pdb
 psi_pdb_file = pkg_resources.resource_filename('reborn', 'data/pdb/1jb0.pdb')
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
 cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_geometry.json')
-
-
-def pnccd_pads():
-    r"""
-    Generate a list of :class:`PADGeometry <reborn.detector.PADGeometry>` instances that are inspired by
-    the `pnCCD <https://doi.org/10.1016/j.nima.2009.12.053>`_ detector.
-
-    Returns: List of |PADGeometry| instances
-    """
-    pads = detector.load_pad_geometry_list(pnccd_geom_file)
-    for p in pads:
-        p.t_vec[2] = 0.1
-    return pads
-
-
-def cspad_pads(detector_distance=0.1):
-    r"""
-    Generate a list of |PADGeometry| instances that are inspired by the |CSPAD| detector.
-
-    Arguments:
-        detector_distance (float): Detector distance in SI units
-
-    Returns: List of |PADGeometry| instances
-    """
-    pads = detector.load_pad_geometry_list(cspad_geom_file)
-    for p in pads:
-        p.t_vec[2] = detector_distance
-    return pads
-
-
-def jungfrau4m_pads(detector_distance=0.1, binning=1):
-    r"""
-    Generate a list of |PADGeometry| instances that are inspired by the |Jungfrau| 4M detector.
-
-    Arguments:
-        detector_distance (float): Detector distance in SI units
-        binning (int): Bin the detector into larger NxN virtual pixels.
-
-    Returns: List of |PADGeometry| instances
-    """
-    pads = detector.tiled_pad_geometry_list(pad_shape=(int(512/binning), int(1024/binning)), pixel_size=75e-6*binning,
-                                            distance=detector_distance, tiling_shape=(4, 2), pad_gap=36 * 75e-6)
-    gap = 9e-3
-    pads[0].t_vec += + np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
-    pads[1].t_vec += + np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
-    pads[2].t_vec += - np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
-    pads[3].t_vec += - np.array([1, 0, 0]) * gap / 2 - np.array([0, 1, 0]) * gap / 2
-    pads[4].t_vec += + np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
-    pads[5].t_vec += + np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
-    pads[6].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
-    pads[7].t_vec += - np.array([1, 0, 0]) * gap / 2 + np.array([0, 1, 0]) * gap / 2
-    return pads
 
 
 def simulate_water(pad_geometry=None, beam=None, water_thickness=1e-6):
@@ -266,9 +210,7 @@ class MoleculeSimulatorV1(object):
 
 
 class CrystalSimulatorV1(object):
-
     r"""
-
     Class for generating crystal diffraction patterns.  Generates the average pattern upon:
 
     1) Randomizing the x-ray beam direction (beam divergence)
@@ -278,15 +220,12 @@ class CrystalSimulatorV1(object):
     5) Randomizing the shape transforms or Gaussian crystal-size broadening
 
     Computations are done on a GPU with OpenCL.
-
     """
 
     def __init__(self, pad_geometry=None, beam=None, crystal_structure=None, n_iterations=1,
                  approximate_shape_transform=True, expand_symmetry=False,
                  cl_double_precision=False, cl_group_size=32, poisson_noise=False):
-
         r"""
-
         Arguments:
             pad_geometry (list of :class:`PADGeometry <reborn.detector.PADGeometry>` instances): PAD geometry.
             beam (:class:`Beam <reborn.source.Beam>`): A beam instance.
@@ -299,7 +238,6 @@ class CrystalSimulatorV1(object):
             cl_double_precision (bool): Use double precision if available on GPU device.
             cl_group_size (int): GPU group size (see the :class:`ClCore <reborn.simulate.clcore.ClCore>` class).
             poisson_noise (bool): Add Poisson noise to the resulting pattern.
-
         """
 
         if not isinstance(pad_geometry, list):
@@ -350,14 +288,12 @@ class CrystalSimulatorV1(object):
         self.cell_volume = self.crystal_structure.unitcell.volume
 
     def generate_pattern(self, rotation_matrix=None):
-
         r"""
         Arguments:
             rotation_matrix: Specify a rotation matrix, else a random rotation is generated.
 
         Returns: A numpy array with diffraction intensities
         """
-
         cryst = self.crystal_structure
         beam = self.beam
         pad = self.pad_geometry
