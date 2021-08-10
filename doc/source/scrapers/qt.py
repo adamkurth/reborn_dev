@@ -38,6 +38,10 @@ def qtscraper(block, block_vars, gallery_conf):
 
     return scrapers.figure_rst(rendered_imgs, gallery_conf['src_dir'])
 
+def reset_qapp(one, two):
+    global qt_app
+    qt_app.exec_ = lambda _: None  # Kill the exec_ method to avoid blocking
+
 def start_display(app, config):
     global display
     display = Display(backend="xvfb", size=(800, 600))
@@ -45,8 +49,7 @@ def start_display(app, config):
 
 def stop_display(app, exception):
     # seems to be necessary to avoid "fatal IO error on X server..."
-    global qt_app
-    qt_app.exec_ = lambda _: None  # Kill the exec_ method to avoid blocking
+    reset_qapp(None, None)
     if display is not None:
         display.stop()
 

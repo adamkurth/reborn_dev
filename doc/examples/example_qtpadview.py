@@ -31,8 +31,7 @@ from reborn.viewers.qtviews import PADView2
 
 beam = source.Beam(wavelength=1.5e-10)
 pads = detector.cspad_pad_geometry_list()
-dat = simulate.solutions
-beam = source.Beam(wavelength=1.5e-10)
+dat = simulate.solutions.get_water_profile(pads.q_mags(beam=beam))
 pv = PADView2(raw_data=dat, pad_geometry=pads, beam=beam)
 pv.show()
 

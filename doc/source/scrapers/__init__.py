@@ -1,4 +1,5 @@
 # from .qtscraper import *
+from .qt import *
 from . import qt
 
 # def setup(app):

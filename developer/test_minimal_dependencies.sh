@@ -8,14 +8,10 @@ source activate reborn-minimal
 #./build_inplace.sh
 export PYTHONPATH=".."
 python << EOF
-import reborn
-assert reborn is not None
-from reborn import detector
+from reborn import source, detector, utils
 p = detector.PADGeometry()
 assert p is not None
-from reborn import source
 b = source.Beam()
 assert b is not None
-from reborn import utils
 assert utils is not None
 EOF

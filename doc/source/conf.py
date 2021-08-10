@@ -108,7 +108,7 @@ sphinx_gallery_conf = {
 
 try:
     import scrapers
-    sphinx_gallery_conf['image_scrapers'] = scrapers.qt.qtscraper
+    sphinx_gallery_conf['image_scrapers'] = ('matplotlib', scrapers.qt.qtscraper)
     sphinx_gallery_conf['reset_modules'] = scrapers.qt.reset_qapp
 except ImportError:
     pass
