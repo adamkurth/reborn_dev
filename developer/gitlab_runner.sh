@@ -23,4 +23,5 @@ if [[ "$1" == "doc" ]]; then
 fi
 
 gitlab-runner exec docker --docker-pull-policy="if-not-present" tests
+echo "=================== doc ==============================================="
 gitlab-runner exec docker --docker-pull-policy="if-not-present" doc

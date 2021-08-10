@@ -25,7 +25,7 @@ tests:
 
 doc:
   script:
-#  - export DISPLAY=:1.0
+  - export DISPLAY=xvfb
   - cd $reborn/doc
   - bash update_docs.sh
   except:
@@ -33,7 +33,7 @@ doc:
 
 pages:
   script:
-#  - export DISPLAY=:1.0
+  - export DISPLAY=xvfb
   - cd $reborn/doc
   - bash update_docs.sh
   - cp -r build/html ../public
