@@ -48,6 +48,8 @@ rst_epilog = """
 .. |PADGeometry|  replace:: :class:`PADGeometry <reborn.detector.PADGeometry>`
 .. |PADGeometryList|  replace:: :class:`PADGeometryList <reborn.detector.PADGeometryList>`
 .. |FrameGetter|  replace:: :class:`FrameGetter <reborn.fileio.getters.FrameGetter>`
+.. |DataFrame|  replace:: :class:`DataFrame <reborn.dataframe.DataFrame>`
+.. |PADView|  replace:: :class:`PADView <reborn.viewers.qtviews.PADView>`
 
 .. |ndarray|  replace:: :class:`ndarray <numpy.ndarray>`
 

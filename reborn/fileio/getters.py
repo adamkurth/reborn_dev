@@ -132,3 +132,15 @@ class FrameGetter(object):
         dat = self.get_frame(self.current_frame)
 
         return dat
+
+
+class ListFrameGetter(FrameGetter):
+    r"""
+    Very simple FrameGetter subclass that operates on a list or similar type of iterable object.
+    """
+    def __init__(self, dataframes):
+        super().__init__()
+        self.n_frames = len(dataframes)
+        self.dataframes = dataframes
+    def get_frame(self, frame_number):
+        return self.dataframes[frame_number]

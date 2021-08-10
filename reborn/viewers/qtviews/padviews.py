@@ -81,7 +81,7 @@ class DummyFrameGetter(FrameGetter):
         return self.dataframe
 
 
-class PADView2(QtCore.QObject):
+class PADView(QtCore.QObject):
 
     r"""
     This is supposed to be an easy way to view PAD data, particularly if you have multiple
@@ -125,13 +125,14 @@ class PADView2(QtCore.QObject):
 
     sig_geometry_changed = QtCore.pyqtSignal()
 
-    def __init__(self, pad_geometry=None, mask_data=None, frame_getter=None, raw_data=None,
+    def __init__(self, pad_geometry=None, mask_data=None, frame_getter=None, raw_data=None, pad_data=None,
                  beam=None, percentiles=None, debug_level=0):
         """
         Arguments:
             pad_geometry (|PADGeometry| list): PAD geometry information.
             mask_data (|ndarray| list): Data masks.
-            raw_data (|ndarray| list or dict): The data arrays, or a dictionary with at least a 'pad_data' key.
+            raw_data (|ndarray| or list of): The data arrays, or a dictionary with at least a 'pad_data' key.
+            pad_data (|ndarray| or list of): Same as raw_data
             beam (|Beam|): X-ray beam parameters.
             frame_getter (|FrameGetter| subclass): Optionally, a frame getter.
         """
@@ -169,6 +170,8 @@ class PADView2(QtCore.QObject):
                     pad_geometry.append(pad)
             pad_geometry = detector.PADGeometryList(pad_geometry)
             # Handling of raw diffraction intensities:
+            if pad_data is not None:
+                raw_data = pad_data
             if raw_data is not None:
                 if isinstance(raw_data, dict):
                     pass
@@ -313,10 +316,13 @@ class PADView2(QtCore.QObject):
         add_menu(mask_menu, 'Save mask...', connect=self.save_masks)
         add_menu(mask_menu, 'Load mask...', connect=self.load_masks)
         plugin_menu = self.menubar.addMenu('Plugins')
+        self.plugin_names = []
         for plg in glob.glob(os.path.join(plugin_path, '*.py')):
-            self.debug('\tSetup plugin ' + os.path.basename(plg).replace('.py', ''), 2)
-            add_menu(plugin_menu, os.path.basename(plg).replace('.py', '').replace('_', ' '),
-                     connect=functools.partial(self.run_plugin, os.path.basename(plg).replace('.py', '')))
+            plugin_name = os.path.basename(plg).replace('.py', '')
+            self.plugin_names.append(plugin_name)
+            self.debug('\tSetup plugin ' + plugin_name, 2)
+            add_menu(plugin_menu, plugin_name.replace('_', ' '),
+                     connect=functools.partial(self.run_plugin, plugin_name))
 
     def set_shortcut(self, shortcut, func):
         r""" Setup one keyboard shortcut so it connects to some function, assuming no arguments are needed. """
@@ -350,7 +356,7 @@ class PADView2(QtCore.QObject):
         self.debug(get_caller(), 3)
         strn = ''
         if frame_number is not None:
-            strn += ' Frame %d' % frame_number
+            strn += ' Frame %d' % (frame_number + 1)
             if n_frames is not None:
                 if n_frames == np.inf:
                     strn += ' of inf'
@@ -516,7 +522,7 @@ class PADView2(QtCore.QObject):
         self.debug(get_caller(), 1)
         if self.scan_arrows is None:
             self.scan_arrows = []
-            for p in self.pad_geometry:
+            for p in self.dataframe.get_pad_geometry():
                 t = p.t_vec
                 f = p.fs_vec
                 n = p.n_fs
@@ -1343,6 +1349,9 @@ class PADView2(QtCore.QObject):
         for module_name in module_names:
             self.run_plugin(module_name)
 
+    def list_plugins(self):
+        return self.plugin_names
+
     def get_text(self, title="Title", label="Label", text="Text"):
         r""" Simple popup widget that allows the capture of a text string."""
         text, ok = QtGui.QInputDialog.getText(self.main_window, title, label, QtGui.QLineEdit.Normal, text)
@@ -1399,4 +1408,4 @@ def view_pad_data(pad_data=None, pad_geometry=None, show=True, title=None, **kwa
         pv.start()
 
 
-PADView = PADView2
+PADView2 = PADView  # For backward compatibility
