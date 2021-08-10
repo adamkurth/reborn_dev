@@ -25,8 +25,8 @@ tests:
 
 doc:
   script:
-  - Xvfb :1 &
-  - xv -display :1 &
+  - Xvfb :1 &  # Using X Virtual Framebuffer for capturing Qt windows
+#  - xv -display :1 &
   - export DISPLAY=:1
   - cd $reborn/doc
   - bash update_docs.sh
@@ -35,8 +35,8 @@ doc:
 
 pages:
   script:
-  - Xvfb :1 &
-  - xv -display :1 &
+  - Xvfb :1 &  # Using X Virtual Framebuffer for capturing Qt windows
+#  - xv -display :1 &
   - export DISPLAY=:1
   - cd $reborn/doc
   - bash update_docs.sh
