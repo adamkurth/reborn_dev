@@ -38,9 +38,12 @@ def qtscraper(block, block_vars, gallery_conf):
 
     return scrapers.figure_rst(rendered_imgs, gallery_conf['src_dir'])
 
+def do_nothing():
+    return None
+
 def reset_qapp(one, two):
     global qt_app
-    qt_app.exec_ = lambda _: None  # Kill the exec_ method to avoid blocking
+    qt_app.exec_ = do_nothing  # Kill the exec_ method to avoid blocking
 
 def start_display(app, config):
     global display
