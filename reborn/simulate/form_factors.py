@@ -13,12 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import numpy as np
-from xraylib import FF_Rayl, Fi, Fii
-
 from scipy import constants as const
-
 eV = const.value('electron volt')
 
 
