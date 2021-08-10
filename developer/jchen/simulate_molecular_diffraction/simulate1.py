@@ -48,7 +48,7 @@ c = np.cos(thet)
 s = np.sin(thet)
 R = np.array([[c, 0, s], [0, 1 ,0], [-s, 0 , c]])#np.eye(3)#Rotation.random().as_matrix()  # Just for fun, let's rotate the molecule
 
-from reborn.utils.
+# from reborn.utils.
 
 
 intensities = []
