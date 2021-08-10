@@ -68,7 +68,7 @@ class CollapsibleBox(QtGui.QWidget):
 if __name__ == "__main__":
     import sys
     import random
-    app = QtGui.QApplication(sys.argv)
+    qt_app = QtGui.QApplication(sys.argv)
     w = QtGui.QMainWindow()
     w.setCentralWidget(QtGui.QWidget())
     dock = QtGui.QDockWidget("Collapsible Demo")
@@ -93,4 +93,4 @@ if __name__ == "__main__":
     vlay.addStretch()
     w.resize(640, 480)
     w.show()
-    sys.exit(app.exec_())
+    sys.exit(qt_app.exec_())

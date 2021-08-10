@@ -2,10 +2,11 @@ from sphinx_gallery import scrapers
 import pyqtgraph as pg
 from pyvirtualdisplay import Display
 
-global app
-app = pg.mkQApp()
+global qt_app
+qt_app = pg.mkQApp()
 
-disp = None
+global display
+display = None
 
 def qtscraper(block, block_vars, gallery_conf):
     """Basic implementation of a Qt window scraper.
@@ -21,12 +22,12 @@ def qtscraper(block, block_vars, gallery_conf):
     """
     imgpath_iter = block_vars['image_path_iterator']
 
-    global app
-    app = pg.mkQApp()
-    app.processEvents()
+    global qt_app
+    qt_app = pg.mkQApp()
+    qt_app.processEvents()
 
     # get top-level widgets that aren't hidden
-    widgets = [w for w in app.topLevelWidgets() if not w.isHidden()]
+    widgets = [w for w in qt_app.topLevelWidgets() if not w.isHidden()]
 
     rendered_imgs = []
     for widg, imgpath in zip(widgets, imgpath_iter):
@@ -37,32 +38,17 @@ def qtscraper(block, block_vars, gallery_conf):
 
     return scrapers.figure_rst(rendered_imgs, gallery_conf['src_dir'])
 
-def reset_qapp(gallery_conf, fname):
-    """Shutdown an existing QApplication and disable ``exec_``.
-
-    Disabling ``QApplication.exec_`` means your example scripts can run the Qt event
-    loop (so the scripts work when run normally) without blocking example execution by
-    sphinx-gallery.
-
-    Intended for use in ``image_scrappers`` in the sphinx-gallery configuration.
-    """
-    global app
-    app.exec_ = lambda _: None
-
-def setup(app):
-    from .qtgallery import setup
-    return setup(app)
-
 def start_display(app, config):
-    global disp
-    disp = Display(backend="xvfb", size=(800, 600))
-    disp.start()
+    global display
+    display = Display(backend="xvfb", size=(800, 600))
+    display.start()
 
 def stop_display(app, exception):
     # seems to be necessary to avoid "fatal IO error on X server..."
-    reset_qapp(None, None)
-    if disp is not None:
-        disp.stop()
+    global qt_app
+    qt_app.exec_ = lambda _: None  # Kill the exec_ method to avoid blocking
+    if display is not None:
+        display.stop()
 
 def setup(app):
     app.connect("config-inited", start_display)

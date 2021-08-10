@@ -114,23 +114,23 @@ for N in Ns:
 
 #Now pyvkfft opencl backend with stupid transpose
 
-   app = pyvkfft.opencl.VkFFTApp((N,N),dtype=dtc,queue=q,ndim=1)
+   qt_app = pyvkfft.opencl.VkFFTApp((N, N), dtype=dtc, queue=q, ndim=1)
    t4=time.time()
    f_dev = cl.array.to_device(q,f,allocator=mem_pool)
    f_dev = x0_dev*f_dev
-   app.fft(f_dev)
+   qt_app.fft(f_dev)
    f_dev = k0_dev*f_dev
-   app.ifft(f_dev)
+   qt_app.ifft(f_dev)
    f_dev = x1_dev*f_dev
    prg.transpose(q, (N,N), None, ft_dev.data, f_dev.data, np.uint32(N))
-   app.fft(ft_dev)
+   qt_app.fft(ft_dev)
    ft_dev = k1t_dev*ft_dev
-   app.ifft(ft_dev)
+   qt_app.ifft(ft_dev)
    prg.transpose(q, (N,N), None, f_dev.data, ft_dev.data, np.uint32(N))
    f_dev = x2_dev*f_dev
-   app.fft(f_dev)
+   qt_app.fft(f_dev)
    f_dev = k0_dev*f_dev
-   app.ifft(f_dev)
+   qt_app.ifft(f_dev)
    f_dev = x1_dev*f_dev
    f_test = f_dev.get()
    q.finish()

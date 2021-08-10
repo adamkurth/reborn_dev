@@ -214,7 +214,7 @@ if args.view_intensities:
     dispim = np.log(dispim)
     MapSlices(dispim, title='Averaged Intensities')
 
-app = pg.mkQApp()
-app.exec_()
+qt_app = pg.mkQApp()
+qt_app.exec_()
 
 print('Done!')
