@@ -12,11 +12,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
-
-
 import pkg_resources
 import numpy as np
+from scipy import constants as const
 import reborn
+
+r_e = const.value('classical electron radius')  # meters
+eV = const.value('electron volt')  # J
 
 file_name = pkg_resources.resource_filename('reborn', 'data/scatter/water_scattering_data.txt')
 
@@ -27,7 +29,7 @@ def water_number_density():
 
 
 @reborn.utils.memoize
-def load_data():
+def get_hura_water_data():
 
     with open(file_name, 'r') as f:
         h = f.readline()
@@ -44,103 +46,63 @@ def load_data():
 
 def get_water_profile(q, temperature=298):
     """
-    Get water scattering profile from Greg Hura's PhD thesis data.  Interpolates the data for given
-    q-vector magnitudes and temperature.  Temperatures range from 1, 11, 25, 44, 55, 66, 77 degrees
-    Celcius.  Bornagain, of course, uses SI units, including for temperature.  To go from Celcius to Kelvin, add 273.16.
-    Note that this is the scattering factor F for a single water molecule.  The number density of water is approximately
-    n = 33.3679e27 / m^3 .
-
-    Arguments:
-        q: The momentum transfer vector magnitudes (i.e. 2 pi sin(theta/lambda)/wavelength )
-        temperature: Desired water temperature in Kelvin
-        volume: if this is not None, the scattering factor will be multiplied by the number of molecules in volume
-
-    Returns:
-
-
+    Depreciated: Use :func:`water_scattering_factor_squared <reborn.simulate.solutions.water_scattering_factor_squared>`
     """
-
-    qmag, intensity, temp = load_data()
-    n = len(temp)
-    out_of_range = False
-    for i in range(n):
-        if temperature < temp[i]:
-            break
-        if i == n:
-            out_of_range = True
-
-    if i == 0:
-        Iavg = intensity[:, 0]
-    elif out_of_range:
-        Iavg = intensity[:, n - 1]
-    else:
-        Tl = temp[i - 1]
-        Tr = temp[i]
-        DT = Tr - Tl
-        dl = (temperature - Tl) / DT
-        dr = (Tr - temperature) / DT
-        Iavg = dr * intensity[:, i - 1] + dl * intensity[:, i]
-
-    II = np.interp(q, qmag, Iavg)
-
-    return II
+    reborn.utils.depreciate("Use the function water_scattering_factor_squared instead of get_water_profile.")
+    return water_scattering_factor_squared(q=q, temperature=temperature, volume=None)
 
 
 def water_scattering_factor_squared(q, temperature=298, volume=None):
     """
-    Get water scattering profile from Greg Hura's PhD thesis data.  Interpolates the data for given
-    q-vector magnitudes and temperature.  Temperatures range from 1, 11, 25, 44, 55, 66, 77 degrees
-    Celcius.  Bornagain, of course, uses SI units, including for temperature.  To go from Celcius to Kelvin, add 273.16.
-    Note that this is the scattering factor F for a single water molecule.  The number density of water is approximately
-    n = 33.3679e27 / m^3 .
+    Get water scattering profile :math:`|F(q)|^2` via interpolations of Greg Hura's PhD thesis data (emailed to us
+    directly from Greg).  Interpolates the data for given q-vector magnitudes and temperatures.  Temperatures of
+    1, 11, 25, 44, 55, 66, 77 degrees Celcius are included in the data.  Note that this is the scattering factors
+    :math:`|F(q)|^2` per water molecule, so you should multiply your intensity by the number of water molecules.
+    The number density of water is approximately 33.3679e27 / m^3.  You may optionally provide the volume and the result
+    will be multiplied by the number of water molecules.
 
     Arguments:
-        q: The momentum transfer vector magnitudes (i.e. 2 pi sin(theta/lambda)/wavelength )
-        temperature: Desired water temperature in Kelvin
-        volume: if this is not None, the scattering factor will be multiplied by the number of molecules in volume
+        q (|ndarray|) : The momentum transfer vector magnitudes (i.e. 2 pi sin(theta/lambda)/wavelength )
+        temperature (float): Desired water temperature in Kelvin
+        volume (float): If provided, the scattering factor will be multiplied by the number of molecules in this volume.
 
     Returns:
+        |ndarray| : The scattering factor |F(q)|^2, possibly multiplied by the number of water molecules if you
+                    specified a volume.
     """
-
-    qmag, intensity, temp = load_data()
-    n = len(temp)
-    out_of_range = False
-    for i in range(n):
-        if temperature < temp[i]:
-            break
-        if i == n:
-            out_of_range = True
-
-    if i == 0:
+    # Interpolate profiles according to temperature (weighted average)
+    # If out of range, choose nearest temperature
+    qmag, intensity, temp = get_hura_water_data()
+    temp_idx = np.interp(temperature, temp, np.arange(temp.size))
+    if temp_idx <= 0:
         Iavg = intensity[:, 0]
-    elif out_of_range:
-        Iavg = intensity[:, n - 1]
+    elif temp_idx >= (temp.size-1):
+        Iavg = intensity[:, 0]
     else:
-        Tl = temp[i - 1]
-        Tr = temp[i]
-        DT = Tr - Tl
-        dl = (temperature - Tl) / DT
-        dr = (Tr - temperature) / DT
-        Iavg = dr * intensity[:, i - 1] + dl * intensity[:, i]
-
-    F2 = np.interp(q, qmag, Iavg)**2
-
+        a = temp_idx % 1
+        Iavg = (1 - a) * intensity[:, int(np.floor(temp_idx))] + a * intensity[:, int(np.ceil(temp_idx))]
+    F2 = np.interp(q, qmag, Iavg)
     if volume is not None:
-        F2 *= volume * water_number_density
-
+        F2 *= volume * water_number_density()
     return F2
 
 
-def get_pad_solution_intensity(pad_geometry, beam, thickness=10e-6, liquid='water', temperature=298, poisson=True):
+def get_pad_solution_intensity(pad_geometry, beam, thickness=10.0e-6, liquid='water', temperature=298.0, poisson=True):
     r"""
-    Given a list of |PADGeometry| instances along with a |Beam| instance, calculate the scattering intensity of a
-    liquid with given thickness.
+    Given a list of |PADGeometry| instances along with a |Beam| instance, calculate the scattering intensity
+    :math:`I(q)` of a liquid of given thickness.
+
+    note::
+
+        This function is only for convenience.  Consider using
+        :func:`water_scattering_factor_squared <reborn.simulate.solutions.water_scattering_factor_squared>` if speed
+        is important; this will avoid re-calculating q magnitudes, solid angles, and polarization factors.
 
     Args:
         pad_geometry (list of |PADGeometry| instances): PAD geometry info.
         beam (|Beam|): X-ray beam parameters.
         thickness (float): Thickness of the liquid (assumed to be a sheet geometry)
-        liquid (str): We can only do "water" at this time...
+        liquid (str): We can only do "water" at this time.
         temperature (float): Temperature of the liquid.
         poisson (bool): If True, add Poisson noise (default=True)
 
@@ -149,15 +111,15 @@ def get_pad_solution_intensity(pad_geometry, beam, thickness=10e-6, liquid='wate
     """
     if liquid != 'water':
         raise ValueError('Sorry, we can only simulate water at this time...')
+    volume = thickness * np.pi * (beam.diameter_fwhm / 2) ** 2
     pads = reborn.detector.PADGeometryList(pad_geometry)
-    n_water_molecules = thickness * beam.diameter_fwhm ** 2 * water_number_density()
     q_mags = pads.q_mags(beam)
     J = beam.photon_number_fluence
     P = pads.polarization_factors(beam)
     SA = pads.solid_angles()
-    F = get_water_profile(q_mags, temperature=temperature)
-    F2 = F ** 2 * n_water_molecules
-    intensity = 2.8179403262e-15 ** 2 * J * P * SA * F2
-    if poisson: intensity = np.double(np.random.poisson(intensity))
+    F2 = water_scattering_factor_squared(q_mags, temperature=temperature, volume=volume)
+    intensity = r_e ** 2 * J * P * SA * F2
+    if poisson:
+        intensity = np.double(np.random.poisson(intensity))
     intensity = pads.split_data(intensity)
     return intensity
