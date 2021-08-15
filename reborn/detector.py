@@ -477,7 +477,7 @@ class PADGeometry:
         Returns: numpy array
         """
 
-        return self.solid_angles2()
+        return self.solid_angles1()
 
     def solid_angles1(self):
         r"""
