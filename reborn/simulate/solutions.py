@@ -29,18 +29,15 @@ def water_number_density():
 
 
 @reborn.utils.memoize
-def get_hura_water_data():
-
+def _get_hura_water_data():
     with open(file_name, 'r') as f:
         h = f.readline()
     h = h.split()[1:-1]
     temperatures = np.array([float(v) for v in h]) + 273.16
-
     d = np.loadtxt(file_name, skiprows=1)
     Q = d[:, 0]
     errors = d[:, -1]
     intensities = d[:, 1:-1]
-
     return 1e10 * Q, intensities, temperatures
 
 
@@ -72,7 +69,7 @@ def water_scattering_factor_squared(q, temperature=298, volume=None):
     """
     # Interpolate profiles according to temperature (weighted average)
     # If out of range, choose nearest temperature
-    qmag, intensity, temp = get_hura_water_data()
+    qmag, intensity, temp = _get_hura_water_data()
     temp_idx = np.interp(temperature, temp, np.arange(temp.size))
     if temp_idx <= 0:
         Iavg = intensity[:, 0]
