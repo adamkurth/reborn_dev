@@ -735,7 +735,7 @@ def radial_stats(f, labels_radial, n_radials, mode):
     Input:
         f              - The input 3D array of numbers
         labels_radial  - The labels
-        N_radials      - Maximum label value
+        n_radials      - Maximum label value
         mode           - The desired statistics that we wish to calculate
 
     Output:
@@ -773,16 +773,16 @@ def radial_stats(f, labels_radial, n_radials, mode):
 
 def get_FSC(f1, f2, labels_radial, n_radials):
     r"""
-    Calculate the FSC.
+    Calculate the Fourier shell correlation (FSC) between two 3D numpy arrays.
     """
     F1 = fftshift(fftn(f1))
     F2 = fftshift(fftn(f2))
 
     radial_f1_f2 = radial_stats(f=F1 * np.conj(F2), labels_radial=labels_radial, n_radials=n_radials, mode="sum")
-    radial_f1 = radial_stats(f=np.abs(F1) ** 2, labels_radial=labels_radial, n_radials=n_radials, mode="sum")
-    radial_f2 = radial_stats(f=np.abs(F2) ** 2, labels_radial=labels_radial, n_radials=n_radials, mode="sum")
+    radial_f1 = radial_stats(f=(np.abs(F1) ** 2).astype(np.float64), labels_radial=labels_radial, n_radials=n_radials, mode="sum")
+    radial_f2 = radial_stats(f=(np.abs(F2) ** 2).astype(np.float64), labels_radial=labels_radial, n_radials=n_radials, mode="sum")
 
-    return np.abs(radial_f1_f2 / (np.sqrt(radial_f1) * np.sqrt(radial_f2)))
+    return np.abs(radial_f1_f2) / np.abs((np.sqrt(radial_f1) * np.sqrt(radial_f2)))
 
 
 def atleast_1d(x):
