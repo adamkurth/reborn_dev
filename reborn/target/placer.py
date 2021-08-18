@@ -115,16 +115,17 @@ def particles_in_a_sphere(sphere_diameter, n_particles, particle_diameter, max_a
     r"""
     Place particles randomly in a spherical volume.  Assume particles are spheres and they cannot touch any other
     particle.  Also assumes that surface of spherical particles cannot extend beyond the surface of the containing
-    sphere.
+    sphere (thus, the maximum distance of a particle from the origin is sphere_diameter/2 - particle_diameter/2).
 
     Args:
-        sphere_radius:
-        n_particles:
-        particle_diameter:
-        max_attempts:
+        sphere_diameter (float): Diameter of the bounding sphere, within which particle positions must lie (but without
+                                 the particle surface extending beyond this bounding sphere).
+        n_particles (int): Number of particles to fit in the bounding sphere.
+        particle_diameter (float): Diameter of the particles that must fit in the sphere.
+        max_attempts (int): Optional. How many times to try to place a sphere before giving up.  Default: 1e6.
 
     Returns:
-
+        |ndarray| : The array of vectors with particle positions.
     """
     # Note: the particle cannot extend outside of the sphere, so we set the diameter of the bounding sphere to be
     # reduced in size by one particle diameter.
