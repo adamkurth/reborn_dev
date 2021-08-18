@@ -126,20 +126,23 @@ def particles_in_a_sphere(sphere_diameter, n_particles, particle_diameter, max_a
     Returns:
 
     """
-    rmax2 = ((sphere_diameter - particle_diameter)/2)**2  # Note: the particle cannot extend outside of the sphere
-    sqrtpd = np.sqrt(particle_diameter)
+    # Note: the particle cannot extend outside of the sphere, so we set the diameter of the bounding sphere to be
+    # reduced in size by one particle diameter.
+    rmax = (sphere_diameter - particle_diameter) / 2
+    rmax2 = rmax ** 2
+    pd2 = particle_diameter ** 2
     if particle_diameter > sphere_diameter:
         raise ValueError("Particle diameter is larger than sphere diameter.")
     pos_vecs = np.zeros((n_particles, 3))
     for i in range(n_particles):
         for a in range(int(max_attempts)):
-            vec = (np.random.rand(3) - 0.5)*rmax2  # Random position ranging from -r to +r
-            vmag = np.sum(vec**2)
-            if vmag > rmax2:  # Check if it's in the sphere
+            vec = (np.random.rand(3) - 0.5)*2*rmax  # Random position ranging from -r to +r
+            vmag2 = np.sum(vec**2)  # Distance of this position from origin
+            if vmag2 > rmax2:  # Check if it's in the sphere
                 continue
             if i > 0:  # No neighbors for the first particle
-                mindist = np.min(np.sum((pos_vecs[0:i] - vec)**2))  # Check closest neighbor
-                if mindist < sqrtpd:
+                mindist2 = np.min(np.sum((pos_vecs[0:i] - vec)**2, axis=-1))  # Check closest neighbor (distance squared)
+                if mindist2 < pd2:
                     continue
             break  # If we made it here, success!
         pos_vecs[i, :] = vec
