@@ -20,8 +20,6 @@ If you want to view results just add the keyword "view"
 > python broken_test_simulate_clcore.py view
 """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import sys
 sys.path.append('..')
 import numpy as np
@@ -47,7 +45,6 @@ ctx = clcore.create_some_gpu_context()
 #     pyopencl = None
 #     havecl = False
 
-import reborn.simulate.numbacore as numbacore
 from reborn.utils import rotation_about_axis
 
 view = False
@@ -81,9 +78,9 @@ def _clcore(double_precision=False):
     core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=have_double)
     # core = clcore.ClCore(context=None, queue=None, group_size=1, double_precision=double_precision)
 
-    if double_precision is False:
-        numbacore.real_t = np.float32
-        numbacore.complex_t = np.complex64
+    # if double_precision is False:
+    #     numbacore.real_t = np.float32
+    #     numbacore.complex_t = np.complex64
 
     assert(core.get_group_size() == core.group_size)
    
@@ -104,9 +101,9 @@ def _clcore(double_precision=False):
     amps = core.phase_factor_qrf(q, r_vecs, f, R=rot)
     assert(type(amps) is np.ndarray)
 
-    ampsn = numbacore.phase_factor_qrf(q, r_vecs, f, R=rot)
+    # ampsn = numbacore.phase_factor_qrf(q, r_vecs, f, R=rot)
 
-    assert(np.max(np.abs(amps - ampsn)) < 1e-3)  # Why such a big difference between CPU and GPU?
+    # assert(np.max(np.abs(amps - ampsn)) < 1e-3)  # Why such a big difference between CPU and GPU?
     
     # make device arrays first
     q = core.to_device(q) 
