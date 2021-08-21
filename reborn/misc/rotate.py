@@ -14,9 +14,8 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-# import scipy
 import scipy.fft as fft
-from .. import utils
+import scipy.spatial.transform
 try:
    import pyopencl as cl
    import pyopencl.array
@@ -24,9 +23,22 @@ try:
    from ..simulate import clcore
    have_gpu = True
 except ImportError:
-   utils.warn("pyvkfft or its dependencies could not be set up correctly")
-   utils.warn("rotate3Dvkfft should not be used")
    have_gpu = False
+
+
+def kabsch(A, A0):
+    r"""
+    Finds the rotation matrix that will bring a set of vectors A into alignment with another set of vectors A0. Uses the
+    Kabsch algorithm implemented in scipy.spatial.transform.Rotation.align_vectors
+
+    Arguments:
+        A (|ndarray|): N, 3x1 vectors stacked into the shape (N,3)
+        A0 (|ndarray|): N, 3x1 vectors stacked into the shape (N,3)
+
+    Returns:
+        |ndarray|: 3x3 rotation matrix.
+    """
+    return scipy.spatial.transform.Rotation.align_vectors(A0, A)[0].as_matrix()
 
 
 class Rotate3D:

@@ -12,7 +12,7 @@ pwd
 [ -d source/api ] && rm -r source/api
 #[ -d source/auto_examples ] && rm -r source/auto_examples
 sphinx-apidoc --maxdepth 10 --output-dir source/api ../reborn \
- ../reborn/data ../reborn/fortran ../reborn/simulate/atoms.py ../reborn/simulate/numbacore.py
+ ../reborn/data ../reborn/fortran ../reborn/simulate/atoms.py ../reborn/simulate/numbacore.py ../reborn/misc
 # FIXME: How do we properly change the title of the auto-generated API page?  Below we do it brute-force...
 tail -n+3 source/api/modules.rst > tmp.rst
 echo 'reborn API' > source/api/modules.rst

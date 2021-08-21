@@ -16,7 +16,10 @@
 import numpy as np
 import scipy
 from reborn.misc.rotate import Rotate3D, Rotate3Dvkfft, have_gpu
-
+from scipy.stats import special_ortho_group
+from reborn.math import kabsch  # Legacy
+import reborn.math.kabsch  # Legacy
+from reborn.misc.rotate import kabsch
 
 def makegaussians(w, g, s, n):
     x = np.linspace(-0.5 * (1.0 - 1.0 / n), 0.5 * (1.0 - 1.0 / n), num=n)
@@ -74,3 +77,35 @@ def test_01():
                 else:
                     error = np.max(np.abs(r3df.f - makegaussians(wr, gr, sigma, N))) / d_max
                     assert (error < 1e-4)  # Weak test
+
+
+def test_kabsch():
+    r"""
+    Generate a random (3x3) array and rotate it with a random rotation matrix.
+    See if we can deduce the rotational matrix given the original A and the rotated A
+    using the Kabsch algorithm.
+    """
+
+    np.random.seed(42)
+
+    small = 1.0e-12 # Error we want the result to be smaller than
+
+    # Generate a random A matrix
+    A = np.random.rand(3,3)
+
+    # Generate a random rotation matrix
+    R = special_ortho_group.rvs(dim=3)
+
+    # Rotate A
+    A_home = np.dot(R,A)
+
+    # Take the transpose because the scipy align_vectors function assumes shape of (N,3),
+    # i.e. the vectors are assumed to be stacked horizontally.
+    A = A.T
+    A_home = A_home.T
+
+    # Now run the Kabsch algorithm and convert the output to a rotation matrix
+    R_est = kabsch(A, A_home)
+
+    assert (np.sum(np.abs(R - R_est)) < small)
+

@@ -49,3 +49,4 @@ developer/rkirian/data
 *.blg
 *.synctex.*
 file_header_*.txt
+workspace.xml

@@ -80,10 +80,10 @@ def vec_norm(vec):
     Compute normal vectors, which have lengths of one.
 
     Arguments:
-        vec (|ndarray): Input vectors.  Array shape: (N, 3).
+        vec (|ndarray|): Input vectors.  Array shape: (N, 3).
 
     Returns:
-        |ndarray| : New unit vectors.  Array shape: (N, 3).
+        (|ndarray|): New unit vectors.  Array shape: (N, 3).
     """
     vecnorm = np.sqrt(np.sum(vec ** 2, axis=(vec.ndim - 1)))
     return (vec.T / vecnorm).T
@@ -99,7 +99,6 @@ def vec_mag(vec):
     Returns:
         |ndarray|: Scalar vector magnitudes
     """
-
     return np.sqrt(np.sum(vec * vec, axis=(vec.ndim - 1)))
 
 
@@ -130,7 +129,6 @@ def warn(message):
 
     Returns: None
     """
-
     sys.stdout.write("WARNING: %s\n" % message)
 
 
@@ -145,7 +143,6 @@ def error(message):
 
     Returns: None
     """
-
     sys.stderr.write("ERROR: %s\n" % message)
 
 
@@ -158,7 +155,6 @@ def random_rotation():
         from scipy.spatial.transform import Rotation
         rotmat = Rotation.random().as_matrix()'
     """
-
     depreciate('reborn.utils.random_rotation has been removed.  Use scipy for this:\n'
                'from scipy.spatial.transform import Rotation\n'
                'rotmat = Rotation.random().as_matrix()')
@@ -176,7 +172,6 @@ def rotation_about_axis(theta, vec):
 
     Returns (numpy array): The shape (3, 3) rotation matrix
     """
-
     vec = vec_norm(np.array(vec)).reshape(3)
     ct = cos(theta)
     st = sin(theta)
@@ -196,8 +191,8 @@ def random_unit_vector():
     r"""
     Generate a totally random unit vector.
 
-    Returns: numpy array length 3
-
+    Returns:
+        |ndarray|
     """
     return vec_norm(np.random.normal(size=3))
 

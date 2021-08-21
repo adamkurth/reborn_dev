@@ -59,12 +59,12 @@ def water_scattering_factor_squared(q, temperature=298, volume=None):
     will be multiplied by the number of water molecules.
 
     Arguments:
-        q (|ndarray|) : The momentum transfer vector magnitudes (i.e. 2 pi sin(theta/lambda)/wavelength )
-        temperature (float): Desired water temperature in Kelvin
+        q (|ndarray|) : The momentum transfer vector magnitudes.
+        temperature (float): Desired water temperature in Kelvin.
         volume (float): If provided, the scattering factor will be multiplied by the number of molecules in this volume.
 
     Returns:
-        |ndarray| : The scattering factor |F(q)|^2, possibly multiplied by the number of water molecules if you
+        |ndarray| : The scattering factor :math:`|F(q)|^2` , possibly multiplied by the number of water molecules if you
                     specified a volume.
     """
     # Interpolate profiles according to temperature (weighted average)
