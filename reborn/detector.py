@@ -824,6 +824,9 @@ class PADGeometryList(list):
         binned = [p.binned(binning) for p in self]
         return PADGeometryList(binned)
 
+    def save(self, filename):
+        save_pad_geometry_list(filename, self)
+
 
 def f2_to_photon_counts(f_squared, beam=None, pad_geometry=None):
     r"""
