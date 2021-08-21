@@ -77,6 +77,7 @@ class DataFrame:
         return True
 
     def copy(self):
+        r""" Makes a copy of the dataframe.  Includes copies of PAD geometry, beam, raw data, processed data. """
         df = DataFrame()
         df.set_pad_geometry(self.get_pad_geometry().copy())
         df.set_beam(self.get_beam().copy())
@@ -101,21 +102,26 @@ class DataFrame:
 
     @property
     def q_mags(self):
+        r""" Concatenates the output of the corresponding function for each PADGeometry. """
         return self.get_q_mags_flat()
 
     @property
     def q_vecs(self):
+        r""" Concatenates the output of the corresponding function for each PADGeometry. """
         return self.get_q_vecs()
 
     @property
     def solid_angles(self):
+        r""" Concatenates the output of the corresponding function for each PADGeometry. """
         return self.get_solid_angles_flat()
 
     @property
     def polarization_factors(self):
+        r""" Concatenates the output of the corresponding function for each PADGeometry. """
         return self.get_polarization_factors_flat()
 
     def clear_cache(self):
+        r""" Deletes cached q_mags, q_vecs, solid_angles, polarization_factors"""
         self._q_mags = None
         self._q_vecs = None
         self._sa = None
@@ -133,7 +139,6 @@ class DataFrame:
     def get_frame_id(self):
         r""" Unique identifier for this dataframe.  Most often this is an integer, but in some cases, such as the LCLS,
         it may be something else such as a tuple.  LCLS uses a tuple of integers: seconds, nanoseconds, and fiducial."""
-        # FIXME: This should somehow make a copy if need be.  No need to copy integers.
         return self._frame_id
 
     def set_frame_id(self, frame_id):
@@ -240,8 +245,8 @@ class DataFrame:
         r""" Get polarization factors as a flat array. """
         return self._pad_geometry.polarization_factors(beam=self._beam)
 
-    def get_bragg_peaks(self):
-        pass
-
-    def set_bragg_peaks(self, bragg_peaks):
-        pass
+    # def get_bragg_peaks(self):
+    #     pass
+    #
+    # def set_bragg_peaks(self, bragg_peaks):
+    #     pass
