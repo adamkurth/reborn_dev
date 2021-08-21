@@ -60,13 +60,20 @@ class DataFrame:
     def validate(self):
         r""" Check that this dataframe is valid.  A valid dataframe must at minimum have a frame ID, a valid Beam
         instance, a valid PADGeometryList instance, and raw data.  """
-        if self._frame_id is None: return False
-        if self._beam is None: return False
-        if self._pad_geometry is None: return False
-        if self._raw_data is None: return False
-        if self._beam.validate() is False: return False
-        if self._pad_geometry.validate() is False: return False
-        if not isinstance(self._raw_data, np.ndarray): return False
+        if self._frame_id is None:
+            return False
+        if self._beam is None:
+            return False
+        if self._pad_geometry is None:
+            return False
+        if self._raw_data is None:
+            return False
+        if self._beam.validate() is False:
+            return False
+        if self._pad_geometry.validate() is False:
+            return False
+        if not isinstance(self._raw_data, np.ndarray):
+            return False
         return True
 
     def copy(self):
