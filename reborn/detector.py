@@ -136,7 +136,7 @@ class PADGeometry:
         r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
         return hash(self.__str__())
 
-    def validate(self):
+    def validate(self, **kwargs):
         r""" Determine if this instance has all the needed parameters defined.
 
         Returns:
@@ -701,7 +701,7 @@ class PADGeometryList(list):
             item.name = len(self).__str__()
         super().append(item)
 
-    def __init__(self, pad_geometry):
+    def __init__(self, pad_geometry=None, filepath=None):
         r"""
         Arguments:
             pad_geometry (|PADGeometry| or list of): The PAD geometry that will form the PADGeometryList.
@@ -711,6 +711,8 @@ class PADGeometryList(list):
             pad_geometry = utils.ensure_list(pad_geometry)
             for p in pad_geometry:
                 self.append(p)
+        if filepath is not None:
+            self.load(filepath)
 
     def __str__(self):
         s = ''
@@ -824,9 +826,26 @@ class PADGeometryList(list):
         binned = [p.binned(binning) for p in self]
         return PADGeometryList(binned)
 
-    def save(self, filename):
-        save_pad_geometry_list(filename, self)
-
+    def load(self, filename):
+        r""" Load the data from saved PADGeometryList. """
+        try:
+            pads = load_pad_geometry_list(filename)
+        except:
+            try:
+                from .external import crystfel
+                pads = crystfel.geometry_file_to_pad_geometry_list(filename)
+            except:
+                raise ValueError("Cannot figure out what kind of geometry file this is.")
+        if len(self) == 0:
+            for p in pads:
+                self.append(p)
+            return
+        elif len(self) == len(pads):
+            for (n, p) in enumerate(pads):
+                self[n] = p
+            return
+        raise ValueError("It is not clear what you are trying to do.  The PADGeometryList should be empty, or should"
+                         "have the same length as the geometry file.")
 
 def f2_to_photon_counts(f_squared, beam=None, pad_geometry=None):
     r"""

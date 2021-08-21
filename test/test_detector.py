@@ -17,6 +17,7 @@ import os
 import tempfile
 from reborn import detector
 from reborn import source
+from reborn.external import crystfel
 import numpy as np
 import scipy.constants as const
 eV = const.value('electron volt')
@@ -67,7 +68,7 @@ def test_save_pad_list():
     pads1 = make_pad_list()
     detector.save_pad_geometry_list(file_name, pads1)
     pads2 = detector.load_pad_geometry_list(file_name)
-    print(pads2)
+    # print(pads2)
     for i in range(len(pads1)):
         assert pads1[i] == pads2[i]
     os.remove(file_name)
@@ -186,7 +187,7 @@ def test_saving():
     detector.save_pad_masks(file_name_1, masks, packbits=False)
     detector.save_pad_masks(file_name_2, masks)
     unpacked = detector.load_pad_masks(file_name_1)
-    print('loaded unpacked')
+    # print('loaded unpacked')
     packed = detector.load_pad_masks(file_name_2)
     for i in range(len(masks)):
         assert np.max(packed[i] - unpacked[i]) == 0
@@ -238,3 +239,15 @@ def test_padlist():
     assert(padlist.random().size == padlist.n_pixels)
     assert(isinstance(padlist5, list))
     assert(isinstance(padlist, detector.PADGeometryList))
+
+def test_loading():
+    crystfel_geom = crystfel.epix10k_geom_file
+    json_geom = detector.epix10k_geom_file
+    pads = detector.PADGeometryList()
+    pads.load(json_geom)
+    assert(len(pads) != 1)
+    pads = detector.PADGeometryList()
+    pads.load(crystfel_geom)
+    assert (len(pads) != 1)
+    pads2 = detector.PADGeometryList(filepath=crystfel_geom)
+    assert(pads == pads2)
