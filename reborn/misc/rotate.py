@@ -22,7 +22,6 @@ try:
    import pyopencl.array
    import pyvkfft.opencl
    from ..simulate import clcore
-   # from .. import simulate.clcore
    have_gpu = True
 except ImportError:
    utils.warn("pyvkfft or its dependencies could not be set up correctly")

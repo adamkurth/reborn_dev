@@ -166,7 +166,7 @@ def get_pad_geometry(detector, run):
         g.n_fs = n_fs
         g.n_ss = n_ss
         geom.append(g)
-    return geom
+    return reborn.detector.PADGeometryList(geom)
 
 
 class LCLSFrameGetterV1(object):
