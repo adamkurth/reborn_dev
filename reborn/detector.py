@@ -207,7 +207,7 @@ class PADGeometry:
 
     @property
     def t_vec(self):
-        r""" (|ndarray|) Translation vector pointing from origin to center of corner pixel, which is first in memory. """
+        r""" (|ndarray|) Translation vector pointing from origin to center of corner pixel, which is first in memory."""
         return self._t_vec
 
     @fs_vec.setter

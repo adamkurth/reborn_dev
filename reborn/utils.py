@@ -12,11 +12,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
-
 r"""
 Some utility functions that might be useful throughout reborn.  Don't put highly specialized functions here.
 """
-
 from functools import wraps
 import sys
 import os
@@ -29,17 +27,15 @@ from scipy.sparse import csr_matrix
 from . import fortran
 from scipy.spatial.transform import Rotation
 
+
 def docs():
     r""" Open the reborn documentation in a web browser (if available)."""
-
     docs_file_path = pkg_resources.resource_filename('reborn', '')
     docs_file_path = os.path.join(docs_file_path, '..', 'doc', 'html', 'index.html')
-
     if os.path.exists(docs_file_path):
         docs_file_path = 'file://' + docs_file_path
     else:
         docs_file_path = 'https://rkirian.gitlab.io/reborn'
-
     try:
         import webbrowser  # pylint: disable=import-outside-toplevel
     except ImportError:
@@ -47,7 +43,6 @@ def docs():
         print("If using conda, perhaps you could run 'conda install webbrowser'")
         print('You can otherwise point your webbrowser to https://rkirian.gitlab.io/reborn')
         return
-
     webbrowser.open('file://' + docs_file_path)
 
 
@@ -85,12 +80,11 @@ def vec_norm(vec):
     Compute normal vectors, which have lengths of one.
 
     Arguments:
-        vec (numpy array of shape Nx3): Input vector
+        vec (|ndarray): Input vectors.  Array shape: (N, 3).
 
     Returns:
-        numpy array of shape Nx3 : New unit vectors
+        |ndarray| : New unit vectors.  Array shape: (N, 3).
     """
-
     vecnorm = np.sqrt(np.sum(vec ** 2, axis=(vec.ndim - 1)))
     return (vec.T / vecnorm).T
 
@@ -100,9 +94,10 @@ def vec_mag(vec):
     Compute the scalar magnitude of an array of vectors.
 
     Arguments:
-        vec (numpy array): Input array of vectors, shape (N, 3)
+        vec (|ndarray|): Input array of vectors, shape (N, 3)
 
-    Returns: scalar vector magnitudes
+    Returns:
+        |ndarray|: Scalar vector magnitudes
     """
 
     return np.sqrt(np.sum(vec * vec, axis=(vec.ndim - 1)))
@@ -540,6 +535,7 @@ def rotate3D(f, R_in):
 
     # ---------------------------
     # Define private functions
+    depreciate("Use the rotations in reborn.misc.rotate.Rotate3D instead of reborn.utils.rotate3D.")
 
     def rotate90(f):
         r"""FIXME: Docstring."""
@@ -653,21 +649,18 @@ def rotate3D(f, R_in):
     # Do the rotations
 
     # print(euler_angles)
-    
-    #--------------------
+
+    # --------------------
     # Joe's implementation
     euler_angles = R_in.as_euler('xyx')
     # euler_angles = R.from_euler('zyz', euler_angles).as_euler('xyx')
     euler_angles[1] = -euler_angles[1]
-    #--------------------
+    # --------------------
     # Kevin's implementation
-    # euler_angles = input_rotation.as_euler('xyx') # input_rotation will be a scipy object when we change the interface to the rotate3D function
+    # euler_angles = input_rotation.as_euler('xyx') # input_rotation will be a scipy object when we change the
+    # interface to the rotate3D function
     # euler_angles = -euler_angles
-    #--------------------
-
-    # print(euler_angles)
-
-
+    # --------------------
 
     f_rot = __rotate_euler_z(f_rot, ang=euler_angles[0])
     f_rot = __rotate_euler_y(f_rot, ang=euler_angles[1])
@@ -779,8 +772,10 @@ def get_FSC(f1, f2, labels_radial, n_radials):
     F2 = fftshift(fftn(f2))
 
     radial_f1_f2 = radial_stats(f=F1 * np.conj(F2), labels_radial=labels_radial, n_radials=n_radials, mode="sum")
-    radial_f1 = radial_stats(f=(np.abs(F1) ** 2).astype(np.float64), labels_radial=labels_radial, n_radials=n_radials, mode="sum")
-    radial_f2 = radial_stats(f=(np.abs(F2) ** 2).astype(np.float64), labels_radial=labels_radial, n_radials=n_radials, mode="sum")
+    radial_f1 = radial_stats(f=(np.abs(F1) ** 2).astype(np.float64), labels_radial=labels_radial, n_radials=n_radials,
+                             mode="sum")
+    radial_f2 = radial_stats(f=(np.abs(F2) ** 2).astype(np.float64), labels_radial=labels_radial, n_radials=n_radials,
+                             mode="sum")
 
     return np.abs(radial_f1_f2) / np.abs((np.sqrt(radial_f1) * np.sqrt(radial_f2)))
 
@@ -858,10 +853,7 @@ def binned_statistic(x, y, func, n_bins, bin_edges, fill_value=0):
 
 def get_caller():
     r""" Get the name of the function that calls this one. """
-    try:
-        stack = inspect.stack()
-        if len(stack) > 1:
-            return inspect.stack()[1][3]
-    except:
-        pass
+    stack = inspect.stack()
+    if len(stack) > 1:
+        return inspect.stack()[1][3]
     return 'get_caller'
