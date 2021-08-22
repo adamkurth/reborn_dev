@@ -91,6 +91,8 @@ class DataFrame:
             df._pfac = self._pfac.copy()
         if self._sa is not None:
             df._sa = self._sa.copy()
+        if self._mask is not None:
+            df._mask = self._mask.copy()
         return df
 
     @property
