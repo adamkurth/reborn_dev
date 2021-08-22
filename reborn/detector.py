@@ -1360,7 +1360,7 @@ class RadialProfiler:
             data (|ndarray|): The intensity data from which the radial profile is formed.
             mask (|ndarray|): Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
                                  provided here, the mask configured with :meth:`set_mask` will be used.
-            statistic (function): Provide a function of your choice that runs on each radial bin.
+            statistic (function or list of functions): Provide a function of your choice that runs on each radial bin.
 
 
         Returns: |ndarray|
@@ -1373,7 +1373,15 @@ class RadialProfiler:
             w = np.where(self.mask)
             data = data[w]
             q_mags = q_mags[w]
-        stat = utils.binned_statistic(q_mags, data, statistic, self.n_bins, (self.bin_edges[0], self.bin_edges[-1]))
+        list_type = False
+        if isinstance(statistic, list):
+            list_type = True
+        statistic = utils.ensure_list(statistic)
+        stat = []
+        for s in statistic:
+            stat.append(utils.binned_statistic(q_mags, data, s, self.n_bins, (self.bin_edges[0], self.bin_edges[-1])))
+        if not list_type:
+            stat = stat[0]
         return stat
 
     def get_counts_profile(self, mask=None):
