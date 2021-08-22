@@ -77,12 +77,20 @@ class DataFrame:
         return True
 
     def copy(self):
-        r""" Makes a copy of the dataframe.  Includes copies of PAD geometry, beam, raw data, processed data. """
+        r""" Makes a copy of the dataframe, including all internal data. """
         df = DataFrame()
-        df.set_pad_geometry(self.get_pad_geometry().copy())
-        df.set_beam(self.get_beam().copy())
-        df.set_raw_data(self.raw_data)
-        df.set_processed_data(self.processed_data)
+        if self._pad_geometry is not None:
+            df._pad_geometry = self._pad_geometry.copy()
+        if self._beam is not None:
+            df._beam = self._beam.copy()
+        if self._raw_data is not None:
+            df._raw_data = self._raw_data.copy()
+        if self._processed_data is not None:
+            df._processed_data = self._processed_data
+        if self._pfac is not None:
+            df._pfac = self._pfac.copy()
+        if self._sa is not None:
+            df._sa = self._sa.copy()
         return df
 
     @property
