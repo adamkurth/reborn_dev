@@ -286,7 +286,7 @@ def snr_mask(dat, mask, nin, ncent, nout, threshold=6, mask_negative=True, max_i
         numpy array : The mask with pixels above the SNR threshold
     """
     if isinstance(dat, list):
-        return [snr_filter(d, m, nin, ncent, nout, threshold=threshold, mask_negative=mask_negative,
+        return [snr_mask(d, m, nin, ncent, nout, threshold=threshold, mask_negative=mask_negative,
                            max_iterations=max_iterations) for (d, m) in zip(dat, mask)]
     mask_a = mask.copy()
     prev = 0

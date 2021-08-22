@@ -239,11 +239,15 @@ class DataFrame:
 
     def get_solid_angles_flat(self):
         r""" Get pixel solid angles as flat array. """
-        return self._pad_geometry.solid_angles()
+        if self._sa is None:
+            self._sa = self._pad_geometry.solid_angles()
+        return self._sa.copy()
 
     def get_polarization_factors_flat(self):
         r""" Get polarization factors as a flat array. """
-        return self._pad_geometry.polarization_factors(beam=self._beam)
+        if self._pfac is None:
+            self._pfac = self._pad_geometry.polarization_factors(beam=self._beam)
+        return self._pfac.copy()
 
     # def get_bragg_peaks(self):
     #     pass
