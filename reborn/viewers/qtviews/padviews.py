@@ -93,7 +93,7 @@ class PADView(QtCore.QObject):
 
     # Note that most of the interface was created using the QT Designer tool.  There are many attributes that are
     # not visible here.
-    frame_getter = FrameGetter()
+    frame_getter = None
     dataframe = None
     debug_level = None  # Levels are 0: no messages, 1: basic messages, 2: more verbose, 3: extremely verbose
     pad_labels = None
