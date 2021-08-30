@@ -1374,6 +1374,7 @@ class RadialProfiler:
         self.q_edge_range = q_edge_range
         self.mask = mask
         self.pad_geometry = pad_geometry
+        self.beam = beam
 
     def get_profile_statistic(self, data, mask=None, statistic=None):
         r"""
