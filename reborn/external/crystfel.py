@@ -390,7 +390,10 @@ class StreamfileFrameGetter(FrameGetter):
         self.geom_dict = load_crystfel_geometry(geom_file)
         self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file)
 
-    def get_frame(self, frame_number=0, no_pad=False):
+    def get_frame(self, *args, **kwargs):
+        return super().get_frame(*args, **kwargs)
+
+    def get_data(self, frame_number=0, no_pad=False):
         if frame_number >= self.n_frames:
             return None
         A = np.zeros((3,3))

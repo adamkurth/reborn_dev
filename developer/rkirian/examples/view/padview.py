@@ -25,7 +25,7 @@ class MyFrameGetter(FrameGetter):
         self.pads = pad_geometry
         self.simulator = examples.PDBMoleculeSimulator(pdb_file=None, pad_geometry=pad_geometry, random_rotation=True)
 
-    def get_frame(self, frame_number=0):
+    def get_data(self, frame_number=0):
 
         self.current_frame = frame_number
 

@@ -235,7 +235,7 @@ class CheetahFrameGetter(FrameGetter):
 
         return peaks
 
-    def get_frame(self, frame_number=0):
+    def get_data(self, frame_number=0):
 
         dat = np.array(self.h5_data[frame_number, :, :]).astype(np.double)
         pad_data = crystfel.split_image(dat, self.geom_dict)

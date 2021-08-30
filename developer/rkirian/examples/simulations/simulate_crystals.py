@@ -44,9 +44,9 @@ simulator = CrystalSimulatorV1(pad_geometry=pads, beam=beam, crystal_structure=c
 # FrameGetter is a class that helps create a unified interface for serving up XFEL events.  The underlying code could
 # read from a CXIDB file, an XTC file, from shared memory, or whatever else is convenient.  For this example, our
 # FrameGetter subclass will generate simulations on the fly.  Making a FrameGetter sub-class is easy: we just need to
-# override one method called "get_frame(frame_number)".
+# override one method called "get_data(frame_number)".
 class MyFrameGetter(FrameGetter):
-    def get_frame(self, frame_number=1):
+    def get_data(self, frame_number=1):
         t = time()
         dat = {'pad_data': simulator.generate_pattern()}
         print('Simulation in %g seconds' % (time()-t,))
