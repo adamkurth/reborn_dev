@@ -136,5 +136,5 @@ class ListFrameGetter(FrameGetter):
         super().__init__()
         self.n_frames = len(dataframes)
         self.dataframes = dataframes
-    def get_frame(self, frame_number):
+    def get_data(self, frame_number=0):
         return self.dataframes[frame_number]

@@ -77,7 +77,7 @@ class DummyFrameGetter(FrameGetter):
         super().__init__()
         self.dataframe = dataframe
         dataframe.validate()
-    def get_data(self, frame_number=None):
+    def get_data(self, frame_number=0):
         return self.dataframe
 
 
