@@ -369,21 +369,21 @@ class StreamfileFrameGetter(FrameGetter):
         """
         super().__init__()
         self.stream_file = stream_file
-        f = open(stream_file, 'r') 
-        self.begin_chunk_lines = []  # Cache where the stream chunks are
-        for (n, line) in enumerate(f):
-            if sta_chunk in line:
-                if indexed_only:
-                    self.begin_chunk_lines.append(n)
-                    self.n_frames += 1
-                    dat = self.get_frame(frame_number=self.n_frames - 1, no_pad=True)
-                    if dat['A_matrix'] is None:
-                        self.n_frames -= 1
-                        self.begin_chunk_lines.pop()
-                        continue
-                else:
-                    self.begin_chunk_lines.append(n)
-                    self.n_frames += 1
+        with open(stream_file, 'r') as f: 
+            self.begin_chunk_lines = []  # Cache where the stream chunks are
+            for (n, line) in enumerate(f):
+                if sta_chunk in line:
+                    if indexed_only:
+                        self.begin_chunk_lines.append(n)
+                        self.n_frames += 1
+                        dat = self.get_frame(frame_number=self.n_frames - 1, no_pad=True)
+                        if dat['A_matrix'] is None:
+                            self.n_frames -= 1
+                            self.begin_chunk_lines.pop()
+                            continue
+                    else:
+                        self.begin_chunk_lines.append(n)
+                        self.n_frames += 1
         if geom_file is None:
             geom_file = 'temp.geom'
         self.geom_file = geom_file
