@@ -390,12 +390,15 @@ class StreamfileFrameGetter(FrameGetter):
         self.geom_dict = load_crystfel_geometry(geom_file)
         self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file)
 
-    def get_frame(self, *args, **kwargs):
+    def get_frame(self, frame_number=0, **kwargs):
         if 'no_pad' in kwargs:
+            self.no_pad = kwargs['no_pad']
             del kwargs['no_pad']
-        return super().get_frame(*args, **kwargs)
+        else:
+            self.no_pad = False
+        return super().get_frame(frame_number=frame_number)
 
-    def get_data(self, frame_number=0, no_pad=False):
+    def get_data(self, frame_number=0):
         if frame_number >= self.n_frames:
             return None
         A = np.zeros((3,3))
@@ -446,7 +449,7 @@ class StreamfileFrameGetter(FrameGetter):
         dat['cxi_file_path'] = cxi_file_path
         dat['cxi_frame_number'] = cxi_frame_number
         dat['photon_energy'] = photon_energy
-        if not no_pad:
+        if not self.no_pad:
             # Extract data from the cxi file
             if self.h5_file_path != cxi_file_path:
                 self.h5_file_path = cxi_file_path
