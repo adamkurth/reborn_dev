@@ -95,7 +95,7 @@ class DropletGetter(FrameGetter):
     def __init__(self):
         super().__init__()
         self.n_frames = np.inf
-    def get_frame(self, frame_number=0):
+    def get_data(self, frame_number=0):
         dd = drop_radius*2 + (np.random.rand()-0.5)*drop_radius/5
         nppd = int(protein_number_density*4/3*np.pi*(dd/2)**3)
         p_vecs = placer.particles_in_a_sphere(sphere_diameter=dd, n_particles=nppd, particle_diameter=protein_diameter)

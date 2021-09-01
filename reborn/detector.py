@@ -847,6 +847,7 @@ class PADGeometryList(list):
         raise ValueError("It is not clear what you are trying to do.  The PADGeometryList should be empty, or should"
                          "have the same length as the geometry file.")
 
+
 def f2_to_photon_counts(f_squared, beam=None, pad_geometry=None):
     r"""
     Convert computed scattering factors :math:`F(\vec{q})^2` into photon counts.  This multiplies :math:`F(\vec{q})^2`
@@ -1247,13 +1248,13 @@ class RadialProfiler:
     bin_centers = None  # q magnitudes corresponding to 1D profile bin centers
     bin_edges = None  # q magnitudes corresponding to 1D profile bin edges (length is n_bins+1)
     bin_size = None  # The size of the 1D profile bin in q space
-    q_mags = None  # q magnitudes corresponding to diffraction pattern intensities
+    _q_mags = None  # q magnitudes corresponding to diffraction pattern intensities
     _mask = None  # The default mask, in case no mask is provided upon requesting profiles
     _counts_profile = None  # For speed, we cache the counts corresponding to the default _mask
     pad_geometry = None  # List of PADGeometry instances
     beam = None  # Beam instance for creating q magnitudes
 
-    def __init__(self, q_mags=None, mask=None, n_bins=None, q_range=None, pad_geometry=None, beam=None):
+    def __init__(self, q_mags=None, mask=None, n_bins=None, q_range=None, pad_geometry=None, beam=None, _plan=True):
         r"""
         Arguments:
             q_mags (|ndarray|): Optional.  Array of q magnitudes.
@@ -1267,20 +1268,42 @@ class RadialProfiler:
             beam (|Beam| instance): Optional, unless pad_geometry is provided.  Wavelength and beam direction are
                                      needed in order to calculate q magnitudes.
         """
-        self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range, pad_geometry=pad_geometry, beam=beam)
+        if _plan:
+            self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range, pad_geometry=pad_geometry, beam=beam)
+
+    def copy(self):
+        r""" Make a copy of this profiler.  Copy all internal data. """
+        rp = RadialProfiler(_plan=False)
+        if self.n_bins is not None:
+            rp.n_bins = self.n_bins
+            rp.q_range = self.q_range
+            rp.q_edge_range = self.q_edge_range.copy()
+            rp.bin_centers = self.bin_centers.copy()
+            rp.bin_edges = self.bin_edges.copy()
+            rp.bin_size = self.bin_size
+            rp._q_mags = self._q_mags.copy()
+            rp.pad_geometry = self.pad_geometry.copy()
+            rp.beam = self.beam.copy()
+        if self._mask is not None:
+            rp._mask = self._mask.copy()
+        if self._counts_profile is not None:
+            rp._counts_profile = self._counts_profile.copy()
+        return rp
 
     @property
     def mask(self):
         r""" PAD masks. """
-        return self._mask
+        if self._mask is not None:
+            return self._mask.copy()
+        return None
 
     @mask.setter
     def mask(self, mask):
         if mask is not None:
             mask = concat_pad_data(mask)
-            if self._mask is not None:  # Check if we already have an identical mask
-                if np.sum(np.abs(mask - self.mask)) == 0:
-                    return
+            # if self._mask is not None:  # Check if we already have an identical mask
+            #     if np.sum(np.abs(mask - self.mask)) == 0:
+            #         return
             self._mask = mask.copy()  # Ensure a properly flattened array
             self._counts_profile = None  # Wipe out this profile
 
@@ -1302,9 +1325,9 @@ class RadialProfiler:
         r""" The number of pixels in each radial bin. """
         if self._counts_profile is None:
             if self.mask is None:
-                self._counts_profile, _ = np.histogram(self.q_mags, bins=self.n_bins, range=self.q_edge_range)
+                self._counts_profile, _ = np.histogram(self._q_mags, bins=self.n_bins, range=self.q_edge_range)
             else:
-                self._counts_profile, _ = np.histogram(self.q_mags, weights=self.mask, bins=self.n_bins,
+                self._counts_profile, _ = np.histogram(self._q_mags, weights=self.mask, bins=self.n_bins,
                                                        range=self.q_edge_range)
         return self._counts_profile
 
@@ -1342,7 +1365,7 @@ class RadialProfiler:
         bin_centers = np.linspace(q_range[0], q_range[1], n_bins)
         bin_edges = np.linspace(q_range[0] - bin_size / 2, q_range[1] + bin_size / 2, n_bins + 1)
         q_edge_range = np.array([q_range[0] - bin_size / 2, q_range[1] + bin_size / 2])
-        self.q_mags = q_mags
+        self._q_mags = q_mags
         self.n_bins = n_bins
         self.bin_centers = bin_centers
         self.bin_edges = bin_edges
@@ -1351,6 +1374,7 @@ class RadialProfiler:
         self.q_edge_range = q_edge_range
         self.mask = mask
         self.pad_geometry = pad_geometry
+        self.beam = beam
 
     def get_profile_statistic(self, data, mask=None, statistic=None):
         r"""
@@ -1360,20 +1384,28 @@ class RadialProfiler:
             data (|ndarray|): The intensity data from which the radial profile is formed.
             mask (|ndarray|): Optional.  A mask to indicate bad pixels.  Zero is bad, one is good.  If no mask is
                                  provided here, the mask configured with :meth:`set_mask` will be used.
-            statistic (function): Provide a function of your choice that runs on each radial bin.
+            statistic (function or list of functions): Provide a function of your choice that runs on each radial bin.
 
 
         Returns: |ndarray|
         """
         data = concat_pad_data(data)
-        q_mags = self.q_mags
+        q_mags = self._q_mags
         if mask is not None:
             self.mask = mask
         if self.mask is not None:
             w = np.where(self.mask)
             data = data[w]
             q_mags = q_mags[w]
-        stat = utils.binned_statistic(q_mags, data, statistic, self.n_bins, (self.bin_edges[0], self.bin_edges[-1]))
+        list_type = False
+        if isinstance(statistic, list):
+            list_type = True
+        statistic = utils.ensure_list(statistic)
+        stat = []
+        for s in statistic:
+            stat.append(utils.binned_statistic(q_mags, data, s, self.n_bins, (self.bin_edges[0], self.bin_edges[-1])))
+        if not list_type:
+            stat = stat[0]
         return stat
 
     def get_counts_profile(self, mask=None):
@@ -1467,7 +1499,7 @@ class RadialProfiler:
             mprof = self.get_profile_statistic(data, mask=mask, statistic=statistic)
             # raise ValueError('Statistic %s not recognized' % (statistic,))
         mprofq = self.bin_centers
-        mpat = np.interp(self.q_mags, mprofq, mprof)
+        mpat = np.interp(self._q_mags, mprofq, mprof)
         mpat = concat_pad_data(mpat)
         data = concat_pad_data(data)
         data = data.copy()

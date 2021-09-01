@@ -356,6 +356,6 @@ class LysozymeFrameGetter(FrameGetter):
                                             beam=beam, random_rotation=True)
         self.pad_geometry = pad_geometry
 
-    def get_frame(self, frame_number=None):
+    def get_data(self, frame_number=0):
         pad_data = detector.split_pad_data(self.pad_geometry,  self.molsim.next())
         return {'pad_data': pad_data}

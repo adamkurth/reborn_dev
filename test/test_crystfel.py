@@ -22,3 +22,8 @@ def test_crystfel():
     geom_dict = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
     assert(isinstance(geom_dict, list))
     assert (len(geom_dict) == 64)
+
+
+def test_02():
+    streamfile = crystfel.example_stream_file_path
+    fg = crystfel.StreamfileFrameGetter(stream_file=streamfile)

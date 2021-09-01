@@ -164,6 +164,16 @@ def test_radial_profiler_03():
     assert(np.max(np.abs(prof3-prof2)) == 0)
 
 
+def test_radial_profiler_04():
+    pads = detector.cspad_2x2_pad_geometry_list()
+    beam = source.Beam(wavelength=1.0e-10)
+    rad = detector.RadialProfiler(beam=beam, pad_geometry=pads, mask=None, n_bins=100)
+    print(rad.beam)
+    rad_mod = rad.copy()
+    m1 = rad._mask
+    m2 = rad_mod._mask
+
+
 def test_vector_math():
 
     pad = detector.PADGeometry(shape=(2, 2), distance=0.1, pixel_size=1e-3)

@@ -361,7 +361,7 @@ class StreamfileFrameGetter(FrameGetter):
     n_frames = 0
     cxi_path_replace = None  # Set to tuple of strings (remove, replace)
 
-    def __init__(self, stream_file=None, geom_file=None, indexed_only=False ):
+    def __init__(self, stream_file=None, geom_file=None, indexed_only=False):
         r"""
         Arguments:
             stream_file (str): Path to the stream file
@@ -369,28 +369,36 @@ class StreamfileFrameGetter(FrameGetter):
         """
         super().__init__()
         self.stream_file = stream_file
-        f = open(stream_file, 'r') 
-        self.begin_chunk_lines = []  # Cache where the stream chunks are
-        for (n, line) in enumerate(f):
-            if sta_chunk in line:
-                if indexed_only:
-                    self.begin_chunk_lines.append(n)
-                    self.n_frames += 1
-                    dat = self.get_frame(frame_number=self.n_frames - 1, no_pad=True)
-                    if dat['A_matrix'] is None:
-                        self.n_frames -= 1
-                        self.begin_chunk_lines.pop()
-                        continue
-                else:
-                    self.begin_chunk_lines.append(n)
-                    self.n_frames += 1
+        with open(stream_file, 'r') as f: 
+            self.begin_chunk_lines = []  # Cache where the stream chunks are
+            for (n, line) in enumerate(f):
+                if sta_chunk in line:
+                    if indexed_only:
+                        self.begin_chunk_lines.append(n)
+                        self.n_frames += 1
+                        dat = self.get_frame(frame_number=self.n_frames - 1, no_pad=True)
+                        if dat['A_matrix'] is None:
+                            self.n_frames -= 1
+                            self.begin_chunk_lines.pop()
+                            continue
+                    else:
+                        self.begin_chunk_lines.append(n)
+                        self.n_frames += 1
         if geom_file is None:
             geom_file = 'temp.geom'
         self.geom_file = geom_file
         self.geom_dict = load_crystfel_geometry(geom_file)
         self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file)
 
-    def get_frame(self, frame_number=0, no_pad=False):
+    def get_frame(self, frame_number=0, **kwargs):
+        if 'no_pad' in kwargs:
+            self.no_pad = kwargs['no_pad']
+            del kwargs['no_pad']
+        else:
+            self.no_pad = False
+        return super().get_frame(frame_number=frame_number)
+
+    def get_data(self, frame_number=0):
         if frame_number >= self.n_frames:
             return None
         A = np.zeros((3,3))
@@ -441,7 +449,7 @@ class StreamfileFrameGetter(FrameGetter):
         dat['cxi_file_path'] = cxi_file_path
         dat['cxi_frame_number'] = cxi_frame_number
         dat['photon_energy'] = photon_energy
-        if not no_pad:
+        if not self.no_pad:
             # Extract data from the cxi file
             if self.h5_file_path != cxi_file_path:
                 self.h5_file_path = cxi_file_path
@@ -451,3 +459,7 @@ class StreamfileFrameGetter(FrameGetter):
             pad_data = split_image(pad_data, self.geom_dict)
             dat['pad_data'] = pad_data
         return dat
+
+    def __del__(self):
+        linecache.clearcache()
+

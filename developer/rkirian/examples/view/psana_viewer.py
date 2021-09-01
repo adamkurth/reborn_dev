@@ -97,7 +97,7 @@ class MyFrameGetter(FrameGetter):
         self.n_frames = len(self.times)
         self.current_frame = 0
         self.detector = detector
-    def get_frame(self, frame_number=1):
+    def get_data(self, frame_number=1):
         self.current_frame = frame_number
         event = self.run.event(self.times[self.current_frame])
         pad_data = self.detector.get_calib_split(event)
