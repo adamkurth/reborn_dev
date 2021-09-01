@@ -20,15 +20,15 @@ Classes for analyzing/simulating diffraction data contained in pixel array detec
 import os
 import json
 import numpy as np
-from . import utils
 import pkg_resources
+from . import utils
 
 
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
 cspad_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_geometry.json')
 cspad_2x2_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad_2x2_geometry.json')
 epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k_geometry.json')
-mpccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/mpccd_geometry.json')  # FIXME: Kosta
+mpccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/mpccd_geometry.json')
 jungfrau4m_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/jungfrau4m_geometry.json')
 
 
@@ -136,7 +136,7 @@ class PADGeometry:
         r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
         return hash(self.__str__())
 
-    def validate(self, raise_error=None):
+    def validate(self, **kwargs):
         r""" Determine if this instance has all the needed parameters defined.
 
         Returns:
@@ -207,7 +207,7 @@ class PADGeometry:
 
     @property
     def t_vec(self):
-        r""" (|ndarray|) Translation vector pointing from origin to center of corner pixel, which is first in memory. """
+        r""" (|ndarray|) Translation vector pointing from origin to center of corner pixel, which is first in memory."""
         return self._t_vec
 
     @fs_vec.setter
@@ -324,7 +324,7 @@ class PADGeometry:
         s_vec = np.outer(idx_ss.ravel(), self.ss_vec)
         return self.t_vec + f_vec + s_vec
 
-    def vectors_to_indices(self, vecs, insist_in_pad=True, round=False):
+    def vectors_to_indices(self, vecs, insist_in_pad=True, round_to_nearest=False, **kwargs):
         r""" Suppose you have a vector pointing away from the origin and you want to know which pixel the vector will
         intercept.  This function will do that calculation for you.  It will return the indices corresponding to the
         point where the vector intercepts the PAD.  Note that the indices are floating points, so you might need to
@@ -334,15 +334,19 @@ class PADGeometry:
             vecs (|ndarray|): An array of vectors, with shape (N, 3) or shape (3)
             insist_in_pad (bool): If you want to allow out-of-range indices, set this to True.  Otherwise, out-of-range
                                   values will be set to nan.
+            round_to_nearest (bool): Round to nearest pixel position.  Default: False.
 
         Returns:
             (tuple) : Slow-scan indices, Fast-scan indices.
         """
+        if "round" in kwargs.keys():  # Legacy keyword agument
+            round_to_nearest = kwargs["round"]
+            del kwargs["round"]
         vecs = np.atleast_2d(vecs)
         fxs = np.dot(vecs, np.cross(self.ss_vec, self.fs_vec))
         i = np.dot(np.cross(self.ss_vec, vecs), self.t_vec)/fxs
         j = -np.dot(np.cross(self.fs_vec, vecs), self.t_vec)/fxs
-        if round:
+        if round_to_nearest:
             i = np.round(i)
             j = np.round(j)
         if insist_in_pad:
@@ -643,6 +647,13 @@ class PADGeometry:
         return 2 * np.pi / np.max(self.q_mags(beam=beam))
 
     def corner_position_vectors(self):
+        r"""
+        Returns the coordinates of all four corners of the detector.  The output is an |ndarray| with shape (5, 3) and
+        the following entries [t, t+nf*f, t+nf*f+ns*s, t+ns*s] .
+
+        Returns:
+            |ndarray| : The corner positions of the PAD.
+        """
         t, f, s, nf, ns = self.t_vec, self.fs_vec, self.ss_vec, self.n_fs, self.n_ss
         return np.array([t, t+nf*f, t+nf*f+ns*s, t+ns*s])
 
@@ -676,6 +687,9 @@ class PADGeometry:
 
 
 class PADGeometryList(list):
+    r""" A subclass of list that does operations on lists of |PADGeometry| instances.  Is helpful, for example.
+    when getting q vectors for many separate PADs.
+    """
 
     _q_mags = None
 
@@ -685,16 +699,20 @@ class PADGeometryList(list):
             raise ValueError('Not a PADGeometry instance.')
         if not item.name:
             item.name = len(self).__str__()
-        super(PADGeometryList, self).append(item)
+        super().append(item)
 
-    def __init__(self, pad_geometry):
-        r""" A subclass of list that does operations on lists of |PADGeometry| instances.  Is helpful, for example.
-        when getting q vectors for many separate PADs. """
+    def __init__(self, pad_geometry=None, filepath=None):
+        r"""
+        Arguments:
+            pad_geometry (|PADGeometry| or list of): The PAD geometry that will form the PADGeometryList.
+        """
         super().__init__()
         if pad_geometry is not None:
             pad_geometry = utils.ensure_list(pad_geometry)
             for p in pad_geometry:
                 self.append(p)
+        if filepath is not None:
+            self.load(filepath)
 
     def __str__(self):
         s = ''
@@ -708,6 +726,9 @@ class PADGeometryList(list):
 
     def concat_data(self, data):
         r""" Concatenate a list of |ndarray| instances into a single concatenated 1D |ndarray| ."""
+        if isinstance(data, list):
+            if len(data) != len(self):
+                raise ValueError("Length of data list is not the same length as the PADGeometryList")
         return concat_pad_data(data)
 
     @property
@@ -725,8 +746,7 @@ class PADGeometryList(list):
             status *= p.validate(raise_error=raise_error)
         if status:
             return True
-        else:
-            return False
+        return False
 
     @property
     def n_pixels(self):
@@ -806,6 +826,26 @@ class PADGeometryList(list):
         binned = [p.binned(binning) for p in self]
         return PADGeometryList(binned)
 
+    def load(self, filename):
+        r""" Load the data from saved PADGeometryList. """
+        try:
+            pads = load_pad_geometry_list(filename)
+        except:
+            try:
+                from .external import crystfel
+                pads = crystfel.geometry_file_to_pad_geometry_list(filename)
+            except:
+                raise ValueError("Cannot figure out what kind of geometry file this is.")
+        if len(self) == 0:
+            for p in pads:
+                self.append(p)
+            return
+        elif len(self) == len(pads):
+            for (n, p) in enumerate(pads):
+                self[n] = p
+            return
+        raise ValueError("It is not clear what you are trying to do.  The PADGeometryList should be empty, or should"
+                         "have the same length as the geometry file.")
 
 def f2_to_photon_counts(f_squared, beam=None, pad_geometry=None):
     r"""
@@ -837,7 +877,7 @@ def save_pad_geometry_list(file_name, geom_list):
 def load_pad_geometry_list(file_name):
     r""" Load a list of PADGeometry instances stored in json format. """
     if file_name == '_pnccd':
-        return
+        return None
     with open(file_name, 'r') as f:
         dicts = json.load(f)
     out = []
@@ -1194,8 +1234,12 @@ class IcosphereGeometry():
         return verts, faces, face_centers
 
 
-class RadialProfiler():
-
+class RadialProfiler:
+    r"""
+    A class for creating radial profiles from image data.  You must provide the number of bins and the q range that
+    you desire for your radial profiles.  The q magnitudes that correspond to your diffraction patterns may be
+    derived from a list of |PADGeometry|'s along with a |Beam|, or you may supply the q magnitudes directly.
+    """
     # pylint: disable=too-many-instance-attributes
     n_bins = None  # Number of bins in radial profile
     q_range = None  # The range of q magnitudes in the 1D profile.  These correspond to bin centers
@@ -1211,10 +1255,6 @@ class RadialProfiler():
 
     def __init__(self, q_mags=None, mask=None, n_bins=None, q_range=None, pad_geometry=None, beam=None):
         r"""
-        A class for creating radial profiles from image data.  You must provide the number of bins and the q range that
-        you desire for your radial profiles.  The q magnitudes that correspond to your diffraction patterns may be
-        derived from a list of |PADGeometry|'s along with a |Beam|, or you may supply the q magnitudes directly.
-
         Arguments:
             q_mags (|ndarray|): Optional.  Array of q magnitudes.
             mask (|ndarray|): Optional.  The arrays will be multiplied by this mask, and the counts per radial bin
@@ -1231,6 +1271,7 @@ class RadialProfiler():
 
     @property
     def mask(self):
+        r""" PAD masks. """
         return self._mask
 
     @mask.setter
@@ -1416,7 +1457,7 @@ class RadialProfiler():
 
         """
         as_list = False
-        if type(data) == list:
+        if isinstance(data, list):
             as_list = True
         if statistic == 'mean':
             mprof = self.get_mean_profile(data, mask=mask)
@@ -1523,7 +1564,8 @@ def load_pad_masks(file_name):
     keys = list(out.keys())
     n = int(len(out) - 1)
     file_format = out['format']
-    def _range(x): return np.arange(x, dtype=int)
+    def _range(x):
+        return np.arange(x, dtype=int)
     if file_format == 1:
         shapes = [out[keys[i]] for i in _range(n/2) + 1]
         masks = [out[keys[i]] for i in _range(n/2) + int(n/2) + 1]

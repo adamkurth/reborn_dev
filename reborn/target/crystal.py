@@ -1048,8 +1048,6 @@ def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, o
     # The above schematic is for a map with 3 bins.  The grid samples that correspond to x_min and x_max are in the
     # centers of the bins, indicated by the * symbol.  Supposing we want to place a Gaussian centered at the x position,
     # we need to calculate distances to sample points indexed with 0, 1, 2 but with wrap-around factored in.
-    #
-    #
 
     n_atoms = f.shape[0]  # Number of atoms
     dx = (x_max - x_min)/(shape - 1)  # Bin width

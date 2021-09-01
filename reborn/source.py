@@ -75,8 +75,7 @@ class Beam:
             return True
         if raise_error:
             raise ValueError('Something is wrong with this Beam instance.')
-        else:
-            return False
+        return False
 
     @property
     def hash(self):
@@ -251,7 +250,7 @@ def float_tuple(val):
     """
     if val is None:
         return val
-    if type(val) == tuple:
+    if isinstance(val, tuple):
         val = tuple([float_tuple(v) for v in val])
         return val
     return float(val)

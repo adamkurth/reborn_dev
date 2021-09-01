@@ -60,21 +60,39 @@ class DataFrame:
     def validate(self):
         r""" Check that this dataframe is valid.  A valid dataframe must at minimum have a frame ID, a valid Beam
         instance, a valid PADGeometryList instance, and raw data.  """
-        if self._frame_id is None: return False
-        if self._beam is None: return False
-        if self._pad_geometry is None: return False
-        if self._raw_data is None: return False
-        if self._beam.validate() is False: return False
-        if self._pad_geometry.validate() is False: return False
-        if not isinstance(self._raw_data, np.ndarray): return False
+        if self._frame_id is None:
+            return False
+        if self._beam is None:
+            return False
+        if self._pad_geometry is None:
+            return False
+        if self._raw_data is None:
+            return False
+        if self._beam.validate() is False:
+            return False
+        if self._pad_geometry.validate() is False:
+            return False
+        if not isinstance(self._raw_data, np.ndarray):
+            return False
         return True
 
     def copy(self):
+        r""" Makes a copy of the dataframe, including all internal data. """
         df = DataFrame()
-        df.set_pad_geometry(self.get_pad_geometry().copy())
-        df.set_beam(self.get_beam().copy())
-        df.set_raw_data(self.raw_data)
-        df.set_processed_data(self.processed_data)
+        if self._pad_geometry is not None:
+            df._pad_geometry = self._pad_geometry.copy()
+        if self._beam is not None:
+            df._beam = self._beam.copy()
+        if self._raw_data is not None:
+            df._raw_data = self._raw_data.copy()
+        if self._processed_data is not None:
+            df._processed_data = self._processed_data
+        if self._pfac is not None:
+            df._pfac = self._pfac.copy()
+        if self._sa is not None:
+            df._sa = self._sa.copy()
+        if self._mask is not None:
+            df._mask = self._mask.copy()
         return df
 
     @property
@@ -94,21 +112,26 @@ class DataFrame:
 
     @property
     def q_mags(self):
+        r""" Concatenates the output of the corresponding function for each PADGeometry. """
         return self.get_q_mags_flat()
 
     @property
     def q_vecs(self):
+        r""" Concatenates the output of the corresponding function for each PADGeometry. """
         return self.get_q_vecs()
 
     @property
     def solid_angles(self):
+        r""" Concatenates the output of the corresponding function for each PADGeometry. """
         return self.get_solid_angles_flat()
 
     @property
     def polarization_factors(self):
+        r""" Concatenates the output of the corresponding function for each PADGeometry. """
         return self.get_polarization_factors_flat()
 
     def clear_cache(self):
+        r""" Deletes cached q_mags, q_vecs, solid_angles, polarization_factors"""
         self._q_mags = None
         self._q_vecs = None
         self._sa = None
@@ -126,7 +149,6 @@ class DataFrame:
     def get_frame_id(self):
         r""" Unique identifier for this dataframe.  Most often this is an integer, but in some cases, such as the LCLS,
         it may be something else such as a tuple.  LCLS uses a tuple of integers: seconds, nanoseconds, and fiducial."""
-        # FIXME: This should somehow make a copy if need be.  No need to copy integers.
         return self._frame_id
 
     def set_frame_id(self, frame_id):
@@ -227,14 +249,18 @@ class DataFrame:
 
     def get_solid_angles_flat(self):
         r""" Get pixel solid angles as flat array. """
-        return self._pad_geometry.solid_angles()
+        if self._sa is None:
+            self._sa = self._pad_geometry.solid_angles()
+        return self._sa.copy()
 
     def get_polarization_factors_flat(self):
         r""" Get polarization factors as a flat array. """
-        return self._pad_geometry.polarization_factors(beam=self._beam)
+        if self._pfac is None:
+            self._pfac = self._pad_geometry.polarization_factors(beam=self._beam)
+        return self._pfac.copy()
 
-    def get_bragg_peaks(self):
-        pass
-
-    def set_bragg_peaks(self, bragg_peaks):
-        pass
+    # def get_bragg_peaks(self):
+    #     pass
+    #
+    # def set_bragg_peaks(self, bragg_peaks):
+    #     pass

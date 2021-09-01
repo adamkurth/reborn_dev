@@ -12,10 +12,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
-
 import numpy as np
 from scipy.special import sph_harm
-from reborn.math.spherical import ylmIntegration
+from reborn.misc.spherical import ylmIntegration
 
 
 def test_ylmIntegration():
@@ -30,37 +29,3 @@ def test_ylmIntegration():
             ylmc = intylm.calc_ylmcoef(f)
             ylmc[l, m] -= 1.0
             assert (np.max(np.abs(ylmc)) < small)
-
-
-def test_kabsch():
-    r""" 
-    Generate a random (3x3) array and rotate it with a random rotation matrix.
-    See if we can deduce the rotational matrix given the original A and the rotated A
-    using the Kabsch algorithm.
-    """
-    from reborn.math.kabsch import kabsch
-    from scipy.stats import special_ortho_group
-
-    np.random.seed(42)
-
-    small = 1.0e-12 # Error we want the result to be smaller than
-
-    # Generate a random A matrix
-    A = np.random.rand(3,3)
-
-    # Generate a random rotation matrix
-    R = special_ortho_group.rvs(dim=3)
-
-    # Rotate A
-    A_home = np.dot(R,A)
-
-    # Take the transpose because the scipy align_vectors function assumes shape of (N,3),
-    # i.e. the vectors are assumed to be stacked horizontally.
-    A = A.T
-    A_home = A_home.T
-
-    # Now run the Kabsch algorithm and convert the output to a rotation matrix
-    R_est = kabsch(A, A_home)
-
-    assert (np.sum(np.abs(R - R_est)) < small)
-
