@@ -361,7 +361,7 @@ class StreamfileFrameGetter(FrameGetter):
     n_frames = 0
     cxi_path_replace = None  # Set to tuple of strings (remove, replace)
 
-    def __init__(self, stream_file=None, geom_file=None, indexed_only=False ):
+    def __init__(self, stream_file=None, geom_file=None, indexed_only=False):
         r"""
         Arguments:
             stream_file (str): Path to the stream file

@@ -55,7 +55,7 @@ class FrameGetter(ABC):
     current_frame = 0
     geom_dict = None
     history_length = 10000
-    history = np.zeros(history_length, dtype=np.int)
+    history = np.zeros(history_length, dtype=int)
     history_index = 0
 
     def __init__(self):
