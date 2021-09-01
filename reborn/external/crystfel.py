@@ -391,6 +391,8 @@ class StreamfileFrameGetter(FrameGetter):
         self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file)
 
     def get_frame(self, *args, **kwargs):
+        if 'no_pad' in kwargs:
+            del kwargs['no_pad']
         return super().get_frame(*args, **kwargs)
 
     def get_data(self, frame_number=0, no_pad=False):
