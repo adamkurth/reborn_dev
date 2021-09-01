@@ -459,3 +459,7 @@ class StreamfileFrameGetter(FrameGetter):
             pad_data = split_image(pad_data, self.geom_dict)
             dat['pad_data'] = pad_data
         return dat
+
+    def __del__(self):
+        linecache.clearcache()
+
