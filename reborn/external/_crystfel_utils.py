@@ -452,6 +452,17 @@ def load_crystfel_geometry(filename):
 
     fhandle = open(filename, mode="r")
     fhlines = fhandle.readlines()
+
+    # Modified to deal with stream files
+    startline = 0
+    endline = len(fhlines)
+    for c, line in enumerate(fhlines):
+        if line.startswith("----- Begin geometry file -----"):
+            startline = c
+        if line.startswith("----- End geometry file -----"):
+            endline = c
+    fhlines = fhlines[startline:endline]
+
     for line in fhlines:
         if line.startswith(";"):
             continue

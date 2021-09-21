@@ -385,7 +385,7 @@ class StreamfileFrameGetter(FrameGetter):
                         self.begin_chunk_lines.append(n)
                         self.n_frames += 1
         if geom_file is None:
-            geom_file = 'temp.geom'
+            geom_file = stream_file  # The stream file should have geometry in it, so we try to use it
         self.geom_file = geom_file
         self.geom_dict = load_crystfel_geometry(geom_file)
         self.pad_geometry = geometry_file_to_pad_geometry_list(geom_file)
