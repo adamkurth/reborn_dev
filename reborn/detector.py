@@ -918,7 +918,7 @@ def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0
             # pad.t_vec[0:2] += 0.5 * pixel_size
             pads.append(pad)
 
-    return pads
+    return PADGeometryList(pads)
 
 
 def concat_pad_data(data):
