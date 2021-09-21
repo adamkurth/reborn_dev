@@ -763,59 +763,59 @@ class PADGeometryList(list):
 
     def position_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.position_vecs() for p in self])
+        return np.concatenate([p.position_vecs().ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def s_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.s_vecs() for p in self])
+        return np.concatenate([p.s_vecs().ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def ds_vecs(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.ds_vecs(beam=beam) for p in self])
+        return np.concatenate([p.ds_vecs(beam=beam).ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def q_vecs(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.q_vecs(beam=beam) for p in self])
+        return np.concatenate([p.q_vecs(beam=beam).ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def q_mags(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.q_mags(beam=beam) for p in self])
+        return np.concatenate([p.q_mags(beam=beam).ravel() for p in self])
 
     def solid_angles(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.solid_angles() for p in self])
+        return np.concatenate([p.solid_angles().ravel() for p in self])
 
     def solid_angles1(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.solid_angles1() for p in self])
+        return np.concatenate([p.solid_angles1().ravel() for p in self])
 
     def solid_angles2(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.solid_angles2() for p in self])
+        return np.concatenate([p.solid_angles2().ravel() for p in self])
 
     def polarization_factors(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.polarization_factors(beam=beam) for p in self])
+        return np.concatenate([p.polarization_factors(beam=beam).ravel() for p in self])
 
     def scattering_angles(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.scattering_angles(beam=beam) for p in self])
+        return np.concatenate([p.scattering_angles(beam=beam).ravel() for p in self])
 
     def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.beamstop_mask(beam, q_min, min_angle) for p in self])
+        return np.concatenate([p.beamstop_mask(beam, q_min, min_angle).ravel() for p in self])
 
     def zeros(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.zeros() for p in self])
+        return np.concatenate([p.zeros().ravel() for p in self])
 
     def ones(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.ones() for p in self])
+        return np.concatenate([p.ones().ravel() for p in self])
 
     def random(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.random() for p in self])
+        return np.concatenate([p.random().ravel() for p in self])
 
     def max_resolution(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
