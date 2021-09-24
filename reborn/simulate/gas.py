@@ -2,8 +2,8 @@ import numpy as np
 from scipy import spatial
 import matplotlib.pyplot as plt
 
-from .. import utils
-from ..target import crystal, atoms
+from reborn import utils
+from reborn.target import crystal, atoms
 
 try: 
     import numba as nb
