@@ -14,6 +14,7 @@ for p in pads2:
     p.t_vec[0] += 100e-3
     p.t_vec[2] += 0.2
 pads = detector.PADGeometryList(pads1 + pads2)
+pads[3] = pads[3].binned(10)
 intsty = get_pad_solution_intensity(beam=beam, pad_geometry=pads, thickness=60e-6, liquid='water', poisson=False)
 intsty = pads.concat_data(intsty)
 intsty /= pads.solid_angles()
