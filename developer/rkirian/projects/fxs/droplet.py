@@ -26,13 +26,13 @@ water_density = 1000
 ##########################################################################
 # Configurations
 #######################################################################
-pad_geometry_file = detector.cspad_2x2_geom_file
-pad_binning = 3
-photon_energy = 7000 * eV
-detector_distance = 1  # 2.4
-pulse_energy = 3e-3
+pad_geometry_file = detector.epix10k_geom_file
+pad_binning = 1
+photon_energy = 3000 * eV
+detector_distance = 2.4
+pulse_energy = 1e-3
 drop_radius = 100e-9 / 2
-beam_diameter = 0.2e-6
+beam_diameter = 0.5e-6
 map_resolution = 0.2e-9  # Minimum resolution for 3D density map
 map_oversample = 2  # Oversampling factor for 3D density map
 cell_size = 200e-10  # Unit cell size (assume P1, cubic)
@@ -58,7 +58,7 @@ f_dens_water = atoms.xraylib_scattering_density('H2O', water_density, photon_ene
 pads = detector.load_pad_geometry_list(pad_geometry_file)
 for p in pads:
     p.t_vec[2] = detector_distance
-pads = pads.binned(3)
+pads = pads.binned(pad_binning)
 q_mags = pads.q_mags(beam=beam)
 solid_angles = pads.solid_angles()
 polarization_factors = pads.polarization_factors(beam=beam)
@@ -96,7 +96,7 @@ class DropletGetter(FrameGetter):
         super().__init__()
         self.n_frames = np.inf
     def get_data(self, frame_number=0):
-        dd = drop_radius*2 + (np.random.rand()-0.5)*drop_radius/5
+        dd = drop_radius*2 #+ (np.random.rand()-0.5)*drop_radius/5
         nppd = int(protein_number_density*4/3*np.pi*(dd/2)**3)
         p_vecs = placer.particles_in_a_sphere(sphere_diameter=dd, n_particles=nppd, particle_diameter=protein_diameter)
         add = False
@@ -105,15 +105,16 @@ class DropletGetter(FrameGetter):
             U = p_vecs[p, :]
             clcore.mesh_interpolation(F_gpu,q_vecs_gpu,N=dmap.shape,q_min=q_min,q_max=q_max,R=R,U=U,a=amps_gpu,add=add)
             add = True
-        clcore.sphere_form_factor(r=drop_radius, q=q_mags_gpu, a=amps_gpu, add=add)
-        I = np.abs(amps_gpu.get())**2*r_e**2*solid_angles*polarization_factors*fluence
+        # clcore.sphere_form_factor(r=dd/2, q=q_mags_gpu, a=amps_gpu, add=add)
+        sff = f_dens_water*sphere_form_factor(radius=dd/2, q_mags=q_mags)
+        I = np.abs(amps_gpu.get()+sff)**2*r_e**2*solid_angles*polarization_factors*fluence
         I = np.random.poisson(I)
         df = dataframe.DataFrame(pad_geometry=pads, beam=beam, raw_data=I)
         return df
 fg = DropletGetter()
 pv = PADView(frame_getter=fg)
 pv.start()
-sys.exit()
+# sys.exit()
 
 ################################################################################
 # FXS Simulation

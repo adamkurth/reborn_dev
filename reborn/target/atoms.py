@@ -375,8 +375,7 @@ def hubbel_form_factors(q_mags, atomic_number):
 def hubbel_henke_scattering_factors(q_mags, atomic_number, photon_energy):
     r"""
     Get the q-dependent atomic form factors for a single atomic number and single photon energy, using the Hubbel atomic
-    form factors and the Henke dispersion corrections.  This is what most people should use if they want q-dependent
-    scattering factors with dispersion included.
+    form factors (|Hubbel1975|) and the Henke dispersion corrections (|Henke1993|).
 
     Args:
         q_mags (|ndarray|):  q vector magnitudes.
@@ -387,6 +386,24 @@ def hubbel_henke_scattering_factors(q_mags, atomic_number, photon_energy):
         |ndarray|: Atomic form factor :math:`f(q)` with dispersion corrections
     """
     f0 = hubbel_form_factors(q_mags, atomic_number)
+    df = henke_scattering_factors(atomic_number, photon_energy) - atomic_number
+    return f0 + df
+
+
+def cmann_henke_scattering_factors(q_mags, atomic_number, photon_energy):
+    r"""
+    Get the q-dependent atomic form factors for a single atomic number and single photon energy, using the Cromer-Mann
+    scattering factors (|Cromer1968|) and the Henke dispersion corrections (|Henke1993|).
+
+    Args:
+        q_mags (|ndarray|):  q vector magnitudes.
+        atomic_number (int):  Atomic number.
+        photon_energy (float):  Photon energy.
+
+    Returns:
+        |ndarray|: Atomic form factor :math:`f(q)` with dispersion corrections
+    """
+    f0 = cromer_mann_scattering_factors(q_mags, atomic_number)
     df = henke_scattering_factors(atomic_number, photon_energy) - atomic_number
     return f0 + df
 
@@ -426,12 +443,12 @@ def cromer_mann_scattering_factors(q_mags, atomic_numbers):
 
 def get_cmann_form_factors(cman, q):
     r"""
-    Generates the form factors :math:`f_0(q)` from the model of |Cromer1968|.  Needs documentation - ask Derek Mendez.
-    If you want to work with neutral atoms, use :func:`cromer_mann_scattering_factors` instead.
+    Generates the form factors :math:`f_0(q)` from the model of |Cromer1968|.  If you want to work with neutral atoms,
+    use :func:`cromer_mann_scattering_factors` instead.
 
     Arguments:
         cman (dict): Dictionary containing {atomic_number : array of cman parameters}
-        q (|ndarray|): Either an array of vectors :math:`\vec{q}` with shape (N,v3), or an array of :math:`q`
+        q (|ndarray|): Either an array of vectors :math:`\vec{q}` with shape (N,3), or an array of :math:`q`
                        magnitudes.
 
     Returns:
