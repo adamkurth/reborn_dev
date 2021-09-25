@@ -50,5 +50,6 @@ if poisson:
 # print(n_gas_molecules)
 # total_intensity = gas_intensity + h2o_intensity
 total_intensity = h2o_intensity / gas_intensity
+print(total_intensity[0:5])
 pv = PADView(pad_geometry=pads, raw_data=total_intensity)
 pv.start()

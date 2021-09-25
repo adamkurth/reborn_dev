@@ -38,37 +38,35 @@ def isotropic_gas_intensity_profile(r_vecs=None, q_mags=None, atomic_numbers=Non
         atomic_numbers = molecule.atomic_numbers
     if beam is not None:
         photon_energy = beam.photon_energy
-    r_vecs = utils.atleast_2d(r_vecs)
+    r_vecs = utils.atleast_2d(r_vecs)  # Make sure it works with a single atom, just to keep things general
     rij = spatial.distance.squareform(spatial.distance.pdist(r_vecs))
     max_dist = rij.max()
     if max_dist == 0:
-        max_dist = 2e-10
+        max_dist = 2e-10  # What is the appropriate Shannon sampling for a single atom?
     n_atoms = r_vecs.shape[0]
-    wsh = np.pi / max_dist
-    nsh = np.ceil(q_mags.max() / wsh).astype(int) + 5
-    qsh = (np.arange(nsh) + 1) * wsh
-    ff = np.zeros((n_atoms, nsh), dtype=np.complex)
+    wsh = np.pi / max_dist  # Width of Shannon sample
+    nsh = np.ceil(q_mags.max() / wsh).astype(int) + 5  # Number of Shannon samples (plus five)
+    qsh = (np.arange(nsh) + 1) * wsh  # q magnitudes for each Shannon sample
+    ff = np.zeros((n_atoms, nsh), dtype=np.complex)  # FIXME: This is a highly redundant array
+    unique_atomic_numbers = np.unique(atomic_numbers)
+    max_z = np.max(unique_atomic_numbers)
+    z_map = np.zeros(max_z)  # This maps atomic number to index of scatter factor
+    ff = np.empty((max_z, nsh), dtype=np.complex)
     for i in range(n_atoms):
         ff[i, :] = atoms.cmann_henke_scattering_factors(q_mags=qsh, atomic_number=atomic_numbers[i],
                                                         photon_energy=photon_energy)
     if numba:
-        intensity_shannon = _pdb2sas_nb(rij, qsh, ff)
+        intensity_shannon = debye_nb(rij, qsh, ff)
     else:
-        intensity_shannon = _pdb2sas(rij, qsh, ff)
-    intensity = Ish2Iq(Ish=intensity_shannon, D=max_dist, q=q_mags)
+        intensity_shannon = debye(rij, qsh, ff)
+    N = np.arange(nsh)+1
+    N = N[:, None]
+    kernel = (N*np.pi)**2 * np.sinc(q_mags*max_dist/np.pi) * (-1)**(N+1) / ((N*np.pi)**2-(q_mags*max_dist)**2)
+    intensity = 2*np.einsum('k,ki->i', intensity_shannon, kernel)
     return intensity
 
 
-def Ish2Iq(Ish, D, q=(np.arange(500)+1.)/1000):
-    """Calculate I(q) from intensities at Shannon points."""
-    n = len(Ish)
-    N = np.arange(n)+1
-    denominator = (N[:, None]*np.pi)**2-(q*D)**2
-    I = 2*np.einsum('k,ki->i', Ish, (N[:, None]*np.pi)**2 / denominator * np.sinc(q*D/np.pi) * (-1)**(N[:, None]+1))
-    return I
-
-
-def _pdb2sas(rij, q, ff):
+def debye(rij, q, ff):
     """
     FIXME: There is something wrong with this function.  It does not produce the same output as the numba version.
     Calculate the scattering of an object from a set of 3D coordinates using the Debye formula.
@@ -77,14 +75,14 @@ def _pdb2sas(rij, q, ff):
     q - q values to use for calculations..
     ff - an array of form factors calculated for each atom in a pdb object. q's much match q array.
     """
-    s = np.sinc(q * rij[...,None]/np.pi)
-    I = np.einsum('iq,jq,ijq->q',ff,ff,s)
+    s = np.sinc(q * rij[..., None] / np.pi)
+    I = np.einsum('iq,jq,ijq->q', ff, ff, s)
     return I
 
 
 if numba:
     @nb.njit(fastmath=True, parallel=True, error_model="numpy", cache=True)
-    def _pdb2sas_nb(rij, q, ff):
+    def debye_nb(rij, q, ff):
         """Calculate the scattering of an object from a set of 3D coordinates using the Debye formula.
         This function is intended to be used with the numba njit decorator for speed.
         rij - distance matrix, ie. output from scipy.spatial.distance.pdist(pdb.coords) (after squareform)
@@ -106,28 +104,3 @@ if numba:
                         acc += ff_T[qi, ri]*ff_T[qi, rj]
             I[qi] = np.abs(acc)
         return I
-
-
-if __name__ == "__main__":
-    # Configuration
-    pdb_id = '1LYZ'
-    cryst = crystal.CrystalStructure(pdb_id)
-    mol = cryst.molecule
-    q_mags = np.linspace(0, 1, 1001) * 1e10
-    photon_energies = np.linspace(280, 290, 20)*1.602e-19
-    # Fancy colors for plotting
-    n_colors = len(photon_energies)
-    cm = plt.get_cmap('gist_rainbow')
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.set_prop_cycle(color=[cm(1. * i / n_colors) for i in range(n_colors)])
-    # Calculate and plot
-    for E in photon_energies:
-        Iq = isotropic_gas_intensity_profile(molecule=cryst.molecule, q_mags=q_mags, photon_energy=E)
-        plt.semilogy(q_mags, Iq, label=('%6.2f' % E))
-        # Save files?
-        if False:
-            np.savetxt('Iq_%6.2f.dat' % E, Iq, delimiter=' ', fmt='%.8e')
-            np.savetxt('Pr_%6.2f.dat' % E, Pr, delimiter=' ', fmt='%.8e')
-    plt.legend()
-    plt.show()
