@@ -1,7 +1,10 @@
+import sys
+from time import time
 import numpy as np
 from scipy import constants
+import matplotlib.pyplot as plt
 from reborn import source, detector
-from reborn.target import molecule
+from reborn.target import molecule, crystal
 from reborn.simulate import gas, solutions
 from reborn.viewers.qtviews import PADView
 eV = constants.value('electron volt')
@@ -29,12 +32,20 @@ h2o_intensity = solutions.get_pad_solution_intensity(beam=beam, pad_geometry=pad
                                            thickness=water_thickness, liquid='water', poisson=poisson)
 h2o_intensity = pads.concat_data(h2o_intensity)
 h2o_intensity /= pads.solid_angles() * pads.polarization_factors(beam=beam)
-# Build an N2 molecule
+# Build a rhodopsin molecule
+rhod_mol = crystal.CrystalStructure('1f88').molecule
+# Build N2, O2, and he molecules
 n2_mol = molecule.Molecule(coordinates=np.array([[0, 0, 0], [0, 0, 1.07e-10]]), atomic_numbers=[7, 7])
 o2_mol = molecule.Molecule(coordinates=np.array([[0, 0, 0], [0, 0, 1.21e-10]]), atomic_numbers=[8, 8])
 he_mol = molecule.Molecule(coordinates=np.array([[0, 0, 0]]), atomic_numbers=[2, 2])
-q_profile = np.linspace(q_mags.min(), q_mags.max(), 1000)
+q_profile = np.linspace(q_mags.min(), q_mags.max(), 100)
+# print('rhod')
+# rhod_profile = gas.isotropic_gas_intensity_profile(molecule=rhod_mol, beam=beam, q_mags=q_profile)
+print('n2')
 n2_profile = gas.isotropic_gas_intensity_profile(molecule=n2_mol, beam=beam, q_mags=q_profile)
+plt.plot(n2_profile)
+plt.show()
+sys.exit()
 o2_profile = gas.isotropic_gas_intensity_profile(molecule=o2_mol, beam=beam, q_mags=q_profile)
 he_profile = gas.isotropic_gas_intensity_profile(molecule=he_mol, beam=beam, q_mags=q_profile)
 n_gas_molecules = np.pi * (beam.diameter_fwhm/2)**2 * gas_length * pressure / k / temperature

@@ -121,13 +121,14 @@ def import_f90(name, extra_args=''):
         write_hash(source_file_path)  # Create the md5 hash of the file, so we'll know if it changes in the future.
     return module
 
-
+omp_args = "--f90flags='-fopenmp -O2' -lgomp"
 utils_f = import_f90('utils')
 interpolations_f = import_f90('interpolations')
 fortran_indexing_f = import_f90('fortran_indexing')
-peaks_f = import_f90('peaks', extra_args="--f90flags='-fopenmp -O2' -lgomp")
-omp_test_f = import_f90('omp_test', extra_args="--f90flags='-fopenmp -O2' -lgomp")
-density_f = import_f90('density', extra_args="--f90flags='-fopenmp -O2' -lgomp")
+peaks_f = import_f90('peaks', extra_args=omp_args)
+omp_test_f = import_f90('omp_test', extra_args=omp_args)
+density_f = import_f90('density', extra_args=omp_args)
+scatter_f = import_f90('scatter', extra_args=omp_args)
 
 from . import omp_test
 
