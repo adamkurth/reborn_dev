@@ -159,7 +159,7 @@ def henke_dispersion_corrections(atomic_numbers, photon_energies):
     return f.T.copy()
 
 
-def get_scattering_factors(atomic_numbers, photon_energy):
+def get_scattering_factors(atomic_numbers, photon_energy=None, beam=None):
     r"""
     Get complex atomic scattering factors (from Henke tables) for a single photon energy and a range of atomic numbers.
     The scattering factor data come from the function :func:`get_henke_data <reborn.target.atoms.get_henke_data>`.
@@ -169,11 +169,13 @@ def get_scattering_factors(atomic_numbers, photon_energy):
     Arguments:
         atomic_numbers (int/list-like): Atomic numbers.
         photon_energy (float): Photon energy in SI units.
+        beam (|Beam|): Supply a beam instead of photon energy.
 
     Returns:
         |ndarray|: Complex scattering factors.
     """
-
+    if beam is not None:
+        photon_energy = beam.photon_energy
     atomic_numbers = np.array(atomic_numbers).ravel()
     f = np.zeros([len(atomic_numbers)], dtype=complex)
     for z in np.unique(atomic_numbers):
@@ -200,7 +202,7 @@ def get_scattering_factors_fixed_z(atomic_number, photon_energies):
     return np.interp(np.array(photon_energies), dat['Photon Energy'], dat['Scatter Factor'], left=-9999, right=-9999)
 
 
-def xraylib_scattering_factors(q_mags, atomic_number, photon_energy):
+def xraylib_scattering_factors(q_mags, atomic_number, photon_energy=None, beam=None):
     r"""
     Get the q-dependent atomic scattering factors from the xraylib package.  The scattering factor is equal to
 
@@ -216,10 +218,13 @@ def xraylib_scattering_factors(q_mags, atomic_number, photon_energy):
         q_mags (|ndarray|):  q-vector magnitudes, where :math:`\vec{q} = \frac{2\pi}{\lambda}(\vec{s}-\vec{s}_0)`
         atomic_number (int):  The atomic number.
         photon_energy (float):  The photon energy in SI units.
+        beam (|Beam|): Supply a beam instead of photon energy.
 
     Returns:
         |ndarray|: Complex scattering factors :math:`f(q)`
     """
+    if beam is not None:
+        photon_energy = beam.photon_energy
     photon_energy = photon_energy/eV/1000
     qq = q_mags / 4.0 / np.pi / 1e10
     from xraylib import FF_Rayl, Fi, Fii
@@ -240,6 +245,7 @@ def xraylib_refractive_index(compound='H2O', density=1000, photon_energy=10000*e
         beam (|Beam|): For convenience, an alternative to photon_energy
         approximate (bool): Approximate with the non-resonant, high-frequency limit (Equation 1.1 of |Guinier|)
                             (Default: False)
+        beam (|Beam|): Supply a beam instead of photon energy.
 
     Returns:
         float: Refractive index
@@ -278,6 +284,7 @@ def xraylib_scattering_density(compound='H2O', density=1000, photon_energy=10000
         photon_energy (float): Photon energy in SI
         approximate (bool): Approximate with the non-resonant, high-frequency limit (Equation 1.1 of |Guinier|)
                             (Default: False)
+        beam (|Beam|): Supply a beam instead of photon energy.
 
     Returns:
         float: Scattering density
@@ -372,7 +379,7 @@ def hubbel_form_factors(q_mags, atomic_number):
 #     return np.interp(radii, r, rho)
 
 
-def hubbel_henke_scattering_factors(q_mags, atomic_number, photon_energy):
+def hubbel_henke_scattering_factors(q_mags, atomic_number, photon_energy=None, beam=None):
     r"""
     Get the q-dependent atomic form factors for a single atomic number and single photon energy, using the Hubbel atomic
     form factors (|Hubbel1975|) and the Henke dispersion corrections (|Henke1993|).
@@ -381,16 +388,19 @@ def hubbel_henke_scattering_factors(q_mags, atomic_number, photon_energy):
         q_mags (|ndarray|):  q vector magnitudes.
         atomic_number (int):  Atomic number.
         photon_energy (float):  Photon energy.
+        beam (|Beam|): Supply a beam instead of photon energy.
 
     Returns:
         |ndarray|: Atomic form factor :math:`f(q)` with dispersion corrections
     """
+    if beam is not None:
+        photon_energy = beam.photon_energy
     f0 = hubbel_form_factors(q_mags, atomic_number)
     df = henke_scattering_factors(atomic_number, photon_energy) - atomic_number
     return f0 + df
 
 
-def cmann_henke_scattering_factors(q_mags, atomic_number, photon_energy):
+def cmann_henke_scattering_factors(q_mags, atomic_number, photon_energy=None, beam=None):
     r"""
     Get the q-dependent atomic form factors for a single atomic number and single photon energy, using the Cromer-Mann
     scattering factors (|Cromer1968|) and the Henke dispersion corrections (|Henke1993|).
@@ -399,10 +409,13 @@ def cmann_henke_scattering_factors(q_mags, atomic_number, photon_energy):
         q_mags (|ndarray|):  q vector magnitudes.
         atomic_number (int):  Atomic number.
         photon_energy (float):  Photon energy.
+        beam (|Beam|): Supply a beam instead of photon energy.
 
     Returns:
         |ndarray|: Atomic form factor :math:`f(q)` with dispersion corrections
     """
+    if beam is not None:
+        photon_energy = beam.photon_energy
     f0 = cromer_mann_scattering_factors(q_mags, atomic_number)
     df = henke_scattering_factors(atomic_number, photon_energy) - atomic_number
     return f0 + df
