@@ -30,7 +30,7 @@ cspad_2x2_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad
 epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k_geometry.json')
 mpccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/mpccd_geometry.json')
 jungfrau4m_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/jungfrau4m_geometry.json')
-
+rayonix_mx340_xfel_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/rayonix_mx340_xfel_geometry.json')
 
 class PADGeometry:
     r"""
@@ -1695,4 +1695,26 @@ def mpccd_pad_geometry_list(detector_distance=0.1):
     pads = load_pad_geometry_list(mpccd_geom_file)
     for p in pads:
         p.t_vec[2] = detector_distance
+    return pads
+
+
+def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, return_mask=False):
+    r"""
+    Generate a list of |PADGeometry| instances that are inspired by the Rayonix MX340-XFEL detector.
+
+    Arguments:
+        detector_distance (float): Detector distance in SI units.
+
+    Returns:
+        (list): List of |PADGeometry| instances.
+    """
+    pads = load_pad_geometry_list(rayonix_mx340_xfel_geom_file)
+    for p in pads:
+        p.t_vec[2] = detector_distance
+    if return_mask:
+        mask = pads.ones()
+        xyz = pads[0].position_vecs()
+        xyz[:, 2] = 0
+        mask[utils.vec_mag(xyz) < 0.0025] = 0
+        return pads, mask
     return pads
