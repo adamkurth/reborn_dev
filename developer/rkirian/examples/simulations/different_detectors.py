@@ -7,60 +7,73 @@ from reborn import source, detector
 from reborn.target import molecule, crystal
 from reborn.simulate import gas, solutions
 from reborn.viewers.qtviews import PADView
+
+# === CONFIGURATION ==============================================================
 eV = constants.value('electron volt')
 r_e = constants.value('classical electron radius')
 k = constants.value('Boltzmann constant')
 gas_length = 1
 temperature = 300
 pressure = 101325
-poisson = False
-water_thickness = 4e-6
-beam = source.Beam(photon_energy=9e3*eV, pulse_energy=1e-3)
-pads1 = detector.tiled_pad_geometry_list(pixel_size=8.9e-5, pad_shape=(3840, 3840), tiling_shape=(1, 1), distance=1.5)
-pads2 = detector.epix10k_pad_geometry_list(detector_distance=0)
-theta = np.pi/4
-R = np.array([[np.cos(theta), 0, np.sin(theta)], [0, 1, 0], [-np.sin(theta), 0, np.cos(theta)]])
-for p in pads2:
+poisson = True
+sample_thickness = 4e-6
+pulse_energy = 1e-3
+photon_energy = 9e3*eV
+rayonix_distance = 1.5
+epix_distance = 0.3
+epix_angle = np.pi/6         # Tilt angle of the epix
+helium_partial_pressure = 0  # Helium partial pressure
+map_resolution = 0.2e-9  # Minimum resolution for 3D density map
+map_oversample = 2  # Oversampling factor for 3D density map
+cell_size = 200e-10  # Unit cell size (assume P1, cubic)
+pdb_file = '1f88'
+protein_concentration = 10  # Protein concentration in mg/ml = kg/m^3
+hit_frac = 0.5  # Hit fraction
+freq = 120  # XFEL frequency
+runtime = 12*60*60  # Run time in seconds
+random_seed = 120  # Seed for random number generator (choose None to make it random)
+cl_double_precision = True
+cl_group_size = 32
+# ======================================================================================
+
+if random_seed is not None:
+    np.random.seed(random_seed)
+beam = source.Beam(photon_energy=photon_energy, pulse_energy=pulse_energy)
+pads_rayonix, mask = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=rayonix_distance, return_mask=True)
+pads_epix = detector.epix10k_pad_geometry_list(detector_distance=0)
+R = np.array([[np.cos(epix_angle), 0, np.sin(epix_angle)], [0, 1, 0], [-np.sin(epix_angle), 0, np.cos(epix_angle)]])
+for p in pads_epix:
     p.fs_vec = np.dot(p.fs_vec, R.T)
     p.ss_vec = np.dot(p.ss_vec, R.T)
     p.t_vec = np.dot(p.t_vec, R.T)
-    p.t_vec[0] += 30e-3
-    p.t_vec[2] += 0.2
-pads = detector.PADGeometryList(pads1 + pads2)
+    p.t_vec += np.dot(np.array([0, 0, epix_distance]), R.T)
+pads = detector.PADGeometryList(pads_rayonix + pads_epix)
+mask = pads.concat_data([mask] + pads_epix.split_data(pads_epix.ones()))
 q_mags = pads.q_mags(beam=beam)
-h2o_intensity = solutions.get_pad_solution_intensity(beam=beam, pad_geometry=pads,
-                                           thickness=water_thickness, liquid='water', poisson=poisson)
-h2o_intensity = pads.concat_data(h2o_intensity)
-h2o_intensity /= pads.solid_angles() * pads.polarization_factors(beam=beam)
+sa = pads.solid_angles()
+pol = pads.polarization_factors(beam=beam)
+J0 = beam.photon_number_fluence
+water_intensity = solutions.get_pad_solution_intensity(beam=beam, pad_geometry=pads,
+                                                       thickness=sample_thickness, liquid='water', poisson=poisson)
+water_intensity = pads.concat_data(water_intensity)
 # Build a rhodopsin molecule
-rhod_mol = crystal.CrystalStructure('1f88').molecule
-# Build N2, O2, and he molecules
-n2_mol = molecule.Molecule(coordinates=np.array([[0, 0, 0], [0, 0, 1.07e-10]]), atomic_numbers=[7, 7])
-o2_mol = molecule.Molecule(coordinates=np.array([[0, 0, 0], [0, 0, 1.21e-10]]), atomic_numbers=[8, 8])
-he_mol = molecule.Molecule(coordinates=np.array([[0, 0, 0]]), atomic_numbers=[2, 2])
+rhod_mol = crystal.CrystalStructure(pdb_file).molecule
 q_profile = np.linspace(q_mags.min(), q_mags.max(), 100)
 # print('rhod')
 # rhod_profile = gas.isotropic_gas_intensity_profile(molecule=rhod_mol, beam=beam, q_mags=q_profile)
-print('n2')
-n2_profile = gas.isotropic_gas_intensity_profile(molecule=n2_mol, beam=beam, q_mags=q_profile)
-# plt.plot(n2_profile)
-# plt.show()
-# sys.exit()
-o2_profile = gas.isotropic_gas_intensity_profile(molecule=o2_mol, beam=beam, q_mags=q_profile)
-he_profile = gas.isotropic_gas_intensity_profile(molecule=he_mol, beam=beam, q_mags=q_profile)
+he_profile = gas.isotropic_gas_intensity_profile(molecule='He', beam=beam, q_mags=q_profile)
 n_gas_molecules = np.pi * (beam.diameter_fwhm/2)**2 * gas_length * pressure / k / temperature
-n2_partial = 0.79  # N2 and O2 partial pressures are combined to form "air"
-o2_partial = 0.21
-air_profile = n2_profile*n2_partial + o2_profile*o2_partial
-he_partial = 0  # He partial pressure combined with air to form "gas"
-gas_profile = air_profile*(1-he_partial) + he_profile*he_partial
-gas_intensity = n_gas_molecules * r_e**2 * np.interp(q_mags, q_profile, gas_profile)
-gas_intensity *= beam.photon_number_fluence
+air_profile = gas.air_intensity_profile(q_mags=q_profile, beam=beam)
+gas_profile = air_profile*(1-helium_partial_pressure) + he_profile*helium_partial_pressure
+gas_intensity = n_gas_molecules * J0 * sa * pol * r_e**2 * np.interp(q_mags, q_profile, gas_profile)
+
 if poisson:
     gas_intensity = np.random.poisson(gas_intensity).astype(np.double)
-# print(n_gas_molecules)
-# total_intensity = gas_intensity + h2o_intensity
-total_intensity = h2o_intensity / gas_intensity
-print(total_intensity[0:5])
-pv = PADView(pad_geometry=pads, raw_data=total_intensity)
+
+if False:
+    water_intensity /= pads.solid_angles() * pads.polarization_factors(beam=beam)
+
+total_intensity = gas_intensity + water_intensity
+print(total_intensity[0:10])
+pv = PADView(pad_geometry=pads, raw_data=total_intensity, mask_data=mask)
 pv.start()
