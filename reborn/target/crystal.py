@@ -323,10 +323,7 @@ class CrystalStructure(object):
         """
 
         if tempdir is not None:
-            try:
-                os.path.mkdir(tempdir)
-            except FileExistsError
-                pass
+            os.makedirs(tempdir, exist_ok=True)
             temp_save = tempdir
         else:
             temp_save = temp_dir
