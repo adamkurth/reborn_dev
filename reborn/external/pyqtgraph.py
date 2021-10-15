@@ -187,9 +187,10 @@ class MultiHistogramLUTItem(pg.HistogramLUTItem):
             img.setLookupTable(self.getLookupTable)
             i += 1
 
-        phonyarray = np.ravel([im.image for im in imgs])
-        phonyarray = phonyarray[0:(len(phonyarray) - (len(phonyarray) % 2))]
-        phonyarray = phonyarray.reshape([2, int(len(phonyarray) / 2)])
+        phonyarray = np.atleast_2d(np.concatenate([im.image.ravel() for im in imgs]))  # np.ravel([im.image for im in imgs])
+
+        #phonyarray = phonyarray[0:(len(phonyarray) - (len(phonyarray) % 2))]
+        #phonyarray = phonyarray.reshape([2, int(len(phonyarray) / 2)])
 
         self.imageItemStrong = pg.ImageItem(phonyarray)
         self.imageItem = weakref.ref(self.imageItemStrong)  # TODO: fix this up

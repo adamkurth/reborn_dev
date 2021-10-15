@@ -30,7 +30,7 @@ cspad_2x2_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/cspad
 epix10k_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/epix10k_geometry.json')
 mpccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/mpccd_geometry.json')
 jungfrau4m_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/jungfrau4m_geometry.json')
-
+rayonix_mx340_xfel_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/rayonix_mx340_xfel_geometry.json')
 
 class PADGeometry:
     r"""
@@ -763,59 +763,59 @@ class PADGeometryList(list):
 
     def position_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.position_vecs() for p in self])
+        return np.concatenate([p.position_vecs().ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def s_vecs(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.s_vecs() for p in self])
+        return np.concatenate([p.s_vecs().ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def ds_vecs(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.ds_vecs(beam=beam) for p in self])
+        return np.concatenate([p.ds_vecs(beam=beam).ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def q_vecs(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.q_vecs(beam=beam) for p in self])
+        return np.concatenate([p.q_vecs(beam=beam).ravel() for p in self]).reshape([self.n_pixels, 3])
 
     def q_mags(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.q_mags(beam=beam) for p in self])
+        return np.concatenate([p.q_mags(beam=beam).ravel() for p in self])
 
     def solid_angles(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.solid_angles() for p in self])
+        return np.concatenate([p.solid_angles().ravel() for p in self])
 
     def solid_angles1(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.solid_angles1() for p in self])
+        return np.concatenate([p.solid_angles1().ravel() for p in self])
 
     def solid_angles2(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.solid_angles2() for p in self])
+        return np.concatenate([p.solid_angles2().ravel() for p in self])
 
     def polarization_factors(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.polarization_factors(beam=beam) for p in self])
+        return np.concatenate([p.polarization_factors(beam=beam).ravel() for p in self])
 
     def scattering_angles(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.scattering_angles(beam=beam) for p in self])
+        return np.concatenate([p.scattering_angles(beam=beam).ravel() for p in self])
 
     def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.beamstop_mask(beam, q_min, min_angle) for p in self])
+        return np.concatenate([p.beamstop_mask(beam, q_min, min_angle).ravel() for p in self])
 
     def zeros(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.zeros() for p in self])
+        return np.concatenate([p.zeros().ravel() for p in self])
 
     def ones(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.ones() for p in self])
+        return np.concatenate([p.ones().ravel() for p in self])
 
     def random(self):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.random() for p in self])
+        return np.concatenate([p.random().ravel() for p in self])
 
     def max_resolution(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
@@ -918,7 +918,7 @@ def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0
             # pad.t_vec[0:2] += 0.5 * pixel_size
             pads.append(pad)
 
-    return pads
+    return PADGeometryList(pads)
 
 
 def concat_pad_data(data):
@@ -1695,4 +1695,26 @@ def mpccd_pad_geometry_list(detector_distance=0.1):
     pads = load_pad_geometry_list(mpccd_geom_file)
     for p in pads:
         p.t_vec[2] = detector_distance
+    return pads
+
+
+def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, return_mask=False):
+    r"""
+    Generate a list of |PADGeometry| instances that are inspired by the Rayonix MX340-XFEL detector.
+
+    Arguments:
+        detector_distance (float): Detector distance in SI units.
+
+    Returns:
+        (list): List of |PADGeometry| instances.
+    """
+    pads = load_pad_geometry_list(rayonix_mx340_xfel_geom_file)
+    for p in pads:
+        p.t_vec[2] = detector_distance
+    if return_mask:
+        mask = pads.ones()
+        xyz = pads[0].position_vecs()
+        xyz[:, 2] = 0
+        mask[utils.vec_mag(xyz) < 0.0025] = 0
+        return pads, mask
     return pads

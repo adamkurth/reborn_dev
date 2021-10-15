@@ -7,7 +7,8 @@ Overview of reborn package
 --------------------------
 
 The reborn Python package contains utilities for the simulation and analysis of x-ray diffraction under the Born 
-approximation.  There are countless other utilities with related aspirations:
+approximation.  The content of reborn is dictated by the needs of the Kirian group, but it is available for anyone to
+use under the GNU V3 License..  Similar utilities with related aspirations are:
 `thor <https://github.com/tjlane/thor>`_,
 `OnDa <https://github.com/ondateam>`_,
 `DIALS <https://dials.github.io/>`_,
@@ -18,12 +19,7 @@ approximation.  There are countless other utilities with related aspirations:
 `Dragonfly <https://github.com/duaneloh/Dragonfly/wiki/EMC-implementation>`_,
 `BornAgain <www.rebornproject.org>`_.
 
-For clarity, reborn is not a "program".  In order to use it you must write Python code.  It is not by any measure
-a *general* or *complete* tool at this time; it's content is presently dictated primarily by what is needed for work
-done by the Kirian group.  It is nonetheless available for anyone to use under the GNU V3
-License.
-
-The reborn package is under constant development.  However, we do try to maintain useful and up-to-date documentation
+The reborn package is under constant development.  However, we try to maintain useful and up-to-date documentation
 along with an extensive suite of tests to make sure that it is reasonably stable.  The icon below indicates if tests are
 presently passing in the master branch:
 
@@ -71,8 +67,8 @@ Acknowledgements
 ----------------
 
 The reborn package is maintained by `Rick Kirian <https://www.physics.asu.edu/content/richard-kirian>`_
-with contributions from Derek Mendez, Joe Chen, Kevin Schmidt, Kosta Karpos, Roberto Alvarez, Rick Hewitt, and
-Cameron Howard.  Code found in reborn has been inspired by numerous open-source software packages listed above.
+with contributions from Derek Mendez, Joe Chen, Kevin Schmidt, Kosta Karpos, Roberto Alvarez, Tom Grant, Rick Hewitt,
+and Cameron Howard.  Code found in reborn has been inspired by numerous open-source software packages listed above.
 Development is supported by National Science Foundation awards
 `1231306 <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1231306>`__,
 `1943448 <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1943448>`__,
