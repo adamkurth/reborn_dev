@@ -23,6 +23,8 @@ Demonstration of how to work with Pixel Array Detectors using the reborn tools.
 
 Contributed by Richard Kirian.
 
+Edited by Konstantinos Karpos
+
 """
 
 # %%
@@ -271,9 +273,124 @@ print(q_mags.shape)
 p_vecs = pads.position_vecs()
 print(p_vecs.shape)
 
+
+
+# %%
+# Importing Pre-Built Detectors
+# --------------------------
+
+# %%
+# `reborn` provides multiple detector geometries that are ready for use. Say your experiment used the MPCCD 
+# detector and you would like to display a 2D pattern. The `reborn.detector.mpccd_pad_geometry_list()` function 
+# will provide that detector as a `PADGeometryList` object, which can be manipulated using the methods described above.
+
+
+mpccd_geom = detector.mpccd_pad_geometry_list(detector_distance=0.05)
+data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in mpccd_geom]
+
+view_pad_data(pad_geometry=mpccd_geom, pad_data=data)
+
+# %%
+# Note the use of multiple panels here. Changing panel properties is easy from here. As as example,
+# say you would like to rotate your detector by 45 degrees. 
+
+theta = 45 * np.pi / 180 # reborn uses radians by default
+
+# define your rotation matrix
+R = np.array([[np.cos(theta), 0, np.sin(theta)], [0, 1, 0], [-np.sin(theta), 0, np.cos(theta)]])
+
+# %%
+# Let's see what this looks like with one panel, first.
+
+geom_1 = mpccd_geom.copy() # make a copy of the pad geometry so you don't mess with the original 
+geom_1[0].fs_vec = np.dot(geom_1[0].fs_vec, R.T)
+geom_1[0].ss_vec = np.dot(geom_1[0].ss_vec, R.T)
+
+view_pad_data(pad_geometry=geom_1, pad_data=data)
+
+# %%
+# Cool, so the bottom left panel was rotated by 45 degrees! Note that the `view_pad_data()`
+# function is a projection operation, so although it looks like it simply shrunk, the panel 
+# shows a 2D projected rotation.
+
+# %%
+# Now let's apply to this to the whole detector.
+geom_2 = mpccd_geom.copy() # make a copy of the pad geometry so you don't mess with the original 
+
+# Loop across each panel and perform the rotation operation
+for pad in geom_2:
+    pad.fs_vec = np.dot(pad.fs_vec, R.T)
+    pad.ss_vec = np.dot(pad.ss_vec, R.T)
+    pad.t_vec = np.dot(pad.t_vec, R.T)
+
+# view the rotation
+view_pad_data(pad_geometry=geom_2, pad_data=data)
+
+
+
+# %%
+# Dealing with Multiple Detectors
+# --------------------------
+
+# %% 
+# In some cases, you may want add two different detectors side by side. While most experiments
+# use a single detector, there have been experiments that utilize multiple detectors to get high resolution
+# low and high q data. For this example, we'll use the Rayonix MX340 and the Epix 10K detectors. Note that all 
+# detector distances are in meters.
+
+rayonix_geom = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.5)
+epix_geom = detector.epix10k_pad_geometry_list(detector_distance=0.1)
+
+# Offset the epix detector to visualize them side by side
+
+for pad in epix_geom:
+    pad.t_vec[0] += 0.2 # translate the epix detector 20 cm to the right
+
+# %%
+# In order to display data across multiple panels, you will have to concatenate the two detectors. 
+# You can do this easily with the following function,
+
+c_geom = detector.PADGeometryList(rayonix_geom + epix_geom)
+
+# %% 
+# Note that from here on out, the order of the detectors matters. You will get an incorrect 2D
+# pattern if you switch the order of the detectors. 
+
+# Create some arbitrary data
+data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in c_geom]
+view_pad_data(pad_geometry=c_geom, pad_data=data)
+
+
+
+
+
+# %%
+# Conclusions
+# --------------------------
+
 # %%
 # The above should give you a pretty good start.  It is advisable that you go ahead and write your code such that it is
 # generalized to an arbitrary number of PADs.  It is not very painful once you know how to make use of the reborn tools.
 #
 # If you think you need further examples, please let Rick know and he will add them here.  Similarly, if you feel that
 # functionality is missing, request that it be added.  Most requests are added within a day.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
