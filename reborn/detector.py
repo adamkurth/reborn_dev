@@ -1262,7 +1262,7 @@ class RadialProfiler:
                                 will come from this (e.g. use values of 0 and 1 if you want a normal average, otherwise
                                 you get a weighted average).
             n_bins (int): Number of radial bins you desire.
-            q_range (tuple): The minimum and maximum of the *centers* of the q bins.
+            q_range (list-like): The minimum and maximum of the *centers* of the q bins.
             pad_geometry (list of |PADGeometry| instances):  Optional.  Will be used to generate q magnitudes.  You must
                                                              provide beam if you provide this.
             beam (|Beam| instance): Optional, unless pad_geometry is provided.  Wavelength and beam direction are
@@ -1684,7 +1684,7 @@ def epix10k_pad_geometry_list(detector_distance=0.1):
 
 def mpccd_pad_geometry_list(detector_distance=0.1):
     r"""
-    Generate a list of |PADGeometry| instances that are inspired by the epix10k detector.
+    Generate a list of |PADGeometry| instances that are inspired by SACLA's MPCCD detector.
 
     Arguments:
         detector_distance (float): Detector distance in SI units.
@@ -1717,4 +1717,4 @@ def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, return_mask=Fals
         xyz[:, 2] = 0
         mask[utils.vec_mag(xyz) < 0.0025] = 0
         return pads, mask
-    return pads
+    return PADGeometryList(pads)

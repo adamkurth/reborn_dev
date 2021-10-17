@@ -307,7 +307,7 @@ class CrystalStructure(object):
     _au_com = None
 
     def __init__(self, pdb_file_path, no_warnings=False, expand_ncs_coordinates=False, tight_packing=False,
-                       unitcell=None, spacegroup=None):
+                       unitcell=None, spacegroup=None, tempdir=None):
         r"""
         This class is initialized with a PDB file.
 
@@ -322,9 +322,15 @@ class CrystalStructure(object):
             spacegroup (Space Group class): Specify a space group manually if needed.
         """
 
+        if tempdir is not None:
+            os.makedirs(tempdir, exist_ok=True)
+            temp_save = tempdir
+        else:
+            temp_save = temp_dir
+
         if not os.path.exists(pdb_file_path):
             # print("PDB file not found.  Attempting to download it to %s." % temp_dir)
-            pdb_file_path = get_pdb_file(pdb_file_path, save_path=temp_dir)
+            pdb_file_path = get_pdb_file(pdb_file_path, save_path=temp_save)
 
         dic = pdb_to_dict(pdb_file_path)
         self.pdb_dict = dic

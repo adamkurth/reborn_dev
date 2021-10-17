@@ -13,8 +13,8 @@ def isotropic_gas_intensity_profile(r_vecs=None, q_mags=None, atomic_numbers=Non
         r_vecs (|ndarray|): Position vectors.
         q_mags (|ndarray|): Q vectors.
         atomic_numbers (|ndarray|): Atomic numbers.
-        photon_energy (|float|): Photon energy.
-        molecule (reborn.target.molecule.Molecule): Molecule (overrides r_vecs and atomic_numbers)
+        photon_energy (float): Photon energy.
+        molecule (reborn.target.molecule.Molecule or str): Molecule (overrides r_vecs and atomic_numbers)
         beam (|Beam|): Beam instance.  Overrides photon_energy.
 
     Returns:

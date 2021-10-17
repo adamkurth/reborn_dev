@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-htmlindex="../doc/build/html/index.html"
+cd ..
+htmlindex="$(pwd)/doc/build/html/index.html"
 
 # Opening files from the command line is easy with Mac OS.  How do you do this in Linux?
 if [ "`echo $(uname -a | grep Darwin)`" != '' ]; then

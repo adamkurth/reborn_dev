@@ -55,7 +55,7 @@ pv.start()
 del pv
 
 # %%
-# If you are using iPython, tab completion on pv.show_ should list various things you can make visible.
+# If you are using iPython, tab completion on `pv.show_` should list various things you can make visible.
 #
 # PADView has a mechanism to create plugins for processing data.  You can retrieve the list of plugins as follows:
 
@@ -96,7 +96,7 @@ del pv
 # It is difficult to demonstrate the mouse clicking that you can do with the mask editor widget, but hopefully there is
 # enough information displayed to figure it out.  Note that you can save your mask, but it is in the reborn mask format.
 # If you want a different format, you can load the mask in a python script using the
-# :func:`load_pad_masks <reborn.detector.load_pad_masks>`_ function and then save it in whatever format you like.
+# :func:`load_pad_masks <reborn.detector.load_pad_masks>` function and then save it in whatever format you like.
 
 # %%
 # If you want to flip through a series of diffraction patterns, you can create a |FrameGetter| class for your data.

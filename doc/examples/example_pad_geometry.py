@@ -23,6 +23,8 @@ Demonstration of how to work with Pixel Array Detectors using the reborn tools.
 
 Contributed by Richard Kirian.
 
+Edited by Konstantinos Karpos
+
 """
 
 # %%
@@ -54,7 +56,10 @@ Contributed by Richard Kirian.
 # There are various ways to create a |PADGeometry| instance.  The "manual" way is to create the instance without any
 # kind of initialization:
 
-from reborn import detector
+import numpy as np
+from scipy.ndimage import gaussian_filter
+from reborn import detector, source, temp_dir
+from reborn.viewers.mplviews import view_pad_data
 
 pad = detector.PADGeometry()
 print(pad)
@@ -137,11 +142,10 @@ q_vecs = pad.q_vecs(beam_vec=[0, 0, 1], wavelength=1.5e-10)
 # %%
 # As in the above, we provided the beam direction and wavelength, which helps clarify what is meant when we say "reborn
 # makes no prior assumptions about geometry".  Since beam direction and wavelength are frequently needed, reborn
-# provides the |Beam| class to handle beam properties in a *standard way*.  For example:
+# provides the |Beam| class as a compact container for various beam properties.  For example:
 
-from reborn import source
 beam = source.Beam(wavelength=1.5e-10, pulse_energy=1e-3)
-q_vecs = pad.q_vecs(beam=beam)
+q_vecs = pad.q_vecs(beam=beam)  # noqa
 
 # %%
 # In the above, the default beam direction for the |Beam| class is [0, 0, 1], but you may configure this as you see fit.
@@ -157,7 +161,6 @@ polfacs = pad.polarization_factors(beam=beam)
 #
 # Note that reborn provides functions to save and load |PADGeometry| information:
 
-from reborn import temp_dir
 filename = temp_dir + 'pads.json'
 detector.save_pad_geometry_list(filename, pad)
 pad2 = detector.load_pad_geometry_list(filename)
@@ -194,9 +197,7 @@ pad2.t_vec[0] += 51*psize
 # At this stage, it would be useful to be able to visualize our PAD list, so let's create some data to look at.  For
 # convenience, we set our data equal to a totally uniform scatterer, and we include the polarization factor:
 
-import numpy as np
 data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in pads]
-from reborn.viewers.mplviews import view_pad_data
 print(pads[0])
 
 # %%
@@ -250,7 +251,6 @@ print(data_concat.shape)
 # are doing image-processing steps using functions in scipy (for example), you will almost certainly need to write loops
 # over the individual 2D |ndarray| s.  For example:
 
-from scipy.ndimage import gaussian_filter
 for i in range(len(data_split)):
     data_split[i] = gaussian_filter(data_split[i], sigma=4)
 view_pad_data(pad_data=data_split, pad_geometry=pads, pad_numbers=True)
@@ -270,6 +270,92 @@ q_mags = pads.q_mags(beam=beam)
 print(q_mags.shape)
 p_vecs = pads.position_vecs()
 print(p_vecs.shape)
+
+# %%
+# Importing Pre-Built Detectors
+# -----------------------------
+
+# %%
+# `reborn` provides multiple detector geometries that are ready for use. Say your experiment used the MPCCD 
+# detector and you would like to display a 2D pattern. The `reborn.detector.mpccd_pad_geometry_list()` function 
+# will provide that detector as a |PADGeometryList| object, which can be manipulated using the methods described above.
+
+mpccd_geom = detector.mpccd_pad_geometry_list(detector_distance=0.05)
+data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in mpccd_geom]
+
+view_pad_data(pad_geometry=mpccd_geom, pad_data=data)
+
+# %%
+# Note the use of multiple panels here. Changing panel properties is easy from here. As as example,
+# say you would like to rotate your detector by 45 degrees. 
+
+theta = 45 * np.pi / 180  # reborn uses radians by default
+
+# define your rotation matrix
+R = np.array([[np.cos(theta), 0, np.sin(theta)], [0, 1, 0], [-np.sin(theta), 0, np.cos(theta)]])
+
+# %%
+# Let's see what this looks like with one panel, first.
+
+geom_1 = mpccd_geom.copy()  # make a copy of the pad geometry so you don't mess with the original
+geom_1[0].fs_vec = np.dot(geom_1[0].fs_vec, R.T)
+geom_1[0].ss_vec = np.dot(geom_1[0].ss_vec, R.T)
+
+view_pad_data(pad_geometry=geom_1, pad_data=data)
+
+# %%
+# Cool, so the bottom left panel was rotated by 45 degrees! Note that the `view_pad_data()`
+# function is a projection operation, so although it looks like it simply shrunk, the panel 
+# shows a 2D projected rotation.
+
+# %%
+# Now let's apply to this to the whole detector.
+geom_2 = mpccd_geom.copy()  # make a copy of the pad geometry so you don't mess with the original
+
+# Loop across each panel and perform the rotation operation
+for pad in geom_2:
+    pad.fs_vec = np.dot(pad.fs_vec, R.T)
+    pad.ss_vec = np.dot(pad.ss_vec, R.T)
+    pad.t_vec = np.dot(pad.t_vec, R.T)
+
+# view the rotation
+view_pad_data(pad_geometry=geom_2, pad_data=data)
+
+# %%
+# Dealing with Multiple Detectors
+# -------------------------------
+
+# %% 
+# In some cases, you may need to work with more than one "detector". While most experiments use a single "detector"
+# (note: a "detector" often consists of several identical PADs), there have been experiments that utilize multiple
+# detectors to combine both high-resolution and low-resolution data. For this example, we'll use the Rayonix MX340 and
+# the Epix 10K detectors. Note that all detector distances are in meters.
+
+rayonix_geom = detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.5)
+epix_geom = detector.epix10k_pad_geometry_list(detector_distance=0.1)
+
+# Offset the epix detector to visualize them side by side
+
+for pad in epix_geom:
+    pad.t_vec[0] += 0.2  # translate the epix detector 20 cm to the right
+
+# %%
+# In order to display data across multiple panels, you will have to concatenate the two detectors. 
+# You can do this easily with the following function,
+
+c_geom = detector.PADGeometryList(rayonix_geom + epix_geom)
+
+# %% 
+# Note that from here on out, the order of the detectors matters. You will get an incorrect 2D
+# pattern if you switch the order of the detectors. 
+
+# Create some arbitrary data
+data = [np.random.random(p.n_pixels)*p.polarization_factors(beam=beam) for p in c_geom]
+view_pad_data(pad_geometry=c_geom, pad_data=data)
+
+# %%
+# Conclusions
+# -----------
 
 # %%
 # The above should give you a pretty good start.  It is advisable that you go ahead and write your code such that it is
