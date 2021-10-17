@@ -1684,7 +1684,7 @@ def epix10k_pad_geometry_list(detector_distance=0.1):
 
 def mpccd_pad_geometry_list(detector_distance=0.1):
     r"""
-    Generate a list of |PADGeometry| instances that are inspired by the epix10k detector.
+    Generate a list of |PADGeometry| instances that are inspired by SACLA's MPCCD detector.
 
     Arguments:
         detector_distance (float): Detector distance in SI units.
