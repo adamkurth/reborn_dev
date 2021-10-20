@@ -200,12 +200,11 @@ subroutine trilinear_insertion_complex(densities, weights, vectors, vals, corner
     enddo
 end subroutine trilinear_insertion_complex
 
-subroutine trilinear_insertions_real(densities, weights, vectors, vals, corners, deltas)
+subroutine trilinear_insertions_real(densities, vectors, vals, corners, deltas)
     implicit none
     real(kind=8), intent(inout) :: densities(:,:,:,:)
     real(kind=8), intent(in) :: vals(:,:)
     real(kind=8) :: val(size(densities,1))
-    real(kind=8), intent(inout) :: weights(:,:,:,:)
     real(kind=8), intent(in) :: vectors(:,:), corners(3), deltas(3)
     real(kind=8) :: i_f,j_f,k_f,x0,y0,z0,x1,y1,z1
     integer(kind=4) :: i0,j0,k0,i1,j1,k1,ii,nx,ny,nz,nn
@@ -238,23 +237,14 @@ subroutine trilinear_insertions_real(densities, weights, vectors, vals, corners,
         densities(:,i0, j1, k1) = densities(:,i0, j1, k1) + val * x1 * y0 * z0
         densities(:,i1, j1, k0) = densities(:,i1, j1, k0) + val * x0 * y0 * z1
         densities(:,i1, j1, k1) = densities(:,i1, j1, k1) + val * x0 * y0 * z0
-        weights(:,i0, j0, k0) = weights(:,i0, j0, k0) + x1 * y1 * z1
-        weights(:,i1, j0, k0) = weights(:,i1, j0, k0) + x0 * y1 * z1
-        weights(:,i0, j1, k0) = weights(:,i0, j1, k0) + x1 * y0 * z1
-        weights(:,i0, j0, k1) = weights(:,i0, j0, k1) + x1 * y1 * z0
-        weights(:,i1, j0, k1) = weights(:,i1, j0, k1) + x0 * y1 * z0
-        weights(:,i0, j1, k1) = weights(:,i0, j1, k1) + x1 * y0 * z0
-        weights(:,i1, j1, k0) = weights(:,i1, j1, k0) + x0 * y0 * z1
-        weights(:,i1, j1, k1) = weights(:,i1, j1, k1) + x0 * y0 * z0
     enddo
 end subroutine trilinear_insertions_real
 
-subroutine trilinear_insertions_complex(densities, weights, vectors, vals, corners, deltas)
+subroutine trilinear_insertions_complex(densities, vectors, vals, corners, deltas)
     implicit none
     complex(kind=8), intent(inout) :: densities(:,:,:,:)
     complex(kind=8), intent(in) :: vals(:,:)
     complex(kind=8) :: val(size(densities,1))
-    real(kind=8), intent(inout) :: weights(:,:,:,:)
     real(kind=8), intent(in) :: vectors(:,:), corners(3), deltas(3)
     real(kind=8) :: i_f,j_f,k_f,x0,y0,z0,x1,y1,z1
     integer(kind=4) :: i0,j0,k0,i1,j1,k1,ii,nx,ny,nz,nn
@@ -287,14 +277,6 @@ subroutine trilinear_insertions_complex(densities, weights, vectors, vals, corne
         densities(:,i0, j1, k1) = densities(:,i0, j1, k1) + val * x1 * y0 * z0
         densities(:,i1, j1, k0) = densities(:,i1, j1, k0) + val * x0 * y0 * z1
         densities(:,i1, j1, k1) = densities(:,i1, j1, k1) + val * x0 * y0 * z0
-        weights(:,i0, j0, k0) = weights(:,i0, j0, k0) + x1 * y1 * z1
-        weights(:,i1, j0, k0) = weights(:,i1, j0, k0) + x0 * y1 * z1
-        weights(:,i0, j1, k0) = weights(:,i0, j1, k0) + x1 * y0 * z1
-        weights(:,i0, j0, k1) = weights(:,i0, j0, k1) + x1 * y1 * z0
-        weights(:,i1, j0, k1) = weights(:,i1, j0, k1) + x0 * y1 * z0
-        weights(:,i0, j1, k1) = weights(:,i0, j1, k1) + x1 * y0 * z0
-        weights(:,i1, j1, k0) = weights(:,i1, j1, k0) + x0 * y0 * z1
-        weights(:,i1, j1, k1) = weights(:,i1, j1, k1) + x0 * y0 * z0
     enddo
 end subroutine trilinear_insertions_complex
 
