@@ -53,16 +53,19 @@ distance to the detector is \emph{much} greater than the size of the object)
 and (3) the first-order Born approximation, which loosely means that the scattering amplitudes are very weak
 compared to the incident amplitudes. The quantities in equation \ref{eqn:key} are as follows:
 \begin{itemize}
-\item $I(\vec{q})$ is the x-ray diffraction signal in a pixel (energy or 
-photons per pixel)
+\item $I(\vec{q})$ is the x-ray diffraction signal in a pixel (power per 
+pixel)
 \item $\vec{q}=\vec{k}-\vec{k}_0$ is the wavevector transfer
-\item $\vec{k}_0$ is the incident wavevector with magnitude $|\vec{k}_0| = |\vec{k}| = \frac{2\pi}{\lambda}$
-\item $\vec{k}$ is the outgoing wavevector that points from the target to the detector pixel
-\item $J_0$ is the incident fluence (energy or photons per area)
-\item $\Delta \Omega$ is the solid angle of the detector pixel (assumed very small)
-\item $\mathcal{P}(\vec{q})$ is the polarization factor defined below
+\item $J_0$ is the incident intensity (power per area)
 \item $r_e = 2.818 \times 10^{-15}$~m is the Classical electron radius
-\item $\rho(\vec{r})$ is the scattering density, which is approximately equal to the electron density.
+\item $\vec{k}_0$ is the incident wavevector with magnitude $|\vec{k}_0| = 
+|\vec{k}| = \frac{2\pi}{\lambda}$
+\item $\vec{k}$ is the outgoing wavevector that points from the target to the detector pixel
+\item $\Delta \Omega$ is the solid angle of the detector pixel (assumed very 
+small)
+\item $\mathcal{P}(\vec{q})$ is the polarization factor defined below
+\item $\rho(\vec{r})$ is the scattering density, which is approximately equal to 
+the electron density.
 \end{itemize}
 %As we can see from equation \ref{eqn:key}, under certain approximations, x-ray diffraction intensities
 %allow us to measure the magnitude of the Fourier transform of the scattering density $\rho(\vec{r})$ of the target:
@@ -121,24 +124,36 @@ where $\vec{\beta} = \vec{v}/c = \dot{\vec{r}}'(t_r)/c$. From the Li\'enard-Wiec
 [(c^2 - v^2)\vec{u} + \brcurs \times (\vec{u} \times \vec{a})] \; , \quad\quad \vec{B}(\vec{r}, t)
 = \frac{1}{c}\hrcurs \times \vec{E}(\vec{r}, t)
 \end{align}
-where $\vec{u} \equiv c (\hrcurs - \vec{\beta})$ and $\vec{a}=\ddot{\vec{r}}'(t_r)$.  Importantly, these 
+where $\vec{u} = c \hrcurs - \vec{\beta}$ and 
+$\vec{a}=\ddot{\vec{r}}'(t_r)$.  Importantly, these 
 fields are correct for relativistic particles, and as such they may be used to derive both the x-ray scattering
 amplitudes as well as the incident source fields created by x-ray free-electron lasers (XFELs) and synchrotrons.
 
 
 \section{Dipole radiation}
 
-Under the dipole approximations we consider locations very far from a localized source.  The
+Under the dipole approximations we consider locations very far from a localized 
+source.  The electric field contains two terms: the generalized Coulomb field 
+and the radiation field:
+\begin{align}
+\vec{E}(\vec r, t) = \vec{E}_\text{Coulomb}(\vec r, t) + \vec 
+E_\text{rad}(\vec r, t) \;.
+\end{align}
+The
 radiation field in equation \ref{eqn:Erad} dominates because it falls off in proportion to $1/\rcurs$ whereas the generalized
 Coulomb field falls off in proportion to $1/\rcurs^2$.  We therefore focus on the
 radiation field
 \begin{align}
-\vec{E}_\text{rad} = \frac{q}{4\pi\epsilon_0} \frac{\rcurs}{(\brcurs\cdot \vec{u})^3}
-[\brcurs \times (\vec{u} \times \vec{a})]
+\vec{E}_\text{rad}(\vec r, t) = \frac{q}{4\pi\epsilon_0} 
+\frac{\rcurs}{(\brcurs\cdot \vec{u})^3}
+[\brcurs \times (\vec{u} \times \vec{a})] \; , \quad\quad 
+\vec{B}_\text{rad}(\vec{r}, t)
+= \frac{1}{c}\hrcurs \times \vec{E}(\vec{r}, t)
 \end{align}
 for the remainder of this note.
 
-Consider a point charge that oscillates about the origin with position $\vec{r}' = r_0 \cos(-i\omega t) \hvec{r}'$.
+Consider a point charge that oscillates about the origin with position $\vec{r}' 
+= r_0 \exp(-i\omega t) \hvec{r}'$ (we take the real part of this).
 We make the standard dipole radiation assumptions: the dipole is small compared to the distance
 to our observation point, which means that $r \gg r'$ and hence $\brcurs \approx \vec{r}$.
 We further assume that the charged particle is non-relativistic, which means that\footnote{Equivalently, 
@@ -149,7 +164,8 @@ $v \ll c$, and we may use $\vec{u} \approx c \hrcurs$.  Plugging these in, we ge
 \begin{align}\label{eqn:dip1}
 \vec{E}_\text{dip}(\vec{r},t) &= \frac{q}{4\pi\epsilon_0} \frac{r}{(\vec{r}\cdot c \hvec{r})^3}
 \vec{r} \times (c \hvec{r} \times \vec{a}) \\
-&= \frac{\mu_0 }{4\pi} \frac{1}{r} [\hvec{r} \times ( \hvec{r} \times  \ddot{\vec{p}}(t_r))
+&= \frac{\mu_0 }{4\pi} \frac{1}{r} \hvec{r} \times ( \hvec{r} \times  
+\ddot{\vec{p}}(t_r))
 \end{align}
 where $\vec{p}(t) = q \vec{r}'(t)$ is the dipole moment of the point charge.
 The magnetic field is
@@ -200,6 +216,13 @@ Plugging this into the dipole radiation formula \ref{eqn:dip1} gives
 where we simplified the expression by defining the classical electron radius
 \begin{align}
 r_e = \frac{1}{4\pi \epsilon_0} \frac{e^2}{m_e c^2} \approx 2.8\times10^{-15} \; \text{m} \;.
+\end{align}
+The Poynting vector is
+\begin{align}
+\vec{S} =  \frac{1}{\mu_0} \vec{E}_\text{dip}\times\vec{B}_\text{dip} =  
+\frac{1}{\mu_0c} E_\text{dip}^2\hvec{r} 
+= \frac{\mu_0}{16 \pi^2 cr^2} |\hvec{r} \times    \ddot{\vec{p}}|^2\hvec{r} 
+\;.
 \end{align}
 We therefore have the power captured by a detector pixel:
 \begin{align}\label{eqn:dpthompson}
@@ -283,9 +306,11 @@ The scattered field is
 \end{align}
 where $t_r = t - \rcurs/c$.  Since we observe in the ``far-field'', where $r \gg r'$, we may use the following approximation:
 \begin{align}
- \rcurs = \sqrt{\vec{r} - \vec{r}'} = \sqrt{r^2 + r'^2 -2\vec{r}\cdot \vec{r}'} \approx r  - \hvec{r}\cdot \vec{r}' \;.
+ \rcurs = \sqrt{(\vec{r} - \vec{r}')^2} = \sqrt{r^2 + r'^2 -2\vec{r}\cdot 
+\vec{r}'} \approx r  - \hvec{r}\cdot \vec{r}' \;.
 \end{align}
-Plugging in this approximation we have
+Plugging in the approximation $t_r \approx t - r/c + \hvec{r} \cdot \vec r'$ we 
+have
 \begin{align}
 \vec{E}_\text{dip}(\vec{r},t) =  \frac{r_e}{r} [\hvec{r} \times ( \hvec{r} \times  \vec{E}_0 )]\exp\left(i\vec{k}_0 \cdot \vec{r}' - i\omega t + i \frac{\omega}{c}( r  - \hvec{r}\cdot \vec{r}')\right) \;.
 \end{align}
@@ -307,16 +332,23 @@ We typically define the ``form factor'' as
 \end{align}
 This form factor is just the Fourier transform of the electron density, with the conjugate variable $\vec{q}$ being defined by the incoming and outgoing wavevectors.  The time-averaged Poynting vector is\footnote{See Appendix \ref{sec:poynt} for details.}
 \begin{align}
-\avg{\vec{S}(\vec{r})} = \frac{1}{2\mu_0} \Re\{\vec{E}_\text{dip}\}\times\Re\{\vec{B}_\text{dip}^*\} = r_e^2 \frac{1}{r^2} I_0 | \hvec{r} \times  \hvec{E}_0 |^2 \left| F(\vec{q}) \right|^2 \hvec{r} \;.
+\avg{\vec{S}(\vec{r})} = \frac{1}{\mu_0}\avg{
+\Re\{\vec{E}_\text{diff}\}\times\Re\{\vec{B}_\text{diff}\}} = r_e^2 
+\frac{1}{r^2} J_0 | \hvec{r} \times  \hvec{E}_0 |^2 \left| \int \rho(\vec{r}') 
+e^{-i\vec{q}\cdot\vec{r}'} d^3r' \right|^2 \hvec{r} \;.
 \end{align}
-Where we have again used the incident intensity $I_0 = |\vec{E}_0|^2/2\mu_0$.  Assuming a detector pixel with area $d\vec{a} = r^2 d\Omega \hvec{r}$, the power into the detector pixel is
+Where we have used the incident intensity $J_0 = |\vec{E}_0|^2/2\mu_0c$.  
+Assuming a detector pixel with area $d\vec{a} = r^2 d\Omega \hvec{r}$, the power 
+into the detector pixel is
 \begin{align}
-I(\vec{q}) = \avg{\vec{S}(\vec{r})} \cdot d\vec{a} = r_e^2 I_0 | \hvec{r} \times  \hvec{E}_0 |^2 \left| F(\vec{q}) \right|^2 d\Omega\;.
+I(\vec{q}) = \avg{\vec{S}(\vec{r})} \cdot d\vec{a} = r_e^2 J_0 | \hvec{r} \times 
+ \hvec{E}_0 |^2 \left| \int \rho(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r' 
+\right|^2 d\Omega\;.
 \end{align}
 Generalizing the polarization factor yields equation \ref{eqn:key}:
 \begin{align}\label{eqn:keyF}
     I(\vec{q}) = J_0 r_e^2  \mathcal{P}(\vec{q})  
-\abs{F(\vec{q})}^2 \Delta \Omega \;.
+\abs{\int \rho(\vec{r}') e^{-i\vec{q}\cdot\vec{r}'} d^3r'}^2 \Delta \Omega \;.
 \end{align}
 The only difference between a single point-like electron (equation  
 \ref{eqn:genthompson}) and a charge distribution (the above equation) is the 
@@ -351,11 +383,11 @@ correction we should make to the radiation field is
 We may call the term involving $\omega$ the ``anomalous dispersion correction''.
 Although it is a very simple model, captures many of the basic 
 frequency-dependent features of diffraction.  The correction to be made to our 
-previous derivations is to make the following replacement:
-\begin{align}
-    r_e^2 \rightarrow \frac{\omega^4}{(\omega_0^2-\omega^2)^2+\gamma^2 
-\omega^2}r_e^2 \;.
-\end{align}
+% previous derivations is to make the following replacement:
+% \begin{align}
+%     r_e^2 \rightarrow \frac{\omega^4}{(\omega_0^2-\omega^2)^2+\gamma^2 
+% \omega^2}r_e^2 \;.
+% \end{align}
 
 
 \section{Atomic Scattering Factors}
@@ -392,7 +424,7 @@ For an assembly of atoms, the overall form factor (equivalent to equation
 \ref{eqn:formfactor}) is
 \begin{align}
 F(\vec{q})  = \sum_n f_n(q)
-\exp(-i \vec{q}\cdot\vec{r}_n)  \; .
+e^{-i \vec{q}\cdot\vec{r}_n}  \; .
 \end{align}
 We sometimes define the ``scattering density'' as the inverse 
 Fourier transform of the above:
@@ -400,6 +432,22 @@ Fourier transform of the above:
 \rho(\vec{r})  &= \sum_n^N \rho_n^{(0)}(|\vec{r}-\vec{r}_n|) +  
 \delta(\vec{r}-\vec{r}_n) \Delta f_n(E) \; .
 \end{align}
+
+
+% \begin{align}
+% I(\vec q) \propto \abs{\int \rho(\vec{r}') 
+% e^{-i\vec{q}\cdot\vec{r}'} d^3r'}^2
+% \end{align}
+% 
+% \begin{align}
+%  =\abs{F(\vec q)}^2
+% \end{align}
+% 
+% 
+% \begin{align}
+%  \rho(\vec r) = \frac{1}{(2\pi)^3} \int F(\vec q) e^{i \vec q \cdot \vec r} 
+% d^3 q
+% \end{align}
 
 
 \section{Refractive Index}
