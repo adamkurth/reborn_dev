@@ -204,7 +204,6 @@ subroutine trilinear_insertions_real(densities, vectors, vals, corners, deltas)
     implicit none
     real(kind=8), intent(inout) :: densities(:,:,:,:)
     real(kind=8), intent(in) :: vals(:,:)
-    real(kind=8) :: val(size(densities,1))
     real(kind=8), intent(in) :: vectors(:,:), corners(3), deltas(3)
     real(kind=8) :: i_f,j_f,k_f,x0,y0,z0,x1,y1,z1
     integer(kind=4) :: i0,j0,k0,i1,j1,k1,ii,nx,ny,nz,nn
@@ -228,15 +227,14 @@ subroutine trilinear_insertions_real(densities, vectors, vals, corners, deltas)
         x1 = 1.0 - x0
         y1 = 1.0 - y0
         z1 = 1.0 - z0
-        val = vals(:,ii)
-        densities(:,i0, j0, k0) = densities(:,i0, j0, k0) + val * x1 * y1 * z1
-        densities(:,i1, j0, k0) = densities(:,i1, j0, k0) + val * x0 * y1 * z1
-        densities(:,i0, j1, k0) = densities(:,i0, j1, k0) + val * x1 * y0 * z1
-        densities(:,i0, j0, k1) = densities(:,i0, j0, k1) + val * x1 * y1 * z0
-        densities(:,i1, j0, k1) = densities(:,i1, j0, k1) + val * x0 * y1 * z0
-        densities(:,i0, j1, k1) = densities(:,i0, j1, k1) + val * x1 * y0 * z0
-        densities(:,i1, j1, k0) = densities(:,i1, j1, k0) + val * x0 * y0 * z1
-        densities(:,i1, j1, k1) = densities(:,i1, j1, k1) + val * x0 * y0 * z0
+        densities(:,i0, j0, k0) = densities(:,i0, j0, k0) + vals(:,ii) * x1 * y1 * z1
+        densities(:,i1, j0, k0) = densities(:,i1, j0, k0) + vals(:,ii) * x0 * y1 * z1
+        densities(:,i0, j1, k0) = densities(:,i0, j1, k0) + vals(:,ii) * x1 * y0 * z1
+        densities(:,i0, j0, k1) = densities(:,i0, j0, k1) + vals(:,ii) * x1 * y1 * z0
+        densities(:,i1, j0, k1) = densities(:,i1, j0, k1) + vals(:,ii) * x0 * y1 * z0
+        densities(:,i0, j1, k1) = densities(:,i0, j1, k1) + vals(:,ii) * x1 * y0 * z0
+        densities(:,i1, j1, k0) = densities(:,i1, j1, k0) + vals(:,ii) * x0 * y0 * z1
+        densities(:,i1, j1, k1) = densities(:,i1, j1, k1) + vals(:,ii) * x0 * y0 * z0
     enddo
 end subroutine trilinear_insertions_real
 
