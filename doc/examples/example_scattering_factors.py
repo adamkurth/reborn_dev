@@ -167,8 +167,8 @@ for i in range(len(E)):
 # Here are the plots for the real and imaginary parts of the scattering factors :math:`f(0)` as a function of photon
 # energy, for both the Henke tables and xraylib:
 
-f = plt.figure(figsize=plt.figaspect(0.4))
-plt.subplot(121)
+f = plt.figure() #figsize=plt.figaspect(0.4))
+# plt.subplot(121)
 plt.semilogy(E/eV, np.real(f_henke), 'r-', label='Henke Real Part')
 plt.semilogy(E/eV, np.imag(f_henke), 'r:', label='Henke Imag Part')
 plt.semilogy(E/eV, np.real(f_xraylib[:, 0]), 'b-', label='xraylib Real Part')
@@ -193,7 +193,8 @@ f_cmann = atoms.cromer_mann_scattering_factors(q_mags, z) + f_henke - z
 f_xraylib = atoms.xraylib_scattering_factors(q_mags, z, E)  # Hubbel form factors with xraylib dispersion
 f_hubbel_henke = atoms.hubbel_henke_scattering_factors(q_mags, z, E)
 
-plt.subplot(122)
+f = plt.figure() #figsize=plt.figaspect(0.4))
+# plt.subplot(122)
 plt.semilogy(q_mags/1e10, np.abs(f_hubbel), label='Hubbel')
 plt.semilogy(q_mags/1e10, np.abs(f_cmann), label='Cromer-Mann/Henke')
 plt.semilogy(q_mags/1e10, np.abs(f_xraylib), label='xraylib')
