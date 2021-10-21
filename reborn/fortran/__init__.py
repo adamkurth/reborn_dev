@@ -95,7 +95,7 @@ def compile_f90(f90_file, extra_args=''):
         os.rename(f, os.path.join(fortran_path, os.path.basename(f)))
 
 
-def import_f90(name, extra_args=''):
+def import_f90(name, extra_args='', hash_file=False):
     r"""
     Import an piece of fortran code directly to a python module.  This attempts to be a super convenient, one-step
     process that will compile your code if necessary, or just use the pre-compiled code.  If the source code changes,
@@ -112,23 +112,26 @@ def import_f90(name, extra_args=''):
         The module.
     """
     source_file_path = os.path.join(fortran_path, name + '.f90')
-    check_hash(source_file_path)  # This will delete compiled code if the source has changed.
+    if hash_file:
+        check_hash(source_file_path)  # This will delete compiled code if the source has changed.
     try:
         module = importlib.import_module('.'+name+'_f', package=__package__)  # Fail if code is not yet compiled.
     except ImportError:
         compile_f90(name+'.f90', extra_args=extra_args)
         module = importlib.import_module('.'+name+'_f', package=__package__)
-        write_hash(source_file_path)  # Create the md5 hash of the file, so we'll know if it changes in the future.
+        if hash_file:
+            write_hash(source_file_path)  # Create the md5 hash of the file, so we'll know if it changes in the future.
     return module
 
+
 omp_args = "--f90flags='-fopenmp -O2' -lgomp"
-utils_f = import_f90('utils')
-interpolations_f = import_f90('interpolations')
-fortran_indexing_f = import_f90('fortran_indexing')
-peaks_f = import_f90('peaks', extra_args=omp_args)
-omp_test_f = import_f90('omp_test', extra_args=omp_args)
-density_f = import_f90('density', extra_args=omp_args)
-scatter_f = import_f90('scatter', extra_args=omp_args)
+utils_f = import_f90('utils', hash_file=True)
+interpolations_f = import_f90('interpolations', hash_file=True)
+fortran_indexing_f = import_f90('fortran_indexing', hash_file=True)
+peaks_f = import_f90('peaks', extra_args=omp_args, hash_file=True)
+omp_test_f = import_f90('omp_test', extra_args=omp_args, hash_file=True)
+density_f = import_f90('density', extra_args=omp_args, hash_file=True)
+scatter_f = import_f90('scatter', extra_args=omp_args, hash_file=True)
 
 from . import omp_test
 
