@@ -314,37 +314,34 @@ class Rotate3DLinearShear:
             # Shear 1
             for x in range(self.N):
                 for y in range(self.N):
-                    xnew = x - np.tan(ang/2) * y
+                    xnew = (x-(self.N-1)/2) - np.tan(ang/2) * (y-(self.N-1)/2)
                     xnew_int = int(xnew)
                     Delta = xnew - xnew_int
 
-                    # ftmp[y,x] = ftmp[y,xnew_int%self.N] * (1-Delta) + ftmp[y,(xnew_int+1)%self.N] * Delta
-                    ftmp[x,y] = ftmp[xnew_int%self.N,y] * (1-Delta) + ftmp[(xnew_int+1)%self.N,y] * Delta
+                    ftmp[y,x] = ftmp[y,xnew_int%self.N]*(1-Delta) + ftmp[y,(xnew_int+1)%self.N]*Delta
+                    # ftmp[x,y] = ftmp[xnew_int%self.N,y] * (1-Delta) + ftmp[(xnew_int+1)%self.N,y] * Delta
 
             # Shear 2
             for x in range(self.N):
                 for y in range(self.N):
-                    ynew =  np.sin(ang) * x + y
+                    ynew = np.sin(ang) * (x-(self.N-1)/2) + (y-(self.N-1)/2)
                     ynew_int = int(ynew)
                     Delta = ynew - ynew_int
 
-                    # ftmp[y,x] = ftmp[ynew_int%self.N,x] * (1-Delta) + ftmp[(ynew_int+1)%self.N,x] * Delta
-                    ftmp[x,y] = ftmp[x,ynew_int%self.N] * (1-Delta) + ftmp[x,(ynew_int+1)%self.N] * Delta
+                    ftmp[y,x] = ftmp[ynew_int%self.N,x] * (1-Delta) + ftmp[(ynew_int+1)%self.N,x] * Delta
+                    # ftmp[x,y] = ftmp[x,ynew_int%self.N] * (1-Delta) + ftmp[x,(ynew_int+1)%self.N] * Delta
 
             # Shear 3
             for x in range(self.N):
                 for y in range(self.N):
-                    xnew = x - np.tan(ang/2) * y
+                    xnew = (x-(self.N-1)/2) - np.tan(ang/2) * (y-(self.N-1)/2)
                     xnew_int = int(xnew)
                     Delta = xnew - xnew_int
 
-                    # ftmp[y,x] = ftmp[y,xnew_int%self.N] * (1-Delta) + ftmp[y,(xnew_int+1)%self.N] * Delta
-                    ftmp[x,y] = ftmp[xnew_int%self.N,y] * (1-Delta) + ftmp[(xnew_int+1)%self.N,y] * Delta
+                    ftmp[y,x] = ftmp[y,xnew_int%self.N] * (1-Delta) + ftmp[y,(xnew_int+1)%self.N] * Delta
+                    # ftmp[x,y] = ftmp[xnew_int%self.N,y] * (1-Delta) + ftmp[(xnew_int+1)%self.N,y] * Delta
 
 
-            # ftmp = fft.ifft(fft.fft(ftmp, axis=1) * k0, axis=1)
-            # ftmp = fft.ifft(fft.fft(ftmp, axis=0) * k1, axis=0)
-            # ftmp = fft.ifft(fft.fft(ftmp, axis=1) * k0, axis=1)
             self._f[i, :, :] = ftmp
 
     def _rotate3Dy(self, ang):
@@ -367,7 +364,7 @@ class Rotate3DLinearShear:
             # Shear 1
             for x in range(self.N):
                 for y in range(self.N):
-                    xnew = x - np.tan(ang/2) * y
+                    xnew = (x-(self.N-1)/2) - np.tan(ang/2) * (y-(self.N-1)/2)
                     xnew_int = int(xnew)
                     Delta = xnew - xnew_int
 
@@ -377,7 +374,7 @@ class Rotate3DLinearShear:
             # Shear 2
             for x in range(self.N):
                 for y in range(self.N):
-                    ynew =  np.sin(ang) * x + y
+                    ynew =  np.sin(ang) * (x-(self.N-1)/2) + (y-(self.N-1)/2)
                     ynew_int = int(ynew)
                     Delta = ynew - ynew_int
 
@@ -387,17 +384,13 @@ class Rotate3DLinearShear:
             # Shear 3
             for x in range(self.N):
                 for y in range(self.N):
-                    xnew = x - np.tan(ang/2) * y
+                    xnew = (x-(self.N-1)/2) - np.tan(ang/2) * (y-(self.N-1)/2)
                     xnew_int = int(xnew)
                     Delta = xnew - xnew_int
 
                     ftmp[x,y] = ftmp[xnew_int%self.N,y] * (1-Delta) + ftmp[(xnew_int+1)%self.N,y] * Delta
                     # ftmp[y,x] = ftmp[y,xnew_int%self.N] * (1-Delta) + ftmp[y,(xnew_int+1)%self.N] * Delta
 
-
-            # ftmp = fft.ifft(fft.fft(ftmp, axis=1) * k0, axis=1)
-            # ftmp = fft.ifft(fft.fft(ftmp, axis=0) * k1, axis=0)
-            # ftmp = fft.ifft(fft.fft(ftmp, axis=1) * k0, axis=1)
             self._f[:, i, :] = ftmp
 
     def _setkorderc0(self):
