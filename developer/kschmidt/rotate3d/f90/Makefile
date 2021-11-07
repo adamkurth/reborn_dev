@@ -2,7 +2,7 @@ FFLAGS=-Ofast -march=native -I/usr/include -fPIC -g
 #FFLAGS=-Ofast -march=native -I/usr/include -fPIC
 
 all: r3df03.o r3df03py.f90
-	f2py -L -lfftw3 -c -m r3df03py r3df03py.f90 r3df03.o
+	f2py --quiet -L -lfftw3 -c -m r3df03py r3df03py.f90 r3df03.o
 
 r3df03.o: r3df03.f90
 	gfortran -c $(FFLAGS) r3df03.f90

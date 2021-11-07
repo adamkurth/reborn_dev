@@ -454,3 +454,74 @@ def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, c
     # print(vectors.shape)
     density_f.trilinear_insertion_factor_real(densities.T, vectors.T, insert_vals.T, corners.T, deltas.T, weight_factor)
     return None
+
+def trilinear_insertions(densities, vectors, insert_vals, corners=None, deltas=None, x_min=None, x_max=None):
+    r"""
+    Performs multiple trilinear inserts
+
+    Notes:
+        * This function behaves as if the density is periodic; points that lie out of bounds will wrap around.  This
+          might change in the future, in which case a keyword argument will be added so that you may explicitly decide
+          what to do in the case of points that lie outside of the grid.  Note that periodic boundaries avoid the
+          need for conditional statements within a for loop, which probably makes the function faster.  For now, if you
+          think you have points that lie outside of the grid, consider handling them separately.
+        * You may specify the output array, which is useful if you wish to simply add to an existing 3D array that you
+          have already allocated.  This can make your code faster and reduce memory.  Beware: the out array is not
+          over-written -- the underlying fortran function will *add* to the existing ``densities[1,:,:,:]`` array.
+        * Make sure that all your arrays are c-contiguous.
+        * An older version of this code allowed the arguments ``corners`` and ``deltas``.  They are discouraged because
+          we aim to standardize on the ``x_min`` and ``x_max`` arguments documented below.  They may be removed in the
+          future.
+        * The shape of the 3D array is inferred from the ``densities`` argument.
+
+    Arguments:
+        densities (numpy array): A 4D array containing the densities, into which values are inserted. 
+        vectors (numpy array): The 3D vector positions corresponding to the values to be inserted.
+        insert_vals (numpy array): The values to be inserted into the 3D map.  They are multiplied by weights before
+                                   being inserted into the densities map.
+        x_min (float or numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
+                                      If a float is passed instead, it will be replicated to make a 3D array.
+        x_max (float or numpy array): Same as x_min, but specifies the opposite corner, with larger values than x_min.
+
+    Returns:
+        None.  This function modifies the densities array; it returns nothing.
+    """
+
+    # # Convert to f-contiguous arrays required by f2py
+    # densities = densities.T
+    # vectors = vectors.T
+
+    if (corners is not None) and (deltas is not None):
+        corners = np.array(corners).copy()
+        deltas = np.array(deltas).copy()
+    else:
+        if (x_min is None) or (x_max is None):
+            raise ValueError('trilinear_insertion requires the x_min and x_max arguments')
+        shape = np.array(densities.shape)
+        if len(shape) != 4:
+            raise ValueError('trilinear_insertion requires a 4D densities argument')
+        x_min = np.atleast_1d(np.array(x_min))
+        x_max = np.atleast_1d(np.array(x_max))
+        if len(x_min) == 1:
+            x_min = np.squeeze(np.array([x_min, x_min, x_min]))
+        if len(x_max) == 1:
+            x_max = np.squeeze(np.array([x_max, x_max, x_max]))
+        
+        shape_3D = np.array(densities[:,:,:,0].shape)
+        deltas = (x_max - x_min)/(shape_3D - 1)
+        corners = x_min
+
+    corners = corners.astype(np.float64)
+    deltas = deltas.astype(np.float64)
+
+    assert densities.flags.c_contiguous
+    assert vectors.flags.c_contiguous
+    assert insert_vals.flags.c_contiguous
+    assert corners.flags.c_contiguous
+    assert deltas.flags.c_contiguous
+
+
+    # print(densities.shape)
+    # print(vectors.shape)
+    density_f.trilinear_insertions_real(densities.T, vectors.T, insert_vals.T, corners.T, deltas.T)
+    return None
