@@ -233,6 +233,182 @@ class Rotate3D:
         return k0
 
 
+
+
+
+class Rotate3DLinearShear:
+    r"""
+     Same as Rotate3D but with the shears done with linear interpolation instead of FFTs.
+     No _rotate3Dxr and _rotate3Dyr
+
+     Note 1: The input array must be 3d, double complex, and have all three
+             dimension sizes equal. Otherwise it raises a ValueError exception.
+
+     Note 2: If you don't want wrap arounds, make sure the input array, f,
+             is zero-padded to at least sqrt(2) times the largest dimension
+             of the desired object.
+
+     Arguments:
+         f (*3D |ndarray|*) : The 3D input array. f is the corresponding
+         class member for output.
+
+         keep_last_even_k (bool) : default False. The last k for even N has an ambiguous
+         sign. Keeping one sign only, makes real data become complex, so
+         this is always False for real data.
+
+
+     Methods:
+       rotation(R): R is a rotation specified as a scipy.spatial.transform.Rotation
+    """
+
+    def __init__(self, f3d, keep_last_even_k=False):
+        self.N = 0
+        self.f = f3d
+        self.keep_last_even_k = keep_last_even_k
+        self.dtf = self._f.dtype
+        self._setkorderc0()
+
+    @property
+    def f(self):
+        return self._f
+
+    @f.setter
+    def f(self, f):
+        self._checkf(f)
+        self._f = f.copy()
+
+    def _checkf(self, f3d):
+        # check f3d is 3d, cubic
+        if len(f3d.shape) != 3:
+            raise ValueError("rotate3D: f3d must be 3 dimensional")
+        if self.N == 0:
+            self.N = int(f3d.shape[0])
+        if f3d.shape.count(self.N) != 3:
+            if self.N == 0:
+                raise ValueError("rotate3D: f3d must have all dimensions equal")
+            else:
+                raise ValueError(
+                    "rotate3D: f3d must have all dimensions equal to N")
+
+    def rotation(self, R):
+        euler = R.as_euler('xyx')
+        self._rotate3Dx(euler[0])
+        self._rotate3Dy(euler[1])
+        self._rotate3Dx(euler[2])
+
+    def _rotate3Dx(self, angin):
+        # angle negative since done in order z then y
+        ang = -angin
+        n90 = np.rint(ang * 2.0 / np.pi)
+        n90 = int(n90 % 4)
+
+        for i in range(self.N):
+            ftmp = self._f[i, :, :]
+            if n90 == 1:
+                ftmp = np.rot90(ftmp, 1, axes=(1, 0))
+            if n90 == 2:
+                ftmp = np.rot90(ftmp, 2, axes=(1, 0))
+            if n90 == 3:
+                ftmp = np.rot90(ftmp, -1, axes=(1, 0))
+
+            # Shear 1
+            for x in range(self.N):
+                for y in range(self.N):
+                    xnew = (x-(self.N-1)/2) - np.tan(ang/2) * (y-(self.N-1)/2)
+                    xnew_int = int(xnew)
+                    Delta = xnew - xnew_int
+
+                    ftmp[y,x] = ftmp[y,xnew_int%self.N]*(1-Delta) + ftmp[y,(xnew_int+1)%self.N]*Delta
+                    # ftmp[x,y] = ftmp[xnew_int%self.N,y] * (1-Delta) + ftmp[(xnew_int+1)%self.N,y] * Delta
+
+            # Shear 2
+            for x in range(self.N):
+                for y in range(self.N):
+                    ynew = np.sin(ang) * (x-(self.N-1)/2) + (y-(self.N-1)/2)
+                    ynew_int = int(ynew)
+                    Delta = ynew - ynew_int
+
+                    ftmp[y,x] = ftmp[ynew_int%self.N,x] * (1-Delta) + ftmp[(ynew_int+1)%self.N,x] * Delta
+                    # ftmp[x,y] = ftmp[x,ynew_int%self.N] * (1-Delta) + ftmp[x,(ynew_int+1)%self.N] * Delta
+
+            # Shear 3
+            for x in range(self.N):
+                for y in range(self.N):
+                    xnew = (x-(self.N-1)/2) - np.tan(ang/2) * (y-(self.N-1)/2)
+                    xnew_int = int(xnew)
+                    Delta = xnew - xnew_int
+
+                    ftmp[y,x] = ftmp[y,xnew_int%self.N] * (1-Delta) + ftmp[y,(xnew_int+1)%self.N] * Delta
+                    # ftmp[x,y] = ftmp[xnew_int%self.N,y] * (1-Delta) + ftmp[(xnew_int+1)%self.N,y] * Delta
+
+
+            self._f[i, :, :] = ftmp
+
+    def _rotate3Dy(self, ang):
+        # identical to x rotation except angle positive since
+        # this is done in the order z then x, and the array slices
+        # in for loop are x-z.
+        n90 = np.rint(ang * 2.0 / np.pi)
+        n90 = int(n90 % 4)
+
+        for i in range(self.N):
+            ftmp = self._f[:, i, :]
+            if n90 == 1:
+                ftmp = np.rot90(ftmp, 1, axes=(1, 0))
+            if n90 == 2:
+                ftmp = np.rot90(ftmp, 2, axes=(1, 0))
+            if n90 == 3:
+                ftmp = np.rot90(ftmp, -1, axes=(1, 0))
+
+
+            # Shear 1
+            for x in range(self.N):
+                for y in range(self.N):
+                    xnew = (x-(self.N-1)/2) - np.tan(ang/2) * (y-(self.N-1)/2)
+                    xnew_int = int(xnew)
+                    Delta = xnew - xnew_int
+
+                    ftmp[x,y] = ftmp[xnew_int%self.N,y] * (1-Delta) + ftmp[(xnew_int+1)%self.N,y] * Delta
+                    # ftmp[y,x] = ftmp[y,xnew_int%self.N] * (1-Delta) + ftmp[y,(xnew_int+1)%self.N] * Delta
+
+            # Shear 2
+            for x in range(self.N):
+                for y in range(self.N):
+                    ynew =  np.sin(ang) * (x-(self.N-1)/2) + (y-(self.N-1)/2)
+                    ynew_int = int(ynew)
+                    Delta = ynew - ynew_int
+
+                    ftmp[x,y] = ftmp[x,ynew_int%self.N] * (1-Delta) + ftmp[x,(ynew_int+1)%self.N] * Delta
+                    # ftmp[y,x] = ftmp[ynew_int%self.N,x] * (1-Delta) + ftmp[(ynew_int+1)%self.N,x] * Delta
+
+            # Shear 3
+            for x in range(self.N):
+                for y in range(self.N):
+                    xnew = (x-(self.N-1)/2) - np.tan(ang/2) * (y-(self.N-1)/2)
+                    xnew_int = int(xnew)
+                    Delta = xnew - xnew_int
+
+                    ftmp[x,y] = ftmp[xnew_int%self.N,y] * (1-Delta) + ftmp[(xnew_int+1)%self.N,y] * Delta
+                    # ftmp[y,x] = ftmp[y,xnew_int%self.N] * (1-Delta) + ftmp[y,(xnew_int+1)%self.N] * Delta
+
+            self._f[:, i, :] = ftmp
+
+    def _setkorderc0(self):
+        self.c0 = 0.5 * (self.N - 1)
+        if self.N % 2 == 0:
+            kint0 = np.arange(-self.N / 2, self.N / 2)
+        else:
+            kint0 = np.arange((1 - self.N) / 2, (1 + self.N) / 2)
+        self.kint = np.zeros(self.N, np.float64)
+        self.kint[(self.N + 1) // 2:] = kint0[0:self.N // 2]
+        self.kint[0:(self.N + 1) // 2] = kint0[self.N // 2:]
+
+
+
+
+
+
+
 class Rotate3Dlegacy(Rotate3D):
     r"""
      This is identical to rotate3D except that the shear orders are
