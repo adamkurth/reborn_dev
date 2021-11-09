@@ -593,7 +593,8 @@ We wish to solve for $V(\vec{r}, t)$ in the inhomogeneous equation
 \begin{align}\label{eqn:ihV2}
 \nabla^2 V(\vec{r}, t) - \mu_0\epsilon_0 \frac{\partial^2 V(\vec{r}, t)}{\partial t^2} &= -\rho(\vec{r}, t) / \epsilon_0
 \end{align}
-assuming that we know $\vec{\rho}(\vec{r}, t)$.  Note that if we solve this equation, the same approach may be applied to the components
+assuming that we know $\rho(\vec{r}, t)$.  Note that if we solve this 
+equation, the same approach may be applied to the components
 of the vector potential $\vec{A}$ in equation \ref{eqn:ihA}.
 
 Briefly, Green's method works as follows.  Assume we have a linear operator $\mathcal{L}_{\vec{r}}$ and we 
@@ -601,6 +602,8 @@ wish to solve for $V(\vec{r})$ in the following equation:
 \begin{align}
  \mathcal{L}_{\vec{r}} V(\vec{r}) = g(\vec{r}) \;.
 \end{align}
+The $\vec r$ subscript indicates that the operator involves the \emph{unprimed} 
+coordinates.
 % The fact that the operator is linear means that
 % \begin{align}
 % \mathcal{L}_{\vec{r}} \big( a V(\vec{r}) + b Q(\vec{r}) \big) =
@@ -627,11 +630,12 @@ Working the proof backwards from the above, we apply $\mathcal{L}_{\vec{r}}$ to 
 
 In order to solve equation \ref{eqn:ihV2}, we will first remove the time variable by expanding $V(\vec{r})$ and
 $\rho(\vec{r})$ into their Fourier transforms:
-\begin{align}
+\begin{align}\label{eqn:Vw}
 V(\vec{r}, t) &= \int_{-\infty}^{\infty} V_{\omega}(\vec{r})e^{- i\omega t} d\omega \\
     \rho(\vec{r}, t) &= \int_{-\infty}^{\infty} \rho_{\omega}(\vec{r})e^{- i\omega t} d\omega \;.
 \end{align}
-We plug the above into equation \ref{eqn:ihV2} we get a differential equation for each frequency component:
+We plug the above into equation \ref{eqn:ihV2} we get a differential 
+equation for each spectral component:
 \begin{align}
 (\nabla^2 + k^2) V_\omega(\vec{r}) = -\rho_\omega (\vec{r})/\epsilon_0
 \end{align}
@@ -643,21 +647,27 @@ The above is easiest to solve if the delta function is at the origin, so we defi
 \begin{align}
  (\nabla^2 + k^2)G(\vec{r}, \vec{r}') = \delta(\vec{R})
 \end{align}
-In the above $\vec{R}$ coordinates the RHS is rotationally invariant, and hence we may write 
-$G(\vec{r}, \vec{r}') = G(R)$.  Taking now the radial component of the Laplacian:
+When written in terms of the $\vec{R}$ coordinates, the RHS is rotationally 
+invariant, and hence the Green's function can only be a function of the radial 
+magnitude: 
+$G(\vec{r}, \vec{r}') = G(R)$.  In writing the Laplacian operator in spherical 
+coordinates, we've reduced our equation to a single variable:
 \begin{align}\label{eqn:symR}
 \left(\frac{1}{R}\frac{\partial}{\partial R}R + k^2\right)G(R) = \delta(R) \;.
 \end{align}
 If we look in the regions $R \ne 0$ where $\delta(R)=0$ we have the equation
 \begin{align}
-\frac{\partial}{\partial R}RG(R) =- k^2R G(R)  
+\frac{\partial}{\partial R}[RG(R)] =- k^2 [R G(R)]  
 \end{align}
 with the usual solutions
 \begin{align}
  G(R) = A \frac{e^{ikR}}{R} + B \frac{e^{-ikR}}{R} \;.
 \end{align}
 With foresight, we can set $B=0$ because the \emph{incoming} spherical waves produce results
-that violate causality.  In order to determine the coefficient $A$ we integrate equation \ref{eqn:symR}
+that violate causality (we've effectively introduced a boundary condition at 
+infinity).  In order to determine the coefficient $A$ we eliminate the 
+Delta function by taking the volume integral of both sides of equation 
+\ref{eqn:symR}
 about an infinitesimal volume centered on the origin:
 \begin{align}
 \int_\text{sphere}\nabla^2 G(R) d^3R  + k^2 \int_\text{sphere} G(R) d^3R = 1 \;.
@@ -666,29 +676,40 @@ In the limit $R\rightarrow 0$ we have $G(R) \rightarrow A/R$:
 \begin{align}
 A \int_\text{sphere}\nabla^2 \frac{1}{R} d^3R  + A k^2 \int_\text{sphere} \frac{1}{R} 4\pi R^2dR = 1 \;.
 \end{align}
-From Griffiths chapter 1 we have $\nabla^2 (1/R) = -4\pi \delta(R)$, and the second term on the LHS 
-vanishes, finally giving us
+For the first term on the LHS we use the result from Griffiths chapter 1: 
+ $\nabla^2 (1/R) = -4\pi \delta(R)$.  The second term on the LHS 
+vanishes.  Finally giving us
 \begin{align}
  A = -\frac{1}{4\pi} \;.
 \end{align}
-We now have the Green's function:
+After all the above work, we finally have the Green's function -- an outgoing 
+spherical wave:
 \begin{align}
- G(\vec{r}, \vec{r}') = - \frac{e^{ik|\vec{r}-\vec{r}'|}}{4\pi |\vec{r}-\vec{r}'|}
+ G(\vec{r}, \vec{r}') = - \frac{e^{ik|\vec{r}-\vec{r}'|}}{4\pi 
+|\vec{r}-\vec{r}'|} \;.
 \end{align}
 
 With the Green's function, we finally plug it into equation \ref{eqn:useg}:
 \begin{align}
 V_\omega(\vec{r}) = \int_\text{Vol} \frac{\rho_\omega(\vec{r}')}{4\pi \epsilon_0} \frac{e^{ik|\vec{r}-\vec{r}'|}}{ |\vec{r}-\vec{r}'|} d^3 r'\;.
 \end{align}
-In order to recover our time variable, we take a Fourier transform of the above:
+Finally, we switch from frequency to the time variable by taking a 
+Fourier transform of the above:
 \begin{align}
 V(\vec{r}, t) &= \int_{-\infty}^\infty \left\{\int_\text{Vol} \frac{\rho_\omega(\vec{r}')}{4\pi \epsilon_0} \frac{e^{ik|\vec{r}-\vec{r}'|}}{ |\vec{r}-\vec{r}'|} d^3 r' \right\}e^{-i\omega t}d\omega \\
 &=\int_\text{Vol} \left\{ \int_{-\infty}^\infty\rho_\omega(\vec{r}') e^{-i\omega (t -|\vec{r}-\vec{r}'|/c)} d\omega\right\}\frac{1}{4\pi \epsilon_0} \frac{1}{ |\vec{r}-\vec{r}'|} d^3 r'  \;.
 \end{align}
-We can finally write the above as the retarded potential
+Comparing the term in the curly braces with equation \ref{eqn:Vw} gives us the 
+retarded potential
 \begin{align}
-V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}\int \frac{\rho(\vec{r}', t_r)}{\rcurs}d^3r' \;.
+V(\vec{r}, t) &= \frac{1}{4\pi\epsilon_0}\int \frac{\rho(\vec{r}', 
+t_r)}{\rcurs}d^3r' 
 \end{align}
+along with the retarded time
+\begin{align}
+ t_r \equiv t - \rcurs / c \;.
+\end{align}
+
 
 \newpage
 \section{Appendix: Li\'enard-Wiechert potential}

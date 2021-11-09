@@ -8,6 +8,8 @@ from reborn.target import molecule, crystal
 from reborn.simulate import gas, solutions
 from reborn.viewers.qtviews import PADView
 
+# print(numpy.__file__)
+
 # === CONFIGURATION ==============================================================
 eV = constants.value('electron volt')
 r_e = constants.value('classical electron radius')
@@ -15,13 +17,13 @@ k = constants.value('Boltzmann constant')
 gas_length = 1
 temperature = 300
 pressure = 101325
-poisson = True
+poisson = False
 sample_thickness = 4e-6
 pulse_energy = 1e-3
 photon_energy = 9e3*eV
 rayonix_distance = 1.5
-epix_distance = 0.3
-epix_angle = np.pi/6         # Tilt angle of the epix
+epix_distance = 8*2.54e-2
+epix_angle = 0.5*42.6*180/np.pi         # Tilt angle of the epix
 helium_partial_pressure = 0  # Helium partial pressure
 map_resolution = 0.2e-9  # Minimum resolution for 3D density map
 map_oversample = 2  # Oversampling factor for 3D density map
@@ -61,11 +63,11 @@ rhod_mol = crystal.CrystalStructure(pdb_file).molecule
 q_profile = np.linspace(q_mags.min(), q_mags.max(), 100)
 # print('rhod')
 # rhod_profile = gas.isotropic_gas_intensity_profile(molecule=rhod_mol, beam=beam, q_mags=q_profile)
-he_profile = gas.isotropic_gas_intensity_profile(molecule='He', beam=beam, q_mags=q_profile)
-n_gas_molecules = np.pi * (beam.diameter_fwhm/2)**2 * gas_length * pressure / k / temperature
-air_profile = gas.air_intensity_profile(q_mags=q_profile, beam=beam)
-gas_profile = air_profile*(1-helium_partial_pressure) + he_profile*helium_partial_pressure
-gas_intensity = n_gas_molecules * J0 * sa * pol * r_e**2 * np.interp(q_mags, q_profile, gas_profile)
+# he_profile = gas.isotropic_gas_intensity_profile(molecule='He', beam=beam, q_mags=q_profile)
+# n_gas_molecules = np.pi * (beam.diameter_fwhm/2)**2 * gas_length * pressure / k / temperature
+# air_profile = gas.air_intensity_profile(q_mags=q_profile, beam=beam)
+# gas_profile = air_profile*(1-helium_partial_pressure) + he_profile*helium_partial_pressure
+# gas_intensity = n_gas_molecules * J0 * sa * pol * r_e**2 * np.interp(q_mags, q_profile, gas_profile)
 
 if poisson:
     gas_intensity = np.random.poisson(gas_intensity).astype(np.double)
@@ -73,7 +75,8 @@ if poisson:
 if False:
     water_intensity /= pads.solid_angles() * pads.polarization_factors(beam=beam)
 
-total_intensity = gas_intensity + water_intensity
-print(total_intensity[0:10])
+total_intensity = water_intensity/sa/pol
+#total_intensity = gas_intensity + water_intensity
+#print(total_intensity[0:10])
 pv = PADView(pad_geometry=pads, raw_data=total_intensity, mask_data=mask)
 pv.start()

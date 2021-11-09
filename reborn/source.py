@@ -21,6 +21,8 @@ import json
 import numpy as np
 from scipy import constants as const
 
+import utils
+
 hc = const.h*const.c  # pylint: disable=invalid-name
 
 
@@ -49,15 +51,21 @@ class Beam:
 
     def __init__(self, beam_vec=np.array([0, 0, 1]), photon_energy=1.602e-15, wavelength=None,
                  polarization_vec=np.array([1, 0, 0]), pulse_energy=1e-3, diameter_fwhm=1e-6):
-
+        r"""
+        Arguments:
+            beam_vec (|ndarray|): Direction of incident beam.
+            photon_energy (float): Photon energy in SI units.
+            wavelength (float): Wavelength in SI units (an alternative to photon energy).
+            polarization_vec (|ndarray|): Direction of the first component of the electric field.  Must be orthogonal to
+                                          the beam vector.  Second component is E2 = E1 x B .
+            pulse_energy (float): Total energy of x-ray pulse.
+            diameter_fwhm (float): Beam diameter.  Default is a tophat beam profile, so this is the tophat diameter.
+        """
         self.beam_vec = beam_vec
         self.polarization_vec = polarization_vec
-
         self.photon_energy = photon_energy
-
         if wavelength is not None:
             self.wavelength = wavelength
-
         self.diameter_fwhm = diameter_fwhm
         self.pulse_energy = pulse_energy
 
@@ -102,21 +110,33 @@ class Beam:
     @property
     def beam_vec(self):
         r""" The nominal direction of the incident x-ray beam. """
-        return self._beam_vec
+        return self._beam_vec.copy()
 
     @beam_vec.setter
     def beam_vec(self, vec):
-        self._beam_vec = np.array(vec)
+        self._beam_vec = utils.vec_norm(np.array(vec))
 
     @property
     def polarization_vec(self):
-        r""" The principle polarization vector :math:`\hat{u}`.  This should be orthogonal to the incident beam
-        direction.  The complementary polarization vector is :math:`\hat{u}\times\hat{b}`"""
+        r""" The principle polarization vector :math:`\hat{E}_1`.  This should be orthogonal to the incident beam
+        direction.  The complementary polarization vector is :math:`\hat{E}_2 = \hat{E}_1\times\hat{b}`"""
         return self._polarization_vec
 
     @polarization_vec.setter
     def polarization_vec(self, vec):
-        self._polarization_vec = np.array(vec)
+        self._polarization_vec = utils.vec_norm(np.array(vec))
+        if np.dot(self._polarization_vec, self.beam_vec) > 1e-5:
+            raise ValueError('Your E-field vector is not orthogonal to your k vector!')
+
+    @property
+    def e1_vec(self):
+        r""" The principle polarization vector.  See docs for polarization_vec property. """
+        return self._polarization_vec.copy()
+
+    @property
+    def e2_vec(self):
+        r""" The complementary polarization vector.  See docs for polarization_vec property. """
+        return np.cross(self.e1_vec, self.beam_vec)
 
     @property
     def polarization_weight(self):

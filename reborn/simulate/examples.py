@@ -102,12 +102,9 @@ def lysozyme_molecule(pad_geometry=None, wavelength=1.5e-10, random_rotation=Tru
 
 
 class PDBMoleculeSimulator(object):
-
     r"""
-
     A simple generator of simulated single-molecule intensities, from a pdb file.  Defaults to lysozyme at 1.5 A
     wavelength, on a pnccd detector layout.
-
     """
 
     def __init__(self, pdb_file=None, pad_geometry=None, beam=None, wavelength=1.5e-10, random_rotation=True):
@@ -350,7 +347,7 @@ class CrystalSimulatorV1(object):
 
 class LysozymeFrameGetter(FrameGetter):
 
-    def __init__(self, pad_geometry=None, beam=None, random_rotation=True):
+    def __init__(self, pad_geometry=None, beam=None):
         super().__init__()
         self.molsim = PDBMoleculeSimulator(pdb_file=lysozyme_pdb_file, pad_geometry=pad_geometry,
                                             beam=beam, random_rotation=True)

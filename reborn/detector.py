@@ -520,39 +520,35 @@ class PADGeometry:
         solid_angle_2 = utils.triangle_solid_angle(corner4, corner2, corner3)
         return solid_angle_1 + solid_angle_2
 
-    def polarization_factors(self, polarization_vec_1=None, beam_vec=None, weight=None, beam=None):
+    def polarization_factors(self, beam=None, e1=None, b=None, a=None):
         r"""
         The scattering polarization factors.
 
         Arguments:
-            polarization_vec_1 (numpy array) :
-                First beam polarization vector (second is this one crossed with beam vector)
-            beam_vec (numpy array) :
-                Incident beam vector
-            weight (float) :
-                The weight of the first polarization component (second is one minus this weight)
-            beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
-                                         of beam_vec ect.
+            beam (|Beam|): Incident beam.
+            e1 (|ndarray|) : Optional: Principle polarization vector.
+            b (|ndarray|) : Optional: Incident beam vector.
+            a (float) : Optional: The weight of the first polarization component.
 
-        Returns:  numpy array
+        Returns: |ndarray|
         """
         if beam is not None:
-            beam_vec = beam.beam_vec
-            polarization_vec_1 = beam.polarization_vec
-            weight = beam.polarization_weight
+            b = beam.beam_vec
+            e1 = beam.e1_vec
+            a = beam.polarization_weight
         pix_vec = utils.vec_norm(self.position_vecs())
-        polarization_vec_1 = utils.vec_norm(np.array(polarization_vec_1))
-        beam_vec = utils.vec_norm(np.array(beam_vec))
-        polarization_vec_2 = np.cross(polarization_vec_1, beam_vec)
-        if weight is None:
+        e1 = utils.vec_norm(np.array(e1))
+        b = utils.vec_norm(np.array(b))
+        polarization_vec_2 = np.cross(e1, b)
+        if a is None:
             weight1 = 1
             weight2 = 0
         else:
-            weight1 = weight
-            weight2 = 1 - weight
+            weight1 = a
+            weight2 = 1 - a
         polarization_factor = 0
         if weight1 > 0:
-            polarization_factor += weight1 * (1 - np.abs(np.dot(pix_vec, polarization_vec_1)) ** 2)
+            polarization_factor += weight1 * (1 - np.abs(np.dot(pix_vec, e1)) ** 2)
         if weight2 > 0:
             polarization_factor += weight2 * (1 - np.abs(np.dot(pix_vec, polarization_vec_2)) ** 2)
         return polarization_factor.ravel()
@@ -886,7 +882,8 @@ def load_pad_geometry_list(file_name):
         pad = PADGeometry()
         pad.from_dict(d)
         out.append(pad)
-    return PADGeometryList(out)
+    out = PADGeometryList(out)
+    return out
 
 
 def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0.1, tiling_shape=(4, 2), pad_gap=0):
