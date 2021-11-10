@@ -44,8 +44,6 @@ fg = LysozymeFrameGetter(pad_geometry=pads, beam=beam)
 # pv.start()
 pat = fg.get_frame()
 pat = pat['pad_data']
-plt.figure(1)
-view_pad_data(pad_geometry=pads, pad_data=[np.log10(p+1) for p in pat], show=False)
 meen, cnt, qc, pc = to_polar(vals=detector.concat_pad_data(pat), q=q_mags, phi=phi, n_q=100,
                              q_range=[0, np.max(q_mags)], n_phi=100)
 plt.figure(2)
@@ -53,4 +51,6 @@ plt.imshow(np.log10(meen+1), aspect='auto', interpolation='none',
            extent=[pc[0]/2/np.pi, pc[-1]/2/np.pi, qc[0]/1e10, qc[-1]/1e10])
 plt.xlabel(r'$\phi/2\pi$')
 plt.ylabel(r'$q$ [${\AA}^{-1}$]')
+plt.figure(1)
+view_pad_data(pad_geometry=pads, pad_data=[np.log10(p+1) for p in pat], show=False)
 plt.show()
