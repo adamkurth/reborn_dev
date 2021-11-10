@@ -681,6 +681,18 @@ class PADGeometry:
         p.ss_vec *= binning
         return p
 
+    def pixel_polar_angles(self, beam=None):
+        r"""
+        The angle describing pad pixel positions in polar coordinates.
+
+        Arguments:
+            beam (source.Beam instance): specify incident beam properties.
+
+        Returns: numpy array
+        """
+        qs = self.q_vecs(beam=beam)
+        return np.arctan2(qs[:, 1], qs[:, 0])
+
 
 class PADGeometryList(list):
     r""" A subclass of list that does operations on lists of |PADGeometry| instances.  Is helpful, for example.
@@ -842,6 +854,10 @@ class PADGeometryList(list):
             return
         raise ValueError("It is not clear what you are trying to do.  The PADGeometryList should be empty, or should"
                          "have the same length as the geometry file.")
+
+    def pixel_polar_angles(self, beam=None):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.pixel_polar_angles(beam).ravel() for p in self])
 
 
 def f2_to_photon_counts(f_squared, beam=None, pad_geometry=None):
