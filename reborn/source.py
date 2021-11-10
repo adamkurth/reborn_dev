@@ -21,7 +21,7 @@ import json
 import numpy as np
 from scipy import constants as const
 
-import utils
+from . import utils
 
 hc = const.h*const.c  # pylint: disable=invalid-name
 
