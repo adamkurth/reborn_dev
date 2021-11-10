@@ -17,8 +17,8 @@ import numpy as np
 import scipy
 from reborn.misc.rotate import Rotate3D, Rotate3Dvkfft, have_gpu
 from scipy.stats import special_ortho_group
-from reborn.math import kabsch  # Legacy
-import reborn.math.kabsch  # Legacy
+# from reborn.math import kabsch  # Legacy
+# import reborn.math.kabsch  # Legacy
 from reborn.misc.rotate import kabsch
 
 def makegaussians(w, g, s, n):

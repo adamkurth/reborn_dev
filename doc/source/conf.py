@@ -39,11 +39,13 @@ intersphinx_mapping = {'python': ('http://docs.python.org/2', None),
 
 # These are shortcuts that can be used in the reborn docs.
 rst_epilog = """
+.. |examples|  replace:: :ref:`examples`
+.. |binning|  replace:: :ref:`binning`
+
 .. |Beam|  replace:: :class:`Beam <reborn.source.Beam>`
 .. |ClCore|  replace:: :mod:`ClCore <reborn.simulate.clcore.ClCore>`
 .. |CSPAD|  replace:: `CSPAD <http://www.slac.stanford.edu/cgi-wrap/getdoc/slac-pub-15284.pdf>`__
 .. |detector|  replace:: :mod:`detector <reborn.detector>`
-.. |examples|  replace:: :ref:`examples`
 .. |PAD|  replace:: :mod:`detector <reborn.detector>`
 .. |PADGeometry|  replace:: :class:`PADGeometry <reborn.detector.PADGeometry>`
 .. |PADGeometryList|  replace:: :class:`PADGeometryList <reborn.detector.PADGeometryList>`
@@ -64,6 +66,7 @@ rst_epilog = """
 .. |git|  replace:: `git <https://git-scm.com>`__
 .. |matplotlib|  replace:: `matplotlib <https://matplotlib.org/>`__
 .. |pycodestyle|  replace:: `pycodestyle <https://pypi.org/project/pycodestyle/>`__
+.. |spherical_coordinates|  replace:: `spherical coordinates <https://en.wikipedia.org/wiki/Spherical_coordinate_system>`__
 
 .. |dipole_notes|  replace:: `dipole scattering notes <files/dipole.pdf>`__
 

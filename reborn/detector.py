@@ -555,7 +555,7 @@ class PADGeometry:
 
     def scattering_angles(self, beam_vec=None, beam=None):
         r"""
-        Scattering angles (i.e. half the Bragg angles).
+        Scattering angles (i.e. twice the Bragg angles).
 
         Arguments:
             beam_vec (numpy array) :
@@ -574,6 +574,32 @@ class PADGeometry:
             raise ValueError('Scattering angles cannot be computed without knowing the incident beam direction')
 
         return np.arccos(utils.vec_norm(self.position_vecs()).dot(beam_vec.ravel()))
+
+    def azimuthal_angles(self, beam):
+        r"""
+        The azimuthal angles of pixels in |spherical_coordinates|.  In the physics convention, the incident beam points
+        along the zenith :math:`\hat{z}`, the outgoing wavevector points to the pixel at position :math:`\vec{r}`, the
+        "polar angle" :math:`\theta` is the scattering angle, and the "azimuthal angle" is :math:`\phi = \arctan(y/x)`.
+
+        Since reborn does not enforce any particular coordinate convention or beam direction, we define the azimuthal
+        angles according to the definition of the incident |Beam| :
+
+        .. math::
+
+            \phi = \arctan(\hat{e}_2 \cdot \hat{r} / \hat{e}_1 \cdot \hat{r})
+
+        where :math:`\hat{e}_1` is the principle polarization component of the incident x-ray beam, and
+        :math:`\hat{e}_2` is the complementary polarization component.
+
+        Arguments:
+            beam (source.Beam instance): specify incident beam properties.
+
+        Returns: numpy array
+        """
+        q_vecs = self.q_vecs(beam=beam)
+        q1 = np.dot(q_vecs, beam.e1_vec)
+        q2 = np.dot(q_vecs, beam.e2_vec)
+        return np.arctan2(q2, q1)
 
     def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
         r"""
@@ -680,18 +706,6 @@ class PADGeometry:
         p.fs_vec *= binning
         p.ss_vec *= binning
         return p
-
-    def pixel_polar_angles(self, beam=None):
-        r"""
-        The angle describing pad pixel positions in polar coordinates.
-
-        Arguments:
-            beam (source.Beam instance): specify incident beam properties.
-
-        Returns: numpy array
-        """
-        qs = self.q_vecs(beam=beam)
-        return np.arctan2(qs[:, 1], qs[:, 0])
 
 
 class PADGeometryList(list):
@@ -809,6 +823,10 @@ class PADGeometryList(list):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return np.concatenate([p.scattering_angles(beam=beam).ravel() for p in self])
 
+    def azimuthal_angles(self, beam):
+        r""" Concatenates the output of the matching method in |PADGeometry|"""
+        return np.concatenate([p.azimuthal_angles(beam).ravel() for p in self])
+
     def beamstop_mask(self, beam=None, q_min=None, min_angle=None):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return np.concatenate([p.beamstop_mask(beam, q_min, min_angle).ravel() for p in self])
@@ -854,10 +872,6 @@ class PADGeometryList(list):
             return
         raise ValueError("It is not clear what you are trying to do.  The PADGeometryList should be empty, or should"
                          "have the same length as the geometry file.")
-
-    def pixel_polar_angles(self, beam=None):
-        r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.pixel_polar_angles(beam).ravel() for p in self])
 
 
 def f2_to_photon_counts(f_squared, beam=None, pad_geometry=None):

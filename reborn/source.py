@@ -29,7 +29,7 @@ hc = const.h*const.c  # pylint: disable=invalid-name
 class Beam:
 
     r"""
-    A minimal containor to gather x-ray beam properties.
+    A minimal container to gather x-ray beam properties.
     """
 
     # derived quantities:
@@ -119,7 +119,7 @@ class Beam:
     @property
     def polarization_vec(self):
         r""" The principle polarization vector :math:`\hat{E}_1`.  This should be orthogonal to the incident beam
-        direction.  The complementary polarization vector is :math:`\hat{E}_2 = \hat{E}_1\times\hat{b}`"""
+        direction.  The complementary polarization vector is :math:`\hat{E}_2 = \hat{b} \times \hat{E}_1`"""
         return self._polarization_vec
 
     @polarization_vec.setter
@@ -136,7 +136,7 @@ class Beam:
     @property
     def e2_vec(self):
         r""" The complementary polarization vector.  See docs for polarization_vec property. """
-        return np.cross(self.e1_vec, self.beam_vec)
+        return np.cross(self.beam_vec, self.e1_vec)
 
     @property
     def polarization_weight(self):
