@@ -22,7 +22,7 @@ from reborn import utils
 
 def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, show_scans=False, show_coords=False,
                   show=True, vmin=None, vmax=None, background_color=None, cmap='viridis', title=None, 
-                  colorbar=False, figsize=(5,5)):
+                  colorbar=False, figsize=(5,5), cbar_title=None, cbar_fontsize=12):
     r"""
     Very simple function to show pad data with matplotlib.  This will take a list of data arrays along with a list
     of |PADGeometry| instances and display them with a decent geometrical layout.
@@ -89,7 +89,8 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     ymx = np.max(bbs[:, 1])
     ax.set_xlim(xmn, xmx)  # work in pixel units
     ax.set_ylim(ymx, ymn)
-    plt.colorbar(im, ax=ax)
+    cbar = plt.colorbar(im, ax=ax)
+    cbar.set_label(label=cbar_title, size=cbar_fontsize)
     if beam_center:
         ax.add_patch(plt.Circle(xy=(0, 0), radius=r/100, fc='none', ec=[0, 1, 0]))
     if show_coords:
