@@ -1262,6 +1262,90 @@ class IcosphereGeometry():
         return verts, faces, face_centers
 
 
+class PolarPADAssembler:
+    r""" A class for converting PAD data to polar coordinates. """
+    def __init__(self, pad_geometry=None, beam=None, n_q_bins=50, q_range=None, n_phi_bins=None, phi_range=None):
+        r"""
+        Arguments:
+            pad_geometry (|PADGeometryList|): PAD Geometry.
+            beam (|Beam|): Beam information.
+            n_q_bins (int): Number of q bins.
+            q_range (tuple): Minimum and maximum q bin centers.  If None, the range is [0, maximum q in PAD].
+            n_phi_bins (int): Number of phi bins.
+            phi_range (tuple): Minimum and maximum phi bin centers.  If None, the full 2*pi ring is assumed.
+        """
+        q_mags = pad_geometry.q_mags(beam=beam)
+        if q_range is None:
+            q_range = [0, np.max(q_mags)]
+        q_bin_size = (q_range[1] - q_range[0]) / float(n_q_bins - 1)
+        q_centers = np.linspace(q_range[0], q_range[1], n_q_bins)
+        q_edges = np.linspace(q_range[0] - q_bin_size / 2, q_range[1] + q_bin_size / 2, n_q_bins + 1)
+        q_min = q_edges[0]
+        if phi_range is None:  # Then we go from 0 to 2pi...
+            phi_bin_size = 2 * np.pi / n_phi_bins
+            phi_range = [phi_bin_size / 2, 2 * np.pi - phi_bin_size / 2]
+        else:
+            phi_bin_size = (phi_range[1] - phi_range[0]) / float(n_phi_bins - 1)
+        phi_centers = np.linspace(phi_range[0], phi_range[1], n_phi_bins)
+        phi_edges = np.linspace(phi_range[0] - phi_bin_size / 2, phi_range[1] + phi_bin_size / 2, n_phi_bins + 1)
+        phi_min = phi_edges[0]
+        self.q_bin_size = q_bin_size
+        self.q_bin_centers = q_centers
+        self.q_bin_edges = q_edges
+        self.n_q_bins = n_q_bins
+        self.q_min = q_min
+        self.phi_bin_size = phi_bin_size
+        self.phi_bin_centers = phi_centers
+        self.phi_bin_edges = phi_edges
+        self.n_phi_bins = n_phi_bins
+        self.phi_min = phi_min
+        self.q_mags = q_mags
+        self.phis = pad_geometry.azimuthal_angles(beam=beam)
+
+    def get_mean(self, data, mask=None):
+        r""" Create the mean polar-binned average intensities.
+        Arguments:
+            data (list or |ndarray|): The PAD data to be binned.
+            mask (list or |ndarray|): A mask to indicate ignored pixels.
+        """
+        # TODO: Implement mask
+        # TODO: Speed up the algorithm.  Fortran?
+        data = concat_pad_data(data)
+        n_q = self.n_q_bins
+        q_size = self.q_bin_size
+        n_phi = self.n_phi_bins
+        phi_size = self.phi_bin_size
+        q_min = self.q_min
+        phi_min = self.phi_min
+        q = self.q_mags
+        phi = self.phis
+        sum_ = np.zeros([n_q, n_phi])
+        cnt = np.zeros([n_q, n_phi], dtype=int)
+        for i in range(len(data)):
+            qi = q[i]
+            pi = phi[i] % (2 * np.pi)
+            vi = data[i]
+            q_ind = int(np.floor((qi - q_min) / q_size))
+            if q_ind >= n_q:
+                continue
+            if q_ind < 0:
+                continue
+            p_ind = int(np.floor((pi - phi_min) / phi_size))
+            if p_ind >= n_phi:
+                continue
+            if p_ind < 0:
+                continue
+            cnt[q_ind, p_ind] += 1
+            sum_[q_ind, p_ind] += vi
+        mean_ = np.divide(sum_, cnt, out=np.zeros_like(sum_), where=cnt != 0)
+        return mean_
+
+    def get_sdev(self, data, mask=None):
+        r""" Create polar-binned standard deviation.  Not implemented yet."""
+        # TODO: Implement this once it is needed.
+        raise NotImplementedError('Time to implement this method!')
+
+
 class RadialProfiler:
     r"""
     A class for creating radial profiles from image data.  You must provide the number of bins and the q range that
