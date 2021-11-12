@@ -89,8 +89,9 @@ def view_pad_data(pad_data, pad_geometry, pad_numbers=False, beam_center=False, 
     ymx = np.max(bbs[:, 1])
     ax.set_xlim(xmn, xmx)  # work in pixel units
     ax.set_ylim(ymx, ymn)
-    cbar = plt.colorbar(im, ax=ax)
-    cbar.set_label(label=cbar_title, size=cbar_fontsize)
+    if colorbar:
+        cbar = plt.colorbar(im, ax=ax)
+        cbar.set_label(label=cbar_title, size=cbar_fontsize)
     if beam_center:
         ax.add_patch(plt.Circle(xy=(0, 0), radius=r/100, fc='none', ec=[0, 1, 0]))
     if show_coords:
