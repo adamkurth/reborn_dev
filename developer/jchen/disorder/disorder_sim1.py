@@ -6,7 +6,7 @@ Features:
 To do:
 
 Date Created: 14 Oct 2020
-Last Modified: 28 Nov 2021
+Last Modified: 30 Nov 2021
 Author: Rick Kirian, Joe Chen
 """
 
@@ -29,6 +29,9 @@ eV = const.value('electron volt')
 r_e = const.value("classical electron radius")
 
 
+np.random.seed(42)
+
+
 CMAP = 'viridis'
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -43,19 +46,31 @@ def colorbar(ax, im):
 #=================================================================================
 # Program parameters
 
-run_number = 3
-N_pattern = 2
+run_number = 1
 save_interval = 500
+
+N_pattern = 1
 
 viewcrystal = False
 addfacets = True
 
-photon_energy = 1.8e3*eV  #50e3 * eV #1.8e3 * eV#50000*eV
+# photon_energy = 1.8e3*eV  #50e3 * eV #1.8e3 * eV#50000*eV
+# pulse_energy = 1e-3
+# beam_diameter = 1e-6
+# pixel_size = 300e-6
+# detector_distance = 0.143#0.141884685 #10
+# n_pixels = 256 #500 # Square detector
+
+
+# Approximate values for Bean 2016 experiment
+photon_energy = 1.8e3*eV
 pulse_energy = 1e-3
 beam_diameter = 1e-6
 pixel_size = 300e-6
-detector_distance = 0.05#0.141884685 #10
-n_pixels = 128 #500
+detector_distance = 0.143
+n_pixels = 256 # Square detector
+
+
 
 #h_max = 25
 #h_min = -25
@@ -77,13 +92,14 @@ def random_rotation():
 pdb_file = '1jb0.pdb'
 
 cryst = crystal.CrystalStructure(pdb_file, tight_packing=True)
-uc = cryst.unitcell
-sg = cryst.spacegroup
 
-cryst = crystal.CrystalStructure(pdb_file)
-cryst.spacegroup.sym_rotations = cryst.spacegroup.sym_rotations[:]  # TODO: fix this
-cryst.spacegroup.sym_translations = cryst.spacegroup.sym_translations[:]  # TODO: fix this
-cryst.fractional_coordinates =  cryst.fractional_coordinates[:] # np.array([[0.4, 0, 0], [0.5, 0, 0]])  # TODO: fix this
+# cryst = crystal.CrystalStructure(pdb_file)
+# cryst.spacegroup.sym_rotations = cryst.spacegroup.sym_rotations[:]  # TODO: fix this
+# cryst.spacegroup.sym_translations = cryst.spacegroup.sym_translations[:]  # TODO: fix this
+# cryst.fractional_coordinates =  cryst.fractional_coordinates[:] # np.array([[0.4, 0, 0], [0.5, 0, 0]])  # TODO: fix this
+
+
+
 spacegroup = cryst.spacegroup
 unitcell = cryst.unitcell
 print('# symmetry operations: %d' % (spacegroup.n_operations,))
@@ -154,22 +170,25 @@ merge_sum = 0
 weight_sum = 0
 intensities_sum = 0
 
-if viewcrystal:
-    scat = Scatter3D()
 
 print('Generating patterns')
 for c in range(N_pattern):
     print(f'Generating pattern {c+1}')
-    rot = random_rotation()
-    trans = np.zeros(3)
-    A = np.dot(rot, unitcell.a_mat)
 
+    #----------------
+    R = random_rotation()
+    trans = np.zeros(3)
+    A = np.dot(R, unitcell.a_mat)
+
+
+    #----------------
     # Construct a finite lattice in the form of a hexagonal prism
     print('Adding Facets')
-    # width = 7 + np.random.rand(1)*3
-    # length = 20 + np.random.rand(1)*3
-    width = 2+ np.random.rand(1)*3 #7 + np.random.rand(1)*3
-    length = 3+ np.random.rand(1)*3 #20 + np.random.rand(1)*3
+
+    width = 7 + np.random.rand(1)*3
+    length = 20 + np.random.rand(1)*3
+    # width = 2+ np.random.rand(1)*3 #7 + np.random.rand(1)*3
+    # length = 3+ np.random.rand(1)*3 #20 + np.random.rand(1)*3
 
     if addfacets:
         for i in range(spacegroup.n_molecules):
@@ -187,9 +206,11 @@ for c in range(N_pattern):
     
     
 
-    t = time()
+    #----------------    
     print('Rotating q vectors')
-    clcore.rotate_translate_vectors(rot, trans, q_vecs_gpu, q_rot_gpu)
+
+    t = time()
+    clcore.rotate_translate_vectors(R, trans, q_vecs_gpu, q_rot_gpu)
     
 
     print('Calculating crystal complex amplitudes')
@@ -206,43 +227,20 @@ for c in range(N_pattern):
         print(f'here3 {i}')
         amps_gpu += amps_lat_gpu * amps_mol_gpu
 
-        yay
-        
-        if viewcrystal:
+        # yay
 
-            plt.figure()
-            ax = plt.axes(projection='3d')
-            xdata_tot = np.array([])
-            ydata_tot = np.array([])
-            zdata_tot = np.array([])
-            for i in range(spacegroup.n_molecules):
-                print(i)
-                xdata = lat_vecs[:,0] + mol_r_coms[i, :][0]
-                ydata = lat_vecs[:,1] + mol_r_coms[i, :][1]
-                zdata = lat_vecs[:,2] + mol_r_coms[i, :][2]
 
-                xdata_tot = np.concatenate([xdata_tot, xdata])
-                ydata_tot = np.concatenate([ydata_tot, ydata])
-                zdata_tot = np.concatenate([zdata_tot, zdata])
+    #----------------
+    # Calculate diffracted intensity
+    intensities = scale * np.abs(amps_gpu.get())**2
 
-            ax.scatter3D(xdata_tot, ydata_tot, zdata_tot)
-            plt.show(block=False)
+    print('Pattern %d took: %.3f seconds' % (c+1, time()-t))
 
-            scat.add_points(lat_vecs + mol_r_coms[i, :], color=bright_colors(i, alpha=0.5), size=5) # Lattice positions
-            scat.add_points(mol_vecs, color=bright_colors(i, alpha=0.5), size=1) # atom positions of the asymmetric unit molecule
-    
-    if viewcrystal:
-        scat.add_rgb_axis()
-        scat.add_unit_cell(cell=unitcell)
-        scat.set_orthographic_projection()
-        scat.show()
-
-    # Diffracted intensities
-    intensities = scale * np.abs(amps_gpu.get()) ** 2
-
+    #----------------
     # Add Poisson noise to the intensities
     # intensities = np.random.poisson(intensities).astype(np.float64)
 
+    #----------------
     print('Merging into 3D Fourier volume')
     h_vecs = unitcell.q2h(q_rot_gpu.get())#/2/np.pi)
     # print(h_vecs.shape, intensities.shape, mask2.shape)
@@ -254,35 +252,65 @@ for c in range(N_pattern):
     weight_sum += weight
 
 
-
+    #----------------
+    # Calculate stack sum (powder pattern)
     # intensities_sum += intensities
 
-
-
-    print('Pattern %d: %.3f seconds' % (c+1, time()-t))
-
-    if ((c+1) % save_interval) == 0:
+    
+    #----------------
+    # Save checkpoint
+    if (c+1) % save_interval == 0:
         # if c+1 == save_interval:
         #     print('saving extra data')
         #     np.savez('run%04d_extras.npz' % (run_number,), q_corner_min=q_corner_min, q_corner_max=q_corner_max, n_q_bins=n_q_bins)
-        print('saving checkpoint on pattern %d run %d' % (c+1, run_number))
+        print(f'Saving checkpoint on pattern {c+1} run {run_number}')
         np.savez('run%04d_merge.npz' % (run_number), merge_sum=merge_sum, weight_sum=weight_sum,
                  h_corner_min=h_corner_min, h_corner_max=h_corner_max, n_h_bins=n_h_bins, num_patterns_merged = c+1)
 
+    #----------------
+    # Result display
 
+    lat_vecs_rot = np.dot(R, lat_vecs.T)
+    lat_vecs_rot = lat_vecs_rot.T
 
     fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(121)
-    im = ax.imshow(intensities, clim=[0,500],cmap=CMAP)
+    ax = fig.add_subplot(221)
+    im = ax.imshow(intensities, clim=[0,100],cmap=CMAP)
     colorbar(ax, im)
-    ax.set_title("diffracted intensity")
-    ax = fig.add_subplot(122)
+    ax.set_title("I(q)")
+    ax = fig.add_subplot(223)
     im = ax.imshow(np.log10(intensities), cmap=CMAP)
     colorbar(ax, im)
-    ax.set_title("log scale")
+    ax.set_title("log I(q)")
+    ax = fig.add_subplot(222, projection='3d')
+    for i in range(1):#range(spacegroup.n_molecules):
+        print(i)
+        xdata = lat_vecs_rot[:,0]#+ mol_r_coms[i, :][0]
+        ydata = lat_vecs_rot[:,1]#+ mol_r_coms[i, :][1]
+        zdata = lat_vecs_rot[:,2]#+ mol_r_coms[i, :][2]
+        ax.scatter3D(xdata, ydata, zdata)
+    # ax.view_init(elev=90, azim=0)
+    ax.set_xlabel('x (m)')
+    ax.set_ylabel('y (m)')
+    ax.set_zlabel('z (m)')
+    ax.set_title("rotated crystal")
+
+    ax = fig.add_subplot(224, projection='3d')
+    for i in range(1):#range(spacegroup.n_molecules):
+        print(i)
+        xdata = lat_vecs_rot[:,0]#+ mol_r_coms[i, :][0]
+        ydata = lat_vecs_rot[:,1]#+ mol_r_coms[i, :][1]
+        zdata = lat_vecs_rot[:,2]#+ mol_r_coms[i, :][2]
+        ax.scatter3D(xdata, ydata, zdata)
+    ax.view_init(elev=90, azim=0)
+    ax.set_xlabel('x (m)')
+    ax.set_ylabel('y (m)')
+    ax.set_zlabel('z (m)')
+    ax.set_title("View along z-axis")
 
     # plt.suptitle("I_merge, numPattern=%d" % (c+1), fontsize=12)
 
+    plt.tight_layout()
     plt.show(block=False)
 
 
@@ -306,7 +334,7 @@ merge_avg.flat[w] /= weight_sum.flat[w]
 
 
 
-
+"""
 from skimage.measure import marching_cubes_lewiner
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -319,9 +347,7 @@ ax = fig.add_subplot(111, projection='3d')
 ax.plot_trisurf(verts[:, 0], verts[:,1], faces, verts[:, 2])#, cmap='Spectral',
                 #lw=1)
 plt.show(block=False)
-
-
-
+"""
 
 #=================================================================================
 # Plot results
