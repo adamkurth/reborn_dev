@@ -11,7 +11,7 @@ eV = const.value('electron volt')
 r_e = const.value('classical electron radius')
 np.random.seed(42)  # Make random numbers that are reproducible
 
-beam = Beam(photon_energy=8000*eV, diameter_fwhm=0.2e-6, pulse_energy=3e-3)
+beam = Beam(photon_energy=8000*eV, diameter_fwhm=0.2e-6, pulse_energy=1e-3)
 fluence = beam.photon_number_fluence
 pads = detector.jungfrau4m_pad_geometry_list(detector_distance=0.36)
 q_vecs = [pad.q_vecs(beam=beam) for pad in pads]
@@ -23,7 +23,7 @@ qmin = np.min(np.array([np.min(q) for q in q_mags]))
 qmax = np.max(np.array([np.max(q) for q in q_mags]))
 print('resolution range (Angstrom): ', 2*np.pi*1e10/qmax, ' - ', 2*np.pi*1e10/qmin)
 
-cryst = crystal.CrystalStructure('BDNA25_sp_mod.pdb')  #('2LYZ.pdb')
+cryst = crystal.CrystalStructure('2LYZ.pdb')#('BDNA25_sp_mod.pdb')  #('2LYZ.pdb')
 r_vecs = cryst.molecule.coordinates  # Atomic coordinates of the asymmetric unit
 r_vecs -= np.mean(r_vecs, axis=0)  # Roughly center the molecule
 atomic_numbers = cryst.molecule.atomic_numbers
@@ -50,9 +50,10 @@ R = np.array([[c, 0, s], [0, 1 ,0], [-s, 0 , c]])#np.eye(3)#Rotation.random().as
 
 # from reborn.utils.
 
-
+print('simulating intensities')
 intensities = []
 for i in range(len(pads)):
+    print(f'simulating pad number {i}')
     pad = pads[i]
     sa = solid_angles[i]
     p = polarization_factors[i]
