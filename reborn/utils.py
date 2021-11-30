@@ -19,6 +19,8 @@ from functools import wraps
 import sys
 import os
 import inspect
+import logging
+import hashlib
 import pkg_resources
 import numpy as np
 from numpy import sin, cos
@@ -26,6 +28,9 @@ from numpy.fft import fftshift, fft, ifft, fftn
 from scipy.sparse import csr_matrix
 from . import fortran
 from scipy.spatial.transform import Rotation
+
+
+logger = logging.getLogger()
 
 
 def docs():
@@ -130,6 +135,16 @@ def warn(message):
     Returns: None
     """
     sys.stdout.write("WARNING: %s\n" % message)
+
+
+def debug(*args, **kwargs):
+    r"""
+    Standard way of sending an debug message.  As of now this simply results in a function call
+
+    logger = logging.getLogger()
+    logger.debug(*args, **kwargs)
+    """
+    logger.debug(*args, **kwargs)
 
 
 def error(message):
@@ -852,3 +867,55 @@ def get_caller():
     if len(stack) > 1:
         return inspect.stack()[1][3]
     return 'get_caller'
+
+
+def check_file_md5(file_path, md5_path=None):
+    r"""
+    Utility for checking if a file has been modified from a previous version.
+
+    Given a file path, check for a file with ".md5" appended to the path.  If it exists, check if the md5 hash
+    saved in the file matches the md5 hash of the current file and return True.  Otherwise, return False.
+
+    Arguments:
+        file_path (str): Path to the file.
+        md5_path (str): Optional path to the md5 file.
+
+    Returns:
+        bool
+    """
+    if md5_path is None:
+        md5_path = file_path+'.md5'
+    if not os.path.exists(md5_path):
+        return False
+    with open(md5_path, 'r') as f:
+        md5 = f.readline()
+    with open(file_path, 'rb') as f:
+        hasher = hashlib.md5()
+        hasher.update(f.read())
+        new_md5 = str(hasher.hexdigest())
+    debug(md5_path, 'md5', md5)
+    debug(file_path, 'md5', new_md5)
+    if new_md5 == md5:
+        return True
+    return False
+
+
+def write_file_md5(file_path, md5_path=None):
+    r"""
+    Save the md5 hash of a file.  The output will be the same as the original file but with a '.md5' extension appended.
+
+    Arguments:
+        file_path (str): The path of the file to make an md5 from.
+        md5_path (str): Optional path to the md5 file.
+
+    Returns:
+        str: the md5
+    """
+    md5_path = file_path+'.md5'
+    with open(file_path, 'rb') as f:
+        hasher = hashlib.md5()
+        hasher.update(f.read())
+        md5 = str(hasher.hexdigest())
+    with open(md5_path, 'w') as f:
+        f.write(md5)
+    return md5_path
