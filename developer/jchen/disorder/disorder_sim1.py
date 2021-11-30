@@ -1,33 +1,29 @@
 """
-Script to simulate diffraction patterns from disordered materials
-
-Features:
+Simulate diffraction patterns from disordered materials.
+This script simulates 2D patterns and then merges them into a 3D Fourier volume
 
 To do:
+- Stacking fault
 
 Date Created: 14 Oct 2020
 Last Modified: 30 Nov 2021
-Author: Rick Kirian, Joe Chen
+Humans responsible: Rick Kirian, Joe Chen
 """
 
 from time import time
 import numpy as np
-# import pyqtgraph as pg
+import scipy.constants as const
+from scipy.spatial.transform import Rotation
+
 from reborn import detector
 from reborn import source
 from reborn.utils import trilinear_insert, vec_mag, vec_norm
 from reborn.simulate.clcore import ClCore
-# from reborn.simulate.examples import psi_pdb_file, lysozyme_pdb_file
 from reborn.target import crystal, density
-from reborn.viewers.qtviews import Scatter3D, bright_colors, colors, PADView
-#from reborn.external.pyqtgraph.extras import keep_open
-import scipy.constants as const
 
-from scipy.spatial.transform import Rotation
 
 eV = const.value('electron volt')
 r_e = const.value("classical electron radius")
-
 
 np.random.seed(42)
 
@@ -41,7 +37,6 @@ def colorbar(ax, im):
     cax = divider.append_axes('right', size='5%', pad=0.03)
     cbar = plt.colorbar(im, cax=cax)
     cbar.ax.tick_params(labelsize=6) 
-
 
 #=================================================================================
 # Program parameters
@@ -62,23 +57,20 @@ addfacets = True
 # n_pixels = 256 #500 # Square detector
 
 
-# Approximate values for Bean 2016 experiment
+# Approximate values for Bean 2016 experiment - check log book, auto post, alias variable (pulse energy)
+# Fluence lower in practice because the crystal hits the edge of the beam and the uniformity of beam is not that uniform
 photon_energy = 1.8e3*eV
 pulse_energy = 1e-3
-beam_diameter = 1e-6
-pixel_size = 300e-6
+beam_diameter = 5e-6
+pixel_size = 75e-6
 detector_distance = 0.143
-n_pixels = 256 # Square detector
+n_pixels = 256 # Assume square detector
 
 
-
-#h_max = 25
-#h_min = -25
 h_corner_min = np.array([-15,-15,-10])
 h_corner_max = np.array([15,15,10])
 os = 4
 n_h_bins = ((h_corner_max-h_corner_min)*os+1) * np.ones([3])
-
 
 #=================================================================================
 def random_rotation():
@@ -178,8 +170,7 @@ for c in range(N_pattern):
     #----------------
     R = random_rotation()
     trans = np.zeros(3)
-    A = np.dot(R, unitcell.a_mat)
-
+    A = np.dot(R, unitcell.a_mat) # Don't actually use the A
 
     #----------------
     # Construct a finite lattice in the form of a hexagonal prism
@@ -206,7 +197,8 @@ for c in range(N_pattern):
     
     
 
-    #----------------    
+    #----------------
+    # Simulate a 2D pattern and merge it
     print('Rotating q vectors')
 
     t = time()
