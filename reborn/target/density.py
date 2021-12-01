@@ -14,11 +14,11 @@
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-from ..fortran import density_f
 try:
     from numba import jit
 except ImportError:
     from ..utils import __fake_numba_jit as jit
+from ..utils import depreciate
 
 
 class DensityMap(object):
@@ -28,7 +28,7 @@ class DensityMap(object):
     corner_max = None  # : 3-vector with coordinates of the center of the voxel with larger values
     spacings = None
     n_voxels = None  # : Total number of voxels
-    dx = None       # : 3-vecto with increments beteen voxels
+    dx = None       # : 3-vector with increments between voxels
     strides = None  # : Array strides
 
     def __init__(self, shape=None, corner_min=None, corner_max=None, deltas=None):
@@ -57,15 +57,12 @@ class DensityMap(object):
 
     @property
     def n_vecs(self):
-
         r"""
-
         Get an Nx3 array of vectors corresponding to the indices of the map voxels.  The array looks like this:
 
         [[0,0,0],[0,0,1],[0,0,2], ... ,[N-1,N-1,N-1]]
 
-        Returns: numpy array
-
+        Returns: |ndarray|
         """
 
         shp = self.shape
@@ -86,7 +83,7 @@ def build_atomic_scattering_density_map(x_vecs, f, sigma, x_min, x_max, shape, o
     In order to increase speed, you may specify the maximum atom size, in which case only grid points within that
     distance are sampled.
 
-    Args:
+    Arguments:
         x_vecs (Mx3 numpy array) : Atom position vectors
         f (numpy array) : Atom structure factors
         sigma (float) : Standard deviation of Gaussian (all atoms are the same)
@@ -169,359 +166,33 @@ def _build_atomic_scattering_density_map_numba(x_vecs, f, sigma, x_min, x_max, s
     return sum_map
 
 
-def _trilinear_interpolation_fortran(densities, vectors, corners, deltas, out):
-    r"""
-    This is the wrapper to the corresponding fortran function.  It is not meant to be used directly.  See the
-    ``trilinear_interpolation`` function.
-
-    Arguments:
-        densities:
-        vectors:
-        corners:
-        deltas:
-        out:
-    """
-    assert vectors.dtype == np.float64
-    assert corners.dtype == np.float64
-    assert deltas.dtype == np.float64
-    assert densities.flags.c_contiguous
-    assert vectors.flags.c_contiguous
-    assert corners.flags.c_contiguous
-    assert deltas.flags.c_contiguous
-    assert out.flags.c_contiguous
-    assert np.min(deltas) > 0
-    if np.iscomplexobj(densities) or np.iscomplexobj(out):
-        assert densities.dtype == np.complex128
-        assert out.dtype == np.complex128
-        density_f.trilinear_interpolation_complex(densities.T, vectors.T, corners.T, deltas.T, out.T)
-    else:
-        assert densities.dtype == np.float64
-        assert out.dtype == np.float64
-        density_f.trilinear_interpolation(densities.T, vectors.T, corners.T, deltas.T, out.T)
+def trilinear_interpolation(*args, **kwargs):
+    r""" Depreciated duplicate of :func:`reborn.misc.interpolate.trilinear_interpolation` """
+    depreciate("Don't use reborn.target.density.trilinear_interpolation.  Use "
+               "reborn.misc.interpolate.trilinear_interpolation instead.")
+    from ..misc.interpolate import trilinear_interpolation
+    return trilinear_interpolation(*args, **kwargs)
 
 
-def trilinear_interpolation(densities, vectors, corners=None, deltas=None, x_min=None, x_max=None, out=None,
-                            strict_types=True):
-    r"""
-    Perform a `trilinear interpolation <https://en.wikipedia.org/wiki/Trilinear_interpolation>`__ on a 3D array.  An
-    arbitrary set of sample points in the form of an :math:`N\times 3` array may be specified.
-
-    Notes:
-        * This function behaves as if the density is periodic; points that lie out of bounds will wrap around.  This
-          might change in the future, in which case a keyword argument will be added so that you may explicitly decide
-          what to do in the case of points that lie outside of the grid.  Note that periodic boundaries avoid the
-          need for conditional statements within a for loop, which probably makes the function faster.  For now, if you
-          think you have points that lie outside of the grid, consider handling them separately.
-        * You may specify the output array, which is useful if you wish to simply add to an existing array that you
-          have already allocated.  This can make your code faster and reduce memory.  Beware: the out array is not
-          over-written -- the underlying fortran function will *add* to the existing *out* array.
-        * Only double precision arrays (both real and complex are allowed) at the fortran level.  You may pass in
-          other types, but they will be converted to double (or double complex) before passing to the fortran function.
-        * Make sure that all your arrays are c-contiguous.
-        * An older version of this code allowed the arguments *corners* and *deltas*.  They are discouraged because
-          we aim to standardize on the *x_min* and *x_max* arguments documented below.  They may be removed in the
-          future.
-        * The shape of the 3D array is inferred from the *densities* argument.
-
-    Arguments:
-        densities (numpy array): A 3D density array.
-        vectors (numpy array): An Nx3 array of vectors that specify the points to be interpolated.
-        x_min (float or numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
-                                      If a float is passed instead, it will be replicated to make a 3D array.
-        x_max (float or numpy array): Same as x_min, but specifies the opposite corner, with larger values than x_min.
-        out (numpy array): If you don't want the output array to be created (e.g for speed), provide it here.
-        strict_types (bool): Set this to False if you don't mind your code being slow due to the need to convert
-                             datatypes (i.e. copy arrays) on every function call.  Default: True.
-
-    Returns:
-        numpy array
-    """
-    if (corners is not None) and (deltas is not None):
-        corners = np.array(corners).copy()
-        deltas = np.array(deltas).copy()
-    else:
-        if (x_min is None) or (x_max is None):
-            raise ValueError('trilinear_interpolation requires the x_min and x_max arguments')
-        shape = np.array(densities.shape)
-        if len(shape) != 3:
-            raise ValueError('trilinear_interpolation requires a 3D densities argument')
-        x_min = np.atleast_1d(np.array(x_min))
-        x_max = np.atleast_1d(np.array(x_max))
-        if len(x_min) == 1:
-            x_min = np.squeeze(np.array([x_min, x_min, x_min]))
-        if len(x_max) == 1:
-            x_max = np.squeeze(np.array([x_max, x_max, x_max]))
-        deltas = (x_max - x_min)/(shape - 1)
-        corners = x_min
-    corners = corners.astype(np.float64)
-    deltas = deltas.astype(np.float64)
-    if not strict_types:
-        if np.iscomplexobj(densities):
-            densities = densities.astype(np.complex128)
-        else:
-            densities = densities.astype(np.float64)
-        if out is not None:
-            if np.iscomplexobj(out):
-                out = out.astype(np.complex128)
-            else:
-                out = out.astype(np.float64)
-    if out is None:
-        out = np.zeros(vectors.shape[0], dtype=densities.dtype)
-    _trilinear_interpolation_fortran(densities, vectors, corners, deltas, out)
-    return out
+def trilinear_insertion(*args, **kwargs):
+    r""" Depreciated duplicate of :func:`reborn.misc.interpolate.trilinear_insertion` """
+    depreciate("Don't use reborn.target.density.trilinear_insertion.  Use "
+               "reborn.misc.interpolate.trilinear_insertion instead.")
+    from ..misc.interpolate import trilinear_insertion
+    return trilinear_insertion(*args, **kwargs)
 
 
-def _trilinear_insertion_fortran(densities, weights, vectors, insert_vals, corners, deltas):
-    r"""
-    This is the wrapper to the corresponding fortran function.  It is not meant to be used directly.  See the
-    ``trilinear_insertion`` function.
-
-    Args:
-        densities:
-        weights:
-        vectors:
-        insert_vals:
-        corners:
-        deltas:
-    """
-    assert weights.dtype == np.float64
-    assert vectors.dtype == np.float64
-    assert corners.dtype == np.float64
-    assert deltas.dtype == np.float64
-    assert densities.flags.c_contiguous
-    assert weights.flags.c_contiguous
-    assert vectors.flags.c_contiguous
-    assert insert_vals.flags.c_contiguous
-    assert corners.flags.c_contiguous
-    assert deltas.flags.c_contiguous
-    if np.iscomplexobj(densities) or np.iscomplexobj(insert_vals):
-        assert densities.dtype == np.complex128
-        assert insert_vals.dtype == np.complex128
-        density_f.trilinear_insertion_complex(densities.T, weights.T, vectors.T, insert_vals.T, corners.T, deltas.T)
-    else:
-        assert densities.dtype == np.float64
-        assert insert_vals.dtype == np.float64
-        density_f.trilinear_insertion_real(densities.T, weights.T, vectors.T, insert_vals.T, corners.T, deltas.T)
+def trilinear_insertions(*args, **kwargs):
+    r""" Depreciated duplicate of :func:`reborn.misc.interpolate.trilinear_insertions` """
+    depreciate("Don't use reborn.target.density.trilinear_insertions.  Use "
+               "reborn.misc.interpolate.trilinear_insertions instead.")
+    from ..misc.interpolate import trilinear_insertions
+    return trilinear_insertions(*args, **kwargs)
 
 
-def trilinear_insertion(densities, weights, vectors, insert_vals, corners=None, deltas=None, x_min=None, x_max=None):
-    r"""
-    Perform the "inverse" of a `trilinear interpolation <https://en.wikipedia.org/wiki/Trilinear_interpolation>`__ .
-    That is, take an arbitrary set of sample values along with their 3D vector locations and "insert" them into a 3D
-    grid of densities.  The values are distributed amongst the nearest 8 grid points so that they sum to the original
-    insert value.
-
-    FIXME: Be more clear about the mathematical operation that this function performs...
-
-    Notes:
-        * This function behaves as if the density is periodic; points that lie out of bounds will wrap around.  This
-          might change in the future, in which case a keyword argument will be added so that you may explicitly decide
-          what to do in the case of points that lie outside of the grid.  Note that periodic boundaries avoid the
-          need for conditional statements within a for loop, which probably makes the function faster.  For now, if you
-          think you have points that lie outside of the grid, consider handling them separately.
-        * You may specify the output array, which is useful if you wish to simply add to an existing 3D array that you
-          have already allocated.  This can make your code faster and reduce memory.  Beware: the out array is not
-          over-written -- the underlying fortran function will *add* to the existing ``densities`` array.
-        * Only double precision arrays (both real and complex are allowed).
-        * Make sure that all your arrays are c-contiguous.
-        * An older version of this code allowed the arguments ``corners`` and ``deltas``.  They are discouraged because
-          we aim to standardize on the ``x_min`` and ``x_max`` arguments documented below.  They may be removed in the
-          future.
-        * The shape of the 3D array is inferred from the ``densities`` argument.
-
-    Arguments:
-        densities (numpy array): A 3D array containing the densities, into which values are inserted.  Note that an
-                                 "insertion" means that the ``insert_vals`` below are multiplied by ``weights`` below.
-        weights (numpy array): A 3D array containing weights.  These are needed in order to perform a weighted average.
-                               After calling this function one or more times, the average densities are calculated by
-                               dividing ``densities`` by ``weights``.  Be mindful of divide-by-zero errors.
-        vectors (numpy array): The 3D vector positions corresponding to the values to be inserted.
-        insert_vals (numpy array): The values to be inserted into the 3D map.  They are multiplied by weights before
-                                   being inserted into the densities map.
-        x_min (float or numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
-                                      If a float is passed instead, it will be replicated to make a 3D array.
-        x_max (float or numpy array): Same as x_min, but specifies the opposite corner, with larger values than x_min.
-
-    Returns:
-        None.  This function modifies the densities and weights arrays; it returns nothing.
-    """
-    if (corners is not None) and (deltas is not None):
-        corners = np.array(corners).copy()
-        deltas = np.array(deltas).copy()
-    else:
-        if (x_min is None) or (x_max is None):
-            raise ValueError('trilinear_insertion requires the x_min and x_max arguments')
-        shape = np.array(densities.shape)
-        if len(shape) != 3:
-            raise ValueError('trilinear_insertion requires a 3D densities argument')
-        x_min = np.atleast_1d(np.array(x_min))
-        x_max = np.atleast_1d(np.array(x_max))
-        if len(x_min) == 1:
-            x_min = np.squeeze(np.array([x_min, x_min, x_min]))
-        if len(x_max) == 1:
-            x_max = np.squeeze(np.array([x_max, x_max, x_max]))
-        deltas = (x_max - x_min)/(shape - 1)
-        corners = x_min
-    corners = corners.astype(np.float64)
-    deltas = deltas.astype(np.float64)
-
-    # Debugging code
-    # print('>'*80, densities.dtype)
-    # print('\n','<'*80, densities.dtype != np.float64)
-
-    if densities.dtype != np.float64:
-        if densities.dtype != np.complex128:
-            raise ValueError('trilinear_interpolation requires densities of numpy.float64 or numpy.complex128 type')
-    if insert_vals.dtype != np.float64:
-        if insert_vals.dtype != np.complex128:
-            raise ValueError('trilinear_interpolation requires insert_vals of numpy.float64 or numpy.complex128 type')
-    _trilinear_insertion_fortran(densities, weights, vectors, insert_vals, corners, deltas)
-    return None
-
-
-
-
-
-def trilinear_insertion_factor(densities, weight_factor, vectors, insert_vals, corners=None, deltas=None, x_min=None, x_max=None):
-    r"""
-    Performs trilinear insert with a factor being multiplied onto the weights.
-
-    Notes:
-        * This function behaves as if the density is periodic; points that lie out of bounds will wrap around.  This
-          might change in the future, in which case a keyword argument will be added so that you may explicitly decide
-          what to do in the case of points that lie outside of the grid.  Note that periodic boundaries avoid the
-          need for conditional statements within a for loop, which probably makes the function faster.  For now, if you
-          think you have points that lie outside of the grid, consider handling them separately.
-        * You may specify the output array, which is useful if you wish to simply add to an existing 3D array that you
-          have already allocated.  This can make your code faster and reduce memory.  Beware: the out array is not
-          over-written -- the underlying fortran function will *add* to the existing ``densities[1,:,:,:]`` array.
-        * Make sure that all your arrays are c-contiguous.
-        * An older version of this code allowed the arguments ``corners`` and ``deltas``.  They are discouraged because
-          we aim to standardize on the ``x_min`` and ``x_max`` arguments documented below.  They may be removed in the
-          future.
-        * The shape of the 3D array is inferred from the ``densities`` argument.
-
-    Arguments:
-        densities (numpy array): A 4D array containing the densities, into which values are inserted.  Note that an
-                                 "insertion" means that the ``insert_vals`` below are multiplied by ``weights`` below.
-        weight_factor (numpy array): A number that gets multiplied with the trilinear insertion weights.
-        vectors (numpy array): The 3D vector positions corresponding to the values to be inserted.
-        insert_vals (numpy array): The values to be inserted into the 3D map.  They are multiplied by weights before
-                                   being inserted into the densities map.
-        x_min (float or numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
-                                      If a float is passed instead, it will be replicated to make a 3D array.
-        x_max (float or numpy array): Same as x_min, but specifies the opposite corner, with larger values than x_min.
-
-    Returns:
-        None.  This function modifies the densities and weights arrays; it returns nothing.
-    """
-
-    # # Convert to f-contiguous arrays required by f2py
-    # densities = densities.T
-    # vectors = vectors.T
-
-    if (corners is not None) and (deltas is not None):
-        corners = np.array(corners).copy()
-        deltas = np.array(deltas).copy()
-    else:
-        if (x_min is None) or (x_max is None):
-            raise ValueError('trilinear_insertion requires the x_min and x_max arguments')
-        shape = np.array(densities.shape)
-        if len(shape) != 4:
-            raise ValueError('trilinear_insertion requires a 4D densities argument')
-        x_min = np.atleast_1d(np.array(x_min))
-        x_max = np.atleast_1d(np.array(x_max))
-        if len(x_min) == 1:
-            x_min = np.squeeze(np.array([x_min, x_min, x_min]))
-        if len(x_max) == 1:
-            x_max = np.squeeze(np.array([x_max, x_max, x_max]))
-        
-        shape_3D = np.array(densities[:,:,:,0].shape)
-        deltas = (x_max - x_min)/(shape_3D - 1)
-        corners = x_min
-
-    corners = corners.astype(np.float64)
-    deltas = deltas.astype(np.float64)
-
-    assert densities.flags.c_contiguous
-    assert vectors.flags.c_contiguous
-    assert insert_vals.flags.c_contiguous
-    assert corners.flags.c_contiguous
-    assert deltas.flags.c_contiguous
-
-
-    # print(densities.shape)
-    # print(vectors.shape)
-    density_f.trilinear_insertion_factor_real(densities.T, vectors.T, insert_vals.T, corners.T, deltas.T, weight_factor)
-    return None
-
-def trilinear_insertions(densities, vectors, insert_vals, corners=None, deltas=None, x_min=None, x_max=None):
-    r"""
-    Performs multiple trilinear inserts
-
-    Notes:
-        * This function behaves as if the density is periodic; points that lie out of bounds will wrap around.  This
-          might change in the future, in which case a keyword argument will be added so that you may explicitly decide
-          what to do in the case of points that lie outside of the grid.  Note that periodic boundaries avoid the
-          need for conditional statements within a for loop, which probably makes the function faster.  For now, if you
-          think you have points that lie outside of the grid, consider handling them separately.
-        * You may specify the output array, which is useful if you wish to simply add to an existing 3D array that you
-          have already allocated.  This can make your code faster and reduce memory.  Beware: the out array is not
-          over-written -- the underlying fortran function will *add* to the existing ``densities[1,:,:,:]`` array.
-        * Make sure that all your arrays are c-contiguous.
-        * An older version of this code allowed the arguments ``corners`` and ``deltas``.  They are discouraged because
-          we aim to standardize on the ``x_min`` and ``x_max`` arguments documented below.  They may be removed in the
-          future.
-        * The shape of the 3D array is inferred from the ``densities`` argument.
-
-    Arguments:
-        densities (numpy array): A 4D array containing the densities, into which values are inserted. 
-        vectors (numpy array): The 3D vector positions corresponding to the values to be inserted.
-        insert_vals (numpy array): The values to be inserted into the 3D map.  They are multiplied by weights before
-                                   being inserted into the densities map.
-        x_min (float or numpy array): A 3-element vector specifying the *center* of the corner voxel of the 3D array.
-                                      If a float is passed instead, it will be replicated to make a 3D array.
-        x_max (float or numpy array): Same as x_min, but specifies the opposite corner, with larger values than x_min.
-
-    Returns:
-        None.  This function modifies the densities array; it returns nothing.
-    """
-
-    # # Convert to f-contiguous arrays required by f2py
-    # densities = densities.T
-    # vectors = vectors.T
-
-    if (corners is not None) and (deltas is not None):
-        corners = np.array(corners).copy()
-        deltas = np.array(deltas).copy()
-    else:
-        if (x_min is None) or (x_max is None):
-            raise ValueError('trilinear_insertion requires the x_min and x_max arguments')
-        shape = np.array(densities.shape)
-        if len(shape) != 4:
-            raise ValueError('trilinear_insertion requires a 4D densities argument')
-        x_min = np.atleast_1d(np.array(x_min))
-        x_max = np.atleast_1d(np.array(x_max))
-        if len(x_min) == 1:
-            x_min = np.squeeze(np.array([x_min, x_min, x_min]))
-        if len(x_max) == 1:
-            x_max = np.squeeze(np.array([x_max, x_max, x_max]))
-        
-        shape_3D = np.array(densities[:,:,:,0].shape)
-        deltas = (x_max - x_min)/(shape_3D - 1)
-        corners = x_min
-
-    corners = corners.astype(np.float64)
-    deltas = deltas.astype(np.float64)
-
-    assert densities.flags.c_contiguous
-    assert vectors.flags.c_contiguous
-    assert insert_vals.flags.c_contiguous
-    assert corners.flags.c_contiguous
-    assert deltas.flags.c_contiguous
-
-
-    # print(densities.shape)
-    # print(vectors.shape)
-    density_f.trilinear_insertions_real(densities.T, vectors.T, insert_vals.T, corners.T, deltas.T)
-    return None
+def trilinear_insertion_factor(*args, **kwargs):
+    r""" Depreciated duplicate of :func:`reborn.misc.interpolate.trilinear_insertion_factor` """
+    depreciate("Don't use reborn.target.density.trilinear_insertion_factor.  Use "
+               "reborn.misc.interpolate.trilinear_insertion_factor instead.")
+    from ..misc.interpolate import trilinear_insertion_factor
+    return trilinear_insertion_factor(*args, **kwargs)

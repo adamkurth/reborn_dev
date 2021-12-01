@@ -15,10 +15,9 @@
 
 import os
 import sys
-import hashlib
 import importlib
-import logging
 import numpy.f2py
+from ..utils import debug, check_file_md5, write_file_md5
 
 fortran_path = os.path.split(os.path.abspath(__file__))[0]
 sys.path.append(fortran_path)
@@ -28,67 +27,6 @@ std_args += ' -DNPY_DISTUTILS_APPEND_FLAGS=0'
 omp_args = " --f90flags='-fopenmp -O2' -lgomp"
 os.environ['NPY_DISTUTILS_APPEND_FLAGS'] = '1'
 os.environ['NPY_NO_DEPRECATED_API'] = 'NPY_1_7_API_VERSION'
-
-
-# FIXME: logger and debug should come from utils, but utils imports fortran, which would make circular import...
-# FIXME: reborn.utils should not import reborn.fortran.
-logger = logging.getLogger()
-
-
-def debug(*args, **kwargs):
-    logger.debug(*args, **kwargs)
-
-
-def check_file_md5(file_path, md5_path=None):
-    r"""
-    Utility for checking if a file has been modified from a previous version.
-
-    Given a file path, check for a file with ".md5" appended to the path.  If it exists, check if the md5 hash
-    saved in the file matches the md5 hash of the current file and return True.  Otherwise, return False.
-
-    Arguments:
-        file_path (str): Path to the file.
-        md5_path (str): Optional path to the md5 file.
-
-    Returns:
-        bool
-    """
-    if md5_path is None:
-        md5_path = file_path+'.md5'
-    if not os.path.exists(md5_path):
-        return False
-    with open(md5_path, 'r') as f:
-        md5 = f.readline()
-    with open(file_path, 'rb') as f:
-        hasher = hashlib.md5()
-        hasher.update(f.read())
-        new_md5 = str(hasher.hexdigest())
-    debug(md5_path, 'md5', md5)
-    debug(file_path, 'md5', new_md5)
-    if new_md5 == md5:
-        return True
-    return False
-
-
-def write_file_md5(file_path, md5_path=None):
-    r"""
-    Save the md5 hash of a file.  The output will be the same as the original file but with a '.md5' extension appended.
-
-    Arguments:
-        file_path (str): The path of the file to make an md5 from.
-        md5_path (str): Optional path to the md5 file.
-
-    Returns:
-        str: the md5
-    """
-    md5_path = file_path+'.md5'
-    with open(file_path, 'rb') as f:
-        hasher = hashlib.md5()
-        hasher.update(f.read())
-        md5 = str(hasher.hexdigest())
-    with open(md5_path, 'w') as f:
-        f.write(md5)
-    return md5_path
 
 
 def import_f90(source_file, extra_args='', hash=False, verbose=False, with_omp=False):
@@ -167,63 +105,3 @@ peaks_f = import_f90('peaks', extra_args=omp_args, hash=True)
 omp_test_f = import_f90('omp_test', extra_args=omp_args, hash=True)
 density_f = import_f90('density', extra_args=omp_args, hash=True)
 scatter_f = import_f90('scatter', extra_args=omp_args, hash=True)
-
-from . import omp_test
-
-# try:
-#     check_hash(os.path.join(fortran_path, 'utils.f90'))
-#     from . import utils_f
-# except ImportError:
-#     compile_f90('utils.f90')
-#     from . import utils_f
-#     write_hash(os.path.join(fortran_path, 'utils.f90'))
-#
-# try:
-#     check_hash(os.path.join(fortran_path, 'interpolations.f90'))
-#     from . import interpolations_f
-# except ImportError:
-#     compile_f90('interpolations.f90')
-#     from . import interpolations_f
-#     write_hash(os.path.join(fortran_path, 'interpolations.f90'))
-#
-# try:
-#     check_hash(os.path.join(fortran_path, 'fortran_indexing.f90'))
-#     from . import fortran_indexing_f
-# except ImportError:
-#     compile_f90('fortran_indexing.f90')
-#     from . import fortran_indexing_f
-#     write_hash(os.path.join(fortran_path, 'fortran_indexing.f90'))
-#
-# try:
-#     check_hash(os.path.join(fortran_path, 'peaks.f90'))
-#     from . import peaks_f
-# except ImportError:
-#     try:
-#         # Attempt to use openmp if it is available
-#         compile_f90('peaks.f90', extra_args="--f90flags='-fopenmp -O2' -lgomp")
-#         from . import peaks_f
-#     except ImportError:
-#         compile_f90('peaks.f90')
-#         from . import peaks_f
-#     write_hash(os.path.join(fortran_path, 'peaks.f90'))
-#
-# try:
-#     check_hash(os.path.join(fortran_path, 'omp_test.f90'))
-#     from . import omp_test_f
-# except ImportError:
-#     try:
-#         # Attempt to use openmp if it is available
-#         compile_f90('omp_test.f90', extra_args="--f90flags='-fopenmp -O2' -lgomp")
-#         from . import omp_test_f
-#     except ImportError:
-#         compile_f90('omp_test.f90')
-#         from . import omp_test_f
-#     write_hash(os.path.join(fortran_path, 'omp_test.f90'))
-#
-# try:
-#     check_hash(os.path.join(fortran_path, 'density.f90'))
-#     from . import density_f
-# except ImportError:
-#     compile_f90('density.f90')
-#     from . import density_f
-#     write_hash(os.path.join(fortran_path, 'density.f90'))

@@ -13,9 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
-from reborn import utils
-from reborn.target import density
 import numpy as np
+from reborn.misc import interpolate
 
 # The usage of N_data and N_pattern in some of the tests below can be interpreted as:
 # N_data    : Number of pixels in a detector
@@ -45,7 +44,7 @@ def test_1():
                     [ 0. ,  1.0,  0. ],
                     [ 0. ,  0. ,  0. ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
 
     weightout[weightout == 0] = 1
@@ -55,7 +54,7 @@ def test_1():
 
     dataout = np.zeros(N_bin, dtype=np.float64)
     weightout = np.zeros(N_bin, dtype=np.float64)
-    density.trilinear_insertion(dataout, weightout, data_coord, data_val, x_min=x_min, x_max=x_max)
+    interpolate.trilinear_insertion(dataout, weightout, data_coord, data_val, x_min=x_min, x_max=x_max)
     w = np.where(weightout != 0)
     data_avg = dataout.copy()
     data_avg[w] /= weightout[w]
@@ -86,7 +85,7 @@ def test_2():
                     [ 0.   ,  1.0,  1.0],
                     [ 0.   ,  1.0,  1.0]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
 
     weightout[weightout == 0] = 1
@@ -116,7 +115,7 @@ def test_3(): # Boundary test
                     [ 0.,  0.,  0.],
                     [ 0.,  0.,  0.]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -145,7 +144,7 @@ def test_4(): # Boundary test
             [ 0.,  0.,  0.],
             [ 0.,  0.,  1.]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -174,7 +173,7 @@ def test_5():
                     [ 0.   ,  0.   ,  0.   ],
                     [ 0.   ,  0.   ,  0.   ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -203,7 +202,7 @@ def test_6():
             [ 0.,  0.,  0.],
             [ 0.,  0.,  0.]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -233,7 +232,7 @@ def test_7(): # Boundary padding test
             [ 0.        ,  0.        ,  0.        ]]])
 
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -262,7 +261,7 @@ def test_8(): # Boundary padding test
             [ 0.        ,  0.        ,  0.        ],
             [ 0.        ,  0.        ,  1]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -291,7 +290,7 @@ def test_9():
             [  0. ,   0. ,   0. ],
             [  0. ,   0. ,   0. ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -320,7 +319,7 @@ def test_10():
             [  0.     ,   0.     ,   0.     ],
             [  0.     ,   0.     ,   0.     ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -359,7 +358,7 @@ def test_11():
             [ 0.        ,  1.0,  1.0],
             [ 0.        ,  1.0,  1.0]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -393,7 +392,7 @@ def test_12():
             [ 0.  ,  0.  ,  0.  ,  0.  ],
             [ 0.  ,  0.  ,  0.  ,  1.  ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -429,7 +428,7 @@ def test_13():
             [ 0.   ,  0.   ,  0.   ,  0.   ],
             [ 0.   ,  0.   ,  0.   ,  0.   ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -465,7 +464,7 @@ def test_14(): # Out of bounds test
             [ 0.,  0.,  0.,  0.],
             [ 0.,  0.,  0.,  0.]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -504,7 +503,7 @@ def test_15(): # More-than-one-patterns test
             [ 0.   ,  0.   ,  0.   ,  0.   ],
             [ 0.   ,  0.   ,  0.   ,  0.   ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -575,7 +574,7 @@ def test_16():
         [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
           0.        ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -609,7 +608,7 @@ def test_17(): # Mask test
             [ 0.  ,  0.  ,  0.  ,  0.  ],
             [ 0.  ,  0.  ,  0.  ,  0.  ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
     
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -649,7 +648,7 @@ def test_18(): # Out of bounds test2
             [ 0.,  0.,  0.,  0.],
             [ 0.,  0.,  0.,  0.]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -684,7 +683,7 @@ def test_19(): # Complex value test 1 - single complex value on the exact grid
                      [ 0.       ,  0.,  0.],
                      [ 0.       ,  0.,  0.]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -713,7 +712,7 @@ def test_20(): # Complex value test 2 - single complex value with interpolations
                     [ 0.   ,  1j,  1j],
                     [ 0.   ,  1j,  1j]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -742,7 +741,7 @@ def test_21(): # Complex value test 3 - multiple complex values with interpolati
                     [ 0.   ,  0.44444444+0.55555556j,  1j],
                     [ 0.   ,  1j,  1j]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -771,7 +770,7 @@ def test_22(): # Wrap-around test 1 - no wrap-around
                      [ 0. ,  1.0,  0. ],
                      [ 0. ,  0. ,  0. ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -800,7 +799,7 @@ def test_23(): # Wrap-around test 2 - exact wrap-around
                      [ 0. ,  0. ,  0. ],
                      [ 0. ,  0. ,  0. ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -829,7 +828,7 @@ def test_24(): # Wrap-around test 3 - wrap-around with interpolation
                      [ 0. ,  0.,  0. ],
                      [ 0. ,  0. ,  0. ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -858,7 +857,7 @@ def test_25(): # Wrap-around test 4 - wrap-around with interpolation on the boun
                      [ 0. ,  1,  0. ],
                      [ 0. ,  0. ,  0. ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -887,7 +886,7 @@ def test_26(): # Wrap-around test 5 - wrap-around with interpolation on the boun
                      [ 0. ,  1,  0. ],
                      [ 0. ,  0. ,  0. ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -916,7 +915,7 @@ def test_27(): # Wrap-around test 6 - wrap-around with interpolation on the boun
                      [ 0. ,  0.,  1,  0. ,  0. ],
                      [ 0. ,  0. ,  0.,  0. ,  0. ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -945,7 +944,7 @@ def test_28(): # Wrap-around test 7 - wrap-around with interpolation on the boun
                      [ 0.   ,  0.   ,  0.   ],
                      [ 1,  0.   ,  1]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -974,7 +973,7 @@ def test_29(): # Wrap-around test 8 - no wrap-around with interpolation on the b
                     [ 0.   ,  1.0,  1.0],
                     [ 0.   ,  1.0,  1.0]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -1003,7 +1002,7 @@ def test_30(): # Wrap-around test 9 - wrap-around with interpolation on the boun
                      [ 0.   ,  0.   ,  0.,  0., 0.    ],
                      [ 1.0,  0.   ,  0.,  0., 0. ]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -1032,7 +1031,7 @@ def test_31(): # Wrap-around test 10 - wrap-around with interpolation on the bou
                      [ 0.   ,  0.   ,  0.   ],
                      [ 1.0,  0.   ,  1.0]]])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -1050,7 +1049,7 @@ def test_32():
     x_min = np.array([-1, -1, -1])
     x_max = np.array([2, 2, 2])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="truncate")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -1091,7 +1090,7 @@ def test_33():
     x_min = np.array([-1, -1, -1])
     x_max = np.array([2, 2, 2])
 
-    dataout, weightout = utils.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
+    dataout, weightout = interpolate.trilinear_insert(data_coord, data_val, x_min, x_max, N_bin, mask, boundary_mode="periodic")
 
     weightout[weightout == 0] = 1
     dataout /= weightout
@@ -1139,7 +1138,7 @@ def test_34():
     weight_factor = 1.0
 
     # Do the trilinear insertion
-    density.trilinear_insertion_factor(densities=densities, 
+    interpolate.trilinear_insertion_factor(densities=densities,
                                        weight_factor=weight_factor, 
                                        vectors=data_coord, 
                                        insert_vals=data_val, 
@@ -1188,7 +1187,7 @@ def test_35():
     weight_factor = 1.0
 
     # Do the trilinear insertion
-    density.trilinear_insertion_factor(densities=densities, 
+    interpolate.trilinear_insertion_factor(densities=densities,
                                        weight_factor=weight_factor, 
                                        vectors=data_coord, 
                                        insert_vals=data_val, 
@@ -1244,7 +1243,7 @@ def test_36():
     weight_factor = 1.0
 
     # Do the trilinear insertion
-    density.trilinear_insertion_factor(densities=densities, 
+    interpolate.trilinear_insertion_factor(densities=densities,
                                        weight_factor=weight_factor, 
                                        vectors=data_coord, 
                                        insert_vals=data_val, 
@@ -1254,7 +1253,7 @@ def test_36():
                                        x_max=x_max)
     
     # # Expected answer
-    dataout, weightout = utils.trilinear_insert(data_coord, 
+    dataout, weightout = interpolate.trilinear_insert(data_coord,
                                                 data_val, 
                                                 x_min, 
                                                 x_max, 

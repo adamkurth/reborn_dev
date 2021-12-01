@@ -26,7 +26,6 @@ import numpy as np
 from numpy import sin, cos
 from numpy.fft import fftshift, fft, ifft, fftn
 from scipy.sparse import csr_matrix
-from . import fortran
 from scipy.spatial.transform import Rotation
 
 
@@ -139,10 +138,12 @@ def warn(message):
 
 def debug(*args, **kwargs):
     r"""
-    Standard way of sending an debug message.  As of now this simply results in a function call
+    Standard way of sending an debug message.  As of now it is equivalent to the following:
 
-    logger = logging.getLogger()
-    logger.debug(*args, **kwargs)
+    .. code-block:: python
+
+        logger = logging.getLogger()
+        logger.debug(*args, **kwargs)
     """
     logger.debug(*args, **kwargs)
 
@@ -344,6 +345,7 @@ def max_pair_distance(vecs):
     Returns:
         float : The maximum pair distance.
     """
+    from . import fortran
     vecs = np.double(vecs)
     if not vecs.flags.c_contiguous:
         vecs = vecs.copy()
@@ -352,172 +354,13 @@ def max_pair_distance(vecs):
     return d_max[0]
 
 
-def trilinear_insert(data_coord, data_val, x_min, x_max, n_bin, mask, boundary_mode="truncate"):
+def trilinear_insert(*args, **kwargs):
     r"""
-    Trilinear insertion on a regular grid with arbitrarily positioned sample points.
-
-    This function returns two arrays, dataout and weightout.
-    weightout is a 3D array containing the accumulated trilinear weights.
-    dataout is the accumulated trilinearly inserted values.
-    One needs to divide dataout by weightout (taking care to deal with zeros in weightout) to get the
-    correct trilinear insertion result.
-    This is so that the function can be used to sum over many trilinearly inserted arrays in
-    for example a 3D diffracted intensity merge.
-
-    Note 1: All input arrays should be C contiguous.
-    Note 2: This code will break if you put a 1 in any of the N_bin entries.
-    Note 3: The boundary is defined as [x_min-0.5, x_max+0.5).
-
-    Arguments:
-        data_coord (Nx3 |ndarray|) : Coordinates (x,y,z) of the data points that you wish to insert into
-                     the regular grid.
-        data_val (Nx1 |ndarray|) : The values of the data points to be inserted into the grid.
-        x_min (1x3 |ndarray|) : (x_min, y_min, z_min)
-        x_max (1x3 |ndarray|) : (x_max, y_max, z_max)
-        n_bin (1x3 |ndarray|) : Number of bins in each direction (N_x, N_y, N_z)
-        mask (Nx1 |ndarray|) : Specify which data points to ignore. Non-zero means use, zero means ignore.
-        boundary_mode (str) : Specify how the boundary should be treated. Options are:
-                              (1) "truncate" - Ignores all points outside the insertion volume.
-                              (2) "periodic" - Equivalent to wrapping around.
-
-    Returns:
-        2-element tuple containing the following
-
-        - **dataout** (*3D |ndarray|*) : Trilinearly summed values that needs to be divided by weightout to give the
-          trilinearly inserted values.
-        - **weightout** (*3D |ndarray|*) : Cumulative trilinear weights.
+    Don't use this function.  Use functions in reborn.misc.interpolate.
     """
-
-    # Checks
-    if fortran is None:
-        raise ImportError('You need to compile fortran code to use utils.trilinear_interpolation()')
-    if len(data_coord) != len(data_val):
-        raise ValueError('The data coordinates and data values must be of the same length.')
-    if len(data_coord) != len(mask):
-        raise ValueError('The data coordinates and data mask must be of the same length.')
-    if len(x_min) != 3:
-        raise ValueError('x_min needs to be an array that contains three elements.')
-    if len(x_max) != 3:
-        raise ValueError('x_max needs to be an array that contains three elements.')
-    if len(n_bin) != 3:
-        raise ValueError('N_bin needs to be an array that contains three elements.')
-    if data_coord.shape[1] != 3:
-        raise ValueError('data_coord needs to be an Nx3 array.')
-
-    if np.sum(x_min <= np.min(data_coord, axis=0)) != 3:
-        print('Warning: Values in data_coord is less than one or more of the limits specified in x_min. \n' +
-              'I.e., one or more points are outside the insertion volume. \n' +
-              'If this is intended, please disregard this message. \n' +
-              'Else consider doing the following: np.min(data_coord, axis=0) and compare against x_min to see.\n')
-    if np.sum(x_max >= np.max(data_coord, axis=0)) != 3:
-        print('Warning: Values in data_coord is greater than one or more of the limits specified in x_max. \n' +
-              'I.e., one or more points are outside the insertion volume. \n' +
-              'If this is intended, please disregard this message. \n' +
-              'Else consider doing the following: np.min(data_coord, axis=0) and compare against x_min to see.\n')
-
-    # Check if the non-1D arrays are c_contiguous
-    assert data_coord.flags.c_contiguous
-
-    # Store the datatype of the incoming data
-    data_val_type = data_val.dtype
-
-    # Convert to appropriate types for the insertion
-    data_coord = data_coord.astype(np.double)
-    data_val = data_val.astype(np.complex128)
-    x_min = x_min.astype(np.double)
-    x_max = x_max.astype(np.double)
-    n_bin = n_bin.astype(np.int64)
-
-    # Bin width
-    delta_x = (x_max - x_min) / (n_bin - 1)
-
-    # Bin volume
-    bin_volume = delta_x[0] * delta_x[1] * delta_x[2]
-    one_over_bin_volume = 1 / bin_volume
-
-    # To safeguard against round-off errors
-    epsilon = 1e-9
-
-    # Constants (these are arrays with 3 elements in them)
-    c1 = 0.0 - x_min / delta_x
-    c2 = x_max + 0.5 - epsilon
-    c3 = x_min - 0.5 + epsilon
-
-    if boundary_mode == 'truncate':
-        # Modify the mask to mask out points outside the insertion volume.
-
-        # All three coordinates of a point needs to evaluate to true for the point to be
-        # included in the insertion volume.
-        mask_out_of_bound_coords_min = np.sum((x_min - delta_x) <= data_coord, axis=1) == 3
-        mask_out_of_bound_coords_max = np.sum((x_max + delta_x) >= data_coord, axis=1) == 3
-
-        # Update mask
-        mask *= mask_out_of_bound_coords_min * mask_out_of_bound_coords_max
-
-        # Mask out data_coord and data_val - user input mask
-        data_coord = data_coord[mask != 0, :]
-        data_val = data_val[mask != 0]
-
-        # Initialise memory for Fortran
-        # The N_bin+2 is for boundary padding when doing the interpolation
-        data_out = np.zeros(n_bin + 2, dtype=np.complex128, order='C')
-        weightout = np.zeros(n_bin + 2, dtype=np.double, order='C')
-        data_out = np.asfortranarray(data_out)
-        weightout = np.asfortranarray(weightout)
-
-        # Mask out data_coord and data_val - user input x_min and x_max, i.e. mask out out-of-bounds data points
-        # If any coordinate is greater than the maximum range (c2), throw it away.
-        ind_outofbound_max = np.sum((data_coord - c2) > 0, axis=1) == 0
-        data_coord = data_coord[ind_outofbound_max]
-        data_val = data_val[ind_outofbound_max]
-
-        # If any coordinate is less than the minimum range (c3), throw it away
-        ind_outofbound_min = np.sum((data_coord - c3) < 0, axis=1) == 0
-        data_coord = data_coord[ind_outofbound_min]
-        data_val = data_val[ind_outofbound_min]
-
-        # Number of data points - very crucial that this line is placed here
-        # because N_data can change depending on if any sample points are out of
-        # bounds.
-        n_data = len(data_val)
-
-        # Do trilinear insertion
-        fortran.interpolations_f.trilinear_insert(data_coord, data_val, x_min, n_data,
-                                                  delta_x, one_over_bin_volume, c1,
-                                                  data_out, weightout)
-
-        # Keep only the inner array - get rid of the boundary padding.
-        data_out = data_out[1:n_bin[0] + 1, 1:n_bin[1] + 1, 1:n_bin[2] + 1]
-        weightout = weightout[1:n_bin[0] + 1, 1:n_bin[1] + 1, 1:n_bin[2] + 1]
-
-    elif boundary_mode == 'periodic':
-        # Periodic boundary conditions on the insertion volume.
-
-        # Mask out data_coord and data_val - user input mask
-        data_coord = data_coord[mask != 0, :]
-        data_val = data_val[mask != 0]
-
-        # Initialise memory for Fortran
-        data_out = np.zeros(n_bin, dtype=np.complex128, order='C')
-        weightout = np.zeros(n_bin, dtype=np.double, order='C')
-        data_out = np.asfortranarray(data_out)
-        weightout = np.asfortranarray(weightout)
-
-        # Number of data points
-        n_data = len(data_val)
-
-        # Do trilinear insertion
-        fortran.interpolations_f.trilinear_insert_with_wraparound(data_coord, data_val, x_min, n_data,
-                                                                  delta_x, one_over_bin_volume, c1, n_bin,
-                                                                  data_out, weightout)
-    else:
-        raise ValueError('Unrecognized boundary mode')
-
-    # If the original datatype is not complex, then return only the real part.
-    if data_val_type != np.complex128:
-        data_out = np.real(data_out)
-
-    return data_out, weightout
+    depreciate("Don't use reborn.utils.trilinear_insert.  Use the functions in reborn.misc.interpolate.")
+    from .misc.interpolate import trilinear_insert
+    return trilinear_insert(*args, **kwargs)
 
 
 def rotate3D(f, R_in):
