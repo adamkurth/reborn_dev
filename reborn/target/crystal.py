@@ -28,7 +28,8 @@ import pkg_resources
 import numpy as np
 from .molecule import Molecule
 from . import atoms
-from ..utils import warn, vec_mag, trilinear_insert
+from ..utils import warn, vec_mag
+from ..misc.interpolate import trilinear_insert
 try:
     from numba import jit
 except ImportError:

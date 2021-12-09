@@ -20,14 +20,18 @@ Utilities for manipulating molecules.
 import numpy as np
 from ..utils import max_pair_distance
 from . import atoms
-from scipy import constants as const
+from .. import const
 
-hc = const.h*const.c
+hc = const.hc
+avogadros_number = const.avogadros_number
 
 
 class Molecule(object):
-
-    coordinates = None
+    r"""
+    Simple container for organizing atomic numbers, coordinates, etc.  There is presently no information about
+    bonds, as the name of the class might suggest...
+    """
+    _coordinates = None
     atomic_numbers = None
     n_atoms = None
     occupancies = None
@@ -48,10 +52,19 @@ class Molecule(object):
             self.atomic_symbols = atomic_symbols
             self.atomic_numbers = atoms.atomic_symbols_to_numbers(atomic_symbols)
         else:
-            self.atomic_numbers = np.ones(len(coordinates.shape[0]))
+            self.atomic_numbers = np.ones(len(self._coordinates.shape[0]))
             self.atomic_symbols = atoms.atomic_numbers_to_symbols(atomic_numbers)
         self.n_atoms = len(self.atomic_symbols)
         self.occupancies = np.ones(self.n_atoms)
+
+    @property
+    def coordinates(self):
+        return self._coordinates.copy()
+
+    @coordinates.setter
+    def coordinates(self, value):
+        self._max_atomic_pair_distance = None
+        self._coordinates = np.array(value)
 
     def get_scattering_factors(self, photon_energy=None, beam=None):
         r"""
@@ -96,3 +109,10 @@ class Molecule(object):
             |ndarray|: An Nx3 array of coordinates.
         """
         return self.coordinates - np.sum((self.atomic_numbers*self.coordinates.T).T, axis=0)/np.sum(self.atomic_numbers)
+
+    def get_atomic_weights(self):
+        r"""
+        Returns the atomic weights in SI units (kg).
+        """
+        import xraylib
+        return np.array([xraylib.AtomicWeight(z) for z in self.atomic_numbers])*1e-3/avogadros_number

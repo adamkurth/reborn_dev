@@ -7,7 +7,7 @@ from scipy.spatial.transform import Rotation
 import argparse
 from reborn import detector
 from reborn import source
-from reborn.utils import trilinear_insert
+from reborn.misc.interpolate import trilinear_insert
 from reborn.simulate.clcore import ClCore
 from reborn.simulate.examples import psi_pdb_file, lysozyme_pdb_file
 from reborn.target import crystal, density
