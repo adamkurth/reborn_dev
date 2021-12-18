@@ -317,7 +317,7 @@ class PADView(QtCore.QObject):
         add_menu(mask_menu, 'Load mask...', connect=self.load_masks)
         plugin_menu = self.menubar.addMenu('Plugins')
         self.plugin_names = []
-        for plg in glob.glob(os.path.join(plugin_path, '*.py')):
+        for plg in sorted(glob.glob(os.path.join(plugin_path, '*.py'))):
             plugin_name = os.path.basename(plg).replace('.py', '')
             self.plugin_names.append(plugin_name)
             self.debug('\tSetup plugin ' + plugin_name, 2)
