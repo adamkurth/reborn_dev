@@ -37,6 +37,7 @@ class Plugin():
 
 class Widget(QtGui.QWidget):
     data_diff = None
+    autoscale = True
     def __init__(self, padview):
         super().__init__()
         self.padview = padview
@@ -62,7 +63,7 @@ class Widget(QtGui.QWidget):
 
     @property
     def pad_geometry(self):
-        return self.padview.pad_geometry
+        return self.padview.dataframe.get_pad_geometry()
 
     def get_pad_display_data(self):
         r""" We subtract the Friedel mate from the current display data in padview. """
@@ -137,24 +138,17 @@ class Widget(QtGui.QWidget):
             self.histogram.item.setLevels(float(min_value), float(max_value))
 
     def update_pads(self):
-        # self.debug(get_caller(), 1)
-        # if self.images is None:
-        #     self.setup_pads()
+        levels = self.get_levels()
         processed_data = self.get_pad_display_data()
-        for i in range(0, self.n_pads):
+        for i in range(0, self.padview.dataframe.n_pads):
             self.images[i].setImage(processed_data[i])
-        # self.histogram.regionChanged()
+        self.set_levels(levels=levels)
 
     @QtCore.pyqtSlot()
     def update_pad_geometry(self):
         self.data_diff = None
-        # time1 = tracemalloc.take_snapshot()
+        levels = self.get_levels()
         self.update_pads()
-        for i in range(0, self.n_pads):
+        for i in range(0, self.padview.dataframe.n_pads):
             self._apply_pad_transform(self.images[i], self.pad_geometry[i])
-        m = np.percentile(np.abs(concat(self.get_pad_display_data())), 95)
-        # time2 = tracemalloc.take_snapshot()
-        # stats = time2.compare_to(time1, 'lineno')
-        # for stat in stats[:3]:
-        #     print(stat)
-        self.set_levels(levels=(-m, m))
+        self.set_levels(levels=levels)  # FIXME: Why must this be done?  Very annoying...
