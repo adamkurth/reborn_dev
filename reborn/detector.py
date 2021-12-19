@@ -713,7 +713,9 @@ class PADGeometryList(list):
     when getting q vectors for many separate PADs.
     """
 
+    _name = ''
     _q_mags = None
+    _groups = []
 
     def append(self, item):
         r""" Override append method.  Check the type, name the panel if it has no name. """
@@ -722,6 +724,48 @@ class PADGeometryList(list):
         if not item.name:
             item.name = len(self).__str__()
         super().append(item)
+
+    def add_group(self, pads, group_name=None):
+        r""" Add a group of PADGeometry instances.  Helpful if you have multiple "detectors" that have different 
+        properties as compared with others.  Or perhaps there are PADs that should translate as a group."""
+        if group_name is None:
+            group_name = str(len(self._groups))
+        if group_name in self.get_group_names():
+            raise ValueError('Group name', group_name, 'already exists.')
+        indices = []
+        for p in pads:
+            indices.append(len(self))
+            self.append(p)
+        self._groups.append({'name': group_name, 'indices': indices})
+
+    def get_group_indices(self, group_name):
+        indices = None
+        for g in self._groups:
+            if group_name == g['name']:
+                indices = g['indices']
+        if indices is None:
+            raise ValueError('No group named', group_name)
+        return indices
+
+    def get_group(self, group_name):
+        group = None
+        for g in self._groups:
+            if g['name'] == group_name:
+                return PADGeometryList([self[i] for i in g['indices']])
+        if group is None:
+            raise ValueError('No group named', g['name'])
+
+    def get_all_groups(self):
+        groups = []
+        for g in self._groups:
+            groups.append(self.get_group(g['name'])) 
+        return groups
+
+    def get_group_names(self):
+        names = []
+        for g in self._groups:
+            names.append(g['name'])
+        return names
 
     def __init__(self, pad_geometry=None, filepath=None):
         r"""
