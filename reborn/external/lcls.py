@@ -337,13 +337,16 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
                  experiment_id,
                  run_number,
                  pad_detectors,
-                 data_src):
+                 psana_dir=None):
 
         super().__init__()  # initialize the superclass
         self.run_number = run_number
 
         # setup data source
-        self.data_string = f'exp={experiment_id}:run={run_number}:{data_src}'
+        if psana_dir is None:
+            self.data_string = f'exp={experiment_id}:run={run_number}:smd'
+        else:
+            self.data_string = f'exp={experiment_id}:run={run_number}:smd:dir={psana_dir}'
         ds = psana.DataSource(self.data_string)
         self.data_source = ds
 
@@ -362,7 +365,10 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         self.n_frames = nevent + 1  # why is this + 1?
 
         # now that we have the times, jump to the events in reverse order
-        self.data_source = psana.DataSource(f'exp={experiment_id}:run={run_number}:idx')
+        if psana_dir is None:
+            self.data_source = psana.DataSource(f'exp={experiment_id}:run={run_number}:idx')
+        else:
+            self.data_source = psana.DataSource(f'exp={experiment_id}:run={run_number}:idx:dir{psana_dir}')
         self.run = self.data_source.runs().__next__()
         self.event_ids = self.run.times()
         self.n_events = len(self.event_ids)
