@@ -368,7 +368,7 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         if psana_dir is None:
             self.data_source = psana.DataSource(f'exp={experiment_id}:run={run_number}:idx')
         else:
-            self.data_source = psana.DataSource(f'exp={experiment_id}:run={run_number}:idx:dir{psana_dir}')
+            self.data_source = psana.DataSource(f'exp={experiment_id}:run={run_number}:idx:dir={psana_dir}')
         self.run = self.data_source.runs().__next__()
         self.event_ids = self.run.times()
         self.n_events = len(self.event_ids)
