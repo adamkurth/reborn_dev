@@ -414,6 +414,10 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         return photon_energy
 
     def get_data(self, frame_number=0):
+        ts = (self.event_timestamp['seconds'][frame_number],
+              self.event_timestamp['nanoseconds'][frame_number],
+              self.event_timestamp['fiducials'][frame_number])
+
         event = self.get_event(frame_number=frame_number)
 
         photon_energy = self.get_photon_energy(event)
@@ -430,4 +434,7 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         df.set_beam(beam)
         df.set_pad_geometry(self.geometry)
         df.set_raw_data(pad_data)
+        if self.mask is not None:
+            df.set_mask(self.mask)
+        df.set_frame_id(ts)
         return df
