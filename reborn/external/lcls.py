@@ -333,6 +333,8 @@ class AreaDetector(object):
 
 class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
 
+    mask = None
+
     def __init__(self,
                  experiment_id,
                  run_number,
@@ -429,12 +431,13 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
 
         # get pad detector data
         pad_data = [data for det in self.detectors for data in det.get_data_split(event)]
+        mask = [det.mask for det in self.detectors]
 
         df = reborn.dataframe.DataFrame()
         df.set_beam(beam)
         df.set_pad_geometry(self.geometry)
         df.set_raw_data(pad_data)
-        if self.mask is not None:
-            df.set_mask(self.mask)
-        df.set_frame_id(ts)
+        # if self.mask is not None:
+        #     df.set_mask(self.mask)
+        # df.set_frame_id(ts)
         return df
