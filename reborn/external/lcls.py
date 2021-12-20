@@ -404,7 +404,13 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         et = psana.EventTime(int((ts[0] << 32) | ts[1]), ts[2])
         return self.run.event(et)
 
-    def get_photon_energy(self, event):
+    def get_data(self, frame_number=0):
+        ts = (self.event_timestamp['seconds'][frame_number],
+              self.event_timestamp['nanoseconds'][frame_number],
+              self.event_timestamp['fiducials'][frame_number])
+
+        event = self.get_event(frame_number=frame_number)
+
         # get photon energy
         eb = self.ebeam_detector.get(event)
         try:
@@ -413,16 +419,7 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
             print(f'Run {self.run_number} frame {frame_number} causes \
                     ebeamPhotonEnergy failure, skipping this shot.')
             photon_energy = None
-        return photon_energy
 
-    def get_data(self, frame_number=0):
-        ts = (self.event_timestamp['seconds'][frame_number],
-              self.event_timestamp['nanoseconds'][frame_number],
-              self.event_timestamp['fiducials'][frame_number])
-
-        event = self.get_event(frame_number=frame_number)
-
-        photon_energy = self.get_photon_energy(event)
         beam = reborn.source.Beam(photon_energy=photon_energy)
 
         if frame_number == 0:
