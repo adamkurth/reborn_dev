@@ -707,6 +707,17 @@ class PADGeometry:
         p.ss_vec *= binning
         return p
 
+    def translate(self, vec):
+        r""" Translate the geometry.  Equivalent to self.t_vec += vec. """
+        self.t_vec += vec
+
+    def rotate(self, matrix=None):
+        r""" Apply a rotation matrix to t_vec, fs_vec, ss_vec.  Equivalent to self.t_vec = np.dot(self.t_vec, matrix.T)"""
+        self.t_vec = np.dot(self.t_vec, matrix.T)
+        self.fs_vec = np.dot(self.fs_vec, matrix.T)
+        self.ss_vec = np.dot(self.ss_vec, matrix.T)
+        
+        
 
 class PADGeometryList(list):
     r""" A subclass of list that does operations on lists of |PADGeometry| instances.  Is helpful, for example.
@@ -766,6 +777,17 @@ class PADGeometryList(list):
         for g in self._groups:
             names.append(g['name'])
         return names
+
+    def get_by_name(self, name):
+        pad = None
+        for p in self:
+            if p.name == name:
+                if pad is not None:
+                    raise ValueError('Ambiguous; more than one pad with the same name!')
+                pad = p
+        if pad is None:
+            raise ValueError('No PAD named', name)
+        return pad
 
     def __init__(self, pad_geometry=None, filepath=None):
         r"""
@@ -895,6 +917,16 @@ class PADGeometryList(list):
         r""" See corresponding method in |PADGeometry|. """
         binned = [p.binned(binning) for p in self]
         return PADGeometryList(binned)
+
+    def translate(self, vec):
+        r""" See corresponding method in |PADGeometry|. """
+        for p in self:
+            p.translate(vec)
+
+    def rotate(self, matrix):
+        r""" See corresponding method in |PADGeometry|. """
+        for p in self:
+            p.rotate(matrix)
 
     def load(self, filename):
         r""" Load the data from saved PADGeometryList. """

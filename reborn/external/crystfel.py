@@ -19,13 +19,13 @@ Most of the functions below wrap around the functions in the crystfel_utils modu
 which is maintained by CFEL.
 The crystfel_utils module is included in reborn so that you do not need to install it with pip.
 """
-
+import re
 import os
 import tempfile
 import h5py
 import numpy as np
 import linecache
-from .. import detector
+from .. import detector, utils
 from ..fileio.getters import FrameGetter
 from . import _crystfel_utils
 from scipy import constants as const
@@ -275,6 +275,63 @@ def write_geom_file_single_pad(file_path=None, beam=None, pad_geometry=None):
     fid.write("0/fs = x\n")
     fid.write("0/ss = y\n")
     fid.close()
+
+
+def write_geom_file_from_template(pad_geometry=None, template_file=None, out_file=None):
+    r"""
+    Given a matching template, write a geom file with the geometry of a corresponding PADGeometryList
+    """
+    pads = pad_geometry
+    f = open(template_file, 'r')
+    out = open(out_file, 'w')
+    in_panel = False
+    for line in f:
+        line = line.strip()
+        if len(line) == 0:  # Blank line
+            out.write('\n')
+            continue
+        if line[0] == ';':  # Comment
+            out.write(line+'\n')
+            continue
+        key = line.split('=')[0].strip()
+        val = line.split('=')[1].strip()
+        if key == 'res':
+            res = float(val);
+            out.write(line+'\n')
+            continue
+        if '/' in key:  # Then this is a panel
+            name = key.split('/')[0]
+            key = key.split('/')[1]
+            if key == 'res':
+                res = float(val);
+                out.write(line+'\n')
+                continue
+            if key == 'fs':
+                v = utils.vec_norm(pads.get_by_name(name).fs_vec)
+                out.write(name+'/'+key+' = '+'%+g'%v[0]+'x '+'%+g'%v[1]+'y '+'%+g'%v[2]+'z\n')
+                continue
+            if key == 'ss':
+                v = utils.vec_norm(pads.get_by_name(name).ss_vec)
+                out.write(name+'/'+key+' = '+'%+g'%v[0]+'x '+'%+g'%v[1]+'y '+'%+g'%v[2]+'z\n')
+                continue
+            # ==== Translation vector of this PAD ==============
+            if key == 'corner_x':
+                x = pads.get_by_name(name).t_vec[0]*res
+                out.write(name+'/'+key+' = '+'%+g'%x+'\n')
+                continue
+            if key == 'corner_y':
+                y = pads.get_by_name(name).t_vec[1]*res
+                z = pads.get_by_name(name).t_vec[2]*res
+                out.write(name+'/'+key+' = '+'%+g'%y+'\n')
+                out.write(name+'/'+'clen = '+'%+g'%z+'\n')
+                continue
+            if (key == 'clen') or (key == 'coffset'):
+                out.write(';'+line+'\n')
+                continue
+        if (key == 'detector_shift_x') or (key == 'detector_shift_y') or (key == 'clen'):
+            out.write(';'+line+'\n')
+            continue
+        out.write(line+'\n')
 
 
 def readStreamfile_get_total_number_of_frames(stream_file):
