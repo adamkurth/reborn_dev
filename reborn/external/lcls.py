@@ -431,7 +431,7 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
         mask = [det.mask for det in self.detectors]
 
         df = reborn.dataframe.DataFrame()
-        df.set_beam(beam)
+        # df.set_beam(beam)
         df.set_pad_geometry(self.geometry)
         df.set_raw_data(pad_data)
         # if self.mask is not None:
