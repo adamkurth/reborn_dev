@@ -336,13 +336,14 @@ class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
     def __init__(self,
                  experiment_id,
                  run_number,
-                 pad_detectors):
+                 pad_detectors,
+                 data_src):
 
         super().__init__()  # initialize the superclass
         self.run_number = run_number
 
         # setup data source
-        self.data_string = f'exp={experiment_id}:run={run_number}:smd'
+        self.data_string = f'exp={experiment_id}:run={run_number}:{data_src}'
         ds = psana.DataSource(self.data_string)
         self.data_source = ds
 
