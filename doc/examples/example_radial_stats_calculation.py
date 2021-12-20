@@ -17,7 +17,7 @@ r"""
 Radial statistics calculation
 =============================
 
-Calculate radial statistics
+Calculate the radial statistics of a 3-dimensional array of numbers.
 
 Contributed by Joe Chen.
 
@@ -30,12 +30,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from reborn.utils import make_label_radial_shell, radial_stats
 
+# Shape of the numpy array
 Nx = 20
 Ny = 20
 Nz = 20
+
+# Number of radial bins we want
 N_radials = 6
 
-# Make a 3D array of radnom numbers
+# Make a 3D array of random numbers
 f = np.random.rand(Nx, Ny, Nz)
 
 # Values of the radius for the start of each shell
@@ -44,7 +47,10 @@ r_bin_vec = np.linspace(0, int(Nx/2), N_radials)
 # Set up the radial labels
 labels_radial = make_label_radial_shell(r_bin_vec, n_vec=(Nx, Ny, Nz))
 
-# Calculate the radial median
+
+# %%
+# Now we calculate the radial median of the array, as an example:
+
 radial_median = radial_stats(f=f, labels_radial=labels_radial, n_radials=N_radials, mode="median")
 
 
@@ -62,6 +68,7 @@ plt.colorbar()
 ax = fig.add_subplot(133)
 plt.imshow(labels_radial[int(Nx/2),:,:])
 plt.colorbar()
+plt.tight_layout()
 plt.show()
 
 # Radial median
