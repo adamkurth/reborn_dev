@@ -64,7 +64,7 @@ class Widget(QtGui.QWidget):
             self.show_ellipse = True
 
     def update_geometry(self):
-        pads = self.padview.pad_geometry
+        pads = self.padview.dataframe.get_pad_geometry()
         X0 = np.mean(np.array([f[8] for f in self.ellipse_fits]))
         Y0 = np.mean(np.array([f[9] for f in self.ellipse_fits]))
         for p in pads:
@@ -80,7 +80,9 @@ class Widget(QtGui.QWidget):
             self.draw_ellipse(f)
 
     def do_action(self):
-        efit = fit_ellipse_pad(self.padview.pad_geometry, self.padview.mask_data, threshold=0.5)
+        pads = self.padview.dataframe.get_pad_geometry()
+        masks = self.padview.dataframe.get_mask_list()
+        efit = fit_ellipse_pad(pads, masks, threshold=0.5)
         self.ellipse_fits.append(efit)
         self.draw_ellipse(efit)
 

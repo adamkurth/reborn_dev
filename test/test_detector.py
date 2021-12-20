@@ -261,3 +261,26 @@ def test_loading():
     assert (len(pads) != 1)
     pads2 = detector.PADGeometryList(filepath=crystfel_geom)
     assert(pads == pads2)
+
+def test_groups():
+    p = detector.PADGeometryList()
+    pads1 = detector.cspad_pad_geometry_list()
+    pads2 = detector.epix10k_pad_geometry_list()
+    p.add_group(pads1, group_name='cspad')
+    p.add_group(pads2, group_name='epix')
+    pads1g = p.get_group('cspad')
+    assert(pads1[0] == pads1g[0])
+    assert(pads1[5] == pads1g[5])
+    groups = p.get_all_groups()
+    assert(groups[0][0] == pads1[0])
+    gn = p.get_group_names()
+    assert(gn[0] == 'cspad')
+    assert(gn[1] == 'epix')
+    
+
+
+
+
+
+
+

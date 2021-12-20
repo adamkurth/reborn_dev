@@ -32,7 +32,7 @@ from reborn.viewers.qtviews import view_pad_data, PADView
 
 beam = source.Beam(wavelength=1.5e-10)
 pads = detector.cspad_pad_geometry_list()
-dat = simulate.solutions.get_water_profile(pads.q_mags(beam=beam))
+dat = simulate.solutions.water_scattering_factor_squared(pads.q_mags(beam=beam))
 dat *= pads.polarization_factors(beam=beam)
 dat = np.random.poisson(dat)
 
@@ -103,7 +103,7 @@ del pv
 # Here is an example in which we build a |FrameGetter| from a normal list.  First, we make a list of |DataFrame|
 # instances, each with different Poisson noise in the simulated data:
 
-dat = simulate.solutions.get_water_profile(pads.q_mags(beam=beam))
+dat = simulate.solutions.water_scattering_factor_squared(pads.q_mags(beam=beam))
 dat *= pads.polarization_factors(beam=beam)
 n_frames = 10
 dataframes = []  # Initialize list of dataframes
