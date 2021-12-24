@@ -115,6 +115,12 @@ class FrameGetter(ABC):
         r""" Do not override this method. """
         return self.get_frame(int(np.floor(np.random.rand(1)*self.n_frames-1e-10)))
 
+    def view(self):
+        r""" Create a PADview instance and start it with this framegetter. """
+        from ..viewers.qtviews.padviews import PADView
+        pv = PADView(frame_getter=self)
+        pv.start()
+
     def __iter__(self):
         r""" Do not override this method. """
         return _FGIterator(self)
