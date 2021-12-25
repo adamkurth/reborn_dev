@@ -32,6 +32,7 @@ mpccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/mpccd_geo
 jungfrau4m_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/jungfrau4m_geometry.json')
 rayonix_mx340_xfel_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/rayonix_mx340_xfel_geometry.json')
 
+
 class PADGeometry:
     r"""
     A container for pixel-array detector (PAD) geometry specification.  By definition, a PAD consists of a single 2D
@@ -91,6 +92,8 @@ class PADGeometry:
     _ss_vec = None
     _t_vec = None
     _name = ''
+    _parent_data_slice = None  # Slice of parent data block
+    _parent_data_shape = None  # Shape of parent data block
 
     def __init__(self, distance=None, pixel_size=None, shape=None, **kwargs):
         r"""
@@ -105,12 +108,17 @@ class PADGeometry:
             self.simple_setup(distance=distance, pixel_size=pixel_size, shape=shape, **kwargs)
 
     def __str__(self):
-        out = self.name+'\n'
+        out = ''
+        out += '{\n'
+        out += 'name: %s\n' % self.name.__str__()
         out += 'n_fs: %s\n' % self._n_fs.__str__()
         out += 'n_ss: %s\n' % self._n_ss.__str__()
         out += 'fs_vec: %s\n' % self._fs_vec.__str__()
         out += 'ss_vec: %s\n' % self._ss_vec.__str__()
-        out += 't_vec: %s' % self._t_vec.__str__()
+        out += 't_vec: %s\n' % self._t_vec.__str__()
+        out += 'parent_data_slice: %s\n' % self._parent_data_slice.__str__()
+        out += 'parent_data_shape: %s\n' % self._parent_data_shape.__str__()
+        out += '}\n'
         return out
 
     def __eq__(self, other):
@@ -126,6 +134,10 @@ class PADGeometry:
             return False
         if np.max(np.abs(self.t_vec - other.t_vec)) > 0:
             return False
+        if self._parent_data_shape != other._parent_data_shape:
+            return False
+        if self._parent_data_slice != other._parent_data_slice:
+            return False
         return True
 
     def __ne__(self, other):
@@ -136,7 +148,7 @@ class PADGeometry:
         r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
         return hash(self.__str__())
 
-    def validate(self, **kwargs):
+    def validate(self):
         r""" Determine if this instance has all the needed parameters defined.
 
         Returns:
@@ -155,6 +167,10 @@ class PADGeometry:
             raise ValueError("The ss_vec parameter is undefined in your PADGeometry instance.")
         if not isinstance(self._t_vec, np.ndarray):
             raise ValueError("The t_vec parameter is undefined in your PADGeometry instance.")
+        if (self._parent_data_slice is not None) and (self._parent_data_shape is None):
+            raise ValueError("The parent data slice is defined but the parent data shape is undefined.")
+        if (self._parent_data_shape is not None) and (self._parent_data_slice is None):
+            raise ValueError("The parent data shape is defined but the parent data slice is undefined.")
         return True
 
     @property
@@ -196,13 +212,11 @@ class PADGeometry:
     @property
     def fs_vec(self):
         r""" (|ndarray|) Fast-scan basis vector. """
-
         return self._fs_vec
 
     @property
     def ss_vec(self):
         r""" (|ndarray|) Slow-scan basis vector. """
-
         return self._ss_vec
 
     @property
@@ -228,21 +242,50 @@ class PADGeometry:
         if self._t_vec.size != 3:
             raise ValueError('PADGeometry vectors should have a length of 3 (it is a vector)')
 
+    @property
+    def parent_data_slice(self):
+        r""" Optionally, this defines the slice of an |ndarray| that this geometry corresponds to.  This is helpful
+        if you wish to work with the 3D arrays in psana, for example. """
+        return tuple_to_slice(self._parent_data_slice)
+
+    @parent_data_slice.setter
+    def parent_data_slice(self, slc):
+        if not is_slice_type(slc):
+            raise ValueError('parent_data_slice must be slice, tuple of slices, or None')
+        self._parent_data_slice = slice_to_tuple(slc)
+
+    @property
+    def parent_data_shape(self):
+        r""" Optionally, this defines the shape of the |ndarray| from which this PAD is sliced. """
+        return self._parent_data_shape
+
+    @parent_data_shape.setter
+    def parent_data_shape(self, shape):
+        if isinstance(shape, list):
+            shape = tuple(shape)
+        if not (isinstance(shape, tuple) or (shape is None)):
+            raise ValueError('parent_data_shape must be tuple or None')
+        self._parent_data_shape = shape
+
     def to_dict(self):
         r""" Convert geometry to a dictionary.
 
         Returns: (dict): Dictionary containing the keys **n_fs**, **n_ss**, **fs_vec**, **ss_vec** and **t_vec**.
         """
-        return {'n_fs': self.n_fs, 'n_ss': self.n_ss, 'fs_vec': tuple(self.fs_vec), 'ss_vec': tuple(self.ss_vec),
-                't_vec': tuple(self.t_vec)}
+        return {'name': self.name, 'n_fs': self.n_fs, 'n_ss': self.n_ss, 'fs_vec': tuple(self.fs_vec),
+                'ss_vec': tuple(self.ss_vec), 't_vec': tuple(self.t_vec), 'parent_data_shape': self.parent_data_shape,
+                'parent_data_slice': slice_to_tuple(self._parent_data_slice)}
 
     def from_dict(self, dictionary):
         r""" Loads geometry from dictionary.  This goes along with the to_dict method."""
+        self.name = dict_default(dictionary, 'name', None)
         self.n_fs = dictionary['n_fs']
         self.n_ss = dictionary['n_ss']
         self.fs_vec = dictionary['fs_vec']
         self.ss_vec = dictionary['ss_vec']
         self.t_vec = dictionary['t_vec']
+        self.parent_data_slice = dict_default(dictionary, 'parent_data_slice', None)
+        self.parent_data_shape = dict_default(dictionary, 'parent_data_shape', None)
 
     def copy(self):
         r""" Make a copy of this class instance. """
@@ -304,7 +347,7 @@ class PADGeometry:
 
     def shape(self):
         r""" Return tuple corresponding to the numpy shape of this PAD. """
-        return (self.n_ss, self.n_fs)
+        return self.n_ss, self.n_fs
 
     def indices_to_vectors(self, idx_ss, idx_fs):
         r"""
@@ -546,7 +589,7 @@ class PADGeometry:
         else:
             weight1 = a
             weight2 = 1 - a
-        polarization_factor = 0
+        polarization_factor = np.zeros(self.n_pixels)
         if weight1 > 0:
             polarization_factor += weight1 * (1 - np.abs(np.dot(pix_vec, e1)) ** 2)
         if weight2 > 0:
@@ -712,11 +755,11 @@ class PADGeometry:
         self.t_vec += vec
 
     def rotate(self, matrix=None):
-        r""" Apply a rotation matrix to t_vec, fs_vec, ss_vec.  Equivalent to self.t_vec = np.dot(self.t_vec, matrix.T)"""
+        r""" Apply a rotation matrix to t_vec, fs_vec, ss_vec.
+        Equivalent to self.t_vec = np.dot(self.t_vec, matrix.T)"""
         self.t_vec = np.dot(self.t_vec, matrix.T)
         self.fs_vec = np.dot(self.fs_vec, matrix.T)
         self.ss_vec = np.dot(self.ss_vec, matrix.T)
-        
         
 
 class PADGeometryList(list):
@@ -750,6 +793,7 @@ class PADGeometryList(list):
         self._groups.append({'name': group_name, 'indices': indices})
 
     def get_group_indices(self, group_name):
+        r""" Get the list indices for a named group. """
         indices = None
         for g in self._groups:
             if group_name == g['name']:
@@ -759,26 +803,28 @@ class PADGeometryList(list):
         return indices
 
     def get_group(self, group_name):
-        group = None
+        r""" Return a named group in the form of a |PADGeometryList| ."""
         for g in self._groups:
             if g['name'] == group_name:
                 return PADGeometryList([self[i] for i in g['indices']])
-        if group is None:
-            raise ValueError('No group named', g['name'])
+        raise ValueError('No group named', group_name)
 
     def get_all_groups(self):
+        r""" Equivalent to get_group, but sets the argument to all group names.  Beware: you may have redundancies!"""
         groups = []
         for g in self._groups:
             groups.append(self.get_group(g['name'])) 
         return groups
 
     def get_group_names(self):
+        r""" Get a list of all group names.  Will be empty list if there are no groups.  """
         names = []
         for g in self._groups:
             names.append(g['name'])
         return names
 
     def get_by_name(self, name):
+        r""" Return a |PADGeometry| with a given name. """
         pad = None
         for p in self:
             if p.name == name:
@@ -788,6 +834,32 @@ class PADGeometryList(list):
         if pad is None:
             raise ValueError('No PAD named', name)
         return pad
+
+    def defines_slicing(self):
+        r""" False if any of the |PADGeometry| instances does not have a parent_data_slice or parent_data_shape
+        defined.  True otherwise. """
+        if (None in [p.parent_data_slice for p in self]) or (None in [p.parent_data_shape for p in self]):
+            return False
+        return True
+
+    @property
+    def parent_data_shape(self):
+        r""" Return parent data shape, or None if undefined.  Raise ValueError if mis-matched parent data shapes."""
+        if False in [(self[0].parent_data_shape == s.parent_data_shape) for s in self]:
+            raise ValueError("Your PADGeometry instances have different parent data shapes!")
+        return self[0].parent_data_shape
+
+    def reshape(self, data):
+        r""" If parent_data_shape is defined, then reshape the data to that shape. """
+        if not isinstance(data, np.ndarray):
+            raise ValueError('data must be an ndarray')
+        shape = self.parent_data_shape
+        if shape is None:
+            dr = data.ravel()
+            if len(dr) != self.n_pixels:
+                raise ValueError('Data length does not match this PADGeometryList.n_pixels')
+            return data.ravel()
+        return np.reshape(data, shape)
 
     def __init__(self, pad_geometry=None, filepath=None):
         r"""
@@ -810,14 +882,31 @@ class PADGeometryList(list):
 
     def split_data(self, data):
         r""" Split a contiguous 1D |ndarray| into list of 2D |ndarray| instances."""
+        if self.defines_slicing():
+            self.validate()
+            datalist = []
+            for p in self:
+                datalist.append(data[p.parent_data_slice])
+            return datalist
         return split_pad_data(self, data)
 
     def concat_data(self, data):
         r""" Concatenate a list of |ndarray| instances into a single concatenated 1D |ndarray| ."""
+        if self.defines_slicing():
+            self.validate()
+            if isinstance(data, np.ndarray):
+                return np.reshape(data, self[0].parent_data_shape)
+            if isinstance(data, list):
+                datacat = np.zeros(self[0].parent_data_shape, dtype=data[0].dtype)
+                for (p, d) in zip(self, data):
+                    datacat[p.parent_data_slice] = d
         if isinstance(data, list):
             if len(data) != len(self):
                 raise ValueError("Length of data list is not the same length as the PADGeometryList")
         return concat_pad_data(data)
+
+    # def reshape(self, data):
+    #     if self.defines_slicing():
 
     @property
     def hash(self):
@@ -827,11 +916,18 @@ class PADGeometryList(list):
             s += p.__str__()
         return hash(s)
 
-    def validate(self, raise_error=False):
-        r""" Same as the the matching method in |PADGeometry|."""
+    def validate(self):
+        r""" Same as the matching method in |PADGeometry|."""
         status = True
+        if self.defines_slicing():
+            p0 = self[0]
+            for p in self:
+                if p.parent_data_shape != p0.parent_data_shape:
+                    raise ValueError('Mismatched parent data shape')
+                if not is_slice_type(p.parent_data_slice, none_ok=False):
+                    raise ValueError('Parent data slice is undefined')
         for p in self:
-            status *= p.validate(raise_error=raise_error)
+            status *= p.validate()
         if status:
             return True
         return False
@@ -1144,8 +1240,7 @@ def subtract_pad_friedel_mate(data, mask, pads):
 #         self._polarization_corrected = True
 
 
-class PADAssembler():
-
+class PADAssembler:
     r"""
     Assemble PAD data into a fake single-panel PAD.  This is done in a lazy way.  The resulting image is not
     centered in any way; the fake detector is a snug fit to the individual PADs.
@@ -1153,7 +1248,6 @@ class PADAssembler():
     A list of PADGeometry objects are required on initialization, as the first argument.  The data needed to
     "interpolate" are cached, hence the need for a class.  The geometry cannot change; there is no update method.
     """
-
     def __init__(self, pad_list):
         pixel_size = utils.vec_mag(pad_list[0].fs_vec)
         position_vecs_concat = np.concatenate([p.position_vecs() for p in pad_list])
@@ -1197,7 +1291,7 @@ class PADAssembler():
         return self.assemble_data(np.ravel(data_list))
 
 
-class IcosphereGeometry():
+class IcosphereGeometry:
     r"""
     Experimental class for a spherical detector that follows the "icosphere" geometry. The Icosphere is generated by
     sub-dividing the vertices of an icosahedron.  The following blog was helpful:
@@ -1456,7 +1550,8 @@ class RadialProfiler:
                                      needed in order to calculate q magnitudes.
         """
         if _plan:
-            self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range, pad_geometry=pad_geometry, beam=beam)
+            self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range,
+                           pad_geometry=pad_geometry, beam=beam)
 
     def copy(self):
         r""" Make a copy of this profiler.  Copy all internal data. """
@@ -1706,7 +1801,7 @@ class RadialProfiler:
         Returns:
 
         """
-        return self.subtract_profile(data, mask=mask, statistic='median')
+        return self.subtract_profile(data, mask=mask, statistic=np.median)
 
     def get_profile(self, data, mask=None, average=True):
         r"""
@@ -1783,8 +1878,10 @@ def load_pad_masks(file_name):
     keys = list(out.keys())
     n = int(len(out) - 1)
     file_format = out['format']
+
     def _range(x):
         return np.arange(x, dtype=int)
+
     if file_format == 1:
         shapes = [out[keys[i]] for i in _range(n/2) + 1]
         masks = [out[keys[i]] for i in _range(n/2) + int(n/2) + 1]
@@ -1843,7 +1940,6 @@ def jungfrau4m_pad_geometry_list(detector_distance=0.1):
 
     Arguments:
         detector_distance (float): Detector distance in SI units
-        binning (int): Bin the detector into larger NxN virtual pixels.
 
     Returns: List of |PADGeometry| instances
     """
@@ -1891,9 +1987,10 @@ def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, return_mask=Fals
 
     Arguments:
         detector_distance (float): Detector distance in SI units.
+        return_mask (bool): The Rayonix has a hole in the center; setting this to True will return the corresponding
+                            mask along with .
 
-    Returns:
-        (list): List of |PADGeometry| instances.
+    Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(rayonix_mx340_xfel_geom_file)
     for p in pads:
@@ -1905,3 +2002,105 @@ def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, return_mask=Fals
         mask[utils.vec_mag(xyz) < 0.0025] = 0
         return pads, mask
     return PADGeometryList(pads)
+
+
+def dict_default(dictionary, key, default):
+    r""" Sometimes we want to fetch a dictionary value for a given key, but the key might be absent in which case we
+    accept a default value.  This function does that. """
+    if key in dictionary.keys():
+        return dictionary[key]
+    return default
+
+
+def is_slice_type(slc, none_ok=True):
+    r""" Specialized test for |slice| type. The reason for the complications below is firstly that slices for
+    multi-dimensional arrays are actually tuples of slice objects, so an isinstance(obj, slice) does not work.
+    Because we save slices in json format, and because json cannot serialize slice types, we also need to
+    allow for the definition of slices as 3-tuples or nested 3-tuples.  Moreover, json seems to work with list
+    types rather than tuples, so we also allow for lists in place of tuples.  Finally, we sometimes allow for the
+    absence of a slice.
+
+    Ultimately, this test allows for the following flexible slice definition (where tuples and lists are treated
+    identically):
+
+    slc = None (if none_ok=True)
+    slc = |slice|
+    slc = (|slice|, |slice|, ...)
+    slc = (int/None, int/None, int/None)
+    slc = ((int/None, int/None, int/None), (int/None, int/None, int/None))
+
+    Arguments:
+        slc (|slice| or tuple): The object to test for slice type.
+        none_ok (bool): Accept None type (return true if None).  Default: True.
+
+    Returns: bool
+    """
+    if none_ok and slc is None:  # If None allowd, OK
+        return True
+    if isinstance(slc, slice):  # If it's actually a slice, OK
+        return True
+    if isinstance(slc, list):
+        return is_slice_type(tuple(slc))  # If list type, recurse: convert list to tuple and start over.
+    if isinstance(slc, tuple):  # There are a couple possibilities if we have a tuple...
+        if isinstance(slc[0], int):  # Option 1: The "slice" has the form (int, int, int/None)
+            if len(slc) != 3:  # Must be 3 entries, which are (start, stop, step).
+                return False
+            for i in range(3):  # Entries may be int or None.  None correspond to the absence of index; e.g. a[:-1]
+                if not (isinstance(slc[i], int) or (slc[i] is None)):  # All entries are int or None.
+                    return False
+            return True
+        if False in [is_slice_type(s) for s in slc]:
+            return False
+        return True
+    return False
+
+
+def slice_to_tuple(slc, none_ok=True):
+    r""" Specialized conversion of |slice| type to tuple.  This exists for the purpose of saving/loading slices
+    in json format (because json cannot serialize slice types).  The input takes flexible slice definition as
+    described in the docs for `is_slice_type` .
+
+    Arguments:
+        slc (|slice| or tuple or None): The object to convert to tuple-type slice.
+        none_ok (bool): Accept None type (return None if slc is None).  Default: True.
+
+    Returns: tuple or tuple(tuple, tuple, ...) or None
+    """
+    if none_ok:
+        if slc is None:
+            return None
+    if isinstance(slc, list):
+        return slice_to_tuple(tuple(slc))
+    if isinstance(slc, slice):
+        return slc.start, slc.stop, slc.step
+    if isinstance(slc, tuple):
+        if isinstance(slc[0], int):
+            if is_slice_type(slc):
+                return slc
+        return tuple(slice_to_tuple(s) for s in slc)
+    raise ValueError('Cannot convert slice to tuple:', slc.__str__())
+
+
+def tuple_to_slice(slc, none_ok=True):
+    r""" Specialized conversion of tuple to |slice| type.  This exists for the purpose of saving/loading slices
+    in json format (because json cannot serialize slice types).  The input takes flexible slice definition as
+    described in the docs for `is_slice_type` .
+
+    Arguments:
+        slc (|slice| or tuple or None): The object to convert to slice-type.
+        none_ok (bool): Accept None type (return None if slc is None).  Default: True.
+
+    Returns: tuple or tuple(tuple, tuple, ...) or None
+    """
+    if isinstance(slc, list):
+        return tuple_to_slice(tuple(slc))
+    if isinstance(slc, slice):
+        return slc
+    if none_ok:
+        if slc is None:
+            return None
+    if not isinstance(slc, tuple):
+        raise ValueError('Expected tuple type')
+    if isinstance(slc[0], int):
+        return np.s_[slc[0]:slc[1]:slc[2]]
+    return tuple([tuple_to_slice(s) for s in slc])

@@ -77,13 +77,11 @@ class Beam:
         out += 'photon_number_fluence: %s\n' % self.photon_number_fluence.__str__()
         return out
 
-    def validate(self, raise_error=False):
+    def validate(self):
         r""" Validate this Beam instance.  Presently, this method only checks that there is a wavelength."""
         if self.photon_energy is not None:
             return True
-        if raise_error:
-            raise ValueError('Something is wrong with this Beam instance.')
-        return False
+        raise ValueError('Something is wrong with this Beam instance.')
 
     @property
     def hash(self):

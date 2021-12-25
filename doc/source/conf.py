@@ -54,6 +54,7 @@ rst_epilog = """
 .. |PADView|  replace:: :class:`PADView <reborn.viewers.qtviews.PADView>`
 
 .. |ndarray|  replace:: :class:`ndarray <numpy.ndarray>`
+.. |slice|  replace:: `slice <https://docs.python.org/dev/library/functions.html#slice>`__
 
 .. |Jungfrau|  replace:: `Jungfrau <https://lcls.slac.stanford.edu/detectors/jungfrau>`__
 .. |xraylib|  replace:: `xraylib <https://github.com/tschoonj/xraylib/wiki>`__

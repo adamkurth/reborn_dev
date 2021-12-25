@@ -116,7 +116,7 @@ class FrameGetter(ABC):
         return self.get_frame(int(np.floor(np.random.rand(1)*self.n_frames-1e-10)))
 
     def view(self):
-        r""" Create a PADview instance and start it with this framegetter. """
+        r""" Create a PADView instance and start it with this FrameGetter instance. """
         from ..viewers.qtviews.padviews import PADView
         pv = PADView(frame_getter=self)
         pv.start()

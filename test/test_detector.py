@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with reborn.  If not, see <https://www.gnu.org/licenses/>.
 
+import sys
 import os
 import tempfile
 from reborn import detector
@@ -24,6 +25,23 @@ eV = const.value('electron volt')
 np.random.seed(0)
 tempdir = tempfile.gettempdir()
 
+
+def test_slice_funcs():
+    assert (detector.is_slice_type(slice(1, 2, 3)))
+    assert (detector.is_slice_type((1, 2, 3)))
+    assert (detector.is_slice_type(((1, 2, 3), (1, 2, 3))))
+    assert (detector.is_slice_type(((1, 2, None), (1, 2, 3))))
+    assert (detector.is_slice_type((slice(1, 2, 3), slice(1, 2, 3))))
+    assert (detector.is_slice_type((np.s_[1:2], np.s_[1:2:None])))
+    assert (not detector.is_slice_type('test'))
+    assert (isinstance(detector.slice_to_tuple(slice(1, 2, 3)), tuple))
+    assert (isinstance(detector.slice_to_tuple((1, 2, 3)), tuple))
+    assert (isinstance(detector.slice_to_tuple(((1, 2, 3), (1, 2, None))), tuple))
+    assert (isinstance(detector.slice_to_tuple((slice(1, 2, 3), slice(1, 2, None)))[0][0], int))
+    assert (isinstance(detector.tuple_to_slice(slice(1, 2, 3)), slice))
+    assert (isinstance(detector.tuple_to_slice((1, 2, 3)), slice))
+    assert (isinstance(detector.tuple_to_slice(((1, 2, 3), (1, 2, None))), tuple))
+    assert (isinstance(detector.tuple_to_slice((slice(1, 2, 3), slice(1, 2, None)))[0], slice))
 
 def make_pad_list():
     r""" Simply check the creation of a pad list. """
@@ -68,7 +86,6 @@ def test_save_pad_list():
     pads1 = make_pad_list()
     detector.save_pad_geometry_list(file_name, pads1)
     pads2 = detector.load_pad_geometry_list(file_name)
-    # print(pads2)
     for i in range(len(pads1)):
         assert pads1[i] == pads2[i]
     os.remove(file_name)
@@ -168,7 +185,6 @@ def test_radial_profiler_04():
     pads = detector.cspad_2x2_pad_geometry_list()
     beam = source.Beam(wavelength=1.0e-10)
     rad = detector.RadialProfiler(beam=beam, pad_geometry=pads, mask=None, n_bins=100)
-    print(rad.beam)
     rad_mod = rad.copy()
     m1 = rad._mask
     m2 = rad_mod._mask
@@ -197,7 +213,6 @@ def test_saving():
     detector.save_pad_masks(file_name_1, masks, packbits=False)
     detector.save_pad_masks(file_name_2, masks)
     unpacked = detector.load_pad_masks(file_name_1)
-    # print('loaded unpacked')
     packed = detector.load_pad_masks(file_name_2)
     for i in range(len(masks)):
         assert np.max(packed[i] - unpacked[i]) == 0
@@ -276,11 +291,18 @@ def test_groups():
     gn = p.get_group_names()
     assert(gn[0] == 'cspad')
     assert(gn[1] == 'epix')
-    
 
-
-
-
-
-
-
+def test_slicing():
+    pads = detector.pnccd_pad_geometry_list()
+    pads.validate()
+    pads[0].parent_data_slice = np.s_[0, :, :]
+    pads[1].parent_data_slice = np.s_[1, :, :]
+    pads[0].parent_data_shape = (2, 512, 1024)
+    pads[1].parent_data_shape = (2, 512, 1024)
+    pads.validate()
+    save_file = tempdir + '/sliced.geom'
+    pads.save_json(save_file)
+    pads2 = detector.load_pad_geometry_list(save_file)
+    assert (pads == pads2)
+    data = np.arange(pads.n_pixels)
+    data = pads.reshape(data)
