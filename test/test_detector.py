@@ -27,21 +27,42 @@ tempdir = tempfile.gettempdir()
 
 
 def test_slice_funcs():
-    assert (detector.is_slice_type(slice(1, 2, 3)))
-    assert (detector.is_slice_type((1, 2, 3)))
-    assert (detector.is_slice_type(((1, 2, 3), (1, 2, 3))))
-    assert (detector.is_slice_type(((1, 2, None), (1, 2, 3))))
-    assert (detector.is_slice_type((slice(1, 2, 3), slice(1, 2, 3))))
-    assert (detector.is_slice_type((np.s_[1:2], np.s_[1:2:None])))
-    assert (not detector.is_slice_type('test'))
-    assert (isinstance(detector.slice_to_tuple(slice(1, 2, 3)), tuple))
-    assert (isinstance(detector.slice_to_tuple((1, 2, 3)), tuple))
-    assert (isinstance(detector.slice_to_tuple(((1, 2, 3), (1, 2, None))), tuple))
-    assert (isinstance(detector.slice_to_tuple((slice(1, 2, 3), slice(1, 2, None)))[0][0], int))
-    assert (isinstance(detector.tuple_to_slice(slice(1, 2, 3)), slice))
-    assert (isinstance(detector.tuple_to_slice((1, 2, 3)), slice))
-    assert (isinstance(detector.tuple_to_slice(((1, 2, 3), (1, 2, None))), tuple))
-    assert (isinstance(detector.tuple_to_slice((slice(1, 2, 3), slice(1, 2, None)))[0], slice))
+    assert (isinstance(detector._slice_to_tuple(slice(1, 2, 3)), tuple))
+    assert (detector._slice_to_tuple(slice(1, 2, 3))[0] == 1)
+    assert (detector._slice_to_tuple(slice(1, 2, 3))[1] == 2)
+    assert (detector._slice_to_tuple(slice(1, 2, 3))[2] == 3)
+    assert (isinstance(detector._slice_to_tuple((1, 2, slice(1, 2, 3))), tuple))
+    assert (isinstance(detector._slice_to_tuple(((1, 2, 3), (1, 2, None))), tuple))
+    assert (isinstance(detector._slice_to_tuple((slice(1, 2, 3), slice(1, 2, None)))[0][0], int))
+    assert (isinstance(detector._tuple_to_slice(slice(1, 2, 3)), slice))
+    assert (isinstance(detector._tuple_to_slice((1, 2, 3)), slice))
+    assert (isinstance(detector._tuple_to_slice(((1, 2, 3), (1, 2, None))), tuple))
+    assert (isinstance(detector._tuple_to_slice((slice(1, 2, 3), slice(1, 2, None)))[0], slice))
+
+
+def test_slicing():
+    pads = detector.pnccd_pad_geometry_list()
+    pads.validate()
+    data = np.arange(pads.n_pixels)
+    data_split = pads.split_data(data)
+    data_slice = pads.slice_data(data)
+    assert np.max(np.abs(data_split[0] - data_slice[0])) == 0
+    pads[0].parent_data_slice = np.s_[0, :, :]
+    pads[1].parent_data_slice = np.s_[1, :, :]
+    pads[0].parent_data_shape = (2, 512, 1024)
+    pads[1].parent_data_shape = (2, 512, 1024)
+    pads.validate()
+    save_file = tempdir + '/sliced.geom'
+    pads.save_json(save_file)
+    pads2 = detector.load_pad_geometry_list(save_file)
+    assert (pads == pads2)
+    data = np.arange(pads.n_pixels)
+    data = pads.reshape(data)
+    assert np.max(np.abs(np.array(data.shape) - np.array([2, 512, 1024]))) == 0
+    data_slice2 = pads.slice_data(data)
+    assert np.max(np.abs(data_split[0] - data_slice[0])) == 0
+    assert np.max(np.abs(data_slice2[0] - data_slice[0])) == 0
+
 
 def make_pad_list():
     r""" Simply check the creation of a pad list. """
@@ -292,17 +313,4 @@ def test_groups():
     assert(gn[0] == 'cspad')
     assert(gn[1] == 'epix')
 
-def test_slicing():
-    pads = detector.pnccd_pad_geometry_list()
-    pads.validate()
-    pads[0].parent_data_slice = np.s_[0, :, :]
-    pads[1].parent_data_slice = np.s_[1, :, :]
-    pads[0].parent_data_shape = (2, 512, 1024)
-    pads[1].parent_data_shape = (2, 512, 1024)
-    pads.validate()
-    save_file = tempdir + '/sliced.geom'
-    pads.save_json(save_file)
-    pads2 = detector.load_pad_geometry_list(save_file)
-    assert (pads == pads2)
-    data = np.arange(pads.n_pixels)
-    data = pads.reshape(data)
+

@@ -246,13 +246,11 @@ class PADGeometry:
     def parent_data_slice(self):
         r""" Optionally, this defines the slice of an |ndarray| that this geometry corresponds to.  This is helpful
         if you wish to work with the 3D arrays in psana, for example. """
-        return tuple_to_slice(self._parent_data_slice)
+        return _tuple_to_slice(self._parent_data_slice)
 
     @parent_data_slice.setter
     def parent_data_slice(self, slc):
-        if not is_slice_type(slc):
-            raise ValueError('parent_data_slice must be slice, tuple of slices, or None')
-        self._parent_data_slice = slice_to_tuple(slc)
+        self._parent_data_slice = _slice_to_tuple(slc)
 
     @property
     def parent_data_shape(self):
@@ -267,6 +265,11 @@ class PADGeometry:
             raise ValueError('parent_data_shape must be tuple or None')
         self._parent_data_shape = shape
 
+    def slice_from_parent(self, data):
+        r""" Slice this 2D array from the parent data array. """
+        data = np.reshape(data, self._parent_data_shape)
+        return self.reshape(data[self.parent_data_slice])
+
     def to_dict(self):
         r""" Convert geometry to a dictionary.
 
@@ -274,7 +277,7 @@ class PADGeometry:
         """
         return {'name': self.name, 'n_fs': self.n_fs, 'n_ss': self.n_ss, 'fs_vec': tuple(self.fs_vec),
                 'ss_vec': tuple(self.ss_vec), 't_vec': tuple(self.t_vec), 'parent_data_shape': self.parent_data_shape,
-                'parent_data_slice': slice_to_tuple(self._parent_data_slice)}
+                'parent_data_slice': _slice_to_tuple(self._parent_data_slice)}
 
     def from_dict(self, dictionary):
         r""" Loads geometry from dictionary.  This goes along with the to_dict method."""
@@ -669,14 +672,12 @@ class PADGeometry:
 
     def reshape(self, dat):
         r"""
-
         Re-shape a flattened array to a 2D array.
 
         Arguments:
-            dat (numpy array): The flattened data array
+            dat (|ndarray|): The flattened data array
 
-        Returns: a 2D numpy array
-
+        Returns: |ndarray|
         """
 
         return dat.reshape(self.shape())
@@ -905,8 +906,14 @@ class PADGeometryList(list):
                 raise ValueError("Length of data list is not the same length as the PADGeometryList")
         return concat_pad_data(data)
 
+    def slice_data(self, data):
+        if not self.defines_slicing():
+            return self.split_data(data)
+        return [p.slice_from_parent(data) for p in self]
+
     # def reshape(self, data):
     #     if self.defines_slicing():
+    #         data = np.reshape(data, self.parent_data_shape)
 
     @property
     def hash(self):
@@ -924,8 +931,6 @@ class PADGeometryList(list):
             for p in self:
                 if p.parent_data_shape != p0.parent_data_shape:
                     raise ValueError('Mismatched parent data shape')
-                if not is_slice_type(p.parent_data_slice, none_ok=False):
-                    raise ValueError('Parent data slice is undefined')
         for p in self:
             status *= p.validate()
         if status:
@@ -2012,95 +2017,35 @@ def dict_default(dictionary, key, default):
     return default
 
 
-def is_slice_type(slc, none_ok=True):
-    r""" Specialized test for |slice| type. The reason for the complications below is firstly that slices for
-    multi-dimensional arrays are actually tuples of slice objects, so an isinstance(obj, slice) does not work.
-    Because we save slices in json format, and because json cannot serialize slice types, we also need to
-    allow for the definition of slices as 3-tuples or nested 3-tuples.  Moreover, json seems to work with list
-    types rather than tuples, so we also allow for lists in place of tuples.  Finally, we sometimes allow for the
-    absence of a slice.
-
-    Ultimately, this test allows for the following flexible slice definition (where tuples and lists are treated
-    identically):
-
-    slc = None (if none_ok=True)
-    slc = |slice|
-    slc = (|slice|, |slice|, ...)
-    slc = (int/None, int/None, int/None)
-    slc = ((int/None, int/None, int/None), (int/None, int/None, int/None))
-
-    Arguments:
-        slc (|slice| or tuple): The object to test for slice type.
-        none_ok (bool): Accept None type (return true if None).  Default: True.
-
-    Returns: bool
-    """
-    if none_ok and slc is None:  # If None allowd, OK
-        return True
-    if isinstance(slc, slice):  # If it's actually a slice, OK
-        return True
+def _slice_to_tuple(slc):
+    r""" Special conversion of slice type to tuple. """
+    if slc is None:
+        return None
     if isinstance(slc, list):
-        return is_slice_type(tuple(slc))  # If list type, recurse: convert list to tuple and start over.
-    if isinstance(slc, tuple):  # There are a couple possibilities if we have a tuple...
-        if isinstance(slc[0], int):  # Option 1: The "slice" has the form (int, int, int/None)
-            if len(slc) != 3:  # Must be 3 entries, which are (start, stop, step).
-                return False
-            for i in range(3):  # Entries may be int or None.  None correspond to the absence of index; e.g. a[:-1]
-                if not (isinstance(slc[i], int) or (slc[i] is None)):  # All entries are int or None.
-                    return False
-            return True
-        if False in [is_slice_type(s) for s in slc]:
-            return False
-        return True
-    return False
-
-
-def slice_to_tuple(slc, none_ok=True):
-    r""" Specialized conversion of |slice| type to tuple.  This exists for the purpose of saving/loading slices
-    in json format (because json cannot serialize slice types).  The input takes flexible slice definition as
-    described in the docs for `is_slice_type` .
-
-    Arguments:
-        slc (|slice| or tuple or None): The object to convert to tuple-type slice.
-        none_ok (bool): Accept None type (return None if slc is None).  Default: True.
-
-    Returns: tuple or tuple(tuple, tuple, ...) or None
-    """
-    if none_ok:
-        if slc is None:
-            return None
-    if isinstance(slc, list):
-        return slice_to_tuple(tuple(slc))
+        return _slice_to_tuple(tuple(slc))
     if isinstance(slc, slice):
         return slc.start, slc.stop, slc.step
     if isinstance(slc, tuple):
-        if isinstance(slc[0], int):
-            if is_slice_type(slc):
-                return slc
-        return tuple(slice_to_tuple(s) for s in slc)
+        return tuple(_slice_to_tuple(s) for s in slc)
+    if isinstance(slc, int):
+        return slc
     raise ValueError('Cannot convert slice to tuple:', slc.__str__())
 
 
-def tuple_to_slice(slc, none_ok=True):
-    r""" Specialized conversion of tuple to |slice| type.  This exists for the purpose of saving/loading slices
-    in json format (because json cannot serialize slice types).  The input takes flexible slice definition as
-    described in the docs for `is_slice_type` .
-
-    Arguments:
-        slc (|slice| or tuple or None): The object to convert to slice-type.
-        none_ok (bool): Accept None type (return None if slc is None).  Default: True.
-
-    Returns: tuple or tuple(tuple, tuple, ...) or None
-    """
-    if isinstance(slc, list):
-        return tuple_to_slice(tuple(slc))
+def _tuple_to_slice(slc):
+    r""" Special conversion of tuple to slice. """
+    if slc is None:
+        return None
     if isinstance(slc, slice):
         return slc
-    if none_ok:
-        if slc is None:
-            return None
-    if not isinstance(slc, tuple):
-        raise ValueError('Expected tuple type')
-    if isinstance(slc[0], int):
-        return np.s_[slc[0]:slc[1]:slc[2]]
-    return tuple([tuple_to_slice(s) for s in slc])
+    if isinstance(slc, tuple) or isinstance(slc, list):
+        if False not in [isinstance(s, int) for s in slc]:
+            return slice(slc[0], slc[1], slc[2])
+        out = []
+        for s in slc:
+            if isinstance(s, tuple) or isinstance(s, list):
+                out.append(slice(s[0], s[1], s[2]))
+            else:
+                out.append(s)
+        return tuple(out)
+    return slc
