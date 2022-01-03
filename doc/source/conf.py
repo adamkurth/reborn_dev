@@ -68,6 +68,7 @@ rst_epilog = """
 .. |matplotlib|  replace:: `matplotlib <https://matplotlib.org/>`__
 .. |pycodestyle|  replace:: `pycodestyle <https://pypi.org/project/pycodestyle/>`__
 .. |spherical_coordinates|  replace:: `spherical coordinates <https://en.wikipedia.org/wiki/Spherical_coordinate_system>`__
+.. |psana|  replace:: `psana <https://pswww.slac.stanford.edu/swdoc/releases/ana-current/psana-ref/html/psana/>`__
 
 .. |dipole_notes|  replace:: `dipole scattering notes <files/dipole.pdf>`__
 
