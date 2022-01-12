@@ -23,7 +23,7 @@ class MyFrameGetter(FrameGetter):
         self.current_frame = 0
 
         self.pads = pad_geometry
-        self.simulator = examples.PDBMoleculeSimulator(pdb_file=None, pad_geometry=pad_geometry, random_rotation=True)
+        self.simulator = examples.PDBMoleculeSimulator(pdb_file='1LYZ', pad_geometry=pad_geometry, random_rotation=True)
 
     def get_data(self, frame_number=0):
 
@@ -42,7 +42,12 @@ class MyFrameGetter(FrameGetter):
 
 
 frame_getter = MyFrameGetter(pad_geometry)
-padview = PADView(frame_getter=frame_getter, pad_geometry=pad_geometry)
+frame_getter.view()
+
+# sys.exit()
+
+
+# padview = PADView(frame_getter=frame_getter, pad_geometry=pad_geometry)
 # padgui.frame_getter = frame_getter
 # padgui.show_all_geom_info()
 # padgui.show_pad_frames()
@@ -52,4 +57,4 @@ padview = PADView(frame_getter=frame_getter, pad_geometry=pad_geometry)
 # padgui.show_grid()
 # padgui.show_pad_labels()
 # padgui.add_rings([200, 400, 600, 800], pens=[pg.mkPen([255, 0, 0], width=2)]*4)
-padview.start()
+# padview.start()

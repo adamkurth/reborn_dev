@@ -21,7 +21,7 @@ import os
 import json
 import numpy as np
 import pkg_resources
-from . import utils
+from . import utils, source
 
 
 pnccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/pnccd_front_geometry.json')
@@ -32,6 +32,7 @@ mpccd_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/mpccd_geo
 jungfrau4m_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/jungfrau4m_geometry.json')
 rayonix_mx340_xfel_geom_file = pkg_resources.resource_filename('reborn', 'data/geom/rayonix_mx340_xfel_geometry.json')
 
+
 class PADGeometry:
     r"""
     A container for pixel-array detector (PAD) geometry specification.  By definition, a PAD consists of a single 2D
@@ -39,7 +40,7 @@ class PADGeometry:
 
     .. note::
 
-        A common point of confusion is that XFELs detectors typically consist of *multiple* PADs, in which case your
+        A common point of confusion is that XFEL detectors typically consist of *multiple* PADs, in which case your
         code must handle *multiple* |PADGeometry| instances.  If that is the case for your data, then you should look to
         the |PADGeometryList| documentation as it extends Python's built-in list class with useful methods for
         PADGeometry instances.  Before you look to |PADGeometryList|, you should finish reading this documentation.
@@ -67,7 +68,7 @@ class PADGeometry:
           the term "stride" does not mean anything to you, then you need to read the |numpy| documentation for
           |ndarray|.
 
-    In addition to providing a standard way to parameterized PAD geometry, the PADGeometry class also provides methods
+    In addition to providing a standard way to specify PAD geometry, the PADGeometry class also provides methods
     that make it easy to generate:
 
         * Vectors from sample to pixel.
@@ -81,6 +82,14 @@ class PADGeometry:
 
     Some of the above parameters require more than a PADGeometry instance -- they also require information about the
     x-ray beam.  The |Beam| class in reborn provides a standard way to specify the properties of an x-ray beam.
+
+    Although PADGeometry is primarily meant to deal with *geometry*, you may also include the information needed to
+    |slice| the PAD data from a parent data array (as of January 2022).  For example, data from the |CSPAD| detector is
+    presented as a 3D |ndarray| when accessed using the LCLS |psana| python package.  In order to specify slicing,
+    you must add the following parameters:
+
+        * **parent_data_shape**: The shape of the parent data array (example: (32, 185, 392) ).
+        * **parent_data_slice**: The slice of the parent data array (example: np.s_[4, :, 196:]).
     """
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
@@ -91,6 +100,8 @@ class PADGeometry:
     _ss_vec = None
     _t_vec = None
     _name = ''
+    _parent_data_slice = None  # Slice of parent data block
+    _parent_data_shape = None  # Shape of parent data block
 
     def __init__(self, distance=None, pixel_size=None, shape=None, **kwargs):
         r"""
@@ -105,12 +116,17 @@ class PADGeometry:
             self.simple_setup(distance=distance, pixel_size=pixel_size, shape=shape, **kwargs)
 
     def __str__(self):
-        out = self.name+'\n'
+        out = ''
+        out += '{\n'
+        out += 'name: %s\n' % self.name.__str__()
         out += 'n_fs: %s\n' % self._n_fs.__str__()
         out += 'n_ss: %s\n' % self._n_ss.__str__()
         out += 'fs_vec: %s\n' % self._fs_vec.__str__()
         out += 'ss_vec: %s\n' % self._ss_vec.__str__()
-        out += 't_vec: %s' % self._t_vec.__str__()
+        out += 't_vec: %s\n' % self._t_vec.__str__()
+        out += 'parent_data_slice: %s\n' % self._parent_data_slice.__str__()
+        out += 'parent_data_shape: %s\n' % self._parent_data_shape.__str__()
+        out += '}\n'
         return out
 
     def __eq__(self, other):
@@ -126,6 +142,10 @@ class PADGeometry:
             return False
         if np.max(np.abs(self.t_vec - other.t_vec)) > 0:
             return False
+        if self._parent_data_shape != other._parent_data_shape:
+            return False
+        if self._parent_data_slice != other._parent_data_slice:
+            return False
         return True
 
     def __ne__(self, other):
@@ -136,7 +156,7 @@ class PADGeometry:
         r"""Return a hash of the geometry parameters.  Useful if you want to avoid re-computing things like q_mags."""
         return hash(self.__str__())
 
-    def validate(self, **kwargs):
+    def validate(self):
         r""" Determine if this instance has all the needed parameters defined.
 
         Returns:
@@ -155,11 +175,15 @@ class PADGeometry:
             raise ValueError("The ss_vec parameter is undefined in your PADGeometry instance.")
         if not isinstance(self._t_vec, np.ndarray):
             raise ValueError("The t_vec parameter is undefined in your PADGeometry instance.")
+        if (self._parent_data_slice is not None) and (self._parent_data_shape is None):
+            raise ValueError("The parent data slice is defined but the parent data shape is undefined.")
+        if (self._parent_data_shape is not None) and (self._parent_data_slice is None):
+            raise ValueError("The parent data shape is defined but the parent data slice is undefined.")
         return True
 
     @property
     def name(self):
-        r""" (*str*) The unique name of this panel. """
+        r"""(*str*) The unique name of this panel. """
         return self._name
 
     @name.setter
@@ -196,13 +220,11 @@ class PADGeometry:
     @property
     def fs_vec(self):
         r""" (|ndarray|) Fast-scan basis vector. """
-
         return self._fs_vec
 
     @property
     def ss_vec(self):
         r""" (|ndarray|) Slow-scan basis vector. """
-
         return self._ss_vec
 
     @property
@@ -228,21 +250,54 @@ class PADGeometry:
         if self._t_vec.size != 3:
             raise ValueError('PADGeometry vectors should have a length of 3 (it is a vector)')
 
+    @property
+    def parent_data_slice(self):
+        r""" Optionally, this defines the slice of an |ndarray| that this geometry corresponds to.  This is helpful
+        if you wish to work with the 3D arrays in psana, for example. """
+        return _tuple_to_slice(self._parent_data_slice)
+
+    @parent_data_slice.setter
+    def parent_data_slice(self, slc):
+        self._parent_data_slice = _slice_to_tuple(slc)
+
+    @property
+    def parent_data_shape(self):
+        r""" Optionally, this defines the shape of the |ndarray| from which this PAD is sliced. """
+        return self._parent_data_shape
+
+    @parent_data_shape.setter
+    def parent_data_shape(self, shape):
+        if isinstance(shape, list):
+            shape = tuple(shape)
+        if not (isinstance(shape, tuple) or (shape is None)):
+            raise ValueError('parent_data_shape must be tuple or None')
+        self._parent_data_shape = shape
+
+    def slice_from_parent(self, data):
+        r""" Slice this 2D array from the parent data array. """
+        data = np.reshape(data, self._parent_data_shape)
+        return self.reshape(data[self.parent_data_slice])
+
     def to_dict(self):
         r""" Convert geometry to a dictionary.
 
-        Returns: (dict): Dictionary containing the keys **n_fs**, **n_ss**, **fs_vec**, **ss_vec** and **t_vec**.
+        Returns: (dict): Dictionary containing the keys **name**, **n_fs**, **n_ss**, **fs_vec**, **ss_vec**, **t_vec**,
+                         **parent_data_shape**, and **parent_data_slice**.
         """
-        return {'n_fs': self.n_fs, 'n_ss': self.n_ss, 'fs_vec': tuple(self.fs_vec), 'ss_vec': tuple(self.ss_vec),
-                't_vec': tuple(self.t_vec)}
+        return {'name': self.name, 'n_fs': self.n_fs, 'n_ss': self.n_ss, 'fs_vec': tuple(self.fs_vec),
+                'ss_vec': tuple(self.ss_vec), 't_vec': tuple(self.t_vec), 'parent_data_shape': self.parent_data_shape,
+                'parent_data_slice': _slice_to_tuple(self._parent_data_slice)}
 
     def from_dict(self, dictionary):
         r""" Loads geometry from dictionary.  This goes along with the to_dict method."""
+        self.name = dict_default(dictionary, 'name', None)
         self.n_fs = dictionary['n_fs']
         self.n_ss = dictionary['n_ss']
         self.fs_vec = dictionary['fs_vec']
         self.ss_vec = dictionary['ss_vec']
         self.t_vec = dictionary['t_vec']
+        self.parent_data_slice = dict_default(dictionary, 'parent_data_slice', None)
+        self.parent_data_shape = dict_default(dictionary, 'parent_data_shape', None)
 
     def copy(self):
         r""" Make a copy of this class instance. """
@@ -265,7 +320,7 @@ class PADGeometry:
         r""" Make this a square PAD with beam at center.
 
         Arguments:
-            shape (tuple): The shape of the 2D panel, consistent with a numpy array with two dimensions.
+            shape (tuple): The shape of the 2D panel.
             pixel_size (float): Pixel size in SI units.
             distance (float): Detector distance in SI units.
         """
@@ -277,9 +332,6 @@ class PADGeometry:
                 shape = (n, n)
         if len(kwargs) > 0:
             raise ValueError('Keywords not recognized:' + '%s '*len(kwargs) % kwargs)
-        # if None in [distance, pixel_size, shape]:
-        #     raise ValueError('PADGeometry initialization requires either all or *none* of the keywords'
-        #                      'distance, pixel_size, and shape parameters.')
         if distance is None:
             utils.warn('Setting distance in simple_setup to 0.1.  You should specify this value explicitly.')
             distance = 0.1
@@ -303,8 +355,8 @@ class PADGeometry:
         return np.mean([utils.vec_mag(self.fs_vec), utils.vec_mag(self.ss_vec)])
 
     def shape(self):
-        r""" Return tuple corresponding to the numpy shape of this PAD. """
-        return (self.n_ss, self.n_fs)
+        r""" Return tuple corresponding to the |ndarray| shape of this PAD. """
+        return self.n_ss, self.n_fs
 
     def indices_to_vectors(self, idx_ss, idx_fs):
         r"""
@@ -365,7 +417,7 @@ class PADGeometry:
         r"""
         Compute vectors pointing from origin to pixel centers.
 
-        Returns: Nx3 numpy array
+        Returns: |ndarray| of shape (N, 3)
         """
 
         i = np.arange(self.n_fs)
@@ -401,26 +453,25 @@ class PADGeometry:
 
         return utils.vec_norm(self.position_vecs())
 
-    def ds_vecs(self, beam_vec=None, beam=None):
+    def ds_vecs(self, beam=None, **kwargs):
         r"""
         Scattering vectors :math:`\hat{s} - \hat{s}_0` where :math:`\hat{s}_0` is the incident beam direction
         and :math:`\hat{s}` is the outgoing vector pointing from sample to pixel.  This does **not** have
         the :math:`2\pi/\lambda` factor that is included in :meth:`q_mags <reborn.detector.PADGeometry.q_mags>`.
 
         Arguments:
-            beam_vec (tuple or numpy array): specify the unit vector of the incident beam
-            beam (|Beam| instance): specify incident beam properties.  If provided, you may omit the specification
+            beam (|Beam|): specify incident beam properties.  If provided, you may omit the specification
                                          of beam_vec ect.
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
+        if beam is None:
+            utils.warn('You need to define the beam.')
+            beam_vec = dict_default(kwargs, 'beam_vec', None)
+            beam = source.Beam(beam_vec=beam_vec)
+        return self.s_vecs() - beam.beam_vec
 
-        if beam is not None:
-            beam_vec = beam.beam_vec
-
-        return self.s_vecs() - beam_vec
-
-    def q_vecs(self, beam_vec=None, wavelength=None, beam=None):
+    def q_vecs(self, beam=None, **kwargs):
         r"""
         Calculate scattering vectors :math:`\frac{2\pi}{\lambda}(\hat{s} - \hat{s}_0)`
 
@@ -429,75 +480,70 @@ class PADGeometry:
             \vec{q}_{ij}=\frac{2\pi}{\lambda}\left(\hat{v}_{ij} - \hat{b}\right)
 
         Arguments:
-            beam_vec (tuple or numpy array): specify the unit vector of the incident beam
-            wavelength (float): wavelength
             beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
                                          of beam_vec ect.
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
+        if beam is None:
+            utils.warn('You need to define the beam.')
+            beam_vec = dict_default(kwargs, 'beam_vec', None)
+            wavelength = dict_default(kwargs, 'wavelength', None)
+            beam = source.Beam(beam_vec=beam_vec, wavelength=wavelength)
+        return (2 * np.pi / beam.wavelength) * self.ds_vecs(beam=beam)
 
-        if beam is not None:
-            beam_vec = beam.beam_vec
-            wavelength = beam.wavelength
-
-        return (2 * np.pi / wavelength) * self.ds_vecs(beam_vec=beam_vec)
-
-    def ds_mags(self, beam_vec=None, beam=None):
+    def ds_mags(self, beam=None, **kwargs):
         r"""
         These are the magnitudes that correspond to
 
         Arguments:
-            beam_vec:
-            beam:
+            beam (|Beam|):
 
-        Returns:
+        Returns: |ndarray|
         """
-        return utils.vec_mag(self.ds_vecs(beam_vec=beam_vec, beam=beam))
+        if beam is None:
+            utils.warn('You need to define the beam.')
+            beam_vec = dict_default(kwargs, 'beam_vec', None)
+            beam = source.Beam(beam_vec=beam_vec)
+        return utils.vec_mag(self.ds_vecs(beam=beam))
 
-    def q_mags(self, beam_vec=None, wavelength=None, beam=None):
+    def q_mags(self, beam=None, **kwargs):
         r"""
         Calculate scattering vector magnitudes:
 
         Arguments:
-            beam_vec (tuple or numpy array): specify the unit vector of the incident beam
-            wavelength (float): wavelength
             beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
                                         of beam_vec ect.
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
-
-        if beam is not None:
-            beam_vec = beam.beam_vec
-            wavelength = beam.wavelength
-
-        return utils.vec_mag(self.q_vecs(beam_vec=beam_vec, wavelength=wavelength))
+        if beam is None:
+            utils.warn('You need to define the beam.')
+            beam_vec = dict_default(kwargs, 'beam_vec', None)
+            wavelength = dict_default(kwargs, 'wavelength', None)
+            beam = source.Beam(beam_vec=beam_vec, wavelength=wavelength)
+        return utils.vec_mag(self.q_vecs(beam=beam))
 
     def solid_angles(self):
         r"""
         Calculate solid angles of pixels.  See solid_angles2 method.
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
-
         return self.solid_angles1()
 
     def solid_angles1(self):
         r"""
         Calculate solid angles of pixels vectorally, assuming the pixels have small angular extent.
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
-
         v_vec = self.position_vecs()
         n_vec = self.norm_vec()
-
         area = utils.vec_mag(np.cross(self.fs_vec, self.ss_vec))  # Area of the pixel
         dist2 = utils.vec_mag(v_vec) ** 2  # Distance to the pixel, squared
         inc = np.dot(n_vec, utils.vec_norm(v_vec).T)  # Inclination factor: cos(theta)
         solid_ang = (area / dist2) * inc  # Solid angle
-
         return np.abs(solid_ang.ravel())
 
     def solid_angles2(self):
@@ -509,7 +555,7 @@ class PADGeometry:
 
         Thanks to Derek Mendez, who thanks Jonas Sellberg.
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
         pixel_center = self.position_vecs()
         corner1 = pixel_center - self.fs_vec * .5 - self.ss_vec * .5
@@ -546,34 +592,28 @@ class PADGeometry:
         else:
             weight1 = a
             weight2 = 1 - a
-        polarization_factor = 0
+        polarization_factor = np.zeros(self.n_pixels)
         if weight1 > 0:
             polarization_factor += weight1 * (1 - np.abs(np.dot(pix_vec, e1)) ** 2)
         if weight2 > 0:
             polarization_factor += weight2 * (1 - np.abs(np.dot(pix_vec, polarization_vec_2)) ** 2)
         return polarization_factor.ravel()
 
-    def scattering_angles(self, beam_vec=None, beam=None):
+    def scattering_angles(self, beam=None, **kwargs):
         r"""
         Scattering angles (i.e. twice the Bragg angles).
 
         Arguments:
-            beam_vec (numpy array) :
-                Incident beam vector.
             beam (source.Beam instance): specify incident beam properties.  If provided, you may omit the specification
                                          of beam_vec ect.
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
-
-        if beam is not None and beam_vec is None:
-            beam_vec = beam.beam_vec
-        elif beam_vec is not None and beam is None:
-            pass
-        else:
-            raise ValueError('Scattering angles cannot be computed without knowing the incident beam direction')
-
-        return np.arccos(utils.vec_norm(self.position_vecs()).dot(beam_vec.ravel()))
+        if beam is None:
+            utils.warn('You need to define the beam.')
+            beam_vec = dict_default(kwargs, 'beam_vec', None)
+            beam = source.Beam(beam_vec=beam_vec)
+        return np.arccos(utils.vec_norm(self.position_vecs()).dot(beam.beam_vec.ravel()))
 
     def azimuthal_angles(self, beam):
         r"""
@@ -594,7 +634,7 @@ class PADGeometry:
         Arguments:
             beam (source.Beam instance): specify incident beam properties.
 
-        Returns: numpy array
+        Returns: |ndarray|
         """
         q_vecs = self.q_vecs(beam=beam)
         q1 = np.dot(q_vecs, beam.e1_vec)
@@ -605,14 +645,12 @@ class PADGeometry:
         r"""
 
         Arguments:
-            beam: Instance of the Beam class (for wavelength)
+            beam (|Beam|): Instance of the Beam class (for wavelength)
             q_min: Minimum q magnitude
             min_angle: Minimum scattering angle
 
-        Returns:
-
+        Returns: |ndarray|
         """
-
         if beam is None:
             raise ValueError("A beam must be provided")
         mask = self.ones().ravel()
@@ -626,16 +664,13 @@ class PADGeometry:
 
     def reshape(self, dat):
         r"""
-
         Re-shape a flattened array to a 2D array.
 
         Arguments:
-            dat (numpy array): The flattened data array
+            dat (|ndarray|): The flattened data array
 
-        Returns: a 2D numpy array
-
+        Returns: |ndarray|
         """
-
         return dat.reshape(self.shape())
 
     def zeros(self):
@@ -712,11 +747,11 @@ class PADGeometry:
         self.t_vec += vec
 
     def rotate(self, matrix=None):
-        r""" Apply a rotation matrix to t_vec, fs_vec, ss_vec.  Equivalent to self.t_vec = np.dot(self.t_vec, matrix.T)"""
+        r""" Apply a rotation matrix to t_vec, fs_vec, ss_vec.
+        Equivalent to self.t_vec = np.dot(self.t_vec, matrix.T)"""
         self.t_vec = np.dot(self.t_vec, matrix.T)
         self.fs_vec = np.dot(self.fs_vec, matrix.T)
         self.ss_vec = np.dot(self.ss_vec, matrix.T)
-        
         
 
 class PADGeometryList(list):
@@ -727,67 +762,6 @@ class PADGeometryList(list):
     _name = ''
     _q_mags = None
     _groups = []
-
-    def append(self, item):
-        r""" Override append method.  Check the type, name the panel if it has no name. """
-        if not isinstance(item, PADGeometry):
-            raise ValueError('Not a PADGeometry instance.')
-        if not item.name:
-            item.name = len(self).__str__()
-        super().append(item)
-
-    def add_group(self, pads, group_name=None):
-        r""" Add a group of PADGeometry instances.  Helpful if you have multiple "detectors" that have different 
-        properties as compared with others.  Or perhaps there are PADs that should translate as a group."""
-        if group_name is None:
-            group_name = str(len(self._groups))
-        if group_name in self.get_group_names():
-            raise ValueError('Group name', group_name, 'already exists.')
-        indices = []
-        for p in pads:
-            indices.append(len(self))
-            self.append(p)
-        self._groups.append({'name': group_name, 'indices': indices})
-
-    def get_group_indices(self, group_name):
-        indices = None
-        for g in self._groups:
-            if group_name == g['name']:
-                indices = g['indices']
-        if indices is None:
-            raise ValueError('No group named', group_name)
-        return indices
-
-    def get_group(self, group_name):
-        group = None
-        for g in self._groups:
-            if g['name'] == group_name:
-                return PADGeometryList([self[i] for i in g['indices']])
-        if group is None:
-            raise ValueError('No group named', g['name'])
-
-    def get_all_groups(self):
-        groups = []
-        for g in self._groups:
-            groups.append(self.get_group(g['name'])) 
-        return groups
-
-    def get_group_names(self):
-        names = []
-        for g in self._groups:
-            names.append(g['name'])
-        return names
-
-    def get_by_name(self, name):
-        pad = None
-        for p in self:
-            if p.name == name:
-                if pad is not None:
-                    raise ValueError('Ambiguous; more than one pad with the same name!')
-                pad = p
-        if pad is None:
-            raise ValueError('No PAD named', name)
-        return pad
 
     def __init__(self, pad_geometry=None, filepath=None):
         r"""
@@ -802,22 +776,23 @@ class PADGeometryList(list):
         if filepath is not None:
             self.load(filepath)
 
+    def append(self, item):
+        r""" Override append method.  Check the type, name the panel if it has no name. """
+        if not isinstance(item, PADGeometry):
+            raise ValueError('Not a PADGeometry instance.')
+        if not item.name:
+            item.name = len(self).__str__()
+        super().append(item)
+
+    def copy(self):
+        r""" Same as the the matching method in |PADGeometry|."""
+        return PADGeometryList([p.copy() for p in self])
+
     def __str__(self):
         s = ''
         for item in self:
             s += '\n'+item.__str__()
         return s
-
-    def split_data(self, data):
-        r""" Split a contiguous 1D |ndarray| into list of 2D |ndarray| instances."""
-        return split_pad_data(self, data)
-
-    def concat_data(self, data):
-        r""" Concatenate a list of |ndarray| instances into a single concatenated 1D |ndarray| ."""
-        if isinstance(data, list):
-            if len(data) != len(self):
-                raise ValueError("Length of data list is not the same length as the PADGeometryList")
-        return concat_pad_data(data)
 
     @property
     def hash(self):
@@ -827,26 +802,165 @@ class PADGeometryList(list):
             s += p.__str__()
         return hash(s)
 
-    def validate(self, raise_error=False):
-        r""" Same as the the matching method in |PADGeometry|."""
+    def validate(self):
+        r""" Same as the matching method in |PADGeometry|."""
         status = True
+        if self.defines_slicing():
+            p0 = self[0]
+            for p in self:
+                if p.parent_data_shape != p0.parent_data_shape:
+                    raise ValueError('Mismatched parent data shape')
         for p in self:
-            status *= p.validate(raise_error=raise_error)
+            status *= p.validate()
         if status:
             return True
         return False
+
+    def save(self, filename):
+        r""" Save this PADGeometryList in default json format. """
+        self.save_json(filename)
+
+    def load(self, filename):
+        r""" Load the data from saved PADGeometryList. """
+        try:
+            pads = load_pad_geometry_list(filename)
+        except:
+            try:
+                from .external import crystfel
+                pads = crystfel.geometry_file_to_pad_geometry_list(filename)
+            except:
+                raise ValueError("Cannot figure out what kind of geometry file this is.")
+        if len(self) == 0:
+            for p in pads:
+                self.append(p)
+            return
+        elif len(self) == len(pads):
+            for (n, p) in enumerate(pads):
+                self[n] = p
+            return
+        raise ValueError("It is not clear what you are trying to do.  The PADGeometryList should be empty, or should"
+                         "have the same length as the geometry file.")
+
+    def add_group(self, pads, group_name=None):
+        r""" Add a group of PADGeometry instances.  Helpful if you have multiple "detectors" that have different
+        properties as compared with others.  Or perhaps there are PADs that should translate as a group."""
+        if group_name is None:
+            group_name = str(len(self._groups))
+        if group_name in self.get_group_names():
+            raise ValueError('Group name', group_name, 'already exists.')
+        indices = []
+        for p in pads:
+            indices.append(len(self))
+            self.append(p)
+        self._groups.append({'name': group_name, 'indices': indices})
+
+    def get_group_indices(self, group_name):
+        r""" Get the list indices for a named group. """
+        indices = None
+        for g in self._groups:
+            if group_name == g['name']:
+                indices = g['indices']
+        if indices is None:
+            raise ValueError('No group named', group_name)
+        return indices
+
+    def get_group(self, group_name):
+        r""" Return a named group in the form of a |PADGeometryList| ."""
+        for g in self._groups:
+            if g['name'] == group_name:
+                return PADGeometryList([self[i] for i in g['indices']])
+        raise ValueError('No group named', group_name)
+
+    def get_all_groups(self):
+        r""" Equivalent to get_group, but sets the argument to all group names.  Beware: you may have redundancies!"""
+        groups = []
+        for g in self._groups:
+            groups.append(self.get_group(g['name']))
+        return groups
+
+    def get_group_names(self):
+        r""" Get a list of all group names.  Will be empty list if there are no groups.  """
+        names = []
+        for g in self._groups:
+            names.append(g['name'])
+        return names
+
+    def get_by_name(self, name):
+        r""" Return a |PADGeometry| with a given name. """
+        pad = None
+        for p in self:
+            if p.name == name:
+                if pad is not None:
+                    raise ValueError('Ambiguous; more than one pad with the same name!')
+                pad = p
+        if pad is None:
+            raise ValueError('No PAD named', name)
+        return pad
+
+    def defines_slicing(self):
+        r""" False if any of the |PADGeometry| instances does not have a parent_data_slice or parent_data_shape
+        defined.  True otherwise. """
+        if (None in [p.parent_data_slice for p in self]) or (None in [p.parent_data_shape for p in self]):
+            return False
+        return True
+
+    @property
+    def parent_data_shape(self):
+        r""" Return parent data shape, or None if undefined.  Raise ValueError if mis-matched parent data shapes."""
+        if False in [(self[0].parent_data_shape == s.parent_data_shape) for s in self]:
+            raise ValueError("Your PADGeometry instances have different parent data shapes!")
+        return self[0].parent_data_shape
+
+    def reshape(self, data):
+        r""" If parent_data_shape is defined, then reshape the data to that shape. """
+        if not isinstance(data, np.ndarray):
+            raise ValueError('data must be an ndarray')
+        shape = self.parent_data_shape
+        if shape is None:
+            dr = data.ravel()
+            if len(dr) != self.n_pixels:
+                raise ValueError('Data length does not match this PADGeometryList.n_pixels')
+            return data.ravel()
+        return np.reshape(data, shape)
+
+    def split_data(self, data):
+        r""" Split a contiguous 1D |ndarray| into list of 2D |ndarray| instances."""
+        if self.defines_slicing():
+            self.validate()
+            datalist = []
+            for p in self:
+                datalist.append(data[p.parent_data_slice])
+            return datalist
+        return split_pad_data(self, data)
+
+    def concat_data(self, data):
+        r""" Concatenate a list of |ndarray| instances into a single concatenated 1D |ndarray| ."""
+        if self.defines_slicing():
+            self.validate()
+            if isinstance(data, np.ndarray):
+                return np.reshape(data, self[0].parent_data_shape)
+            if isinstance(data, list):
+                datacat = np.zeros(self[0].parent_data_shape, dtype=data[0].dtype)
+                for (p, d) in zip(self, data):
+                    datacat[p.parent_data_slice] = d
+        if isinstance(data, list):
+            if len(data) != len(self):
+                raise ValueError("Length of data list is not the same length as the PADGeometryList")
+        return concat_pad_data(data)
+
+    def slice_data(self, data):
+        r""" Slice this PAD data from a parent data array. """
+        if not self.defines_slicing():
+            return self.split_data(data)
+        return [p.slice_from_parent(data) for p in self]
 
     @property
     def n_pixels(self):
         r""" Sums the output of the matching method in |PADGeometry|"""
         return np.sum(np.array([p.n_pixels for p in self]))
 
-    def copy(self):
-        r""" Same as the the matching method in |PADGeometry|."""
-        return PADGeometryList([p.copy() for p in self])
-
     def save_json(self, file_name):
-        r""" Same as the the matching method in |PADGeometry|."""
+        r""" Same as the matching method in |PADGeometry|."""
         save_pad_geometry_list(file_name, self)
 
     def position_vecs(self):
@@ -928,27 +1042,6 @@ class PADGeometryList(list):
         for p in self:
             p.rotate(matrix)
 
-    def load(self, filename):
-        r""" Load the data from saved PADGeometryList. """
-        try:
-            pads = load_pad_geometry_list(filename)
-        except:
-            try:
-                from .external import crystfel
-                pads = crystfel.geometry_file_to_pad_geometry_list(filename)
-            except:
-                raise ValueError("Cannot figure out what kind of geometry file this is.")
-        if len(self) == 0:
-            for p in pads:
-                self.append(p)
-            return
-        elif len(self) == len(pads):
-            for (n, p) in enumerate(pads):
-                self[n] = p
-            return
-        raise ValueError("It is not clear what you are trying to do.  The PADGeometryList should be empty, or should"
-                         "have the same length as the geometry file.")
-
 
 def f2_to_photon_counts(f_squared, beam=None, pad_geometry=None):
     r"""
@@ -1003,12 +1096,9 @@ def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0
         tiling_shape (tuple): Shape of tiling (n tiles along slow scan, n tiles along fast scan)
         pad_gap (float): Gap between pad tiles in SI units
 
-    Returns:
-        list of PADGeometry instances
+    Returns: |PADGeometryList|
     """
-
     pads = []
-
     tilefs_sep = pad_shape[1] + pad_gap / pixel_size
     tilefs_pos = (np.arange(tiling_shape[1]) - (tiling_shape[1] - 1) / 2) * tilefs_sep
     tiless_sep = pad_shape[0] + pad_gap / pixel_size
@@ -1020,7 +1110,6 @@ def tiled_pad_geometry_list(pad_shape=(512, 1024), pixel_size=100e-6, distance=0
             pad.t_vec += pad.ss_vec * ss_cent
             # pad.t_vec[0:2] += 0.5 * pixel_size
             pads.append(pad)
-
     return PADGeometryList(pads)
 
 
@@ -1035,9 +1124,9 @@ def concat_pad_data(data):
     This should exist in numpy but I couldn't find it.
 
     Arguments:
-        data (list or numpy array): A list of 2D numpy arrays.  If data is a numpy array, then data.ravel() is returned
+        data (list or |ndarray|): A list of 2D |ndarray| s.  If data is an |ndarray|, then data.ravel() is returned
 
-    Returns: 1D numpy array
+    Returns: 1D |ndarray|
     """
     if isinstance(data, np.ndarray):
         return data.ravel()
@@ -1054,8 +1143,7 @@ def split_pad_data(pad_list, data):
         data: A contiguous array with data values (total pixels to add up to sum of pixels in all PADs)
 
     Returns:
-        A list of 2D numpy arrays
-
+        A list of 2D |ndarray| s
     """
     if isinstance(data, list):
         return data
@@ -1077,7 +1165,7 @@ def edge_mask(data, n_edge):
         data (2D numpy array): a data array (for shape reference)
         n_edge (int): number of pixels to mask around edges
 
-    Returns: numpy array
+    Returns: |ndarray|
     """
     n_edge = int(n_edge)
     mask = np.ones_like(data)
@@ -1086,7 +1174,6 @@ def edge_mask(data, n_edge):
     mask[(n_ss - n_edge):n_ss, :] = 0
     mask[:, 0:n_edge] = 0
     mask[:, (n_fs - n_edge):n_fs] = 0
-
     return mask
 
 
@@ -1144,8 +1231,7 @@ def subtract_pad_friedel_mate(data, mask, pads):
 #         self._polarization_corrected = True
 
 
-class PADAssembler():
-
+class PADAssembler:
     r"""
     Assemble PAD data into a fake single-panel PAD.  This is done in a lazy way.  The resulting image is not
     centered in any way; the fake detector is a snug fit to the individual PADs.
@@ -1153,7 +1239,6 @@ class PADAssembler():
     A list of PADGeometry objects are required on initialization, as the first argument.  The data needed to
     "interpolate" are cached, hence the need for a class.  The geometry cannot change; there is no update method.
     """
-
     def __init__(self, pad_list):
         pixel_size = utils.vec_mag(pad_list[0].fs_vec)
         position_vecs_concat = np.concatenate([p.position_vecs() for p in pad_list])
@@ -1171,16 +1256,14 @@ class PADAssembler():
         Given a contiguous block of data, create the fake single-panel PAD.
 
         Arguments:
-            data (numpy array): Image data
+            data (|ndarray|): Image data
 
-        Returns:
-            assembled_data (numpy array): Assembled PAD image
+        Returns: |ndarray|
         """
         data = np.ravel(data)
         assembled = self.assembled
         position_vecs_concat = self.position_vecs_concat
         assembled[position_vecs_concat[:, 0], position_vecs_concat[:, 1]] = data
-
         return assembled.copy()
 
     def assemble_data_list(self, data_list):
@@ -1190,14 +1273,12 @@ class PADAssembler():
         Arguments:
             data_list (list of numpy arrays): Image data
 
-        Returns:
-            assembled_data (numpy array): Assembled PAD image
+        Returns: |ndarray|
         """
-
         return self.assemble_data(np.ravel(data_list))
 
 
-class IcosphereGeometry():
+class IcosphereGeometry:
     r"""
     Experimental class for a spherical detector that follows the "icosphere" geometry. The Icosphere is generated by
     sub-dividing the vertices of an icosahedron.  The following blog was helpful:
@@ -1229,55 +1310,42 @@ class IcosphereGeometry():
         # to avoid duplicated verts
         smaller_index = min(point_1, point_2)
         greater_index = max(point_1, point_2)
-
         key = '{0}-{1}'.format(smaller_index, greater_index)
-
         if key in middle_point_cache:
             return middle_point_cache[key]
-
         # If it's not in cache, then we can cut it
         vert_1 = verts[point_1]
         vert_2 = verts[point_2]
         middle = [sum(i) / 2 for i in zip(vert_1, vert_2)]
-
         verts.append(self._vertex(*middle))
-
         index = len(verts) - 1
         middle_point_cache[key] = index
-
         return index
 
     def compute_vertices_and_faces(self):
         r"""
         Compute vertex and face coordinates.  FIXME: Needs documentation.
         """
-
         # Make the base icosahedron
-
         vertex = self._vertex
         middle_point = self._middle_point
         middle_point_cache = {}
-
         # Golden ratio
         phi = (1 + np.sqrt(5)) / 2
-
         verts = [
             vertex(-1, phi, 0),
             vertex(1, phi, 0),
             vertex(-1, -phi, 0),
             vertex(1, -phi, 0),
-
             vertex(0, -1, phi),
             vertex(0, 1, phi),
             vertex(0, -1, -phi),
             vertex(0, 1, -phi),
-
             vertex(phi, 0, -1),
             vertex(phi, 0, 1),
             vertex(-phi, 0, -1),
             vertex(-phi, 0, 1),
         ]
-
         faces = [
             # 5 faces around point 0
             [0, 11, 5],
@@ -1285,21 +1353,18 @@ class IcosphereGeometry():
             [0, 1, 7],
             [0, 7, 10],
             [0, 10, 11],
-
             # Adjacent faces
             [1, 5, 9],
             [5, 11, 4],
             [11, 10, 2],
             [10, 7, 6],
             [7, 1, 8],
-
             # 5 faces around 3
             [3, 9, 4],
             [3, 4, 2],
             [3, 2, 6],
             [3, 6, 8],
             [3, 8, 9],
-
             # Adjacent faces
             [4, 9, 5],
             [2, 4, 11],
@@ -1307,34 +1372,26 @@ class IcosphereGeometry():
             [8, 6, 7],
             [9, 8, 1],
         ]
-
         # -----------------------------------------------------------------------------
         # Subdivisions
-
         for i in range(self.n_subdivisions):
             faces_subdiv = []
-
             for tri in faces:
                 pt1 = middle_point(tri[0], tri[1], verts, middle_point_cache)
                 pt2 = middle_point(tri[1], tri[2], verts, middle_point_cache)
                 pt3 = middle_point(tri[2], tri[0], verts, middle_point_cache)
-
                 faces_subdiv.append([tri[0], pt1, pt3])
                 faces_subdiv.append([tri[1], pt2, pt1])
                 faces_subdiv.append([tri[2], pt3, pt2])
                 faces_subdiv.append([pt1, pt2, pt3])
-
             faces = faces_subdiv
-
         faces = np.array(faces)
         verts = np.array(verts)
         n_faces = faces.shape[0]  # pylint:disable=unsubscriptable-object
-
         face_centers = np.zeros([n_faces, 3])
         for i in range(0, n_faces):
             face_centers[i, :] = (
                 verts[faces[i, 0], :] + verts[faces[i, 1], :] + verts[faces[i, 2], :]) / 3
-
         return verts, faces, face_centers
 
 
@@ -1456,7 +1513,8 @@ class RadialProfiler:
                                      needed in order to calculate q magnitudes.
         """
         if _plan:
-            self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range, pad_geometry=pad_geometry, beam=beam)
+            self.make_plan(q_mags=q_mags, mask=mask, n_bins=n_bins, q_range=q_range,
+                           pad_geometry=pad_geometry, beam=beam)
 
     def copy(self):
         r""" Make a copy of this profiler.  Copy all internal data. """
@@ -1706,7 +1764,7 @@ class RadialProfiler:
         Returns:
 
         """
-        return self.subtract_profile(data, mask=mask, statistic='median')
+        return self.subtract_profile(data, mask=mask, statistic=np.median)
 
     def get_profile(self, data, mask=None, average=True):
         r"""
@@ -1783,8 +1841,10 @@ def load_pad_masks(file_name):
     keys = list(out.keys())
     n = int(len(out) - 1)
     file_format = out['format']
+
     def _range(x):
         return np.arange(x, dtype=int)
+
     if file_format == 1:
         shapes = [out[keys[i]] for i in _range(n/2) + 1]
         masks = [out[keys[i]] for i in _range(n/2) + int(n/2) + 1]
@@ -1843,7 +1903,6 @@ def jungfrau4m_pad_geometry_list(detector_distance=0.1):
 
     Arguments:
         detector_distance (float): Detector distance in SI units
-        binning (int): Bin the detector into larger NxN virtual pixels.
 
     Returns: List of |PADGeometry| instances
     """
@@ -1891,9 +1950,10 @@ def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, return_mask=Fals
 
     Arguments:
         detector_distance (float): Detector distance in SI units.
+        return_mask (bool): The Rayonix has a hole in the center; setting this to True will return the corresponding
+                            mask along with .
 
-    Returns:
-        (list): List of |PADGeometry| instances.
+    Returns: |PADGeometryList|
     """
     pads = load_pad_geometry_list(rayonix_mx340_xfel_geom_file)
     for p in pads:
@@ -1905,3 +1965,45 @@ def rayonix_mx340_xfel_pad_geometry_list(detector_distance=0.1, return_mask=Fals
         mask[utils.vec_mag(xyz) < 0.0025] = 0
         return pads, mask
     return PADGeometryList(pads)
+
+
+def dict_default(dictionary, key, default):
+    r""" Sometimes we want to fetch a dictionary value for a given key, but the key might be absent in which case we
+    accept a default value.  This function does that. """
+    if key in dictionary.keys():
+        return dictionary[key]
+    return default
+
+
+def _slice_to_tuple(slc):
+    r""" Special conversion of slice type to tuple. """
+    if slc is None:
+        return None
+    if isinstance(slc, list):
+        return _slice_to_tuple(tuple(slc))
+    if isinstance(slc, slice):
+        return slc.start, slc.stop, slc.step
+    if isinstance(slc, tuple):
+        return tuple(_slice_to_tuple(s) for s in slc)
+    if isinstance(slc, int):
+        return slc
+    raise ValueError('Cannot convert slice to tuple:', slc.__str__())
+
+
+def _tuple_to_slice(slc):
+    r""" Special conversion of tuple to slice. """
+    if slc is None:
+        return None
+    if isinstance(slc, slice):
+        return slc
+    if isinstance(slc, tuple) or isinstance(slc, list):
+        if False not in [isinstance(s, int) for s in slc]:
+            return slice(slc[0], slc[1], slc[2])
+        out = []
+        for s in slc:
+            if isinstance(s, tuple) or isinstance(s, list):
+                out.append(slice(s[0], s[1], s[2]))
+            else:
+                out.append(s)
+        return tuple(out)
+    return slc

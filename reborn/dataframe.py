@@ -163,7 +163,7 @@ class DataFrame:
         r""" See the corresponding get_beam method."""
         self.clear_cache()
         beam = beam.copy()
-        beam.validate(raise_error=True)
+        beam.validate()
         self._beam = beam
 
     def get_pad_geometry(self):
@@ -176,7 +176,7 @@ class DataFrame:
         r""" See the corresponding get_pad_geometry method. """
         self.clear_cache()
         pads = detector.PADGeometryList(pads.copy())
-        pads.validate(raise_error=True)
+        pads.validate()
         self._pad_geometry = pads
 
     def get_raw_data_list(self):
