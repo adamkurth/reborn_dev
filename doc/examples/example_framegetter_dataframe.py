@@ -54,8 +54,8 @@ class WaterFrameGetter(FrameGetter):
         df = dataframe.DataFrame()  # This creates a DataFrame instance, which combines PADGeometry with Beam and data.
         df.set_frame_index(self.current_frame)  # Not mandatory, but good practice.
         df.set_frame_id('Water %s' % frame_number)  # Not mandatory, but good practice.
-        df.set_raw_data(intensity)
         df.set_pad_geometry(self.pad_geometry)
+        df.set_raw_data(intensity)
         df.set_beam(self.beam)
         df.validate()  # Not mandatory, but good practice.
         return df
