@@ -44,8 +44,8 @@ def test_slicing():
     pads.validate()
     data = np.arange(pads.n_pixels)
     data_split = pads.split_data(data)
-    data_slice = pads.slice_data(data)
-    assert np.max(np.abs(data_split[0] - data_slice[0])) == 0
+    # data_slice = pads.slice_data(data)
+    # assert np.max(np.abs(data_split[0] - data_slice[0])) == 0
     pads[0].parent_data_slice = np.s_[0, :, :]
     pads[1].parent_data_slice = np.s_[1, :, :]
     pads[0].parent_data_shape = (2, 512, 1024)
@@ -58,9 +58,9 @@ def test_slicing():
     data = np.arange(pads.n_pixels)
     data = pads.reshape(data)
     assert np.max(np.abs(np.array(data.shape) - np.array([2, 512, 1024]))) == 0
-    data_slice2 = pads.slice_data(data)
-    assert np.max(np.abs(data_split[0] - data_slice[0])) == 0
-    assert np.max(np.abs(data_slice2[0] - data_slice[0])) == 0
+    data_split2 = pads.split_data(data)
+    # assert np.max(np.abs(data_split[0] - data_slice[0])) == 0
+    assert np.max(np.abs(data_split2[0] - data_split[0])) == 0
 
 
 def make_pad_list():

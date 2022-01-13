@@ -923,35 +923,37 @@ class PADGeometryList(list):
             return data.ravel()
         return np.reshape(data, shape)
 
-    def split_data(self, data):
+    def _split_data(self, data):
         r""" Split a contiguous 1D |ndarray| into list of 2D |ndarray| instances."""
         if self.defines_slicing():
             self.validate()
             datalist = []
+            d = np.reshape(data, self.parent_data_shape)
             for p in self:
-                datalist.append(data[p.parent_data_slice])
+                datalist.append(d[p.parent_data_slice])
             return datalist
         return split_pad_data(self, data)
 
     def concat_data(self, data):
         r""" Concatenate a list of |ndarray| instances into a single concatenated 1D |ndarray| ."""
+        if isinstance(data, list):
+            if len(data) != len(self):
+                raise ValueError("Length of data list is not the same length as the PADGeometryList")
         if self.defines_slicing():
             self.validate()
             if isinstance(data, np.ndarray):
-                return np.reshape(data, self[0].parent_data_shape)
+                return data.ravel()
             if isinstance(data, list):
                 datacat = np.zeros(self[0].parent_data_shape, dtype=data[0].dtype)
                 for (p, d) in zip(self, data):
                     datacat[p.parent_data_slice] = d
-        if isinstance(data, list):
-            if len(data) != len(self):
-                raise ValueError("Length of data list is not the same length as the PADGeometryList")
+                return datacat.ravel()
         return concat_pad_data(data)
 
-    def slice_data(self, data):
+    def split_data(self, data):
         r""" Slice this PAD data from a parent data array. """
         if not self.defines_slicing():
-            return self.split_data(data)
+            return self._split_data(data)
         return [p.slice_from_parent(data) for p in self]
 
     @property

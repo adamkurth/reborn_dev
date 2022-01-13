@@ -21,9 +21,9 @@ def test_01():
     df = dataframe.DataFrame()
     beam = source.Beam(photon_energy=10*1.602e-19)
     geom = detector.pnccd_pad_geometry_list()
+    df.set_pad_geometry(geom)
     raw = geom.solid_angles()
     df.set_raw_data(raw)
-    df.set_pad_geometry(geom)
     df.set_beam(beam)
     proc = df.get_processed_data_list()
     sa = df.solid_angles

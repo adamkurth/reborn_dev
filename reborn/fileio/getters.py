@@ -57,9 +57,16 @@ class FrameGetter(ABC):
     history_length = 10000
     history = np.zeros(history_length, dtype=int)
     history_index = 0
+    init_params = None
+    skip_empty_frames = True
 
     def __init__(self):
         pass
+
+    def __copy__(self):
+        if self.init_params is not None:
+            return type(self)(**self.init_params)
+        raise ValueError('Cannot copy because init_params is not defined for this FrameGetter subclass.')
 
     @property
     def n_frames(self):
@@ -105,20 +112,38 @@ class FrameGetter(ABC):
 
     def get_next_frame(self, skip=1, wrap_around=True):
         r""" Do not override this method. """
-        return self.get_frame(self.current_frame+skip, wrap_around=wrap_around)
+        df = None
+        for _ in range(self.n_frames):
+            df = self.get_frame(self.current_frame+skip, wrap_around=wrap_around)
+            if (df is None) and self.skip_empty_frames:
+                continue
+            break
+        return df
 
     def get_previous_frame(self, skip=1, wrap_around=True):
         r""" Do not override this method. """
-        return self.get_frame(self.current_frame-skip, wrap_around=wrap_around)
+        df = None
+        for _ in range(self.n_frames):
+            df = self.get_frame(self.current_frame-skip, wrap_around=wrap_around)
+            if (df is None) and self.skip_empty_frames:
+                continue
+            break
+        return df
 
     def get_random_frame(self):
         r""" Do not override this method. """
-        return self.get_frame(int(np.floor(np.random.rand(1)*self.n_frames-1e-10)))
+        df = None
+        for _ in range(self.n_frames):
+            df = self.get_frame(int(np.floor(np.random.rand(1)*self.n_frames)))
+            if (df is None) and self.skip_empty_frames:
+                continue
+            break
+        return df
 
-    def view(self):
+    def view(self, **kwargs):
         r""" Create a PADView instance and start it with this FrameGetter instance. """
         from ..viewers.qtviews.padviews import PADView
-        pv = PADView(frame_getter=self)
+        pv = PADView(frame_getter=self, **kwargs)
         pv.start()
 
     def __iter__(self):

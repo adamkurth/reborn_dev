@@ -192,6 +192,8 @@ class Widget(QtGui.QWidget):
         if setval is None:
             mask[inds] = -(mask[inds] - 1)
         else:
+            print(mask.shape)
+            print(inds.shape)
             mask[inds] = setval
         self.padview.dataframe.set_mask(mask)
         self.padview.update_masks()

@@ -21,6 +21,7 @@ import os
 import inspect
 import logging
 import hashlib
+import subprocess
 import pkg_resources
 import numpy as np
 from numpy import sin, cos
@@ -704,11 +705,11 @@ def binned_statistic(x, y, func, n_bins, bin_edges, fill_value=0):
     return out[1:-1]
 
 
-def get_caller():
+def get_caller(n=0):
     r""" Get the name of the function that calls this one. """
     stack = inspect.stack()
-    if len(stack) > 1:
-        return inspect.stack()[1][3]
+    if len(stack) > (n+1):
+        return inspect.stack()[n+1][3]
     return 'get_caller'
 
 
@@ -754,7 +755,8 @@ def write_file_md5(file_path, md5_path=None):
     Returns:
         str: the md5
     """
-    md5_path = file_path+'.md5'
+    if md5_path is None:
+        md5_path = file_path+'.md5'
     with open(file_path, 'rb') as f:
         hasher = hashlib.md5()
         hasher.update(f.read())
@@ -762,3 +764,20 @@ def write_file_md5(file_path, md5_path=None):
     with open(md5_path, 'w') as f:
         f.write(md5)
     return md5_path
+
+
+def git_sha():
+    r""" Return the SHA of the git repo is in the current directory.  Return None if the repo is not
+    totally clean. Useful if you wish to keep track of the git version that produced your results.
+
+    Returns: str
+    """
+    out = subprocess.run(['git', 'diff'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if out.stderr == b'':
+        if out.stdout == b'':
+            sha = subprocess.run(['git', 'rev-parse', '--verify', 'HEAD'], stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE).stdout
+            return sha.decode("utf-8").strip()
+        else:
+            return None
+    return None

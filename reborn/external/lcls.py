@@ -17,17 +17,31 @@ r"""
 Utilities for working with LCLS data.  Most of what you need is already in the psana package.  I don't know where the
 official psana documentation is but if you work with LCLS data you should at least skim through all of the material in
 the `LCLS Data Analysis Confluence pages <https://confluence.slac.stanford.edu/display/PSDM/LCLS+Data+Analysis>`_.
-Note that there is documentation on `LCLS PAD geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
+Note that there is documentation on
+`LCLS PAD geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 """
 
 import re
 import numpy as np
 import reborn
+from .. import utils, detector
+from . import crystfel, cheetah
 try:
     import psana
 except ImportError:
     psana = None
-from scipy import constants
+
+
+debug = False
+
+
+def debug_message(*args, caller=True, **kwargs):
+    r""" Standard debug message, which includes the function called. """
+    if debug:
+        s = ''
+        if caller:
+            s = utils.get_caller(1)
+        print('DEBUG:lcls.'+s+':', *args, **kwargs)
 
 
 def pad_to_asic_data_split(data, n, m):
@@ -39,7 +53,9 @@ def pad_to_asic_data_split(data, n, m):
     For cspad we split into 1x2 (?)
 
     Arguments:
-        data (np.ndarray): An array of PAD data.
+        data (np.ndarray): PAD data.
+        n (int): Number of ASICS to split "vertically" with vsplit
+        m (int): Number of ASICS to split "horizontally" with hsplit
 
     Returns:
         pads (list): List of separated PADs.
@@ -56,7 +72,7 @@ def pad_to_asic_data_split(data, n, m):
 
 def get_pad_pixel_coordinates(pad_det, run_number, splitter):
     r"""
-    This should works for any detector (except Rayonix, not implemented in psana)
+    This should work for any detector (except Rayonix, not implemented in psana)
     without modification so long as splitter is set up correctly.
 
     Parameters:
@@ -75,10 +91,13 @@ def get_pad_pixel_coordinates(pad_det, run_number, splitter):
     xdc, ydc, zdc = pad_det.coords_xyz(run_number)
 
     if xdc.size != n_panels * n_ss * n_fs:
+        debug_message('Wrong size')
         return None
     if ydc.size != n_panels * n_ss * n_fs:
+        debug_message('Wrong size')
         return None
     if zdc.size != n_panels * n_ss * n_fs:
+        debug_message('Wrong size')
         return None
 
     x = splitter(xdc)
@@ -111,12 +130,13 @@ def get_pad_geometry_from_psana(pad_det, run_number, splitter):
                https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry
                https://confluence.slac.stanford.edu/display/PSDM/CSPAD+Geometry+and+Alignment
     """
+    debug_message()
     xx, yy, zz = get_pad_pixel_coordinates(pad_det, run_number, splitter)
 
     geom = reborn.detector.PADGeometryList()
     for (x, y, z) in zip(xx, yy, zz):
         g = reborn.detector.PADGeometry()
-        g.t_vec  = np.array([x[0, 0], y[0, 0], z[0, 0]]) * 1e-6
+        g.t_vec = np.array([x[0, 0], y[0, 0], z[0, 0]]) * 1e-6
         g.ss_vec = np.array([x[2, 1] - x[1, 1],
                              y[2, 1] - y[1, 1],
                              z[2, 1] - z[1, 1]]) * 1e-6
@@ -128,114 +148,92 @@ def get_pad_geometry_from_psana(pad_det, run_number, splitter):
     return geom
 
 
+class EpicsTranslationStageMotion:
+    r""" A class that updates PADGeometry according to stages with positions specified by EPICS PVs. """
+    def __init__(self, epics_pv, vector=np.array([0, 0, 1e-3])):
+        r"""
+        Arguments:
+            epics_pv ('str'): The EPICS PV string.
+            vector (|ndarray|): This is the vector indicating the direction and step size.  The stage position will be
+                                multiplied by this vector and added to PADGeometry.t_vec
+        """
+        self.detector = psana.Detector(epics_pv)
+        self.vector = vector
+    def modify_geometry(self, pad_geometry, event):
+        r""" Modify the PADGeometryList.
+
+        Arguments:
+            pad_geometry (|PADGeometryList|): PAD geometry.
+            event (psana.Event): A psana event from which the stage position derives.
+        """
+        position = self.detector(event)
+        p = pad_geometry.copy()
+        p.translate(self.vector * position)
+        return p
+
+
 class AreaDetector(object):
     r"""
     Thin wrapper for psana.Detector class. Adds methods to generate list of PADGeometry instances and to split the PAD
     data into a list of 2d arrays.
     """
 
-    _type = None
-    _splitter = None
+    splitter = None
+    motions = None  # Allow for some translation operations based on epics pvs
+    _home_geometry = None  # This is the initial geometry, before translations/rotations
+    _funky_cheetah_cspad = False
 
-    def __init__(self, detector_info,
-                 run_number=1,
-                 **kwargs):
+    def __init__(self, pad_id=None, geometry=None, mask=None, data_type='calib', motions=None, run_number=1, **kwargs):
         r"""
         Instantiate with same arguments you would use to instantiate a psana.Detector instance.
-        Usually this means to suppply a psana.DataSource instance.
+        Usually this means to supply a psana.DataSource instance.
+
+        Arguments:
+            pad_id (str): Example: DscCsPad
+            geometry (|PADGeometryList|): Geometry, or a path to geometry file.
+            mask (|ndarray|): Mask array, or path to mask file
+            data_type (str): Default data type ('calib' or 'raw')
+            motions (dict): Special dictionaries to describe motorized motions of the detector
+
         """
-        _detectors = ['cspad', 'pnccd', 'epix10k2m', 'rayonix', 'unknown']
-        _det_split = [lambda data: pad_to_asic_data_split(data, 1, 2),
-                      None,
-                      lambda data: pad_to_asic_data_split(data, 2, 2),
-                      None,
-                      None]
-        _nominal   = [[110e-6, 110e-6],  # [ss, fs]
-                      None,
-                      [100e-6, 100e-6],
-                      [44e-6, 44e-6],  # in unbinned mode (typically 2x2 or 4x4)
-                      None]
-        _longs     = [[109.92e-6, 274.8e-6],  # [ss, fs]
-                      None,
-                      [100e-6, 100e-6],
-                      None,
-                      None]
-        _bigs      = [None,  # [ss, fs]
-                      None,
-                      [100e-6, 100e-6],
-                      None,
-                      None]
-        _dist_pvs  = [None,
-                      None,
-                      ['MFX:ROB:CONT:POS:X',
-                       'MFX:ROB:CONT:POS:Y',
-                       'MFX:ROB:CONT:POS:Z'],
-                      ['MFX:DET:MMS:01.RBV',  # detector_x
-                       'MFX:DET:MMS:02.RBV',  # detector_y1
-                       'MFX:DET:MMS:04.RBV'],  # detector_z
-                      # 'MFX:DET:MMS:03.RBV']  # detector_y2
-                      None]
-        _rots_pvs  = [None,
-                      None,
-                      ['MFX:ROB:CONT:POS:RX',
-                       'MFX:ROB:CONT:POS:RY',
-                       'MFX:ROB:CONT:POS:RZ'],
-                      None,
-                      None]
-        _splits = {d: s for d, s in zip(_detectors, _det_split)}
-        # nominal pixel length along slow-scan and fast-scan
-        _pixels = {d: p for d, p in zip(_detectors, _nominal)}
-        # long pixel length along slow-scan and fast-scan
-        _longpix = {d: p for d, p in zip(_detectors, _longs)}
-        # big pixel length along slow-scan and fast-scan (currently only epix10k)
-        _big_pix = {d: p for d, p in zip(_detectors, _bigs)}
-        _stages = {d: dst for d, dst in zip(_detectors, _dist_pvs)}
-        _rotations = {d: r for d, r in zip(_detectors, _rots_pvs)}
-
-        if type(detector_info) == str:
-            detector_info = {'pad_id': detector_info}
-
-        self.detector = psana.Detector(detector_info['pad_id'], **kwargs)
+        debug_message('AreaDetector')
+        self.detector = psana.Detector(pad_id, **kwargs)
         self.detector_type = self.get_detector_type()
-        self.splitter = _splits[self.detector_type]
-        self.pixel_shape = _pixels[self.detector_type]
-        self.long_pixel_shape = _longpix[self.detector_type]
-        self.big_pixel_shape = _big_pix[self.detector_type]
+        self.data_type = data_type
+        self.motions = motions
+        if isinstance(motions, str):
+            self.motions = [EpicsTranslationStageMotion(epics_pv=motions)]
 
-        # setup distance detector
-        if 'stage' in detector_info:
-            self.distance = [psana.Detector(cord, **kwargs) for cord in detector_info['stage']]
-        else:
-            distance_pv = _stages[self.detector_type]
-            if distance_pv is not None:
-                self.distance = [psana.Detector(cord) for cord in distance_pv]
+        if self.detector_type == 'cspad':
+            self.splitter = lambda data: pad_to_asic_data_split(data, 1, 2)
+        if self.detector_type == 'epix10k2m':
+            self.splitter = lambda data: pad_to_asic_data_split(data, 2, 2)
+
+        if isinstance(geometry, str):
+            try:  # Check if it is a reborn geometry file
+                debug_message('Check for reborn geometry format')
+                geometry = detector.load_pad_geometry_list(geometry)
+            except:  # Check if it is a crystfel geometry file
+                debug_message('Check for CrystFEL geometry format')
+                geometry = crystfel.geometry_file_to_pad_geometry_list(geometry)
+                if (self.detector_type == 'cspad') and geometry.parent_data_shape[0] == 1480:
+                    geometry = crystfel.fix_cspad_cheetah_indexing(geometry)
+                    # self._funky_cheetah_cspad = True
+                    # self.splitter = None
+                    print('Your CrystFEL geometry assumes the psana data has been re-shuffled by Cheetah!!')
+        if geometry is None:
+            if self.detector_type == 'rayonix':
+                geom = reborn.detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=1)
+                geometry = geom.binned(2)
             else:
-                self.distance = None
-        # setup detector rotations detector
-        if 'rotations' in detector_info:
-            self.rotation = [psana.Detector(rot, **kwargs) for rot in detector_info['rotations']]
-        else:
-            rotation_pv = _rotations[self.detector_type]
-            if rotation_pv is not None:
-                self.rotation = [psana.Detector(rot) for rot in rotation_pv]
-            else:
-                self.rotation = None
-        # setup detector geometry
-        if 'geometry' in detector_info:
-            self.geometry = detector_info['geometry']
-        else:
-            self.geometry = self.get_pad_geometry(run_number)
-
-        # setup detector geometry mask
-        if 'mask' in detector_info:
-            self.mask = detector_info['mask']
-        else:
-            self.mask = None
-
-        if 'data_type' in detector_info:
-            self.data_type = detector_info['data_type']
-        else:
-            self.data_type = 'calib'
+                geometry = get_pad_geometry_from_psana(self.detector, run_number, self.splitter)
+        self._home_geometry = geometry.copy()
+        # print(self._home_geometry)
+        self.mask = mask
+        if isinstance(mask, str):
+            self.mask = detector.load_pad_masks(mask)
+        if self.mask is None:
+            self.mask = [p.ones() for p in self._home_geometry]
 
     def get_detector_type(self):
         """ The psana detector fails to provide reliable information on detector type. """
@@ -252,21 +250,19 @@ class AreaDetector(object):
             detector_type = 'unknown'
         return detector_type
 
-    def get_pad_geometry(self, run, binning=2):
+    def get_pad_geometry(self, event):
         """ See documentation for the function get_pad_geometry(). """
-        if self.detector_type == 'rayonix':
-            geom = reborn.detector.rayonix_mx340_xfel_pad_geometry_list(detector_distance=1)
-            geometry = geom.binned(binning)
-        elif self.detector_type == 'unknown':
-            geometry = reborn.detector.PADGeometryList()
-        else:
-            geometry = get_pad_geometry_from_psana(self.detector, run, self.splitter)
+        geometry = self._home_geometry.copy()
+        if self.motions is None:
+            return geometry
+        for m in self.motions:
+            geometry = m.modify_geometry(geometry, event)
         return geometry
 
     def split_pad(self, data):
         """ Split psana data block into a PAD list """
         if self.splitter is None:
-            return [data]
+            return self._home_geometry.split_data(data)
         else:
             return self.splitter(data)
 
@@ -282,7 +278,7 @@ class AreaDetector(object):
         else:
             data = None
         if not isinstance(data, np.ndarray):
-            data = [g.zeros() for g in self.geometry]
+            data = [g.zeros() for g in self.get_pad_geometry(event)]
         else:
             data = self.split_pad(data)
         return data
@@ -292,149 +288,111 @@ class AreaDetector(object):
         if self.detector_type == 'rayonix':
             x, y, z = [None, None, None]
         else:
-            x, y, z = get_pad_pixel_coordinates(self.detector,
-                                                run_number,
-                                                self.splitter)
+            x, y, z = get_pad_pixel_coordinates(self.detector, run_number, self.splitter)
         return x, y, z
 
-    def get_detector_coordinates(self, event):
-        return [det(event) * 1e-3 for det in self.distance]
-
-    def get_detector_rotations(self, event):
-        return [det(event) for det in self.rotation]
-
-    def update_detector_distance(self, event=None, distance=None):
-        if distance is None:
-            x, y, z = self.get_detector_coordinates(event)
-        else:
-            z = distance
-        for pad in self.geometry:
-            pad.t_vec[2] = z
-
-    def update_detector_rotation(self, event=None, rotations=None):
-        if rotations is None:
-            rxa, rya, rza = self.get_detector_coordinates(event)
-        else:
-            rxa, rya, rza = rotations
-        rx = np.array([[1, 0, 0],
-                      [0, np.cos(rxa), -np.sin(rxa)],
-                      [0, np.sin(rxa), np.cos(rxa)]])
-        ry = np.array([[np.cos(rya), 0, np.sin(rya)],
-                      [0, 1, 0],
-                      [-np.sin(rya), 0, np.cos(rya)]])
-        rz = np.array([[np.cos(rza), -np.sin(rza), 0],
-                      [np.sin(rza), np.cos(rza), 0],
-                      [0, 0, 1]])
-        for pad in self.geometry:
-            pad.t_vec = np.dot(np.dot(np.dot(pad.t_vec, rx.T), ry.T), rz.T)
-            pad.ss_vec = np.dot(np.dot(np.dot(pad.ss_vec, rx.T), ry.T), rz.T)
-            pad.fs_vec = np.dot(np.dot(np.dot(pad.fs_vec, rx.T), ry.T), rz.T)
+    @property
+    def n_pixels(self):
+        return self._home_geometry.n_pixels
 
 
 class LCLSFrameGetter(reborn.fileio.getters.FrameGetter):
 
     mask = None
+    event = None
+    event_codes = None
 
-    def __init__(self,
-                 experiment_id,
-                 run_number,
-                 pad_detectors,
-                 psana_dir=None):
-
+    def __init__(self, experiment_id, run_number, pad_detectors, max_events=1e6, psana_dir=None, beam=None, idx=True):
+        debug_message('Initializing superclass')
         super().__init__()  # initialize the superclass
         self.run_number = run_number
-
-        # setup data source
-        if psana_dir is None:
-            self.data_string = f'exp={experiment_id}:run={run_number}:smd'
-        else:
-            self.data_string = f'exp={experiment_id}:run={run_number}:smd:dir={psana_dir}'
-        ds = psana.DataSource(self.data_string)
-        self.data_source = ds
-
-        # LCLS uses 3 numbers to define an event.
-        # In LCLS2 this will be one number.
-        self.event_timestamp = {'seconds': [],
-                                'nanoseconds': [],
-                                'fiducials': []}
-
-        # Get the times of events (these could come from a saved "small data" file, for example)
+        self.data_string = f'exp={experiment_id}:run={run_number}:smd'
+        debug_message('datastring', self.data_string)
+        if psana_dir is not None:
+            self.data_string += f'dir={psana_dir}'
+        self.data_source = psana.DataSource(self.data_string)
+        self.event_ids = []
         for nevent, evt in enumerate(self.data_source.events()):
+            if nevent >= max_events:
+                break
             evtId = evt.get(psana.EventId)
-            self.event_timestamp['seconds'].append(evtId.time()[0])
-            self.event_timestamp['nanoseconds'].append(evtId.time()[1])
-            self.event_timestamp['fiducials'].append(evtId.fiducials())
-        self.n_frames = nevent + 1  # why is this + 1?
-
-        # now that we have the times, jump to the events in reverse order
-        if psana_dir is None:
-            self.data_source = psana.DataSource(f'exp={experiment_id}:run={run_number}:idx')
-        else:
-            self.data_source = psana.DataSource(f'exp={experiment_id}:run={run_number}:idx:dir={psana_dir}')
+            self.event_ids.append((evtId.time()[0], evtId.time()[1], evtId.fiducials()))
+        self.n_frames = len(self.event_ids)
+        self.has_indexing = idx
+        if self.has_indexing:
+            self.data_string = self.data_string.replace(':smd', ':idx')
+        debug_message('datastring', self.data_string)
+        self.data_source = psana.DataSource(self.data_string)
         self.run = self.data_source.runs().__next__()
-        self.event_ids = self.run.times()
-        self.n_events = len(self.event_ids)
-
-        # setup detectors
+        self.events = self.run.events()
+        self.previous_frame = 0
         self.ebeam_detector = psana.Detector('EBeam')
-        self.detectors = [AreaDetector(p, run_number=self.run_number, accept_missing=True) for p in pad_detectors]
-
-        # setup geometries
-        self.geometry = reborn.detector.PADGeometryList()
-        for det in self.detectors:
-            self.geometry.add_group(pads=det.geometry, group_name=det.detector_type)
-
-        # unit conversions
-        self.eV_to_J = constants.value('electron volt')
-
-    def get_event(self, frame_number=0):
-        r"""
-        Return the current event.
-
-        Arguements:
-            frame_number:
-
-        Returns:
-            event
-        """
-        # get event
-        ts = (self.event_timestamp['seconds'][frame_number],
-              self.event_timestamp['nanoseconds'][frame_number],
-              self.event_timestamp['fiducials'][frame_number])
-        et = psana.EventTime(int((ts[0] << 32) | ts[1]), ts[2])
-        return self.run.event(et)
+        self.evr = psana.Detector('evr0')
+        self.detectors = [AreaDetector(**p, run_number=self.run_number, accept_missing=True) for p in pad_detectors]
+        self.beam = beam
+        if beam is None:
+            self.beam = reborn.source.Beam()
 
     def get_data(self, frame_number=0):
-        ts = (self.event_timestamp['seconds'][frame_number],
-              self.event_timestamp['nanoseconds'][frame_number],
-              self.event_timestamp['fiducials'][frame_number])
-
-        event = self.get_event(frame_number=frame_number)
-
-        # get photon energy
-        eb = self.ebeam_detector.get(event)
+        debug_message()
+        # This is annoying: ideally we would use indexed data for which we can skip to any frame... but
+        # sometimes the index file is missing (e.g. due to DAQ crash or data migration).  So we accommodate
+        # the 'smd' mode in addition to the 'idx' mode:
+        event = None
+        if self.has_indexing:
+            ts = self.event_ids[frame_number]
+            event = self.run.event(psana.EventTime(int((ts[0] << 32) | ts[1]), ts[2]))
+        else:
+            if frame_number == self.previous_frame + 1:
+                event = self.events.__next__()
+            else:
+                if not frame_number == 0:
+                    debug_message('Skipping frames in the smd mode will be quite slow...')
+                ts = self.event_ids[frame_number]
+                self.data_source = psana.DataSource(self.data_string)
+                self.run = self.data_source.runs().__next__()
+                self.events = self.run.events()
+                for i in range(frame_number+1):
+                    event = self.events.__next__()
+        self.previous_frame = frame_number
+        self.event = event
+        if event is None:
+            debug_message('The event is None!')
+            return None
+        self.event_codes = self.evr.eventCodes(event)
         try:
-            photon_energy = eb.ebeamPhotonEnergy() * self.eV_to_J
+            photon_energy = self.ebeam_detector.get(event).ebeamPhotonEnergy()*reborn.const.eV
         except AttributeError:
-            print(f'Run {self.run_number} frame {frame_number} causes \
-                    ebeamPhotonEnergy failure, skipping this shot.')
+            debug_message(f'Run {self.run_number} frame {frame_number} causes ebeamPhotonEnergy failure, skipping this '
+                     f'shot.')
             photon_energy = None
-
-        beam = reborn.source.Beam(photon_energy=photon_energy)
-
-        if frame_number == 0:
-            for d in self.detectors:
-                d.update_detector_distance()
-
-        # get pad detector data
-        pad_data = [data for det in self.detectors for data in det.get_data_split(event)]
-        mask = [det.mask for det in self.detectors]
-
+        beam = self.beam
+        beam.photon_energy = photon_energy
+        geometry = reborn.detector.PADGeometryList()
+        for det in self.detectors:
+            for p in det.get_pad_geometry(event):
+                geometry.append(p)
+        pad_data = []
+        for det in self.detectors:
+            for dat in det.get_data_split(event):
+                pad_data.append(dat)
+        mask = []
+        for det in self.detectors:
+            for m in det.mask:
+                if m is not None:
+                    mask.append(m)
+        xray_on = 40 in self.event_codes   # FIXME: This number might differ from one experiment to the next
+        laser_on = 41 in self.event_codes  # FIXME: This number might differ from one experiment to the next
         df = reborn.dataframe.DataFrame()
-        # df.set_beam(beam)
-        df.set_pad_geometry(self.geometry)
+        df.set_dataset_id(self.data_string)
+        df.set_frame_id(ts)
+        df.set_frame_index(frame_number)
+        df.set_beam(beam)
+        df.set_pad_geometry(geometry)
         df.set_raw_data(pad_data)
-        # if self.mask is not None:
-        #     df.set_mask(self.mask)
-        # df.set_frame_id(ts)
+        if mask:
+            df.set_mask(mask)
+        parameters = {'xray_on': xray_on, 'laser_on': laser_on}
+        df.parameters = parameters
+        debug_message('returning', df)
         return df

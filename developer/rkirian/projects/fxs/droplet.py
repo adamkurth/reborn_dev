@@ -69,6 +69,7 @@ dmap = crystal.CrystalDensityMap(cryst, map_resolution, map_oversample)
 f = cryst.molecule.get_scattering_factors(beam=beam)
 x = cryst.unitcell.r2x(cryst.molecule.get_centered_coordinates())
 rho = dmap.place_atoms_in_map(x, f, mode='nearest')  # FIXME: replace 'nearest' with Cromer Mann densities
+pg.image(np.sum(np.fft.fftshift(np.real(rho)), axis=2))
 rho[rho != 0] -= f_dens_water * dmap.voxel_volume  # FIXME: Need a better model for solvent envelope
 F = fftshift(fftn(rho))
 I = np.abs(F) ** 2
@@ -108,6 +109,7 @@ class DropletGetter(FrameGetter):
         # clcore.sphere_form_factor(r=dd/2, q=q_mags_gpu, a=amps_gpu, add=add)
         sff = f_dens_water*sphere_form_factor(radius=dd/2, q_mags=q_mags)
         I = np.abs(amps_gpu.get()+sff)**2*r_e**2*solid_angles*polarization_factors*fluence
+        I = np.abs(amps_gpu.get()) ** 2 * r_e ** 2 * solid_angles * polarization_factors * fluence
         I = np.random.poisson(I)
         df = dataframe.DataFrame(pad_geometry=pads, beam=beam, raw_data=I)
         return df
