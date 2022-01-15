@@ -28,24 +28,25 @@ from reborn.viewers.qtviews import view_pad_data, PADView
 
 # %%
 # The PADView class provides a GUI to help visualize diffraction data that consists of multiple PADs.  Let's begin by
-# creating some data to look at:
+# simulating some data to look at:
 
 beam = source.Beam(wavelength=1.5e-10)
-pads = detector.cspad_pad_geometry_list()
+pads = detector.cspad_pad_geometry_list(detector_distance=0.1)
 dat = simulate.solutions.water_scattering_factor_squared(pads.q_mags(beam=beam))
 dat *= pads.polarization_factors(beam=beam)
-dat = np.random.poisson(dat)
+dat = np.double(np.random.poisson(dat))
 
 # %%
-# The simplest way to see a display is as follows:
+# The simplest way to display the data is as follows:
 
 view_pad_data(pad_data=dat, pad_geometry=pads, beam=beam)
 
 # %%
-# The above function exists for convenience.  A better way is to create an instance of the PADView class.  This way,
-# you can use some of the class methods before launching the viewer.  We will call a few methods that help us understand
-# the geometry layout.  The beam origin and axes are shown at the center of the pattern (x: red, y: green, z: blue), the
-# PAD names (or numbers) are overlaid on the pads, and the fast-scan directions are indicated by the red arrows.
+# Although the above function exists for convenience, a better way is to create an instance of the PADView class.
+# This way, you can customize a few things before launching the viewer.  We will call a few  methods that help us
+# understand the geometry layout.  The beam origin and axes are shown at the center of the pattern (x: red, y: green,
+# z: blue), the PAD names (or numbers) are overlaid on the pads, and the fast-scan directions are indicated by the
+# red arrows.
 
 pv = PADView(pad_data=dat, pad_geometry=pads, beam=beam)
 pv.show_coordinate_axes()

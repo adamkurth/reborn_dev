@@ -84,11 +84,14 @@ def geometry_dict_to_pad_geometry_list(geometry_dict):
         pad = detector.PADGeometry()
         pad.name = panel_name
         p = geom['panels'][panel_name]
+        # for k in p.keys():
+        #     print(k, p[k])
+        # print('\n')
         dist = 0
         if p['coffset']:
             dist += p['coffset']
         if isinstance(p['clen'], str):
-            pad.clen = p['clen']
+            pad.crystfel_clen = p['clen']
         else:
             if p['clen'] != -1:  # Why is clen sometimes -1?  Very annoying.
                 dist += p['clen']
@@ -98,9 +101,34 @@ def geometry_dict_to_pad_geometry_list(geometry_dict):
         pad.ss_vec = np.array([p['ssx'], p['ssy'], p['ssz']]) * pix
         pad.n_ss = p['max_ss'] - p['min_ss'] + 1
         pad.t_vec = np.array([p['cnx'] * pix, p['cny'] * pix, dist])
+        pad.crystfel_max_ss = p['max_ss']
+        pad.crystfel_max_fs = p['max_fs']
+        pad.crystfel_min_ss = p['min_ss']
+        pad.crystfel_min_fs = p['min_fs']
         pads.append(pad)
 
-    return detector.PADGeometryList(pads)
+    pads = detector.PADGeometryList(pads)
+    maxfs = 0
+    maxss = 0
+    for p in pads:
+        maxfs = max(maxfs, p.crystfel_max_fs)
+        maxss = max(maxss, p.crystfel_max_ss)
+    pds = (maxss+1, maxfs+1)
+    for p in pads:
+        p.parent_data_shape = pds
+        p.parent_data_slice = np.s_[p.crystfel_min_ss:p.crystfel_max_ss + 1, p.crystfel_min_fs:p.crystfel_max_fs + 1]
+    return pads
+
+
+def fix_cspad_cheetah_indexing(pads):
+    p = pads
+    for i in range(32):
+        s = slice(None, None, None)
+        p[2*i].parent_data_slice = (i, s, slice(0, 194, None))
+        p[2*i+1].parent_data_slice = (i, s, slice(194, 388, None))
+        p[2*i].parent_data_shape = (32, 185, 388)
+        p[2*i+1].parent_data_shape = (32, 185, 388)
+    return p
 
 
 def extract_geom_from_stream(stream_path, geom_path=None):

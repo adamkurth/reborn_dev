@@ -15,7 +15,11 @@
 
 r""" Classes for handling dataframes. """
 import numpy as np
-from . import detector
+from . import detector, utils
+
+
+def warn(*args, **kwargs):
+    utils.warn(':DataFrame:', *args, **kwargs)
 
 
 class DataFrame:
@@ -38,11 +42,13 @@ class DataFrame:
     _raw_data = None
     _processed_data = None
     _mask = None
+    _dataset_id = 'Unknown dataset'
     # Cached arrays
     _q_mags = None
     _q_vecs = None
     _sa = None
     _pfac = None
+    parameters = {}  # Should contain miscellaneous "parameters"; e.g. 'xrays_on', 'laser_on', etc.
 
     def __init__(self, raw_data=None, processed_data=None, mask=None, beam=None, pad_geometry=None, frame_id=0):
         if pad_geometry is not None:
@@ -95,6 +101,20 @@ class DataFrame:
             df._mask = self._mask.copy()
         return df
 
+    def concat_data(self, data):
+        if self._pad_geometry is None:
+            warn('Your PADGeometry is not defined!  Define the geometry first.')
+            return detector.concat_pad_data(data.copy())
+        else:
+            return self._pad_geometry.concat_data(data)
+
+    def split_data(self, data):
+        if self._pad_geometry is None:
+            warn('Your PADGeometry is not defined!  Cannot split data.')
+            return detector.split_pad_data(data.copy())
+        else:
+            return self._pad_geometry.split_data(data)
+
     @property
     def n_pads(self):
         r""" Number of PADs. """
@@ -146,6 +166,17 @@ class DataFrame:
         r""" See corresponding get_frame_index method. """
         self._frame_index = int(index)
 
+    def get_dataset_id(self):
+        r""" Unique identifier for the parent dataset.
+
+        For LCLS-I this would follow the "data source" convention: for example, "exp=cxil2316:run=56"
+        """
+        return self._dataset_id
+
+    def set_dataset_id(self, val):
+        r""" See the corresponding get_dataset_id method. """
+        self._dataset_id = val
+
     def get_frame_id(self):
         r""" Unique identifier for this dataframe.  Most often this is an integer, but in some cases, such as the LCLS,
         it may be something else such as a tuple.  LCLS uses a tuple of integers: seconds, nanoseconds, and fiducial."""
@@ -181,48 +212,49 @@ class DataFrame:
 
     def get_raw_data_list(self):
         r""" Get the raw data as a list of 2D arrays."""
-        return self._pad_geometry.split_data(self.get_raw_data_flat())
+        return self.split_data(self.get_raw_data_flat())
 
     def get_raw_data_flat(self):
         r""" Get the raw data as a contiguous 1D array, with all PADs concatenated."""
-        return self._raw_data.copy()
+        return self._raw_data.copy().ravel()
 
     def set_raw_data(self, data):
         r""" Set the raw data.  You may pass a list or a concatentated 1D array."""
-        self._raw_data = detector.concat_pad_data(data.copy()).astype(np.double)
+        self._raw_data = self.concat_data(data)
         self._raw_data.flags.writeable = False
         self._processed_data = None
 
     def get_mask_list(self):
         r""" Get the mask as a list of 2D arrays."""
-        return self._pad_geometry.split_data(self.get_mask_flat())
+        return self.split_data(self.get_mask_flat())
 
     def get_mask_flat(self):
         r""" Get the mask as a contiguous 1D array, with all PADs concatenated."""
         if self._mask is None:
             self.set_mask(np.ones(self.get_raw_data_flat().shape))
-        return self._mask.copy()
+        return self._mask.copy().ravel()
 
     def set_mask(self, mask):
         r""" Set the mask.  You may pass a list or a concatentated 1D array."""
-        self._mask = detector.concat_pad_data(mask.copy())
+
+        self._mask = self.concat_data(mask.copy())
         self._mask.flags.writeable = False
 
     def get_processed_data_list(self):
         r""" See corresponding _raw_ method."""
         if self._processed_data is None:
             self._processed_data = self._raw_data.copy()
-        return self._pad_geometry.split_data(self.get_processed_data_flat())
+        return self.split_data(self.get_processed_data_flat())
 
     def get_processed_data_flat(self):
         r""" See corresponding _raw_ method."""
         if self._processed_data is None:
             self._processed_data = self._raw_data.copy()
-        return self._processed_data.copy()
+        return self._processed_data.copy().ravel()
 
     def set_processed_data(self, data):
         r""" See corresponding _raw_ method."""
-        self._processed_data = detector.concat_pad_data(data).astype(np.double)
+        self._processed_data = self.concat_data(data).astype(np.double)
 
     def clear_processed_data(self):
         r""" Clear the processed data.  After this operation, the get_processed_data method will return a copy of
@@ -241,23 +273,23 @@ class DataFrame:
         if self._q_mags is None:
             self._q_mags = self._pad_geometry.q_mags(self._beam)
             self._q_mags.flags.writeable = False
-        return self._q_mags.copy()
+        return self._q_mags.copy().ravel()
 
     def get_q_mags_list(self):
         r""" Get q magnitudes as a list of 2D arrays. """
-        return self._pad_geometry.split_data(self.get_q_mags_flat())
+        return self.split_data(self.get_q_mags_flat())
 
     def get_solid_angles_flat(self):
         r""" Get pixel solid angles as flat array. """
         if self._sa is None:
             self._sa = self._pad_geometry.solid_angles()
-        return self._sa.copy()
+        return self._sa.copy().ravel()
 
     def get_polarization_factors_flat(self):
         r""" Get polarization factors as a flat array. """
         if self._pfac is None:
             self._pfac = self._pad_geometry.polarization_factors(beam=self._beam)
-        return self._pfac.copy()
+        return self._pfac.copy().ravel()
 
     # def get_bragg_peaks(self):
     #     pass
