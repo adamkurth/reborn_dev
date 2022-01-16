@@ -327,10 +327,11 @@ def scatter_plot(vecs):
 
 
 def view_finite_crystal(finite_crystal):
-
+    r""" Shows the lattice points of all the symmetry partners of a finite crystal with pyqtgraph and also the atoms of one asymmetric unit """
     lattices = finite_crystal.lattices
-    cryst = finite_crystal.crystal_structure
+    cryst = finite_crystal.cryst
     scat = Scatter3D()
+    # Plot the lattice points of each symmetry partner
     for k in range(cryst.spacegroup.n_molecules):
         x = lattices[k].occupied_x_coordinates
         r = cryst.unitcell.x2r(x + finite_crystal.au_x_coms[k])
