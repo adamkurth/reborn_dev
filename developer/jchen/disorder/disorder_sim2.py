@@ -8,7 +8,7 @@ To do:
 - Stacking fault
 
 Date Created: 2020
-Last Modified: 30 Nov 2021
+Last Modified: 3 Jan 2022
 Humans responsible: Rick Kirian, Joe Chen
 """
 
@@ -19,6 +19,8 @@ from scipy.spatial.transform import Rotation
 from reborn.simulate.clcore import ClCore
 from reborn.target import crystal
 
+
+np.random.seed(42)
 
 CMAP = 'viridis'
 import matplotlib.pyplot as plt
@@ -31,7 +33,7 @@ r_e = const.value("classical electron radius")
 #==========================================================================
 
 # Some parameters to get us started:
-pdb_id = '2LYZ'
+pdb_id = '1Jb0'
 photon_energy = 9 * keV
 resolution = 4e-10
 oversampling = 10
@@ -98,11 +100,71 @@ clcore = ClCore()
 # Note: tight_packing option => molecule COMs will be in unit cell, which is nice for displays.
 crystal_structure = crystal.CrystalStructure(pdb_id, tight_packing=True)
 
+# yay
+
+# We want to make a hexagonal lattice with ABC stacking fault
+
+
+
+# Turn the crystal into a P1 manually - this is just a label - does not affect anything
+crystal_structure.spacegroup.spacegroup_symbol = 'P 1'
+
+# Make rotations - all three rotations are the identity operator
+ok = []
+for i in range(3):
+    ok.append(np.array([[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]]))
+crystal_structure.spacegroup.sym_rotations = ok
+
+# Make translations
+a = crystal_structure.unitcell.a_vec
+b = crystal_structure.unitcell.b_vec
+
+crystal_structure.spacegroup.sym_translations = [0 for i in range(3)]
+crystal_structure.spacegroup.sym_translations[0] = np.array([0.0,0.0,0.0])
+crystal_structure.spacegroup.sym_translations[1] = (a+b)/3
+crystal_structure.spacegroup.sym_translations[2] = (2*b-a)/3
+
+# Set gamma to 60 degs
+crystal_structure.unitcell.gamma = np.pi/3
+
+
 print('Number of symmetry operations: %d' % (crystal_structure.spacegroup.n_operations,))
 print(crystal_structure.unitcell)
+print(crystal_structure.spacegroup)
+
+
 
 # Make the FiniteCrystal tool, which stores lattice coordinates + occupancies, helps create facets and more.
-finite_crystal = crystal.FiniteCrystal(crystal_structure, max_size=20)
+finite_crystal = crystal.FiniteCrystal(crystal_structure, max_size=5)
+
+
+
+# Visualise the lattice
+
+
+l1 = finite_crystal.lattices[0].occupied_r_coordinates
+l2 = finite_crystal.lattices[1].occupied_r_coordinates
+
+import matplotlib.pyplot as plt
+
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+ax.scatter(l1[:,0], l1[:,1], l1[:,2])
+ax.scatter(l2[:,0], l2[:,1], l2[:,2])
+plt.show(block=False)
+
+
+finite_crystal.crystal_structure = finite_crystal.cryst
+
+from reborn.viewers.qtviews import view_finite_crystal
+view_finite_crystal(finite_crystal)
+
+yay
+
+
+
+
+
 
 # Make the CrystalDensityMap tool, which chooses sensible grid points along with symmetry transform operators.
 density_map = crystal.CrystalDensityMap(cryst=crystal_structure, resolution=resolution, oversampling=oversampling)
@@ -133,8 +195,10 @@ finite_crystal.make_parallelepiped((5, 7, 3))
 print('Making crystal surface')
 x_crappy_surface = []
 for k in range(len(finite_crystal.lattices)):
+
     # Here are the occupied coordinates of the kth lattice
     x = finite_crystal.lattices[k].occupied_x_coordinates.copy()
+
     # The above lattice is centered at the origin, but that's not representative of where the center of mass of the
     # molecules is.  However, the FiniteCrystal class stores those COMs for us -- here's the COM of the kth molecule:
     com = finite_crystal.au_x_coms[k]
@@ -167,6 +231,8 @@ lims = density_map.h_limits * 2 * np.pi
 print('Calculating the diffraction') 
 for k in range(crystal_structure.spacegroup.n_molecules):
     print(k)
+
+    # Use the coordinates worked on above to calculate the diffraction 
     x = x_crappy_surface[k]
     # x = finite_crystal.lattices[k].occupied_x_coordinates
 
