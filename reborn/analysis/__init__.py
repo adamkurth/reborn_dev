@@ -15,4 +15,5 @@
 
 from . import optimize
 from . import peaks
+from . import runstats
 from . import svd
