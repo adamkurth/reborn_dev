@@ -17,8 +17,8 @@ np.random.seed(0)
 
 
 # flip this to True to show histograms of the randomized data
-show_plots = False
-save_npz = True
+show_plots = True
+save_npz = False
 
 """
 =================================
@@ -28,7 +28,7 @@ Set up the simulation parameters
 
 config = {'n_steps': 20, # number of helium chamber spatial steps
             'bin_pixels': 10, # pixel bin size
-            'n_shots': 2, #1000, # number of exposure events to integrate
+            'n_shots': 50, #1000, # number of exposure events to integrate
             'detector_distance': 0.056, # m
             'gas_pathlength': [-0.02, 0.03], # m, [len of gas before interaction region, len of gas after]
             'kapton_window_diameter': 0.31115, # m, 12.25 inches. Any pixels outside of this diameter are masks 
@@ -36,7 +36,7 @@ config = {'n_steps': 20, # number of helium chamber spatial steps
             'nominal_sample_path_length': 5, # um, nominal sampe thickness, will add noise around this value
             'temperature': 293.15, # K
             'pressure': 101325.0, # Pa = 1 atm
-            'histogram_bins': 5,
+            'histogram_bins': 20,
             'photon_energy_random_scale': 1,
             'sample_thickness_random_scale': 1/6
             }
@@ -85,7 +85,9 @@ if show_plots:
 if show_plots:
     # show the histogram plots
     fig.suptitle(f"Randomized Data -- {config['n_shots']} Total Shots")
+    plt.savefig(np_save+'histograms.png')
     plt.show()
+    sys.exit()
 
 
 
