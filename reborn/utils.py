@@ -107,7 +107,7 @@ def vec_mag(vec):
     return np.sqrt(np.sum(vec * vec, axis=(vec.ndim - 1)))
 
 
-def depreciate(message):
+def depreciate(*message, caller=0, **kwargs):
     r"""
     Utility for sending warnings when some class, method, function, etc. is depreciated.  It simply prints a message of
     the form "WARNING: DEPRECIATION: blah blah blah" but perhaps it will do someting more sophisticated in the future
@@ -118,10 +118,13 @@ def depreciate(message):
 
     Returns: None
     """
-    warn('DEPRECIATION: ' + message)
+    msg = "WARNING:DEPRECIATION:"
+    if caller:
+        msg += get_caller(1)+':'
+    print(msg, *message, **kwargs)
 
 
-def warn(message):
+def warn(*message, caller=0, **kwargs):
     r"""
     Standard way of sending a warning message.  As of now this simply results in a function call
 
@@ -130,11 +133,15 @@ def warn(message):
     The purpose of this function is that folks can search for "WARNING:" to find all warning messages, e.g. with grep.
 
     Arguments:
-        message: the message you want to have printed.
+        message: The message you want to have printed.
+        caller (int): Prefix the warning message with name of function calling warn.
 
     Returns: None
     """
-    sys.stdout.write("WARNING: %s\n" % message)
+    msg = "WARNING:"
+    if caller:
+        msg += get_caller(1)+':'
+    print(msg, *message, **kwargs)
 
 
 def debug(*args, **kwargs):
@@ -149,7 +156,7 @@ def debug(*args, **kwargs):
     logger.debug(*args, **kwargs)
 
 
-def error(message):
+def error(*message, caller=0, **kwargs):
     r"""
     Standard way of sending an error message.  As of now this simply results in a function call
 
@@ -160,7 +167,10 @@ def error(message):
 
     Returns: None
     """
-    sys.stderr.write("ERROR: %s\n" % message)
+    msg = "ERROR:"
+    if caller:
+        msg += get_caller(1)+':'
+    print(msg, *message, **kwargs)
 
 
 def random_rotation():

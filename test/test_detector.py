@@ -312,4 +312,12 @@ def test_groups():
     assert(gn[0] == 'cspad')
     assert(gn[1] == 'epix')
 
-
+def test_names():
+    pads = detector.cspad_2x2_pad_geometry_list()
+    pads[0].name = 'hello'
+    pads[1].name = 'hello'
+    pads[2].name = '3'
+    pads.assign_names()
+    assert(pads[0].name == '0')
+    assert(pads[1].name == '1')
+    assert(pads[2].name == '2')

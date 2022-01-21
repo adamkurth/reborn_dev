@@ -26,6 +26,8 @@ class Plugin():
 
 class Widget(QtGui.QWidget):
 
+    previous_mask = None
+
     def __init__(self, padview):
         super().__init__()
         bold = QtGui.QFont()
@@ -42,6 +44,14 @@ class Widget(QtGui.QWidget):
         padview.set_shortcut(QtCore.Qt.Key_Space, self.apply_mask)
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Space), self).activated.connect(self.apply_mask)
         self.layout.addWidget(label, row, 1)
+        row += 1
+        self.clear_button = QtGui.QPushButton("Clear mask")
+        self.clear_button.clicked.connect(padview.clear_masks)
+        self.layout.addWidget(self.clear_button, row, 1, 1, 2)
+        row += 1
+        self.undo_button = QtGui.QPushButton("Undo")
+        self.undo_button.clicked.connect(padview.clear_masks)
+        self.layout.addWidget(self.undo_button, row, 1, 1, 2)
         row += 1
         self.visible_button = QtGui.QPushButton("Toggle mask visible")
         self.visible_button.clicked.connect(padview.toggle_masks)
@@ -142,59 +152,56 @@ class Widget(QtGui.QWidget):
         self.layout.addWidget(self.load_button, row, 1, 1, 2)
         self.setLayout(self.layout)
 
+    def undo(self):
+        if self.previous_mask is not None:
+            m = self.padview.dataframe.get_mask_flat()
+            self.padview.dataframe.set_mask(self.previous_mask)
+            self.padview.update_masks()
+            self.previous_mask = m
+
     def apply_mask(self):
-        self.padview.debug('apply_mask', 1)
-        mask = self.padview.dataframe.get_mask_flat()  # reborn.detector.concat_pad_data(self.padview.mask_data)
-        data = None
-        if self.mask_radio.isChecked():
-            setval = 0
-        elif self.unmask_radio.isChecked():
-            setval = 1
-        else:
-            setval = None
+        self.padview.debug()
+        mask = self.padview.dataframe.get_mask_flat()
+        self.previous_mask = mask.copy()
+        geom = self.padview.dataframe.get_pad_geometry()
+        data = geom.concat_data(self.padview.get_pad_display_data())
+        select = geom.zeros(dtype=int)
         if self.everywhere_radio.isChecked():
-            inds = np.arange(mask.size)
+            select[:] = 1
         else:
             inds, typ = self.padview.get_hovering_roi_indices()
             if inds is None:
-                self.padview.debug('No ROI selected', 1)
+                self.padview.debug('No ROI selected')
                 return
+            select[inds] = 1
             if self.outside_radio.isChecked():
-                inds = -(inds - 1)
+                select = -(select - 1)
         if self.above_upper_checkbox.isChecked():
             thresh = self.padview.get_levels()[1]
-            if data is None:
-                data = reborn.detector.concat_pad_data(self.padview.get_pad_display_data())
-            inds[data <= thresh] = 0
+            select *= (data > thresh)
         if self.below_upper_checkbox.isChecked():
             thresh = self.padview.get_levels()[1]
-            if data is None:
-                data = reborn.detector.concat_pad_data(self.padview.get_pad_display_data())
-            inds[data > thresh] = 0
+            select *= (data < thresh)
         if self.above_lower_checkbox.isChecked():
             thresh = self.padview.get_levels()[0]
-            if data is None:
-                data = reborn.detector.concat_pad_data(self.padview.get_pad_display_data())
-            inds[data <= thresh] = 0
+            select *= (data > thresh)
         if self.below_lower_checkbox.isChecked():
             thresh = self.padview.get_levels()[0]
-            if data is None:
-                data = reborn.detector.concat_pad_data(self.padview.get_pad_display_data())
-            inds[data > thresh] = 0
+            select *= (data < thresh)
         if self.pad_under_mouse_checkbox.isChecked():
             x, y, pid = self.padview.get_pad_coords_from_mouse_pos()
-            inds = reborn.detector.split_pad_data(self.padview.pad_geometry, inds)
-            for i in range(self.padview.n_pads):
-                if i == pid:
-                    continue
-                inds[i][:, :] = 0
-            inds = reborn.detector.concat_pad_data(inds)
-        if setval is None:
-            mask[inds] = -(mask[inds] - 1)
-        else:
-            print(mask.shape)
-            print(inds.shape)
-            mask[inds] = setval
+            pids = []
+            for (i, p) in enumerate(geom):
+                d = p.zeros() + i
+                pids.append(d)
+            pids = geom.concat_data(pids)
+            select[pids != pid] = 0
+        if self.mask_radio.isChecked():
+            mask[select == 1] = 0
+        elif self.unmask_radio.isChecked():
+            mask[select == 1] = 1
+        elif self.invert_radio.isChecked():
+            mask[select == 1] = -(mask[select == 1] - 1)
         self.padview.dataframe.set_mask(mask)
         self.padview.update_masks()
 

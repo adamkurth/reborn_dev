@@ -1,8 +1,6 @@
-import sys
-from time import time
+""" Example """
 import numpy as np
 from scipy import constants
-import matplotlib.pyplot as plt
 from reborn import source, detector
 from reborn.target import molecule, crystal, atoms
 from reborn.simulate import gas, solutions
@@ -23,12 +21,10 @@ h2o_intensity = solutions.get_pad_solution_intensity(beam=beam, pad_geometry=pad
 h2o_intensity = pads.concat_data(h2o_intensity)
 he_mol = molecule.Molecule(coordinates=np.array([[0, 0, 0]]), atomic_numbers=[2, 2])
 q_profile = np.linspace(q_mags.min(), q_mags.max(), 100)
-# he_profile = np.abs(atoms.cmann_henke_scattering_factors(q_profile, 2, beam=beam))**2
-# he_profile = np.abs(atoms.hubbel_henke_scattering_factors(q_profile, 2, beam=beam))**2
 he_profile = gas.isotropic_gas_intensity_profile(molecule=he_mol, beam=beam, q_mags=q_profile)
 n_gas_molecules = np.pi * (beam.diameter_fwhm/2)**2 * gas_length * pressure / k / temperature
-gas_intensity = beam.photon_number_fluence * n_gas_molecules * r_e**2 * np.interp(q_mags, q_profile, he_profile) * pads.solid_angles() * pads.polarization_factors(beam=beam)
-# gas_intensity *= beam.photon_number_fluence
+gas_intensity = beam.photon_number_fluence * n_gas_molecules * r_e**2 * np.interp(q_mags, q_profile, he_profile) * \
+                pads.solid_angles() * pads.polarization_factors(beam=beam)
 if poisson:
     gas_intensity = np.random.poisson(gas_intensity).astype(np.double)
 total_intensity = h2o_intensity + gas_intensity

@@ -466,7 +466,7 @@ class PADGeometry:
         Returns: |ndarray|
         """
         if beam is None:
-            utils.warn('You need to define the beam.')
+            utils.warn('You need to define the beam.', caller=1)
             beam_vec = dict_default(kwargs, 'beam_vec', None)
             beam = source.Beam(beam_vec=beam_vec)
         return self.s_vecs() - beam.beam_vec
@@ -486,7 +486,7 @@ class PADGeometry:
         Returns: |ndarray|
         """
         if beam is None:
-            utils.warn('You need to define the beam.')
+            utils.warn('You need to define the beam.', caller=1)
             beam_vec = dict_default(kwargs, 'beam_vec', None)
             wavelength = dict_default(kwargs, 'wavelength', None)
             beam = source.Beam(beam_vec=beam_vec, wavelength=wavelength)
@@ -502,7 +502,7 @@ class PADGeometry:
         Returns: |ndarray|
         """
         if beam is None:
-            utils.warn('You need to define the beam.')
+            utils.warn('You need to define the beam.', caller=1)
             beam_vec = dict_default(kwargs, 'beam_vec', None)
             beam = source.Beam(beam_vec=beam_vec)
         return utils.vec_mag(self.ds_vecs(beam=beam))
@@ -518,7 +518,7 @@ class PADGeometry:
         Returns: |ndarray|
         """
         if beam is None:
-            utils.warn('You need to define the beam.')
+            utils.warn('You need to define the beam.', caller=1)
             beam_vec = dict_default(kwargs, 'beam_vec', None)
             wavelength = dict_default(kwargs, 'wavelength', None)
             beam = source.Beam(beam_vec=beam_vec, wavelength=wavelength)
@@ -610,7 +610,7 @@ class PADGeometry:
         Returns: |ndarray|
         """
         if beam is None:
-            utils.warn('You need to define the beam.')
+            utils.warn('You need to define the beam.', caller=1)
             beam_vec = dict_default(kwargs, 'beam_vec', None)
             beam = source.Beam(beam_vec=beam_vec)
         return np.arccos(utils.vec_norm(self.position_vecs()).dot(beam.beam_vec.ravel()))
@@ -673,23 +673,23 @@ class PADGeometry:
         """
         return dat.reshape(self.shape())
 
-    def zeros(self):
+    def zeros(self, *args, **kwargs):
         r"""
         For convenience: np.zeros((self.n_ss, self.n_fs))
         """
-        return np.zeros((self.n_ss, self.n_fs))
+        return np.zeros((self.n_ss, self.n_fs), *args, **kwargs)
 
-    def ones(self):
+    def ones(self, *args, **kwargs):
         r"""
         For convenience: np.ones((self.n_ss, self.n_fs))
         """
-        return np.ones((self.n_ss, self.n_fs))
+        return np.ones((self.n_ss, self.n_fs), *args, **kwargs)
 
-    def random(self):
+    def random(self, *args, **kwargs):
         r"""
         For convenience: np.random.random((self.n_ss, self.n_fs))
         """
-        return np.random.random((self.n_ss, self.n_fs))  # pylint: disable=no-member
+        return np.random.random((self.n_ss, self.n_fs), *args, **kwargs)  # pylint: disable=no-member
 
     def max_resolution(self, beam=None):
         r"""
@@ -735,8 +735,8 @@ class PADGeometry:
         if not isinstance(binning, int):
             raise ValueError('binning should be an integer')
         p = self.copy()
-        p.n_fs = np.int(p.n_fs / binning)
-        p.n_ss = np.int(p.n_ss / binning)
+        p.n_fs = int(p.n_fs / binning)
+        p.n_ss = int(p.n_ss / binning)
         p.t_vec += (p.fs_vec + p.ss_vec) * (binning - 1) / 2
         p.fs_vec *= binning
         p.ss_vec *= binning
@@ -804,6 +804,7 @@ class PADGeometryList(list):
 
     def validate(self):
         r""" Same as the matching method in |PADGeometry|."""
+        self.assign_names()
         status = True
         if self.defines_slicing():
             p0 = self[0]
@@ -897,6 +898,19 @@ class PADGeometryList(list):
             raise ValueError('No PAD named', name)
         return pad
 
+    def assign_names(self):
+        r""" Make sure that all |PADGeometry| instances have unique names. """
+        for (i, p) in enumerate(self):
+            if (p.name == 'None') or (p.name is None):
+                p.name = '%d'%i
+        names = [p.name for p in self]
+        repeats = [x for x in names if names.count(x) > 1]
+        if repeats:
+            for (i, p) in enumerate(self):
+                if p.name in repeats:
+                    p.name = None
+            self.assign_names()
+
     def defines_slicing(self):
         r""" False if any of the |PADGeometry| instances does not have a parent_data_slice or parent_data_shape
         defined.  True otherwise. """
@@ -923,17 +937,6 @@ class PADGeometryList(list):
             return data.ravel()
         return np.reshape(data, shape)
 
-    def _split_data(self, data):
-        r""" Split a contiguous 1D |ndarray| into list of 2D |ndarray| instances."""
-        if self.defines_slicing():
-            self.validate()
-            datalist = []
-            d = np.reshape(data, self.parent_data_shape)
-            for p in self:
-                datalist.append(d[p.parent_data_slice])
-            return datalist
-        return split_pad_data(self, data)
-
     def concat_data(self, data):
         r""" Concatenate a list of |ndarray| instances into a single concatenated 1D |ndarray| ."""
         if isinstance(data, list):
@@ -953,7 +956,7 @@ class PADGeometryList(list):
     def split_data(self, data):
         r""" Slice this PAD data from a parent data array. """
         if not self.defines_slicing():
-            return self._split_data(data)
+            return split_pad_data(self, data)
         return [p.slice_from_parent(data) for p in self]
 
     @property
@@ -1013,17 +1016,17 @@ class PADGeometryList(list):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
         return np.concatenate([p.beamstop_mask(beam, q_min, min_angle).ravel() for p in self])
 
-    def zeros(self):
+    def zeros(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.zeros().ravel() for p in self])
+        return np.concatenate([p.zeros(*args, **kwargs).ravel() for p in self])
 
-    def ones(self):
+    def ones(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.ones().ravel() for p in self])
+        return np.concatenate([p.ones(*args, **kwargs).ravel() for p in self])
 
-    def random(self):
+    def random(self, *args, **kwargs):
         r""" Concatenates the output of the matching method in |PADGeometry|"""
-        return np.concatenate([p.random().ravel() for p in self])
+        return np.concatenate([p.random(*args, **kwargs).ravel() for p in self])
 
     def max_resolution(self, beam):
         r""" Concatenates the output of the matching method in |PADGeometry|"""

@@ -1,19 +1,17 @@
-import sys
+""" Example of how to generate a polar-binned diffraction intensity map. """
 import numpy as np
 import matplotlib.pyplot as plt
-from reborn import utils, source, detector
-from reborn.viewers.qtviews import padviews
+from reborn import source, detector
 from reborn.viewers.mplviews.padviews import view_pad_data
 from reborn.simulate.examples import LysozymeFrameGetter
 beam = source.Beam(photon_energy=9000*1.602e-19)
 pads = detector.cspad_2x2_pad_geometry_list(detector_distance=0.1).binned(1)
 polar_assembler = detector.PolarPADAssembler(pad_geometry=pads, beam=beam, n_q_bins=100, n_phi_bins=100)
 fg = LysozymeFrameGetter(pad_geometry=pads, beam=beam)
+fg.view()
 pat = fg.get_frame()
 data = pat['pad_data']
 meen = polar_assembler.get_mean(data)
-# pv = padviews.PADView(frame_getter=fg)
-# pv.start()
 pc = polar_assembler.phi_bin_centers
 qc = polar_assembler.q_bin_centers
 plt.imshow(np.log10(meen+1), aspect='auto', interpolation='none',

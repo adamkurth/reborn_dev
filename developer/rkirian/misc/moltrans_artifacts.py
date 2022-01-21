@@ -51,7 +51,8 @@ intensities = np.abs(amps) ** 2
 rho = fftn(ifftshift(amps*gaus))
 
 rhoabs = np.abs(ifftshift(rho))
-pg.image(rhoabs/np.max(rhoabs))
-pg.image(intensities/1e16)
+im1 = pg.image(rhoabs/np.max(rhoabs))
+
+im2 = pg.image(intensities/1e16)
 print('Keeping open...')
 keep_open()

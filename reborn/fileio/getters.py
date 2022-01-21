@@ -19,36 +19,33 @@ import numpy as np
 class FrameGetter(ABC):
 
     r"""
-    FrameGetter is a generic interface for serving up data frames.  It exists so that we can hide the specific details
-    of where data come from (be it files on disk, shared memory, simulations, etc.) and build software that can work
-    in a way that is agnostic to the source of the data.
+    FrameGetter is a generic interface for serving up DataFrames.  It exists so that we can hide the specific details
+    of where data come from (disk, shared memory, on-the-fly simulations, etc.) and thereby build software that can work
+    in a way that is agnostic to the data source.
 
-    The FrameGetter serves up dictionaries that contain diffraction data, peak positions, x-ray source info, and so on.
-    It is assumed that frames are indexed with with integers, starting with zero.  This indexing scheme will eventually
-    be generalized in the future (for example, LCLS indexes frames by a tuple of three integers: seconds, nanoseconds,
-    and a fiducial).
+    The FrameGetter serves up |DataFrame| instances that contain diffraction raw data, x-ray |Beam| info, |PADGeometry|,
+    etc.  It is assumed that frames can be indexed with integers, starting with zero.
 
-    This FrameGetter class is only a base class -- you're not supposed to use it directly.  Instead, you should subclass
-    it.  Here is a minimal example of how to subclass it:
+    This FrameGetter class is only an Abstract Base Class (ABC).  You cannot use it directly.  Instead,
+    you must define a subclass.  Here is what the subclass should look like:
 
     .. code-block:: Python
 
         class MyFrameGetter(FrameGetter):
             def __init__(self, arguments):
                 super().__init__()
-                # Possibly set the n_frames attribute during initialization
+                # Do whatever is needed to set up the data source.
+                # Be sure to set the n_frames attribute:
                 self.n_frames = something_based_on_arguments
             def get_data(self, frame_number):
-                # Do something to fetch data with specified index
-                return {'pad_data':pad_data} or DataFrame instance
+                # Do something to fetch data and create a proper DataFrame instance
+                return mydataframe
 
     Minimally, your FrameGetter subclass should set the n_frames attribute that specifies how many frames there are, and
-    the get_data method should be defined.  The FrameGetter base class will then implement other conveniences such as
-    get_next_frame(), get_previous_frame(), etc.
-
-    The get_data() method should return a dictionary with standard keys.  The only required key at this time is
-    "pad_data" and it should point to a list of 2D numpy arrays.  We have not yet documented how to specify e.g. peak
-    lists in a standard way.
+    the get_data method should be defined such that it returns a properly constructed DataFrame instance.  The
+    FrameGetter base class will then implement other conveniences such as
+    get_next_frame(), get_previous_frame(), etc.  Eventually we hope to implement pre-fetching of dataframes to speed
+    things up (optionally).
     """
 
     _n_frames = 1

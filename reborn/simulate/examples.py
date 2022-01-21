@@ -20,7 +20,7 @@ Some simple examples for testing purposes.  Don't build any of this into your co
 import pkg_resources
 import numpy as np
 from scipy.spatial.transform import Rotation
-from .. import detector
+from .. import detector, source
 from ..fileio.getters import FrameGetter
 from ..utils import rotation_about_axis, random_unit_vector, random_beam_vector, max_pair_distance, ensure_list
 from ..target import atoms
@@ -127,16 +127,15 @@ class PDBMoleculeSimulator(object):
         #     pad_geometry = crystfel.geometry_file_to_pad_geometry_list(cspad_geom_file)
         self.random_rotation = random_rotation
 
-        if beam is not None:
-            wavelength = beam.wavelength
-        photon_energy = hc / wavelength
+        if beam is None:
+            beam = source.Beam(wavelength=wavelength)
 
         self.clcore = ClCore(group_size=32)
         cryst = CrystalStructure(pdb_file)
 
         r = cryst.molecule.coordinates
-        f = cryst.molecule.get_scattering_factors(photon_energy=photon_energy)
-        q = [pad.q_vecs(beam_vec=[0, 0, 1], wavelength=wavelength) for pad in pad_geometry]
+        f = cryst.molecule.get_scattering_factors(beam=beam)
+        q = [pad.q_vecs(beam=beam) for pad in pad_geometry]
         q = np.ravel(q)
         nq = int(len(q)/3)
 
@@ -354,5 +353,6 @@ class LysozymeFrameGetter(FrameGetter):
         self.pad_geometry = pad_geometry
 
     def get_data(self, frame_number=0):
-        pad_data = detector.split_pad_data(self.pad_geometry,  self.molsim.next())
+        pad_data = self.pad_geometry.split_data(self.molsim.next())
+        # pad_data = detector.split_pad_data(self.pad_geometry,  self.molsim.next())
         return {'pad_data': pad_data}

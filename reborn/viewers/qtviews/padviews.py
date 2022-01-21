@@ -383,14 +383,15 @@ class PADView(QtCore.QObject):
         self.set_shortcut("Ctrl+s", self.increase_skip)
         self.set_shortcut("Shift+s", self.decrease_skip)
         self.set_shortcut("m", self.toggle_masks)
-        # self.set_shortcut("t", self.mask_hovering_roi)
-        # self.set_shortcut("h", self.mask_hovering_roi_inverse)
-        # self.set_shortcut("d", self.mask_hovering_roi_toggle)
 
     def update_status_string(self, frame_number=None, n_frames=None):
         r""" Update status string at the bottom of the main window. """
         self.debug(level=3)
         strn = ''
+        if frame_number is None:
+            frame_number = self.frame_getter.current_frame
+        if n_frames is None:
+            n_frames = self.frame_getter.n_frames
         if frame_number is not None:
             strn += ' Frame %d' % (frame_number + 1)
             if n_frames is not None:
@@ -687,6 +688,9 @@ class PADView(QtCore.QObject):
         else:
             self.dataframe.set_mask(masks)
         for i in range(self.dataframe.n_pads):
+            # print(masks[i])
+            # pg.image(masks[i])
+            print('update', np.sum(masks[i]))
             self.mask_image_items[i].setImage(self.make_mask_rgba(masks[i]))
 
     def hide_masks(self):
@@ -801,7 +805,7 @@ class PADView(QtCore.QObject):
     #     self.mask_hovering_roi(toggle=True)
 
     def clear_masks(self):
-        self._mask = None
+        self.dataframe.set_mask(None)
         self.update_masks()
 
     def get_pad_display_data(self):
@@ -1092,36 +1096,18 @@ class PADView(QtCore.QObject):
     def show_next_frame(self):
         self.debug()
         self.dataframe = ensure_dataframe(self.frame_getter.get_next_frame(), self.dataframe)
-        # d = None
-        # while d is None:
-        #     d = ensure_dataframe(self.frame_getter.get_next_frame(), self.dataframe)
-        #     self.dataframe = d
-        #     if not self.skip_empty_frames:
-        #         break
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_previous_frame(self):
         self.debug()
         self.dataframe = ensure_dataframe(self.frame_getter.get_previous_frame(), self.dataframe)
-        # d = None
-        # while d is None:
-        #     d = ensure_dataframe(self.frame_getter.get_previous_frame(), self.dataframe)
-        #     self.dataframe = d
-        #     if not self.skip_empty_frames:
-        #         break
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
     def show_random_frame(self):
         self.debug()
         self.dataframe = ensure_dataframe(self.frame_getter.get_random_frame(), self.dataframe)
-        # d = None
-        # while d is None:
-        #     d = ensure_dataframe(self.frame_getter.get_random_frame(), self.dataframe)
-        #     self.dataframe = d
-        #     if not self.skip_empty_frames:
-        #         break
         self.update_display_data()
 
     # FIXME: This should be handled by the frame navigator
@@ -1145,8 +1131,8 @@ class PADView(QtCore.QObject):
         self.remove_scatter_plots()
         if self.do_peak_finding is True:
             self.find_peaks()
-        self.display_peaks()
-        self.update_status_string(frame_number=self.frame_getter.current_frame, n_frames=self.frame_getter.n_frames)
+            self.display_peaks()
+        self.update_status_string()
         self.mouse_moved(self.evt)
 
     def add_plot_item(self, *args, **kargs):

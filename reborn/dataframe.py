@@ -231,13 +231,15 @@ class DataFrame:
     def get_mask_flat(self):
         r""" Get the mask as a contiguous 1D array, with all PADs concatenated."""
         if self._mask is None:
-            self.set_mask(np.ones(self.get_raw_data_flat().shape))
+            self.set_mask(np.ones(self.get_raw_data_flat().shape, dtype=int))
         return self._mask.copy().ravel()
 
     def set_mask(self, mask):
         r""" Set the mask.  You may pass a list or a concatentated 1D array."""
-
-        self._mask = self.concat_data(mask.copy())
+        if mask is None:
+            self._mask = self._pad_geometry.ones(dtype=int)
+        else:
+            self._mask = self.concat_data(mask.copy())
         self._mask.flags.writeable = False
 
     def get_processed_data_list(self):

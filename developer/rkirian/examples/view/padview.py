@@ -42,7 +42,7 @@ class MyFrameGetter(FrameGetter):
 
 
 frame_getter = MyFrameGetter(pad_geometry)
-frame_getter.view()
+frame_getter.view(debug_level=1)
 
 # sys.exit()
 
