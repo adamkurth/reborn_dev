@@ -73,7 +73,8 @@ class Beam:
         out = ''
         out += 'beam_vec: %s\n' % self.beam_vec.__str__()
         out += 'polarization_vec: %s\n' % self._polarization_vec.__str__()
-        out += 'wavelength: %s\n' % self.wavelength.__str__()
+        # out += 'wavelength: %s\n' % self.wavelength.__str__()
+        out += 'photon_energy: %s\n' % self.photon_energy.__str__()
         out += 'photon_number_fluence: %s\n' % self.photon_number_fluence.__str__()
         return out
 
@@ -223,7 +224,7 @@ class Beam:
     def save_json(self, file_name):
         r""" Save the beam as a json file. """
         with open(file_name, 'w') as f:
-            json.dump(self.to_dict(), f)
+            json.dump(self.to_dict(), f, sort_keys=True, indent=0)
 
     def load_json(self, file_name):
         r""" Save the beam as a json file. """

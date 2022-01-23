@@ -293,6 +293,26 @@ class DataFrame:
             self._pfac = self._pad_geometry.polarization_factors(beam=self._beam)
         return self._pfac.copy().ravel()
 
+    # def save(self, filename):
+    #     np.savez(filename, dataset_id=self._dataset_id,
+    #                        frame_id=self._frame_id,
+    #                        pad_geometry=self._pad_geometry,
+    #                        beam=self._beam,
+    #                        raw_data=self._raw_data,
+    #                        processed_data=self._processed_data,
+    #                        mask=self._mask)
+    #
+    # def load(self, filename):
+    #     dat = np.load(filename)
+    #     self.set_dataset_id(utils.key_value_default(dat, 'dataset_id'))
+    #     self.set_frame_id(utils.key_value_default(dat, 'frame_id', 0))
+    #     self.set_pad_geometry(utils.key_value_default(dat, 'pad_geometry'))
+    #     self.set_beam(utils.key_value_default(dat, 'beam'))
+    #     self.set_raw_data(utils.key_value_default(dat, 'raw_data'))
+    #     self.set_processed_data(utils.key_value_default(dat, 'processed_data'))
+    #     self.set_mask(utils.key_value_default(dat, 'mask'))
+
+
     # def get_bragg_peaks(self):
     #     pass
     #

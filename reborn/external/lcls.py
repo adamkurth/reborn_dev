@@ -172,6 +172,26 @@ class EpicsTranslationStageMotion:
         return p
 
 
+class TranslationMotion:
+    r""" A class that updates PADGeometry with a shift. """
+    def __init__(self, vector=np.array([0, 0, 1e-3])):
+        r"""
+        Arguments:
+            vector (|ndarray|): The translation to apply to the PADGeometry
+        """
+        self.vector = np.array(vector)
+    def modify_geometry(self, pad_geometry, event):
+        r""" Modify the PADGeometryList.
+
+        Arguments:
+            pad_geometry (|PADGeometryList|): PAD geometry.
+            event (psana.Event): A psana event from which the stage position derives.
+        """
+        p = pad_geometry.copy()
+        p.translate(self.vector)
+        return p
+
+
 class AreaDetector(object):
     r"""
     Thin wrapper for psana.Detector class. Adds methods to generate list of PADGeometry instances and to split the PAD
@@ -203,7 +223,8 @@ class AreaDetector(object):
         self.motions = motions
         if isinstance(motions, str):
             self.motions = [EpicsTranslationStageMotion(epics_pv=motions)]
-
+        if isinstance(motions, list):
+            self.motions = [TranslationMotion(vector=motions)]
         if self.detector_type == 'cspad':
             self.splitter = lambda data: pad_to_asic_data_split(data, 1, 2)
         if self.detector_type == 'epix10k2m':
@@ -253,10 +274,9 @@ class AreaDetector(object):
     def get_pad_geometry(self, event):
         """ See documentation for the function get_pad_geometry(). """
         geometry = self._home_geometry.copy()
-        if self.motions is None:
-            return geometry
-        for m in self.motions:
-            geometry = m.modify_geometry(geometry, event)
+        if self.motions:
+            for m in self.motions:
+                geometry = m.modify_geometry(geometry, event)
         return geometry
 
     def split_pad(self, data):

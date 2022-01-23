@@ -80,6 +80,22 @@ def ensure_list(obj):
     return [obj]
 
 
+def key_value_default(dat, key, default=None):
+    r""" Check if a dict has a key.  Return the value if so, else return a default value.
+
+    Arguments:
+        dat (dict): Dictionary.
+        key (str): Key name.
+        default (object): What to return if the key does not exist.  Default is None.
+
+    Returns: object
+    """
+    if key not in dat.keys():
+        return default
+    else:
+        return dat[key]
+
+
 def vec_norm(vec):
     r"""
     Compute normal vectors, which have lengths of one.

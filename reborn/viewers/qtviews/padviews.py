@@ -18,6 +18,7 @@ import os
 import glob
 import importlib
 import pickle
+import json
 import numpy as np
 import pkg_resources
 import functools
@@ -125,6 +126,7 @@ class PADView(QtCore.QObject):
     peak_style = {'pen': pg.mkPen('g'), 'brush': None, 'width': 5, 'size': 10, 'pxMode': True}
 
     sig_geometry_changed = QtCore.pyqtSignal()
+    sig_beam_changed = QtCore.pyqtSignal()
 
     def __init__(self, pad_geometry=None, mask_data=None, frame_getter=None, raw_data=None, pad_data=None,
                  beam=None, percentiles=None, debug_level=0):
@@ -208,6 +210,9 @@ class PADView(QtCore.QObject):
         self.setup_image_items()
         self.show_frame()
         self.main_window.show()
+        self.sig_geometry_changed.connect(self.update_rings)
+        self.sig_beam_changed.connect(self.update_rings)
+        # self.sig_geometry_changed.connect(self.update_rings)
         self.debug('initialization complete')
 
     def debug(self, *args, level=1, **kwargs):
@@ -228,6 +233,7 @@ class PADView(QtCore.QObject):
 
     @property
     def dataframe(self):
+        r""" The current |DataFrame| instance. """
         return self._dataframe
 
     @dataframe.setter
@@ -340,17 +346,20 @@ class PADView(QtCore.QObject):
         mask_menu = self.menubar.addMenu('Mask')
         add_menu(mask_menu, 'Clear masks', connect=self.clear_masks)
         add_menu(mask_menu, 'Toggle masks visible', connect=self.toggle_masks)
-        add_menu(mask_menu, 'Choose mask color', connect=self.choose_mask_color)
+        # add_menu(mask_menu, 'Choose mask color', connect=self.choose_mask_color)
         # add_menu(mask_menu, 'Mask PADs by name', connect=self.mask_pads_by_names)
         # add_menu(mask_menu, 'Mask panel edges...', connect=self.mask_panel_edges)
         # add_menu(mask_menu, 'Mask above upper limit', connect=self.mask_upper_level)
         # add_menu(mask_menu, 'Mask below lower limit', connect=self.mask_lower_level)
         # add_menu(mask_menu, 'Mask outside limits', connect=self.mask_levels)
-        add_menu(mask_menu, 'Add rectangle ROI', connect=self.add_rectangle_roi)
-        add_menu(mask_menu, 'Add circle ROI', connect=self.add_circle_roi)
-        add_menu(mask_menu, 'Toggle ROIs visible', connect=self.toggle_rois)
+        # add_menu(mask_menu, 'Add rectangle ROI', connect=self.add_rectangle_roi)
+        # add_menu(mask_menu, 'Add circle ROI', connect=self.add_circle_roi)
+        # add_menu(mask_menu, 'Toggle ROIs visible', connect=self.toggle_rois)
         add_menu(mask_menu, 'Save mask...', connect=self.save_masks)
         add_menu(mask_menu, 'Load mask...', connect=self.load_masks)
+        beam_menu = self.menubar.addMenu('Beam')
+        add_menu(beam_menu, 'Save beam...', connect=self.save_beam)
+        add_menu(beam_menu, 'Load beam...', connect=self.load_beam)
         plugin_menu = self.menubar.addMenu('Plugins')
         self.plugin_names = []
         for plg in sorted(glob.glob(os.path.join(plugin_path, '*.py'))):
@@ -640,7 +649,7 @@ class PADView(QtCore.QObject):
         else:
             self.hide_pad_labels()
 
-    def apply_pad_transform(self, im, p):
+    def _apply_pad_transform(self, im, p):
         self.debug(level=2)
         f = p.fs_vec.copy()
         s = p.ss_vec.copy()
@@ -649,7 +658,7 @@ class PADView(QtCore.QObject):
         trans.setMatrix(s[0], s[1], s[2], f[0], f[1], f[2], t[0], t[1], t[2])
         im.setTransform(trans)
 
-    def make_mask_rgba(self, mask):
+    def _make_mask_rgba(self, mask):
         d = mask
         mask_rgba = np.zeros((d.shape[0], d.shape[1], 4))
         r = np.zeros_like(d)
@@ -690,8 +699,7 @@ class PADView(QtCore.QObject):
         for i in range(self.dataframe.n_pads):
             # print(masks[i])
             # pg.image(masks[i])
-            print('update', np.sum(masks[i]))
-            self.mask_image_items[i].setImage(self.make_mask_rgba(masks[i]))
+            self.mask_image_items[i].setImage(self._make_mask_rgba(masks[i]))
 
     def hide_masks(self):
         self.debug()
@@ -855,19 +863,23 @@ class PADView(QtCore.QObject):
         self.set_levels_by_percentiles()
 
     def update_pads(self):
-        r""" Update the data shown in the PAD image items. """
+        r""" Update the data that is displayed. """
         self.debug()
         data = self.get_pad_display_data()
         if data is None:
             self.debug('get_pad_display_data returned None!')
             return
-        for i in range(self.dataframe.n_pads): self.pad_image_items[i].setImage(data[i])
-        if self._auto_percentiles is not None: self.set_levels_by_percentiles(percents=self._auto_percentiles)
+        for i in range(self.dataframe.n_pads):
+            d = np.nan_to_num(data[i])
+            self.pad_image_items[i].setImage(d)
+        if self._auto_percentiles is not None:
+            self.set_levels_by_percentiles(percents=self._auto_percentiles)
         self.histogram.regionChanged()
         self.set_title()
 
     # FIXME: We also need an update_beam method.
     def update_pad_geometry(self, pad_geometry=None):
+        r""" Update the PAD geometry.  Apply Qt transforms.  Also emits the sig_geometry_changed signal."""
         self.debug()
         if pad_geometry is None:
             pad_geometry = self.dataframe.get_pad_geometry()
@@ -875,16 +887,24 @@ class PADView(QtCore.QObject):
             self.dataframe.set_pad_geometry(pad_geometry)
         for i in range(self.dataframe.n_pads):
             if self.pad_image_items is not None:
-                self.apply_pad_transform(self.pad_image_items[i], pad_geometry[i])
+                self._apply_pad_transform(self.pad_image_items[i], pad_geometry[i])
             if self.mask_image_items is not None:
-                self.apply_pad_transform(self.mask_image_items[i], pad_geometry[i])
+                self._apply_pad_transform(self.mask_image_items[i], pad_geometry[i])
         if self.pad_labels is not None:
             self.toggle_pad_labels()
             self.toggle_pad_labels()
         self.sig_geometry_changed.emit()
 
+    def update_beam(self, beam=None):
+        r""" Update the |Beam|.  Emits the sig_beam_changed signal. """
+        self.debug()
+        if beam is None:
+            return
+        self.dataframe.set_beam(beam)
+        self.sig_beam_changed.emit()
+
     def set_auto_level_percentiles(self, percents=(1, 99)):
-        r""" Set to None if auto scaling is not desired """
+        r""" Set to None if auto-scaling is not desired """
         self.debug()
         self._auto_percentiles = percents
         self.update_display_data()
@@ -910,20 +930,47 @@ class PADView(QtCore.QObject):
                                                                  options=options)
         if file_name == "":
             return
-        self.debug('Loading PAD geometry to file: %s' % file_name)
+        self.debug('Loading PAD geometry from file: %s' % file_name)
         pads = detector.load_pad_geometry_list(file_name)
         self.update_pad_geometry(pads)
 
-    def vector_to_view_coords(self, vec):
-        r""" If you have a vector (or vectors) pointing in some direction in space, this function will tell you the 2D
-        point at which it intercepts with the view plane (the plane 1 meter away from the origin)."""
+    def save_beam(self):
+        r""" Save beam specifications in json format. """
+        self.debug()
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getSaveFileName(self.main_window, "Save Beam", "beam",
+                                                          "reborn Beam File (*.json);;",
+                                                                 options=options)
+        if file_name == "":
+            return
+        self.debug('Saving Beam to file: %s' % file_name)
+        source.save_beam(self.dataframe.get_beam(), file_name)
+
+    def load_beam(self):
+        r""" Load beam specifications in json format. """
+        self.debug()
+        options = QtGui.QFileDialog.Options()
+        file_name, file_type = QtGui.QFileDialog.getOpenFileName(self.main_window, "Load Beam", "beam",
+                                                          "reborn Beam File (*.json);;",
+                                                                 options=options)
+        if file_name == "":
+            return
+        self.debug('Loading Beam from file: %s' % file_name)
+        beam = source.load_beam(file_name)
+        self.update_beam(beam)
+
+    @staticmethod
+    def vector_to_view_coords(vec):
+        r""" If you have a vector (or vectors) pointing in some direction in space, this function provides the
+        point at which it intercepts with the view plane (the plane that is 1 meter away from the origin)."""
         vec = np.atleast_2d(vec)
         vec = (vec.T / np.squeeze(vec[:, 2])).T.copy()
         vec[:, 2] = 1
         return np.squeeze(vec)
 
-    # FIXME: Needs good documentation.
     def get_pad_coords_from_view_coords(self, view_coords):
+        r""" Get PAD coordinates (slow-scan index, fast-scan index, PAD index) from view coordinates.  The view
+        coordinates correspond to the plane that is 1 meter away from the origin."""
         self.debug(level=3)
         x = view_coords[0]
         y = view_coords[1]
@@ -937,16 +984,16 @@ class PADView(QtCore.QObject):
                 break
         return ss_idx, fs_idx, pad_idx
 
-    # FIXME: Needs good documentation.
     def get_pad_coords_from_mouse_pos(self):
+        r""" Maps mouse cursor position to view coordinates, then maps the view coords to PAD coordinates."""
         self.debug(level=3)
         view_coords = self.get_view_coords_from_mouse_pos()
         ss_idx, fs_idx, pad_idx = self.get_pad_coords_from_view_coords(view_coords)
-        self.debug('\tpad coords: '+(ss_idx, fs_idx, pad_idx).__str__(), level=3)
+        self.debug('PAD coords: '+(ss_idx, fs_idx, pad_idx).__str__(), level=3)
         return ss_idx[0], fs_idx[0], pad_idx
 
     def get_view_coords_from_mouse_pos(self):
-        r""" These are the real-space coordinates in the plane situated 1 meter from the interaction point. """
+        r""" Map the current mouse cursor position to the display plane situated 1 meter from the interaction point. """
         self.debug(level=3)
         if self.evt is None:  # Note: self.evt is updated by _mouse_moved
             return 0, 0
@@ -960,8 +1007,9 @@ class PADView(QtCore.QObject):
         return vb.mapSceneToView(vb.mapToScene(vb.rect()).boundingRect()).boundingRect().getRect()
 
     def mouse_moved(self, evt):
+        r""" Updates the status string with info about mouse position (e.g. data value under cursor)."""
         self.debug(level=3)
-        self.debug('\tmouse position: ' + evt.__str__(), level=3)
+        self.debug('mouse position: ' + evt.__str__(), level=3)
         if evt is None:
             return
         self.evt = evt
@@ -980,43 +1028,67 @@ class PADView(QtCore.QObject):
 
     def edit_ring_radii(self):
         self.debug()
-        text, ok = QtGui.QInputDialog.getText(self.main_window, "Enter ring radii (comma separated)", "Ring radii",
-                                              QtGui.QLineEdit.Normal, "100,200")
+        text, ok = QtGui.QInputDialog.getText(self.main_window, "Enter ring radii (dict format)", "Ring radii",
+                                              QtGui.QLineEdit.Normal,
+                                              '{"q_mags":[], "d_spacings":[], "radii":[], "angles":[], "pens":[]}')
         if ok:
-            if text == '':
-                self.remove_rings()
-                return
-            r = text.split(',')
-            rad = []
-            for i in range(0, len(r)):
-                try:
-                    rad.append(float(r[i].strip()))
-                except:
-                    pass
+            d = json.loads(text)
+            # if text == '':
+            #     self.remove_rings()
+            #     return
+            # r = text.split(',')
+            # rad = []
+            # for i in range(0, len(r)):
+            #     try:
+            #         rad.append(float(r[i].strip()))
+            #     except:
+            #         pass
             self.remove_rings()
-            self.add_rings(rad)
+            self.add_rings(**d)
 
-    # FIXME: Rings are dependent on beam and geometry.  They need to be updated as needed.
+    # FIXME: Rings are dependent on beam and geometry.  They need to be updated when the beam changes.
     # FIXME: Add option to put labels on rings that indicate resolution or q magnitudes.
-    def add_rings(self, radii=[], pens=None, radius_handle=False):
+    def add_rings(self, radii=None, angles=None, q_mags=None, d_spacings=None, pens=None):
         r""" Plot rings.  Note that these are in a plane located 1 meter from the sample position; calculate the radius
-        Needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is tan(theta)"""
+        Needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is
+        tan(theta)"""
         self.debug()
-        if not isinstance(radii, (list,)):
-            radii = [radii]
+        if radii:
+            radii = utils.ensure_list(radii)
+        elif angles:
+            angles = np.array(utils.ensure_list(angles))
+            radii = np.tan(angles)
+        elif q_mags:
+            q_mags = np.array(utils.ensure_list(q_mags))
+            angles = 2*np.arcsin(q_mags*self.dataframe.get_beam().wavelength/(4*np.pi))
+            radii = np.tan(angles)
+        elif d_spacings:
+            d = np.array(utils.ensure_list(d_spacings))
+            angles = 2*np.arcsin(self.dataframe.get_beam().wavelength / (2*d))
+            q_mags = 4*np.pi/d
+            radii = np.tan(angles)
+        else:
+            return
         n = len(radii)
-        if pens is None:
+        if not pens:
             pens = [pg.mkPen([255, 255, 255], width=2)]*n
-        for i in range(0, n):
-            r = 2*radii[i]
-            s = -r/2 
-            circ = pg.CircleROI(pos=[s, s], size=r, pen=pens[i])
-            circ.translatable = False
-            circ.removable = True
-            self.rings.append(circ)
-            self.viewbox.addItem(circ)
-        if not radius_handle:
-            self.hide_ring_radius_handles()
+        for (r, p, i) in zip(radii, pens, range(n)):
+            ring = pg.CircleROI(pos=[-r, -r], size=2*r, pen=p, movable=False)
+            ring.q_mag = None
+            if q_mags:
+                ring.q_mag = q_mags[i]
+            self.rings.append(ring)
+            self.viewbox.addItem(ring)
+        self.hide_ring_radius_handles()
+
+    def update_rings(self):
+        r""" Update rings (needed if the |Beam| changes). """
+        self.debug()
+        if self.rings:
+            for ring in self.rings:
+                if ring.q_mag:
+                    r = np.tan(2*np.arcsin(ring.q_mag*self.dataframe.get_beam().wavelength/(4*np.pi)))
+                    ring.setState({"pos": [-r, -r], "size": 2*r, "angle": 0})
 
     def hide_ring_radius_handles(self):
         self.debug()
@@ -1173,6 +1245,7 @@ class PADView(QtCore.QObject):
             print('CrystFEL geom not implemented.')
             pass
 
+    # FIXME: Use DataFrame methods for saving/loading
     def load_pickled_dataframe(self, file_name):
         r""" Load data in pickle format.  Should be a dictionary with keys:
 
@@ -1180,7 +1253,7 @@ class PADView(QtCore.QObject):
         """
         dataframe = reborn.fileio.misc.load_pickle(file_name)
         write('Loaded pickled dictionary:' + list(dataframe.keys()).__str__())
-        self.update_masks(dataframe['mask_data'])
+        self.update_masks(dataframe['mask'])
         self.set_pad_display_data(dataframe['pad_display_data'])
         self.beam = dataframe['beam']
         self.update_pad_geometry(dataframe['pad_geometry'])
