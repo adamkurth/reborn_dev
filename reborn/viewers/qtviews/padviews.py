@@ -1053,29 +1053,31 @@ class PADView(QtCore.QObject):
         Needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is
         tan(theta)"""
         self.debug()
-        if radii:
-            radii = utils.ensure_list(radii)
-        elif angles:
-            angles = np.array(utils.ensure_list(angles))
+        if radii is not None:
+            radii = np.squeeze(np.array(utils.ensure_list(radii)))
+        elif angles is not None:
+            angles = np.squeeze(np.array(utils.ensure_list(angles)))
             radii = np.tan(angles)
-        elif q_mags:
-            q_mags = np.array(utils.ensure_list(q_mags))
+        elif q_mags is not None:
+            q_mags = np.squeeze(np.array(utils.ensure_list(q_mags)))
             angles = 2*np.arcsin(q_mags*self.dataframe.get_beam().wavelength/(4*np.pi))
             radii = np.tan(angles)
-        elif d_spacings:
-            d = np.array(utils.ensure_list(d_spacings))
+        elif d_spacings is not None:
+            d = np.squeeze(np.array(utils.ensure_list(d_spacings)))
             angles = 2*np.arcsin(self.dataframe.get_beam().wavelength / (2*d))
             q_mags = 4*np.pi/d
             radii = np.tan(angles)
         else:
             return
         n = len(radii)
-        if not pens:
+        if pens is None:
             pens = [pg.mkPen([255, 255, 255], width=2)]*n
+        print(radii)
         for (r, p, i) in zip(radii, pens, range(n)):
+            print(r, p, i)
             ring = pg.CircleROI(pos=[-r, -r], size=2*r, pen=p, movable=False)
             ring.q_mag = None
-            if q_mags:
+            if q_mags is not None:
                 ring.q_mag = q_mags[i]
             self.rings.append(ring)
             self.viewbox.addItem(ring)
