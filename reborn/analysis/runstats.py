@@ -8,7 +8,7 @@ from ..dataframe import DataFrame
 from ..fileio.getters import ListFrameGetter
 
 
-def padstats(framegetter=None, parallel=False, n_processes=None, process_id=None, verbose=False):
+def padstats(framegetter=None, start=0, stop=None, parallel=False, n_processes=None, process_id=None, verbose=False):
     r""" EXPERIMENTAL!!!  Since we often need to loop over a series of dataframes and fetch the mean, variance, min
     max values, this function will do that for you.  You should be able to pass in any FrameGetter subclass.  You can
     try the parallel flag if you have joblib package installed... but if you parallelize, please understand that you
@@ -26,11 +26,18 @@ def padstats(framegetter=None, parallel=False, n_processes=None, process_id=None
     There is a corresponding view_padstats function to view the results in this dictionary.
 
     Returns: dict """
+    if framegetter is None:
+        raise ValueError('framegetter cannot be None')
     if parallel:
         if Parallel is None:
             raise ImportError('You need the joblib package to run padstats in parallel mode.')
-        out = Parallel(n_jobs=n_processes)(delayed(padstats)(framegetter=framegetter, parallel=False,
-                                                             n_processes=n_processes, process_id=i)
+        if not isinstance(framegetter, dict):
+            if framegetter.init_params is None:
+                raise ValueError('This FrameGetter does not have init_params attribute needed to make a replica')
+            framegetter = {'framegetter': type(framegetter), 'kwargs': framegetter.init_params}
+        out = Parallel(n_jobs=n_processes)(delayed(padstats)(framegetter=framegetter, start=start, stop=stop,
+                                                             parallel=False, n_processes=n_processes, process_id=i,
+                                                             verbose=verbose)
                                                              for i in range(n_processes))
         tot = out[0]
         for i in np.linspace(1, len(out), 1, dtype=int):
@@ -44,7 +51,9 @@ def padstats(framegetter=None, parallel=False, n_processes=None, process_id=None
         return tot
     if isinstance(framegetter, dict):
         framegetter = framegetter['framegetter'](**framegetter['kwargs'])
-    frame_ids = np.arange(framegetter.n_frames, dtype=int)
+    if stop is None:
+        stop = framegetter.n_frames
+    frame_ids = np.arange(start, stop, dtype=int)
     if process_id is not None:
         frame_ids = np.array_split(frame_ids, n_processes)[process_id]
     first = True
@@ -77,7 +86,7 @@ def padstats(framegetter=None, parallel=False, n_processes=None, process_id=None
         n_frames += 1
     return {'sum': sum_pad, 'sum2': sum_pad2, 'min': min_pad, 'max': max_pad, 'n_frames': n_frames,
             'dataset_id': dat.get_dataset_id(), 'pad_geometry': dat.get_pad_geometry(),
-            'mask': dat.get_mask_flat(), 'beam': dat.get_beam()}
+            'mask': dat.get_mask_flat(), 'beam': dat.get_beam(), 'start': start, 'stop': stop}
 
 
 def save_padstats(stats, filepath):
@@ -88,7 +97,8 @@ def load_padstats(filepath):
     return np.load(filepath)
 
 
-def view_padstats(stats):
+def padstats_framegetter(stats):
+    r""" Make a FrameGetter that can flip through the padstats result. """
     beam = stats['beam']
     geom = stats['pad_geometry']
     mask = stats['mask']
@@ -106,5 +116,9 @@ def view_padstats(stats):
         d.set_mask(mask)
         d.set_raw_data(b)
         dfs.append(d)
-    fg2 = ListFrameGetter(dfs)
-    fg2.view()
+    return ListFrameGetter(dfs)
+
+
+def view_padstats(stats):
+    fg = padstats_framegetter(stats)
+    fg.view()

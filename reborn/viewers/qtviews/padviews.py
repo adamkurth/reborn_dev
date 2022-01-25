@@ -55,10 +55,12 @@ def write(msg):
 
 class PADViewMainWindow(QtGui.QMainWindow):
     r""" A QMainWindow that closes all windows when it is closed.  Be careful... """
-    def __init__(self):
+    def __init__(self, main=True):
         super().__init__()
+        self.main = main
     def closeEvent(self, *args, **kwargs):
-        QtGui.QApplication.instance().closeAllWindows()
+        if self.main:
+            QtGui.QApplication.instance().closeAllWindows()
 
 
 def ensure_dataframe(data, parent):
@@ -129,7 +131,7 @@ class PADView(QtCore.QObject):
     sig_beam_changed = QtCore.pyqtSignal()
 
     def __init__(self, pad_geometry=None, mask_data=None, frame_getter=None, raw_data=None, pad_data=None,
-                 beam=None, percentiles=None, debug_level=0):
+                 beam=None, percentiles=None, debug_level=0, main=True):
         """
         Arguments:
             pad_geometry (|PADGeometry| list): PAD geometry information.
@@ -142,6 +144,7 @@ class PADView(QtCore.QObject):
         super().__init__()
         self.debug_level = debug_level
         self.debug()
+        self.main = main
         self._auto_percentiles = percentiles
         self.debug('frame_getter:', frame_getter)
         if frame_getter is not None:
@@ -210,7 +213,6 @@ class PADView(QtCore.QObject):
         self.setup_image_items()
         self.show_frame()
         self.main_window.show()
-        self.sig_geometry_changed.connect(self.update_rings)
         self.sig_beam_changed.connect(self.update_rings)
         # self.sig_geometry_changed.connect(self.update_rings)
         self.debug('initialization complete')
@@ -249,7 +251,7 @@ class PADView(QtCore.QObject):
 
     def setup_ui(self):
         r""" Creates the main interface: QMainWindow, menubar, statusbar, viewbox, etc."""
-        self.main_window = PADViewMainWindow() #QtGui.QMainWindow()
+        self.main_window = PADViewMainWindow(main=self.main) #QtGui.QMainWindow()
         self.menubar = self.main_window.menuBar()
         self.statusbar = self.main_window.statusBar()
         self.hbox = QtGui.QHBoxLayout()
@@ -1053,32 +1055,37 @@ class PADView(QtCore.QObject):
         Needed for an equivalent detector at that distance.  If you know the scattering angle, the radius is
         tan(theta)"""
         self.debug()
+        qq = []
+        rr = []
         if radii is not None:
-            radii = np.squeeze(np.array(utils.ensure_list(radii)))
-        elif angles is not None:
-            angles = np.squeeze(np.array(utils.ensure_list(angles)))
+            radii = np.array(radii)
+            qq += [None for _ in radii]
+            rr += [r for r in radii]
+        if angles is not None:
+            angles = np.array(angles)
             radii = np.tan(angles)
-        elif q_mags is not None:
-            q_mags = np.squeeze(np.array(utils.ensure_list(q_mags)))
+            qq += [None for _ in radii]
+            rr += [r for r in radii]
+        if q_mags is not None:
+            q_mags = np.array(q_mags)
             angles = 2*np.arcsin(q_mags*self.dataframe.get_beam().wavelength/(4*np.pi))
             radii = np.tan(angles)
-        elif d_spacings is not None:
-            d = np.squeeze(np.array(utils.ensure_list(d_spacings)))
+            qq += [q for q in q_mags]
+            rr += [r for r in radii]
+        if d_spacings is not None:
+            d = np.array(d_spacings)
             angles = 2*np.arcsin(self.dataframe.get_beam().wavelength / (2*d))
             q_mags = 4*np.pi/d
             radii = np.tan(angles)
-        else:
-            return
-        n = len(radii)
-        if pens is None:
+            qq += [q for q in q_mags]
+            rr += [r for r in radii]
+        n = len(rr)
+        pens = utils.ensure_list(pens)
+        if pens is None or len(pens) < n:
             pens = [pg.mkPen([255, 255, 255], width=2)]*n
-        print(radii)
-        for (r, p, i) in zip(radii, pens, range(n)):
-            print(r, p, i)
+        for (r, p, i) in zip(rr, pens, range(n)):
             ring = pg.CircleROI(pos=[-r, -r], size=2*r, pen=p, movable=False)
-            ring.q_mag = None
-            if q_mags is not None:
-                ring.q_mag = q_mags[i]
+            ring.q_mag = qq[i]
             self.rings.append(ring)
             self.viewbox.addItem(ring)
         self.hide_ring_radius_handles()
@@ -1488,7 +1495,8 @@ class PADView(QtCore.QObject):
     def start(self):
         self.debug()
         self.app.aboutToQuit.connect(self.stop)
-        self.app.exec_()
+        if self.main:
+            self.app.exec_()
 
     def stop(self):
         self.debug()

@@ -19,15 +19,16 @@ import numpy as np
 class FrameGetter(ABC):
 
     r"""
-    FrameGetter is a generic interface for serving up DataFrames.  It exists so that we can hide the specific details
-    of where data come from (disk, shared memory, on-the-fly simulations, etc.) and thereby build software that can work
-    in a way that is agnostic to the data source.
+    |FrameGetter| is a generic interface for serving up |DataFrames|.  It exists so that we have a standard interface
+    that hides the details of where data come from (disk, shared memory, on-the-fly simulations, etc.), which allows us
+    to build software that can work in a way that is agnostic to the data source.  This of course comes at a cost --
+    the reborn |FrameGetter| only deals with basic coherent diffraction data.
 
-    The FrameGetter serves up |DataFrame| instances that contain diffraction raw data, x-ray |Beam| info, |PADGeometry|,
-    etc.  It is assumed that frames can be indexed with integers, starting with zero.
+    The FrameGetter serves up |DataFrame| instances that contain diffraction raw data, x-ray |Beam| info, |PADGeometry|
+    info, etc.  It is assumed that a set of frames can be indexed with integers, starting with zero.
 
-    This FrameGetter class is only an Abstract Base Class (ABC).  You cannot use it directly.  Instead,
-    you must define a subclass.  Here is what the subclass should look like:
+    This FrameGetter class is only an Abstract Base Class (ABC).  You cannot use it directly.  Instead, you must define
+    a subclass.  Here is what a very simple subclass should look like:
 
     .. code-block:: Python
 
@@ -41,11 +42,35 @@ class FrameGetter(ABC):
                 # Do something to fetch data and create a proper DataFrame instance
                 return mydataframe
 
-    Minimally, your FrameGetter subclass should set the n_frames attribute that specifies how many frames there are, and
-    the get_data method should be defined such that it returns a properly constructed DataFrame instance.  The
-    FrameGetter base class will then implement other conveniences such as
-    get_next_frame(), get_previous_frame(), etc.  Eventually we hope to implement pre-fetching of dataframes to speed
-    things up (optionally).
+    Minimally, your |FrameGetter| subclass should set the n_frames attribute that specifies how many frames there
+    are, and the get_data method should be defined such that it returns a properly constructed |DataFrame| instance.
+    The |FrameGetter| base class will then implement other conveniences such as get_next_frame(), get_previous_frame(),
+    etc.  Eventually we hope to implement pre-fetching of dataframes to speed things up (optionally).
+
+    Some advanced notes:
+
+    COPY: It is sometimes useful to copy a |FrameGetter|.  Please understand that this is not always an easy thing to
+    implement because a |FrameGetter| might have pointers to file objects that should not be copied, as there may be
+    serious issues if multiple threads or processes are using that same pointer.  If you want your subclass to allow
+    copies, then you need to store all of the initialization parameters in the init_params dictionary.
+
+    PARALLEL PROCESSING: Parallel processing is not problematic so long as you create a new |FrameGetter| instance
+    within each process.  However, if you wish to allow one process to spawn multiple processes that each operates on an
+    existing |FrameGetter| instance, then you need to be mindful of the fact that it is rarely possible to pass a
+    |FrameGetter| from one process to another without creating a disaster.  To get around this, we currently use
+    the following strategy: we pass the init_params dictionary mentioned above (needed for creating a copy) along
+    with your |FrameGetter| sub-class type.  We create a dictionary like so:
+
+    .. code-block:: Python
+
+        fgd = {"framegetter": YourSubclass, "kwargs": your_init_params}
+
+    Next, you can create a new instance of the |FrameGetter| like so:
+
+    .. code-block:: Python
+
+        fg = fgd["framegetter"](**fgd["kwargs"])
+
     """
 
     _n_frames = 1
