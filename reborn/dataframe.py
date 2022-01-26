@@ -49,7 +49,6 @@ class DataFrame:
     _sa = None
     _pfac = None
     parameters = {}  # Should contain miscellaneous "parameters"; e.g. 'xrays_on', 'laser_on', etc.
-    is_dark = True
 
     def __init__(self, raw_data=None, processed_data=None, mask=None, beam=None, pad_geometry=None, frame_id=0):
         if pad_geometry is not None:
@@ -101,6 +100,12 @@ class DataFrame:
         if self._mask is not None:
             df._mask = self._mask.copy()
         return df
+
+    @property
+    def is_dark(self):
+        if self._beam is None:
+            return True
+        return False
 
     def concat_data(self, data):
         if self._pad_geometry is None:
@@ -195,7 +200,6 @@ class DataFrame:
         r""" See the corresponding get_beam method."""
         self.clear_cache()
         beam.validate()
-        self.is_dark = False
         beam = beam.copy()
         self._beam = beam
 
