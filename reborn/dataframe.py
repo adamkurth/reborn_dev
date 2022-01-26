@@ -15,7 +15,7 @@
 
 r""" Classes for handling dataframes. """
 import numpy as np
-from . import detector, utils
+from . import source, detector, utils
 
 
 def warn(*args, **kwargs):
@@ -193,8 +193,9 @@ class DataFrame:
     def set_beam(self, beam):
         r""" See the corresponding get_beam method."""
         self.clear_cache()
+        assert(isinstance(beam, source.Beam))
+        # beam.validate()
         beam = beam.copy()
-        beam.validate()
         self._beam = beam
 
     def get_pad_geometry(self):
@@ -206,8 +207,9 @@ class DataFrame:
     def set_pad_geometry(self, pads):
         r""" See the corresponding get_pad_geometry method. """
         self.clear_cache()
+        # assert(isinstance(pads, detector.PADGeometryList))
         pads = detector.PADGeometryList(pads.copy())
-        pads.validate()
+        # pads.validate()
         self._pad_geometry = pads
 
     def get_raw_data_list(self):

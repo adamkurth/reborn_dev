@@ -14,10 +14,11 @@ class MyFrameGetter(FrameGetter):
         super().__init__()
         self.n_frames = 1000
         self.init_params = {}
-        self.simulator = examples.PDBMoleculeSimulator(pdb_file=pdb, pad_geometry=geom, beam=beam)
+        # self.simulator = examples.PDBMoleculeSimulator(pdb_file=pdb, pad_geometry=geom, beam=beam)
     def get_data(self, frame_number=0):
         np.random.seed(frame_number)
-        I = self.simulator.next()
+        I = geom.q_mags()
+        # I = self.simulator.next()
         # tot = np.sum(I.ravel())
         # I *= 1e5/tot
         I = np.random.poisson(I)
