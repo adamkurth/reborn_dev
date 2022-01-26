@@ -49,6 +49,7 @@ class DataFrame:
     _sa = None
     _pfac = None
     parameters = {}  # Should contain miscellaneous "parameters"; e.g. 'xrays_on', 'laser_on', etc.
+    is_dark = True
 
     def __init__(self, raw_data=None, processed_data=None, mask=None, beam=None, pad_geometry=None, frame_id=0):
         if pad_geometry is not None:
@@ -193,8 +194,8 @@ class DataFrame:
     def set_beam(self, beam):
         r""" See the corresponding get_beam method."""
         self.clear_cache()
-        assert(isinstance(beam, source.Beam))
-        # beam.validate()
+        beam.validate()
+        self.is_dark = False
         beam = beam.copy()
         self._beam = beam
 
