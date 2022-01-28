@@ -1230,6 +1230,7 @@ def pdb_to_dict(pdb_file_path, ignore_waters=False):
                 if len(line) >= 78:
                     at = line[76:78].strip().capitalize()
                 # It is common that the atom type is not in the right place... try something else if so:
+                # The something else is the atom types column on column 3 just after the atom index on column 2.
                 if at == '':
                     at = line[12:14].strip().capitalize()
                     if poorly_formatted_atoms is False:
