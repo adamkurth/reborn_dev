@@ -13,3 +13,4 @@ c = speed_of_light
 hc = const.h*const.c
 N_A = avogadros_number
 eV = electron_volt
+r_e = classical_electron_radius

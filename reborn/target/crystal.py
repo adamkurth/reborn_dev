@@ -107,11 +107,11 @@ class UnitCell(object):
     alpha = None  #: Lattice angle in radians (float)
     beta = None  #: Lattice angle in radians (float)
     gamma = None  #: Lattice angle in radians (float)
-    volume = None  #: Unit cell volume (float)
-    o_mat = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = O.x on fractional coordinates x.
-    o_mat_inv = None  #: Inverse orthogonalization matrix (3x3 array)
-    a_mat = None  #: Orthogonalization matrix transpose (3x3 array). Does the transform q = A.h, with Miller indices h.
-    a_mat_inv = None  #: A inverse
+    # volume = None  #: Unit cell volume (float)
+    # o_mat = None  #: Orthogonalization matrix (3x3 array).  Does the transform r = O.x on fractional coordinates x.
+    # o_mat_inv = None  #: Inverse orthogonalization matrix (3x3 array)
+    # a_mat = None  #: Orthogonalization matrix transpose (3x3 array). Does the transform q = A.h, with Miller indices h.
+    # a_mat_inv = None  #: A inverse
 
     def __init__(self, a, b, c, alpha, beta, gamma):
         r"""
@@ -139,24 +139,6 @@ class UnitCell(object):
         self.beta = be
         self.gamma = ga
 
-        vol = a * b * c * np.sqrt(1 - np.cos(al)**2 - np.cos(be) **
-              2 - np.cos(ga)**2 + 2 * np.cos(al) * np.cos(be) * np.cos(ga))
-        o_mat = np.array([
-                [a, b * np.cos(ga), c * np.cos(be)],
-                [0, b * np.sin(ga), c * (np.cos(al) - np.cos(be) * np.cos(ga)) / np.sin(ga)],
-                [0, 0, vol / (a * b * np.sin(ga))]
-                ])
-        o_inv = np.array([
-                [1 / a, -np.cos(ga) / (a * np.sin(ga)), 0],
-                [0, 1 / (b * np.sin(ga)), 0],
-                [0, 0, a * b * np.sin(ga) / vol]
-                ])
-        self.o_mat = o_mat
-        self.o_mat_inv = o_inv
-        self.a_mat = o_inv.T.copy()
-        self.a_mat_inv = o_mat.T.copy()
-        self.volume = vol
-
     def __str__(self):
         s  = 'UnitCell\n'
         s += '========\n'
@@ -166,6 +148,58 @@ class UnitCell(object):
         s += self.o_mat.__str__()
         s += '\n--------\n'
         return s
+
+    @property
+    def o_mat(self):
+        a = self.a
+        b = self.b
+        c = self.c
+        al = self.alpha
+        be = self.beta
+        ga = self.gamma
+        vol = self.volume
+        o_mat = np.array([
+                [a, b * np.cos(ga), c * np.cos(be)],
+                [0, b * np.sin(ga), c * (np.cos(al) - np.cos(be) * np.cos(ga)) / np.sin(ga)],
+                [0, 0, vol / (a * b * np.sin(ga))]
+                ])
+        return o_mat
+
+    @property
+    def o_mat_inv(self):
+        a = self.a
+        b = self.b
+        c = self.c
+        al = self.alpha
+        be = self.beta
+        ga = self.gamma
+        vol = self.volume
+        o_inv = np.array([
+                [1 / a, -np.cos(ga) / (a * np.sin(ga)), 0],
+                [0, 1 / (b * np.sin(ga)), 0],
+                [0, 0, a * b * np.sin(ga) / vol]
+                ])
+        return o_inv
+
+    @property
+    def a_mat(self):
+        return self.o_mat_inv.T.copy()
+
+    @property
+    def a_mat_inv(self):
+        return self.o_mat.T.copy()
+
+    @property
+    def volume(self):
+        a = self.a
+        b = self.b
+        c = self.c
+        al = self.alpha
+        be = self.beta
+        ga = self.gamma
+        vol = a * b * c * np.sqrt(1 - np.cos(al)**2 - np.cos(be) **
+              2 - np.cos(ga)**2 + 2 * np.cos(al) * np.cos(be) * np.cos(ga))
+        return vol
 
     def r2x(self, r_vecs):
         r""" Transform orthogonal coordinates to fractional coordinates. """
